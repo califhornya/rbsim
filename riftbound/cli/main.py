@@ -8,12 +8,15 @@ from riftbound.core.player import Player, Deck
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
 
-# New imports for database logging
+# DB logging
 from riftbound.data.session import make_session
 from riftbound.data.writer import record_game
 
-app = typer.Typer(help="Riftbound Simulator CLI")
+# Agents
+from riftbound.ai.heuristics.simple_aggro import SimpleAggro
+from riftbound.ai.heuristics.simple_control import SimpleControl
 
+app = typer.Typer(help="Riftbound Simulator CLI")
 
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 units, 10 spells."""
@@ -22,25 +25,35 @@ def make_simple_deck() -> Deck:
     cards += [SpellCard("Bolt", damage=2) for _ in range(10)]
     return Deck(cards=cards)
 
+AI_REGISTRY = {
+    "aggro": SimpleAggro,
+    "control": SimpleControl,
+}
+
+def make_agent(name: str, player: Player):
+    key = name.strip().lower()
+    if key not in AI_REGISTRY:
+        raise typer.BadParameter(f"Unknown AI '{name}'. Available: {', '.join(AI_REGISTRY.keys())}")
+    return AI_REGISTRY[key](player)
 
 @app.command()
 def simulate(
     games: int = typer.Option(100, help="Number of games to simulate"),
     seed: int = typer.Option(42, help="Random seed for reproducibility"),
-    record_draws: bool = typer.Option(False, "--record-draws", help="Reserved; not used in minimal loop"),
+    ai_a: str = typer.Option("aggro", "--aiA", help="Agent for Player A (aggro|control)"),
+    ai_b: str = typer.Option("aggro", "--aiB", help="Agent for Player B (aggro|control)"),
     verbose: bool = typer.Option(True, help="Print a line per game"),
     db: Optional[str] = typer.Option(None, help="Optional path to SQLite database (e.g. results.db)"),
 ):
     """
-    Run a batch of minimal-rule simulated games (no energy/costs) and optionally log to SQLite.
+    Run a batch of minimal-rule simulated games (no energy/costs) using pluggable heuristic agents.
     """
-    config = GameConfig(games=games, seed=seed, record_draws=record_draws)
-    typer.echo("=== Riftbound Simulator (Minimal Prototype) ===")
-    typer.echo(f"Games: {config.games} | Seed: {config.seed} | Per-game output: {verbose}")
+    config = GameConfig(games=games, seed=seed, record_draws=False)
+    typer.echo("=== Riftbound Simulator (Agents Prototype) ===")
+    typer.echo(f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | Per-game output: {verbose}")
     if db:
         typer.echo(f"Database logging enabled -> {db}")
 
-    # optional DB session
     session = make_session(db) if db else None
 
     wins_A = 0
@@ -51,25 +64,28 @@ def simulate(
     base_rng = random.Random(config.seed)
 
     for i in range(config.games):
-        # independent RNG per game for determinism
+        # independent RNG per game
         game_seed = base_rng.randrange(1 << 30)
         rng = random.Random(game_seed)
 
-        # Build decks and shuffle
+        # Decks & shuffle
         deckA = make_simple_deck()
         deckB = make_simple_deck()
         deckA.shuffle(rng)
         deckB.shuffle(rng)
 
-        # Create players
+        # Players
         A = Player(name="A", hp=10, deck=deckA)
         B = Player(name="B", hp=10, deck=deckB)
 
-        # Game state + loop
+        # Attach agents
+        A.agent = make_agent(ai_a, A)
+        B.agent = make_agent(ai_b, B)
+
+        # Game
         gs = GameState(rng=rng, A=A, B=B, turn=1, max_turns=20, active="A")
         result = GameLoop(gs).start()
 
-        # track stats
         turns_total += result.turns
         if result.winner == "A":
             wins_A += 1
@@ -78,38 +94,34 @@ def simulate(
         else:
             draws += 1
 
-        # write to database
+        # DB write
         if session:
-            total_units = A.board_units + B.board_units
-            total_spells = 20 - len(A.deck.cards) - len(B.deck.cards) - total_units
             record_game(
                 session=session,
                 seed=game_seed,
                 winner=result.winner,
                 turns=result.turns,
-                total_units=total_units,
-                total_spells=total_spells,
+                total_units=result.units_played,
+                total_spells=result.spells_cast,
             )
 
-        # print to console
         if verbose:
-            typer.echo(f"Game {i+1}: Winner {result.winner} in {result.turns} turns (seed={game_seed})")
+            typer.echo(
+                f"Game {i+1}: Winner {result.winner} in {result.turns} turns "
+                f"(seed={game_seed}) [units={result.units_played}, spells={result.spells_cast}]"
+            )
 
     if session:
         session.commit()
         session.close()
 
-    # print summary
     total = config.games
     avg_turns = turns_total / total if total else 0.0
     typer.echo("")
     typer.echo(f"Summary: A {wins_A} | B {wins_B} | DRAW {draws} | Avg Turns {avg_turns:.2f}")
 
-
 def main():
-    """Entry point for Typer CLI."""
     app()
-
 
 if __name__ == "__main__":
     main()

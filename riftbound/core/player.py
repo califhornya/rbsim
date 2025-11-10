@@ -21,8 +21,9 @@ class Player:
     name: str
     hp: int = 10
     hand: List[Card] = field(default_factory=list)
-    board_units: int = 0  # count of units on battlefield (each deals 1 damage in attack step)
+    board_units: int = 0  # each unit deals 1 damage in attack step
     deck: Deck = field(default_factory=lambda: Deck([]))
+    agent: object = None  # set by CLI after Player creation
 
     def draw(self) -> Optional[Card]:
         card = self.deck.draw()

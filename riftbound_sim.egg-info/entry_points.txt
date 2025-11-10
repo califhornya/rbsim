@@ -1,2 +1,2 @@
 [console_scripts]
-rbsim = riftbound.cli.main:app
+rbsim = riftbound.cli.main:main
