@@ -1,81 +1,124 @@
-# Riftbound Simulator | Dev Agent Guide
+# Riftbound Simulator | Milestone 6: Core Riftbound Mechanics
 
-## Repo Overview
-**Project:** `rbsim`  
-A fully automated Riftbound match simulator for AI self-play, testing decks and heuristics.  
-Repository: [github.com/califhornya/rbsim](https://github.com/califhornya/rbsim)
+### Overview
+This milestone begins the transition from a simplified simulation engine into a **mechanically faithful Riftbound rules model**.
 
----
-
-## Dev Environment
-- Run `uv venv && uv sync` to create and sync the virtual environment.
-- Launch interactive shell: `uv run python -i`
-- CLI entrypoint: `rbsim`  
-  - Example: `rbsim --games 50 --aiA aggro --aiB control --victory-score 8`
-- Add dependencies with `uv add <package>`.
-- Check imports and formatting with `ruff check . && black .`.
+All previous systems (Hold/Conquer scoring, two battlefields, AI heuristics, and energy) are complete. We now expand to include **Might-based combat, rune/power resources, movement, and basic keyword support.**
 
 ---
 
-## Testing
-- All logic is deterministic via seeded RNG.  
-- Database results can be inspected manually:
-  ```python
-  import sqlite3
-  con = sqlite3.connect("results.db")
-  print(con.execute("SELECT COUNT(*) FROM games").fetchall())
-  con.close()
-  ```
-- For quick smoke tests:  
-  ```bash
-  rbsim --games 5 --seed 123
-  ```
-- Future: integrate `pytest` once combat and resource systems are finalized.
+## Phase 1 — Combat & Might System
+- Add `might: int` to `UnitCard`.
+- Replace simple 1-for-1 removal with **Might-based combat** using the rulebook's structure (section 439).
+- Implement damage marking and cleanup:
+  - Units take damage up to their Might.
+  - Damage clears at end of combat or turn.
+- Extend `Battlefield.resolve_combat_simple()` → `resolve_combat_might()`.
+- Track combat outcomes for stats (`kills`, `deaths`).
+
+### Stretch
+- Add hooks for **Shield**, **Stun**, **Guard** (non-functional placeholders for now).
 
 ---
 
-## Code Architecture
+## Phase 2 — Rune & Power System
+Replace static energy gain with a **true Rune Pool** resource system.
+
+#### Player-side Changes
+- Add `rune_pool` (dict of {domain: count}).
+- Replace `energy` and `channel_rate` with `channel()` that:
+  - Channels 2 runes per turn (per §315.3.b).
+  - Produces Energy + Power tokens.
+- Modify `can_pay()` and `pay()` to consider both Energy and Domain Power costs.
+
+#### Card-side Changes
+- Extend cost structure: `cost_energy: int`, `cost_power: Optional[Domain]`.
+- Update play logic in `GameLoop._apply_action`.
+
+#### Example Rune Model
+```python
+@dataclass
+class Rune:
+    domain: Domain
+    ready: bool = True
+
+    def activate(self):
+        if not self.ready:
+            return None
+        self.ready = False
+        return self.domain
 ```
-riftbound/
-├── ai/heuristics/        # Agents (SimpleAggro, SimpleControl, base)
-├── core/                 # Game logic (battlefields, loop, state)
-├── data/                 # Database schema + writer
-└── cli/                  # CLI entrypoint (Typer)
+
+---
+
+## Phase 3 — Movement & Showdown
+- Introduce **Base** and **Battlefield** locations for units.
+- Implement agent action `("MOVE", None, src, dst)`.
+- Update `GameLoop._apply_action` to handle:
+  - Move Base → Battlefield.
+  - Battlefield → Base.
+  - (Future) Battlefield ↔ Battlefield (for Ganking).
+- Add Showdown phase per §340–345:
+  - Triggered when a battlefield becomes contested but uncontrolled.
+  - Simple alternating-play system between players.
+  - Placeholder for *Action*/*Reaction* keywords.
+
+---
+
+## Phase 4 — Card Model Expansion
+Restructure card hierarchy for rule-completeness.
+
+```
+Card
+├── Unit
+├── Spell
+├── Gear
+├── Rune
+├── Legend
+└── Battlefield
 ```
 
----
-
-## Dev Tasks & Conventions
-### Commit Rules
-- Use present tense: *“Add Rune system,” “Refactor combat loop.”*
-- Always run local lint + simulation before committing:
-  ```bash
-  ruff check . && uv run rbsim --games 1
-  ```
-
-### Pull Requests
-- **Title format:** `[rbsim] <feature>`  
-- Include a one-line summary of the rules implemented.  
-- Ensure the CLI runs end-to-end with no DB schema breaks.
+Each card gains:
+- `domain: Optional[Domain]`
+- `tags: list[str]`
+- `keywords: list[str]`
+- `might: Optional[int]`
+- `category: CardType`
 
 ---
 
-## Next Milestone — Core Riftbound Mechanics
-**Goal:** transition from abstract simulation to full rules-based Riftbound play.
+## Phase 5 — Minimal Keyword Layer
+Implement the following keywords:
 
-### Phase 1
-- Two total **Battlefields** (confirmed per rulebook).
-- Full **Hold** and **Conquer** logic (implemented).
+| Keyword | Effect |
+|----------|---------|
+| **Accelerate** | Unit enters ready (no exhaustion) |
+| **Guard** | Prioritized when assigning combat damage |
+| **Ganking** | Allows battlefield-to-battlefield movement |
 
-### Phase 2
-- Implement **Rune Channeling / Energy** system (implemented).
-- Add **Card costs** + resource tracking.
-- Introduce **Movement**, **Showdowns**, and basic **Keywords**.
+> Later expansions: Hidden, Shield, Temporary, Deathknell, etc.
 
 ---
 
-## Design Notes
-- Deterministic seeds for reproducibility.
-- Modular, pluggable AI system.
-- SQLite logs for analysis.
-- Parallelizable core loop (future).
+## Phase 6 — Testing & Validation
+- Add `pytest` suite under `/tests`:
+  - Hold and Conquer scoring tests
+  - Rune pool and energy channel tests
+  - Combat simulation validation (Might vs damage)
+- Deterministic results via RNG seed.
+
+---
+
+## Deliverables
+- `core/combat.py` for Might-based resolution logic.
+- Updated `cards.py` and `player.py` for rune/power system.
+- Extended `loop.py` for Showdown handling.
+- 3–4 basic test cases for resource and combat validation.
+
+---
+
+## Status
+🟢 Previous: Functional Hold/Conquer, AI, logging, CLI complete.  
+🟡 Current: Begin true Riftbound mechanics (combat, runes, movement).  
+⚪ Next: Add full ability system (Active, Triggered, Passive) + keyword stack resolution.
+
