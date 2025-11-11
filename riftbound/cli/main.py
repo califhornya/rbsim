@@ -22,8 +22,8 @@ app = typer.Typer(help="Riftbound Simulator CLI")
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 Units, 10 Spells."""
     cards: List[Card] = []
-    cards += [UnitCard("Recruit", cost=1) for _ in range(10)]
-    cards += [SpellCard("Bolt", cost=2, damage=2) for _ in range(10)]
+    cards += [UnitCard("Recruit", cost_energy=1) for _ in range(10)]
+    cards += [SpellCard("Bolt", cost_energy=2, damage=2) for _ in range(10)]
     return Deck(cards=cards)
 
 AI_REGISTRY = {
@@ -84,8 +84,8 @@ def simulate(
         deckB.shuffle(rng)
 
         # Players
-        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
-        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
+        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy)
+        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy)
 
         # Agents
         A.agent = make_agent(ai_a, A)
