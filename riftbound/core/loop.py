@@ -14,9 +14,10 @@ class Result:
     units_played: int
     spells_cast: int
 
-# Legacy 3-tuple action signature retained for agents:
-# ("SPELL"|"UNIT"|"PASS", hand_index_or_None, battlefield_index_or_None)
-Action = Tuple[str, Optional[int], Optional[int]]
+# Legacy action signature retained for agents:
+# ("SPELL"|"UNIT"|"MOVE"|"PASS", hand_index_or_None, battlefield_index_or_src, optional_dst)
+# Agents implemented before MOVE support still emit 3-tuples; the loop normalises them.
+Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
 
 class GameLoop:
     """
@@ -33,7 +34,8 @@ class GameLoop:
       ACTION:
         - Agent plays a card or passes.
           * UNIT: place a unit onto a chosen battlefield.
-          * SPELL: placeholder (no effects yet), reserved for Phase 2 extensions.
+          * SPELL: spend energy to remove opposing units on the chosen battlefield.
+          * MOVE: relocate one of the active player's units between battlefields.
         - Placement may cause a lane to become contested (if both sides have units).
         - IMPORTANT: Do NOT decide control changes or score CONQUER in this phase.
 
@@ -67,6 +69,9 @@ class GameLoop:
         # Snapshot controllers (state at start of turn)
         for bf in self.gs.battlefields:
             bf.last_controller = bf.controller()
+        # Any lane already containing both sides immediately triggers a showdown flag.
+        for bf in self.gs.battlefields:
+            bf.mark_contested_if_needed()
 
         # Rune Channeling (active player first, then opponent)
         active_player = self.gs.get_player(active)
@@ -87,13 +92,20 @@ class GameLoop:
         ap.draw()
 
     def _apply_action(self, ap: Player, action: Action) -> None:
-        """Execute a UNIT / SPELL / PASS during ACTION; no combat resolution here."""
-        kind, idx, lane = action
+        """Execute a UNIT / SPELL / MOVE / PASS during ACTION; no combat resolution here."""
+        # Support historical 3-tuple actions by padding a None destination.
+        if len(action) == 3:  # type: ignore[arg-type]
+            kind, idx, lane = action  # type: ignore[misc]
+            dst_lane = None
+        else:
+            kind, idx, lane, dst_lane = action
 
         # Normalize lane index
         if lane is not None:
             if not (0 <= lane < len(self.gs.battlefields)):
                 lane = 0
+        if dst_lane is not None and not (0 <= dst_lane < len(self.gs.battlefields)):
+            dst_lane = None        
 
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
@@ -119,9 +131,39 @@ class GameLoop:
                     return
                 if not ap.pay(card.cost):
                     return
-                # Placeholder: no effects yet (Phase 2 will add effects/costs)
+                tgt: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
+                # Simple damage model: remove opposing units up to damage amount.
+                if self.gs.active == "A":
+                    tgt.units_B = max(0, tgt.units_B - card.damage)
+                else:
+                    tgt.units_A = max(0, tgt.units_A - card.damage)
                 ap.remove_from_hand(idx)
                 self.spells_cast += 1
+                # Spell effects may keep a lane contested if both sides remain.
+                tgt.mark_contested_if_needed()
+                
+        elif kind == "MOVE":
+            src = lane
+            dst = dst_lane
+            if src is None or dst is None or src == dst:
+                return
+            if not (0 <= src < len(self.gs.battlefields)) or not (0 <= dst < len(self.gs.battlefields)):
+                return
+            src_bf = self.gs.battlefields[src]
+            dst_bf = self.gs.battlefields[dst]
+            if self.gs.active == "A":
+                if src_bf.units_A <= 0:
+                    return
+                src_bf.units_A -= 1
+                dst_bf.units_A += 1
+            else:
+                if src_bf.units_B <= 0:
+                    return
+                src_bf.units_B -= 1
+                dst_bf.units_B += 1
+            # Moving can cause (or maintain) contests on either lane.
+            src_bf.mark_contested_if_needed()
+            dst_bf.mark_contested_if_needed()        
 
         # PASS or invalid: do nothing
 
