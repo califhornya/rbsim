@@ -1,16 +1,18 @@
 import typer
+from rich import print
 import random
 from typing import List, Optional
 
 from riftbound.core.models import GameConfig
 from riftbound.core.cards import UnitCard, SpellCard, Card
+from riftbound.core.enums import Domain
 from riftbound.core.player import Player, Deck
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
 
 # DB logging
 from riftbound.data.session import make_session
-from riftbound.data.writer import record_game
+from riftbound.data.writer import GameRecorder, record_game
 
 # Agents
 from riftbound.ai.heuristics.simple_aggro import SimpleAggro
@@ -22,8 +24,8 @@ app = typer.Typer(help="Riftbound Simulator CLI")
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 Units, 10 Spells."""
     cards: List[Card] = []
-    cards += [UnitCard("Recruit") for _ in range(10)]
-    cards += [SpellCard("Bolt", damage=2) for _ in range(10)]
+    cards += [UnitCard("Recruit", cost_energy=1) for _ in range(10)]
+    cards += [SpellCard("Bolt", cost_energy=2, damage=2) for _ in range(10)]
     return Deck(cards=cards)
 
 AI_REGISTRY = {
@@ -84,8 +86,14 @@ def simulate(
         deckB.shuffle(rng)
 
         # Players
-        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
-        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
+        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy)
+        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy)
+
+        # Basic rune loadout so channeling can produce energy/power
+        for player in (A, B):
+            for domain in (Domain.CALM, Domain.FURY):
+                player.add_rune(domain)
+
 
         # Agents
         A.agent = make_agent(ai_a, A)
@@ -97,7 +105,22 @@ def simulate(
             turn=1, max_turns=40, active="A",
             victory_score=victory_score
         )
-        result = GameLoop(gs).start()
+        recorder = None
+        game_id = None
+        if session:
+            game_id = record_game(
+                session=session,
+                seed=game_seed,
+                winner="?",
+                turns=0,
+                total_units=0,
+                total_spells=0,
+            )
+            recorder = GameRecorder(session, game_id)
+            recorder.record_deck("A", deckA.cards, ai_name=ai_a)
+            recorder.record_deck("B", deckB.cards, ai_name=ai_b)
+
+        result = GameLoop(gs, recorder=recorder).start()
 
         turns_total += result.turns
         if result.winner == "A":
@@ -107,7 +130,7 @@ def simulate(
         else:
             draws += 1
 
-        if session:
+        if session and game_id is not None:
             record_game(
                 session=session,
                 seed=game_seed,
@@ -115,13 +138,29 @@ def simulate(
                 turns=result.turns,
                 total_units=result.units_played,
                 total_spells=result.spells_cast,
+                game_id=game_id,
             )
 
         if verbose:
-            typer.echo(
-                f"Game {i+1}: Winner {result.winner} in {result.turns} turns "
-                f"(seed={game_seed}) [units={result.units_played}, spells={result.spells_cast}]"
+            print("\n" + "=" * 90)
+            print(
+                f"[bold cyan]Game[/] {i+1}: "
+                f"Winner {result.winner} in {result.turns} turns "
+                f"(seed={game_seed}) "
+                f"[units={result.units_played}, spells={result.spells_cast}, "
+                f"VP_A={gs.points_A}, VP_B={gs.points_B}]"
             )
+
+
+            if i < 5:  # mostra solo le prime 5 partite per non spammare
+                for idx, bf in enumerate(gs.battlefields):
+                    typer.echo(
+                        f"  Battlefield {idx}: "
+                        f"A={len(bf.units_A)} B={len(bf.units_B)} ctl={bf.controller()}"
+                    )
+            typer.echo(f"  Energy A={gs.A.energy}, Energy B={gs.B.energy}")
+            typer.echo(f"  Points: A={gs.points_A} | B={gs.points_B}")
+            typer.echo("=" * 90)
 
     if session:
         session.commit()
@@ -130,7 +169,7 @@ def simulate(
     total = config.games
     avg_turns = turns_total / total if total else 0.0
     typer.echo("")
-    typer.echo(f"Summary: A {wins_A} | B {wins_B} | DRAW {draws} | Avg Turns {avg_turns:.2f}")
+    print(f"[bold magenta]Summary[/]: A {wins_A} | B {wins_B} | DRAW {draws} | Avg Turns {avg_turns:.2f}")
 
 def main():
     app()
