@@ -68,6 +68,13 @@ class GameLoop:
         for bf in self.gs.battlefields:
             bf.last_controller = bf.controller()
 
+        # Rune Channeling (active player first, then opponent)
+        active_player = self.gs.get_player(active)
+        active_player.channel()
+        opposing_player = self.gs.get_player(self.gs.other(active))
+        opposing_player.channel()
+
+
         # HOLD scoring (once per battlefield per turn)
         vps = 0
         for bf in self.gs.battlefields:
@@ -91,6 +98,10 @@ class GameLoop:
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, UnitCard):
+                if not ap.can_pay(card.cost):
+                    return
+                if not ap.pay(card.cost):
+                    return
                 tgt: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
                 if self.gs.active == "A":
                     tgt.units_A += 1
@@ -104,6 +115,10 @@ class GameLoop:
         elif kind == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, SpellCard):
+                if not ap.can_pay(card.cost):
+                    return
+                if not ap.pay(card.cost):
+                    return
                 # Placeholder: no effects yet (Phase 2 will add effects/costs)
                 ap.remove_from_hand(idx)
                 self.spells_cast += 1

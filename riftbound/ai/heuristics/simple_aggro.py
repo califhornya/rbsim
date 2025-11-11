@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional, Tuple
 from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.player import Player
 from .base_agent import Agent, Action
@@ -27,14 +26,22 @@ class SimpleAggro(Agent):
                     best = (key, i)
             lane = best[1] if best else 0
 
-        # play first Unit in hand if any
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, UnitCard):
-                return ("UNIT", i, lane)
+        energy = self.player.energy
 
-        # otherwise, play a Spell if available
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard):
-                return ("SPELL", i, lane)
+        # play the most expensive affordable Unit in hand if any
+        affordable_units = [
+            (i, c) for i, c in enumerate(self.player.hand) if isinstance(c, UnitCard) and c.cost <= energy
+        ]
+        if affordable_units:
+            idx, _ = max(affordable_units, key=lambda item: item[1].cost)
+            return ("UNIT", idx, lane)
+
+        # otherwise, play the most expensive affordable Spell if available
+        affordable_spells = [
+            (i, c) for i, c in enumerate(self.player.hand) if isinstance(c, SpellCard) and c.cost <= energy
+        ]
+        if affordable_spells:
+            idx, _ = max(affordable_spells, key=lambda item: item[1].cost)
+            return ("SPELL", idx, lane)
 
         return ("PASS", None, None)

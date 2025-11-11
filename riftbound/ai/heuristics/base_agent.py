@@ -1,7 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
-from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.player import Player
 
 # Legacy action signature kept for backward-compat:

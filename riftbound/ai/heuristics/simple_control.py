@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional, Tuple
 from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.player import Player
 from .base_agent import Agent, Action
@@ -27,12 +26,20 @@ class SimpleControl(Agent):
                     best = (key, i)
             lane = best[1] if best else 0
 
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, UnitCard):
-                return ("UNIT", i, lane)
-
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard):
-                return ("SPELL", i, lane)
+        energy = self.player.energy
+        affordable_units = [
+            (i, c) for i, c in enumerate(self.player.hand) if isinstance(c, UnitCard) and c.cost <= energy
+        ]
+        if affordable_units:
+            # Control prefers to conserve energy; choose the cheapest viable Unit
+            idx, _ = min(affordable_units, key=lambda item: item[1].cost)
+            return ("UNIT", idx, lane)
+        
+        affordable_spells = [
+            (i, c) for i, c in enumerate(self.player.hand) if isinstance(c, SpellCard) and c.cost <= energy
+        ]
+        if affordable_spells:
+            idx, _ = min(affordable_spells, key=lambda item: item[1].cost)
+            return ("SPELL", idx, lane)
 
         return ("PASS", None, None)

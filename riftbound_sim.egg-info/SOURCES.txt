@@ -1,10 +1,14 @@
 README.md
 pyproject.toml
 riftbound/__init__.py
+riftbound/ai/heuristics/base_agent.py
 riftbound/ai/heuristics/simple_agent.py
+riftbound/ai/heuristics/simple_aggro.py
+riftbound/ai/heuristics/simple_control.py
 riftbound/cli/__init__.py
 riftbound/cli/main.py
 riftbound/core/__init__.py
+riftbound/core/battlefield.py
 riftbound/core/cards.py
 riftbound/core/enums.py
 riftbound/core/loop.py

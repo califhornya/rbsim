@@ -22,8 +22,8 @@ app = typer.Typer(help="Riftbound Simulator CLI")
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 Units, 10 Spells."""
     cards: List[Card] = []
-    cards += [UnitCard("Recruit") for _ in range(10)]
-    cards += [SpellCard("Bolt", damage=2) for _ in range(10)]
+    cards += [UnitCard("Recruit", cost=1) for _ in range(10)]
+    cards += [SpellCard("Bolt", cost=2, damage=2) for _ in range(10)]
     return Deck(cards=cards)
 
 AI_REGISTRY = {
