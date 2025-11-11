@@ -19,7 +19,7 @@ class CardType(Enum):
 class Phase(Enum):
     AWAKEN = auto()
     BEGINNING = auto()
-    CHANNEL = auto()
     DRAW = auto()
     ACTION = auto()
+    COMBAT = auto()   # explicit combat phase (contested → 1-for-1 → control/Conquer)
     END = auto()

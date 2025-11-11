@@ -4,8 +4,11 @@ from typing import Optional, Tuple
 from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.player import Player
 
-# ("SPELL"|"UNIT"|"PASS", hand_index_or_None, battlefield_index_or_None)
-Action = Tuple[str, Optional[int], Optional[int]]
+# Legacy action signature kept for backward-compat:
+# ("SPELL"|"UNIT"|"MOVE"|"PASS", hand_index_or_None, lane_or_src, [lane_or_dst for MOVE])
+# For UNIT/SPELL: (TYPE, hand_idx, target_lane)
+# For MOVE: ("MOVE", None, src_lane, dst_lane)
+Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
 
 class Agent(ABC):
     name: str = "Agent"
@@ -16,5 +19,5 @@ class Agent(ABC):
 
     @abstractmethod
     def decide_action(self, opponent: Player) -> Action:
-        """Return ("SPELL"| "UNIT"| "PASS", hand_idx, battlefield_idx)."""
+        """Return a chosen action."""
         ...

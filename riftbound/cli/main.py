@@ -16,10 +16,11 @@ from riftbound.data.writer import record_game
 from riftbound.ai.heuristics.simple_aggro import SimpleAggro
 from riftbound.ai.heuristics.simple_control import SimpleControl
 
+
 app = typer.Typer(help="Riftbound Simulator CLI")
 
 def make_simple_deck() -> Deck:
-    """Create a 20-card toy deck: 10 units, 10 spells."""
+    """Create a 20-card toy deck: 10 Units, 10 Spells."""
     cards: List[Card] = []
     cards += [UnitCard("Recruit") for _ in range(10)]
     cards += [SpellCard("Bolt", damage=2) for _ in range(10)]
@@ -45,13 +46,20 @@ def simulate(
     victory_score: int = typer.Option(8, help="Victory points needed to win via Hold/Conquer"),
     verbose: bool = typer.Option(True, help="Print a line per game"),
     db: Optional[str] = typer.Option(None, help="Optional path to SQLite database (e.g. results.db)"),
+    channel_rate: int = typer.Option(1, help="Energy gained each CHANNEL phase"),
+    max_energy: int = typer.Option(10, help="Energy cap per player"),
+    starting_energy: int = typer.Option(0, help="Energy at the beginning of the match for each player"),
 ):
     """
     Two-battlefield Hold/Conquer scoring with simple combat and pluggable agents.
+    Adds Rune Channeling/Energy & costs; COMBAT resolves after ACTION.
     """
     config = GameConfig(games=games, seed=seed, record_draws=False)
-    typer.echo("=== Riftbound Simulator (Two-Battlefield Scoring) ===")
-    typer.echo(f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | Victory Score: {victory_score} | Per-game output: {verbose}")
+    typer.echo("=== Riftbound Simulator (Two-Battlefield + Energy + Combat Phase) ===")
+    typer.echo(
+        f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | "
+        f"Victory Score: {victory_score} | Energy: +{channel_rate}/turn cap {max_energy}, start {starting_energy} | Per-game output: {verbose}"
+    )
     if db:
         typer.echo(f"Database logging enabled -> {db}")
 
@@ -76,8 +84,8 @@ def simulate(
         deckB.shuffle(rng)
 
         # Players
-        A = Player(name="A", hp=10, deck=deckA)
-        B = Player(name="B", hp=10, deck=deckB)
+        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
+        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy, channel_rate=channel_rate, max_energy=max_energy)
 
         # Agents
         A.agent = make_agent(ai_a, A)
