@@ -5,7 +5,7 @@ This milestone begins the transition from a simplified simulation engine into a 
 
 All previous systems (Hold/Conquer scoring, two battlefields, AI heuristics, and energy) are complete. We now expand to include **Might-based combat, rune/power resources, movement, and basic keyword support.**
 
-**EDIT**: We should now have completed Phase 1 and 2. Before continuing to Phase 3, look at "Known Bugs" at the end on this file and hopefully fix it (there's only one).
+**EDIT**: We should now have completed Phase 1 and 2. 
 
 ---
 
@@ -117,6 +117,4 @@ Implement the following keywords:
 🟡 Current: Begin true Riftbound mechanics (combat, runes, movement).  
 ⚪ Next: Add full ability system (Active, Triggered, Passive) + keyword stack resolution.
 
-## Known Bugs
-- Simulating 500 games, they all end in draw. Might indicate something's off.
 

@@ -1,9 +1,11 @@
 import typer
+from rich import print
 import random
 from typing import List, Optional
 
 from riftbound.core.models import GameConfig
 from riftbound.core.cards import UnitCard, SpellCard, Card
+from riftbound.core.enums import Domain
 from riftbound.core.player import Player, Deck
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
@@ -87,6 +89,12 @@ def simulate(
         A = Player(name="A", hp=10, deck=deckA, energy=starting_energy)
         B = Player(name="B", hp=10, deck=deckB, energy=starting_energy)
 
+        # Basic rune loadout so channeling can produce energy/power
+        for player in (A, B):
+            for domain in (Domain.CALM, Domain.FURY):
+                player.add_rune(domain)
+
+
         # Agents
         A.agent = make_agent(ai_a, A)
         B.agent = make_agent(ai_b, B)
@@ -118,10 +126,25 @@ def simulate(
             )
 
         if verbose:
-            typer.echo(
-                f"Game {i+1}: Winner {result.winner} in {result.turns} turns "
-                f"(seed={game_seed}) [units={result.units_played}, spells={result.spells_cast}]"
+            print("\n" + "=" * 90)
+            print(
+                f"[bold cyan]Game[/] {i+1}: "
+                f"Winner {result.winner} in {result.turns} turns "
+                f"(seed={game_seed}) "
+                f"[units={result.units_played}, spells={result.spells_cast}, "
+                f"VP_A={gs.points_A}, VP_B={gs.points_B}]"
             )
+
+
+            if i < 5:  # mostra solo le prime 5 partite per non spammare
+                for idx, bf in enumerate(gs.battlefields):
+                    typer.echo(
+                        f"  Battlefield {idx}: "
+                        f"A={len(bf.units_A)} B={len(bf.units_B)} ctl={bf.controller()}"
+                    )
+            typer.echo(f"  Energy A={gs.A.energy}, Energy B={gs.B.energy}")
+            typer.echo(f"  Points: A={gs.points_A} | B={gs.points_B}")
+            typer.echo("=" * 90)
 
     if session:
         session.commit()
@@ -130,7 +153,7 @@ def simulate(
     total = config.games
     avg_turns = turns_total / total if total else 0.0
     typer.echo("")
-    typer.echo(f"Summary: A {wins_A} | B {wins_B} | DRAW {draws} | Avg Turns {avg_turns:.2f}")
+    print(f"[bold magenta]Summary[/]: A {wins_A} | B {wins_B} | DRAW {draws} | Avg Turns {avg_turns:.2f}")
 
 def main():
     app()
