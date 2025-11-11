@@ -1,120 +1,93 @@
-# Riftbound Simulator | Milestone 6: Core Riftbound Mechanics
+# 📊 rbsim | Analytics Roadmap (Codex-Optimized)
 
-### Overview
-This milestone begins the transition from a simplified simulation engine into a **mechanically faithful Riftbound rules model**.
-
-All previous systems (Hold/Conquer scoring, two battlefields, AI heuristics, and energy) are complete. We now expand to include **Might-based combat, rune/power resources, movement, and basic keyword support.**
-
-**EDIT**: We should now have completed Phase 1 and 2. 
+## Objective
+Upgrade `rbsim` into a **data-rich simulator** for large-scale analysis.  
+Focus: analytics infrastructure — not game-rule fidelity.
 
 ---
 
-## Phase 1 — Combat & Might System
-- Add `might: int` to `UnitCard`.
-- Replace simple 1-for-1 removal with **Might-based combat** using the rulebook's structure (section 439).
-- Implement damage marking and cleanup:
-  - Units take damage up to their Might.
-  - Damage clears at end of combat or turn.
-- Extend `Battlefield.resolve_combat_simple()` → `resolve_combat_might()`.
-- Track combat outcomes for stats (`kills`, `deaths`).
+## Phase A — Database Expansion
 
-### Stretch
-- Add hooks for **Shield**, **Stun**, **Guard** (non-functional placeholders for now).
+### Tasks
+1. Extend `riftbound/data/schema.py`:
+   - Add ORM models: `Deck`, `Draw`, `Hand`, `Board`, `Play`, `AIStats`.
+   - Use `UUID` for card instances.
+   - Keep backward-compatible `DB_VERSION = 2`.
+2. Update `writer.py`:
+   - Add `record_draw()`, `record_play()`, `record_board()`, etc.
+3. Modify `GameLoop` and `Player`:
+   - Log all card transitions: draw, play, death.
+   - Hook `record_*` functions after each event.
 
----
-
-## Phase 2 — Rune & Power System
-Replace static energy gain with a **true Rune Pool** resource system.
-
-#### Player-side Changes
-- Add `rune_pool` (dict of {domain: count}).
-- Replace `energy` and `channel_rate` with `channel()` that:
-  - Channels 2 runes per turn (per §315.3.b).
-  - Produces Energy + Power tokens.
-- Modify `can_pay()` and `pay()` to consider both Energy and Domain Power costs.
-
-#### Card-side Changes
-- Extend cost structure: `cost_energy: int`, `cost_power: Optional[Domain]`.
-- Update play logic in `GameLoop._apply_action`.
-
-#### Example Rune Model
-```python
-@dataclass
-class Rune:
-    domain: Domain
-    ready: bool = True
-
-    def activate(self):
-        if not self.ready:
-            return None
-        self.ready = False
-        return self.domain
-```
+### Schema Summary
+| Table | Purpose |
+|--------|----------|
+| `Deck` | Stores cardlist, hash, and AI used. |
+| `Game` | Match metadata (seed, winner, turns, etc.). |
+| `Turn` | Turn-level summary. |
+| `Draw` | Card draw events. |
+| `Hand` | Hand snapshot at turn end. |
+| `Board` | Battlefield summary per turn. |
+| `Play` | Card play / cast events. |
+| `AIStats` | Aggregate results per AI type. |
 
 ---
 
-## Phase 3 — Movement & Showdown
-- Introduce **Base** and **Battlefield** locations for units.
-- Implement agent action `("MOVE", None, src, dst)`.
-- Update `GameLoop._apply_action` to handle:
-  - Move Base → Battlefield.
-  - Battlefield → Base.
-  - (Future) Battlefield ↔ Battlefield (for Ganking).
-- Add Showdown phase per §340–345:
-  - Triggered when a battlefield becomes contested but uncontrolled.
-  - Simple alternating-play system between players.
-  - Placeholder for *Action*/*Reaction* keywords.
+## Phase B — Replay / Export Layer
+
+### Tasks
+1. Add module: `riftbound/data/export.py`.
+2. Implement:
+   ```bash
+   rbsim export --query "SELECT winner, turns FROM games" --out results.csv
+   ```
+3. Support formats: `.csv`, `.json`, `.parquet`.
+4. Add `rbsim replay <game_id>` to reconstruct a single match from logs.
 
 ---
 
-## Phase 4 — Card Model Expansion
-Restructure card hierarchy for rule-completeness.
+## Phase C — Card Tracking
 
-```
-Card
-├── Unit
-├── Spell
-├── Gear
-├── Rune
-├── Legend
-└── Battlefield
-```
-
-Each card gains:
-- `domain: Optional[Domain]`
-- `tags: list[str]`
-- `keywords: list[str]`
-- `might: Optional[int]`
-- `category: CardType`
+### Tasks
+1. Each `Card` gets `uuid = uuid4()`.
+2. Record state transitions:
+   - `DECK → HAND` → `BOARD` → `GRAVE`.
+3. Add helper:
+   ```python
+   def record_card_event(session, game_id, card_uuid, phase, action, turn_no): ...
+   ```
+4. Enable queries like:
+   ```sql
+   SELECT card_name, AVG(turns_alive)
+   FROM plays
+   JOIN cards USING (card_uuid)
+   GROUP BY card_name;
+   ```
 
 ---
 
-## Phase 5 — Minimal Keyword Layer
-Implement the following keywords:
+## Phase D — AI Benchmarking
 
-| Keyword | Effect |
-|----------|---------|
-| **Accelerate** | Unit enters ready (no exhaustion) |
-| **Guard** | Prioritized when assigning combat damage |
-| **Ganking** | Allows battlefield-to-battlefield movement |
-
-> Later expansions: Hidden, Shield, Temporary, Deathknell, etc.
-
----
-
-## Phase 6 — Testing & Validation
-- Add `pytest` suite under `/tests`:
-  - Hold and Conquer scoring tests
-  - Rune pool and energy channel tests
-  - Combat simulation validation (Might vs damage)
-- Deterministic results via RNG seed.
+### Tasks
+1. Extend `record_game()` with `ai_a`, `ai_b`, `avg_turns`, `avg_energy_used`.
+2. Create new table `AIStats`:
+   - `ai_name`, `wins`, `losses`, `draws`, `avg_turns`.
+3. Provide summary CLI:
+   ```bash
+   rbsim stats
+   ```
 
 ---
 
+## Expected Outcome
+- Full per-turn, per-card, per-AI data capture.
+- Ready for analytics via SQL or Python (pandas).
+- Reproducible, deterministic simulation datasets.
+- Scalable to millions of games.
 
-## Status
-🟢 Previous: Functional Hold/Conquer, AI, logging, CLI complete.  
-🟡 Current: Begin true Riftbound mechanics (combat, runes, movement).  
-⚪ Next: Add full ability system (Active, Triggered, Passive) + keyword stack resolution.
+---
 
-
+## References
+Repo: [github.com/califhornya/rbsim](https://github.com/califhornya/rbsim)  
+Rulebook: *Riftbound Core Rules v1.1* (for mechanics context).  
+Inspiration: *Magic Simulator (Genesis Project)*.
