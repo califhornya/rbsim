@@ -8,17 +8,31 @@ class SimpleAggro(Agent):
     name = "SimpleAggro"
 
     def decide_action(self, opponent: Player) -> Action:
-        # 1) If any spell is lethal, cast it.
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard) and c.damage >= opponent.hp:
-                return ("SPELL", i)
-        # 2) Otherwise, cast the first spell you find.
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard):
-                return ("SPELL", i)
-        # 3) Otherwise, play a unit if available.
+        bfs = getattr(self.player, "battlefields", [])
+        # pick a lane: prefer the first lane where opponent has 0 or fewer units
+        lane = 0
+        if bfs:
+            # Estimate opponent units per lane
+            # We don't know if we're A or B here; infer from player name
+            am_A = (self.player.name == "A")
+            best = None
+            for i, bf in enumerate(bfs):
+                opp_units = bf.units_B if am_A else bf.units_A
+                my_units = bf.units_A if am_A else bf.units_B
+                # prefer lanes with opponent = 0, or where we are behind
+                key = (opp_units == 0, my_units - opp_units)  # True sorts after False
+                # choose the first with opp==0; else the most negative (behind)
+                if best is None or (key > best[0]):
+                    best = (key, i)
+            lane = best[1] if best else 0
+
+        # Simple aggro now prefers UNIT first (to seize/contest), spells are placeholders
         for i, c in enumerate(self.player.hand):
             if isinstance(c, UnitCard):
-                return ("UNIT", i)
-        # 4) Pass.
-        return ("PASS", None)
+                return ("UNIT", i, lane)
+
+        for i, c in enumerate(self.player.hand):
+            if isinstance(c, SpellCard):
+                return ("SPELL", i, lane)
+
+        return ("PASS", None, None)

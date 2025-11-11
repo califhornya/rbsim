@@ -42,15 +42,16 @@ def simulate(
     seed: int = typer.Option(42, help="Random seed for reproducibility"),
     ai_a: str = typer.Option("aggro", "--aiA", help="Agent for Player A (aggro|control)"),
     ai_b: str = typer.Option("aggro", "--aiB", help="Agent for Player B (aggro|control)"),
+    victory_score: int = typer.Option(8, help="Victory points needed to win via Hold/Conquer"),
     verbose: bool = typer.Option(True, help="Print a line per game"),
     db: Optional[str] = typer.Option(None, help="Optional path to SQLite database (e.g. results.db)"),
 ):
     """
-    Run a batch of minimal-rule simulated games (no energy/costs) using pluggable heuristic agents.
+    Two-battlefield Hold/Conquer scoring with simple combat and pluggable agents.
     """
     config = GameConfig(games=games, seed=seed, record_draws=False)
-    typer.echo("=== Riftbound Simulator (Agents Prototype) ===")
-    typer.echo(f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | Per-game output: {verbose}")
+    typer.echo("=== Riftbound Simulator (Two-Battlefield Scoring) ===")
+    typer.echo(f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | Victory Score: {victory_score} | Per-game output: {verbose}")
     if db:
         typer.echo(f"Database logging enabled -> {db}")
 
@@ -78,12 +79,16 @@ def simulate(
         A = Player(name="A", hp=10, deck=deckA)
         B = Player(name="B", hp=10, deck=deckB)
 
-        # Attach agents
+        # Agents
         A.agent = make_agent(ai_a, A)
         B.agent = make_agent(ai_b, B)
 
         # Game
-        gs = GameState(rng=rng, A=A, B=B, turn=1, max_turns=20, active="A")
+        gs = GameState(
+            rng=rng, A=A, B=B,
+            turn=1, max_turns=40, active="A",
+            victory_score=victory_score
+        )
         result = GameLoop(gs).start()
 
         turns_total += result.turns
@@ -94,7 +99,6 @@ def simulate(
         else:
             draws += 1
 
-        # DB write
         if session:
             record_game(
                 session=session,

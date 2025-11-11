@@ -8,22 +8,30 @@ class SimpleControl(Agent):
     name = "SimpleControl"
 
     def decide_action(self, opponent: Player) -> Action:
-        # 1) Build board first: play a unit if you have fewer than 3 units.
-        if self.player.board_units < 3:
-            for i, c in enumerate(self.player.hand):
-                if isinstance(c, UnitCard):
-                    return ("UNIT", i)
-        # 2) If any spell is lethal, cast it.
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard) and c.damage >= opponent.hp:
-                return ("SPELL", i)
-        # 3) If you already have 3+ units, cast a spell.
-        for i, c in enumerate(self.player.hand):
-            if isinstance(c, SpellCard):
-                return ("SPELL", i)
-        # 4) Otherwise, play a unit if still available.
+        bfs = getattr(self.player, "battlefields", [])
+        am_A = (self.player.name == "A")
+
+        # Choose lane: reinforce where we're behind, else balance.
+        lane = 0
+        if bfs:
+            best = None
+            for i, bf in enumerate(bfs):
+                my = bf.units_A if am_A else bf.units_B
+                opp = bf.units_B if am_A else bf.units_A
+                diff = my - opp  # negative -> we're behind
+                # prefer the most negative diff; if tie, smaller index
+                key = (diff, -i)
+                if best is None or key < best[0]:
+                    best = (key, i)
+            lane = best[1] if best else 0
+
+        # Control: build board until parity+1, then consider spells (placeholder)
         for i, c in enumerate(self.player.hand):
             if isinstance(c, UnitCard):
-                return ("UNIT", i)
-        # 5) Pass.
-        return ("PASS", None)
+                return ("UNIT", i, lane)
+
+        for i, c in enumerate(self.player.hand):
+            if isinstance(c, SpellCard):
+                return ("SPELL", i, lane)
+
+        return ("PASS", None, None)

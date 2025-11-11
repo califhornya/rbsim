@@ -2,6 +2,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
+victory_mode = Column(String(16), default="control")
+points_A = Column(Integer, default=0)
+points_B = Column(Integer, default=0)
 
 class Game(Base):
     __tablename__ = "games"

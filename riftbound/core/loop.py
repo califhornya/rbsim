@@ -1,9 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Tuple
 from .state import GameState
 from .cards import SpellCard, UnitCard
 from .player import Player
+from .battlefield import Battlefield
 
 @dataclass
 class Result:
@@ -14,84 +14,136 @@ class Result:
 
 class GameLoop:
     """
-    Minimal loop with pluggable agents:
-      - Start: each player draws 5.
-      - Each turn:
-          1) Draw 1.
-          2) Agent decides action: SPELL / UNIT / PASS (no costs in this prototype).
-          3) Attack: active player's units deal 1 each to opponent.
-      - Win: opponent HP <= 0 or max turns -> HP tiebreak, else DRAW.
+    Loop with two Battlefields and scoring rules:
+      - BEGINNING (Hold): For each battlefield you already control, if not scored yet this turn, +1 VP.
+      - ACTION: Agent plays a card (UNIT -> choose battlefield; SPELL currently no effect).
+        If UNIT placement creates/maintains both sides present, lane becomes contested; then we resolve simple combat (1-for-1).
+        If after combat the active player *newly* controls the lane and it was contested this turn, they score CONQUER (+1 VP, once per battlefield per turn).
+      - First to victory_score wins immediately.
+      - Turn ends: switch active.
     """
+
     def __init__(self, gs: GameState):
         self.gs = gs
         self.units_played = 0
         self.spells_cast = 0
 
+        # Link battlefields to agents so they can inspect distribution
+        if hasattr(gs.A, "agent") and gs.A.agent:
+            gs.A.agent.player.battlefields = gs.battlefields
+        if hasattr(gs.B, "agent") and gs.B.agent:
+            gs.B.agent.player.battlefields = gs.battlefields
+
+    def _score_hold(self, active: str) -> int:
+        """Apply Hold scoring at Beginning Phase. Returns VPs gained this phase."""
+        vps = 0
+        for bf in self.gs.battlefields:
+            # reset per-turn flags/start-of-turn
+            bf.begin_turn_reset()
+        # Important: we reset first, THEN compute hold based on current control
+        for bf in self.gs.battlefields:
+            if bf.can_score_hold(active):
+                vps += 1
+                bf.mark_scored(active)
+        return vps
+
     def start(self) -> Result:
         gs = self.gs
-        # opening draws
+
+        # Opening draws
         for _ in range(5):
             gs.A.draw()
             gs.B.draw()
 
         while gs.turn <= gs.max_turns:
+            # ===== BEGINNING PHASE: HOLD scoring =====
+            hold_vps = self._score_hold(gs.active)
+            if hold_vps:
+                if gs.active == "A":
+                    gs.points_A += hold_vps
+                else:
+                    gs.points_B += hold_vps
+                if gs.points_A >= gs.victory_score:
+                    return Result("A", gs.turn, self.units_played, self.spells_cast)
+                if gs.points_B >= gs.victory_score:
+                    return Result("B", gs.turn, self.units_played, self.spells_cast)
+
+            # ===== MAIN TURN =====
             ap: Player = gs.get_player(gs.active)
             op: Player = gs.get_player(gs.other(gs.active))
 
-            # 1) Draw
+            # Draw
             ap.draw()
 
-            # 2) Agent decision
+            # Decision
             if ap.agent is None:
-                # fallback: do nothing if unassigned
-                action, idx = ("PASS", None)
+                action, idx, lane = ("PASS", None, None)
             else:
-                action, idx = ap.agent.decide_action(op)
+                action, idx, lane = ap.agent.decide_action(op)
 
+            # Guard lane index
+            if lane is not None:
+                if not (0 <= lane < len(gs.battlefields)):
+                    lane = 0  # fallback
+
+            # Snapshot controllers for possible CONQUER checks
+            lane_before: dict[int, str | None] = {}
+            for i, bf in enumerate(gs.battlefields):
+                lane_before[i] = bf.controller()
+
+            # Apply action
             if action == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
                 card = ap.hand[idx]
                 if isinstance(card, SpellCard):
-                    op.hp -= card.damage
                     ap.remove_from_hand(idx)
                     self.spells_cast += 1
-                # else ignore invalid index/type
+                # No effects yet; placeholder
+
             elif action == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
                 card = ap.hand[idx]
                 if isinstance(card, UnitCard):
-                    ap.board_units += 1
+                    tgt: Battlefield = gs.battlefields[lane if lane is not None else 0]
+                    # Place unit
+                    if gs.active == "A":
+                        tgt.units_A += 1
+                    else:
+                        tgt.units_B += 1
                     ap.remove_from_hand(idx)
                     self.units_played += 1
-            # PASS does nothing
 
-            # 3) Attack step
-            if ap.board_units > 0:
-                op.hp -= ap.board_units
+                    # Mark contested if both sides present
+                    tgt.mark_contested_if_needed()
 
-            # Win check
-            if op.hp <= 0:
-                return Result(
-                    winner=gs.active,
-                    turns=gs.turn,
-                    units_played=self.units_played,
-                    spells_cast=self.spells_cast,
-                )
+                    # Snapshot last_controller for this lane (pre-combat)
+                    tgt.last_controller = lane_before[gs.battlefields.index(tgt)]
 
-            # Next turn
+                    # Resolve simplified combat now
+                    tgt.resolve_combat_simple()
+
+                    # After combat, if contested-this-turn and control changed in favor of active -> CONQUER
+                    if tgt.can_score_conquer(gs.active):
+                        if gs.active == "A":
+                            gs.points_A += 1
+                        else:
+                            gs.points_B += 1
+                        tgt.mark_scored(gs.active)
+
+                        if gs.points_A >= gs.victory_score:
+                            return Result("A", gs.turn, self.units_played, self.spells_cast)
+                        if gs.points_B >= gs.victory_score:
+                            return Result("B", gs.turn, self.units_played, self.spells_cast)
+
+            # (No attack phase for now; combat already resolved on placement.)
+
+            # ===== TURN END =====
             gs.active = gs.other(gs.active)
             gs.turn += 1
 
-        # turn limit -> pick winner by HP tiebreaker; else DRAW
-        A_hp, B_hp = gs.A.hp, gs.B.hp
-        if A_hp > B_hp:
+        # Turn limit: winner by points, else draw
+        if gs.points_A > gs.points_B:
             w = "A"
-        elif B_hp > A_hp:
+        elif gs.points_B > gs.points_A:
             w = "B"
         else:
             w = "DRAW"
-
-        return Result(
-            winner=w,
-            turns=self.gs.turn - 1,
-            units_played=self.units_played,
-            spells_cast=self.spells_cast,
-        )
+        return Result(w, gs.turn - 1, self.units_played, self.spells_cast)
