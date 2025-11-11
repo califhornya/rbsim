@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, TYPE_CHECKING
 
 from .state import GameState
 from .cards import SpellCard, UnitCard
 from .combat import UnitInPlay
 from .player import Player
 from .battlefield import Battlefield
+
+if TYPE_CHECKING:
+    from riftbound.data.writer import GameRecorder
 
 
 @dataclass
@@ -27,10 +30,11 @@ Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
 class GameLoop:
     """Core turn structure, extended with Might combat, rune channeling and movement."""
 
-    def __init__(self, gs: GameState):
+    def __init__(self, gs: GameState, recorder: Optional["GameRecorder"] = None):
         self.gs = gs
         self.units_played = 0
         self.spells_cast = 0
+        self.recorder = recorder
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -72,7 +76,9 @@ class GameLoop:
         return vps
 
     def _phase_draw(self, ap: Player) -> None:
-        ap.draw()
+        card = ap.draw()
+        if card and self.recorder:
+            self.recorder.record_draw(ap.name, self.gs.turn, card)
 
     def _apply_action(self, ap: Player, action: Action) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
@@ -102,7 +108,15 @@ class GameLoop:
                     unit.ready = False
                 ap.remove_from_hand(idx)
                 self.units_played += 1
-                
+                if self.recorder:
+                    self.recorder.record_play(
+                        ap.name,
+                        self.gs.turn,
+                        card,
+                        action="UNIT",
+                        battlefield_index=lane if lane is not None else 0,
+                    )
+
 
         elif kind == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
@@ -112,12 +126,23 @@ class GameLoop:
                 if not ap.pay_cost(card.cost_energy, card.cost_power):
                     return
                 target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
+                before_A = list(target.units_A)
+                before_B = list(target.units_B)
                 if self.gs.active == "A":
                     target.apply_spell_damage("B", card.damage)
                 else:
                     target.apply_spell_damage("A", card.damage)
                 ap.remove_from_hand(idx)
                 self.spells_cast += 1
+                if self.recorder:
+                    self.recorder.record_play(
+                        ap.name,
+                        self.gs.turn,
+                        card,
+                        action="SPELL",
+                        battlefield_index=lane if lane is not None else 0,
+                    )
+                    self._record_spell_deaths(target, before_A, before_B)
 
         elif kind == "MOVE":
             src = lane
@@ -159,7 +184,7 @@ class GameLoop:
                     unit.ready = True
                     return
                 unit.ready = False
-                dst_bf.add_unit(side, unit)    
+                dst_bf.add_unit(side, unit)
 
     def _phase_showdown(self, active: str, opponent: str) -> None:
         for bf in self.gs.battlefields:
@@ -170,8 +195,12 @@ class GameLoop:
     def _phase_combat_and_conquer(self, active: str) -> None:
 
         for bf in self.gs.battlefields:
+            before_A = list(bf.units_A)
+            before_B = list(bf.units_B)
             if bf.contested_this_turn:
                 bf.resolve_combat_might()
+                if self.recorder:
+                    self._record_combat_deaths(bf, before_A, before_B)
                 if bf.can_score_conquer(active):
                     if active == "A":
                         self.gs.points_A += 1
@@ -186,8 +215,16 @@ class GameLoop:
         gs = self.gs
 
         for _ in range(5):
-            gs.A.draw()
-            gs.B.draw()
+            card_a = gs.A.draw()
+            card_b = gs.B.draw()
+            if self.recorder:
+                if card_a:
+                    self.recorder.record_draw("A", 0, card_a)
+                if card_b:
+                    self.recorder.record_draw("B", 0, card_b)
+
+        if self.recorder:
+            self._snapshot_state(turn_override=0)
 
         while gs.turn <= gs.max_turns:
             gained = self._phase_beginning(gs.active)
@@ -197,8 +234,12 @@ class GameLoop:
                 else:
                     gs.points_B += gained
                 if gs.points_A >= gs.victory_score:
+                    if self.recorder:
+                        self._snapshot_state()
                     return Result("A", gs.turn, self.units_played, self.spells_cast)
                 if gs.points_B >= gs.victory_score:
+                    if self.recorder:
+                        self._snapshot_state()
                     return Result("B", gs.turn, self.units_played, self.spells_cast)
 
 
@@ -217,13 +258,19 @@ class GameLoop:
 
             self._phase_combat_and_conquer(gs.active)
             if gs.points_A >= gs.victory_score:
+                if self.recorder:
+                    self._snapshot_state()
                 return Result("A", gs.turn, self.units_played, self.spells_cast)
             if gs.points_B >= gs.victory_score:
+                if self.recorder:
+                    self._snapshot_state()
                 return Result("B", gs.turn, self.units_played, self.spells_cast)
 
 
             gs.active = gs.other(gs.active)
             gs.turn += 1
+            if self.recorder:
+                self._snapshot_state()
 
         if gs.points_A > gs.points_B:
             winner = "A"
@@ -231,4 +278,100 @@ class GameLoop:
             winner = "B"
         else:
             winner = "DRAW"
+        if self.recorder:
+            self._snapshot_state()
         return Result(winner, gs.turn - 1, self.units_played, self.spells_cast)
+
+    def _snapshot_state(self, *, turn_override: Optional[int] = None) -> None:
+        if not self.recorder:
+            return
+
+        turn_number = turn_override if turn_override is not None else self.gs.turn
+        for idx, bf in enumerate(self.gs.battlefields):
+            self.recorder.record_board(
+                turn_number,
+                idx,
+                bf.units_A,
+                bf.units_B,
+                controller=bf.controller(),
+                contested=bf.contested_this_turn,
+                points_a=self.gs.points_A,
+                points_b=self.gs.points_B,
+            )
+
+        self.recorder.record_hand("A", turn_number, self.gs.A.hand)
+        self.recorder.record_hand("B", turn_number, self.gs.B.hand)
+
+    def _record_spell_deaths(
+        self,
+        battlefield: Battlefield,
+        before_a: list[UnitInPlay],
+        before_b: list[UnitInPlay],
+    ) -> None:
+        if not self.recorder:
+            return
+
+        self._record_unit_diffs(
+            before_a,
+            battlefield.units_A,
+            owner="A",
+            battlefield_index=self.gs.battlefields.index(battlefield),
+            cause="spell",
+        )
+        self._record_unit_diffs(
+            before_b,
+            battlefield.units_B,
+            owner="B",
+            battlefield_index=self.gs.battlefields.index(battlefield),
+            cause="spell",
+        )
+
+    def _record_combat_deaths(
+        self,
+        battlefield: Battlefield,
+        before_a: list[UnitInPlay],
+        before_b: list[UnitInPlay],
+    ) -> None:
+        if not self.recorder:
+            return
+
+        index = self.gs.battlefields.index(battlefield)
+        self._record_unit_diffs(
+            before_a,
+            battlefield.units_A,
+            owner="A",
+            battlefield_index=index,
+            cause="combat",
+        )
+        self._record_unit_diffs(
+            before_b,
+            battlefield.units_B,
+            owner="B",
+            battlefield_index=index,
+            cause="combat",
+        )
+
+    def _record_unit_diffs(
+        self,
+        before: list[UnitInPlay],
+        after: list[UnitInPlay],
+        *,
+        owner: str,
+        battlefield_index: int,
+        cause: str,
+    ) -> None:
+        if not self.recorder:
+            return
+
+        remaining = {getattr(unit.card, "uuid", None) for unit in after}
+        for unit in before:
+            uuid = getattr(unit.card, "uuid", None)
+            if uuid not in remaining:
+                self.recorder.record_play(
+                    owner,
+                    self.gs.turn,
+                    unit.card,
+                    action="DEATH",
+                    battlefield_index=battlefield_index,
+                    result=cause,
+                )

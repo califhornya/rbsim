@@ -12,7 +12,7 @@ from riftbound.core.loop import GameLoop
 
 # DB logging
 from riftbound.data.session import make_session
-from riftbound.data.writer import record_game
+from riftbound.data.writer import GameRecorder, record_game
 
 # Agents
 from riftbound.ai.heuristics.simple_aggro import SimpleAggro
@@ -105,7 +105,22 @@ def simulate(
             turn=1, max_turns=40, active="A",
             victory_score=victory_score
         )
-        result = GameLoop(gs).start()
+        recorder = None
+        game_id = None
+        if session:
+            game_id = record_game(
+                session=session,
+                seed=game_seed,
+                winner="?",
+                turns=0,
+                total_units=0,
+                total_spells=0,
+            )
+            recorder = GameRecorder(session, game_id)
+            recorder.record_deck("A", deckA.cards, ai_name=ai_a)
+            recorder.record_deck("B", deckB.cards, ai_name=ai_b)
+
+        result = GameLoop(gs, recorder=recorder).start()
 
         turns_total += result.turns
         if result.winner == "A":
@@ -115,7 +130,7 @@ def simulate(
         else:
             draws += 1
 
-        if session:
+        if session and game_id is not None:
             record_game(
                 session=session,
                 seed=game_seed,
@@ -123,6 +138,7 @@ def simulate(
                 turns=result.turns,
                 total_units=result.units_played,
                 total_spells=result.spells_cast,
+                game_id=game_id,
             )
 
         if verbose:

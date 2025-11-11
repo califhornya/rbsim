@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional
+from uuid import uuid4
 
 from .enums import CardType, Domain
 
@@ -17,6 +18,7 @@ class Card:
     tags: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     might: Optional[int] = None
+    uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
 
     def has_keyword(self, keyword: str) -> bool:
         return keyword.upper() in {k.upper() for k in self.keywords}   
