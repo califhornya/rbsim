@@ -5,6 +5,8 @@ This milestone begins the transition from a simplified simulation engine into a 
 
 All previous systems (Hold/Conquer scoring, two battlefields, AI heuristics, and energy) are complete. We now expand to include **Might-based combat, rune/power resources, movement, and basic keyword support.**
 
+**EDIT**: We should now have completed Phase 1 and 2. Before continuing to Phase 3, look at "Known Bugs" at the end on this file and hopefully fix it (there's only one).
+
 ---
 
 ## Phase 1 — Combat & Might System
@@ -109,16 +111,12 @@ Implement the following keywords:
 
 ---
 
-## Deliverables
-- `core/combat.py` for Might-based resolution logic.
-- Updated `cards.py` and `player.py` for rune/power system.
-- Extended `loop.py` for Showdown handling.
-- 3–4 basic test cases for resource and combat validation.
-
----
 
 ## Status
 🟢 Previous: Functional Hold/Conquer, AI, logging, CLI complete.  
 🟡 Current: Begin true Riftbound mechanics (combat, runes, movement).  
 ⚪ Next: Add full ability system (Active, Triggered, Passive) + keyword stack resolution.
+
+## Known Bugs
+- Simulating 500 games, they all end in draw. Might indicate something's off.
 
