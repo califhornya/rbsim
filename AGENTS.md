@@ -1,93 +1,141 @@
-# 📊 rbsim | Analytics Roadmap (Codex-Optimized)
+# ⚔️ rbsim | Real Riftbound Mechanics Roadmap (Final)
 
 ## Objective
-Upgrade `rbsim` into a **data-rich simulator** for large-scale analysis.  
-Focus: analytics infrastructure — not game-rule fidelity.
+Implement **real Riftbound game mechanics** on top of the simulator, using the *Riftbound Core Rules v1.1*.  
+This roadmap is now actionable — you can start coding directly from Phase 0.
 
 ---
 
-## Phase A — Database Expansion
+## Phase 0 — Card Registry & Effect System (Integration Step)
+
+### Goal
+Introduce a data-driven card registry and minimal effect resolution. This enables loading cards from JSON instead of hardcoding classes.
 
 ### Tasks
-1. Extend `riftbound/data/schema.py`:
-   - Add ORM models: `Deck`, `Draw`, `Hand`, `Board`, `Play`, `AIStats`.
-   - Use `UUID` for card instances.
-   - Keep backward-compatible `DB_VERSION = 2`.
-2. Update `writer.py`:
-   - Add `record_draw()`, `record_play()`, `record_board()`, etc.
-3. Modify `GameLoop` and `Player`:
-   - Log all card transitions: draw, play, death.
-   - Hook `record_*` functions after each event.
+1. **Card Registry Setup**
+   - File: `riftbound/core/cards_registry.py`
+   - Add dataclass `CardSpec` and `load_cards_json()` loader.
+   - Registry loads all `.json` files under `riftbound/data/cards/`.
+   - Example `riftbound/data/cards/core/unit.json`:
+     ```json
+     [
+       {
+         "name": "Stalwart Recruit",
+         "category": "UNIT",
+         "domain": "ORDER",
+         "cost_energy": 1,
+         "might": 2,
+         "keywords": []
+       }
+     ]
+     ```
 
-### Schema Summary
-| Table | Purpose |
-|--------|----------|
-| `Deck` | Stores cardlist, hash, and AI used. |
-| `Game` | Match metadata (seed, winner, turns, etc.). |
-| `Turn` | Turn-level summary. |
-| `Draw` | Card draw events. |
-| `Hand` | Hand snapshot at turn end. |
-| `Board` | Battlefield summary per turn. |
-| `Play` | Card play / cast events. |
-| `AIStats` | Aggregate results per AI type. |
+2. **Effect Registry**
+   - File: `riftbound/core/effects.py`
+   - Define `@effect` decorator to register functions in `REGISTRY`.
+   - Example effects:
+     ```python
+     @effect("deal_damage")
+     def _deal_damage(ctx, spec): ...
+
+     @effect("grant_might")
+     def _grant_might(ctx, spec): ...
+     ```
+
+3. **Integrate with GameLoop**
+   - Add small `EffectContext` class inside `loop.py`.
+   - On Spell or Gear play, resolve registered effects:
+     ```python
+     spec = CARD_REG.get(card.name)
+     if spec and spec.effects:
+         self._resolve_on_play_effects(spec)
+     ```
+
+4. **Minimal Example Cards**
+   - Only three cards at this stage:
+     - **Stalwart Recruit** (Unit)
+     - **Bolt** (Spell)
+     - **Iron Shield** (Gear)
+   - Place under `riftbound/data/cards/core/`.
+
+✅ *Deliverable:* Running simulation uses JSON-driven cards. “Bolt” resolves via the effect system.
 
 ---
 
-## Phase B — Replay / Export Layer
+## Phase 1 — Phases & Turn Structure
 
 ### Tasks
-1. Add module: `riftbound/data/export.py`.
-2. Implement:
-   ```bash
-   rbsim export --query "SELECT winner, turns FROM games" --out results.csv
-   ```
-3. Support formats: `.csv`, `.json`, `.parquet`.
-4. Add `rbsim replay <game_id>` to reconstruct a single match from logs.
-
----
-
-## Phase C — Card Tracking
-
-### Tasks
-1. Each `Card` gets `uuid = uuid4()`.
-2. Record state transitions:
-   - `DECK → HAND` → `BOARD` → `GRAVE`.
-3. Add helper:
+1. Expand `Phase` enum with `AWAKEN`, `BEGINNING`, `DRAW`, `MAIN`, `COMBAT`, `SHOWDOWN`, `END`.
+   NB: (if no battlefields are challegend, no showdows nor combats happen.
+      it means a player just cast some spells or directly passed the turn)
+2. Add dedicated phase handlers in `GameLoop`.
+3. Introduce lightweight event bus:
    ```python
-   def record_card_event(session, game_id, card_uuid, phase, action, turn_no): ...
+   game.trigger(event="BEGINNING", actor=player)
    ```
-4. Enable queries like:
-   ```sql
-   SELECT card_name, AVG(turns_alive)
-   FROM plays
-   JOIN cards USING (card_uuid)
-   GROUP BY card_name;
-   ```
+4. Add placeholder functions for advanced phases (Showdown, Recovery).
 
 ---
 
-## Phase D — AI Benchmarking
+## Phase 2 — Battlefield & Legend System
 
 ### Tasks
-1. Extend `record_game()` with `ai_a`, `ai_b`, `avg_turns`, `avg_energy_used`.
-2. Create new table `AIStats`:
-   - `ai_name`, `wins`, `losses`, `draws`, `avg_turns`.
-3. Provide summary CLI:
-   ```bash
-   rbsim stats
+1. Add real `BattlefieldCard` logic with passive modifiers. (e.g., +1 Might, Spells do +1 damage).
+2. Implement `LegendCard` mechanics (unique per player, persistent, affects scoring or stats).
+
+---
+
+## Phase 3 — Stack & Priority System
+
+### Tasks
+1. Implement minimal spell stack:
+   ```python
+   class Stack:
+       def push(effect): ...
+       def resolve(): ...
    ```
+2. Modify `_apply_action()` to push Spell effects instead of resolving immediately.
+3. Add response window before resolution (AI opportunity to act).
 
 ---
 
-## Expected Outcome
-- Full per-turn, per-card, per-AI data capture.
-- Ready for analytics via SQL or Python (pandas).
-- Reproducible, deterministic simulation datasets.
-- Scalable to millions of games.
+## Phase 4 — Resource & Rune Expansion
+
+### Tasks
+1. Implement *Advanced Channeling* rules (exhaustion, recycle).
 
 ---
 
-## References
-Repo: [github.com/califhornya/rbsim](https://github.com/califhornya/rbsim)  
-Rulebook: *Riftbound Core Rules v1.1* (for mechanics context).  
-Inspiration: *Magic Simulator (Genesis Project)*.
+## Phase 5 — Controlled Card Expansion
+
+### Tasks
+1. User will expand JSON library.
+   - Add 3 placeholder cards.
+   - Validate format with `rbsim validate-cards`.
+3. Keep effects modular — all logic in `effects.py`.
+
+---
+
+## Phase 6 — AI Adaptation & Validation
+
+### Tasks
+1. Update SimpleAggro and SimpleControl to evaluate card metadata.
+2. Add new heuristic agents for testing (e.g., Midrange, Combo).
+3. Build regression tests: 100-game runs to ensure determinism.
+4. Connect to analytics layer to analyze card/AI performance.
+
+---
+
+## Milestone Result
+After Phase 6:
+- All actions, effects, and outcomes are logged to the analytics DB.
+- The engine is modular: new cards or rules only require JSON or effect updates.
+
+---
+
+## Implementation Notes
+- Keep deterministic RNG (`seed`) for reproducibility.
+- Always log plays and effects using the existing `GameRecorder`.
+- Keep cards modular and data-driven — no class-per-card.
+- Reference: *Riftbound Core Rules v1.1* for card behavior and phase timing.
+
