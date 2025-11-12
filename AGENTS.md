@@ -49,24 +49,21 @@ The goal: assess how far the current system fulfills the original AI simulation 
 
 ## 4. Outstanding Gaps
 
-| Area | Description | Priority |
-|------|--------------|----------|
-| **Card pool population** | Only minimal test cards (`Bolt`, `Stalwart Recruit`); expand JSON registry with full Riftbound set. | HIGH |
-| **Decklists from JSON** | Decks currently hardcoded; need proper deck definitions linked to Legends & Domains. | HIGH |
-| **Advanced analytics layer** | Database ready, but no SQL / notebook utilities for queries (e.g. average win turn, card performance). | MEDIUM |
-| **Extended AI logic** | Heuristics basic; add adaptive decision making per battlefield, hand evaluation, and rune efficiency. | MEDIUM |
-| **Multi-match orchestration** | Add tournament runner (cross-deck matrix simulation) for meta-analysis. | MEDIUM |
-| **Effect coverage expansion** | Registry supports `deal_damage`, `grant_might`; add all canonical Riftbound keywords (Stun, Heal, Buff, etc.). | MEDIUM |
-| **Data validation / schema versioning** | Version tracking exists (`DB_VERSION=2`); migrate support still to implement. | LOW |
-| **Codex integration hooks** | Export simplified JSON schemas for Codex ingestion (deck, match, turn snapshots). | LOW |
+| Area | Description | Priority | To-Do by Codex |
+|------|--------------|----------|----------|
+| **Card pool population** | Only minimal test cards (`Bolt`, `Stalwart Recruit`); expand JSON registry with full Riftbound set. | HIGH | No |
+| **Decklists from JSON** | Decks currently hardcoded; need proper deck definitions linked to Legends & Domains. | HIGH | No |
+| **Advanced analytics layer** | Database ready, but no SQL / notebook utilities for queries (e.g. average win turn, card performance). | MEDIUM | Yes |
+| **Extended AI logic** | Heuristics basic; add adaptive decision making per battlefield, hand evaluation, and rune efficiency. | MEDIUM | Yes |
+| **Multi-match orchestration** | Add tournament runner (cross-deck matrix simulation) for meta-analysis. | MEDIUM | No |
+| **Effect coverage expansion** | Registry supports `deal_damage`, `grant_might`; add all canonical Riftbound keywords (Stun, Heal, Buff, etc.). | MEDIUM | Yes |
+| **Data validation / schema versioning** | Version tracking exists (`DB_VERSION=2`); migrate support still to implement. | LOW | Yes |
 
 ---
 
 ## 5. Next Steps
 
 **Short-term (Codex integration readiness)**  
-- Populate `data/cards/` with 1-unit, 1-spell, 1-gear example JSON files (canonical format).  
-- Create `data/decks/` with legend/domain-compliant decklists.  
 - Write lightweight analytics script to query SQLite results and export CSV summaries.  
 
 **Mid-term**  
@@ -74,10 +71,8 @@ The goal: assess how far the current system fulfills the original AI simulation 
 - Integrate extended Effect handlers and keyword registry from rulebook (`Riftbound Core Rules v1.1`).  
 - Implement in-game triggers for passive and triggered abilities (using `EffectContext`).  
 
-**Long-term**  
-- Add multi-deck tournament orchestration and balance evaluation.  
-- Provide visualization and meta dashboards (e.g., victory curve, card efficiency).  
-- Enable Codex auto-training from stored simulations.
+**Long-term**   
+- Provide visualization and meta dashboards (e.g., victory curve, card efficiency).
 
 ---
 
