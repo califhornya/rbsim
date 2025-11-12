@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from typing import Optional, Tuple, TYPE_CHECKING
 
 from .state import GameState
-from .cards import SpellCard, UnitCard
+from .cards import Card, GearCard, SpellCard, UnitCard
 from .combat import UnitInPlay
 from .player import Player
 from .battlefield import Battlefield
+from .cards_registry import CARD_REGISTRY, EffectSpec
+from .effects import REGISTRY as EFFECT_REGISTRY
 
 if TYPE_CHECKING:
     from riftbound.data.writer import GameRecorder
@@ -19,6 +21,68 @@ class Result:
     turns: int
     units_played: int
     spells_cast: int
+
+
+@dataclass
+class EffectContext:
+    loop: "GameLoop"
+    card: Card
+    actor: Player
+    opponent: Player
+    battlefield: Battlefield
+
+    def _side_for_player(self, player: Player) -> str:
+        return "A" if player is self.loop.gs.A else "B"
+
+    @property
+    def actor_side(self) -> str:
+        return self._side_for_player(self.actor)
+
+    @property
+    def opponent_side(self) -> str:
+        return self._side_for_player(self.opponent)
+
+    def deal_damage(self, amount: int, *, target: str = "opponent") -> None:
+        if amount <= 0:
+            return
+
+        before_a = list(self.battlefield.units_A)
+        before_b = list(self.battlefield.units_B)
+
+        target_key = target.lower()
+        if target_key in {"actor", "ally", "self"}:
+            target_side = self.actor_side
+        else:
+            target_side = self.opponent_side
+
+        self.battlefield.apply_spell_damage(target_side, amount)
+
+        if self.loop.recorder:
+            self.loop._record_spell_deaths(self.battlefield, before_a, before_b)
+
+    def grant_might(self, amount: int, *, target: str = "actor", scope: str = "all") -> None:
+        if amount == 0:
+            return
+
+        target_key = target.lower()
+        if target_key in {"actor", "ally", "self"}:
+            side = self.actor_side
+        else:
+            side = self.opponent_side
+
+        units = self.battlefield.units_A if side == "A" else self.battlefield.units_B
+        if not units:
+            return
+
+        scope_key = scope.lower()
+        if scope_key == "single":
+            iterable = units[:1]
+        else:
+            iterable = units
+
+        for unit in iterable:
+            current = int(unit.card.might or 0)
+            unit.card.might = current + amount
 
 
 # Legacy action signature retained for agents:
@@ -80,6 +144,36 @@ class GameLoop:
         if card and self.recorder:
             self.recorder.record_draw(ap.name, self.gs.turn, card)
 
+    def _resolve_card_effects(
+        self,
+        card: Card,
+        battlefield: Battlefield,
+        actor: Player,
+        opponent: Player,
+    ) -> None:
+        spec = CARD_REGISTRY.get(card.name)
+        effect_specs: list[EffectSpec] = []
+        if spec and spec.effects:
+            effect_specs = list(spec.effects)
+        elif getattr(card, "effects", None):
+            try:
+                effect_specs = [EffectSpec.from_dict(e) for e in card.effects]  # type: ignore[arg-type]
+            except Exception:
+                effect_specs = []
+
+        context = EffectContext(self, card, actor, opponent, battlefield)
+
+        if not effect_specs:
+            if isinstance(card, SpellCard):
+                context.deal_damage(int(getattr(card, "damage", 0)), target="opponent")
+            return
+
+        for effect_spec in effect_specs:
+            handler = EFFECT_REGISTRY.get(effect_spec.effect)
+            if not handler:
+                continue
+            handler(context, effect_spec.params)
+
     def _apply_action(self, ap: Player, action: Action) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
@@ -92,7 +186,9 @@ class GameLoop:
         if dst_lane is not None and not (0 <= dst_lane < len(self.gs.battlefields) + 1):
             dst_lane = None
 
-        base_index = len(self.gs.battlefields)           
+        base_index = len(self.gs.battlefields)
+
+        opponent = self.gs.get_player(self.gs.other(self.gs.active))
 
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
@@ -126,12 +222,7 @@ class GameLoop:
                 if not ap.pay_cost(card.cost_energy, card.cost_power):
                     return
                 target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
-                before_A = list(target.units_A)
-                before_B = list(target.units_B)
-                if self.gs.active == "A":
-                    target.apply_spell_damage("B", card.damage)
-                else:
-                    target.apply_spell_damage("A", card.damage)
+                self._resolve_card_effects(card, target, ap, opponent)
                 ap.remove_from_hand(idx)
                 self.spells_cast += 1
                 if self.recorder:
@@ -142,7 +233,25 @@ class GameLoop:
                         action="SPELL",
                         battlefield_index=lane if lane is not None else 0,
                     )
-                    self._record_spell_deaths(target, before_A, before_B)
+
+        elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
+            card = ap.hand[idx]
+            if isinstance(card, GearCard):
+                if not ap.can_pay_cost(card.cost_energy, card.cost_power):
+                    return
+                if not ap.pay_cost(card.cost_energy, card.cost_power):
+                    return
+                target = self.gs.battlefields[lane if lane is not None else 0]
+                self._resolve_card_effects(card, target, ap, opponent)
+                ap.remove_from_hand(idx)
+                if self.recorder:
+                    self.recorder.record_play(
+                        ap.name,
+                        self.gs.turn,
+                        card,
+                        action="GEAR",
+                        battlefield_index=lane if lane is not None else 0,
+                    )
 
         elif kind == "MOVE":
             src = lane

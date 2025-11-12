@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Stalwart Recruit",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 1,
+    "might": 2,
+    "keywords": []
+  }
+]
