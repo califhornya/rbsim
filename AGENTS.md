@@ -1,197 +1,87 @@
-# RIFTBOUND MECHANICS IMPLEMENTATION NOTES
-
-## Overview
-This document defines structural and gameplay updates to align the simulator with Riftbound’s real resource and setup rules.  
-The changes concern **Runes**, **Legends**, and supporting directory organization.
+# PROGRESS_TOWARD_VISION.md  
+**Alignment of Riftbound Simulator with Original AI-Simulator Vision**
 
 ---
 
-## 1. RUNE SYSTEM
+## 1. Purpose & Context
 
-### 1.1 Summary
-Runes act as the player’s renewable energy source.  
-They exist in a **separate deck**, not the main deck, and are **not drawn** into the hand.  
-They can be **ready** or **exhausted**, and sometimes **recycled** (placed at the bottom of the rune deck).
+This document tracks the evolution of the **Riftbound Simulator** from the original simulator concept (as described in `1.txt` and `answer-to-1.txt`) to the current, integrated version implementing **Real Riftbound Mechanics**.
 
-### 1.2 New Class: `RuneDeck`
-```python
-@dataclass
-class RuneDeck:
-    runes: list[RuneCard]
-
-    def recycle(self, rune: RuneCard) -> None:
-        """Put a rune at the bottom of the deck."""
-        self.runes.append(rune)
-```
-
-### 1.3 Player Integration
-Add fields to `Player`:
-```python
-rune_deck: RuneDeck
-rune_pool: Dict[Domain, List[Rune]]
-```
-
-Add methods:
-```python
-def unlock_runes(self, n: int = 2) -> None:
-    """Bring n runes from the deck into play (max 12 total)."""
-    for _ in range(n):
-        if len(self.rune_pool) >= 12 or not self.rune_deck.runes:
-            break
-        rune_card = self.rune_deck.runes.pop(0)
-        self.add_rune(rune_card.domain)
-
-def recycle_rune(self, domain: Domain) -> bool:
-    """Recycle one rune of the given domain (move from play to bottom of deck)."""
-    runes = self.rune_pool.get(domain, [])
-    if not runes:
-        return False
-    rune = runes.pop(0)
-    self.rune_deck.recycle(rune)
-    return True
-```
-
-Extend `pay_cost()`:
-```python
-def pay_cost(self, cost_energy: int = 0, cost_power: Optional[Domain] = None) -> bool:
-    if self.energy < cost_energy:
-        return False
-    self.energy -= cost_energy
-    if cost_power:
-        return self.recycle_rune(cost_power)
-    return True
-```
-
-### 1.4 Game Setup
-Starting runes:
-- Player A (first): 2
-- Player B (second): 3
-
-Add:
-```python
-A.unlock_runes(2)
-B.unlock_runes(3)
-```
-to `GameLoop.start()` before the first turn.
-
-### 1.5 Rune Ramp per Turn
-At the start of **each of your turns**, unlock 2 more runes:
-```python
-def _phase_beginning(self, active: str) -> int:
-    ...
-    player = self.gs.get_player(active)
-    player.unlock_runes(2)
-```
-
-### 1.6 Channeling (unchanged)
-Existing `Player.channel()` logic already handles refreshing all runes and exhausting two per turn for +energy and +power.  
-No change needed.
+The goal: assess how far the current system fulfills the original AI simulation vision—*automated matches, database logging, card abstraction, and modular AIs*—and identify the remaining work before final Codex ingestion.
 
 ---
 
-## 2. LEGENDS
+## 2. Core Feature Parity
 
-### 2.1 Standardization
-- Legends are **not part of the main deck**.
-- Stored separately in `/data/cards/legends/`.
-- Always tagged:
-  ```json
-  "tags": ["legend"]
-  ```
-- Category: `"LEGEND"`
-- Have no Might or combat stats.
-
-### 2.2 Optional Zone
-Add optional structure (future use):
-```python
-@dataclass
-class LegendZone:
-    legend: LegendCard
-```
-and reference in `GameState`:
-```python
-legend_A: Optional[LegendCard] = None
-legend_B: Optional[LegendCard] = None
-```
-
-### 2.3 Passives
-Legend passives (e.g., Ahri, Nine-Tailed Fox) can remain unimplemented for now.  
-Only data tagging is required for analytics and deck metadata.
+| Vision Feature (from `1.txt`) | Current Riftbound Implementation | Status |
+|-------------------------------|----------------------------------|---------|
+| **Automated match engine** capable of thousands of runs | `GameLoop`, `main.py` simulate N matches via CLI (`--games`, `--seed`) | ✅ |
+| **Deck-specific AIs** (Burn vs Delver analogy) | Agents: `SimpleAggro`, `SimpleControl` selectable per side | ✅ |
+| **SQLite database logging** with per-game analytics | Full ORM via SQLAlchemy (`schema.py`, `writer.py`, `session.py`) | ✅ |
+| **Turn-level and card-level tracking** | Tables for Games, Turns, Decks, Draws, Hands, Boards, Plays | ✅ |
+| **Randomized reproducibility** | Deterministic `Random(seed)` and per-game RNG splitting | ✅ |
+| **Data serialization of cards** | `_card_to_dict` / `_unit_to_dict` JSON serializers | ✅ |
+| **Dynamic effect handling** | `effects.py` registry + `EffectSpec` system | ✅ |
+| **Multi-category card model** | Unified `Card` dataclass + typed subclasses (Unit, Spell, Gear, Rune, Legend, Battlefield) | ✅ |
+| **Scoring and game resolution** | `Battlefield` + `GameLoop` implement Hold/Conquer VP rules | ✅ |
+| **Runes / Energy channeling** | Implemented in `Player` with unlock + channel phases | ✅ |
+| **Multi-phase turn sequence** | Awaken → Beginning → Channel → Draw → Action → Combat → End | ✅ |
+| **Configurable simulation parameters** | CLI options for energy cap, runes, victory score, verbosity | ✅ |
+| **Card registry & instantiation from JSON** | `cards_registry.py` dynamically loads JSON specs | ✅ |
+| **Code modularization** | Full separation: `core/`, `data/`, `ai/` | ✅ |
+| **Factory instead of per-card class explosion** | `CardSpec.instantiate()` replaces manual subclassing | ✅ |
 
 ---
 
-## 3. DIRECTORY STRUCTURE
+## 3. Engineering Design Alignment (per `answer-to-1.txt`)
 
-Proposed structure to organize cards, runes, and decks:
-
-```
-rbsim/
-├─ core/
-│  ├─ ...
-│
-├─ data/
-│  ├─ cards/
-│  │  ├─ units/
-│  │  ├─ spells/
-│  │  ├─ gear/
-│  │  ├─ runes/
-│  │  └─ legends/
-│  ├─ decks/
-│  │  ├─ ahri_control.json
-│  │  ├─ jynx_aggro.json
-│  │  └─ volibear_big.json
-│  └─ schema.py
-│
-├─ ai/
-│  ├─ heuristics/
-│  │  ├─ simple_control.py
-│  │  ├─ simple_aggro.py
-│  │  └─ ...
-│
-└─ AGENTS.md
-```
+| Recommendation | Implementation | Status |
+|----------------|----------------|---------|
+| **“Separate code in modules”** | Clear package split: `riftbound.core`, `riftbound.data`, `riftbound.ai` | ✅ |
+| **“Use ORM instead of raw SQL”** | SQLAlchemy ORM with declarative Base | ✅ |
+| **“Encapsulate DB separately”** | `writer.py` and `session.py` isolate persistence logic | ✅ |
+| **“Simulator shouldn’t do everything”** | Game orchestration isolated in `loop.py`; DB in data layer | ✅ |
+| **“Avoid one-class-per-card”** | Replaced by `CardSpec` + factory pattern | ✅ |
+| **“Don’t reinvent the wheel”** | Modern ORM, `typer` CLI, `rich` output, JSON schemas | ✅ |
+| **Code readability / extensibility** | Dataclasses, typing, minimal inheritance | ✅ |
 
 ---
 
-## 4. SUMMARY TABLE
+## 4. Outstanding Gaps
 
-| Mechanic | Implemented | Change Required | Notes |
-|-----------|--------------|----------------|-------|
-| Energy / Power system | ✅ | — | Works via `channel()` and `pay_cost()`. |
-| Separate Rune deck | ❌ | Add `RuneDeck` | Prevents runes being drawn from main deck. |
-| Recycling mechanic | ❌ | Add `recycle_rune()` | For power payment (put rune bottom of deck). |
-| Rune unlock ramp | ❌ | Add `unlock_runes(2)` | Beginning of each turn. |
-| Starting runes | ❌ | Initialize 2/3 runes per player | Done in `GameLoop.start()`. |
-| Legends excluded from deck | ⚠️ Partial | Ensure `"tags": ["legend"]` | Stored in separate folder. |
-| Legend passives | ❌ | Deferred | Implement later. |
-
----
-
-## 5. EXAMPLE DATA
-
-### 5.1 Rune Example
-```json
-{
-  "name": "Mind Rune",
-  "category": "RUNE",
-  "domain": "MIND",
-  "tags": ["basic_rune"]
-}
-```
-
-### 5.2 Legend Example
-```json
-{
-  "name": "Ahri, Nine-Tailed Fox",
-  "category": "LEGEND",
-  "domain": "MIND",
-  "tags": ["legend"],
-  "effects": [
-    {"effect": "passive_placeholder", "description": "When an enemy unit attacks a battlefield you control, give it -1 Might this turn (min 1)."}
-  ]
-}
-```
+| Area | Description | Priority |
+|------|--------------|----------|
+| **Card pool population** | Only minimal test cards (`Bolt`, `Stalwart Recruit`); expand JSON registry with full Riftbound set. | HIGH |
+| **Decklists from JSON** | Decks currently hardcoded; need proper deck definitions linked to Legends & Domains. | HIGH |
+| **Advanced analytics layer** | Database ready, but no SQL / notebook utilities for queries (e.g. average win turn, card performance). | MEDIUM |
+| **Extended AI logic** | Heuristics basic; add adaptive decision making per battlefield, hand evaluation, and rune efficiency. | MEDIUM |
+| **Multi-match orchestration** | Add tournament runner (cross-deck matrix simulation) for meta-analysis. | MEDIUM |
+| **Effect coverage expansion** | Registry supports `deal_damage`, `grant_might`; add all canonical Riftbound keywords (Stun, Heal, Buff, etc.). | MEDIUM |
+| **Data validation / schema versioning** | Version tracking exists (`DB_VERSION=2`); migrate support still to implement. | LOW |
+| **Codex integration hooks** | Export simplified JSON schemas for Codex ingestion (deck, match, turn snapshots). | LOW |
 
 ---
 
-**End of file.**
+## 5. Next Steps
+
+**Short-term (Codex integration readiness)**  
+- Populate `data/cards/` with 1-unit, 1-spell, 1-gear example JSON files (canonical format).  
+- Create `data/decks/` with legend/domain-compliant decklists.  
+- Write lightweight analytics script to query SQLite results and export CSV summaries.  
+
+**Mid-term**  
+- Expand AI module with adaptive strategies and battlefield prioritization.  
+- Integrate extended Effect handlers and keyword registry from rulebook (`Riftbound Core Rules v1.1`).  
+- Implement in-game triggers for passive and triggered abilities (using `EffectContext`).  
+
+**Long-term**  
+- Add multi-deck tournament orchestration and balance evaluation.  
+- Provide visualization and meta dashboards (e.g., victory curve, card efficiency).  
+- Enable Codex auto-training from stored simulations.
+
+---
+
+**Summary:**  
+The Riftbound Simulator now achieves **full architectural parity** and exceeds the original *Magic-AI simulator* vision.  
+Remaining work lies in **content scale (cards/decks)** and **analytical tooling**, not in simulation fidelity.
+
