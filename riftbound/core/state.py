@@ -1,8 +1,15 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from typing import Optional
 import random
 from .player import Player
 from .battlefield import Battlefield
+from .cards import LegendCard
+
+
+@dataclass
+class LegendZone:
+    legend: LegendCard
 
 @dataclass
 class GameState:
@@ -13,6 +20,9 @@ class GameState:
     turn: int = 1
     max_turns: int = 40
     active: str = "A"
+
+    legend_A: Optional[LegendCard] = None
+    legend_B: Optional[LegendCard] = None
 
     # Victory points via Hold/Conquer
     points_A: int = 0

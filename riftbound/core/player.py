@@ -24,6 +24,20 @@ class Rune:
         self.ready = True
 
 @dataclass
+class RuneDeck:
+    runes: List[Rune]
+
+    def draw(self) -> Optional[Rune]:
+        if not self.runes:
+            return None
+        return self.runes.pop(0)
+
+    def recycle(self, rune: Rune) -> None:
+        rune.refresh()
+        self.runes.append(rune)
+
+
+@dataclass
 class Deck:
     cards: List[Card]
 
@@ -46,12 +60,42 @@ class Player:
 
     energy: int = 0
 
+    rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
     power_pool: Dict[Domain, int] = field(default_factory=dict)
     base_units: List[UnitInPlay] = field(default_factory=list)
 
-    def add_rune(self, domain: Domain, *, ready: bool = True) -> None:
-        self.rune_pool.setdefault(domain, []).append(Rune(domain=domain, ready=ready))
+    def add_rune(self, domain: Domain, *, ready: bool = True) -> Rune:
+        rune = Rune(domain=domain, ready=ready)
+        self.rune_pool.setdefault(domain, []).append(rune)
+        return rune
+
+    def total_runes_in_play(self) -> int:
+        return sum(len(runes) for runes in self.rune_pool.values())
+
+    def unlock_runes(self, n: int = 2) -> None:
+        """Bring n runes from the deck into play (max 12 total)."""
+
+        for _ in range(n):
+            if self.total_runes_in_play() >= 12:
+                break
+            rune = self.rune_deck.draw()
+            if rune is None:
+                break
+            rune.refresh()
+            self.rune_pool.setdefault(rune.domain, []).append(rune)
+
+    def recycle_rune(self, domain: Domain) -> bool:
+        """Recycle one rune of the given domain (move from play to bottom of deck)."""
+
+        runes = self.rune_pool.get(domain, [])
+        if not runes:
+            return False
+        rune = runes.pop(0)
+        if not runes:
+            self.rune_pool.pop(domain, None)
+        self.rune_deck.recycle(rune)
+        return True
 
     def channel(self) -> None:
         """Channel up to two ready runes, producing energy and power tokens."""
@@ -100,16 +144,22 @@ class Player:
             return False
         if cost_power is None:
             return True
-        return self.power_pool.get(cost_power, 0) > 0
+        if self.power_pool.get(cost_power, 0) <= 0:
+            return False
+        return bool(self.rune_pool.get(cost_power))
 
     def pay_cost(self, cost_energy: int = 0, cost_power: Optional[Domain] = None) -> bool:
         if not self.can_pay_cost(cost_energy, cost_power):
             return False
         self.energy -= cost_energy
         if cost_power is not None:
-            self.power_pool[cost_power] = self.power_pool.get(cost_power, 0) - 1
-            if self.power_pool[cost_power] <= 0:
-                del self.power_pool[cost_power]
+            current = self.power_pool.get(cost_power, 0) - 1
+            if current <= 0:
+                self.power_pool.pop(cost_power, None)
+            else:
+                self.power_pool[cost_power] = current
+            if not self.recycle_rune(cost_power):
+                return False
         return True
 
     def draw(self) -> Optional[Card]:

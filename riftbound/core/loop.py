@@ -128,6 +128,7 @@ class GameLoop:
         self._ready_active_units(active)
 
         active_player = self.gs.get_player(active)
+        active_player.unlock_runes(2)
         active_player.channel()
         opposing_player = self.gs.get_player(self.gs.other(active))
         opposing_player.channel()
@@ -234,24 +235,24 @@ class GameLoop:
                         action="SPELL",
                         battlefield_index=lane if lane is not None else 0,
                     )
-                elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
-                    card = ap.hand[idx]
-                    if isinstance(card, GearCard):
-                        if not ap.can_pay_cost(card.cost_energy, card.cost_power):
-                            return
-                        if not ap.pay_cost(card.cost_energy, card.cost_power):
-                            return
-                        target = self.gs.battlefields[lane if lane is not None else 0]
-                        self._resolve_card_effects(card, target, ap, opponent)
-                        ap.remove_from_hand(idx)
-                        if self.recorder:
-                            self.recorder.record_play(
-                                ap.name,
-                                self.gs.turn,
-                                card,
-                                action="GEAR",
-                                battlefield_index=lane if lane is not None else 0,
-                            )    
+        elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
+            card = ap.hand[idx]
+            if isinstance(card, GearCard):
+                if not ap.can_pay_cost(card.cost_energy, card.cost_power):
+                    return
+                if not ap.pay_cost(card.cost_energy, card.cost_power):
+                    return
+                target = self.gs.battlefields[lane if lane is not None else 0]
+                self._resolve_card_effects(card, target, ap, opponent)
+                ap.remove_from_hand(idx)
+                if self.recorder:
+                    self.recorder.record_play(
+                        ap.name,
+                        self.gs.turn,
+                        card,
+                        action="GEAR",
+                        battlefield_index=lane if lane is not None else 0,
+                    )            
 
         elif kind == "MOVE":
             src = lane
@@ -331,6 +332,9 @@ class GameLoop:
                     self.recorder.record_draw("A", 0, card_a)
                 if card_b:
                     self.recorder.record_draw("B", 0, card_b)
+
+        gs.A.unlock_runes(2)
+        gs.B.unlock_runes(3)
 
         if self.recorder:
             self._snapshot_state(turn_override=0)

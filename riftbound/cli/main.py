@@ -6,7 +6,7 @@ from typing import List, Optional
 from riftbound.core.models import GameConfig
 from riftbound.core.cards import Card
 from riftbound.core.enums import Domain
-from riftbound.core.player import Player, Deck
+from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
 from riftbound.core.cards_registry import CARD_REGISTRY
@@ -28,14 +28,25 @@ def make_simple_deck() -> Deck:
     bolt = CARD_REGISTRY.get("Bolt")
     if recruit is None or bolt is None:
         raise RuntimeError("Core cards not found in registry")
+    cards: List[Card] = []
     cards += [recruit.instantiate() for _ in range(10)]
     cards += [bolt.instantiate() for _ in range(10)]
-    cards: List[Card] = []
     return Deck(cards=cards)
+
+def make_basic_rune_deck(rng: Optional[random.Random] = None) -> RuneDeck:
+    """Create a basic rune deck with Calm and Fury runes."""
+
+    runes = [Rune(domain=Domain.CALM) for _ in range(6)]
+    runes += [Rune(domain=Domain.FURY) for _ in range(6)]
+    if rng is not None:
+        rng.shuffle(runes)
+    return RuneDeck(runes=runes)
 
 AI_REGISTRY = {
     "aggro": SimpleAggro,
     "control": SimpleControl,
+    "ahri": SimpleControl,
+    "jynx": SimpleAggro,
 }
 
 def make_agent(name: str, player: Player):
@@ -91,14 +102,23 @@ def simulate(
         deckB.shuffle(rng)
 
         # Players
-        A = Player(name="A", hp=10, deck=deckA, energy=starting_energy)
-        B = Player(name="B", hp=10, deck=deckB, energy=starting_energy)
+        rune_rng_a = random.Random(rng.randrange(1 << 30))
+        rune_rng_b = random.Random(rng.randrange(1 << 30))
 
-        # Basic rune loadout so channeling can produce energy/power
-        for player in (A, B):
-            for domain in (Domain.CALM, Domain.FURY):
-                player.add_rune(domain)
-
+        A = Player(
+            name="A",
+            hp=10,
+            deck=deckA,
+            energy=starting_energy,
+            rune_deck=make_basic_rune_deck(rune_rng_a),
+        )
+        B = Player(
+            name="B",
+            hp=10,
+            deck=deckB,
+            energy=starting_energy,
+            rune_deck=make_basic_rune_deck(rune_rng_b),
+        )
 
         # Agents
         A.agent = make_agent(ai_a, A)

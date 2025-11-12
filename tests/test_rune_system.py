@@ -1,6 +1,6 @@
 from riftbound.core.cards import UnitCard
 from riftbound.core.enums import Domain
-from riftbound.core.player import Player
+from riftbound.core.player import Player, RuneDeck, Rune
 
 
 def test_channel_generates_energy_and_power():
@@ -19,6 +19,8 @@ def test_channel_generates_energy_and_power():
     assert player.pay_cost(card.cost_energy, card.cost_power)
     assert player.energy == 1
     assert Domain.FURY not in player.power_pool
+    assert len(player.rune_pool.get(Domain.FURY, [])) == 0
+    assert len(player.rune_deck.runes) == 1
 
 
 def test_cannot_pay_missing_power():
@@ -28,3 +30,25 @@ def test_cannot_pay_missing_power():
     player.channel()
 
     assert not player.can_pay_cost(1, Domain.FURY)
+
+
+def test_unlock_runes_from_deck():
+    player = Player(
+        name="C",
+        rune_deck=RuneDeck([Rune(domain=Domain.FURY), Rune(domain=Domain.CALM)]),
+    )
+
+    player.unlock_runes(2)
+
+    assert player.total_runes_in_play() == 2
+    assert not player.rune_deck.runes
+
+
+def test_unlock_runes_caps_at_twelve():
+    runes = [Rune(domain=Domain.CALM) for _ in range(15)]
+    player = Player(name="D", rune_deck=RuneDeck(list(runes)))
+
+    player.unlock_runes(20)
+
+    assert player.total_runes_in_play() == 12
+    assert len(player.rune_deck.runes) == len(runes) - 12
