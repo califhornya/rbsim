@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Bolt",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "damage": 2,
+    "effects": [
+      {"effect": "deal_damage", "amount": 2, "target": "opponent"}
+    ]
+  }
+]
