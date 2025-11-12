@@ -18,6 +18,7 @@ class Card:
     tags: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     might: Optional[int] = None
+    effects: list[dict[str, object]] = field(default_factory=list)
     uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
 
     def has_keyword(self, keyword: str) -> bool:
@@ -37,6 +38,7 @@ class UnitCard(Card):
         might: int = 1,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -47,6 +49,7 @@ class UnitCard(Card):
             tags=list(tags or []),
             keywords=list(keywords or []),
             might=might,
+            effects=list(effects or []),
         )
 
 @dataclass
@@ -65,6 +68,7 @@ class SpellCard(Card):
         damage: int = 2,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -74,6 +78,7 @@ class SpellCard(Card):
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
+            effects=list(effects or []),
         )
         self.damage = damage
 
@@ -89,6 +94,7 @@ class GearCard(Card):
         domain: Optional[Domain] = None,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -98,6 +104,7 @@ class GearCard(Card):
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
+            effects=list(effects or []),
         )
 
 
@@ -110,6 +117,7 @@ class RuneCard(Card):
         domain: Domain,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -119,6 +127,7 @@ class RuneCard(Card):
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
+            effects=list(effects or []),
         )
 
 
@@ -134,6 +143,7 @@ class LegendCard(Card):
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
         might: Optional[int] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -144,6 +154,7 @@ class LegendCard(Card):
             tags=list(tags or []),
             keywords=list(keywords or []),
             might=might,
+            effects=list(effects or []),
         )
 
 
@@ -155,10 +166,12 @@ class BattlefieldCard(Card):
         *,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
+        effects: Optional[list[dict[str, object]]] = None,
     ) -> None:
         super().__init__(
             name=name,
             category=CardType.BATTLEFIELD,
             tags=list(tags or []),
             keywords=list(keywords or []),
+            effects=list(effects or []),
         )

@@ -4,11 +4,12 @@ import random
 from typing import List, Optional
 
 from riftbound.core.models import GameConfig
-from riftbound.core.cards import UnitCard, SpellCard, Card
+from riftbound.core.cards import Card
 from riftbound.core.enums import Domain
 from riftbound.core.player import Player, Deck
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
+from riftbound.core.cards_registry import CARD_REGISTRY
 
 # DB logging
 from riftbound.data.session import make_session
@@ -23,9 +24,14 @@ app = typer.Typer(help="Riftbound Simulator CLI")
 
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 Units, 10 Spells."""
+    recruit = CARD_REGISTRY.get("Stalwart Recruit")
+    bolt = CARD_REGISTRY.get("Bolt")
+    if recruit is None or bolt is None:
+        raise RuntimeError("Core cards not found in registry")
+
     cards: List[Card] = []
-    cards += [UnitCard("Recruit", cost_energy=1) for _ in range(10)]
-    cards += [SpellCard("Bolt", cost_energy=2, damage=2) for _ in range(10)]
+    cards += [recruit.instantiate() for _ in range(10)]
+    cards += [bolt.instantiate() for _ in range(10)]
     return Deck(cards=cards)
 
 AI_REGISTRY = {

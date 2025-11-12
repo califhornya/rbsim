@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Iron Shield",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "effects": [
+      {"effect": "grant_might", "amount": 1, "target": "actor", "scope": "all"}
+    ]
+  }
+]
