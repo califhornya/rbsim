@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState
 from .cards import Card, GearCard, SpellCard, UnitCard
@@ -10,6 +11,7 @@ from .player import Player
 from .battlefield import Battlefield
 from .cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
+from .enums import Domain
 
 if TYPE_CHECKING:
     from riftbound.data.writer import GameRecorder
@@ -40,6 +42,21 @@ class EffectContext:
     @property
     def opponent_side(self) -> str:
         return self._side_for_player(self.opponent)
+    
+    def _player_for_target(self, target: str) -> Player:
+        key = target.lower()
+        if key in {"actor", "ally", "self"}:
+            return self.actor
+        if key in {"opponent", "enemy"}:
+            return self.opponent
+        raise ValueError(f"Unknown player target '{target}'")
+
+    def _units_for_side(self, side: str) -> list[UnitInPlay]:
+        return self.battlefield.units_A if side == "A" else self.battlefield.units_B
+
+    def _units_for_target(self, target: str) -> list[UnitInPlay]:
+        player = self._player_for_target(target)
+        return self._units_for_side(self._side_for_player(player))
 
     def deal_damage(self, amount: int, *, target: str = "opponent") -> None:
         if amount <= 0:
@@ -83,7 +100,63 @@ class EffectContext:
             current = int(unit.card.might or 0)
             unit.card.might = current + amount
 
+    def draw_cards(self, count: int, *, target: str = "actor", source: str = "effect") -> None:
+        if count <= 0:
+            return
 
+        player = self._player_for_target(target)
+        for _ in range(count):
+            card = player.draw()
+            if not card:
+                break
+            if self.loop.recorder:
+                self.loop.recorder.record_draw(
+                    player.name,
+                    self.loop.gs.turn,
+                    card,
+                    source=source,
+                )
+
+    def gain_energy(self, amount: int, *, target: str = "actor") -> None:
+        if amount == 0:
+            return
+
+        player = self._player_for_target(target)
+        player.energy += amount
+
+    def ready_units(self, *, target: str = "actor", scope: str = "all") -> None:
+        units = self._units_for_target(target)
+        if not units:
+            return
+
+        scope_key = scope.lower()
+        if scope_key == "single":
+            iterable: Iterable[UnitInPlay] = units[:1]
+        else:
+            iterable = units
+
+        for unit in iterable:
+            unit.ready = True
+
+    def add_rune(self, domain: object, *, target: str = "actor", ready: bool = True) -> None:
+        domain_obj = self._coerce_domain(domain)
+        player = self._player_for_target(target)
+        player.add_rune(domain_obj, ready=ready)
+
+    def _coerce_domain(self, value: object) -> Domain:
+        if isinstance(value, Domain):
+            return value
+        if isinstance(value, str):
+            key = value.strip().upper()
+            if not key:
+                raise ValueError("Domain value cannot be empty")
+            try:
+                return Domain[key]
+            except KeyError:
+                for domain in Domain:
+                    if domain.value.upper() == key:
+                        return domain
+        raise ValueError(f"Unknown domain '{value}'")      
 
 
 # Legacy action signature retained for agents:

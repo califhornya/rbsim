@@ -12,6 +12,7 @@ from riftbound.core.loop import GameLoop
 from riftbound.core.cards_registry import CARD_REGISTRY
 
 # DB logging
+from riftbound.data.analytics import summarize_session
 from riftbound.data.session import make_session
 from riftbound.data.writer import GameRecorder, record_game
 
@@ -21,6 +22,52 @@ from riftbound.ai.heuristics.simple_control import SimpleControl
 
 
 app = typer.Typer(help="Riftbound Simulator CLI")
+
+@app.command()
+def analyze(
+    db: str = typer.Option("results.db", help="Path to the SQLite database to inspect."),
+    top: int = typer.Option(10, help="Number of top-played cards to display."),
+) -> None:
+    """Print aggregated statistics from a simulation database."""
+
+    session = make_session(db)
+    try:
+        report = summarize_session(session, top_cards=top)
+    except RuntimeError as exc:
+        typer.secho(str(exc), err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    finally:
+        session.close()
+
+    print("[bold magenta]Game Summary[/]")
+    print(
+        f"  Total Games: {report.games.total_games}\n"
+        f"  Wins A/B: {report.games.wins_A}/{report.games.wins_B}\n"
+        f"  Draws: {report.games.draws}\n"
+        f"  Avg Turns: {report.games.avg_turns:.2f}\n"
+        f"  Avg Units Played: {report.games.avg_units_played:.2f}\n"
+        f"  Avg Spells Cast: {report.games.avg_spells_cast:.2f}"
+    )
+
+    print("\n[bold magenta]AI Performance[/]")
+    if not report.ai_stats:
+        print("  (no AI records found)")
+    else:
+        for stat in report.ai_stats:
+            print(
+                f"  {stat.ai_name}: games={stat.games} wins={stat.wins} "
+                f"losses={stat.losses} draws={stat.draws} "
+                f"win_rate={stat.win_rate:.2%} avg_turns={stat.avg_turns:.2f}"
+            )
+
+    print("\n[bold magenta]Top Cards[/]")
+    if not report.top_cards:
+        print("  (no card plays recorded)")
+    else:
+        for usage in report.top_cards:
+            print(
+                f"  {usage.card_name} ({usage.action}): {usage.plays} plays"
+            )
 
 def make_simple_deck() -> Deck:
     """Create a 20-card toy deck: 10 Units, 10 Spells."""
