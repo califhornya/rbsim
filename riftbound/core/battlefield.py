@@ -49,12 +49,6 @@ class Battlefield:
         for unit in self._units_for(who):
             unit.ready = True
 
-    def mark_contested_if_needed(self) -> None:
-        if self.units_A and self.units_B:
-            self.contested_this_turn = True
-            if self.controller() is None:
-                self.showdown_pending = True
-    
     def add_unit(self, who: str, unit: UnitInPlay) -> None:
         unit_list = self._units_for(who)
         unit_list.append(unit)
@@ -90,8 +84,8 @@ class Battlefield:
                 return unit
         return None
 
-    def resolve_combat_might(self) -> CombatStats:
-        stats = resolve_might_combat(self.units_A, self.units_B)
+    def resolve_combat_might(self, *, attacker_side: str = "A") -> CombatStats:
+        stats = resolve_might_combat(self.units_A, self.units_B, attacker_side=attacker_side)
         self.kills_A += stats.kills_A
         self.kills_B += stats.kills_B
         self.deaths_A += stats.deaths_A

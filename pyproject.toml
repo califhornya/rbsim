@@ -18,4 +18,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.uv]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
 # no special config needed, this just keeps uv happy

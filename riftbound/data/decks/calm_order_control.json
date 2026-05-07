@@ -1,0 +1,24 @@
+{
+  "name": "Calm/Order Control",
+  "legend": "Leona Radiant Dawn",
+  "champion": "Caitlyn Patrolling",
+  "runes": [
+    {"domain": "CALM", "count": 6},
+    {"domain": "ORDER", "count": 6}
+  ],
+  "cards": [
+    {"name": "Clockwork Keeper",    "count": 3},
+    {"name": "Stalwart Poro",       "count": 3},
+    {"name": "Solari Shieldbearer", "count": 3},
+    {"name": "Sunlit Guardian",     "count": 3},
+    {"name": "Poro Herder",         "count": 3},
+    {"name": "Adaptatron",          "count": 3},
+    {"name": "Wielder of Water",    "count": 3},
+    {"name": "Faithful Manufactor", "count": 3},
+    {"name": "Daring Poro",         "count": 3},
+    {"name": "Vanguard Captain",    "count": 3},
+    {"name": "Meditation",          "count": 3},
+    {"name": "En Garde",            "count": 3},
+    {"name": "Find Your Center",    "count": 3}
+  ]
+}

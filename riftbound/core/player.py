@@ -130,15 +130,6 @@ class Player:
                 return self.base_units.pop(idx)
         return None
 
-    def can_pay(self, cost: int) -> bool:
-        return self.energy >= cost
-
-    def pay(self, cost: int) -> bool:
-        if self.energy >= cost:
-            self.energy -= cost
-            return True
-        return False
-
     def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[Domain] = None) -> bool:
         if self.energy < cost_energy:
             return False

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Tuple, TYPE_CHECKING
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState
@@ -201,11 +200,13 @@ class GameLoop:
         self._ready_active_units(active)
 
         active_player = self.gs.get_player(active)
+        # Clear leftover resources from last turn before channeling
+        active_player.energy = 0
+        active_player.power_pool.clear()
+
         active_player.unlock_runes(2)
         active_player.channel()
-        opposing_player = self.gs.get_player(self.gs.other(active))
-        opposing_player.channel()
-
+        # Only the Turn Player channels — opponent channels on their own turn
 
         vps = 0
         for bf in self.gs.battlefields:
@@ -273,10 +274,15 @@ class GameLoop:
                 if not ap.pay_cost(card.cost_energy, card.cost_power):
                     return
                 target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
-                unit = UnitInPlay(card=card, ready=card.has_keyword("ACCELERATE"))
+                # ACCELERATE: optional additional cost of 1 energy + 1 power of the unit's domain
+                enters_ready = False
+                if card.has_keyword("ACCELERATE"):
+                    accel_domain = card.domain
+                    if ap.can_pay_cost(1, accel_domain):
+                        ap.pay_cost(1, accel_domain)
+                        enters_ready = True
+                unit = UnitInPlay(card=card, ready=enters_ready)
                 target.add_unit(self.gs.active, unit)
-                if not unit.ready:
-                    unit.ready = False
                 ap.remove_from_hand(idx)
                 self.units_played += 1
                 if self.recorder:
@@ -381,7 +387,7 @@ class GameLoop:
             before_A = list(bf.units_A)
             before_B = list(bf.units_B)
             if bf.contested_this_turn:
-                bf.resolve_combat_might()
+                bf.resolve_combat_might(attacker_side=active)
                 if self.recorder:
                     self._record_combat_deaths(bf, before_A, before_B)
                 if bf.can_score_conquer(active):
@@ -397,7 +403,7 @@ class GameLoop:
     def start(self) -> Result:
         gs = self.gs
 
-        for _ in range(5):
+        for _ in range(4):
             card_a = gs.A.draw()
             card_b = gs.B.draw()
             if self.recorder:

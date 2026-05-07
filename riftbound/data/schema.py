@@ -1,12 +1,9 @@
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import declarative_base, relationship
 
 DB_VERSION = 2
 
 Base = declarative_base()
-victory_mode = Column(String(16), default="control")
-points_A = Column(Integer, default=0)
-points_B = Column(Integer, default=0)
 
 class Game(Base):
     __tablename__ = "games"
@@ -115,12 +112,3 @@ class Play(Base):
     game = relationship("Game", back_populates="plays_rel")
 
 
-class AIStats(Base):
-    __tablename__ = "ai_stats"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    ai_name = Column(String(64), unique=True, nullable=False)
-    wins = Column(Integer, default=0)
-    losses = Column(Integer, default=0)
-    draws = Column(Integer, default=0)
-    avg_turns = Column(Float, default=0.0)

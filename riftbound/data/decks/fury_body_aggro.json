@@ -1,0 +1,24 @@
+{
+  "name": "Fury/Body Aggro",
+  "legend": "Volibear Relentless Storm",
+  "champion": "Vi Destructive",
+  "runes": [
+    {"domain": "FURY", "count": 6},
+    {"domain": "BODY", "count": 6}
+  ],
+  "cards": [
+    {"name": "Chemtech Enforcer",  "count": 3},
+    {"name": "Legion Rearguard",   "count": 3},
+    {"name": "Pouty Poro",         "count": 3},
+    {"name": "Immortal Phoenix",   "count": 3},
+    {"name": "Flame Chompers",     "count": 3},
+    {"name": "Noxus Hopeful",      "count": 3},
+    {"name": "Noxus Saboteur",     "count": 3},
+    {"name": "Raging Soul",        "count": 3},
+    {"name": "Captain Farron",     "count": 3},
+    {"name": "Crackshot Corsair",  "count": 3},
+    {"name": "Cleave",             "count": 3},
+    {"name": "Disintegrate",       "count": 3},
+    {"name": "Get Excited!",       "count": 3}
+  ]
+}

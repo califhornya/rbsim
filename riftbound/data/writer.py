@@ -7,7 +7,7 @@ from typing import Iterable, Optional
 
 from sqlalchemy.orm import Session
 
-from riftbound.data.schema import Board, Deck, Draw, Game, Hand, Play, Turn
+from riftbound.data.schema import Board, Deck, Draw, Game, Hand, Play
 
 
 def _card_to_dict(card) -> dict:
@@ -93,28 +93,6 @@ def record_game(
     game.total_spells_cast = total_spells
     session.flush()
     return game.id
-
-
-def record_turn(
-    session: Session,
-    game_id: int,
-    turn_no: int,
-    active: str,
-    units_A: int,
-    units_B: int,
-    hp_A: int,
-    hp_B: int,
-) -> None:
-    t = Turn(
-        game_id=game_id,
-        turn_number=turn_no,
-        active_player=active,
-        units_A=units_A,
-        units_B=units_B,
-        hp_A=hp_A,
-        hp_B=hp_B,
-    )
-    session.add(t)
 
 
 def record_deck(

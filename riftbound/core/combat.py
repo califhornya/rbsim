@@ -13,16 +13,21 @@ class UnitInPlay:
     card: UnitCard
     damage: int = 0
     ready: bool = False
+    bonus_might: int = 0  # temporary combat bonus (ASSAULT/SHIELD)
 
     def reset_damage(self) -> None:
         self.damage = 0
+        self.bonus_might = 0
 
     @property
     def might(self) -> int:
-        return int(self.card.might or 0)
+        return max(0, int(self.card.might or 0) + self.bonus_might)
 
     def has_keyword(self, keyword: str) -> bool:
         return self.card.has_keyword(keyword)
+
+    def keyword_value(self, keyword: str) -> int:
+        return self.card.keyword_value(keyword)
 
 
 @dataclass
@@ -42,10 +47,9 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
 
 
 def _ordered_targets(units: List[UnitInPlay]) -> List[UnitInPlay]:
-    guards = [u for u in units if u.has_keyword("GUARD")]
-    others = [u for u in units if not u.has_keyword("GUARD")]
-    # Guards defend first; otherwise maintain insertion order
-    return guards + others
+    tanks = [u for u in units if u.has_keyword("TANK")]
+    others = [u for u in units if not u.has_keyword("TANK")]
+    return tanks + others
 
 
 def _apply_damage(units: List[UnitInPlay], damage: int) -> tuple[int, int]:
@@ -68,10 +72,26 @@ def _apply_damage(units: List[UnitInPlay], damage: int) -> tuple[int, int]:
     return kills, assigned
 
 
-def resolve_might_combat(units_a: List[UnitInPlay], units_b: List[UnitInPlay]) -> CombatStats:
-    """Resolve simultaneous combat between two unit groups."""
+def resolve_might_combat(
+    units_a: List[UnitInPlay],
+    units_b: List[UnitInPlay],
+    *,
+    attacker_side: str = "A",
+) -> CombatStats:
+    """Resolve simultaneous combat between two unit groups.
 
+    attacker_side: "A" if A is attacking (Turn Player), "B" otherwise.
+    Attackers gain ASSAULT bonus; defenders gain SHIELD bonus.
+    """
     stats = CombatStats()
+
+    a_attacks = attacker_side == "A"
+
+    # Apply combat bonuses before resolving damage
+    for u in units_a:
+        u.bonus_might = u.keyword_value("ASSAULT") if a_attacks else u.keyword_value("SHIELD")
+    for u in units_b:
+        u.bonus_might = u.keyword_value("ASSAULT") if not a_attacks else u.keyword_value("SHIELD")
 
     damage_to_a = _total_might(units_b)
     damage_to_b = _total_might(units_a)
@@ -86,11 +106,11 @@ def resolve_might_combat(units_a: List[UnitInPlay], units_b: List[UnitInPlay]) -
     stats.damage_to_A = assigned_a
     stats.damage_to_B = assigned_b
 
-    # Remove defeated units
+    # Remove defeated units (u.might == 0 with no damage is immortal by rule, keep them)
     units_a[:] = [u for u in units_a if u.damage < u.might or u.might == 0]
     units_b[:] = [u for u in units_b if u.damage < u.might or u.might == 0]
 
-    # Survivors clear damage after combat concludes
+    # Survivors clear damage and combat bonuses
     for unit in units_a:
         unit.reset_damage()
     for unit in units_b:

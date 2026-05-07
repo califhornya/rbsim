@@ -22,7 +22,22 @@ class Card:
     uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
 
     def has_keyword(self, keyword: str) -> bool:
-        return keyword.upper() in {k.upper() for k in self.keywords}   
+        kw = keyword.upper()
+        return any(k.upper() == kw or k.upper().startswith(kw + " ") for k in self.keywords)
+
+    def keyword_value(self, keyword: str) -> int:
+        """Return the numeric value of a parameterized keyword (e.g. ASSAULT 2 → 2, ASSAULT → 1, absent → 0)."""
+        kw = keyword.upper()
+        for k in self.keywords:
+            ku = k.upper()
+            if ku == kw:
+                return 1
+            if ku.startswith(kw + " "):
+                try:
+                    return int(ku[len(kw):].strip())
+                except ValueError:
+                    return 1
+        return 0
 
 @dataclass
 class UnitCard(Card):

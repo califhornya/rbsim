@@ -1,15 +1,15 @@
 import typer
 from rich import print
 import random
+from pathlib import Path
 from typing import List, Optional
 
 from riftbound.core.models import GameConfig
 from riftbound.core.cards import Card
-from riftbound.core.enums import Domain
 from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
-from riftbound.core.cards_registry import CARD_REGISTRY
+from riftbound.core.cards_registry import load_deck_json
 
 # DB logging
 from riftbound.data.analytics import summarize_session
@@ -69,25 +69,15 @@ def analyze(
                 f"  {usage.card_name} ({usage.action}): {usage.plays} plays"
             )
 
-def make_simple_deck() -> Deck:
-    """Create a 20-card toy deck: 10 Units, 10 Spells."""
-    recruit = CARD_REGISTRY.get("Stalwart Recruit")
-    bolt = CARD_REGISTRY.get("Bolt")
-    if recruit is None or bolt is None:
-        raise RuntimeError("Core cards not found in registry")
-    cards: List[Card] = []
-    cards += [recruit.instantiate() for _ in range(10)]
-    cards += [bolt.instantiate() for _ in range(10)]
-    return Deck(cards=cards)
-
-def make_basic_rune_deck(rng: Optional[random.Random] = None) -> RuneDeck:
-    """Create a basic rune deck with Calm and Fury runes."""
-
-    runes = [Rune(domain=Domain.CALM) for _ in range(6)]
-    runes += [Rune(domain=Domain.FURY) for _ in range(6)]
-    if rng is not None:
-        rng.shuffle(runes)
-    return RuneDeck(runes=runes)
+def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card]]:
+    """Load a deck, rune deck, and champion card from a JSON file."""
+    specs, rune_entries, champion_spec = load_deck_json(path)
+    cards: List[Card] = [spec.instantiate() for spec in specs]
+    runes: List[Rune] = []
+    for domain, count in rune_entries:
+        runes.extend(Rune(domain=domain) for _ in range(count))
+    champion = champion_spec.instantiate() if champion_spec is not None else None
+    return Deck(cards=cards), RuneDeck(runes=runes), champion
 
 AI_REGISTRY = {
     "aggro": SimpleAggro,
@@ -108,11 +98,11 @@ def simulate(
     seed: int = typer.Option(42, help="Random seed for reproducibility"),
     ai_a: str = typer.Option("aggro", "--aiA", help="Agent for Player A (aggro|control)"),
     ai_b: str = typer.Option("aggro", "--aiB", help="Agent for Player B (aggro|control)"),
+    deck_a: Path = typer.Option(..., "--deckA", help="Path to deck JSON for Player A"),
+    deck_b: Path = typer.Option(..., "--deckB", help="Path to deck JSON for Player B"),
     victory_score: int = typer.Option(8, help="Victory points needed to win via Hold/Conquer"),
     verbose: bool = typer.Option(True, help="Print a line per game"),
     db: Optional[str] = typer.Option(None, help="Optional path to SQLite database (e.g. results.db)"),
-    channel_rate: int = typer.Option(1, help="Energy gained each CHANNEL phase"),
-    max_energy: int = typer.Option(10, help="Energy cap per player"),
     starting_energy: int = typer.Option(0, help="Energy at the beginning of the match for each player"),
 ):
     """
@@ -121,9 +111,12 @@ def simulate(
     """
     config = GameConfig(games=games, seed=seed, record_draws=False)
     typer.echo("=== Riftbound Simulator (Two-Battlefield + Energy + Combat Phase) ===")
+    deck_a_label = deck_a.stem
+    deck_b_label = deck_b.stem
     typer.echo(
         f"Games: {config.games} | Seed: {config.seed} | AIs: A={ai_a} B={ai_b} | "
-        f"Victory Score: {victory_score} | Energy: +{channel_rate}/turn cap {max_energy}, start {starting_energy} | Per-game output: {verbose}"
+        f"Decks: A={deck_a_label} B={deck_b_label} | "
+        f"Victory Score: {victory_score} | Starting Energy: {starting_energy} | Per-game output: {verbose}"
     )
     if db:
         typer.echo(f"Database logging enabled -> {db}")
@@ -143,28 +136,34 @@ def simulate(
         rng = random.Random(game_seed)
 
         # Decks & shuffle
-        deckA = make_simple_deck()
-        deckB = make_simple_deck()
-        deckA.shuffle(rng)
-        deckB.shuffle(rng)
-
-        # Players
         rune_rng_a = random.Random(rng.randrange(1 << 30))
         rune_rng_b = random.Random(rng.randrange(1 << 30))
+
+        champion_a: Optional[Card] = None
+        champion_b: Optional[Card] = None
+
+        deckA, rune_deck_a, champion_a = make_deck_from_file(deck_a)
+        rune_rng_a.shuffle(rune_deck_a.runes)
+
+        deckB, rune_deck_b, champion_b = make_deck_from_file(deck_b)
+        rune_rng_b.shuffle(rune_deck_b.runes)
+
+        deckA.shuffle(rng)
+        deckB.shuffle(rng)
 
         A = Player(
             name="A",
             hp=10,
             deck=deckA,
             energy=starting_energy,
-            rune_deck=make_basic_rune_deck(rune_rng_a),
+            rune_deck=rune_deck_a,
         )
         B = Player(
             name="B",
             hp=10,
             deck=deckB,
             energy=starting_energy,
-            rune_deck=make_basic_rune_deck(rune_rng_b),
+            rune_deck=rune_deck_b,
         )
 
         # Agents
@@ -175,7 +174,9 @@ def simulate(
         gs = GameState(
             rng=rng, A=A, B=B,
             turn=1, max_turns=40, active="A",
-            victory_score=victory_score
+            victory_score=victory_score,
+            champion_A=champion_a,
+            champion_B=champion_b,
         )
         recorder = None
         game_id = None

@@ -14,6 +14,7 @@ class CardType(Enum):
     SPELL = auto()
     RUNE = auto()
     LEGEND = auto()
+    CHAMPION = auto()      # Champion supertype — starts in Champion Zone, plays as a Unit
     BATTLEFIELD = auto()
 
 class Phase(Enum):
