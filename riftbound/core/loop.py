@@ -464,6 +464,12 @@ class GameLoop:
                 unit.ready = False
                 target_bf = self.gs.battlefields[dst]
                 target_bf.add_unit(side, unit)
+
+                # Trigger showdown if battlefield becomes contested
+                opp_units = target_bf.units_B if side == "A" else target_bf.units_A
+                if opp_units:
+                    self._run_showdown(dst, attacker=side)
+
             elif dst == base_index:
                 src_bf = self.gs.battlefields[src]
                 unit = src_bf.pop_unit_for_movement(side)
@@ -483,6 +489,11 @@ class GameLoop:
                     return
                 unit.ready = False
                 dst_bf.add_unit(side, unit)
+
+                # Trigger showdown if battlefield becomes contested
+                opp_units = dst_bf.units_B if side == "A" else dst_bf.units_A
+                if opp_units:
+                    self._run_showdown(dst, attacker=side)
 
     def _run_chain(self, caster: str) -> None:
         """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""
