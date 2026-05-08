@@ -3,11 +3,12 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 from riftbound.core.player import Player
 
-# Legacy action signature kept for backward-compat:
-# ("SPELL"|"UNIT"|"MOVE"|"PASS", hand_index_or_None, lane_or_src, [lane_or_dst for MOVE])
+# Action signature supports multiple action types:
+# ("SPELL"|"UNIT"|"MOVE"|"PASS"|"ABILITY", ...)
 # For UNIT/SPELL: (TYPE, hand_idx, target_lane)
 # For MOVE: ("MOVE", None, src_lane, dst_lane)
-Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
+# For ABILITY: ("ABILITY", ability_id, arg)
+Action = tuple
 
 class Agent(ABC):
     name: str = "Agent"

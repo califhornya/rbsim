@@ -53,6 +53,16 @@ class PykeAgent(Agent):
             best_bf = self._lane_for_unit(my_side, bfs)
             candidates.append((move_score, ("MOVE", None, base_idx, best_bf)))
 
+        # Pyke legend ability
+        ability_score = self._score_pyke_ability(my_side, bfs)
+        if ability_score > 0:
+            candidates.append((ability_score, ("ABILITY", "PYKE_LEGEND", 0)))
+
+        # Gold sacrifice for rune
+        gold_domain = self._should_sacrifice_gold()
+        if gold_domain:
+            candidates.append((7, ("ABILITY", "GOLD_SACRIFICE", gold_domain)))
+
         # Champion deploy check (highest priority)
         if self._should_deploy_champion(my_side, opponent, bfs):
             lane = self._lane_for_unit(my_side, bfs)
@@ -92,11 +102,13 @@ class PykeAgent(Agent):
         opp_side = "B" if my_side == "A" else "A"
         for bf in bfs:
             if bf.controller() == opp_side:
-                return 8
+                # Extra bonus if moving to fight opponent units (trigger showdown)
+                opp_units = len(bf.units_B if my_side == "A" else bf.units_A)
+                return 8 + (2 if opp_units > 0 else 0)
         # Medium: contested (no one controls, both have units)
         for bf in bfs:
             if bf.units_A and bf.units_B:
-                return 7
+                return 7 + 2  # Bonus for triggering a fight
         # Baseline: just getting presence on the board
         return 5
 
@@ -125,14 +137,22 @@ class PykeAgent(Agent):
                 any(u.might <= 3 for u in (bf.units_B if my_side == "A" else bf.units_A))
                 for bf in bfs
             )
-            return 8 if has_target else 0
+            score = 8 if has_target else 0
+            # Bonus if opponent controls a bf
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            return score
         if name == "Death from Below":
             opp_side = "B" if my_side == "A" else "A"
             has_target = any(
                 any(u.might <= 3 for u in (bf.units_B if my_side == "A" else bf.units_A))
                 for bf in bfs
             )
-            return 8 if has_target else 5
+            score = 8 if has_target else 5
+            # Bonus if opponent controls a bf
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            return score
         if name == "Fizz Trickster":
             # +2 if we have a playable spell in trash
             score = 7
@@ -150,7 +170,15 @@ class PykeAgent(Agent):
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return 7 if opp_units > 0 else 5
+            score = 7 if opp_units > 0 else 5
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            # Extra bonus if 2+ opponent units
+            if opp_units >= 2:
+                score += 2
+            return score
         if name == "Detonate":
             # Check if opponent has gear
             has_gear = any(
@@ -165,7 +193,12 @@ class PykeAgent(Agent):
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return 6 if opp_units > 0 else 3
+            score = 6 if opp_units > 0 else 3
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            return score
         if name == "Pack of Wonders":
             has_unit = any(
                 len(bf.units_A if my_side == "A" else bf.units_B) > 0
@@ -224,6 +257,37 @@ class PykeAgent(Agent):
                 best_lane = i
 
         return best_lane
+
+    def _score_pyke_ability(self, my_side: str, bfs: list) -> int:
+        """Score Pyke legend ability: [1],[tap] → bounce + Gold token."""
+        side = my_side
+        # Check Pyke is on a battlefield and ready
+        pyke_ready = any(
+            any(u.card.name == "Pyke Bloodharbor Ripper" and u.ready
+                for u in (bf.units_A if side == "A" else bf.units_B))
+            for bf in bfs
+        )
+        if not pyke_ready:
+            return 0
+        if not self.player.can_pay_cost(1, None, None):
+            return 0
+        # High value: bounce enables replaying a unit, Gold is tempo
+        return 8
+
+    def _should_sacrifice_gold(self) -> str | None:
+        """Return domain to sacrifice Gold for, or None if not worth it."""
+        from riftbound.core.enums import Domain
+
+        has_gold = any(u.card.name == "Gold" and u.is_token for u in self.player.base_units)
+        if not has_gold:
+            return None
+        # Check if we have a card that needs power we don't have
+        for card in self.player.hand:
+            if card.cost_power and card.cost_power >= 1:
+                if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                    # We'd afford it with a rune
+                    return card.cost_power_domain.value if card.cost_power_domain else "FURY"
+        return None
 
     def _should_deploy_champion(self, my_side: str, opponent: Player, bfs: list) -> bool:
         """Deploy champion when affordable and opponent controls at least one battlefield."""

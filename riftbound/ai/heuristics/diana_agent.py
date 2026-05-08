@@ -98,11 +98,13 @@ class DianaAgent(Agent):
         opp_side = "B" if my_side == "A" else "A"
         for bf in bfs:
             if bf.controller() == opp_side:
-                return 8
+                # Extra bonus if moving to fight opponent units (trigger showdown)
+                opp_units = len(bf.units_B if my_side == "A" else bf.units_A)
+                return 8 + (2 if opp_units > 0 else 0)
         # Medium: contested (no one controls, both have units)
         for bf in bfs:
             if bf.units_A and bf.units_B:
-                return 7
+                return 7 + 2  # Bonus for triggering a fight
         # Baseline: just getting presence on the board
         return 5
 
@@ -136,7 +138,15 @@ class DianaAgent(Agent):
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return (9 if opp_units > 0 else 5) + ravenbloom_bonus
+            score = (9 if opp_units > 0 else 5)
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            # Extra bonus if 2+ opponent units
+            if opp_units >= 2:
+                score += 2
+            return score + ravenbloom_bonus
         if name == "Eager Apprentice":
             return 9
         if name == "Consult the Past":
@@ -150,7 +160,15 @@ class DianaAgent(Agent):
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return (8 if opp_units > 0 else 5) + ravenbloom_bonus
+            score = (8 if opp_units > 0 else 5)
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            # Extra bonus if 2+ opponent units
+            if opp_units >= 2:
+                score += 2
+            return score + ravenbloom_bonus
         if name == "Stacked Deck":
             return 7 + ravenbloom_bonus
         if name == "Hard Bargain":
@@ -158,13 +176,26 @@ class DianaAgent(Agent):
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return (7 if opp_units > 0 else 3) + ravenbloom_bonus
+            score = (7 if opp_units > 0 else 3)
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            return score + ravenbloom_bonus
         if name == "Moonfall":
             opp_units = sum(
                 len(bf.units_B if my_side == "A" else bf.units_A)
                 for bf in bfs
             )
-            return (7 if opp_units > 0 else 3) + ravenbloom_bonus
+            score = (7 if opp_units > 0 else 3)
+            # Bonus if opponent controls a bf
+            opp_side = "B" if my_side == "A" else "A"
+            if any(bf.controller() == opp_side for bf in bfs):
+                score += 3
+            # Extra bonus if 2+ opponent units
+            if opp_units >= 2:
+                score += 2
+            return score + ravenbloom_bonus
         if name == "Ride the Wind":
             has_unit = any(
                 len(bf.units_A if my_side == "A" else bf.units_B) > 0

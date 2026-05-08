@@ -20,6 +20,7 @@ class UnitInPlay:
     might_counters: int = 0  # BUFF counters — persistent, max 1 per unit per application
     aura_might: int = 0  # external aura bonus (e.g. Baron Nashor)
     hidden: bool = False  # reserved for future HIDDEN keyword
+    is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
 
     def reset_damage(self) -> None:
         self.damage = 0

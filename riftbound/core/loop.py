@@ -12,6 +12,7 @@ from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
 from .enums import Domain
 from .legion_effects import get_legion_cost_reduction
+from .movement_effects import MOVEMENT_REGISTRY
 
 if TYPE_CHECKING:
     from riftbound.data.writer import GameRecorder
@@ -311,9 +312,10 @@ class GameLoop:
         else:
             kind, idx, lane, dst_lane = action
 
-        if kind != "MOVE" and lane is not None and not (0 <= lane < len(self.gs.battlefields)):
+        # Validate lanes only for actions that use them as integers
+        if kind not in ("MOVE", "ABILITY") and lane is not None and isinstance(lane, int) and not (0 <= lane < len(self.gs.battlefields)):
             lane = 0
-        if dst_lane is not None and not (0 <= dst_lane < len(self.gs.battlefields) + 1):
+        if dst_lane is not None and isinstance(dst_lane, int) and not (0 <= dst_lane < len(self.gs.battlefields) + 1):
             dst_lane = None
 
         base_index = len(self.gs.battlefields)
@@ -464,6 +466,9 @@ class GameLoop:
                 unit = ap.pop_base_unit()
                 if unit is None:
                     return
+                if unit.is_token:
+                    ap.base_units.insert(0, unit)
+                    return
                 if self.verbose:
                     print(f"  {ap.name} moves UNIT: {unit.card.name} to BF{dst}")
                 unit.ready = False
@@ -482,6 +487,11 @@ class GameLoop:
                     target_bf.contested_this_turn = True
                     self._run_showdown(dst, attacker=side)
 
+                # Dispatch movement effects
+                handler = MOVEMENT_REGISTRY.get(unit.card.name)
+                if handler:
+                    handler(ap, op, self.gs, unit, "base", "bf", target_bf)
+
             elif dst == base_index:
                 src_bf = self.gs.battlefields[src]
                 unit = src_bf.pop_unit_for_movement(side)
@@ -489,6 +499,11 @@ class GameLoop:
                     return
                 unit.ready = True
                 base.append(unit)
+
+                # Dispatch movement effects
+                handler = MOVEMENT_REGISTRY.get(unit.card.name)
+                if handler:
+                    handler(ap, op, self.gs, unit, "bf", "base", None)
             else:
                 src_bf = self.gs.battlefields[src]
                 dst_bf = self.gs.battlefields[dst]
@@ -513,6 +528,74 @@ class GameLoop:
                 if gained_control or both_sides:
                     dst_bf.contested_this_turn = True
                     self._run_showdown(dst, attacker=side)
+
+                # Dispatch movement effects
+                handler = MOVEMENT_REGISTRY.get(unit.card.name)
+                if handler:
+                    handler(ap, op, self.gs, unit, "bf", "bf", dst_bf)
+
+        elif kind == "ABILITY":
+            ability_id = idx  # idx actually contains the ability_id
+            arg = lane  # lane actually contains the argument
+            if ability_id == "PYKE_LEGEND":
+                self._apply_pyke_ability(ap, opponent)
+            elif ability_id == "GOLD_SACRIFICE":
+                self._apply_gold_sacrifice(ap, str(arg) if arg is not None else "FURY")
+
+    def _apply_pyke_ability(self, ap: Player, op: Player) -> None:
+        """[1],[tap]: Return a friendly unit at a battlefield to hand. Play Gold token."""
+        side = "A" if ap is self.gs.A else "B"
+
+        # Find Pyke legend on any friendly battlefield, must be ready
+        pyke_unit = None
+        for bf in self.gs.battlefields:
+            units = bf.units_A if side == "A" else bf.units_B
+            for u in units:
+                if u.card.name == "Pyke Bloodharbor Ripper" and u.ready:
+                    pyke_unit = u
+                    break
+            if pyke_unit:
+                break
+
+        if pyke_unit is None:
+            return
+        if not ap.can_pay_cost(1, None, None):
+            return
+        ap.pay_cost(1, None, None)
+        pyke_unit.ready = False
+
+        # Return a friendly unit from a battlefield to hand (prefer non-Pyke units)
+        for bf in self.gs.battlefields:
+            units = bf.units_A if side == "A" else bf.units_B
+            candidates = [u for u in units if u is not pyke_unit and not u.is_token]
+            if candidates:
+                target_unit = candidates[0]
+                units.remove(target_unit)
+                ap.hand.append(target_unit.card)
+                if self.verbose:
+                    print(f"  {ap.name} PYKE ABILITY: returned {target_unit.card.name} to hand")
+                break
+
+        # Spawn Gold token to base
+        from .movement_effects import _spawn_token_to_base
+        _spawn_token_to_base(ap, "Gold", ready=False)
+        if self.verbose:
+            print(f"  {ap.name} spawned Gold token")
+
+    def _apply_gold_sacrifice(self, ap: Player, domain_str: str) -> None:
+        """Kill a Gold token, add a rune of chosen domain."""
+        gold = next((u for u in ap.base_units if u.card.name == "Gold" and u.is_token), None)
+        if gold is None:
+            return
+        ap.base_units.remove(gold)
+        ap.trash.append(gold.card)
+        try:
+            domain = Domain[domain_str.upper()]
+            ap.add_rune(domain, ready=True)
+            if self.verbose:
+                print(f"  {ap.name} GOLD SACRIFICE: gained {domain_str} rune")
+        except (KeyError, AttributeError):
+            pass
 
     def _run_chain(self, caster: str) -> None:
         """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""
