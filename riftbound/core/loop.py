@@ -448,7 +448,7 @@ class GameLoop:
                 return
             if dst not in range(len(self.gs.battlefields) + 1):
                 return
-            
+
             side = self.gs.active
             base = ap.base_units
 
@@ -458,13 +458,22 @@ class GameLoop:
                 unit = ap.pop_base_unit()
                 if unit is None:
                     return
+                if self.verbose:
+                    print(f"  {ap.name} moves UNIT: {unit.card.name} to BF{dst}")
                 unit.ready = False
                 target_bf = self.gs.battlefields[dst]
-                target_bf.add_unit(side, unit)
 
-                # Trigger showdown if battlefield becomes contested
-                opp_units = target_bf.units_B if side == "A" else target_bf.units_A
-                if opp_units:
+                # Check if this move establishes contested status (moving to a BF the player doesn't control)
+                prev_controller = target_bf.controller()
+                target_bf.add_unit(side, unit)
+                new_controller = target_bf.controller()
+
+                # Contested if: gaining control from empty/opponent, OR both sides now have units
+                gained_control = prev_controller != side and new_controller == side
+                both_sides = target_bf.units_A and target_bf.units_B
+
+                if gained_control or both_sides:
+                    target_bf.contested_this_turn = True
                     self._run_showdown(dst, attacker=side)
 
             elif dst == base_index:
@@ -485,11 +494,18 @@ class GameLoop:
                     unit.ready = True
                     return
                 unit.ready = False
-                dst_bf.add_unit(side, unit)
 
-                # Trigger showdown if battlefield becomes contested
-                opp_units = dst_bf.units_B if side == "A" else dst_bf.units_A
-                if opp_units:
+                # Check if this move establishes contested status (moving to a BF the player doesn't control)
+                prev_controller = dst_bf.controller()
+                dst_bf.add_unit(side, unit)
+                new_controller = dst_bf.controller()
+
+                # Contested if: gaining control from empty/opponent, OR both sides now have units
+                gained_control = prev_controller != side and new_controller == side
+                both_sides = dst_bf.units_A and dst_bf.units_B
+
+                if gained_control or both_sides:
+                    dst_bf.contested_this_turn = True
                     self._run_showdown(dst, attacker=side)
 
     def _run_chain(self, caster: str) -> None:
