@@ -1,0 +1,29 @@
+{
+  "name": "Diana Chaos/Mind",
+  "legend": "Diana Scorn of the Moon",
+  "champion": "Diana Lunari",
+  "runes": [
+    {"domain": "CHAOS", "count": 7},
+    {"domain": "MIND", "count": 5}
+  ],
+  "cards": [
+    {"name": "Tideturner", "count": 3},
+    {"name": "Ravenbloom Student", "count": 3},
+    {"name": "Existential Dread", "count": 3},
+    {"name": "Stupefy", "count": 3},
+    {"name": "Stacked Deck", "count": 3},
+    {"name": "Moonfall", "count": 2},
+    {"name": "Hwei Brooding Painter", "count": 3},
+    {"name": "Eclipse", "count": 3},
+    {"name": "Gust", "count": 2},
+    {"name": "Star-Crossed", "count": 2},
+    {"name": "Fizz Trickster", "count": 1},
+    {"name": "Ride the Wind", "count": 2},
+    {"name": "Consult the Past", "count": 2},
+    {"name": "Eager Apprentice", "count": 2},
+    {"name": "Traveling Merchant", "count": 1},
+    {"name": "Vex Apathetic", "count": 2},
+    {"name": "Thousand-Tailed Watcher", "count": 1},
+    {"name": "Hard Bargain", "count": 1}
+  ]
+}

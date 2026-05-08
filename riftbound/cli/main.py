@@ -18,6 +18,7 @@ from riftbound.data.writer import GameRecorder, record_game
 
 # Agents
 from riftbound.ai.heuristics.pyke_agent import PykeAgent
+from riftbound.ai.heuristics.diana_agent import DianaAgent
 
 
 app = typer.Typer(help="Riftbound Simulator CLI")
@@ -80,6 +81,7 @@ def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card]]:
 
 AI_REGISTRY = {
     "pyke": PykeAgent,
+    "diana": DianaAgent,
 }
 
 def make_agent(name: str, player: Player):
