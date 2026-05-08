@@ -13,7 +13,8 @@ class Card:
     name: str
     category: CardType
     cost_energy: int = 0
-    cost_power: Optional[Domain] = None
+    cost_power: Optional[int] = None
+    cost_power_domain: Optional[Domain] = None
     domain: Optional[Domain] = None
     tags: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
@@ -48,7 +49,8 @@ class UnitCard(Card):
         name: str = "Recruit",
         *,
         cost_energy: int = 1,
-        cost_power: Optional[Domain] = None,
+        cost_power: Optional[int] = None,
+        cost_power_domain: Optional[Domain] = None,
         domain: Optional[Domain] = None,
         might: int = 1,
         tags: Optional[list[str]] = None,
@@ -60,6 +62,7 @@ class UnitCard(Card):
             category=CardType.UNIT,
             cost_energy=cost_energy,
             cost_power=cost_power,
+            cost_power_domain=cost_power_domain,
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
@@ -72,13 +75,14 @@ class SpellCard(Card):
     """Spell cards resolve an immediate effect when cast."""
 
     damage: int = 2
-    
+
     def __init__(
         self,
         name: str = "Bolt",
         *,
         cost_energy: int = 2,
-        cost_power: Optional[Domain] = None,
+        cost_power: Optional[int] = None,
+        cost_power_domain: Optional[Domain] = None,
         domain: Optional[Domain] = None,
         damage: int = 2,
         tags: Optional[list[str]] = None,
@@ -90,6 +94,7 @@ class SpellCard(Card):
             category=CardType.SPELL,
             cost_energy=cost_energy,
             cost_power=cost_power,
+            cost_power_domain=cost_power_domain,
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
@@ -105,7 +110,8 @@ class GearCard(Card):
         name: str,
         *,
         cost_energy: int = 0,
-        cost_power: Optional[Domain] = None,
+        cost_power: Optional[int] = None,
+        cost_power_domain: Optional[Domain] = None,
         domain: Optional[Domain] = None,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
@@ -116,6 +122,7 @@ class GearCard(Card):
             category=CardType.GEAR,
             cost_energy=cost_energy,
             cost_power=cost_power,
+            cost_power_domain=cost_power_domain,
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
@@ -153,7 +160,8 @@ class LegendCard(Card):
         name: str,
         *,
         cost_energy: int = 0,
-        cost_power: Optional[Domain] = None,
+        cost_power: Optional[int] = None,
+        cost_power_domain: Optional[Domain] = None,
         domain: Optional[Domain] = None,
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
@@ -165,6 +173,7 @@ class LegendCard(Card):
             category=CardType.LEGEND,
             cost_energy=cost_energy,
             cost_power=cost_power,
+            cost_power_domain=cost_power_domain,
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),

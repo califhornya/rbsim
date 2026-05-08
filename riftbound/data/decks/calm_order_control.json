@@ -1,7 +1,7 @@
 {
   "name": "Calm/Order Control",
   "legend": "Leona Radiant Dawn",
-  "champion": "Caitlyn Patrolling",
+  "champion": "Leona Determined",
   "runes": [
     {"domain": "CALM", "count": 6},
     {"domain": "ORDER", "count": 6}

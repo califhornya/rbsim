@@ -20,3 +20,8 @@ class Agent(ABC):
     def decide_action(self, opponent: Player) -> Action:
         """Return a chosen action."""
         ...
+
+    @abstractmethod
+    def decide_mulligan(self) -> list[int]:
+        """Return indices of hand cards to send back. Empty list = keep all."""
+        ...

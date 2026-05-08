@@ -14,9 +14,9 @@ def test_channel_generates_energy_and_power():
     assert player.power_pool[Domain.CALM] == 1
     assert player.power_pool[Domain.FURY] == 1
 
-    card = UnitCard(name="Disciple", cost_energy=1, cost_power=Domain.FURY, might=2)
-    assert player.can_pay_cost(card.cost_energy, card.cost_power)
-    assert player.pay_cost(card.cost_energy, card.cost_power)
+    card = UnitCard(name="Disciple", cost_energy=1, cost_power=1, cost_power_domain=Domain.FURY, might=2)
+    assert player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain)
+    assert player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain)
     assert player.energy == 1
     assert Domain.FURY not in player.power_pool
     assert len(player.rune_pool.get(Domain.FURY, [])) == 0
@@ -29,7 +29,7 @@ def test_cannot_pay_missing_power():
     player.add_rune(Domain.CALM)
     player.channel()
 
-    assert not player.can_pay_cost(1, Domain.FURY)
+    assert not player.can_pay_cost(1, 1, Domain.FURY)
 
 
 def test_unlock_runes_from_deck():

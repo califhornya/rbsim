@@ -16,7 +16,8 @@ def _card_to_dict(card) -> dict:
     name = getattr(card, "name", "")
     category = getattr(getattr(card, "category", None), "name", None)
     cost_energy = getattr(card, "cost_energy", None)
-    cost_power = getattr(getattr(card, "cost_power", None), "name", None)
+    cost_power = getattr(card, "cost_power", None)
+    cost_power_domain = getattr(getattr(card, "cost_power_domain", None), "name", None)
     domain = getattr(getattr(card, "domain", None), "name", None)
     keywords = list(getattr(card, "keywords", []) or [])
     tags = list(getattr(card, "tags", []) or [])
@@ -28,6 +29,7 @@ def _card_to_dict(card) -> dict:
         "category": category,
         "cost_energy": cost_energy,
         "cost_power": cost_power,
+        "cost_power_domain": cost_power_domain,
         "domain": domain,
         "keywords": keywords,
         "tags": tags,

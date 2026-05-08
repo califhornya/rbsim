@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from .combat import CombatStats, UnitInPlay, deal_direct_damage, resolve_might_combat
+
+if TYPE_CHECKING:
+    from .cards import Card
 
 @dataclass
 class Battlefield:
@@ -19,6 +22,7 @@ class Battlefield:
 
     last_controller: Optional[str] = None
     showdown_pending: bool = False
+    card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
 
     kills_A: int = 0
     kills_B: int = 0
@@ -128,15 +132,15 @@ class Battlefield:
             return False
         return True
     
-    def apply_spell_damage(self, target: str, damage: int) -> int:
-        """Deal direct damage to the target side; returns kills."""
+    def apply_spell_damage(self, target: str, damage: int) -> tuple[int, list]:
+        """Deal direct damage to the target side; returns (kills, dead_units)."""
 
         units = self._units_for(target)
-        kills = deal_direct_damage(units, damage)
+        kills, dead = deal_direct_damage(units, damage)
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
                 self.showdown_pending = True
         else:
             self.showdown_pending = False
-        return kills
+        return kills, dead

@@ -9,7 +9,7 @@ from riftbound.core.cards import Card
 from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
-from riftbound.core.cards_registry import load_deck_json
+from riftbound.registry.cards_registry import load_deck_json
 
 # DB logging
 from riftbound.data.analytics import summarize_session

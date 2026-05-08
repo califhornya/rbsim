@@ -29,6 +29,10 @@ class GameState:
     # Exactly two battlefields total in 1v1
     battlefields: list[Battlefield] = field(default_factory=lambda: [Battlefield(), Battlefield()])
 
+    # Champion deployment state
+    champion_A_deployed: bool = False
+    champion_B_deployed: bool = False
+
     def other(self, who: str) -> str:
         return "B" if who == "A" else "A"
 

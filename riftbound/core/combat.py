@@ -14,14 +14,30 @@ class UnitInPlay:
     damage: int = 0
     ready: bool = False
     bonus_might: int = 0  # temporary combat bonus (ASSAULT/SHIELD)
+    temporary_might: int = 0  # temporary this-turn bonus (REACTION spells like Discipline)
+    gear: list = field(default_factory=list)  # List[GearCard] attached to this unit
+    stunned: bool = False
+    might_counters: int = 0  # BUFF counters — persistent, max 1 per unit per application
+    aura_might: int = 0  # external aura bonus (e.g. Baron Nashor)
+    hidden: bool = False  # reserved for future HIDDEN keyword
 
     def reset_damage(self) -> None:
         self.damage = 0
         self.bonus_might = 0
+        # gear, might_counters, aura_might, hidden intentionally preserved
+
+    def clear_turn_end_bonuses(self) -> None:
+        self.temporary_might = 0
 
     @property
     def might(self) -> int:
-        return max(0, int(self.card.might or 0) + self.bonus_might)
+        gear_bonus = sum(
+            int(e.get("amount", 0))
+            for g in self.gear
+            for e in getattr(g, "effects", []) or []
+            if isinstance(e, dict) and e.get("effect") == "grant_might"
+        )
+        return max(0, int(self.card.might or 0) + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + gear_bonus)
 
     def has_keyword(self, keyword: str) -> bool:
         return self.card.has_keyword(keyword)
@@ -40,10 +56,12 @@ class CombatStats:
     deaths_B: int = 0
     damage_to_A: int = 0
     damage_to_B: int = 0
+    dead_A: list = field(default_factory=list)  # List[UnitInPlay] that died
+    dead_B: list = field(default_factory=list)  # List[UnitInPlay] that died
 
 
 def _total_might(units: Iterable[UnitInPlay]) -> int:
-    return sum(unit.might for unit in units)
+    return sum(unit.might for unit in units if not unit.stunned)
 
 
 def _ordered_targets(units: List[UnitInPlay]) -> List[UnitInPlay]:
@@ -106,6 +124,10 @@ def resolve_might_combat(
     stats.damage_to_A = assigned_a
     stats.damage_to_B = assigned_b
 
+    # Capture dead units before filtering them out
+    stats.dead_A = [u for u in units_a if u.damage >= u.might and u.might > 0]
+    stats.dead_B = [u for u in units_b if u.damage >= u.might and u.might > 0]
+
     # Remove defeated units (u.might == 0 with no damage is immortal by rule, keep them)
     units_a[:] = [u for u in units_a if u.damage < u.might or u.might == 0]
     units_b[:] = [u for u in units_b if u.damage < u.might or u.might == 0]
@@ -119,11 +141,12 @@ def resolve_might_combat(
     return stats
 
 
-def deal_direct_damage(units: List[UnitInPlay], damage: int) -> int:
-    """Apply spell or ability damage to a unit group; returns kills."""
+def deal_direct_damage(units: List[UnitInPlay], damage: int) -> tuple[int, list[UnitInPlay]]:
+    """Apply spell or ability damage to a unit group; returns (kills, dead_units)."""
 
     kills, _ = _apply_damage(units, damage)
+    dead = [u for u in units if u.damage >= u.might and u.might > 0]
     units[:] = [u for u in units if u.damage < u.might or u.might == 0]
     for unit in units:
         unit.reset_damage()
-    return kills
+    return kills, dead

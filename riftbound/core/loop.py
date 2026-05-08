@@ -8,7 +8,7 @@ from .cards import Card, GearCard, SpellCard, UnitCard
 from .combat import UnitInPlay
 from .player import Player
 from .battlefield import Battlefield
-from .cards_registry import CARD_REGISTRY, EffectSpec
+from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
 from .enums import Domain
 
@@ -70,7 +70,13 @@ class EffectContext:
         else:
             target_side = self.opponent_side
 
-        self.battlefield.apply_spell_damage(target_side, amount)
+        _, dead = self.battlefield.apply_spell_damage(target_side, amount)
+
+        # Route spell-killed units to trash and gear to base
+        owner = self.loop.gs.A if target_side == "A" else self.loop.gs.B
+        for dead_unit in dead:
+            owner.trash.append(dead_unit.card)
+            owner.base_gear.extend(dead_unit.gear)
 
         if self.loop.recorder:
             self.loop._record_spell_deaths(self.battlefield, before_a, before_b)
@@ -180,6 +186,24 @@ class GameLoop:
 
     # ====== PHASE HELPERS ======
 
+    def _phase_mulligan(self) -> None:
+        for player in [self.gs.A, self.gs.B]:
+            if player.agent is None:
+                continue
+            indices_to_return = player.agent.decide_mulligan()
+            if not indices_to_return:
+                continue
+            indices_to_return.sort(reverse=True)
+            returned_cards = []
+            for idx in indices_to_return:
+                if 0 <= idx < len(player.hand):
+                    returned_cards.append(player.hand.pop(idx))
+            player.deck.cards.extend(returned_cards)
+            for _ in returned_cards:
+                card = player.draw()
+                if not card:
+                    break
+
     def _ready_active_units(self, active: str) -> None:
         player = self.gs.get_player(active)
         player.ready_base_units()
@@ -189,6 +213,22 @@ class GameLoop:
     def _phase_beginning(self, active: str) -> int:
         for bf in self.gs.battlefields:
             bf.begin_turn_reset()
+
+        # Remove TEMPORARY units at the start of the active player's turn
+        for bf in self.gs.battlefields:
+            player = self.gs.get_player(active)
+            units = bf.units_A if active == "A" else bf.units_B
+            dead = [u for u in units if u.card.has_keyword("TEMPORARY")]
+            for u in dead:
+                units.remove(u)
+                player.trash.append(u.card)
+                player.base_gear.extend(u.gear)
+
+        # Clear STUN status at the start of the active player's turn
+        for bf in self.gs.battlefields:
+            for unit in bf.units_A + bf.units_B:
+                unit.stunned = False
+
         for bf in self.gs.battlefields:
             bf.last_controller = bf.controller()
         for bf in self.gs.battlefields:
@@ -248,9 +288,19 @@ class GameLoop:
             handler = EFFECT_REGISTRY.get(effect_spec.effect)
             if not handler:
                 continue
-            handler(context, effect_spec.params)        
+            handler(context, effect_spec.params)
 
-    def _apply_action(self, ap: Player, action: Action) -> None:
+        # REPEAT (Rule 746): run effects a second time
+        # NOTE: REPEAT is optional additional cost in actual rules, but simulator always repeats if keyword present.
+        # TODO: Verify REPEAT interacts correctly with all effect types (especially card draw, damage, etc.)
+        if card.has_keyword("REPEAT"):
+            for effect_spec in effect_specs:
+                handler = EFFECT_REGISTRY.get(effect_spec.effect)
+                if not handler:
+                    continue
+                handler(context, effect_spec.params)        
+
+    def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
             dst_lane = None
@@ -269,20 +319,33 @@ class GameLoop:
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, UnitCard):
-                if not ap.can_pay_cost(card.cost_energy, card.cost_power):
+                if not ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                if not ap.pay_cost(card.cost_energy, card.cost_power):
+                if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
                 target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
                 # ACCELERATE: optional additional cost of 1 energy + 1 power of the unit's domain
                 enters_ready = False
                 if card.has_keyword("ACCELERATE"):
                     accel_domain = card.domain
-                    if ap.can_pay_cost(1, accel_domain):
-                        ap.pay_cost(1, accel_domain)
+                    if ap.can_pay_cost(1, 1, accel_domain):
+                        ap.pay_cost(1, 1, accel_domain)
                         enters_ready = True
                 unit = UnitInPlay(card=card, ready=enters_ready)
                 target.add_unit(self.gs.active, unit)
+
+                # LEGION (Rule 738): trigger effects if another card was played this turn
+                # NOTE: Per rules, a card is "played" when fully resolved. Countered spells don't count.
+                # BUT LEGION units ARE considered played even if later countered (peculiarity of LEGION).
+                # Counter system is deferred; this check works for non-counter context.
+                if card.has_keyword("LEGION") and cards_played_this_turn > 0:
+                    self._resolve_card_effects(card, target, ap, opponent)
+
+                # WEAPONMASTER: auto-attach first gear from base if available
+                if card.has_keyword("WEAPONMASTER") and ap.base_gear:
+                    gear_card = ap.base_gear.pop(0)
+                    unit.gear.append(gear_card)
+
                 ap.remove_from_hand(idx)
                 self.units_played += 1
                 if self.recorder:
@@ -298,9 +361,9 @@ class GameLoop:
         elif kind == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, SpellCard):
-                if not ap.can_pay_cost(card.cost_energy, card.cost_power):
+                if not ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                if not ap.pay_cost(card.cost_energy, card.cost_power):
+                if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
                 target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
                 self._resolve_card_effects(card, target, ap, opponent)
@@ -317,12 +380,19 @@ class GameLoop:
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, GearCard):
-                if not ap.can_pay_cost(card.cost_energy, card.cost_power):
+                if not ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                if not ap.pay_cost(card.cost_energy, card.cost_power):
+                if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                target = self.gs.battlefields[lane if lane is not None else 0]
-                self._resolve_card_effects(card, target, ap, opponent)
+                target_bf = self.gs.battlefields[lane if lane is not None else 0]
+                friendly_units = target_bf.units_A if self.gs.active == "A" else target_bf.units_B
+
+                if friendly_units:
+                    target_unit = friendly_units[0]
+                    target_unit.gear.append(card)
+                else:
+                    ap.base_gear.append(card)
+
                 ap.remove_from_hand(idx)
                 if self.recorder:
                     self.recorder.record_play(
@@ -331,7 +401,34 @@ class GameLoop:
                         card,
                         action="GEAR",
                         battlefield_index=lane if lane is not None else 0,
-                    )            
+                    )
+
+        elif kind == "CHAMPION":
+            is_A = (self.gs.active == "A")
+            champion = self.gs.champion_A if is_A else self.gs.champion_B
+            already_deployed = self.gs.champion_A_deployed if is_A else self.gs.champion_B_deployed
+            if champion is None or already_deployed:
+                return
+            if not ap.can_pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
+                return
+            if not ap.pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
+                return
+            unit = UnitInPlay(card=champion, ready=False)
+            target_bf = self.gs.battlefields[lane if lane is not None else 0]
+            target_bf.add_unit(self.gs.active, unit)
+            if is_A:
+                self.gs.champion_A_deployed = True
+            else:
+                self.gs.champion_B_deployed = True
+            self.units_played += 1
+            if self.recorder:
+                self.recorder.record_play(
+                    ap.name,
+                    self.gs.turn,
+                    champion,
+                    action="UNIT",
+                    battlefield_index=lane if lane is not None else 0,
+                )
 
         elif kind == "MOVE":
             src = lane
@@ -387,7 +484,27 @@ class GameLoop:
             before_A = list(bf.units_A)
             before_B = list(bf.units_B)
             if bf.contested_this_turn:
-                bf.resolve_combat_might(attacker_side=active)
+                stats = bf.resolve_combat_might(attacker_side=active)
+
+                # Route dead units to trash and gear to base
+                for dead_unit in stats.dead_A:
+                    self.gs.A.trash.append(dead_unit.card)
+                    self.gs.A.base_gear.extend(dead_unit.gear)
+                for dead_unit in stats.dead_B:
+                    self.gs.B.trash.append(dead_unit.card)
+                    self.gs.B.base_gear.extend(dead_unit.gear)
+
+                # Trigger DEATHKNELL effects
+                for dead_unit in stats.dead_A + stats.dead_B:
+                    if dead_unit.card.has_keyword("DEATHKNELL"):
+                        if dead_unit in stats.dead_A:
+                            actor = self.gs.A
+                            opponent = self.gs.B
+                        else:
+                            actor = self.gs.B
+                            opponent = self.gs.A
+                        self._resolve_card_effects(dead_unit.card, bf, actor, opponent)
+
                 if self.recorder:
                     self._record_combat_deaths(bf, before_A, before_B)
                 if bf.can_score_conquer(active):
@@ -415,6 +532,8 @@ class GameLoop:
         gs.A.unlock_runes(2)
         gs.B.unlock_runes(3)
 
+        self._phase_mulligan()
+
         if self.recorder:
             self._snapshot_state(turn_override=0)
 
@@ -439,12 +558,17 @@ class GameLoop:
             op: Player = gs.get_player(gs.other(gs.active))
             self._phase_draw(ap)
 
-
-            if ap.agent is None:
-                act: Action = ("PASS", None, None)
-            else:
-                act = ap.agent.decide_action(op)
-            self._apply_action(ap, act)
+            # Multi-action turn loop
+            cards_played_this_turn = 0
+            while True:
+                if ap.agent is None:
+                    act: Action = ("PASS", None, None)
+                else:
+                    act = ap.agent.decide_action(op)
+                if act[0] == "PASS":
+                    break
+                self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
+                cards_played_this_turn += 1
 
             self._phase_showdown(gs.active, gs.other(gs.active))
 
@@ -458,6 +582,11 @@ class GameLoop:
                     self._snapshot_state()
                 return Result("B", gs.turn, self.units_played, self.spells_cast)
 
+
+            # Clear temporary might bonuses (REACTION spells like Discipline)
+            for bf in self.gs.battlefields:
+                for unit in bf.units_A + bf.units_B:
+                    unit.clear_turn_end_bonuses()
 
             gs.active = gs.other(gs.active)
             gs.turn += 1

@@ -4,7 +4,7 @@ import random
 
 from riftbound.core.battlefield import Battlefield
 from riftbound.core.cards import UnitCard
-from riftbound.core.cards_registry import CARD_REGISTRY
+from riftbound.registry.cards_registry import CARD_REGISTRY
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.loop import GameLoop
 from riftbound.core.player import Deck, Player
@@ -23,5 +23,5 @@ def make_game() -> GameLoop:
 def test_registry_loads_master_data():
     assert len(CARD_REGISTRY) > 100
     assert "Vi Destructive" in CARD_REGISTRY
-    assert "Caitlyn Patrolling" in CARD_REGISTRY
+    assert "Darius Trifarian" in CARD_REGISTRY
     assert "Chemtech Enforcer" in CARD_REGISTRY

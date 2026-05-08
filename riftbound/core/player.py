@@ -57,6 +57,9 @@ class Player:
     hand: List[Card] = field(default_factory=list)
     deck: Deck = field(default_factory=lambda: Deck([]))
     agent: object = None  # set by CLI after Player creation
+    trash: List[Card] = field(default_factory=list)
+    banished: List[Card] = field(default_factory=list)
+    base_gear: List[Card] = field(default_factory=list)
 
     energy: int = 0
 
@@ -130,27 +133,29 @@ class Player:
                 return self.base_units.pop(idx)
         return None
 
-    def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[Domain] = None) -> bool:
+    def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if self.energy < cost_energy:
             return False
-        if cost_power is None:
+        if cost_power is None or cost_power_domain is None:
             return True
-        if self.power_pool.get(cost_power, 0) <= 0:
+        if self.power_pool.get(cost_power_domain, 0) < cost_power:
             return False
-        return bool(self.rune_pool.get(cost_power))
+        runes = self.rune_pool.get(cost_power_domain, [])
+        return len(runes) >= cost_power
 
-    def pay_cost(self, cost_energy: int = 0, cost_power: Optional[Domain] = None) -> bool:
-        if not self.can_pay_cost(cost_energy, cost_power):
+    def pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
+        if not self.can_pay_cost(cost_energy, cost_power, cost_power_domain):
             return False
         self.energy -= cost_energy
-        if cost_power is not None:
-            current = self.power_pool.get(cost_power, 0) - 1
+        if cost_power and cost_power_domain:
+            current = self.power_pool.get(cost_power_domain, 0) - cost_power
             if current <= 0:
-                self.power_pool.pop(cost_power, None)
+                self.power_pool.pop(cost_power_domain, None)
             else:
-                self.power_pool[cost_power] = current
-            if not self.recycle_rune(cost_power):
-                return False
+                self.power_pool[cost_power_domain] = current
+            for _ in range(cost_power):
+                if not self.recycle_rune(cost_power_domain):
+                    return False
         return True
 
     def draw(self) -> Optional[Card]:

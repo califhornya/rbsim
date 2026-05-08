@@ -1,0 +1,11 @@
+[{
+  "name": "Baron Nashor",
+  "category": "UNIT",
+  "domain": "CHAOS",
+  "cost_energy": 10,
+  "cost_power": "CHAOS",
+  "might": 12,
+  "effects": [
+    { "effect": "add_battlefield" }
+  ]
+}]

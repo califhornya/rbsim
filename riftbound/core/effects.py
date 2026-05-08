@@ -69,6 +69,100 @@ def _add_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.add_rune(domain, target=target, ready=ready)
 
 
+@effect("grant_temporary_might")
+def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    amount = int(spec.get("amount", 0))
+    target = str(spec.get("target", "actor"))
+    units = ctx._units_for_target(target)
+    if not units:
+        return
+    unit = units[0]
+    unit.temporary_might += amount
+
+
+@effect("grant_temporary_might_per_enemy")
+def _grant_temporary_might_per_enemy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    base_amount = int(spec.get("amount", 0))
+    target = str(spec.get("target", "actor"))
+    units = ctx._units_for_target(target)
+    if not units:
+        return
+    unit = units[0]
+    # Count enemy units at the target battlefield
+    enemy_count = len(ctx._units_for_target("opponent"))
+    total_amount = base_amount * enemy_count
+    unit.temporary_might += total_amount
+
+
+@effect("grant_temporary_might_per_friendly")
+def _grant_temporary_might_per_friendly(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    base_amount = int(spec.get("amount", 0))
+    target = str(spec.get("target", "actor"))
+    units = ctx._units_for_target(target)
+    if not units:
+        return
+    unit = units[0]
+    # Count friendly units at the target battlefield
+    friendly_count = len(ctx._units_for_target("actor"))
+    total_amount = base_amount * friendly_count
+    unit.temporary_might += total_amount
+
+
+@effect("buff_unit")
+def _buff_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    target = str(spec.get("target", "actor"))
+    units = ctx._units_for_target(target)
+    if not units:
+        return
+    unit = units[0]
+    if unit.might_counters < 1:
+        unit.might_counters += 1
+
+
+@effect("stun_unit")
+def _stun_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    target = str(spec.get("target", "opponent"))
+    units = ctx._units_for_target(target)
+    if units:
+        units[0].stunned = True
+
+
+@effect("recycle_card")
+def _recycle_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    from .cards import RuneCard
+    target = str(spec.get("target", "actor"))
+    player = ctx._player_for_target(target)
+    if player.hand:
+        card = player.hand.pop(0)
+        # Route card to correct deck by type (Rule 403: RECYCLE)
+        if isinstance(card, RuneCard):
+            player.rune_deck.cards.append(card)  # Bottom of rune deck
+        else:
+            player.deck.cards.append(card)  # Bottom of main deck (Units, Spells, Gear)
+
+
+@effect("add_battlefield")
+def _add_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    from .battlefield import Battlefield
+    already_exists = any(
+        getattr(bf, "card", None) and getattr(bf.card, "name", "") == "Baron Nashor"
+        for bf in ctx.loop.gs.battlefields
+    )
+    if already_exists:
+        return
+    bf = Battlefield()
+    bf.card = ctx.card
+    ctx.loop.gs.battlefields.append(bf)
+    actor_side = ctx.actor_side
+    for existing_bf in ctx.loop.gs.battlefields[:-1]:
+        units = existing_bf.units_A if actor_side == "A" else existing_bf.units_B
+        for unit in units:
+            unit.aura_might += 2
+    from .combat import UnitInPlay
+    baron_unit = UnitInPlay(card=ctx.card, ready=False)
+    bf.add_unit(actor_side, baron_unit)
+
+
 def _coerce_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value

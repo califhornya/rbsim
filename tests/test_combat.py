@@ -27,7 +27,7 @@ def test_guard_priority_absorbs_spell_damage_first():
     bf.add_unit("B", guard)
     bf.add_unit("B", ally)
 
-    bf.apply_spell_damage("B", 2)
+    _, _ = bf.apply_spell_damage("B", 2)
 
     assert bf.count("B") == 2
     assert guard.damage == 0

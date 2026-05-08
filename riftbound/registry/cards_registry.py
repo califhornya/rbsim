@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, Mapping, Optional
 import json
 import re
 
-from .cards import (
+from riftbound.core.cards import (
     Card,
     BattlefieldCard,
     GearCard,
@@ -15,7 +15,32 @@ from .cards import (
     SpellCard,
     UnitCard,
 )
-from .enums import CardType, Domain
+from riftbound.core.enums import CardType, Domain
+
+
+# Domain and type mappings (used by parsing functions)
+_MASTER_TYPE_MAP: dict[str, CardType] = {
+    "champion": CardType.CHAMPION,
+    "unit": CardType.UNIT,
+    "signature unit": CardType.UNIT,
+    "token": CardType.UNIT,
+    "spell": CardType.SPELL,
+    "signature spell": CardType.SPELL,
+    "gear": CardType.GEAR,
+    "signature gear": CardType.GEAR,
+    "rune": CardType.RUNE,
+    "legend": CardType.LEGEND,
+    "battlefield": CardType.BATTLEFIELD,
+}
+
+_DOMAIN_NAMES: dict[str, Domain] = {
+    "fury": Domain.FURY,
+    "calm": Domain.CALM,
+    "mind": Domain.MIND,
+    "body": Domain.BODY,
+    "chaos": Domain.CHAOS,
+    "order": Domain.ORDER,
+}
 
 
 def _parse_domain(value: Optional[str]) -> Optional[Domain]:
@@ -33,9 +58,14 @@ def _parse_domain(value: Optional[str]) -> Optional[Domain]:
 
 
 def _parse_card_type(value: str) -> CardType:
-    key = value.strip().upper()
-    if key in CardType.__members__:
-        return CardType[key]
+    key = value.strip().lower()
+    # First try the mapping (handles "signature spell", "token", etc.)
+    if key in _MASTER_TYPE_MAP:
+        return _MASTER_TYPE_MAP[key]
+    # Then try direct enum lookup
+    key_upper = key.upper()
+    if key_upper in CardType.__members__:
+        return CardType[key_upper]
     raise ValueError(f"Unknown card category '{value}'")
 
 
@@ -64,7 +94,8 @@ class CardSpec:
     category: CardType
     domain: Optional[Domain] = None
     cost_energy: int = 0
-    cost_power: Optional[Domain] = None
+    cost_power: Optional[int] = None
+    cost_power_domain: Optional[Domain] = None
     might: Optional[int] = None
     damage: Optional[int] = None
     keywords: tuple[str, ...] = ()
@@ -77,10 +108,48 @@ class CardSpec:
         name = str(data.get("name", "")).strip()
         if not name:
             raise ValueError("Card specification requires a name")
-        category = _parse_card_type(str(data.get("category", "")))
-        domain = _parse_domain(data.get("domain")) if "domain" in data else None
-        cost_energy = int(data.get("cost_energy", 0))
-        cost_power = _parse_domain(data.get("cost_power")) if data.get("cost_power") else None
+        category_str = str(data.get("category") or data.get("type") or "").strip()
+        category = _parse_card_type(category_str)
+        domain_raw = data.get("domain")
+        # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
+        if domain_raw:
+            domain_raw = str(domain_raw).strip()
+            first_word = domain_raw.split()[0].lower() if domain_raw else ""
+            domain = _DOMAIN_NAMES.get(first_word)
+        else:
+            domain = None
+        # Handle both nested cost structure (from master data) and flat structure (hand-crafted)
+        cost_obj = data.get("cost", {})
+        if isinstance(cost_obj, dict):
+            cost_energy = int(cost_obj.get("energy") or 0)
+            cost_power_raw = cost_obj.get("power") or 0
+        else:
+            cost_energy = int(data.get("cost_energy") or 0)
+            cost_power_raw = data.get("cost_power")
+
+        cost_power = None
+        cost_power_domain = None
+        cost_power_domain_raw = data.get("cost_power_domain")
+
+        # Parse cost_power: can be int (numeric cost) or string (domain name from old format)
+        if cost_power_raw:
+            try:
+                cost_power = int(cost_power_raw)
+            except (ValueError, TypeError):
+                # If not numeric, treat as domain string and assume cost of 1
+                domain_str = str(cost_power_raw).strip().lower()
+                if domain_str in _DOMAIN_NAMES:
+                    cost_power = 1
+                    cost_power_domain = _DOMAIN_NAMES[domain_str]
+
+        # cost_power_domain can also be explicitly specified
+        if cost_power_domain_raw:
+            domain_str = str(cost_power_domain_raw).strip().lower()
+            cost_power_domain = _DOMAIN_NAMES.get(domain_str)
+        elif cost_power and cost_power_domain is None:
+            # If cost_power exists but no domain specified, use card's domain
+            cost_power_domain = domain
+
         might = data.get("might")
         damage = data.get("damage")
         keywords = tuple(str(k) for k in data.get("keywords", []))
@@ -93,6 +162,7 @@ class CardSpec:
             domain=domain,
             cost_energy=cost_energy,
             cost_power=cost_power,
+            cost_power_domain=cost_power_domain,
             might=int(might) if might is not None else None,
             damage=int(damage) if damage is not None else None,
             keywords=keywords,
@@ -109,6 +179,7 @@ class CardSpec:
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
+                cost_power_domain=self.cost_power_domain,
                 domain=self.domain,
                 might=might,
                 tags=list(self.tags),
@@ -121,6 +192,7 @@ class CardSpec:
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
+                cost_power_domain=self.cost_power_domain,
                 domain=self.domain,
                 damage=damage,
                 tags=list(self.tags),
@@ -132,6 +204,7 @@ class CardSpec:
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
+                cost_power_domain=self.cost_power_domain,
                 domain=self.domain,
                 tags=list(self.tags),
                 keywords=list(self.keywords),
@@ -152,6 +225,7 @@ class CardSpec:
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
+                cost_power_domain=self.cost_power_domain,
                 domain=self.domain,
                 tags=list(self.tags),
                 keywords=list(self.keywords),
@@ -194,29 +268,6 @@ _KNOWN_KEYWORDS: frozenset[str] = frozenset({
     "REACTION", "SHIELD", "TANK", "TEMPORARY", "VISION", "WEAPONMASTER",
 })
 
-_MASTER_TYPE_MAP: dict[str, CardType] = {
-    "champion": CardType.CHAMPION,
-    "unit": CardType.UNIT,
-    "signature unit": CardType.UNIT,
-    "token": CardType.UNIT,
-    "spell": CardType.SPELL,
-    "signature spell": CardType.SPELL,
-    "gear": CardType.GEAR,
-    "signature gear": CardType.GEAR,
-    "rune": CardType.RUNE,
-    "legend": CardType.LEGEND,
-    "battlefield": CardType.BATTLEFIELD,
-}
-
-_DOMAIN_NAMES: dict[str, Domain] = {
-    "fury": Domain.FURY,
-    "calm": Domain.CALM,
-    "mind": Domain.MIND,
-    "body": Domain.BODY,
-    "chaos": Domain.CHAOS,
-    "order": Domain.ORDER,
-}
-
 
 _VALUED_KEYWORDS: frozenset[str] = frozenset({"ASSAULT", "SHIELD", "DEFLECT"})
 
@@ -255,7 +306,8 @@ def master_entry_to_spec(entry: Mapping[str, Any]) -> Optional[CardSpec]:
     cost: Mapping[str, Any] = entry.get("cost") or {}
     cost_energy = int(cost.get("energy") or 0)
     cost_power_count = cost.get("power") or 0
-    cost_power = domain if cost_power_count and int(cost_power_count) > 0 else None
+    cost_power = int(cost_power_count) if cost_power_count else None
+    cost_power_domain = domain if cost_power else None
     might = entry.get("might")
     keywords = _extract_keywords(str(entry.get("rules_text") or ""))
     return CardSpec(
@@ -264,6 +316,7 @@ def master_entry_to_spec(entry: Mapping[str, Any]) -> Optional[CardSpec]:
         domain=domain,
         cost_energy=cost_energy,
         cost_power=cost_power,
+        cost_power_domain=cost_power_domain,
         might=int(might) if might is not None else None,
         keywords=keywords,
         tags=(),
@@ -288,7 +341,8 @@ def load_master_data(path: Optional[Path] = None) -> dict[str, CardSpec]:
 
 
 # Master data is the base; hand-crafted cards in data/cards/ override (they have explicit effects).
-CARD_REGISTRY: dict[str, CardSpec] = {**load_master_data(), **load_cards_json()}
+# Load all card data from /data/cards/ (origins.json, unleashed.json, spiritforged.json, and overlays/)
+CARD_REGISTRY: dict[str, CardSpec] = load_cards_json()
 
 
 def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec]]:
