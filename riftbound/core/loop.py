@@ -11,6 +11,7 @@ from .battlefield import Battlefield
 from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
 from .enums import Domain
+from .legion_effects import get_legion_cost_reduction
 
 if TYPE_CHECKING:
     from riftbound.data.writer import GameRecorder
@@ -324,7 +325,9 @@ class GameLoop:
             if isinstance(card, (UnitCard, LegendCard)):
                 effective_energy = card.cost_energy
                 if card.has_keyword("LEGION") and cards_played_this_turn > 0:
-                    effective_energy = max(0, card.cost_energy - 2)
+                    legion_reduction = get_legion_cost_reduction(card.name)
+                    if legion_reduction is not None:
+                        effective_energy = max(0, card.cost_energy - legion_reduction)
                 if not ap.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
                     return
                 if not ap.pay_cost(effective_energy, card.cost_power, card.cost_power_domain):

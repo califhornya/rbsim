@@ -3,6 +3,7 @@ from __future__ import annotations
 from riftbound.ai.heuristics.base_agent import Agent
 from riftbound.core.cards import UnitCard, SpellCard, GearCard, LegendCard
 from riftbound.core.player import Player
+from riftbound.core.legion_effects import get_legion_cost_reduction
 
 
 class PykeAgent(Agent):
@@ -67,7 +68,9 @@ class PykeAgent(Agent):
         """Compute effective energy cost for units, accounting for LEGION discount."""
         energy = card.cost_energy
         if card.has_keyword("LEGION") and cards_played > 0:
-            energy = max(0, energy - 2)
+            legion_reduction = get_legion_cost_reduction(card.name)
+            if legion_reduction is not None:
+                energy = max(0, energy - legion_reduction)
         return energy
 
     def decide_mulligan(self) -> list[int]:
