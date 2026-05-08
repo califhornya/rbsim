@@ -490,7 +490,7 @@ class GameLoop:
                 # Dispatch movement effects
                 handler = MOVEMENT_REGISTRY.get(unit.card.name)
                 if handler:
-                    handler(ap, op, self.gs, unit, "base", "bf", target_bf)
+                    handler(ap, opponent, self.gs, unit, "base", "bf", target_bf)
 
             elif dst == base_index:
                 src_bf = self.gs.battlefields[src]
@@ -503,7 +503,7 @@ class GameLoop:
                 # Dispatch movement effects
                 handler = MOVEMENT_REGISTRY.get(unit.card.name)
                 if handler:
-                    handler(ap, op, self.gs, unit, "bf", "base", None)
+                    handler(ap, opponent, self.gs, unit, "bf", "base", None)
             else:
                 src_bf = self.gs.battlefields[src]
                 dst_bf = self.gs.battlefields[dst]

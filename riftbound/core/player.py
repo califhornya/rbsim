@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence
 import random
 
 from .cards import Card
@@ -67,6 +67,53 @@ class Player:
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
     power_pool: Dict[Domain, int] = field(default_factory=dict)
     base_units: List[UnitInPlay] = field(default_factory=list)
+
+    @classmethod
+    def from_cards_and_runes(
+        cls,
+        name: str,
+        cards: Sequence[Card],
+        rune_domains: Sequence[Domain] | None = None,
+        agent_class=None
+    ) -> "Player":
+        """Create a player with properly initialized deck and rune deck for simulation.
+
+        Args:
+            name: Player name ("A" or "B")
+            cards: List of Card objects for the deck
+            rune_domains: List of Domain enums for runes (defaults to 6x FURY, 4x CALM, 4x MIND)
+            agent_class: Optional agent class to instantiate
+        """
+        if rune_domains is None:
+            rune_domains = [
+                Domain.FURY, Domain.FURY, Domain.FURY, Domain.FURY, Domain.FURY, Domain.FURY,
+                Domain.CALM, Domain.CALM, Domain.CALM, Domain.CALM,
+                Domain.MIND, Domain.MIND, Domain.MIND, Domain.MIND,
+            ]
+
+        runes = [Rune(domain=d) for d in rune_domains]
+
+        # Convert CardSpec objects to Card objects if needed
+        instantiated_cards = []
+        for card in cards:
+            if hasattr(card, 'instantiate'):
+                instantiated_cards.append(card.instantiate())
+            else:
+                instantiated_cards.append(card)
+
+        deck = Deck(cards=instantiated_cards)
+        rune_deck = RuneDeck(runes=runes)
+
+        player = cls(
+            name=name,
+            deck=deck,
+            rune_deck=rune_deck
+        )
+
+        if agent_class:
+            player.agent = agent_class(player)
+
+        return player
 
     def add_rune(self, domain: Domain, *, ready: bool = True) -> Rune:
         rune = Rune(domain=domain, ready=ready)
