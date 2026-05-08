@@ -12,7 +12,7 @@ class DianaAgent(Agent):
     Key mechanics: Eager Apprentice cost reduction, Ravenbloom spell synergy.
     """
 
-    def decide_action(self, opponent: Player) -> tuple:
+    def decide_action(self, opponent: Player, cards_played: int = 0) -> tuple:
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
         base_idx = len(bfs)
@@ -25,6 +25,11 @@ class DianaAgent(Agent):
             if isinstance(card, SpellCard):
                 effective_cost = self._effective_spell_cost(card, my_side, bfs)
                 if not self.player.can_pay_cost(effective_cost, card.cost_power, card.cost_power_domain):
+                    continue
+            # For units, check affordability with LEGION discount
+            elif isinstance(card, (UnitCard, LegendCard)):
+                effective_energy = self._effective_unit_cost(card, cards_played)
+                if not self.player.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
                     continue
             else:
                 if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
@@ -63,6 +68,13 @@ class DianaAgent(Agent):
 
         candidates.sort(key=lambda x: -x[0])
         return candidates[0][1]
+
+    def _effective_unit_cost(self, card, cards_played: int) -> int:
+        """Compute effective energy cost for units, accounting for LEGION discount."""
+        energy = card.cost_energy
+        if card.has_keyword("LEGION") and cards_played > 0:
+            energy = max(0, energy - 2)
+        return energy
 
     def decide_mulligan(self) -> list[int]:
         """Mulligan away slow and high-power-cost cards. Keep the early engine."""

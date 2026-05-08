@@ -11,7 +11,7 @@ class PykeAgent(Agent):
     Strategy: cheap filtering + hand disruption early, bounce removal mid, big threats late.
     """
 
-    def decide_action(self, opponent: Player) -> tuple:
+    def decide_action(self, opponent: Player, cards_played: int = 0) -> tuple:
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
         base_idx = len(bfs)
@@ -20,8 +20,14 @@ class PykeAgent(Agent):
 
         # Score every affordable card in hand
         for idx, card in enumerate(self.player.hand):
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
+            # For units, check affordability with LEGION discount
+            if isinstance(card, (UnitCard, LegendCard)):
+                effective_energy = self._effective_unit_cost(card, cards_played)
+                if not self.player.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
+                    continue
+            else:
+                if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                    continue
 
             score = self._score_card(card, my_side, opponent, bfs)
             if score <= 0:
@@ -56,6 +62,13 @@ class PykeAgent(Agent):
 
         candidates.sort(key=lambda x: -x[0])
         return candidates[0][1]
+
+    def _effective_unit_cost(self, card, cards_played: int) -> int:
+        """Compute effective energy cost for units, accounting for LEGION discount."""
+        energy = card.cost_energy
+        if card.has_keyword("LEGION") and cards_played > 0:
+            energy = max(0, energy - 2)
+        return energy
 
     def decide_mulligan(self) -> list[int]:
         """Mulligan away slow cards (cost >= 5) and high-power-cost cards."""
@@ -117,7 +130,7 @@ class PykeAgent(Agent):
                 for bf in bfs
             )
             return 8 if has_target else 5
-        if name == "Fizz, Trickster":
+        if name == "Fizz Trickster":
             # +2 if we have a playable spell in trash
             score = 7
             has_spell = any(

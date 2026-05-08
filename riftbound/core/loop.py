@@ -322,9 +322,12 @@ class GameLoop:
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, (UnitCard, LegendCard)):
-                if not ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                effective_energy = card.cost_energy
+                if card.has_keyword("LEGION") and cards_played_this_turn > 0:
+                    effective_energy = max(0, card.cost_energy - 2)
+                if not ap.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
                     return
-                if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                if not ap.pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
                     return
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}")
@@ -750,7 +753,7 @@ class GameLoop:
                 if ap.agent is None:
                     act: Action = ("PASS", None, None)
                 else:
-                    act = ap.agent.decide_action(op)
+                    act = ap.agent.decide_action(op, cards_played=cards_played_this_turn)
                 if act[0] == "PASS":
                     if self.verbose:
                         print(f"  {ap.name} passes")

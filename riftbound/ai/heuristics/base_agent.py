@@ -17,8 +17,8 @@ class Agent(ABC):
         # GameLoop will inject: self.player.battlefields = list[Battlefield]
 
     @abstractmethod
-    def decide_action(self, opponent: Player) -> Action:
-        """Return a chosen action."""
+    def decide_action(self, opponent: Player, cards_played: int = 0) -> Action:
+        """Return a chosen action. cards_played is the number of cards played this turn (for LEGION cost reduction)."""
         ...
 
     @abstractmethod
