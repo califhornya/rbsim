@@ -1,0 +1,28 @@
+{
+  "name": "Pyke Fury/Chaos",
+  "legend": "Pyke Bloodharbor Ripper",
+  "champion": "Pyke Dockside Butcher",
+  "runes": [
+    {"domain": "FURY", "count": 6},
+    {"domain": "CHAOS", "count": 6}
+  ],
+  "cards": [
+    {"name": "Noxus Hopeful", "count": 3},
+    {"name": "Mindsplitter", "count": 1},
+    {"name": "Treasure Hunter", "count": 3},
+    {"name": "Fizz Trickster", "count": 2},
+    {"name": "Bewitching Spirit", "count": 3},
+    {"name": "Baron Nashor", "count": 2},
+    {"name": "Sharkling", "count": 2},
+    {"name": "Tideturner", "count": 2},
+    {"name": "Falling Star", "count": 3},
+    {"name": "Gust", "count": 2},
+    {"name": "Stacked Deck", "count": 3},
+    {"name": "Detonate", "count": 3},
+    {"name": "Star-Crossed", "count": 2},
+    {"name": "Death from Below", "count": 1},
+    {"name": "Rebuke", "count": 2},
+    {"name": "Pack of Wonders", "count": 2},
+    {"name": "Treasure Trove", "count": 3}
+  ]
+}

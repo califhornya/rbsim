@@ -17,8 +17,7 @@ from riftbound.data.session import make_session
 from riftbound.data.writer import GameRecorder, record_game
 
 # Agents
-from riftbound.ai.heuristics.simple_aggro import SimpleAggro
-from riftbound.ai.heuristics.simple_control import SimpleControl
+from riftbound.ai.heuristics.pyke_agent import PykeAgent
 
 
 app = typer.Typer(help="Riftbound Simulator CLI")
@@ -80,10 +79,7 @@ def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card]]:
     return Deck(cards=cards), RuneDeck(runes=runes), champion
 
 AI_REGISTRY = {
-    "aggro": SimpleAggro,
-    "control": SimpleControl,
-    "ahri": SimpleControl,
-    "jynx": SimpleAggro,
+    "pyke": PykeAgent,
 }
 
 def make_agent(name: str, player: Player):

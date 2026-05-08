@@ -108,7 +108,7 @@ class CardSpec:
         name = str(data.get("name", "")).strip()
         if not name:
             raise ValueError("Card specification requires a name")
-        category_str = str(data.get("category") or data.get("type") or "").strip()
+        category_str = str(data.get("category", "")).strip()
         category = _parse_card_type(category_str)
         domain_raw = data.get("domain")
         # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
@@ -118,14 +118,8 @@ class CardSpec:
             domain = _DOMAIN_NAMES.get(first_word)
         else:
             domain = None
-        # Handle both nested cost structure (from master data) and flat structure (hand-crafted)
-        cost_obj = data.get("cost", {})
-        if isinstance(cost_obj, dict):
-            cost_energy = int(cost_obj.get("energy") or 0)
-            cost_power_raw = cost_obj.get("power") or 0
-        else:
-            cost_energy = int(data.get("cost_energy") or 0)
-            cost_power_raw = data.get("cost_power")
+        cost_energy = int(data.get("cost_energy") or 0)
+        cost_power_raw = data.get("cost_power")
 
         cost_power = None
         cost_power_domain = None

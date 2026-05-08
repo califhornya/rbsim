@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState
-from .cards import Card, GearCard, SpellCard, UnitCard
+from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
 from .combat import UnitInPlay
 from .player import Player
 from .battlefield import Battlefield
@@ -181,8 +181,10 @@ class GameLoop:
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
+            gs.A.agent.gs = gs
         if hasattr(gs.B, "agent") and gs.B.agent:
             gs.B.agent.player.battlefields = gs.battlefields
+            gs.B.agent.gs = gs
 
     # ====== PHASE HELPERS ======
 
@@ -318,7 +320,7 @@ class GameLoop:
 
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
-            if isinstance(card, UnitCard):
+            if isinstance(card, (UnitCard, LegendCard)):
                 if not ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
                 if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
