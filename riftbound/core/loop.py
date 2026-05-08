@@ -173,11 +173,12 @@ Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
 class GameLoop:
     """Core turn structure, extended with Might combat, rune channeling and movement."""
 
-    def __init__(self, gs: GameState, recorder: Optional["GameRecorder"] = None):
+    def __init__(self, gs: GameState, recorder: Optional["GameRecorder"] = None, verbose: bool = False):
         self.gs = gs
         self.units_played = 0
         self.spells_cast = 0
         self.recorder = recorder
+        self.verbose = verbose
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -309,7 +310,7 @@ class GameLoop:
         else:
             kind, idx, lane, dst_lane = action
 
-        if lane is not None and not (0 <= lane < len(self.gs.battlefields)):
+        if kind != "MOVE" and lane is not None and not (0 <= lane < len(self.gs.battlefields)):
             lane = 0
         if dst_lane is not None and not (0 <= dst_lane < len(self.gs.battlefields) + 1):
             dst_lane = None
@@ -325,7 +326,8 @@ class GameLoop:
                     return
                 if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
+                if self.verbose:
+                    print(f"  {ap.name} plays UNIT: {card.name}")
                 # ACCELERATE: optional additional cost of 1 energy + 1 power of the unit's domain
                 enters_ready = False
                 if card.has_keyword("ACCELERATE"):
@@ -334,14 +336,14 @@ class GameLoop:
                         ap.pay_cost(1, 1, accel_domain)
                         enters_ready = True
                 unit = UnitInPlay(card=card, ready=enters_ready)
-                target.add_unit(self.gs.active, unit)
+                ap.base_units.append(unit)
 
                 # LEGION (Rule 738): trigger effects if another card was played this turn
                 # NOTE: Per rules, a card is "played" when fully resolved. Countered spells don't count.
                 # BUT LEGION units ARE considered played even if later countered (peculiarity of LEGION).
                 # Counter system is deferred; this check works for non-counter context.
                 if card.has_keyword("LEGION") and cards_played_this_turn > 0:
-                    self._resolve_card_effects(card, target, ap, opponent)
+                    self._resolve_card_effects(card, self.gs.battlefields[0], ap, opponent)
 
                 # WEAPONMASTER: auto-attach first gear from base if available
                 if card.has_keyword("WEAPONMASTER") and ap.base_gear:
@@ -356,14 +358,8 @@ class GameLoop:
                         self.gs.turn,
                         card,
                         action="UNIT",
-                        battlefield_index=lane if lane is not None else 0,
+                        battlefield_index=0,
                     )
-
-                # Trigger showdown if battlefield becomes contested
-                target_bf = self.gs.battlefields[lane if lane is not None else 0]
-                opp_units = target_bf.units_B if self.gs.active == "A" else target_bf.units_A
-                if opp_units:
-                    self._run_showdown(lane if lane is not None else 0, attacker=self.gs.active)
 
 
         elif kind == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
@@ -375,6 +371,8 @@ class GameLoop:
                     return
                 target_lane = lane if lane is not None else 0
                 ap.remove_from_hand(idx)
+                if self.verbose:
+                    print(f"  {ap.name} plays SPELL: {card.name} at BF{target_lane}")
                 self.gs.chain.append(ChainItem(player=ap.name, card=card, bf_idx=target_lane))
                 self._run_chain(ap.name)
                 if self.recorder:
@@ -422,8 +420,7 @@ class GameLoop:
             if not ap.pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
                 return
             unit = UnitInPlay(card=champion, ready=False)
-            target_bf = self.gs.battlefields[lane if lane is not None else 0]
-            target_bf.add_unit(self.gs.active, unit)
+            ap.base_units.append(unit)
             if is_A:
                 self.gs.champion_A_deployed = True
             else:
@@ -546,6 +543,9 @@ class GameLoop:
         if self.gs.showdown_active:
             return  # Already in a showdown
 
+        if self.verbose:
+            print(f"  [SHOWDOWN triggered at BF{bf_idx}] {attacker} has focus")
+
         self.gs.showdown_active = True
         self.gs.showdown_bf_idx = bf_idx
         self.gs.focus_player = attacker
@@ -564,6 +564,8 @@ class GameLoop:
 
             if action[0] == "PASS":
                 passes += 1
+                if self.verbose:
+                    print(f"    {self.gs.focus_player} passes (passes={passes}/2)")
             else:
                 kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
                 if kind == "SPELL" and idx is not None and 0 <= idx < len(focus_player.hand):
@@ -575,6 +577,8 @@ class GameLoop:
                         ):
                             if focus_player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                                 focus_player.remove_from_hand(idx)
+                                if self.verbose:
+                                    print(f"    {self.gs.focus_player} plays SPELL in showdown: {card.name}")
                                 self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
                                 self._run_chain(self.gs.focus_player)
                                 passes = 0
@@ -701,6 +705,9 @@ class GameLoop:
             self._snapshot_state(turn_override=0)
 
         while gs.turn <= gs.max_turns:
+            if self.verbose:
+                print(f"\n=== TURN {gs.turn} ({gs.active}'s turn) ===")
+
             gained = self._phase_beginning(gs.active)
             if gained:
                 if gs.active == "A":
@@ -729,6 +736,8 @@ class GameLoop:
                 else:
                     act = ap.agent.decide_action(op)
                 if act[0] == "PASS":
+                    if self.verbose:
+                        print(f"  {ap.name} passes")
                     break
                 self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
                 cards_played_this_turn += 1
@@ -750,6 +759,11 @@ class GameLoop:
             for bf in self.gs.battlefields:
                 for unit in bf.units_A + bf.units_B:
                     unit.clear_turn_end_bonuses()
+
+            if self.verbose:
+                bf0 = gs.battlefields[0]
+                bf1 = gs.battlefields[1]
+                print(f"  [END TURN] Board: BF0={len(bf0.units_A)}A vs {len(bf0.units_B)}B ({bf0.controller() or '?'}) | BF1={len(bf1.units_A)}A vs {len(bf1.units_B)}B ({bf1.controller() or '?'}) | Points: A={gs.points_A} B={gs.points_B}")
 
             gs.active = gs.other(gs.active)
             gs.turn += 1

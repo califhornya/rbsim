@@ -15,10 +15,11 @@ class DianaAgent(Agent):
     def decide_action(self, opponent: Player) -> tuple:
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
+        base_idx = len(bfs)
 
         candidates = []
 
-        # Score every affordable card
+        # Score every affordable card in hand
         for idx, card in enumerate(self.player.hand):
             # For spells, use effective cost (accounting for Eager Apprentice discount)
             if isinstance(card, SpellCard):
@@ -44,9 +45,15 @@ class DianaAgent(Agent):
             else:
                 continue
 
-            candidates.append((score, idx, action, lane))
+            candidates.append((score, (action, idx, lane)))
 
-        # Champion deploy check
+        # Score MOVE opportunity
+        move_score = self._score_move(my_side, bfs)
+        if move_score > 0:
+            best_bf = self._lane_for_unit(my_side, bfs)
+            candidates.append((move_score, ("MOVE", None, base_idx, best_bf)))
+
+        # Champion deploy check (highest priority)
         if self._should_deploy_champion(my_side, opponent, bfs):
             lane = self._lane_for_unit(my_side, bfs)
             return ("CHAMPION", None, lane)
@@ -55,8 +62,7 @@ class DianaAgent(Agent):
             return ("PASS", None, None)
 
         candidates.sort(key=lambda x: -x[0])
-        score, idx, action, lane = candidates[0]
-        return (action, idx, lane)
+        return candidates[0][1]
 
     def decide_mulligan(self) -> list[int]:
         """Mulligan away slow and high-power-cost cards. Keep the early engine."""
@@ -67,6 +73,23 @@ class DianaAgent(Agent):
             elif card.cost_power and card.cost_power >= 1 and card.cost_energy >= 4:
                 indices.append(idx)
         return indices
+
+    def _score_move(self, my_side: str, bfs: list) -> int:
+        """Score the value of moving a ready base unit to a battlefield."""
+        ready_unit = next((u for u in self.player.base_units if u.ready), None)
+        if ready_unit is None:
+            return 0
+        # High value: opponent controls a bf we don't
+        opp_side = "B" if my_side == "A" else "A"
+        for bf in bfs:
+            if bf.controller() == opp_side:
+                return 8
+        # Medium: contested (no one controls, both have units)
+        for bf in bfs:
+            if bf.units_A and bf.units_B:
+                return 7
+        # Baseline: just getting presence on the board
+        return 5
 
     def _effective_spell_cost(self, card: SpellCard, my_side: str, bfs: list) -> int:
         """Reduce spell energy cost by 1 if Eager Apprentice is on the board."""
