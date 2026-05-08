@@ -8,6 +8,14 @@ from .cards import Card
 
 
 @dataclass
+class ChainItem:
+    """Item on the spell chain (LIFO stack)."""
+    player: str    # "A" or "B"
+    card: Card
+    bf_idx: int
+
+
+@dataclass
 class GameState:
     rng: random.Random
     A: Player
@@ -32,6 +40,12 @@ class GameState:
     # Champion deployment state
     champion_A_deployed: bool = False
     champion_B_deployed: bool = False
+
+    # Chain and Showdown state
+    chain: list[ChainItem] = field(default_factory=list)
+    showdown_active: bool = False
+    showdown_bf_idx: Optional[int] = None
+    focus_player: Optional[str] = None
 
     def other(self, who: str) -> str:
         return "B" if who == "A" else "A"

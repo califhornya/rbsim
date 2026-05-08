@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
-from .state import GameState
+from .state import GameState, ChainItem
 from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
 from .combat import UnitInPlay
 from .player import Player
@@ -359,6 +359,12 @@ class GameLoop:
                         battlefield_index=lane if lane is not None else 0,
                     )
 
+                # Trigger showdown if battlefield becomes contested
+                target_bf = self.gs.battlefields[lane if lane is not None else 0]
+                opp_units = target_bf.units_B if self.gs.active == "A" else target_bf.units_A
+                if opp_units:
+                    self._run_showdown(lane if lane is not None else 0, attacker=self.gs.active)
+
 
         elif kind == "SPELL" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
@@ -367,17 +373,17 @@ class GameLoop:
                     return
                 if not ap.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                     return
-                target: Battlefield = self.gs.battlefields[lane if lane is not None else 0]
-                self._resolve_card_effects(card, target, ap, opponent)
+                target_lane = lane if lane is not None else 0
                 ap.remove_from_hand(idx)
-                self.spells_cast += 1
+                self.gs.chain.append(ChainItem(player=ap.name, card=card, bf_idx=target_lane))
+                self._run_chain(ap.name)
                 if self.recorder:
                     self.recorder.record_play(
                         ap.name,
                         self.gs.turn,
                         card,
                         action="SPELL",
-                        battlefield_index=lane if lane is not None else 0,
+                        battlefield_index=target_lane,
                     )
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
@@ -433,6 +439,10 @@ class GameLoop:
                 )
 
         elif kind == "MOVE":
+            # Illegal during Showdown or Closed State (active chain)
+            if self.gs.showdown_active or self.gs.chain:
+                return
+
             src = lane
             dst = dst_lane
             if src is None or dst is None or src == dst:
@@ -474,11 +484,151 @@ class GameLoop:
                 unit.ready = False
                 dst_bf.add_unit(side, unit)
 
+    def _run_chain(self, caster: str) -> None:
+        """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""
+        active = self.gs.other(caster)
+        passes = 0
+
+        while passes < 2 and self.gs.chain:
+            player = self.gs.get_player(active)
+            if player.agent is None:
+                passes += 1
+                active = self.gs.other(active)
+                continue
+
+            action = player.agent.decide_reaction(self.gs.get_player(self.gs.other(active)), self.gs.chain)
+
+            if action[0] == "PASS":
+                passes += 1
+            else:
+                kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
+                if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
+                    card = player.hand[idx]
+                    if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
+                        if player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                            if player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                                if lane is None or not (0 <= lane < len(self.gs.battlefields)):
+                                    lane = 0
+                                player.remove_from_hand(idx)
+                                self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
+                                passes = 0
+
+            active = self.gs.other(active)
+
+        # Resolve chain LIFO
+        while self.gs.chain:
+            item = self.gs.chain.pop()
+            actor = self.gs.get_player(item.player)
+            opponent = self.gs.get_player(self.gs.other(item.player))
+            battlefield = self.gs.battlefields[item.bf_idx]
+            self._resolve_card_effects(item.card, battlefield, actor, opponent)
+
+            if self.recorder:
+                before_a = list(battlefield.units_A)
+                before_b = list(battlefield.units_B)
+                self._record_spell_deaths(battlefield, before_a, before_b)
+
+            self.spells_cast += 1
+
+    def _run_showdown(self, bf_idx: int, attacker: str) -> None:
+        """Execute a showdown at the given battlefield (§337–345)."""
+        if self.gs.showdown_active:
+            return  # Already in a showdown
+
+        self.gs.showdown_active = True
+        self.gs.showdown_bf_idx = bf_idx
+        self.gs.focus_player = attacker
+
+        passes = 0
+        while passes < 2:
+            focus_player = self.gs.get_player(self.gs.focus_player)
+            opponent_player = self.gs.get_player(self.gs.other(self.gs.focus_player))
+
+            if focus_player.agent is None:
+                passes += 1
+                self.gs.focus_player = self.gs.other(self.gs.focus_player)
+                continue
+
+            action = focus_player.agent.decide_showdown_action(opponent_player, bf_idx)
+
+            if action[0] == "PASS":
+                passes += 1
+            else:
+                kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
+                if kind == "SPELL" and idx is not None and 0 <= idx < len(focus_player.hand):
+                    card = focus_player.hand[idx]
+                    if isinstance(card, SpellCard):
+                        has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
+                        if has_action_or_reaction and focus_player.can_pay_cost(
+                            card.cost_energy, card.cost_power, card.cost_power_domain
+                        ):
+                            if focus_player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                                focus_player.remove_from_hand(idx)
+                                self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
+                                self._run_chain(self.gs.focus_player)
+                                passes = 0
+
+            self.gs.focus_player = self.gs.other(self.gs.focus_player)
+
+        self.gs.showdown_active = False
+        self.gs.showdown_bf_idx = None
+        self.gs.focus_player = None
+
+        # Resolve showdown outcome
+        bf = self.gs.battlefields[bf_idx]
+        if bf.units_A and bf.units_B:
+            # Contested: run combat
+            self._phase_combat_and_conquer_single(bf_idx, attacker)
+        elif bf.units_A and not bf.units_B:
+            # A controls
+            if bf.can_score_conquer("A"):
+                self.gs.points_A += 1
+                bf.mark_scored("A")
+        elif bf.units_B and not bf.units_A:
+            # B controls
+            if bf.can_score_conquer("B"):
+                self.gs.points_B += 1
+                bf.mark_scored("B")
+
+    def _phase_combat_and_conquer_single(self, bf_idx: int, attacker: str) -> None:
+        """Resolve combat for a single battlefield."""
+        bf = self.gs.battlefields[bf_idx]
+        before_A = list(bf.units_A)
+        before_B = list(bf.units_B)
+
+        stats = bf.resolve_combat_might(attacker_side=attacker)
+
+        # Route dead units
+        for dead_unit in stats.dead_A:
+            self.gs.A.trash.append(dead_unit.card)
+            self.gs.A.base_gear.extend(dead_unit.gear)
+        for dead_unit in stats.dead_B:
+            self.gs.B.trash.append(dead_unit.card)
+            self.gs.B.base_gear.extend(dead_unit.gear)
+
+        # Trigger DEATHKNELL effects
+        for dead_unit in stats.dead_A + stats.dead_B:
+            if dead_unit.card.has_keyword("DEATHKNELL"):
+                if dead_unit in stats.dead_A:
+                    actor = self.gs.A
+                    opponent = self.gs.B
+                else:
+                    actor = self.gs.B
+                    opponent = self.gs.A
+                self._resolve_card_effects(dead_unit.card, bf, actor, opponent)
+
+        if self.recorder:
+            self._record_combat_deaths(bf, before_A, before_B)
+
+        if bf.can_score_conquer(attacker):
+            if attacker == "A":
+                self.gs.points_A += 1
+            else:
+                self.gs.points_B += 1
+            bf.mark_scored(attacker)
+
     def _phase_showdown(self, active: str, opponent: str) -> None:
-        for bf in self.gs.battlefields:
-            if bf.showdown_pending and bf.controller() is None:
-                # Placeholder: acknowledge showdown without additional actions
-                bf.showdown_pending = False
+        pass  # Showdowns now trigger immediately when battlefield contested
 
     def _phase_combat_and_conquer(self, active: str) -> None:
 

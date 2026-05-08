@@ -215,3 +215,59 @@ class PykeAgent(Agent):
 
         return False
 
+    def decide_showdown_action(self, opponent: Player, bf_idx: int) -> tuple:
+        """Play best ACTION or REACTION spell during showdown."""
+        my_side = "A" if self.player.name == "A" else "B"
+        bfs = self.player.battlefields
+
+        candidates = []
+        for idx, card in enumerate(self.player.hand):
+            if not isinstance(card, SpellCard):
+                continue
+            if not (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
+                continue
+            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                continue
+
+            score = self._score_card(card, my_side, opponent, bfs)
+            if score <= 0:
+                continue
+
+            candidates.append((score, idx))
+
+        if not candidates:
+            return ("PASS", None, None)
+
+        candidates.sort(key=lambda x: -x[0])
+        score, idx = candidates[0]
+        return ("SPELL", idx, bf_idx)
+
+    def decide_reaction(self, opponent: Player, chain: list) -> tuple:
+        """Play REACTION spell in response to chain."""
+        my_side = "A" if self.player.name == "A" else "B"
+        bfs = self.player.battlefields
+
+        candidates = []
+        for idx, card in enumerate(self.player.hand):
+            if not isinstance(card, SpellCard):
+                continue
+            if not card.has_keyword("REACTION"):
+                continue
+            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                continue
+
+            score = self._score_card(card, my_side, opponent, bfs)
+
+            # PykeAgent mostly passes reactions, but plays high-value ones
+            if score < 5:
+                continue
+
+            candidates.append((score, idx))
+
+        if not candidates:
+            return ("PASS", None, None)
+
+        candidates.sort(key=lambda x: -x[0])
+        score, idx = candidates[0]
+        return ("SPELL", idx, 0)
+

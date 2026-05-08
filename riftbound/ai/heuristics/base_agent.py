@@ -25,3 +25,11 @@ class Agent(ABC):
     def decide_mulligan(self) -> list[int]:
         """Return indices of hand cards to send back. Empty list = keep all."""
         ...
+
+    def decide_showdown_action(self, opponent: Player, bf_idx: int) -> Action:
+        """Return ACTION or REACTION spell to play during showdown, or PASS."""
+        return ("PASS", None, None)
+
+    def decide_reaction(self, opponent: Player, chain: list) -> Action:
+        """Return REACTION spell to play in response to chain, or PASS."""
+        return ("PASS", None, None)
