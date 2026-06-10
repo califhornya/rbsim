@@ -1,0 +1,387 @@
+Disintegrate	conditional follow-up draw when damage kills the target is not yet modeled
+Flame Chompers	play from hand when discarded by paying an alternate cost is not modeled
+Get Excited!	discard a card and deal damage equal to its energy cost is not modeled
+Magma Wurm	'Other friendly units' likely means everywhere, not just here; no anywhere-scoped friendly target exists yet
+Noxus Saboteur	Prevents opponents' HIDDEN cards from being revealed here — no engine support.
+Sun Disc	Grants the next unit you play this turn enters ready (LEGION conditional) — no engine support for 'next unit enters ready' modifier.
+Unlicensed Armory	Conditional death-replacement with optional fury payment to heal/exhaust/recall — no engine support for optional-pay death replacement on chosen unit.
+Blind Fury	Reveals top of each opponent's deck, choose one to banish then play for free, recycle rest — no engine support.
+Brynhir Thundersong	Opponents can't play cards this turn — no engine support.
+Raging Firebrand	Next spell you play this turn costs [5] less — aura cost reduction on next spell only, engine doesn't dispatch aura cost reductions to other cards.
+Ravenborn Tome	Next spell you play this turn deals 1 Bonus Damage — no engine support.
+Shakedown	Deal 6 to enemy unit unless controller has you draw 2 — opponent choice modal effect, no engine support.
+Vayne Hunter	'If an opponent controls a battlefield, I enter ready' and 'on conquer, pay [1] to return me to hand' lack engine verbs.
+Immortal Phoenix	Trigger when you kill a unit with a spell, optional cost to play self from trash — no matching trigger/verb.
+Volibear Furious	'Deal 5 damage split among any number of enemy units here' requires a damage-splitting verb.
+Find Your Center	'Channel 1 rune exhausted' lacks a matching verb.
+Meditation	'Otherwise, draw 1' is an else-branch keyed off the optional cost; engine has no negated kicker condition.
+Stand United	'Buffs give an additional +1 might to friendly units this turn' is a buff-amount modifier with no matching verb.
+Adaptatron	On conquer, optionally kill a gear to buff self; no verb for targeted gear destruction with conditional follow-up
+Eclipse Herald	Trigger 'when you stun an enemy unit' not supported
+Mask of Foresight	Trigger 'when a friendly unit attacks or defends alone' not directly supported
+Reinforce	Look at top 5, play a unit with cost reduced by 5, then recycle the rest — no verb for dig+play with cost reduction
+Spirit's Refuge	Static aura granting DEFLECT to all friendly buffed units not supported
+Caitlyn Patrolling	'Must be assigned combat damage last' is a static combat-order modifier not supported
+Mageseeker Warden	Static restrictions: opponents can only play units to base; spells/abilities can't ready enemy units/gears
+Party Favors	Multiplayer choice with per-player branching (draw or channel rune) not supported
+Sona Harmonious	Conditional on being at a battlefield; up-to-N choice
+Mushroom Pouch	Conditional draw at start of Beginning Phase if you control a facedown card at a battlefield; no condition for facedown control exists.
+Portal Rescue	Banish a friendly unit, then owner plays it to their base ignoring cost — no verb for banish-then-replay-to-base.
+Ava Achiever	On attack, optional cost to play a HIDDEN card from hand ignoring its cost; no verb for play-from-hand-ignoring-cost with conditional filter.
+Convergent Mutation	Set a friendly unit's Might equal to another friendly unit's Might this turn — no set-might verb.
+Heimerdinger Inventor	Copies all tap-activated abilities of friendly legends/units/gears; no engine support.
+Kai'Sa Evolutionary	On conquer, play a spell from trash whose energy cost < your points, ignoring energy cost, then recycle it.
+Malzahar Fanatic	Activated ability adds 2 runes of any domain to pool; cost includes killing a friendly unit/gear. No gain_power verb and no kill-friendly cost key.
+Promising Future	Each player digs 5, banishes one, recycles rest, then each player plays those cards ignoring energy costs.
+Viktor Innovator	Trigger should be 'when you play a card on opponent's turn' — no such trigger; using on_play as placeholder is incorrect.
+Wraith of Echoes	Should only trigger on the FIRST friendly unit death each turn, not every death.
+Teemo Strategist	On defend, reveal top 5, deal 1 to chosen enemy here per HIDDEN card revealed, then recycle.
+Time Warp	Take an extra turn, then banish self.
+Unchecked Power	Exhaust all friendly units, then deal 12 to all units at battlefields (everywhere, both sides).
+Challenge	Requires choosing both a friendly and an enemy unit and dealing mutual damage equal to their mights.
+Confront	Units you play this turn enter ready — no verb for this yet.
+Dune Drake	Conditional on-attack buff requires checking for a ready enemy unit here.
+Flurry of Blades	Deals 1 to all units at all battlefields — no global target.
+Mobilize	Channel a rune exhausted as a card effect; fallback to draw if unable.
+Stormclaw Ursine	On play, channel a rune exhausted.
+Catalyst of Aeons	Channel 2 runes exhausted; if fewer than 2 channeled, draw 1.
+Herald of Scales	Aura reducing other friendly Dragons' energy costs by 2 (min 1); engine currently only applies reduce_cost to the owning card.
+Pirate's Haven	Trigger is 'when you ready a friendly unit', not 'play'. No on_ready_friendly trigger exists.
+Spoils of War	Conditional self cost reduction based on enemy death this turn.
+Spoils of War	unknown condition type 'enemy_unit_died_this_turn'
+Unyielding Spirit	Prevent all spell/ability damage this turn — no matching verb.
+Wallop	Optional additional cost 'spend a buff' to ignore the spell's cost — kicker key not in allowed list, and 'ignore cost' is not modeled.
+Wildclaw Shaman	On play, may spend a buff to buff and ready self; if no buff, gains +1 buff first. Complex modal/optional with spend_buff cost.
+Carnivorous Snapvine	Mutual damage equal to each unit's might between self and a chosen unit.
+Kraken Hunter	Variable cost reduction by spending any number of buffs as additional cost.
+Lee Sin Centered	Static aura granting +2 might to other buffed friendly units here; aura dispatch limited.
+Mistfall	Triggered on buffing a friendly unit with optional cost (pay [body] + exhaust this) to ready it.
+Overt Operation	For each friendly unit, optionally spend its buff to ready it, then buff all friendly units. Multi-step optional per-unit cost and global buff target not supported.
+Qiyana Victorious	Modal choice between draw 1 or channel 1 rune exhausted; engine has no mode_choice or channel_rune verb
+Sabotage	Reveal opponent's hand and recycle a chosen non-unit from it; no verb for revealing opponent hand and forcing recycle
+Udyr Wildman	Modal 'choose one you've not chosen this turn' with spend buff cost; engine lacks mode_choice tracking
+Volibear Imposing	Trigger is opponent moving to a battlefield other than mine, not self move; needs on_opponent_move trigger
+Warwick Hunter	'Enters ready' static ability and 'damaged' as filter not supported
+Dazzling Aurora	Reveal-until-unit, play it ignoring cost, recycle the rest at end of turn; no verb for reveal-until and play-from-reveal
+Deadbloom Predator	Allows playing to an occupied enemy battlefield; no verb for alternate placement rule
+Miss Fortune Captain	'First time each turn' limiter and 'something else exhausted' (could be unit or rune) not fully modeled
+Sett Brawler	Spend buff cost not in allowed cost keys
+Ember Monk	Trigger is 'when you play a card from HIDDEN' — needs a specific trigger for hidden-card play, not generic friendly unit played.
+Sai Scout	'You may play me to an open battlefield' is an alternate placement rule with no current verb.
+Sneaky Deckhand	'You may play me to an open battlefield' is an alternate placement rule with no current verb.
+Stealthy Pursuer	'When a friendly unit moves from my location, I may be moved with it' — no trigger/verb for piggyback movement.
+Acceptable Losses	'Each player kills one of their gear' — no verb for symmetric per-player gear sacrifice.
+Fading Memories	Target is 'a unit at a battlefield or a gear' — engine has no chosen_unit_or_gear target.
+Pack of Wonders	Return another friendly gear/unit/facedown card to hand — no bounce-to-hand verb exists.
+Treasure Trove	'When this leaves the board' is broader than on_death (includes bounce/banish); also 'channel 1 rune exhausted' has no verb.
+Whirlwind	Each player in turn order may return a unit; no verb for multi-player sequential optional returns.
+Kayn Unleashed	Conditional damage immunity after moving twice this turn; no verb for damage prevention based on move count.
+Miss Fortune Buccaneer	Allows playing units to open (empty) battlefields; no verb for modifying play-zone restrictions.
+Nocturne Horrifying	Top-of-deck reveal alternate-cost play; no verb for banish-from-top-of-deck alternate cost.
+Tideturner	Swap locations of this unit with another friendly unit; no verb for unit position swap.
+Twisted Fate Gambler	Reveal top rune and branch effect by domain (fury/mind/order); no verb for domain-based branching off revealed rune.
+Invert Timelines	Each player discards hand then draws 4 — no verb for symmetric discard-hand/draw
+Jinx Rebel	Trigger on you discarding cards not in supported trigger list
+Jinx Rebel	unknown trigger 'on_discard'; unknown trigger 'on_discard'
+Possession	Take control of an enemy unit and recall it — take_control verb exists but combined move+control+recall sequence needs review
+Yasuo Windrider	Score 1 point on third move in a turn — needs move-count tracking condition
+Call to Glory	Optional 'spend a buff' additional cost to ignore the spell's cost — not in allowed additional_cost keys, and cost-ignoring not modeled
+Cruel Patron	Mandatory additional cost to play (kill a friendly unit) — additional_cost is for optional kickers only
+Cull the Weak	Each player kills one of their units — no verb for symmetric forced sacrifice
+Forge of the Future	'Kill this' as activated cost and 'recycle up to 4 from trashes' (variable, from trash) need confirmation
+Hidden Blade	Second effect draws for the killed unit's controller, not necessarily opponent — needs target:controller_of_target
+Imperial Decree	Delayed trigger: when any unit takes damage this turn, kill it.
+Solari Chief	Conditional kill-or-stun based on target's stunned state; no condition type for 'target is stunned'.
+Spectral Matron	play_from_trash filter for 'no more than 3 and no more than [rune]' (max power cost) may not be supported; using params hint.
+Symbol of the Solari	Replacement effect on tied combat where you are attacker: recall all units instead.
+Vanguard of Helm	Trigger is 'when a buffed friendly unit dies'; condition should check the dying unit was buffed, not self.
+Albus Ferros	Spend any number of buffs; for each, channel 1 rune exhausted.
+Commander Ledros	Variable additional cost: kill any number of friendly units to reduce cost by [order] each.
+Grand Strategem	Buffs all friendly units everywhere; no 'all friendly units anywhere' target exists.
+Karma Channeler	Trigger 'when you recycle one or more cards' is not in the supported trigger list.
+Karthus Eternal	Causes DEATHKNELL effects to trigger an additional time; no verb for triggering multiplier.
+King's Edict	No effect text provided.
+Baited Hook	Complex chained ability: sacrifice friendly unit, dig 5, conditionally banish-and-play a unit with might<=killed+1, recycle rest. No composite verb exists; dig+conditional-play-from-banish not supported.
+Divine Judgment	Each player keeps 2 of each category and recycles the rest across multiple zones; no mass selective recycle verb.
+Seal of Unity	ADD [order] power to pool — gain_power verb not supported.
+Viktor Leader	Filter 'non-Recruit' (lacks_subtype) is not in supported target_filter keys; also play_token destination 'base' not standard.
+Viktor Leader	unknown target_filter key(s) ['lacks_subtype']
+Kai'Sa Daughter of the Void	ADD [rune] tap ability adds power to pool; no gain_power verb yet
+Volibear Relentless Storm	Optional exhaust-self trigger to channel a rune exhausted on playing a Mighty unit; no channel_rune verb
+Stormbringer	Targets a friendly unit in your base, deals damage equal to its might to all enemies at a battlefield, then moves that unit there
+Jinx Loose Cannon	Condition 'cards in hand <= 1' not in supported condition list
+Jinx Loose Cannon	unknown condition type 'cards_in_hand_at_most'
+Super Mega Death Rocket!	Second clause: on conquer, may discard 1 to return this spell from trash to hand
+Noxian Guillotine	Delayed conditional kill ('kill the next time it takes damage this turn') and LEGION upgrade to kill immediately; no delayed-trigger verb
+Ahri Nine-Tailed Fox	Trigger 'when an enemy unit attacks a battlefield you control' with -1 might this turn floored at 1
+Fox-Fire	Kill any number of units at a battlefield with total might <= 4 (multi-target with aggregate constraint)
+Dragon's Rage	Move an enemy then choose another enemy at the destination; both deal damage equal to their mights to each other
+Last Breath	Damage equal to the readied friendly unit's might dealt to an enemy at a battlefield; amount_source 'target_might' not in allowed list
+Last Breath	unknown amount_source 'target_might'
+Leona Radiant Dawn	Trigger 'when you stun one or more enemy units' not supported
+Leona Radiant Dawn	unknown trigger 'on_stun'
+Zenith Blade	Second effect is optional and must move to the stunned unit's battlefield; engine lacks targeted destination move
+Teemo Swift Scout	Alternate hide cost and returning a Teemo unit from Champion Zone to hand not supported
+Guerilla Warfare	'You can hide ignoring costs this turn' not supported
+Bullet Time	Variable X cost paid in [rune] dealing X damage not supported; also 'at a battlefield' is a chosen battlefield, not necessarily here
+Sett The Boss	Death replacement that spends a buff to heal/exhaust/recall not supported
+Aspirant's Climb	Modifies points needed to win the game
+Bandle Tree	Allows hiding an additional card at this battlefield
+Monastery of Hirana	Conquer here ability with spend-a-buff cost; cost key spend_buff not in allowed set
+Navori Fighting Pit	On-hold-here buff effect; need trigger scoping to this battlefield
+Reckoner's Arena	Activates conquer effects of units here on hold
+Sigil of the Storm	On conquer here, controller must recycle a rune (non-choice)
+The Arena's Greatest	Each player gains 1 point at their first Beginning Phase
+The Candlelit Sanctum	On conquer here: scry-like look at top 2, optionally recycle, reorder
+The Grand Plaza	Win-game condition on hold not supported
+Vilemaw's Lair	Movement restriction not supported
+Void Gate	Bonus damage aura at battlefield not supported
+Annie Fiery	Bonus damage to all your spells/abilities not supported
+Gentlemen's Duel	Second clause: chosen enemy and chosen unit deal damage equal to their might to each other not supported
+Master Yi Wuju Bladesman	Conditional aura: +2 might to friendly unit while defending alone not supported
+Detonate	'Its controller draws 2' — controller of the killed gear, not necessarily opponent
+Void Drone	Cost reduction when played from zones other than hand (e.g. trash, banish) — no engine support
+Battering Ram	Self cost reduction scaling with cards played this turn, with a minimum
+Minotaur Reckoner	Global static: units can't move to base
+Perched Grimwyrm	Play restriction: only to a battlefield you conquered this turn
+Void Hatchling	Replacement effect on reveals: peek top card and optionally recycle before revealing
+Assembly Rig	Additional cost 'recycle a unit from your trash' not in cost vocab; also [1] [fury] specifies fury domain power; token destination 'to your base' not standard
+Rell Magnetic	Play an Equipment from hand ignoring its cost and attach it to me — no verb for play-from-hand-with-cost-override + attach.
+Rumble Hotheaded	Aura grants ASSAULT to all your Mechs (anywhere, not just here); on-conquer recycles a friendly unit to play a Mech from trash with cost reduced by the recycled unit's might.
+Lucian Gunslinger	Damage equals my ASSAULT value, not my might; no amount_source for assault value.
+Skyfall of Areion	Equipped unit's hold effects also trigger on conquer and vice versa — no verb for cross-mapping trigger types.
+Apprentice Smith	Reveal top card; draw if gear, else recycle — reveal_and_choose semantics need a conditional branch on card type.
+Brutalizer	Conditional +2 might only if this gear was attached to me this turn.
+Brutalizer	unknown condition type 'attached_this_turn'
+Legion Quartermaster	Mandatory additional cost to play: return a friendly gear to hand. Not an optional kicker.
+Not So Fast	Counter enemy spell/ability only if it targets a friendly unit or gear — needs target filter for spell's chosen target.
+Not So Fast	unknown target_filter key(s) ['chooses_friendly']
+Poro Snax	Activated cost includes 'kill this' (self-sacrifice); using sacrifice cost flag approximately.
+Azir Ascendant	Swap-positions move with optional gear re-attach; no verb for swapping unit locations or transferring equipment.
+Svellsongur	Copies attached unit's text onto this equipment; no verb for text-copy.
+Tianna Crownguard	Static aura preventing opponents from gaining points while at a battlefield; no verb for point-gain prevention.
+Chemtech Cask	Triggered ability that requires exhausting self and is restricted to opponent's turn spell plays; engine may not gate on opponent_turn_only.
+Pickpocket	Second effect is conditional on having killed a gear with the optional first effect; no chained 'if you do' conditional verb. Also filter is by Energy cost not might.
+Rocket Barrage	Choose-one modal spell; no mode-choice dispatch.
+Temporal Portal	Grants REPEAT to next spell played; no verb for granting keywords to future plays.
+Bard Mercurial	Additional cost is exhaust your legend; not in additional_cost vocab. Also 'any number of your units to an open battlefield' lacks target vocabulary.
+Bard Mercurial	unknown additional_cost key(s) ['exhaust_legend']
+Card Sharp	Opponents may choose to play a Gold token; no vocab for opponent choice or per-opponent triggers.
+Ezreal Dashing	'I don't deal combat damage' has no vocab.
+Hextech Anomaly	Pay any amount of rune to add equivalent energy; no vocab for variable resource conversion.
+Jayce Man of Progress	Kill a friendly gear to enable playing a gear from hand ignoring energy cost; multiple unsupported mechanics.
+Premonition	Card text only states REACTION keyword reminder; no actual effect printed in provided text.
+Rumble Scrapper	Static aura giving +1 might to friendly Mechs (including self) anywhere not supported.
+The Zero Drive	Plays all units banished with this card; no vocab for tracking cards banished by a source or playing them ignoring cost.
+Dauntless Vanguard	Alternate play destination (occupied enemy battlefield); no vocab.
+Ruin Runner	Untargetable by enemy spells/abilities — no verb for this protection.
+Strike Down	Equipped friendly unit deals damage equal to its might to an enemy, then detach an Equipment. No verbs for unit-as-source damage or detach.
+Akshan Mischievous	Kicker moves an enemy gear to your base and takes control until I leave; if Equipment, attach to me. No verb for moving/taking control of gear or attaching enemy equipment.
+Fiora Peerless	Trigger is 'one on one' (attacking or defending alone vs a single unit). Approximated with this_is_alone on attack/defend; may need a dedicated condition.
+Here to Help	Play a unit from hand with a cost reduction of 3. No verb for playing a card from hand with discounted cost.
+Kato the Arm	On move, give another friendly unit my keywords and +might equal to my Might this turn. No verb for copying keywords to another unit.
+Marching Orders	Chosen friendly and enemy units deal damage equal to their mights to each other. No verb for mutual unit-might damage.
+Ancient Henge	Tap and pay X energy to add X power of any domain. No verb for gaining power/resources.
+Sivir Ambitious	Conditional excess-damage redirect on conquer not modeled
+Black Market Broker	Trigger on playing a card from face down (HIDDEN) not modeled
+Fae Porter	Optional cost on triggered ability (not on-play kicker); move target to same battlefield as self
+Loyal Pup	Trigger when you defend at a battlefield, optionally move self there
+Overzealous Fan	Self-kill as optional cost on defend trigger; targets attacking unit specifically
+Temptation	Move enemy unit to a location containing another unit with same controller
+Factory Recall	Return a gear to owner's hand not modeled
+Edge of Night	Hidden play attaches to a friendly unit here — facedown alternate play not modeled.
+Fizz Trickster	play_from_trash with energy-cost cap, ignoring energy, then recycling — params not standard.
+Irelia Graceful	Cost reduction on spells that target this unit — no aura cost-reduction-on-others dispatch yet.
+Switcheroo	Swap might of two units at same battlefield — no swap_might verb.
+Vex Cheerless	Conditional aura cost modifier (while in combat) affecting friendly and enemy spells with minimum floor.
+Downwell	Return all units and gear to owners' hands — no global bounce verb.
+Draven Audacious	Need once-per-turn limiter on win_combat trigger and died-in-combat condition.
+Draven Audacious	unknown condition type 'died_in_combat'
+Zaun Punk	Additional cost is kill_friendly_gear, not in cost vocab; target is a gear (any side).
+Zaun Punk	unknown additional_cost key(s) ['kill_friendly_gear']
+Blood Money	Conditional branching based on whether killed unit was enemy or friendly, plus playing token gears exhausted.
+Drag Under	Cost reduction when played from anywhere other than hand is not supported as a standard cost_modifier condition
+Drag Under	unknown condition type 'played_from_non_hand'
+Glasc Mixologist	play_from_trash filter for max cost (energy and power) not in standard target_filter keys
+Glasc Mixologist	unknown target_filter key(s) ['max_cost_energy', 'max_cost_power']
+Rek'Sai Swarm Queen	Complex reveal-banish-play-or-recycle with conditional 'play here if unit' not fully expressible
+Soraka Wanderer	'Must be assigned combat damage last' and conditional death replacement (heal+exhaust+recall if friendly unit here has less might) not supported
+Blade of the Ruined King	EQUIP cost includes killing a friendly unit in addition to power; cost composition not in EQUIP keyword vocab
+Fiora Worthy	Trigger 'when a unit you control becomes MIGHTY' and optional cost-to-activate trigger response not in supported triggers
+Fiora Worthy	unknown trigger 'on_friendly_becomes_mighty'
+Rumble Mechanized Menace	Aura granting keyword to all friendly Mechs anywhere (not just here) not supported
+Danger Zone	Buff to all friendly Mechs anywhere (not just here) not supported
+Relentless Pursuit	Granting a temporary triggered ability ('When I conquer, you may move me to my base') not expressible as a keyword
+Relentless Pursuit	unknown target_filter key(s) ['same_controller']
+Rek'Sai Void Burrower	On-conquer optional self-exhaust to reveal top 2, banish one and play it, recycle rest — no verb for reveal-then-banish-and-play
+Void Rush	Reveal top 2, optionally banish-and-play one with cost reduction, draw the rest — no verb yet
+Ornn Fire Below the Mountain	Tap to ADD [rune] restricted to gear plays/abilities — no gain_power verb
+Rabadon's Deathcrown	UNIQUE deckbuilding restriction and 'spells and abilities deal 3 Bonus Damage' aura while attached — no bonus_damage verb
+Shurelya's Requiem	UNIQUE deckbuilding restriction; also 'ready your units' may target everywhere not just here
+Jax Grandmaster at Arms	Activated abilities that attach a controlled Equipment to a unit — no attach_existing_gear verb
+Irelia Blade Dancer	Triggers on 'choose a friendly unit' with optional self-exhaust+rune to ready it; on-conquer optional [1] to ready self — no choose-trigger or pay-to-ready verbs
+Azir Emperor of the Sands	Aura granting WEAPONMASTER to all Sand Soldiers anywhere; conditional restriction is 'played an Equipment this turn' not generic card
+Renata Glasc Chem-Baroness	On hold (you or ally) optional self-exhaust to play exhausted Gold gear token; Gold tokens ADD extra [1] while within 3 of victory
+Sivir Battle Mistress	Triggers on recycling a rune and on enemy deaths with conditional exhaust-to-pay self-cost; play_token exhausted not modeled; ready-me on enemy death pattern not supported.
+On the Hunt	"Ready your units" means all friendly units everywhere, not just here.
+Fiora Grand Duelist	Trigger on a friendly unit becoming Mighty; channel-rune effect with exhaust-self cost not modeled.
+Riposte	Combined counter-spell and buff-friendly-unit by spell's energy cost; magnitude source 'countered_spell_cost' not in vocab; need a single effect that targets both a unit and a spell.
+Emperor's Dais	On-conquer optional cost: pay 1 and bounce a friendly unit here to play a Sand Soldier token here; bounce-to-hand and conditional token-play chain not modeled.
+Forge of the Fluft	Grants an activated ability to friendly legends while controlling this battlefield; ability-granting auras and Equipment attachment via tap not modeled.
+Forgotten Monument	Score-prevention until turn 3 not modeled.
+Hall of Legends	On-conquer optional pay-1 to ready your legend; ready-by-subtype and optional-cost-on-conquer not modeled.
+Marai Spire	Reduces friendly REPEAT costs by 1 while controlling this battlefield; aura cost-reduction on others not dispatched yet, and REPEAT-cost specifically (vs base cost) is a distinct concept.
+Minefield	On-conquer mill top 2 of Main Deck to trash; mill effect not modeled.
+Ornn's Forge	Only first gear each turn; engine reduce_cost is flat and doesn't track 'first per turn' or control of battlefield gating.
+Power Nexus	Optional power cost on a hold trigger; additional_cost is documented for on_play, applying it to on_hold may not be dispatched.
+Ravenbloom Conservatory	Reveal top of deck and conditionally draw or recycle; no verb for reveal-top-conditional-draw.
+Rockfall Path	Static restriction preventing units from being played here.
+The Papertree	Each player channels a rune exhausted on hold; no verb for forced channel by each player.
+Treasure Hoard	Optional energy cost on conquer; additional_cost dispatch on on_conquer not confirmed, and play_token exhausted flag may need engine support.
+Veiled Temple	Ready a friendly gear and optionally detach equipment; no verbs for ready_gear or detach_gear.
+Gold	Token's tap ability adds a power of any domain; no gain_power verb yet.
+Smite	'If it would die this turn, banish it instead' is a death-replacement on the targeted unit, not an unconditional banish.
+Fresh Beans	Trigger is conditional on showdown timing and uses an optional exhaust-self cost on a triggered ability; engine has no showdown-condition or optional-triggered-cost yet.
+Lotus Trap	Doubles all damage dealt to a chosen unit this turn; no damage-modification verb exists.
+Monster Harpoon	Conditional bonus damage vs. a facedown card; no facedown-card condition or replacement-amount mechanic.
+Right of Conquest	Second draw scales by battlefields you/allies control; no such amount_source exists.
+Right of Conquest	unknown amount_source 'battlefields_controlled'
+Yeti Brawler	On-conquer trigger gated by excess-damage threshold, plays exhausted Gold gear tokens (gear token type with built-in ability).
+Blighted Battleaxe	End-of-turn conditional self-damage and unattach based on whether the equipped unit conquered this turn; no did-not-conquer condition or unattach verb.
+Dancing Grenade	Replay-for-rune with stacking bonus damage per prior damage this turn not modelable
+Katarina Reckless	Triggers on hiding a card and playing facedown not modelable
+Undying Legion	Conditional play-from-trash with alternate cost not modelable
+Red Brambleback	Conquer effects here trigger additional time not modelable
+Monch	Conditional cost reduction and enter-ready based on opponent's stunned unit not modelable
+Back Off	Conditional draw only when played from hand (not from hidden) not modelable
+Forgotten Signpost	Move a unit to another unit's location with exhaust-friendly cost not modelable
+Honeyfruit	ADD [rune]/[1] [rune] tap abilities not yet supported
+Ivern Nurturer	Dig+reveal-and-draw with conditional BUFF based on revealed tag not yet supported as a single verb
+Nami Headstrong	'Next unit you play this turn: ready it and buff it' delayed trigger on_hold not yet supported
+Scuttle Crab	'Opponent reveals hand; you can look at their facedown cards this turn' not yet supported
+Tricksy Tentacles	Move multiple enemy units sharing a controller with total might <= 8 to a single location — multi-target with aggregate constraint not yet supported
+Vex Mocking	Trigger 'when you stun an enemy unit at a battlefield' not yet a defined trigger
+Yuumi Magical Cat	Text says '+3 power' to a unit; mapped to +3 might as closest verb — confirm
+Alpha Wildclaw	Static 'your units here with less might than me can't be chosen by enemy spells/abilities' protection aura not yet supported
+Lillia Protector of Dreams	'Friendly tokens gain Tank' targets all friendly tokens anywhere, not just here; passive aura for other cards not fully dispatched
+Master Yi Unstoppable	LEVEL 16 'can't be chosen by enemy spells/abilities' has no verb; cost reduction has power-domain component not modeled
+Vilemaw	'Enemy units here with less Might than me don't deal combat damage' has no verb
+Fate Weaver	dig filter uses energy cost, not might; using might_at_least as placeholder may be wrong
+Icevale Archer	'a unit here' uses here-scope; debuff_might target should be restricted to here
+Deadly Flourish	'When it dies this turn, play a Gold gear token exhausted' is a delayed conditional trigger not modeled
+Frigid Jewel	Trigger 'when you draw your second card each turn' not modeled
+Petal Pixie	Self-buff based on count of friendly TEMPORARY units here; n_friendly_with_tag counts by subtype tag, not keyword
+Soul Shepherd	Aura buff to all friendly token units anywhere not fully dispatched
+Sprite Fountain	play_token to base location not standard; DEATHKNELL repeats play effect
+Diana Lunari	Triggered showdown-begin ability with optional energy cost; predict then conditional reveal-and-draw not yet modelable cleanly
+Hwei Brooding Painter	On-move loot then branch by discarded card type (spell/gear/unit) is a mode-by-type choice not supported
+Keeper of Masks	Plays tokens that become copies of self — copy-token mechanic not supported
+Lillia Fae Fawn	Token must be placed at the location moved from, not current; engine play_token location semantics unclear
+Smoke and Mirrors	Swap locations of two chosen friendly units conditional on TEMPORARY, then draw — swap not supported
+Sprite Queen	Token must be placed at controller's base, not current location
+Sumpworks Map	Trigger on opponent scoring not in supported trigger list
+Sumpworks Map	unknown trigger 'on_opponent_scores'
+Zilean Time Mage	Replacement effect that duplicates token plays once per turn — not supported
+Blue Sentinel	Doubles hold triggers here; on-hold ADD [rune] delayed to next Main Phase — none supported
+Gutter Palace	Alternate win condition at start of Beginning Phase not supported
+Gutter Palace	unknown activated cost key(s) ['discard_cards']
+Jhin Meticulous Killer	Alternate cost based on spell energy spent this turn not supported
+Leblanc Everywhere at Once	Suppressing TEMPORARY triggers at battlefield not modeled
+Grim Resolve	XP trigger needs to be tied to the buffed unit's next combat win this turn
+Kinkou Initiate	Condition on total might of other friendly units not in supported list
+Kinkou Initiate	unknown condition type 'other_friendly_units_total_might_at_least'
+Call to Battle	Forcing opponent to move a unit to the same battlefield not modeled
+Disposal Order	Choose-one modal effect not dispatched
+Repulse	Counter only spells/abilities targeting a chosen friendly unit and no other friendly not modeled
+Stare Down	Targets enemies at a chosen battlefield with might less than a chosen friendly unit; engine lacks 'choose friendly unit + battlefield' targeting combo.
+Wily Newtfish	Conditional passive based on having gained XP this turn; condition type not in supported list.
+Wily Newtfish	unknown condition type 'controller_gained_xp_this_turn'; unknown condition type 'controller_gained_xp_this_turn'
+Clash of Giants	Choose two units and have them deal damage equal to their own Might to each other; engine lacks multi-target reciprocal damage.
+Determined Sentry	Static restriction preventing moving to base; no verb for movement restrictions.
+Irresistible Faefolk	On-move trigger moves an enemy unit to the battlefield I just moved to; engine move_unit destination semantics for 'that battlefield' unclear.
+Arachnoid Horror	Modifies playability rules (can be played to occupied battlefield if enemy unit is alone there) for self and other friendly units; no verb for play-restriction modification.
+Elder Dragon	'Any amount of damage kills enemies' is a global damage replacement; on-play deals 1 to one chosen enemy at each location.
+Kha'Zix Evolving Hunter	Optional XP cost on attack trigger; 'spend_xp' is supported as activated cost but not yet as additional_cost on triggered ability.
+Kha'Zix Evolving Hunter	unknown additional_cost key(s) ['spend_xp']
+Rengar Trophy Hunter	Modifies own play restriction to allow playing to battlefield with enemy units even without friendly units there; no verb for play-restriction modification.
+Crescent Guardian	Kicker is gated on 'if you've played a spell this turn'; engine has no condition for that combined with kicker availability.
+Isolate	Conditional draw based on whether an enemy unit is alone at the battlefield the moved unit was at is not expressible.
+Blast Cone	Second ability is a triggered ability with an optional exhaust-self cost when an enemy unit moves; engine doesn't model optional-cost triggers on movement events.
+Existential Dread	Targets an attacking unit specifically, and has a conditional 'return to hand if already stunned' replacement; neither is expressible.
+Insightful Investigator	Opponent reveals hand, you choose a card paying 2 XP, then they discard it and draw 1; reveal-and-choose-from-opponent-hand with XP cost and follow-on draw isn't modeled.
+Scryer's Bloom	Card enters exhausted, and the activation cost is 'kill this' (sacrifice self) rather than sacrifice any friendly; also need 'enters exhausted' modeling.
+Sinister Poro	Optional pay-cost on an on_attack trigger to move an enemy unit here to base; using kicker_paid pattern but it's not a play-time kicker.
+The List	As-you-play names a tag, then tap ability gives -2 might this turn to a unit with that tag; naming-a-tag state and tag-filtered debuff target aren't modeled.
+Bone Skewer	Opponent reveals hand, you choose a unit and play it to a chosen battlefield ignoring costs, then stun it; not expressible.
+Conscription	Take control + exhaust + recall combo with optional XP additional cost and a target-power condition; engine lacks take_control, target power filter, and XP additional cost
+Evelynn Entrancing	Trigger on playing from face down (HIDDEN) and moving an enemy unit from another battlefield to me; no trigger for hidden-play and move_unit semantics for cross-battlefield enemy move not modeled
+Heedless Resurrection	Additional cost kills a friendly unit; play a unit from trash with cost <= killed unit's cost. No vocab for kill-friendly additional cost gating a play_from_trash with dynamic cost cap
+Kha'Zix Mutating Horror	Condition 'an enemy unit is alone here' not in supported conditions
+Kha'Zix Mutating Horror	unknown condition type 'enemy_alone_here'; unknown condition type 'enemy_alone_here'; unknown condition type 'enemy_alone_here'; unknown condition type 'enemy_alone_here'
+Maduli the Gatekeeper	'Cannot be readied' static effect and conditional move to occupied enemy battlefield based on Might comparison not modeled
+Maduli the Gatekeeper	unknown condition type 'self_might_greater_than_enemies_at_target'
+Pyke Returned	Once-per-turn trigger on enemy death while at a battlefield; plays a Gold gear token exhausted. No trigger for on_enemy_unit_death, no once-per-turn limiter, and play_token exhausted not standardized
+Syndra Transcendent	Conditional aura: while I'm in a showdown, your spells gain REPEAT. No vocab for granting keywords to other cards conditionally, nor 'in showdown' state
+Cursed Sarcophagus	Banish all units from own trash and later play a unit banished by this card (paying its costs); targets/filters not in supported set
+Cursed Sarcophagus	unknown target_filter key(s) ['banished_with_this']
+Vex Apathetic	Trigger on opponent playing a unit while I'm at a battlefield; STUN it and prevent movement this turn. No on_enemy_unit_played trigger and stun_unit semantics for no-combat-damage/no-move this turn need confirmation
+Black Rose Dignitary	DEATHKNELL effect: channel 1 rune exhausted; no vocab for channeling runes
+Crimson Pigeons	Conditional buff only while attacking with another unit; approximated with on_attack + units_here>=2
+Scrutinizing Sergeant	'Each friendly unit' is anywhere, not just here
+Ultrasoft Poro	Bird token (1 might, DEFLECT) is not a canonical named token
+Divining Shells	Activated cost is 'kill this gear' (self-sacrifice of gear), approximated with sacrifice cost
+Mageseeker Investigator	Static tax on opponent move actions
+Safety Inspector	Additional cost is spend XP (not in allowed kicker keys); also requires each player to kill a unit with conditional skip
+Stalking Wolf	Mandatory additional cost requiring sacrifice of a typed unit, plus modifies AMBUSH placement rule
+Starhound	Filter is 'Bird OR Cat OR Dog OR Poro' — multi-subtype OR not expressible
+Undying Loyalty	Cost reduction conditional on chosen subtype; play_from_trash needs cost cap filter
+Ashe Focused	Reveal opponent's hand, choose and banish a card, return to hand when they hold — no verbs for forced reveal/choose-from-hand/banish-from-hand with conditional return.
+Atakhan	Optional additional cost 'kill a friendly unit' reduces my own cost by variable amount per its Energy/Power. Also 'defender must kill one of their units here' on attack — no verb for forced opponent sacrifice.
+Galio Indefatigable	'I don't deal combat damage' — no verb for suppressing own combat damage.
+Leblanc Fragmented	DEATHKNELL draws 2 instead if it's your Beginning Phase — no condition for current phase.
+Sacrifice	Additional cost requires killing a [Mighty] friendly unit specifically; also 'channel 1 rune exhausted' has no verb.
+Shard of Undoing	Triggered once per turn during your Beginning Phase when a friendly unit dies, forcing each opponent to kill one of their units. No verbs for phase-gated trigger, once-per-turn limit, or forced opponent sacrifice.
+Ivern Friend to All	As-you-play mode choice grants a tag; conquer/hold scores 1 if friendly units collectively cover four specific tags. No verbs for gain-tag-on-play or multi-tag presence check.
+Poppy Defender of the Meek	Additional cost 'spend 3 XP' isn't in the additional_cost key list (only energy/power/discard/exhaust/kill).
+Poppy Defender of the Meek	unknown additional_cost key(s) ['spend_xp']
+Rift Herald	DEATHKNELL plays a unit from hand to base ignoring Energy cost (still pay Power). No verb for play-from-hand-ignoring-cost.
+Jhin Virtuoso	On play-spell with cost>=4, may banish it; when 4 spells banished with this legend, return each to trash, channel 4 runes, draw 1. No verbs for banish-spell-with-self, count-banished-with-self, channel runes.
+Curtain Call	Multi-modal 'choose one you haven't already chosen' interacts with REPEAT; engine has no mode-choice dispatch.
+Thrill of the Hunt	Banish a friendly unit then its owner replays it to any battlefield ignoring cost — no verb for banish-and-replay.
+Pyke Bloodharbor Ripper	Single activated ability has two effects (bounce + play Gold token); engine emits them as separate activations. Confirm grouping.
+Death from Below	Conditional 'if killed unit had 3 might or less, may play this from trash for [rune]' — no verb for self-replay-from-trash conditional on killed target's might.
+Vi Piltover Enforcer	Condition 'if you assigned 3 or more excess damage' on conquer, and exhaust-self is the cost of an optional triggered ability.
+Hextech Gauntlets	EQUIP cost reduced by Might of chosen unit; on_conquer condition 'if you assigned 3 or more excess damage'.
+Lillia Bashful Bloom	Activated ability cost is reduced by [1] for each friendly unit with TEMPORARY — no dynamic cost-reduction support on activated abilities.
+Lilting Lullaby	Second clause 'its controller can't play spells this turn' has no verb.
+Master Yi Wuju Master	LEVEL-gated static auras: +1 might to all your units, and 'your units enter ready' — no aura-on-all-your-units or enter-ready replacement verbs.
+Alpha Strike	Chosen friendly unit deals damage equal to its Might split among enemy units at battlefields; gain 1 XP per unit killed by this — no split-damage or per-kill XP verbs.
+Vex Gloomist	Trigger is 'when you or an ally hold' with optional exhaust-self cost; engine on_hold trigger exists but conditional exhaust-as-cost on a triggered ability isn't modeled.
+Shadow	'Enter ready if played to a battlefield' condition and 'enemy unit attacking here' target filter not modeled.
+Shadow	unknown condition type 'played_to_battlefield'
+Ivern Green Father	Replace current battlefield with a Brush battlefield token on conquer/hold; battlefield replacement and brush token not modeled.
+Daisy!	Self cost reduction by count of distinct tags among friendlies, and conditional on attack requiring all 4 tags among friendlies, not modeled.
+Daisy!	unknown condition type 'friendly_units_have_all_tags'
+Diana Scorn of the Moon	Tap to add energy usable only during showdowns; gain_energy with restricted usage not modeled.
+Leblanc Deceiver	On conquer/hold, discard+exhaust to play a Reflection token that copies a unit there with TEMPORARY; copy-unit token and conditional cost not modeled.
+Mirror Image	Play a Reflection token that becomes a copy of a chosen unit with TEMPORARY; copy-unit token not modeled.
+Kha'Zix Voidreaver	Target filter 'exhausted friendly unit' not in supported filter list.
+Kha'Zix Voidreaver	unknown target_filter key(s) ['is_exhausted']
+Keeper's Verdict	Place an enemy unit on top or bottom of owner's deck; bounce-to-deck not modeled.
+Abandoned Hall	Trigger fires for either player's spell and grants the spell's controller (not battlefield owner) a +1 might to one of their units here; per-player optional choice not modeled.
+Abandoned Hall	unknown target_filter key(s) ['controlled_by_active_player']
+Altar of Blood	Death-replacement triggered by opponent paying rune cost on enemy units; engine has replace_death_with_recall but not as an optional cost-gated effect available to either controller.
+Black Flame Altar	Static aura granting SHIELD to units here with TEMPORARY; engine lacks aura-style give_keyword targeting filtered units at this battlefield.
+Dusk Rose Lab	Optional sacrifice-a-unit-here cost to draw at start of your Beginning Phase; engine lacks an optional cost gated on_start_of_turn with cost:kill_friendly_unit_here.
+Forbidding Waste	Conditional static debuff to a unit here while defending alone; engine has no aura debuff_might with combat-state condition.
+Frozen Fortress	Triggers at the start of EACH player's Beginning Phase, not just yours; engine on_start_of_turn fires once per controller turn.
+Gardens of Becoming	Grants an activated ability ('[tap]: Gain 1 XP') to units here; engine lacks granting activated abilities via aura.
+Ripper's Bay	Optional pay-to-channel-rune trigger when a unit here is returned to hand; no matching trigger or channel_rune effect.
+Star Spring	Once-per-turn-per-player trigger on playing a non-token unit here, with optional move-another-unit-to-base; engine lacks first-time-per-turn gating and move_units_to_base as an optional response.
+The Academy	Grants REPEAT to your next spell this turn equal to its base cost; engine lacks granting keywords to future cards in hand.
+Trapping Grounds	Conquer trigger gated on excess damage assigned (3+); no condition type for excess damage on conquer.
+Valley of Idols	Battlefield triggers an optional kicker-style buff on any unit played here by either player; no engine support for player-choice optional pay-to-buff on play.
+Vaults of Helia	On-hold effect that raises opponents'/owner's non-token unit play costs by 1 this turn; no cost_increase aura verb.
+Baron Pit	Token battlefield that allows units to move here from anywhere; no engine support for movement-rule modification.
+Brush	Static aura giving +1 might to units of specific subtypes here, plus a score-replacement effect; no aura buff verb and no replace-battlefield verb.
+Reflection	Token becomes a copy of another card on play; no copy-card mechanic.

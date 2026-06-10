@@ -1,0 +1,205 @@
+[
+  {
+    "name": "Annie Fiery",
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": null,
+    "cost_power_domain": "Fury",
+    "effect": "Your spells and abilities deal 1 Bonus Damage. (Each instance of damage they deal is increased by 1.)",
+    "might": 4
+  },
+  {
+    "name": "Firestorm",
+    "category": "Spell",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Fury",
+    "effect": "Deal 3 to all enemy units at a battlefield."
+  },
+  {
+    "name": "Incinerate",
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "ACTION (play on your turn or in showdowns.) \nDeal 2 to a unit at a battlefield."
+  },
+  {
+    "name": "Master Yi Meditative",
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": null,
+    "cost_power_domain": "Calm",
+    "effect": "While you have 8+ runes, I have +4 [might].",
+    "might": 4
+  },
+  {
+    "name": "Zephyr Sage",
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Calm",
+    "effect": "SHIELD (+1 [might] while I'm a defender.)",
+    "might": 6
+  },
+  {
+    "name": "Lux Illuminated",
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Mind",
+    "effect": "When you play a spell that costs 5 or more, give me +3 [might] this turn.",
+    "might": 5
+  },
+  {
+    "name": "Garen Rugged",
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Body",
+    "effect": "ASSAULT 2, SHIELD 2 (+2 [might] while I'm an attacker or defender.)",
+    "might": 5
+  },
+  {
+    "name": "Gentlemen's Duel",
+    "category": "Spell",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Body",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive a friendly unit +3 [might] this turn. Then, choose an enemy unit. They deal damage equal to their Mights to each other."
+  },
+  {
+    "name": "Master Yi Honed",
+    "category": "Champion",
+    "cost_energy": 7,
+    "cost_power": null,
+    "cost_power_domain": "Body",
+    "effect": "GANKING (I can move from battlefield to battlefield.)\nI enter ready.",
+    "might": 6
+  },
+  {
+    "name": "Annie Stubborn",
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": null,
+    "cost_power_domain": "Chaos",
+    "effect": "When you play me, return a spell from your trash to your hand.",
+    "might": 3
+  },
+  {
+    "name": "Flash",
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play at any time, even before spells and abilities resolve.)\nMove up to 2 friendly units to base."
+  },
+  {
+    "name": "Blast of Power",
+    "category": "Spell",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Order",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nKill a unit at a battlefield."
+  },
+  {
+    "name": "Garen Commander",
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Order",
+    "effect": "Other friendly units have +1 might here.",
+    "might": 5
+  },
+  {
+    "name": "Lux Crownguard",
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "[tap]: REACTION \u2014 ADD [2] Use only to play spells. (Abilities that add resources can't be reacted to.)",
+    "might": 2
+  },
+  {
+    "name": "Recruit the Vanguard",
+    "category": "Spell",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nPlay four 1 might Recruit unit tokens. (They can be played to your base or to battlefields you control.)"
+  },
+  {
+    "name": "Vanguard Attendant",
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": null,
+    "cost_power_domain": "Order",
+    "effect": "I enter ready.",
+    "might": 5
+  },
+  {
+    "name": "Annie Dark Child",
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "At the end of your turn, ready up to 2 runes."
+  },
+  {
+    "name": "Tibbers",
+    "category": "Signature Unit",
+    "cost_energy": 8,
+    "cost_power": null,
+    "cost_power_domain": "Fury/Chaos Fury/Chaos",
+    "effect": "When you play me, deal 3 damage to all units at battlefields.",
+    "might": 7
+  },
+  {
+    "name": "Master Yi Wuju Bladesman",
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "While a friendly unit defends alone, it gets +2 [might]."
+  },
+  {
+    "name": "Highlander",
+    "category": "Signature Spell",
+    "cost_energy": 4,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. The next time it would die this turn, heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)"
+  },
+  {
+    "name": "Lux Lady of Luminosity",
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "When you play a spell that costs 5 or more, draw 1."
+  },
+  {
+    "name": "Final Spark",
+    "category": "Signature Spell",
+    "cost_energy": 8,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nDeal 8 to a unit."
+  },
+  {
+    "name": "Garen Might of Demacia",
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": null,
+    "cost_power_domain": null,
+    "effect": "When you conquer, if you have 4+ units at that battlefield, draw 2."
+  },
+  {
+    "name": "Decisive Strike",
+    "category": "Signature Spell",
+    "cost_energy": 5,
+    "cost_power": null,
+    "cost_power_domain": "Body/Order",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive friendly units +2 [might] this turn."
+  }
+]

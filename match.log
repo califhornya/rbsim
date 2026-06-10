@@ -1,0 +1,136 @@
+=== Riftbound Simulator (Two-Battlefield + Energy + Combat Phase) ===
+Games: 1 | Seed: 424 | AIs: A=simple_trade B=simple_trade | Decks: A=calm_chaos_yasuo B=calm_chaos_yasuo | Victory Score: 8 | Starting Energy: 0 | First player: random | Per-game output: True
+
+=== TURN 1 (B's turn) ===
+  [CHANNEL] B energy=2 power={CHAOS:2}
+  B plays UNIT: Scuttle Crab
+  B passes
+  [END TURN] Board: BF0=0A vs 0B (?) | BF1=0A vs 0B (?) | Points: A=0 B=0
+
+=== TURN 2 (A's turn) ===
+  [CHANNEL] A energy=3 power={CALM:1, CHAOS:2}
+  A plays GEAR: Heart of Dark Ice (staged at base)
+  A passes
+  [END TURN] Board: BF0=0A vs 0B (?) | BF1=0A vs 0B (?) | Points: A=0 B=0
+
+=== TURN 3 (B's turn) ===
+  [CHANNEL] B energy=4 power={CALM:2, CHAOS:2}
+  B plays UNIT: Scuttle Crab
+  B moves UNIT: Scuttle Crab to BF0
+  [SHOWDOWN triggered at BF0] B has focus
+    B plays SPELL in showdown: En Garde
+    A passes (passes=1/2)
+    B plays SPELL in showdown: Stacked Deck
+    A passes (passes=1/2)
+    B passes (passes=2/2)
+  [CONQUER] B conquers BF0 (uncontested showdown) -> +1 VP
+  B passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=0A vs 0B (?) | Points: A=0 B=1
+
+=== TURN 4 (A's turn) ===
+  [CHANNEL] A energy=4 power={CALM:1, CHAOS:3}
+  A plays UNIT: Adaptatron
+  A passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=0A vs 0B (?) | Points: A=0 B=1
+
+=== TURN 5 (B's turn) ===
+  [CHANNEL] B energy=6 power={CALM:3, CHAOS:3}
+  [HOLD] B holds BF0 -> +1 VP
+  B deploys CHAMPION: Yasuo Remorseful
+  B moves UNIT: Scuttle Crab to BF1
+  [SHOWDOWN triggered at BF1] B has focus
+    B passes (passes=1/2)
+    A passes (passes=2/2)
+  [CONQUER] B conquers BF1 (uncontested showdown) -> +1 VP
+  B passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=0A vs 1B (B) | Points: A=0 B=3
+
+=== TURN 6 (A's turn) ===
+  [CHANNEL] A energy=6 power={CALM:2, CHAOS:4}
+  A deploys CHAMPION: Yasuo Remorseful
+  A moves UNIT: Adaptatron to BF0
+  [SHOWDOWN triggered at BF0] A has focus
+    A passes (passes=1/2)
+    B passes (passes=2/2)
+  [COMBAT BF0] attacker=A A_might=3 [Adaptatron(3)] vs B_might=1 [Scuttle Crab(1)]
+  [COMBAT RESULT BF0] deaths A=[-] B=[Scuttle Crab] survivors A=1 B=0
+  [CONQUER] A conquers BF0 -> +1 VP
+  A passes
+  [END TURN] Board: BF0=1A vs 0B (A) | BF1=0A vs 1B (B) | Points: A=1 B=3
+
+=== TURN 7 (B's turn) ===
+  [CHANNEL] B energy=6 power={CALM:2, CHAOS:4}
+  [HOLD] B holds BF1 -> +1 VP
+  B moves UNIT: Yasuo Remorseful to BF0
+  [SHOWDOWN triggered at BF0] B has focus
+    B plays SPELL in showdown: Stacked Deck
+    A passes (passes=1/2)
+    B passes (passes=2/2)
+  [COMBAT BF0] attacker=B A_might=3 [Adaptatron(3)] vs B_might=6 [Yasuo Remorseful(6)]
+  [COMBAT RESULT BF0] deaths A=[Adaptatron] B=[-] survivors A=0 B=1
+  [CONQUER] B conquers BF0 -> +1 VP
+  B plays GEAR: Zhonya's Hourglass -> Yasuo Remorseful
+  B plays GEAR: Heart of Dark Ice -> Yasuo Remorseful
+  B passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=0A vs 1B (B) | Points: A=1 B=5
+
+=== TURN 8 (A's turn) ===
+  [CHANNEL] A energy=6 power={CHAOS:6}
+  A moves UNIT: Yasuo Remorseful to BF1
+  [SHOWDOWN triggered at BF1] A has focus
+    A plays SPELL in showdown: Discipline
+    B passes (passes=1/2)
+    A plays SPELL in showdown: Stacked Deck
+    B passes (passes=1/2)
+    A passes (passes=2/2)
+  [COMBAT BF1] attacker=A A_might=8 [Yasuo Remorseful(8)] vs B_might=0 [Scuttle Crab(0)]
+  [COMBAT RESULT BF1] deaths A=[-] B=[Scuttle Crab] survivors A=1 B=0
+  [CONQUER] A conquers BF1 -> +1 VP
+  A plays UNIT: Lonely Poro
+  A passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=1A vs 0B (A) | Points: A=2 B=5
+
+=== TURN 9 (B's turn) ===
+  [CHANNEL] B energy=7 power={CALM:2, CHAOS:5}
+  [HOLD] B holds BF0 -> +1 VP
+  B plays GEAR: Heart of Dark Ice -> Yasuo Remorseful
+  B passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=1A vs 0B (A) | Points: A=2 B=6
+
+=== TURN 10 (A's turn) ===
+  [CHANNEL] A energy=8 power={CALM:2, CHAOS:6}
+  [HOLD] A holds BF1 -> +1 VP
+  A EQUIP: Heart of Dark Ice -> Yasuo Remorseful
+  A plays UNIT: Adaptatron
+  A passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=1A vs 0B (A) | Points: A=3 B=6
+
+=== TURN 11 (B's turn) ===
+  [CHANNEL] B energy=8 power={CALM:2, CHAOS:6}
+  [HOLD] B holds BF0 -> +1 VP
+  B plays GEAR: Guardian Angel -> Yasuo Remorseful
+  B passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=1A vs 0B (A) | Points: A=3 B=7
+
+=== TURN 12 (A's turn) ===
+  [CHANNEL] A energy=9 power={CALM:3, CHAOS:6}
+  [HOLD] A holds BF1 -> +1 VP
+  A plays UNIT: Stellacorn Herder
+  A plays UNIT: Lonely Poro
+  A passes
+  [END TURN] Board: BF0=0A vs 1B (B) | BF1=1A vs 0B (A) | Points: A=4 B=7
+
+=== TURN 13 (B's turn) ===
+  [CHANNEL] B energy=10 power={CALM:4, CHAOS:6}
+  [HOLD] B holds BF0 -> +1 VP
+
+==========================================================================================
+Game 1: Winner B in 13 turns (seed=998129115) 
+  Battlefield 0: A=0 B=1 ctl=B
+  Battlefield 1: A=1 B=0 ctl=A
+  Energy A=3, Energy B=10
+  Points: A=4 | B=8
+==========================================================================================
+
+Summary: A 0 | B 1 | DRAW 0 | Avg Turns 13.00
+  Starts: A=0 B=1 | First-player wins: 1/1 (100%)

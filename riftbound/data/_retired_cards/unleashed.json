@@ -1,0 +1,4437 @@
+[
+  {
+    "card_id": "UNL-001",
+    "name": "Arena Kingpin",
+    "domain": "Fury",
+    "might": 3,
+    "rules_text": "I enter ready.\n[tap]: Give a unit +3 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-001-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-002",
+    "name": "Inferna",
+    "domain": "Fury",
+    "might": 1,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nASSAULT 2 (+2 [might] while I'm an attacker.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-002-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-003",
+    "name": "Mischievous Marai",
+    "domain": "Fury",
+    "might": 2,
+    "rules_text": "HIDDEN (Hide now for [Rune] to react later for [0].)\nWhen you play me at a battlefield, deal 2 to an enemy unit here.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-003-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-004",
+    "name": "Prepared Neophyte",
+    "domain": "Fury",
+    "might": 1,
+    "rules_text": "If you're spent [4] or more to play a spell this turn, I have +4 [might].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-004-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-005",
+    "name": "Revna the Lorekeeper",
+    "domain": "Fury",
+    "might": 7,
+    "rules_text": "GANKING (I can move from battlefield to battlefield.)\nWhen you play a spell, if you spent [4] or more, ready me.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-005-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 7,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-006",
+    "name": "Sharkling",
+    "domain": "Fury",
+    "might": 1,
+    "rules_text": "ACCELERATE (You may pay [1][Fury] as an additional cost to have me enter ready.)\nASSAULT 4 (+4 [might] while I'm an attacker.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-006-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-007",
+    "name": "Smite",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nDeal 3 to a unit at a battlefield . If it would die this turn, banish it instead.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-007-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-008",
+    "name": "Towering Pairofant",
+    "domain": "Fury",
+    "might": 6,
+    "rules_text": "ASSAULT (+1 [might] while I'm an attacker.)\nIf a unit died this turn, I enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-008-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-009",
+    "name": "Upstage Comedy",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "REPEAT 2 (You may pay the additional cost to repeat this spell's effect.)\nReady a unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-009-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-010",
+    "name": "Vault Breaker",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nGive a unit ASSAULT 2 and GANKING this turn. (+2 [might] while it's an attacker. It can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-010-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-011",
+    "name": "Fresh Beans",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "When you play a unit during a showdown, you may exhaust this to draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-011-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-012",
+    "name": "Lord Broadmane",
+    "domain": "Fury",
+    "might": 5,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play me, give your other units here ASSAULT this turn. (+1 [might] while they're attackers.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-012-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-013",
+    "name": "Lotus Trap",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nREACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit. Double all damage that would be dealt to it this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-013-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-014",
+    "name": "Monster Harpoon",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nDeal 2 to a unit at a battlefield. If you control a facedown card, deal 4 to it instead.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-014-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-015",
+    "name": "Right of Conquest",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "Draw 1, then draw 1 for each battlefield you or your allies control.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-015-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-016",
+    "name": "Scorchclaw",
+    "domain": "Fury",
+    "might": 3,
+    "rules_text": "HUNT 2 (When I conquer or hold, gain 2 XP.)\nLEVEL 3[>] I have +1 [might], and I enter ready. (While you have 3+ XP, get the effect)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-016-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-017",
+    "name": "Square Up",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "REPEAT \u2014 Discard 1 (You may pay the additional cost to repeat this spell's effect.)\nGive a unit ASSAULT 4 this turn. (+4 [might] while it's an attacker.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-017-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-018",
+    "name": "Yeti Brawler",
+    "domain": "Fury",
+    "might": 6,
+    "rules_text": "When I conquer, if you assigned 3 or more excess damage, play two Gold gear tokens exhausted. (They have \"REACTION[>] Kill this [tap], Exhaust: ADD [rune].\")",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-018-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-019",
+    "name": "Blighted Battleaxe",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "EQUIP [1] [fury] ([1] [fury]: Attach this to a unit you control.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-019-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-020",
+    "name": "Dancing Grenade",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "Deal 2 to a unit. Its controller may play this spell again for [rune]. If they do, this deals 1 additional Bonus Damage for each time this spell has dealt damage this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-020-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-021",
+    "name": "Grim Apothecary",
+    "domain": "Fury",
+    "might": 3,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play me, you may return a friendly unit at a battlefield to its owner's hand.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-021-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-022",
+    "name": "Jhin Murderous Artist",
+    "domain": "Fury",
+    "might": 4,
+    "rules_text": "DEFLECT (Opponents must pay [Rune] to choose me with a spell or ability.)\nGANKING (I can move from battlefield to battlefield.)\nWhen I move, ADD [1][rune]. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-022-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-022-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-023",
+    "name": "Katarina Reckless",
+    "domain": "Fury",
+    "might": 5,
+    "rules_text": "When you hide a card, ready me.\nWhen you play a card from face down, deal 2 to an enemy unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-023-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-024",
+    "name": "Rengar Unseen",
+    "domain": "Fury",
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nASSAULT 2 (+2 [might] while I'm an attacker.)\nDEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nGANKING (I can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-024-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-024-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-025",
+    "name": "Undying Legion",
+    "domain": "Fury",
+    "might": 3,
+    "rules_text": "LEGION[>] You may play me from your trash for [3] [fury]. (Get this effect if you've played another card this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-025-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-026",
+    "name": "Xerath Freed",
+    "domain": "Fury",
+    "might": 5,
+    "rules_text": "[fury], [tap]: Deal 3 to a unit. Use this ability only while I'm at a battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-026-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-027",
+    "name": "Inviolus Vox",
+    "domain": "Fury",
+    "might": 8,
+    "rules_text": "When I conquer, give a friendly unit +8 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-027-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 8,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-028",
+    "name": "Pyke Dockside Butcher",
+    "domain": "Fury",
+    "might": 2,
+    "rules_text": "HIDDEN (Hide now for 1 to react with later for [0].)\nGANKING (I can move from battlefield to battlefield.)\nYou may pay [fury] as an additional cost to play me. When you play me, if you paid the additional cost, ready me and give me +2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-028-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-028-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-029",
+    "name": "Red Brambleback",
+    "domain": "Fury",
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nYour conquer effects for conquering here trigger an additional time.\nWhen I conquer, BUFF a friendly unit. (Give it +1 [might] buff if it doesn't have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-029-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-029-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-030",
+    "name": "Vi Hotheaded",
+    "domain": "Fury",
+    "might": 3,
+    "rules_text": "DEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)\n[2] [fury]: Double my Might this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-030-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-030-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-031",
+    "name": "Combat Experience",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit +1 [might] this turn.\nLEVEL 6 Give it +3 [might] this turn instead. (While you have 6+ XP, get this effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-031-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-032",
+    "name": "Double Trouble",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "REPEAT 2] (You may pay the additional cost to repeat this spell's effect.)\nLook at the top 3 cards of your Main Deck. You may reveal a unit from among them and draw it. Recycle the rest.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-032-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-033",
+    "name": "Frisky Hunter",
+    "domain": "Calm",
+    "might": 3,
+    "rules_text": "When you play me, play a 1 [might] Bird unit token with DEFLECT here. (Opponents must pay [rune] to choose it with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-033-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-034",
+    "name": "Herald of Spring",
+    "domain": "Calm",
+    "might": 4,
+    "rules_text": "HUNT (When I conquer or hold, gain 1 XP.)\nWhen you play me, gain 2 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-034-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-035",
+    "name": "Monch",
+    "domain": "Calm",
+    "might": 6,
+    "rules_text": "If an opponent controls a stunned unit, I cost [2] less and enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-035-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-036",
+    "name": "Mutated Mouser",
+    "domain": "Calm",
+    "might": 1,
+    "rules_text": "SHIELD 2 (+2 [Might] while I'm a defender.)\nTANK (I must be assigned combat damage first.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-036-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-037",
+    "name": "Shadow Watcher",
+    "domain": "Calm",
+    "might": 5,
+    "rules_text": "If a friendly unit died during your Beginning Phase this turn, I enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-037-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-038",
+    "name": "Skyward Strike",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "Move an enemy unit.\nLEVEL 6[>] STUN an enemy unit. (While you have 6+ XP, get the effect. A stunned unit doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-038-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-039",
+    "name": "Soul Sword",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "EQUIP [calm]. ([calm]: Attach this to a unit you control.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-039-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-040",
+    "name": "Wuju Apprentice",
+    "domain": "Calm",
+    "might": 2,
+    "rules_text": "HUNT (When I conquer or hold, gain 1 XP.)\nLEVEL 6[>] When you play me, draw 1. (While you have 6+ XP, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-040-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-041",
+    "name": "Allay Eager Admirer",
+    "domain": "Calm",
+    "might": 3,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhile I'm at a battlefield, your other units here have DEFLECT.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-041-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-042",
+    "name": "Back Off",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nSTUN a unit. (It doesn't deal combat damage this turn.)\nIf you played this from your hand, draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-042-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-043",
+    "name": "Enthusiastic Promoter",
+    "domain": "Calm",
+    "might": 2,
+    "rules_text": "BACKLINE (I must be assigned combat damage last.)\nWhen I hold, BUFF all units here. (Give each a +1 [might] buff if it doesn't have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-043-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-044",
+    "name": "Flurry of Feathers",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose one \u2014\n\u2022 Counter a spell.\n\u2022 Play four 1 [might] Bird unit tokens with DEFLECT. (Opponents must pay [rune] to choose them with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-044-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 4,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-045",
+    "name": "Forgotten Signpost",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "ACTION Exhaust a unit you control, [tap]: Move a different unit you control to the location of the unit you exhausted to pay for this ability.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-045-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-046",
+    "name": "Friendship",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit. Give it +1 [might] this turn for each of the following tags among your units \u2014 Bird, Cat, Dog, and Poro.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-046-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-047",
+    "name": "Mosstomper",
+    "domain": "Calm",
+    "might": 3,
+    "rules_text": "HUNT 2 (When I conquer or hold, gain 2 XP.)\nLEVEL 3[>] I have +1 [might] and DEFLECT. (While you have 3+ XP, get the effect. Opponents must pay [rune] to choose a DEFLECT unit with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-047-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-048",
+    "name": "Trevor Snoozebottom",
+    "domain": "Calm",
+    "might": 3,
+    "rules_text": "SHIELD (+1 [might] while I'm a defender.)\nWhen I hold, play a ready 3 [might] Sprite unit token with TEMPORARY here. (Kill it at the start of its controller's next Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-048-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-049",
+    "name": "Honeyfruit",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "This enters exhausted.\nREACTION[>] [tap]: ADD [rune]. (Abilities that add resources can't be reacted to.)\nLEVEL 6[>] REACTION[>] [tap]: ADD [1] [rune]. (Use this ability only while you have 6+ XP.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-049-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-050",
+    "name": "Iascylla",
+    "domain": "Calm",
+    "might": 6,
+    "rules_text": "When I hold, at the start of your next Main Phase, you may move an enemy unit to this battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-050-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 7,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-051",
+    "name": "Ivern Nurturer",
+    "domain": "Calm",
+    "might": 4,
+    "rules_text": "When you play me or when I hold, look at the top 3 cards of your Main Deck. You may reveal a unit from among them and draw it. Recycle the rest. Then if you revealed a Bird, Cat, Dog, or Poro, do this: BUFF a friendly unit. (Give it a +1 [might] buff if it doesn\u2019t have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-051-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-051-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-052",
+    "name": "Nami Headstrong",
+    "domain": "Calm",
+    "might": 3,
+    "rules_text": "You may pay [calm] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, STUN an enemy unit. (It doesn't deal combat damage this turn.)\nWhen I hold, the next time you play a unit this turn, ready it and BUFF it.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-052-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-053",
+    "name": "Scuttle Crab",
+    "domain": "Calm",
+    "might": 0,
+    "rules_text": "(Units with 0 [might] can conquer and hold.)\nWhen you play me, draw 1.\nDEATHKNELL[>] Choose an opponent. They reveal their hand. You can look at their facedown cards this turn, Gain 1 XP. (When I die, get the effects.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-053-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-054",
+    "name": "Tricksy Tentacles",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "Move any number of enemy units with the same controller and a total Might of 8 or less to a single location.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-054-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-055",
+    "name": "Vex Mocking",
+    "domain": "Calm",
+    "might": 5,
+    "rules_text": "SHIELD (+1 [might] while I'm a defender.)\nTANK (I must be assigned combat damage first.)\nWhen you STUN an enemy unit at a battlefield, you may move me to that battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-055-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-055-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-056",
+    "name": "Yuumi Magical Cat",
+    "domain": "Calm",
+    "might": 1,
+    "rules_text": "When I attack or defend, give one of your other units here +3 power and TANK this turn. (It must be assigned combat damage first.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-056-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-057",
+    "name": "Alpha Wildclaw",
+    "domain": "Calm",
+    "might": 7,
+    "rules_text": "TANK (I must be assigned combat damage first.)\nYour units here with less Might than me can't be chosen by enemy spells and abilities.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-057-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-058",
+    "name": "Lillia Protector of Dreams",
+    "domain": "Calm",
+    "might": 4,
+    "rules_text": "Whenever you play a token, I gain +1 Might.\nFriendly tokens gain Tank.\n(Not official text, translation might not be accurate)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-058-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-058-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-059",
+    "name": "Master Yi Unstoppable",
+    "domain": "Calm",
+    "might": 12,
+    "rules_text": "LEVEL 3[>] I cost [2] [calm] less. (While you have 3+ XP, get the effect.)\nLEVEL 6[>] I cost [4] [calm] [calm] less instead.\nLEVEL 11[>] I cost [6] [calm] [calm] [calm] less instead.\nLEVEL 16[>] I can't be chosen by enemy spells and abilities.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-059-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-059-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 12,
+    "cost_power": 3
+  },
+  {
+    "card_id": "UNL-060",
+    "name": "Vilemaw",
+    "domain": "Calm",
+    "might": 8,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units)\nEnemy units here with less Might than me don't deal combat damage.\nWhen I hold, draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-060-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-060-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 8,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-061",
+    "name": "Downstage Dramatics",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [2] (You may pay the additional cost to repeat this spell's effect.)\nDraw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-061-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-062",
+    "name": "Dramatic Visionary",
+    "domain": "Mind",
+    "might": 4,
+    "rules_text": "DEATHKNELL[>] PREDICT 2. (When I die, look at the top two cards of your Main Deck. Recycle any of them and put the rest back in any order.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-062-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-063",
+    "name": "Eclipse",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit -4 [might] this turn.\nPREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-063-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-064",
+    "name": "Fate Weaver",
+    "domain": "Mind",
+    "might": 4,
+    "rules_text": "When you play me, look at the top 4 cards of your Main Deck. You may reveal a spell with Energy cost [4] or more from among them and draw it. Recycle the rest.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-064-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-065",
+    "name": "Icevale Archer",
+    "domain": "Mind",
+    "might": 2,
+    "rules_text": "When I attack, you may pay [1] to give a unit here -1 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-065-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-066",
+    "name": "Moonlight Affliction",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit -10 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-066-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 7,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-067",
+    "name": "Ruined Rex",
+    "domain": "Mind",
+    "might": 6,
+    "rules_text": "DEATHKNELL[>] Deal 4 to an enemy unit. (When I die, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-067-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-068",
+    "name": "Spectral Centaur",
+    "domain": "Mind",
+    "might": 5,
+    "rules_text": "When another friendly unit dies, give me +2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-068-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-069",
+    "name": "Sprite Burst",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "Play two ready 3 [might] Sprite unit tokens with TEMPORARY. (Kill each at the start of its controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-069-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-070",
+    "name": "Turn to Dust",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "Give a gear TEMPORARY. (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-070-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-071",
+    "name": "Chakram Dancer",
+    "domain": "Mind",
+    "might": 3,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play me, give your other units here SHIELD this turn. (+1 [might] while they're defenders.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-071-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-072",
+    "name": "Crescent Strike",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nChoose a battlefield and an enemy unit there. Deal 4 to that unit and 1 to each other enemy unit there.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-072-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-073",
+    "name": "Deadly Flourish",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "Deal 3 to an enemy unit. When it dies this turn, play a Gold gear token exhausted. (It has \"REACTION[>] Kill this, [tap]: ADD [rune].\")",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-073-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-074",
+    "name": "Frigid Jewel",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "When you draw your second card each turn, give a friendly unit +2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-074-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-075",
+    "name": "Gustwalker",
+    "domain": "Mind",
+    "might": 3,
+    "rules_text": "HUNT 2 (When I conquer or hold, gain 2 XP.)\nLEVEL 3[>]  I have +1 [might] and GANKING. (While you have 3+ XP, get the effect. A GANKING unit can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-075-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-076",
+    "name": "Petal Pixie",
+    "domain": "Mind",
+    "might": 2,
+    "rules_text": "I have +1 [might] for each of your units with TEMPORARY at my battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-076-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-077",
+    "name": "Soul Shepherd",
+    "domain": "Mind",
+    "might": 3,
+    "rules_text": "Your token units have +1 [might].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-077-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-078",
+    "name": "Sprite Fountain",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "TEMPORARY (Kill this at the start of its controller's Beginning Phase, before scoring.)\nWhen you play this, play a ready 3 [might] Sprite unit token with TEMPORARY to your base.\nDEATHKNELL[>] Repeat this gear's play effect. (When this dies, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-078-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-079",
+    "name": "Diana Lunari",
+    "domain": "Mind",
+    "might": 3,
+    "rules_text": "When a showdown begins here, you may pay [1]. If you do, PREDICT, then reveal the top card of your Main Deck. If it's a spell, draw it. (To Predict, look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-079-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-079-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-080",
+    "name": "Hwei Brooding Painter",
+    "domain": "Mind",
+    "might": 5,
+    "rules_text": "When I move, draw 1, then discard 1. Then, do the following based on the discarded card's type:\n\u2022 Spell \u2014 Draw 1.\n\u2022 Gear \u2014 Ready up to 2 runes.\n\u2022 Unit \u2014 Give me +3 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-080-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-081",
+    "name": "Keeper of Masks",
+    "domain": "Mind",
+    "might": 1,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nTEMPORARY (Kill me at the start of my controller's Beginning Phase, before scoring.)\nWhen you play me, play two Reflection unit tokens here. They become copies of me.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-081-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-082",
+    "name": "Lillia Fae Fawn",
+    "domain": "Mind",
+    "might": 3,
+    "rules_text": "ACCELERATE (You may pay [1] [mind] as an additional cost to have me enter ready.)\nWhen I move from a location, play a 3 [might] Sprite unit token with TEMPORARY there. (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-082-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-082-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-083",
+    "name": "Smoke and Mirrors",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nChoose a unit you control and another unit you control at a different location. If at least one of them has TEMPORARY, move each to the other's location. Draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-083-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-084",
+    "name": "Sprite Queen",
+    "domain": "Mind",
+    "might": 6,
+    "rules_text": "When you play me or at the of your Beginning Phase, play a ready 3 [might] Sprite unit token with TEMPORARY to your base. (kill them at the start of the controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-084-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 7,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-085",
+    "name": "Sumpworks Map",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nTEMPORARY (Kill this at the start of its controller's Beginning Phase, before scoring.)\nWhen an opponent scores, draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-085-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-086",
+    "name": "Zilean Time Mage",
+    "domain": "Mind",
+    "might": 5,
+    "rules_text": "Once each turn, if you would play a token unit while I'm at a battlefield, you may play that token and an additional copy of it instead.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-086-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-087",
+    "name": "Blue Sentinel",
+    "domain": "Mind",
+    "might": 4,
+    "rules_text": "SHIELD 2 (+2 [might] while I'm a defender.)\nYour hold effects for holding here trigger an additional time.\nWhen I hold, ADD [rune] at the start of your next Main Phase. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-087-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-087-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-088",
+    "name": "Gutter Palace",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "At the start of your Beginning Phase, if you have exactly 4 cards in hand and exactly 4 units at battlefields, you win the game.\nDiscard 1, [tap] : Play a 1 [might] Bird unit token with DEFLECT . (Opponents must pay [rune] to choose it with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-088-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-089",
+    "name": "Jhin Meticulous Killer",
+    "domain": "Mind",
+    "might": 4,
+    "rules_text": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)\nIf you're spent [4] or more to play a spell this turn, you may play me for [mind].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-089-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-089-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-090",
+    "name": "Leblanc Everywhere at Once",
+    "domain": "Mind",
+    "might": 4,
+    "rules_text": "BACKLINE (I must be assigned combat damage last.)\nYour TEMPORARY effects at my battlefield don't trigger.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-090-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-090-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-091",
+    "name": "Concentrate",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "Draw 2.\nLEVEL 6[>] This costs 2 less. (While you have 6+ XP, get the effect.)\nLEVEL 11[>] This costs 4 less instead.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-091-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-092",
+    "name": "Demacian Diplomat",
+    "domain": "Body",
+    "might": 2,
+    "rules_text": "When you play me, gain 1 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-092-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-093",
+    "name": "Dragonsoul Sage",
+    "domain": "Body",
+    "might": 1,
+    "rules_text": "REACTION[>] [tap] : ADD [1]. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-093-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-094",
+    "name": "Gemhand Hunter",
+    "domain": "Body",
+    "might": 2,
+    "rules_text": "HUNT (When i conquer or hold, gain 1 XP.)\nLEVEL 6[>] I have +1 [might] . (While you have 6+ XP, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-094-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-095",
+    "name": "Grim Resolve",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nGive a friendly unit +3 [might] this turn. When it wins a combat this turn, gain 2 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-095-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-096",
+    "name": "Hunter's Machete",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "EQUIP [body] ([body]: Attach this to a unit you control.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-096-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-097",
+    "name": "Kinkou Initiate",
+    "domain": "Body",
+    "might": 3,
+    "rules_text": "When you play me, draw 1 if your other units have total Might 5 or more.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-097-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-098",
+    "name": "Targonian Visionary",
+    "domain": "Body",
+    "might": 6,
+    "rules_text": "LEVEL 11[>] I have +4 [might]. (While your have 11+ XP, get this effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-098-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-099",
+    "name": "Towering Combatant",
+    "domain": "Body",
+    "might": 3,
+    "rules_text": "SHIELD 2 (+2 [might] while I'm a defender.)\nTANK (I must be assigned combat damage first.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-099-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-100",
+    "name": "Voracious\u00a0Gromp",
+    "domain": "Body",
+    "might": 5,
+    "rules_text": "HUNT 3 (When I conquer or hold, gain 3 XP.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-100-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-101",
+    "name": "Call to Battle",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "Move a unit you control to a battlefield you control. Then, choose an opponent. They move a unit they control to the same battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-101-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-102",
+    "name": "Crowd Favorite",
+    "domain": "Body",
+    "might": 3,
+    "rules_text": "HUNT (When I conquer or hold, gain 1 XP.)\nSpend 2 XP: BUFF me. (Give me a +1 Buff if I don't have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-102-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-103",
+    "name": "Disposal Order",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose one \u2014\n\u2022 Choose up to 3 cards from opponents' trashes. Their owners recycle them.\n\u2022 Draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-103-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-104",
+    "name": "Gentle Gemdragon",
+    "domain": "Body",
+    "might": 8,
+    "rules_text": "When you play me or another Dragon, ready up to 2 runes.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-104-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 8,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-105",
+    "name": "Imposing Challenger",
+    "domain": "Body",
+    "might": 5,
+    "rules_text": "When I move, you may move an enemy unit here with less Might than me to a different battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-105-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-106",
+    "name": "Repulse",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit at a battlefield. Counter an enemy spell or ability that chooses it and no other friendly unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-106-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-107",
+    "name": "Stare Down",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "Choose a friendly unit and a battlefield. Move all enemy units at that battlefield with less Might than the chosen unit to their base. Gain 1 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-107-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-108",
+    "name": "Wily Newtfish",
+    "domain": "Body",
+    "might": 4,
+    "rules_text": "If you've gained XP this turn, I have +1[might] and GANKING. (I can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-108-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-109",
+    "name": "Blood Rose",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "When you play a unit, you may pay [1] to gain 1 XP.\nSpend 3 XP, [tap]: Ready a unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-109-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-110",
+    "name": "Clash of Giants",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "Choose two units. They deal damage equal to their Mights to each other.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-110-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 6,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-111",
+    "name": "Determined Sentry",
+    "domain": "Body",
+    "might": 1,
+    "rules_text": "I can't move to base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-111-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-112",
+    "name": "Irresistible Faefolk",
+    "domain": "Body",
+    "might": 1,
+    "rules_text": "When I move to a battlefield, you may move an enemy unit to that battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-112-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-113",
+    "name": "Master Yi Tempered",
+    "domain": "Body",
+    "might": 4,
+    "rules_text": "HUNT 2 (When I conquer or hold, gain 2 XP.)\nLEVEL 6[>] I have DEFLECT and GANKING. (While you have 6+ XP, opponents must pay [rune] to choose me with a spell or ability and I can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-113-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-113-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-114",
+    "name": "Nidalee Cat Form",
+    "domain": "Body",
+    "might": 4,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen I win a combat, draw 1. (I win if I remain after combat.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-114-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-115",
+    "name": "Nilah Joyful Ascetic",
+    "domain": "Body",
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.)\nGANKING (I can move from battlefield to battlefield.)\nWhen I move, gain 1 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-115-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-116",
+    "name": "Poppy Paragon",
+    "domain": "Body",
+    "might": 5,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhen you play me, if an opponent's score is within 3 points from Victory Score, ready me and gain 3 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-116-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-116-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-117",
+    "name": "Arachnoid Horror",
+    "domain": "Body",
+    "might": 6,
+    "rules_text": "HUNT 2 (When I conquer or hold, gain 2 XP.)\nI can be played to an occupied battlefield if an enemy unit is alone there.\nFriendly units can be played to an occupied battlefield if an enemy unit is alone there.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-117-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-118",
+    "name": "Elder Dragon",
+    "domain": "Body",
+    "might": 10,
+    "rules_text": "Any amount of your damage is enough to kill enemy units.\nWhen you play me, choose up to one enemy unit at each location. Deal 1 to them.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-118-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-118-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 12,
+    "cost_power": 4
+  },
+  {
+    "card_id": "UNL-119",
+    "name": "Kha'Zix Evolving Hunter",
+    "domain": "Body",
+    "might": 5,
+    "rules_text": "HUNT (When I conquer or hold, gain 1 XP.)\nWhen I attack, you may spend 3 XP to deal damage equal to my Might to an enemy unit here.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-119-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-119-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-120",
+    "name": "Rengar Trophy Hunter",
+    "domain": "Body",
+    "might": 6,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nI can be played to a battlefield where there are enemy units (even if you don't have units there.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-120-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-120-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-121",
+    "name": "Bewitching Spirit",
+    "domain": "Chaos",
+    "might": 2,
+    "rules_text": "When you play me, choose a player. They discard 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-121-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-122",
+    "name": "Crescent Guardian",
+    "domain": "Chaos",
+    "might": 4,
+    "rules_text": "If you've played a spell this turn, you may pay [chaos] as an additional cost to play me. If you do, I enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-122-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-123",
+    "name": "Evershade Stalker",
+    "domain": "Chaos",
+    "might": 3,
+    "rules_text": "When you play me, discard 1, then draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-123-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-124",
+    "name": "Isolate",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "Move an enemy unit from a battlefield to its base. Then, if there's an enemy unit alone at that battlefield, draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-124-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-125",
+    "name": "Lunar Boon",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nDiscard 1, then draw 2.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-125-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-126",
+    "name": "Megatusk",
+    "domain": "Chaos",
+    "might": 6,
+    "rules_text": "Spend 3 XP: Give your units here GANKING this turn. (We can move from battlefield to battlefield.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-126-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-127",
+    "name": "Mister Root",
+    "domain": "Chaos",
+    "might": 1,
+    "rules_text": "ACCELERATE (You may pay [1] [chaos] as an additional cost to have me enter ready.)\nWhen I move to a battlefield, gain 2 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-127-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-128",
+    "name": "Star-Crossed",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nReturn a friendly unit and an enemy unit to their owner's hands.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-128-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-129",
+    "name": "Vicious Snapjaws",
+    "domain": "Chaos",
+    "might": 5,
+    "rules_text": "When another friendly unit dies, gain 1 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-129-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-130",
+    "name": "Walking Roost",
+    "domain": "Chaos",
+    "might": 6,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhen you play me, choose an opponent. They play a 1 [might] Bird unit token with DEFLECT.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-130-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-131",
+    "name": "Abandon",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell. Return it to its owner's hand instead of putting it in their trash.\nPREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-131-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-132",
+    "name": "Angler Beast",
+    "domain": "Chaos",
+    "might": 5,
+    "rules_text": "When you play me, return all units with 2 [might] or less to their owners' hands.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-132-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-133",
+    "name": "Blast Cone",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "When you play this, you may move an enemy unit. When you move an enemy unit, you may exhaust this to STUN it. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-133-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-134",
+    "name": "Existential Dread",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nREPEAT[2] (You may pay the additional cost to repeat this spell's effect.)\nSTUN an attacking unit. If it's already stunned, return it to its owner's hand instead. (A stunned unit doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-134-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-135",
+    "name": "Insightful Investigator",
+    "domain": "Chaos",
+    "might": 3,
+    "rules_text": "When you play me, choose an opponent. They reveal their hand. You may pay 2 XP to choose a card from their hand. If you do, they discard that card and draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-135-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-136",
+    "name": "Scryer's Bloom",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "This enters exhausted.\nKill this, 1, Exhaust: PREDICT 2, then draw 1. Gain 1 XP. (To Predict 2, look at the top two cards of your Main Deck. Recycle any of them and put the rest back in any order.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-136-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-137",
+    "name": "Sinister Poro",
+    "domain": "Chaos",
+    "might": 1,
+    "rules_text": "When I attack, you may pay [1] to move an enemy unit here to its base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-137-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-138",
+    "name": "The List",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "As you play this, name a tag. (For example, Miss Fortune, Demacia, and Poro are tags.)\n[tap]: Give a unit with the named tag -2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-138-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-139",
+    "name": "Bone Skewer",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nChoose a battlefield. An opponent reveals their hand. You may choose a unit from it. Then play that unit to the battlefield, ignoring any and all costs. When they do, STUN it. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-139-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-140",
+    "name": "Conscription",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "You may spend 5 XP as an additional cost to play this.\nChoose an enemy unit at a battlefield with 3 power or less. If you paid the additional cost, choose any enemy unit at a battlefield instead. Take control of it, exhaust it, and recall it.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-140-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 5,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-141",
+    "name": "Evelynn Entrancing",
+    "domain": "Chaos",
+    "might": 2,
+    "rules_text": "HIDDEN (Hide now for its cost to react with later for 0.)\nBACKLINE (I must be assigned combat damage last.)\nWhen you play me from face down on your turn, you may move an enemy unit at a different location to my battlefield.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-141-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-142",
+    "name": "Heedless Resurrection",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nAs an additional cost to play this, kill a friendly unit.\nPlay a unit from your trash that costs no more Energy and no more Power than the killed unit, ignoring its cost.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-142-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-143",
+    "name": "Kha'Zix Mutating Horror",
+    "domain": "Chaos",
+    "might": 4,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen I attack or defend, if an enemy unit is alone here, give me +2 [might] this turn and gain 2 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-143-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-143-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-144",
+    "name": "Maduli the Gatekeeper",
+    "domain": "Chaos",
+    "might": 6,
+    "rules_text": "I can't be readied.\n[chaos]: Move me to an occupied enemy battlefield if my Might is greater than the total Might of enemy units there.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-144-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 7,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-145",
+    "name": "Pyke Returned",
+    "domain": "Chaos",
+    "might": 3,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for 0.)\nBACKLINE (I must be assigned combat damage last.)\nOnce each turn, when an enemy unit dies while I\u2019m at a battlefield, play a Gold gear token exhausted.\n(It has \u201cREACTION[>] Kill this, [tap]: ADD [rune].\u201d)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-145-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-145-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-146",
+    "name": "Syndra Transcendent",
+    "domain": "Chaos",
+    "might": 6,
+    "rules_text": "While I'm in a showdown, your spells have REPEAT . (You may pay the additional cost to repeat the spell's effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-146-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-147",
+    "name": "Baron Nashor",
+    "domain": "Chaos",
+    "might": 12,
+    "rules_text": "As you play me, add the Baron Pit battlefield token to the board if it's not there already. If you do, I enter there. (It has \"Units can move from anywhere.\")\nI can't be chosen by enemy spells and abilities. Other friendly units have +2[might].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-147-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-147-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 10,
+    "cost_power": 3
+  },
+  {
+    "card_id": "UNL-148",
+    "name": "Cursed Sarcophagus",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "When you play this, banish all units from your trash.\n[tap]: Play a unit banished with this. (You must pay its costs.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-148-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-149",
+    "name": "Diana No Longer Human",
+    "domain": "Chaos",
+    "might": 3,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play a spell, give me +2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-149-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-149-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-150",
+    "name": "Vex Apathetic",
+    "domain": "Chaos",
+    "might": 4,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhen an opponent plays a unit while I'm at a battlefield, STUN it. They can't move it this turn. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-150-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-150-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-151",
+    "name": "Bandle Soldier",
+    "domain": "Order",
+    "might": 5,
+    "rules_text": "LEVEL 3[>] I enter ready. (While you have 3+ XP, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-151-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-152",
+    "name": "Black Rose Dignitary",
+    "domain": "Order",
+    "might": 2,
+    "rules_text": "ASSAULT (+1 [might] while I'm an attacker.)\nDEATHKNELL[>] Channel 1 rune exhausted. (When I die, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-152-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-153",
+    "name": "Carrion Dredger",
+    "domain": "Order",
+    "might": 1,
+    "rules_text": "DEATHKNELL[>] Play a 1 [might] Bird token with DEFLECT to your base. (When I die, get the effect. Opponents must pay [rune] to choose a DEFLECT unit with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-153-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-154",
+    "name": "Crimson Pigeons",
+    "domain": "Order",
+    "might": 3,
+    "rules_text": "I have +2 [might] while I'm attacking with another unit",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-154-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-155",
+    "name": "Heroic Charge",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nGive a friendly unit +1 [might] this turn and STUN an enemy unit at its location. (A stunned unit doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-155-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-156",
+    "name": "Loyal Poro",
+    "domain": "Order",
+    "might": 3,
+    "rules_text": "DEATHKNELL[>] If I didn't die alone, draw 1. (When I die, get the effect. I wasn't alone if there were other friendly units here.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-156-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-157",
+    "name": "Scrutinizing Sergeant",
+    "domain": "Order",
+    "might": 6,
+    "rules_text": "When you play me, gain 1 XP for each friendly unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-157-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-158",
+    "name": "Shepherd's Heirloom",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "When you play this, gain 1 XP.\nEQUIP \u2014 Spend 1 XP (Pay the cost: Attach this to a unit you control.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-158-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-159",
+    "name": "Soul Harvest",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "Kill a unit at a battlefield with 3 [might] or less.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-159-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-160",
+    "name": "Ultrasoft Poro",
+    "domain": "Order",
+    "might": 5,
+    "rules_text": "[tap]: Play two 1 [might] Bird unit tokens with DEFLECT. Use this ability only while I'm at a battlefield. (Opponents must pay [rune] to choose a DEFLECT unit with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-160-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-161",
+    "name": "Divining Shells",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "VISION (When you play this, look at the top card of your Main Deck. You may recycle it.)\nACTION[>] Kill this, [tap]: Give a unit +2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-161-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-162",
+    "name": "Enthralling Protector",
+    "domain": "Order",
+    "might": 2,
+    "rules_text": "HUNT (When I conquer or hold, gain 1 XP.)\nSpend 2 XP: BUFF me. (Give me a +1 [might] buff if I don't have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-162-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-163",
+    "name": "Mageseeker Investigator",
+    "domain": "Order",
+    "might": 4,
+    "rules_text": "Opponents must pay 1 for each unit beyond the first to move multiple units to my battlefield at the same time.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-163-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-164",
+    "name": "Safety Inspector",
+    "domain": "Order",
+    "might": 3,
+    "rules_text": "You may spend 3 XP as an additional cost to play me.\nWhen you play me, each player must kill one of their units. If you paid my additional cost, you don't kill a unit this way.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-164-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-165",
+    "name": "Shadow's Call",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "Choose a friendly unit without TEMPORARY. Give it TEMPORARY. Draw 2. (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-165-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-166",
+    "name": "Stalking Wolf",
+    "domain": "Order",
+    "might": 6,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nAs an additional cost to play me, kill a Bird, Cat, Dog, or Poro you control. You may play me to its battlefield (even if you don't have other units there).",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-166-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-167",
+    "name": "Starhound",
+    "domain": "Order",
+    "might": 6,
+    "rules_text": "When you play me, return a Bird, Cat, Dog, or Poro from your trash to your hand.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-167-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-168",
+    "name": "Undying Loyalty",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "This costs [2] less if you choose a Bird, Cat, Dog, or Poro.\nPlay a unit with cost no more than [2] and no more than [rune] from your trash, ignoring its cost.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-168-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-169",
+    "name": "Ashe Focused",
+    "domain": "Order",
+    "might": 4,
+    "rules_text": "When you play me, choose an opponent. They reveal their hand. Choose a card revealed this way and banish it. When they hold, return it to their hand (even if I'm no longer on the board).",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-169-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-170",
+    "name": "Atakhan",
+    "domain": "Order",
+    "might": 7,
+    "rules_text": "You may kill a friendly unit as an additional cost to play me. If you do, I cost [1] less for each Energy it costs and [order] less for each Power it costs.\nGANKING (I can move from battlefield to battlefield.)\nWhen I attack, the defender must kill one of their units here.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-170-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 10,
+    "cost_power": 3
+  },
+  {
+    "card_id": "UNL-171",
+    "name": "Galio Indefatigable",
+    "domain": "Order",
+    "might": 6,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nTANK (I must be assigned combat damage first.)\nI don't deal combat damage.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-171-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-172",
+    "name": "Leblanc Fragmented",
+    "domain": "Order",
+    "might": 3,
+    "rules_text": "ASSAULT (+1 [might] while I'm an attacker.)\nDEATHKNELL[>] Draw 1. If it's your Beginning Phase,  draw 2 instead. (When I die, get the effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-172-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-172-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-173",
+    "name": "Sacrifice",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nAs an additional cost to play this, kill a friendly [Mighty] unit. (A unit is MIGHTY while it has [5]+[might].)\nDraw 2 and channel 1 rune exhausted.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-173-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 1,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-174",
+    "name": "Shard of Undoing",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "The first time a friendly unit dies during your Beginning Phase each turn, each opponent must kill one of their units.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-174-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Gear",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-175",
+    "name": "Tactical Retreat",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. The next time it would die this turn, heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-175-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 2,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-176",
+    "name": "Vi Peacekeeper",
+    "domain": "Order",
+    "might": 5,
+    "rules_text": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen I attack, STUN an enemy unit here. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-176-1",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "unl-176-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 5,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-177",
+    "name": "Ivern Friend to All",
+    "domain": "Order",
+    "might": 6,
+    "rules_text": "As you play me, choose Bird, Cat, Dog, or Poro. I gain that tag.\nWhen I conquer or hold, score 1 point if your units have all of the following tags among them \u2014 Bird, Cat, Dog, and Poro.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-177-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-177-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-178",
+    "name": "Poppy Defender of the Meek",
+    "domain": "Order",
+    "might": 5,
+    "rules_text": "You may spend 3 XP as an additional cost to play me. If you do, I cost [3] less.\nAMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nTANK (I must be assigned combat damage first.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-178-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-178-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Champion",
+    "cost_energy": 6,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-179",
+    "name": "Rift Herald",
+    "domain": "Order",
+    "might": 7,
+    "rules_text": "When I move to a battlefield, look at the top 3 cards of your Main Deck. You may reveal a unit from among them and draw it. Recycle the rest.\nDEATHKNELL[>] Play a unit from your hand to your base, ignoring its Energy cost. (When I die, get the effect. You must still pay its Power cost.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-179-1",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "unl-179-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 8,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-180",
+    "name": "The Ruination",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "Kill all units.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-180-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Spell",
+    "cost_energy": 9,
+    "cost_power": 3
+  },
+  {
+    "card_id": "UNL-181",
+    "name": "Jhin Virtuoso",
+    "domain": "Fury Mind",
+    "might": null,
+    "rules_text": "When you play a spell, if you spent [4] or more, you may banish it. Then, if there are four spells banished with me, put each in its trash, channel 4 runes, and draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-181-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-182",
+    "name": "Curtain Call",
+    "domain": "Fury Mind",
+    "might": null,
+    "rules_text": "REPEAT \u2014 [1]/[rune]/1[rune] (You may pay each additional cost to repeat this spell's effect.)\nChoose one you haven't already chosen \u2014\n\u2022 Draw 1.\n\u2022 Deal 2 to a unit at a battlefield.\n\u2022 Deal 3 to a unit at a base.\n\u2022 Give a unit at a battlefield -4 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-182-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 4,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-183",
+    "name": "Rengar Pridestalker",
+    "domain": "Fury Body",
+    "might": null,
+    "rules_text": "When you play a unit, give a unit +1 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-183-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-184",
+    "name": "Thrill of the Hunt",
+    "domain": "Fury Body",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nBanish a friendly unit, then its owner plays it to any battlefield, ignoring its cost.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-184-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 2,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-185",
+    "name": "Pyke Bloodharbor Ripper",
+    "domain": "Fury Chaos",
+    "might": null,
+    "rules_text": "[1], [tap]: Return a friendly unit at a battlefield to its owner's hand. Play a Gold gear token exhausted. (It has \"REACTION Kill this, [tap]: ADD [rune].\")",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-185-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-186",
+    "name": "Death from Below",
+    "domain": "Fury Chaos",
+    "might": null,
+    "rules_text": "Kill a unit at a battlefield. Then, if it had 3 [might] or less, you may play this from your trash for [rune].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-186-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 4,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-187",
+    "name": "Vi Piltover Enforcer",
+    "domain": "Fury Order",
+    "might": null,
+    "rules_text": "When you conquer, if you assigned 3 or more excess damage, you may exhaust me to ready a unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-187-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-188",
+    "name": "Hextech Gauntlets",
+    "domain": "Fury Order",
+    "might": null,
+    "rules_text": "EQUIP [3] [rune]. This ability's Energy cost is reduced by the Might of the unit you choose. (Pay the cost: Attach this to a unit you control.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-188-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Gear",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-189",
+    "name": "Lillia Bashful Bloom",
+    "domain": "Calm Mind",
+    "might": null,
+    "rules_text": "[4], [tap]: Play a ready 3 [might] Sprite unit Token with TEMPORARY . This ability costs [1] less for each friendly unit with TEMPORARY.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-189-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-190",
+    "name": "Lilting Lullaby",
+    "domain": "Calm Mind",
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell. Its controller can't play spells this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-190-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 2,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-191",
+    "name": "Master Yi Wuju Master",
+    "domain": "Calm Body",
+    "might": null,
+    "rules_text": "LEVEL 6[>] Your units have +1 [might]. (While you have 6+ XP, get the effect.)\nLEVEL 11[>] Your units enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-191-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-192",
+    "name": "Alpha Strike",
+    "domain": "Calm Body",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nChoose a friendly unit. It deals damage equal to its Might split among enemy units at battlefields. Then for each unit this kills: Gain 1 XP.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-192-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-193",
+    "name": "Vex Gloomist",
+    "domain": "Calm Chaos",
+    "might": null,
+    "rules_text": "When you or an ally hold, you may exhaust me to draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-193-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-194",
+    "name": "Shadow",
+    "domain": "Calm Chaos",
+    "might": 3,
+    "rules_text": "If you play me to a battlefield, I enter ready.\nACTION[>] [1] [rune], [tap]: STUN an enemy unit attacking here. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-194-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Unit",
+    "cost_energy": 3,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-195",
+    "name": "Ivern Green Father",
+    "domain": "Calm Order",
+    "might": null,
+    "rules_text": "When you conquer or hold, you may exhaust me to replace that battlefield with a Brush battlefield token. (Bird, Cat, Dog, Poro, and Ivern units have +1 [might] in Brush. It can be swapped back when scored.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-195-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-196",
+    "name": "Daisy!",
+    "domain": "Calm Order",
+    "might": 8,
+    "rules_text": "I enter ready.\nReduce my cost by [1] for each of the following tags among your units \u2014 Bird, Cat, Dog, and Poro.\nWhen I attack while your units have all 4 tags, STUN an enemy unit here. (It doesn't deal combat damage this turn.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-196-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Unit",
+    "cost_energy": 9,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-197",
+    "name": "Diana Scorn of the Moon",
+    "domain": "Mind Chaos",
+    "might": null,
+    "rules_text": "REACTION[>] [tap]: ADD [1] . Spend this Energy only during showdowns. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-197-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-198",
+    "name": "Moonfall",
+    "domain": "Mind Chaos",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nChoose a battlefield where you have units. You may move up to one enemy unit to that battlefield. Then give enemy units there -2 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-198-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 3,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-199",
+    "name": "Leblanc Deceiver",
+    "domain": "Mind Order",
+    "might": null,
+    "rules_text": "When you conquer or hold, you may discard 1 and exhaust me to play a ready Reflection unit token there. It becomes a copy of another unit there.\nGive it TEMPORARY",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-199-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-200",
+    "name": "Mirror Image",
+    "domain": "Mind Order",
+    "might": null,
+    "rules_text": "Choose a unit. Play a ready Reflection unit token to your base. It becomes a copy of that unit. Give it TEMPORARY, (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-200-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 3,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-201",
+    "name": "Kha'Zix Voidreaver",
+    "domain": "Body Chaos",
+    "might": null,
+    "rules_text": "When you win a combat, gain 1 XP.\nSpend 1 XP, [tap]: Buff a unit.\nSpend 2 XP, [tap]: Move and exhausted friendly unit from a battlefield to its base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-201-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-202",
+    "name": "Void Assault",
+    "domain": "Body Chaos",
+    "might": null,
+    "rules_text": "Move a friendly unit, then move an enemy unit. (If they both move to a battlefield you don't control, you're the attacker.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-202-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 2,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-203",
+    "name": "Poppy Keeper of the Hammer",
+    "domain": "Body Order",
+    "might": null,
+    "rules_text": "When you hold, gain 1 XP.\nSpend 3 XP, [tap]: Draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-203-1",
+        "rarity": "Rare"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-204",
+    "name": "Keeper's Verdict",
+    "domain": "Body Order",
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nChoose an enemy unit at a battlefield. Its owner places it on the top or bottom of their Main Deck",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-204-1",
+        "rarity": "Epic"
+      }
+    ],
+    "category": "Signature Spell",
+    "cost_energy": 2,
+    "cost_power": 2
+  },
+  {
+    "card_id": "UNL-205",
+    "name": "Abandoned Hall",
+    "domain": "",
+    "might": null,
+    "rules_text": "When a player plays a spell, they may give a unit they control here +1 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-205-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-206",
+    "name": "Altar of Blood",
+    "domain": "",
+    "might": null,
+    "rules_text": "If a unit here would die during combat, its controller may pay [rune][rune][rune] to heal it, exhaust it, and recall it instead.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-206-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-207",
+    "name": "Amateur Recital",
+    "domain": "",
+    "might": null,
+    "rules_text": "When you hold here, you may move a unit at a battlefield to its base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-207-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-208",
+    "name": "Black Flame Altar",
+    "domain": "",
+    "might": null,
+    "rules_text": "Units here with TEMPORARY have SHIELD. (+1 [might] while they're defenders.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-208-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-209",
+    "name": "Dusk Rose Lab",
+    "domain": "",
+    "might": null,
+    "rules_text": "At the start of your Beginning Phase, you may kill a unit you control here to draw 1. (This happens before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-209-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-210",
+    "name": "Forbidding Waste",
+    "domain": "",
+    "might": null,
+    "rules_text": "While a unit here is defending alone, it has -2 [might]. (It's alone if there are no other friendly units here.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-210-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-211",
+    "name": "Forgotten Library",
+    "domain": "",
+    "might": null,
+    "rules_text": "While you control this battlefield, when you play a spell, if you spent [4] or more, PREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-211-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-212",
+    "name": "Frozen Fortress",
+    "domain": "",
+    "might": null,
+    "rules_text": "At the start of each player's Beginning Phase, deal 1 to each unit here. (This happens before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-212-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-213",
+    "name": "Gardens of Becoming",
+    "domain": "",
+    "might": null,
+    "rules_text": "Units here have \"[tap]: Gain 1 XP.\"",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-213-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-214",
+    "name": "Ripper's Bay",
+    "domain": "",
+    "might": null,
+    "rules_text": "When a unit here is returned to a player's hand, that player may pay [1] to channel 1 rune exhausted.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-214-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-215",
+    "name": "Star Spring",
+    "domain": "",
+    "might": null,
+    "rules_text": "The first time a player plays a non-token unit here each turn, they may move another unit they control here to its base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-215-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-216",
+    "name": "The Academy",
+    "domain": "",
+    "might": null,
+    "rules_text": "When you hold here, give your next spell this turn REPEAT equal to its base cost. (You may the additional cost to repeat the spell's effect.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-216-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-217",
+    "name": "Trapping Grounds",
+    "domain": "",
+    "might": null,
+    "rules_text": "When you conquer here, if you assigned 3 or more excess damage, play a 1 power Bird unit token with DEFLECT.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-217-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-218",
+    "name": "Valley of Idols",
+    "domain": "",
+    "might": null,
+    "rules_text": "When a player plays a unit here, they may pay [1] to BUFF it. (Give it a +1 [might] buff if it doesn't have one.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-218-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-219",
+    "name": "Vaults of Helia",
+    "domain": "",
+    "might": null,
+    "rules_text": "When you hold here, your non-token units cost [1] more to play this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-219-1",
+        "rarity": "Uncommon"
+      }
+    ],
+    "category": "Battlefield",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-220",
+    "name": "Pouty Poro",
+    "domain": "Fury",
+    "might": 2,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with an ability or spell)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-013-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-221",
+    "name": "Lonely Poro",
+    "domain": "Calm",
+    "might": 2,
+    "rules_text": "DEATHKNELL[>] If I died alone, draw 1. (When I die, get the effect. I'm alone if there are no other friendly units here.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "sfd-036-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-222",
+    "name": "Plundering Poro",
+    "domain": "Mind",
+    "might": 2,
+    "rules_text": "When I conquer, play a Gold gear token exhausted.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "sfd-069-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-223",
+    "name": "Veteran Poro",
+    "domain": "Body",
+    "might": 2,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it's already attached.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "sfd-099-2",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-224",
+    "name": "Mystic Poro",
+    "domain": "Chaos",
+    "might": 2,
+    "rules_text": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-171-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-225",
+    "name": "Daring Poro",
+    "domain": "Order",
+    "might": 2,
+    "rules_text": "ASSAULT (+1 [might] while I'm an attacker.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-210-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 2,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-226",
+    "name": "Jhin Virtuoso",
+    "domain": "Fury Mind",
+    "might": null,
+    "rules_text": "When you play a spell, if you spent [4] or more, you may banish it. Then, if there are four spells banished with me, put each in its trash, channel 4 runes, and draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-181-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-181-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-227",
+    "name": "Rengar Pridestalker",
+    "domain": "Fury Body",
+    "might": null,
+    "rules_text": "When you play a unit, give a unit +1 [might] this turn.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-183-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-183-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-228",
+    "name": "Pyke Bloodharbor Ripper",
+    "domain": "Fury Chaos",
+    "might": null,
+    "rules_text": "[1], [tap]: Return a friendly unit at a battlefield to its owner's hand. Play a Gold gear token exhausted. (It has \"REACTION Kill this, [tap]: ADD [rune].\")",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-185-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-185-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-229",
+    "name": "Vi Piltover Enforcer",
+    "domain": "Fury Order",
+    "might": null,
+    "rules_text": "When you conquer, if you assigned 3 or more excess damage, you may exhaust me to ready a unit.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-187-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-187-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-230",
+    "name": "Lillia Bashful Bloom",
+    "domain": "Calm Mind",
+    "might": null,
+    "rules_text": "[4], [tap]: Play a ready 3 [might] Sprite unit Token with TEMPORARY . This ability costs [1] less for each friendly unit with TEMPORARY.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-189-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-189-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-231",
+    "name": "Master Yi Wuju Master",
+    "domain": "Calm Body",
+    "might": null,
+    "rules_text": "LEVEL 6[>] Your units have +1 [might]. (While you have 6+ XP, get the effect.)\nLEVEL 11[>] Your units enter ready.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-191-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-191-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-232",
+    "name": "Vex Gloomist",
+    "domain": "Calm Chaos",
+    "might": null,
+    "rules_text": "When you or an ally hold, you may exhaust me to draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-193-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-193-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-233",
+    "name": "Ivern Green Father",
+    "domain": "Calm Order",
+    "might": null,
+    "rules_text": "When you conquer or hold, you may exhaust me to replace that battlefield with a Brush battlefield token. (Bird, Cat, Dog, Poro, and Ivern units have +1 [might] in Brush. It can be swapped back when scored.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-195-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-195-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-234",
+    "name": "Diana Scorn of the Moon",
+    "domain": "Mind Chaos",
+    "might": null,
+    "rules_text": "REACTION[>] [tap]: ADD [1] . Spend this Energy only during showdowns. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-197-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-197-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-235",
+    "name": "Leblanc Deceiver",
+    "domain": "Mind Order",
+    "might": null,
+    "rules_text": "When you conquer or hold, you may discard 1 and exhaust me to play a ready Reflection unit token there. It becomes a copy of another unit there.\nGive it TEMPORARY",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-199-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-199-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-236",
+    "name": "Kha'Zix Voidreaver",
+    "domain": "Body Chaos",
+    "might": null,
+    "rules_text": "When you win a combat, gain 1 XP.\nSpend 1 XP, [tap]: Buff a unit.\nSpend 2 XP, [tap]: Move and exhausted friendly unit from a battlefield to its base.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-201-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-201-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-237",
+    "name": "Poppy Keeper of the Hammer",
+    "domain": "Body Order",
+    "might": null,
+    "rules_text": "When you hold, gain 1 XP.\nSpend 3 XP, [tap]: Draw 1.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-203-2",
+        "rarity": "Showcase"
+      },
+      {
+        "variant_id": "unl-203-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Legend",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-238",
+    "name": "Baron Nashor",
+    "domain": "Chaos",
+    "might": 12,
+    "rules_text": "As you play me, add the Baron Pit battlefield token to the board if it's not there already. If you do, I enter there. (It has \"Units can move from anywhere.\")\nI can't be chosen by enemy spells and abilities. Other friendly units have +2[might].",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-147-3",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Unit",
+    "cost_energy": 10,
+    "cost_power": 1
+  },
+  {
+    "card_id": "UNL-R01a",
+    "name": "Fury Rune",
+    "domain": "Fury",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-007-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-R02a",
+    "name": "Calm Rune",
+    "domain": "Calm",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-042-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-R03a",
+    "name": "Mind Rune",
+    "domain": "Mind",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-089-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-R04a",
+    "name": "Body Rune",
+    "domain": "Body",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-126-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-R05a",
+    "name": "Chaos Rune",
+    "domain": "Chaos",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-166-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-R06a",
+    "name": "Order Rune",
+    "domain": "Order",
+    "might": null,
+    "rules_text": "",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-214-7",
+        "rarity": "Showcase"
+      }
+    ],
+    "category": "Rune",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-T01",
+    "name": "Baron Pit",
+    "domain": "",
+    "might": null,
+    "rules_text": "(You can't start the game with a token battlefield).\nUnits can move here from anywhere.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-t01-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-T02",
+    "name": "Bird",
+    "domain": "",
+    "might": 1,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-t02-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-T03",
+    "name": "Brush",
+    "domain": "",
+    "might": null,
+    "rules_text": "Bird, Cat, Dog, Poro and, Ivern units here have +1[might].\nWhen you score here, you may replace this with the battlefield it replaced.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-t03-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-T05",
+    "name": "Gold",
+    "domain": "",
+    "might": null,
+    "rules_text": "Kill this: [tap]: REACTION: ADD [rune]. (Abilities that add resources can't be reacted to.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "sfd-t03-2",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-T06",
+    "name": "Reflection",
+    "domain": "",
+    "might": null,
+    "rules_text": "(I become a copy of something when played. I don't get that card's play effects)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-t06-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": 0,
+    "cost_power": 0
+  },
+  {
+    "card_id": "UNL-T07",
+    "name": "Sprite",
+    "domain": "",
+    "might": 3,
+    "rules_text": "TEMPORARY (Kill me at the start of your Beginning Phase, before scoring.)",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "ogn-274-2",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": null,
+    "cost_power": null
+  },
+  {
+    "card_id": "UNL-T08",
+    "name": "XP Tracker",
+    "domain": "",
+    "might": null,
+    "rules_text": "Track gained XP here.\nSome cards get bonuses based on your LEVEL.\nSome cards can spend XP for powerful effects.",
+    "set": "Unleashed",
+    "variants": [
+      {
+        "variant_id": "unl-t08-1",
+        "rarity": "Common"
+      }
+    ],
+    "category": "Token",
+    "cost_energy": 0,
+    "cost_power": 0
+  }
+]

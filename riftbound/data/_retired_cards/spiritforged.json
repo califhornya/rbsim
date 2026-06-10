@@ -1,0 +1,3007 @@
+[
+  {
+    "name": "Against the Odds",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a friendly unit at a battlefield +2 [might] this turn for each enemy unit there.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might_per_enemy",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Armed Assailant",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": 6,
+    "rules_text": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nWEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Blood Rush",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nREPEAT [1] (You may pay the additional cost to repeat this spell&#39;s effect.)\nGive a unit ASSAULT 2 this turn. (+2 [might] while it&#39;s an attacker.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_assault",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Bushwhack",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nFriendly units enter ready this turn. Play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Detonate",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 1,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "Kill a gear. Its controller draws 2.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury"
+  },
+  {
+    "name": "Eager Drakehound",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "I enter ready.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Gem Jammer",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "When you play me, give a unit GANKING this turn.\n(It can move from battlefield to battlefield.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_keyword",
+        "keyword": "GANKING"
+      }
+    ]
+  },
+  {
+    "name": "Sentinel Adept",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Serrated Dirk",
+    "category": "GEAR",
+    "domain": "FURY",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [fury] ([fury]: Attach this to a unit you control.)\n\n",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Void Drone",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "I cost [2] less to play from anywhere other than your hand.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Angle Shot",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit and an Equipment with the same controller. Attach that Equipment to that unit or detach that Equipment from that unit. Draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Battering Ram",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "I cost [1] less for each card you&#39;ve played this turn, to a minimum of [1].",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Blast Corps Cadet",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "You may pay [1] [fury] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, deal 2 to a unit at a battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Minotaur Reckoner",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "Units can&#39;t move to base.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Perched Grimwyrm",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "Play me only to a battlefield you conquered this turn. (You can&#39;t play me anywhere else.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Recurve Bow",
+    "category": "GEAR",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [fury] ([fury]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Sudden Storm",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nDeal 2 to a unit at a battlefield. If it&#39;s attacking, deal 4 to it instead.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Void Hatchling",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "If you would reveal cards from a deck, look at the top card first. You may recycle it. Then reveal those cards.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Assembly Rig",
+    "category": "GEAR",
+    "domain": "FURY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "[1] [fury], Recycle a unit from your trash, [tap]: Play a 3 [might] Mech unit token to your base.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ferrous Forerunner",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": 6,
+    "rules_text": "DEATHKNELL — Play two 3 [might] Mech unit tokens to your base. (When I die, get the effect.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury"
+  },
+  {
+    "name": "Long Sword",
+    "category": "GEAR",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "QUICK-DRAW (This has REACTION. When you play it, attach it to a unit you control.)\nEQUIP [fury] ( [fury]: Attach this to a unit you control.)\n",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury"
+  },
+  {
+    "name": "Piercing Light",
+    "category": "SPELL",
+    "domain": "FURY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REPEAT [2] [FURY] (You may pay the additional cost to repeat this spell&#39;s effect.)\nDeal 2 to a unit at a battlefield, then deal 2 to up to one other unit.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Rell Magnetic",
+    "category": "CHAMPION",
+    "domain": "FURY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "TANK (I must be assigned combat damage first.)\nWhen I attack, you may play an Equipment with Energy cost no more than [2], ignoring its cost. If you do, then do this: Attach it to me.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Rengar Pouncing",
+    "category": "CHAMPION",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve, including to a battlefield you control.)\nASSAULT 2 (+2 [might] while I&#39;m an attacker.)\nI can be played to a battlefield you&#39;re attacking.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "grant_assault",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Rumble Hotheaded",
+    "category": "CHAMPION",
+    "domain": "FURY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "Your Mechs each have ASSAULT. (+1 [might] while we&#39;re attackers.)\nWhen I conquer, you may recycle another friendly unit to play a Mech from your trash. Reduce its Energy cost by the Might of the unit you recycled.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Dunebreaker",
+    "category": "UNIT",
+    "domain": "FURY",
+    "cost_energy": 7,
+    "cost_power": 1,
+    "might": 7,
+    "rules_text": "If you have two or fewer cards in your hand, I enter ready.\nWhen I hold, draw 2.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 2
+      },
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Lucian Gunslinger",
+    "category": "CHAMPION",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "ASSAULT (+1 might while I&#39;m an attacker.)\nWhen I attack, deal damage equal to my ASSAULT to an enemy unit here.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Rek&#39;Sai Breacher",
+    "category": "CHAMPION",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nASSAULT (+1 [might] while I&#39;m an attacker.)\nFriendly units played from anywhere other than a player&#39;s hand have ACCELERATE.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Skyfall of Areion",
+    "category": "GEAR",
+    "domain": "FURY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [1] [fury] ([1] [fury]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Desert&#39;s Call",
+    "category": "SPELL",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nPlay a 2 [might] Sand Soldier unit token.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Disarming Rake",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 2,
+    "rules_text": "When you play me, you may kill a gear.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Doran&#39;s Shield",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [CALM] ([calm]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Feral Strength",
+    "category": "SPELL",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nGive a unit +2 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Guardian of the Passage",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 6,
+    "cost_power": null,
+    "might": 6,
+    "rules_text": "When I hold, you may return a unit or gear from your trash to your hand.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Lonely Poro",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "DEATHKNELL — If I died alone, draw 1. (When I die, get the effect. I&#39;m alone if there are no other friendly units here.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Navori Scout",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ribbon Dancer",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When I move to a battlefield, give another friendly unit +1 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Royal Entourage",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "When you play me, ready or exhaust a legend.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Thwonk!",
+    "category": "SPELL",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nREPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nStun an attacking unit. (It doesn&#39;t deal combat damage this turn.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "stun_unit"
+      }
+    ]
+  },
+  {
+    "name": "Apprentice Smith",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "When I move, reveal the top card of your Main Deck. If it&#39;s a gear, draw it. Otherwise, recycle it.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Brutalizer",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [calm] ([calm]: Attach this to a unit you control.)\n",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Emperor&#39;s Divide",
+    "category": "SPELL",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nMove any number of friendly units at a battlefield to their base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "move_units_to_base"
+      }
+    ]
+  },
+  {
+    "name": "Legion Quartermaster",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "As an additional cost to play me, return a friendly gear to its owner&#39;s hand.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Not So Fast",
+    "category": "SPELL",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter an enemy spell or ability that chooses a friendly unit or gear.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Poro Snax",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 1,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "When you play this, draw 1.\n[1] [calm], [tap], Kill this: Draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Simian Ancestor",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "When you buff me, ready me.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Stellacorn Herder",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When I move, draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Aphelios Exalted",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "When you attach an Equipment to me, choose one that hasn&#39;t been chosen this turn —\n• Ready 2 runes.\n• Channel 1 rune exhausted.\n• Buff a friendly unit.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Azir Ascendant",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": 6,
+    "rules_text": "[calm]: ACTION — Choose a unit you control. Move me to its location and it to my original location. If it&#39;s equipped, you may attach one of its Equipment to me. Use only once per turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Guardian Angel",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP  [calm] ([calm]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Heart of Dark Ice",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "[tap]: Give a unit +3 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "name": "Janna Savior",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve, including to a battlefield you control.)\nWhen you play me, heal your units here, then move up to one enemy unit from here to its base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Jax Unmatched",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nYour Equipment everywhere have QUICK-DRAW. (Each gains REACTION. When you play it, attach it to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Needlessly Large Yordle",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 10,
+    "cost_power": 3,
+    "might": 5,
+    "rules_text": "SHIELD 5 (+5 [might] while I&#39;m a defender.)\nTANK (I must be assigned combat damage first.)\nI cost [2] [calm] less for each point you scored from holding this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm",
+    "effects": [
+      {
+        "effect": "grant_shield",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "name": "Sterak&#39;s Gage",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "QUICK-DRAW (This has Reaction. When you play it, attach it to a unit you control.)\nEquip [calm] ([calm]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Irelia Fervent",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhen you choose or ready me, give me +1 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Ornn Blacksmith",
+    "category": "CHAMPION",
+    "domain": "CALM",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "When you play me or when I hold, look at the top 4 cards of your Main Deck. You may reveal a gear from among them and draw it. Then recycle the rest.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Svellsongur",
+    "category": "GEAR",
+    "domain": "CALM",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "Equip [1] [calm] ([1] [calm]: Attach this to a unit you control.)\nAs this is attached to a unit, copy that unit&#39;s text to this Equipment&#39;s effect text for as long as this is attached to it",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Tianna Crownguard",
+    "category": "UNIT",
+    "domain": "CALM",
+    "cost_energy": 7,
+    "cost_power": 2,
+    "might": 4,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhile I&#39;m at a battlefield, opponents can&#39;t gain points.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm"
+  },
+  {
+    "name": "Aspiring Engineer",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When you play me, return a gear from your trash to your hand.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "Bubble Bot",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When you play me, ready another friendly Mech.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Chemtech Cask",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you play a spell on an opponent&#39;s turn, you may exhaust me to play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Cloth Armor",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "QUICK-DRAW (This has REACTION. When you play it, attach it to a unit you control.)\nEQUIP [mind] ([mind]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Forecaster",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "Your Mechs have VISION. (When you play us, look at the top card of your Main Deck. You may recycle it.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Frigid Touch",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nGive a unit -2 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Frostcoat Cub",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "You may pay [mind] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, give a unit -2  this turn.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Gearhead",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "ACCELERATE (You may pay [1] [mind] as an additional cost to have me enter ready.)\nEach Equipment attached to me gives double its base Might bonus.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Plundering Poro",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "When I conquer, play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Wages of Pain",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nDeal 3 to a unit at a battlefield. Play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "name": "Breakneck Mech",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 8,
+    "cost_power": 2,
+    "might": 7,
+    "rules_text": "Your Mechs have DEFLECT and GANKING. (Opponents must pay [rune] to choose us with a spell or ability. We can move from battlefield to battlefield.)\nI enter ready if you control another Mech.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Dropboarder",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "When you play me, if you control two or more gear, ready me.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Experimental Hexplate",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [mind] ([mind]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Pickpocket",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When you play me, you may kill a gear with Energy cost no more than [1]. If you do, play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Prize of Progress",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When you use an activated ability of a gear, give me +1 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Production Surge",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "This costs [2] less if you control a Mech.\nPlay a 3 [might] Mech unit token to your base.\nDraw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Rocket Barrage",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REPEAT [4] [mind] (You may pay the additional cost to repeat this spell&#39;s effect, and may make different choices.)\nChoose one  —\n• Deal 4 damage to a unit in a base.\n• Kill a gear. ",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "name": "Temporal Portal",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "[rune], [tap]: Give the next spell you play this turn REPEAT equal to its cost. (You may pay the additional cost to repeat the spell&#39;s effect.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Bard Mercurial",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "You may exhaust your legend as an additional cost to play me.\nWhen you play me, if you paid the additional cost, move any number of your units to an open battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "Bellows Breath",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 1,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nREPEAT [1] [mind] (You may pay the additional cost to repeat this spell&#39;s effect.)\nDeal 1 to up to three units at the same location.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Card Sharp",
+    "category": "UNIT",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When you play me, you and each opponent may play a Gold gear token exhausted. For each opponent who did, you play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ezreal Dashing",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When I attack or defend, deal damage equal to my Might to an enemy unit here.\nI don&#39;t deal combat damage.\n[mind]: ACTION — Move me to your base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "Hextech Anomaly",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "[tap]: REACTION — Pay any amount of [rune] to ADD that much Energy. (Abilities that add resources can&#39;t be reacted to.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "Jayce Man of Progress",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "When you play me, you may kill a friendly gear. If you do, you may play a gear with Energy cost no more than [7] from hand this turn, ignoring its Energy cost. (You must still pay its Power cost.) ",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ornn Forge God",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 6,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "DEFLECT 2 (Opponents must pay [rune] [rune] to choose me with a spell or ability.)\nWEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)\nI have +1 [might] for each friendly gear.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "World Atlas",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [mind] ([mind]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Premonition",
+    "category": "SPELL",
+    "domain": "MIND",
+    "cost_energy": 2,
+    "cost_power": 3,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "Renata Glasc Mastermind",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "[1] [mind]: Draw 1.\n[4] [mind] [mind] [mind] [mind], [tap]: Score 1 point.\nUse my abilities only while I&#39;m at a battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Rumble Scrapper",
+    "category": "CHAMPION",
+    "domain": "MIND",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "Your Mechs have +1 [might] (including me).\nWhen I hold, play a 3 [might] Mech unit token to your base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind"
+  },
+  {
+    "name": "The Zero Drive",
+    "category": "GEAR",
+    "domain": "MIND",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [1] [mind] ([1] [mind]: Attach this to a unit you control.)\n[3] [mind], Banish this: Play all units banished with this, ignoring their costs. (Use only if unattached.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Buhru Captain",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When you play me, you may draw 1 or buff me. (To buff a unit, give it a +1 [might] buff if it doesn&#39;t already have one.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      },
+      {
+        "effect": "ready_units"
+      },
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Combat Chef",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Dauntless Vanguard",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "You may play me to an occupied enemy battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Direwing",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 7,
+    "cost_power": null,
+    "might": 7,
+    "rules_text": "I enter ready if you control another Dragon.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Doran&#39;s Blade",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [body] ([body]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Laurent Bladekeeper",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "GANKING (I can move from battlefield to battlefield.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Punch First",
+    "category": "SPELL",
+    "domain": "BODY",
+    "cost_energy": 1,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nGive a unit +5 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "name": "Sea Monkey",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "You may pay [1] as an additional cost to play me. When you play me, if you paid the additional cost, buff me. (Give me a +1 [might] if I don&#39;t already have one.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      },
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Veteran Poro",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Yordle Explorer",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "When you play a card with Power cost [rune] [rune] or more, draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Fae Dragon",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 7,
+    "cost_power": 1,
+    "might": 7,
+    "rules_text": "When you play me, buff up to four friendly units. (Give each a +1 [might] buff if it doesn&#39;t have one.)\nWhen you spend a buff, play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Hexdrinker",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [body] ([body]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Jaull-Fish",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 7,
+    "cost_power": 2,
+    "might": 6,
+    "rules_text": "ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.)\nI cost [2] less for each of your MIGHTY units. (A unit is Mighty while it has 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Petricite Monument",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "TEMPORARY (Kill this at the start of its controller&#39;s Beginning Phase, before scoring.)\nFriendly units have DEFLECT. (Opponents must pay [rune] to choose them with a spell or ability.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ruin Runner",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 6,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "I can&#39;t be chosen by enemy spells and abilities.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Show of Strength",
+    "category": "SPELL",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nDraw 1 for each of your MIGHTY units. (A unit is Mighty while it has 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Strike Down",
+    "category": "SPELL",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "Choose an equipped friendly unit. It deals damage equal to its Might to an enemy unit. Then detach an Equipment from it.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Warmog&#39;s Armor",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [body] ([body]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Akshan Mischievous",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "WEAPONMASTER\nYou may pay [body] [body] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, move an enemy gear to your base. You control it until I leave the board. If it&#39;s an Equipment, attach it to me.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Fiora Peerless",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When I attack or defend one on one, double my Might this combat.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Here to Help",
+    "category": "SPELL",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nYou may play a unit from your hand to a battlefield you control, reducing its cost by [3].",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Kato the Arm",
+    "category": "UNIT",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nWhen I move to a battlefield, give another friendly unit my keywords and+ [might] equal to my Might this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Lucian Merciless",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "WEAPONMASTER (When you play me, you may Equip one of your Equipment to me for  less, even if it&#39;s already attached.)\nThe first time I conquer each turn, ready me.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Marching Orders",
+    "category": "SPELL",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nREPEAT [3] (You may pay the additional cost to repeat this spell&#39;s effect.)\nChoose a friendly unit anywhere and an enemy unit at a battlefield. They deal damage equal to their Mights to each other.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Trinity Force",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [body] ([body]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Yone Blademaster",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)\nWhen I conquer a battlefield that was uncontrolled, deal damage equal to my Might to an enemy unit in a base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Ancient Henge",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "[tap]: REACTION — Pay any amount of Energy to ADD that much [rune]. (Abilities that add resources can&#39;t be reacted to.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Boneshiver",
+    "category": "GEAR",
+    "domain": "BODY",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [1] [body] ([1] [body]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Jax Unrelenting",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)\nWhen you attach an Equipment to me, you may pay [1] to draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      },
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Sivir Ambitious",
+    "category": "CHAMPION",
+    "domain": "BODY",
+    "cost_energy": 6,
+    "cost_power": 3,
+    "might": 7,
+    "rules_text": "DEFLECT 2 (Opponents must pay [rune] [rune] to choose me with a spell or Ability.)\nWhen I conquer after an attack, if you assigned 5 or more excess damage to enemy units, you may deal that much to an enemy unit.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body"
+  },
+  {
+    "name": "Black Market Broker",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When you play a card from face down, play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Corrupt Enforcer",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "When I move to a battlefield, discard 1.\nWhen I win a combat, draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Doran&#39;s Ring",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [chaos] ([chaos]: Attach this to a unit you control.)-.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Fae Porter",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "When I move to a battlefield, you may pay [chaos] to move a unit you control to the same battlefield.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Loyal Pup",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When you defend at a battlefield, you may move me there.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Master Bingwen",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 6,
+    "cost_power": null,
+    "might": 6,
+    "rules_text": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it&#39;s already attached.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Overzealous Fan",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "When I defend, you may kill me to move an attacking unit to its base.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Temptation",
+    "category": "SPELL",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nMove an enemy unit to a location where there&#39;s a unit with the same controller.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Treasure Hunter",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 1,
+    "rules_text": "When I move, play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ancient Warmonger",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 5,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [chaos] as an additional cost to have me enter ready.)\nI have ASSAULT equal to the number of enemy units here. (+1 [might] while I&#39;m an attacker for each instance of Assault.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Beast Below",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 7,
+    "cost_power": 2,
+    "might": 8,
+    "rules_text": "When you play me, return another friendly unit and an enemy unit to their owners&#39; hands.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Boots of Swiftness",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [chaos] ([chaos]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Cull",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [chaos] ([chaos]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Factory Recall",
+    "category": "SPELL",
+    "domain": "CHAOS",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nReturn a gear to its owner&#39;s hand.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Hard Bargain",
+    "category": "SPELL",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nCounter a spell unless its controller pays [2].",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Harpoon Squad",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "When I move from a battlefield, give me +2 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Windsinger",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 1,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me, you may return another unit at a battlefield with 3 [might] or less to its owner&#39;s hand.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Edge of Night",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for .)\nWhen you play this from face down, attach it to a unit you control (here).\nEQUIP [chaos] ([chaos]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Fizz Trickster",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When you play me, you may play a spell from your trash with Energy cost no more than [3], ignoring its Energy cost. Recycle that spell after you play it. (You must still pay its Power cost.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Irelia Graceful",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "Your spells that choose me cost [1] or [rune] less.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Jae Medarda",
+    "category": "UNIT",
+    "domain": "CHAOS",
+    "cost_energy": 5,
+    "cost_power": 2,
+    "might": 5,
+    "rules_text": "When you choose me with a spell, draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Sivir Mercenary",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [chaos] as an additional cost to have me enter ready.)\nIf you&#39;ve spent at least [rune] [rune] this turn, I have +2 might and GANKING. (I can move from battlefield to battlefield.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Spirit Wheel",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you choose a friendly unit, you may pay [1] and exhaust this to draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Switcheroo",
+    "category": "SPELL",
+    "domain": "CHAOS",
+    "cost_energy": 2,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for  to react with later for [0].)\nACTION (Play on your turn or in showdowns.)\nSwap the Might of two units at the same battlefield this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Vex Cheerless",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "While I&#39;m in combat, friendly spells cost [1][rune] less to a minimum of [1], and enemy spells cost [1][rune] more.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Downwell",
+    "category": "SPELL",
+    "domain": "CHAOS",
+    "cost_energy": 8,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "Return all units and gear to their owners&#39; hands.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Draven Audacious",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": 6,
+    "rules_text": "DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)\nThe first time I win a combat each turn, you score 1 point.\nWhen I die in combat, choose an opponent. They score 1 point.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos"
+  },
+  {
+    "name": "Ezreal Prodigy",
+    "category": "CHAMPION",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 3,
+    "rules_text": "When you play me, discard 1, then draw 2.\nOptional additional costs you pay cost [1] or [rune] less.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Chaos",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "name": "Last Rites",
+    "category": "GEAR",
+    "domain": "CHAOS",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP — [chaos], Recycle 2 cards from your trash (Pay the cost: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Bonds of Strength",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [2] (You may pay the additional cost to repeat this spell&#39;s effect.)\nGive two friendly units each +1 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Eminent Benefactor",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 6,
+    "cost_power": null,
+    "might": 5,
+    "rules_text": "When I hold, play two Gold gear tokens exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Eye of the Herald",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 1,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [order] ([order]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Guards!",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for [0].)\nPlay a 2 [might] Sand Soldier unit token. You may pay [order] to ready it.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Honest Broker",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "DEATHKNELL — Play a Gold gear token exhausted. (When I die, get the effect.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Laurent Duelist",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "ASSAULT 2 (+2 [might] while I&#39;m an attacker.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "grant_assault",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Royal Guard",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "When you play me, play a 2 [might] Sand Soldier unit token here.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Sandshifter",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 5,
+    "cost_power": 2,
+    "might": 6,
+    "rules_text": "When you play me, kill an enemy unit with 3 [might] or less.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Trusty Ramhound",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "While you have another unit here, I have +1 [might].",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Zaun Punk",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "You may kill a friendly gear as an additional cost to play me.\nWhen you play me, if you paid the additional cost, kill a gear.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "B.F. Sword",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "EQUIP [order] ([order]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Blood Money",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nKill a unit at a battlefield with 2 [might] or less. If it was an enemy unit, play a Gold gear token exhausted. If it was a friendly unit, play two Gold gear tokens exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Deathgrip",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nKill a friendly unit. If you do, give +[might] equal to its Might to another friendly unit this turn. Draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Drag Under",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nI cost [2] less to play from anywhere other than your hand.\nKill a unit at a battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Glasc Mixologist",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "DEATHKNELL — You may play a unit with cost no more than [3] and no more than [rune] from your trash, ignoring its cost. (When I die, get the effect.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Rally the Troops",
+    "category": "SPELL",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nWhen a friendly unit is played this turn, buff it. (If it doesn&#39;t have a buff, it gets a +1 [might] buff.)\nDraw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      },
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Unsung Hero",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": 2,
+    "rules_text": "DEATHKNELL — If I was MIGHTY, draw 2. (When I die, get the effect, I&#39;m Mighty while I have 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "name": "Vanguard Armory",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 7,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "[tap]: Play three 1 [might] Recruit unit tokens. (You may play them to different locations.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Altar of Memories",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When a friendly unit dies, you may exhaust me to draw 1, then put a card from your hand on the top or bottom of your Main Deck.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Rek&#39;Sai Swarm Queen",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 5,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "When I attack, you may reveal the top 2 cards of your Main Deck. You may banish one, then play it. If it is a unit, you may play it here. Recycle the rest.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Renata Glasc Industrialist",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "Your tokens enter ready.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Sacred Shears",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "EQUIP [order] ([order]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Soraka Wanderer",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "I must be assigned combat damage last.\nIf another unit you control here would die, if it has less Might than me, instead heal it, exhaust it, and recall it. (Send it to base. This isn&#39;t a move.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Trove Golem",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 8,
+    "cost_power": 2,
+    "might": 9,
+    "rules_text": "When you play me, play four Gold gear tokens exhausted.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Undertitan",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": 5,
+    "rules_text": "When you play me, give your other units +2 [might] this turn.\nAs I&#39;m revealed from your deck, ADD [2].",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Xin Zhao Vigilant",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": 4,
+    "rules_text": "TANK (I must be assigned combat damage first.)\nI enter ready if you have two or more other units in your base.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Azir Sovereign",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 4,
+    "cost_power": null,
+    "might": 4,
+    "rules_text": "ACCELERATE (You may pay [1] [order] as an additional cost to have me enter ready.)\nWhen I attack, you may move any number of your token units to this battlefield.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Blade of the Ruined King",
+    "category": "GEAR",
+    "domain": "ORDER",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "EQUIP — [order], Kill a friendly unit (Pay the cost: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order"
+  },
+  {
+    "name": "Corina Veraza",
+    "category": "UNIT",
+    "domain": "ORDER",
+    "cost_energy": 7,
+    "cost_power": 1,
+    "might": 6,
+    "rules_text": "ACCELERATE (You may pay [1] [order] as an additional cost to have me enter ready.)\nWhen I move to a battlefield, play three 1 [might] Recruit unit tokens here.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Order",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Fiora Worthy",
+    "category": "CHAMPION",
+    "domain": "ORDER",
+    "cost_energy": 3,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "When a unit you control becomes MIGHTY, you may pay [order] to ready it. (A unit is Mighty while it has 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Rumble Mechanized Menace",
+    "category": "LEGEND",
+    "domain": "FURY MIND",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Your Mechs have SHIELD. (+1 [might] while they&#39;re defenders.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Danger Zone",
+    "category": "SIGNATURE SPELL",
+    "domain": "FURY MIND",
+    "cost_energy": 1,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nREPEAT [1] [rune] (You may pay the additional cost to repeat this spell&#39;s effect.)\nGive your Mechs +1 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury/Mind",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "name": "Lucian Purifier",
+    "category": "LEGEND",
+    "domain": "FURY BODY",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Your Equipment each give ASSAULT. (+1 [might] while equipped unit is an attacker.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "buff_unit"
+      }
+    ]
+  },
+  {
+    "name": "Relentless Pursuit",
+    "category": "SIGNATURE SPELL",
+    "domain": "FURY BODY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nMove a friendly unit. You may attach an Equipment with the same controller to it. This turn, that unit has &quot;When I conquer, you may move me to my base.&quot;",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury/Body"
+  },
+  {
+    "name": "Draven Glorious Executioner",
+    "category": "LEGEND",
+    "domain": "FURY CHAOS",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you win a combat, draw 1. (You win if only your units remain after combat.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Spinning Axe",
+    "category": "SIGNATURE GEAR",
+    "domain": "FURY CHAOS",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "QUICK-DRAW (This has REACTION. When you play it, attach it to a unit you control.)\nEQUIP [rune] ([rune]: Attach this to a unit you control.)\nTEMPORARY (If this is unattached, kill it at the start of its controller&#39;s Beginning Phase, before scoring.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury/Chaos"
+  },
+  {
+    "name": "Rek&#39;Sai Void Burrower",
+    "category": "LEGEND",
+    "domain": "FURY ORDER",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer, you may exhaust me to reveal the top 2 cards of your Main Deck. You may banish one, then play it. Recycle the rest.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Void Rush",
+    "category": "SIGNATURE SPELL",
+    "domain": "FURY ORDER",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "Reveal the top 2 cards of your Main Deck. You may banish one, then play it, reducing its cost by [2]. Draw any you didn&#39;t banish.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Fury/Order"
+  },
+  {
+    "name": "Ornn Fire Below the Mountain",
+    "category": "LEGEND",
+    "domain": "CALM MIND",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "[tap]: REACTION — ADD [rune]. Use only to play gear or use gear abilities. (Abilities that add resources can&#39;t be reacted to.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Forgefire Cape",
+    "category": "SIGNATURE GEAR",
+    "domain": "CALM MIND",
+    "cost_energy": 4,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "UNIQUE (Your deck can only have 1 card with this name.)\nEQUIP [rune] ([rune]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Mind"
+  },
+  {
+    "name": "Rabadon&#39;s Deathcrown",
+    "category": "SIGNATURE GEAR",
+    "domain": "CALM MIND",
+    "cost_energy": 4,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "UNIQUE (Your deck can have only 1 card with this name.)\nEQUIP [rune] ([rune]: Attach this to a unit you control.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Mind"
+  },
+  {
+    "name": "Shurelya&#39;s Requiem",
+    "category": "SIGNATURE GEAR",
+    "domain": "CALM MIND",
+    "cost_energy": 4,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "UNIQUE (Your deck can have only 1 card with this name.)\nEQUIP [rune] ([rune]: Attach this to a unit you control.) \nWhen you play this, ready your units.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Mind",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Jax Grandmaster at Arms",
+    "category": "LEGEND",
+    "domain": "CALM BODY",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "[1], [tap]: Attach a detached Equipment you control to a unit you control.\n[tap]: Attach an attached Equipment you control to a unit you control.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Counter Strike",
+    "category": "SIGNATURE SPELL",
+    "domain": "CALM BODY",
+    "cost_energy": 2,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit. The next time that unit would be dealt damage this turn, prevent it. Draw 1.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Body",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Irelia Blade Dancer",
+    "category": "LEGEND",
+    "domain": "CALM CHAOS",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you choose a friendly unit, you may exhaust me and pay [rune] to ready it.\nWhen you conquer, you may pay [1] to ready me.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Defiant Dance",
+    "category": "SIGNATURE SPELL",
+    "domain": "CALM CHAOS",
+    "cost_energy": 1,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit +2 [might] this turn and another unit -2 [might] this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Chaos",
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "name": "Azir Emperor of the Sands",
+    "category": "LEGEND",
+    "domain": "CALM ORDER",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Your Sand Soldiers have WEAPONMASTER.\n[1], [tap] : Play a 2 [might] Sand Soldier unit token to your base. Use only if you&#39;ve played an Equipment this turn.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Arise!",
+    "category": "SIGNATURE SPELL",
+    "domain": "CALM ORDER",
+    "cost_energy": 6,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "Play a 2 [might] Sand Solider unit token for each Equipment you control. Then do this: Ready up to two of them.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Calm/Order",
+    "effects": [
+      {
+        "effect": "ready_units"
+      }
+    ]
+  },
+  {
+    "name": "Ezreal Prodigal Explorer",
+    "category": "LEGEND",
+    "domain": "MIND CHAOS",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "[tap]: REACTION — Draw 1. Use only if you&#39;ve chosen enemy units and/or gear twice this turn with spells or unit abilities.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Arcane Shift",
+    "category": "SIGNATURE SPELL",
+    "domain": "MIND CHAOS",
+    "cost_energy": 3,
+    "cost_power": 1,
+    "might": null,
+    "rules_text": "ACTION (Play on your turn or in showdowns.)\nBanish a friendly unit, then its owner plays it, ignoring its cost. Deal 3 to an enemy unit at a battlefield. Banish this.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind/Chaos",
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "name": "Renata Glasc Chem-Baroness",
+    "category": "LEGEND",
+    "domain": "MIND ORDER",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you or an ally hold, you may exhaust me to play a Gold gear token exhausted.\nWhile your score is within 3 points of the Victory Score, your Gold ADD an additional [1].",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Hostile Takeover",
+    "category": "SIGNATURE SPELL",
+    "domain": "MIND ORDER",
+    "cost_energy": 5,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "HIDDEN (Hide now for [rune] to react with later for 0.) \nTake control of an enemy unit at a battlefield. \nReady it. (Start a combat if other enemies are there. Otherwise, conquer.)\nLose control of that unit and recall it at end of turn. (Send it to base. This isn&#39;t a move.)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Mind/Order"
+  },
+  {
+    "name": "Sivir Battle Mistress",
+    "category": "LEGEND",
+    "domain": "BODY CHAOS",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you recycle a rune, you may exhaust me to play a Gold gear token exhausted.\nWhen one or more enemy units die, ready me.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "On the Hunt",
+    "category": "SIGNATURE SPELL",
+    "domain": "BODY CHAOS",
+    "cost_energy": 1,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "Ready your units.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body/Chaos"
+  },
+  {
+    "name": "Fiora Grand Duelist",
+    "category": "LEGEND",
+    "domain": "BODY ORDER",
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When one of your units becomes MIGHTY, you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Riposte",
+    "category": "SIGNATURE SPELL",
+    "domain": "BODY ORDER",
+    "cost_energy": 2,
+    "cost_power": 2,
+    "might": null,
+    "rules_text": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit and a spell. Counter that spell and give that unit +[might] equal to that spell&#39;s energy cost this turn.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "cost_power_domain": "Body/Order"
+  },
+  {
+    "name": "Emperor&#39;s Dais",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, you may pay [1] and return a unit you control here to its owner&#39;s hand. If you do, play a 2 [might] Sand Soldier unit token here.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Forge of the Fluft",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "While you control this battlefield, friendly legends have &quot;[tap]: Attach an Equipment you control to a unit you control.&quot;",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Forgotten Monument",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Players can&#39;t score here until their third turn.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Hall of Legends",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, you may pay [1] to ready your legend.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Marai Spire",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "While you control this battlefield, friendly REPEAT costs cost [1] less.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Minefield",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, put the top 2 cards of your Main Deck into your trash.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ornn&#39;s Forge",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you control this battlefield, the first friendly non-token gear played each turn costs [1] less.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Power Nexus",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you hold here, you may pay [rune] [rune] [rune] [rune] to score 1 point.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Ravenbloom Conservatory",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you defend here, reveal the top card of your Main Deck. If it&#39;s a spell, put it in your hand. Otherwise, recycle it.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Rockfall Path",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Units can&#39;t be played here.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Seat of Power",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, draw 1 for each other battlefield you or allies control.",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "Sunken Temple",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here with one or more MIGHTY units, you may pay [1] to draw 1. (A unit is Mighty while it has 5+ [might].)",
+    "set": "Spiritforged",
+    "card_id": "",
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "name": "The Papertree",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you hold here, each player channels 1 rune exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Treasure Hoard",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, you may pay [1] to play a Gold gear token exhausted.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Veiled Temple",
+    "category": "BATTLEFIELD",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "When you conquer here, you may ready a friendly gear. If it&#39;s an equipment, you may detach it.",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Mech",
+    "category": "TOKEN",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": 3,
+    "rules_text": "",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Sand Soldier",
+    "category": "TOKEN",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "",
+    "set": "Spiritforged",
+    "card_id": ""
+  },
+  {
+    "name": "Gold",
+    "category": "TOKEN",
+    "domain": null,
+    "cost_energy": 0,
+    "cost_power": null,
+    "might": null,
+    "rules_text": "Kill this: [tap]: REACTION: ADD [rune]. (Abilities that add resources can&#39;t be reacted to.)",
+    "set": "Spiritforged",
+    "card_id": ""
+  }
+]

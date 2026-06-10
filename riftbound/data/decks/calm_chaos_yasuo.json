@@ -1,0 +1,24 @@
+{
+  "name": "Yasuo Calm/Chaos",
+  "legend": "Yasuo Unforgiven",
+  "champion": "Yasuo Remorseful",
+  "runes": [
+    {"domain": "CALM",  "count": 6},
+    {"domain": "CHAOS", "count": 6}
+  ],
+  "cards": [
+    {"name": "Lonely Poro",         "count": 3},
+    {"name": "Scuttle Crab",        "count": 3},
+    {"name": "Adaptatron",          "count": 3},
+    {"name": "Stellacorn Herder",   "count": 3},
+    {"name": "Defy",                "count": 3},
+    {"name": "En Garde",            "count": 3},
+    {"name": "Stacked Deck",        "count": 3},
+    {"name": "Discipline",          "count": 3},
+    {"name": "Emperor's Divide",    "count": 3},
+    {"name": "Feral Strength",      "count": 3},
+    {"name": "Guardian Angel",      "count": 3},
+    {"name": "Zhonya's Hourglass",  "count": 3},
+    {"name": "Heart of Dark Ice",   "count": 3}
+  ]
+}
