@@ -95,8 +95,9 @@ class PykeAgent(Agent):
 
     def _score_move(self, my_side: str, bfs: list) -> int:
         """Score the value of moving a ready base unit to a battlefield."""
-        ready_unit = next((u for u in self.player.base_units if u.ready), None)
-        if ready_unit is None:
+        # Only non-token units can move to a battlefield; a ready token must not
+        # count, or the agent would propose a MOVE the engine refuses.
+        if not self.player.has_movable_base_unit():
             return 0
         # High value: opponent controls a bf we don't
         opp_side = "B" if my_side == "A" else "A"

@@ -123,7 +123,7 @@ class Player:
     def total_runes_in_play(self) -> int:
         return sum(len(runes) for runes in self.rune_pool.values())
 
-    def unlock_runes(self, n: int = 2) -> None:
+    def unlock_runes(self, n: int = 2, *, exhausted: bool = False) -> None:
         """Bring n runes from the deck into play (max 12 total)."""
 
         for _ in range(n):
@@ -132,7 +132,7 @@ class Player:
             rune = self.rune_deck.draw()
             if rune is None:
                 break
-            rune.refresh()
+            rune.ready = not exhausted
             self.rune_pool.setdefault(rune.domain, []).append(rune)
 
     def recycle_rune(self, domain: Domain) -> bool:
@@ -170,10 +170,16 @@ class Player:
             unit.ready = True
 
     def pop_base_unit(self) -> Optional[UnitInPlay]:
+        # Only non-token units may move from base to a battlefield; tokens are
+        # skipped so a ready token can't block a movable unit behind it.
         for idx, unit in enumerate(self.base_units):
-            if unit.ready:
+            if unit.ready and not unit.is_token:
                 return self.base_units.pop(idx)
         return None
+
+    def has_movable_base_unit(self) -> bool:
+        """True if a ready non-token unit is available to move to a battlefield."""
+        return any(u.ready and not u.is_token for u in self.base_units)
 
     def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if self.energy < cost_energy:

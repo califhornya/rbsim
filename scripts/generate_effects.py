@@ -142,11 +142,13 @@ AND gate that effect with `condition: {{"type": "kicker_paid"}}`. Allowed keys:
   {", ".join(_ADDITIONAL_COST_KEYS_SORTED)}.
   `energy`/`power`/`discard_cards` take ints; `kill_friendly_unit`/
   `exhaust_friendly_unit` are bools.
-  Example — "If you paid an additional [1], deal 2 damage to an enemy unit"
-  (Blast Corps Cadet):
+  Cost symbols: a bare bracketed number `[N]` is N energy; a domain symbol like
+  `[fury]`/`[calm]` is 1 POWER of that domain — use the `power` key, not `energy`.
+  Example — "You may pay an additional [fury] to play me. If you did, deal 2
+  damage to an enemy unit" (Blast Corps Cadet):
   {{"effect": "deal_damage", "trigger": "on_play", "amount": 2,
     "target": "enemy_unit", "condition": {{"type": "kicker_paid"}},
-    "additional_cost": {{"energy": 1}}}}.
+    "additional_cost": {{"power": 1}}}}.
   Effects WITHOUT a kicker condition fire normally regardless.
 
 Cost modification (`reduce_cost`) — for static/conditional flat discounts. Use verb "reduce_cost"
@@ -208,8 +210,10 @@ Few-shot examples (from spot-check feedback — follow these patterns):
 5. "here" scoping. If the text says "here" / "a unit here" / "an enemy here" /
    "units here", the resolution location IS this battlefield — use
    `friendly_unit`/`enemy_unit`/`all_friendly_units_here`/`all_enemy_units_here`
-   (those already mean "at the current battlefield"). Do NOT add `here` scope
-   to a target if the text doesn't say "here".
+   (those already mean "at the current battlefield"). When the text DOES say
+   "here", emitting those targets is correct and required — that is a normal
+   parse, not a reason to flag the card. Do NOT add `here` scope to a target
+   if the text doesn't say "here".
    When the text says "at a battlefield" / "to a unit" with no "here", the
    target is a CHOSEN unit (any location) → use `chosen_unit`.
    When the text says "friendly units" / "your units" with NO location qualifier
@@ -229,19 +233,45 @@ Few-shot examples (from spot-check feedback — follow these patterns):
 
 7. Canonical tokens (Recruit 1 might, Sprite 3 might TEMPORARY, Gold 1 might
    TEMPORARY) have FIXED stats. For `play_token` just name the token; do NOT
-   redundantly emit might/keyword/ready fields on the spec.
+   redundantly emit might/keyword fields on the spec. Omitting the redundant
+   stats is a STYLE rule, never a reason to refuse the parse: if the printed
+   token matches a canonical token, emit `play_token` with the `token_name`
+   (plus `ready: true` only when the text says "a ready ... token").
    Text: "[1], [tap]: Play a 1 [might] Recruit unit token."
    → effects: [{{"effect":"play_token","trigger":"activated","timing":"action",
-     "cost":{{"energy":1,"tap":true}},"params":{{"token_name":"Recruit"}}}}]
+     "cost":{{"energy":1,"tap":true}},"token_name":"Recruit"}}]
+   Text: "When you play this, play a ready 3 [might] Sprite unit token with
+   TEMPORARY to your base."
+   → effects: [{{"effect":"play_token","trigger":"on_play",
+     "token_name":"Sprite","ready":true}}]
+   (token_name/ready are flat fields on the effect object, never nested.)
 
 8. Kicker / additional cost — when text says "You may pay [X] as an additional
    cost. If you do, …", put `additional_cost` + `condition: kicker_paid` on the
    gated effect (see "Optional additional cost / kicker" section above).
-   Text: "You may pay [1] [fury] as an additional cost to play me. When you
+   Text: "You may pay [fury] as an additional cost to play me. When you
    play me, if you paid the additional cost, deal 2 to a unit at a battlefield."
    → effects: [{{"effect":"deal_damage","trigger":"on_play","amount":2,
      "target":"enemy_unit","condition":{{"type":"kicker_paid"}},
-     "additional_cost":{{"energy":1}}}}]
+     "additional_cost":{{"power":1}}}}]
+   (Remember: `[fury]` is a power symbol → `power`; a bare `[1]` would be `energy`.)
+
+9. PARTIAL parses are better than empty ones. When a card has several
+   independent abilities and only SOME need unsupported mechanics, parse the
+   supported abilities normally and flag ONLY the unsupported remainder
+   (needs_review: true + suggested_vocab tags). Do not return an empty
+   `effects` list when part of the card is cleanly parseable.
+   Text: "When you play this, draw 1. [1] [calm], [tap], Kill this: Draw 1."
+   → effects: [{{"effect":"draw_cards","trigger":"on_play","count":1}}],
+     needs_review: true, suggested_vocab: ["cost:kill_self"]
+   (the on_play draw is supported; the kill-this activated cost is not)
+   Text: "Deal 5 to a unit. When you conquer, you may discard 1 to return
+   this from your trash to your hand."
+   → effects: [{{"effect":"deal_damage","trigger":"on_cast","amount":5,
+     "target":"chosen_unit"}}],
+     needs_review: true, suggested_vocab: ["cost_gated_trigger",
+     "effect:return_self_from_trash"]
+   (the damage is supported; a cost-gated triggered ability is not)
 
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]
@@ -355,6 +385,9 @@ def read_review_names() -> list[str]:
 
 def select_cards(all_cards: list[dict], args) -> list[dict]:
     cards = all_cards
+    if getattr(args, "names", None):
+        wanted = {n.strip().lower() for n in args.names.split(";") if n.strip()}
+        cards = [c for c in cards if c.get("name", "").lower() in wanted]
     if getattr(args, "retry_review", False):
         names = set(read_review_names())
         cards = [c for c in cards if c.get("name") in names]
@@ -373,6 +406,7 @@ def select_cards(all_cards: list[dict], args) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--set", help="Only cards from this set (e.g. 'Proving Grounds')")
+    ap.add_argument("--names", help="Only these card names, ';'-separated (targeted re-parse)")
     ap.add_argument("--only-empty", action="store_true", help="Only cards lacking structured effects")
     ap.add_argument("--retry-review", action="store_true",
                     help="Only cards currently flagged in review_needed.txt (re-run after a vocab/prompt update)")
@@ -417,8 +451,16 @@ def main() -> int:
     shutil.copy(CARDS_PATH, bak)
     print(f"Snapshot saved to {bak}")
 
-    # review_needed.txt is stale across runs — reset it now (names already read
-    # above by --retry-review). It is rewritten with this run's flags at the end.
+    # review_needed.txt is rewritten with this run's flags at the end. On a full
+    # run it is reset; on a targeted --names run the entries for cards NOT in
+    # this run are preserved (a 5-card re-parse must not wipe the whole list).
+    preserved_review: list[str] = []
+    if getattr(args, "names", None) and REVIEW_PATH.exists():
+        target_names = {c.get("name") for c in targets}
+        preserved_review = [
+            ln for ln in REVIEW_PATH.read_text(encoding="utf-8").splitlines()
+            if ln.strip() and ln.split("\t", 1)[0] not in target_names
+        ]
     REVIEW_PATH.write_text("", encoding="utf-8")
 
     review_lines: list[str] = []
@@ -471,14 +513,22 @@ def main() -> int:
               f"(in={usage.input_tokens} out={usage.output_tokens} "
               f"cache_read={getattr(usage, 'cache_read_input_tokens', 0)})")
 
-    if review_lines:
-        REVIEW_PATH.write_text("\n".join(review_lines) + "\n", encoding="utf-8")
-        print(f"Flagged {len(review_lines)} entries to {REVIEW_PATH}")
+    all_review = preserved_review + review_lines
+    if all_review:
+        REVIEW_PATH.write_text("\n".join(all_review) + "\n", encoding="utf-8")
+        print(f"Flagged {len(review_lines)} entries to {REVIEW_PATH} "
+              f"({len(preserved_review)} preserved from previous runs)")
     if suggested_vocab:
-        vocab_path = Path(__file__).resolve().parent / "suggested_vocab.txt"
-        lines = [f"{count}\t{name}" for name, count in suggested_vocab.most_common()]
-        vocab_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        print(f"Aggregated {len(suggested_vocab)} distinct suggested vocab items to {vocab_path}")
+        if getattr(args, "names", None):
+            # Targeted run: don't clobber the corpus-wide priority queue.
+            print("Suggested vocab from this targeted run (file NOT rewritten):")
+            for name, count in suggested_vocab.most_common():
+                print(f"  {count}\t{name}")
+        else:
+            vocab_path = Path(__file__).resolve().parent / "suggested_vocab.txt"
+            lines = [f"{count}\t{name}" for name, count in suggested_vocab.most_common()]
+            vocab_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            print(f"Aggregated {len(suggested_vocab)} distinct suggested vocab items to {vocab_path}")
 
     print(f"\nDone. Enriched {processed} cards. "
           f"Tokens: in={total_in} out={total_out} cache_read={total_cache_read}")

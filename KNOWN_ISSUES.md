@@ -3,6 +3,37 @@
 Out-of-scope findings logged here instead of being fixed inline (per brief v3
 convention). Each entry: what, where, why deferred.
 
+## Completion-work log (Step 1)
+
+### (FIXED) Action-phase infinite loop / apparent "12s per game"
+- **Was:** a ready **token** in base (e.g. Recruit/Gold) made the Pyke/Diana
+  agents propose `MOVE` every action; the engine silently refuses to move tokens
+  to a battlefield (`loop.py` MOVE branch re-inserts the token and returns), so
+  the action state never changed and the `while True` action loop spun forever.
+  Full games never completed — what looked like "~12s/game slowness" was this
+  hang hitting the harness timeout.
+- **Fix:** (1) engine no-op guard in the action loop — `_action_fingerprint()`
+  compares state before/after each action and ends the action phase if nothing
+  changed (durable: protects against *any* agent proposing an unapplicable
+  action; a precursor to the Step 2 `legal_actions()` work). (2) `pop_base_unit()`
+  now skips tokens + `Player.has_movable_base_unit()`. (3) both agents' `_score_move`
+  use that helper so they don't propose impossible moves. Regression: `tests/test_no_hang.py`.
+- After the fix: 100 seeded games in 0.2s, 0 hangs, avg 14.3 turns.
+
+### (DEFERRED) Gear collapses play-cost and equip-cost
+- The engine pays EQUIP from the gear card's `cost_energy`/`cost_power` fields
+  (`loop.py` equip branch), the SAME fields used to play the gear from hand — so
+  a gear's printed EQUIP cost (e.g. `EQUIP [1][fury]` = 2) is not modeled
+  separately from its play cost. The parsed `EQUIP N` keyword is cosmetic to the
+  engine (never read on the pay path); `scripts/audit_equip.py` now keeps that
+  keyword consistent with the printed text (6 fixed), for display/future use.
+- Deferred: modeling a distinct equip cost is an engine-semantics change; revisit
+  after the Step 2 refactor lands the golden-game fixture.
+
+### (NOTE) Pyke-vs-Diana winrate is ~66% Diana
+- Not a correctness bug — a heuristic-agent/deck balance artifact. The Step 4
+  agents (Greedy/ISMCTS) replace these hand-tuned bots; revisit balance then.
+
 ## 0. (FIXED) Unit on_play effects never resolved
 - **Was:** the UNIT play branch only called `_resolve_card_effects` when
   `LEGION and cards_played>0`, so every non-LEGION unit's "When you play me…"

@@ -730,13 +730,9 @@
     ],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "kill_gear",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "battlefield",
-        "target_filter": {
-          "is_gear": true
-        },
         "scope": "all"
       }
     ]
@@ -3277,10 +3273,10 @@
         "target": "friendly_unit"
       },
       {
-        "effect": "add_rune",
+        "effect": "channel_rune",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "opponent",
+        "target": "actor",
         "amount": 1,
         "exhausted": true
       }
@@ -9107,7 +9103,11 @@
       {
         "effect": "return_from_trash",
         "trigger": "on_play",
-        "target": "chosen_spell"
+        "target": "actor",
+        "count": 1,
+        "target_filter": {
+          "is_spell": true
+        }
       }
     ]
   },
@@ -10353,7 +10353,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -10386,7 +10386,7 @@
         "token_name": "Sand Soldier",
         "might": 2,
         "count": 1,
-        "target": "battlefield"
+        "target": "actor"
       }
     ]
   },
@@ -11204,7 +11204,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -12045,7 +12045,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -12802,7 +12802,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 2"
     ],
     "effects": [
       {
@@ -16219,7 +16219,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -21221,7 +21221,7 @@
       }
     ],
     "keywords": [
-      "EQUIP 3"
+      "EQUIP 4"
     ],
     "effects": []
   },

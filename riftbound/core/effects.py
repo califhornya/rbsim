@@ -69,6 +69,14 @@ def _add_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.add_rune(domain, target=target, ready=ready)
 
 
+@effect("channel_rune")
+def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Channel runes from the rune deck into play ('channel N rune(s)[, exhausted]')."""
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    count = int(spec.get("count", spec.get("amount", 1)))
+    player.unlock_runes(count, exhausted=_coerce_bool(spec.get("exhausted", False)))
+
+
 @effect("grant_temporary_might")
 def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = _amount(ctx, spec)
@@ -283,11 +291,19 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     return True
 
 
+# Targets that mean "units on both sides of this battlefield" (board-wide
+# spells like 'Kill all units' / 'return all units with 2 [might] or less').
+_BOTH_SIDES_TARGETS = {"battlefield", "both", "both_players", "everyone", "all_units"}
+
+
 def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
     """Return the list of units an effect should hit, honoring target + scope + target_filter."""
     target = str(spec.get("target", "actor"))
     scope = str(spec.get("scope", "single")).lower()
-    units = ctx._units_for_target(target)
+    if target.lower() in _BOTH_SIDES_TARGETS:
+        units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
+    else:
+        units = ctx._units_for_target(target)
     tf = spec.get("target_filter")
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
@@ -356,15 +372,37 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
 
 @effect("kill_unit")
 def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    target = str(spec.get("target", "enemy_unit"))
-    side = _target_side(ctx, target)
-    units = _bf_units(ctx, side)
-    owner = ctx.loop.gs.get_player(side)
-    for unit in _resolve_targets(ctx, spec):
-        if unit in units:
-            units.remove(unit)
-            owner.trash.append(unit.card)
-            owner.base_gear.extend(unit.gear)
+    gs = ctx.loop.gs
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}):
+        # The owner is found per unit so both-sides targets route each card to
+        # the right trash.
+        for side in ("A", "B"):
+            units = _bf_units(ctx, side)
+            if unit in units:
+                units.remove(unit)
+                owner = gs.get_player(side)
+                owner.trash.append(unit.card)
+                owner.base_gear.extend(unit.gear)
+                break
+
+
+@effect("kill_gear")
+def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Destroy gear in play ('Kill all gear'): attached gear anywhere plus
+    unattached base gear goes to its owner's trash."""
+    gs = ctx.loop.gs
+    for side in ("A", "B"):
+        player = gs.get_player(side)
+        in_play = [u for bf in gs.battlefields
+                   for u in (bf.units_A if side == "A" else bf.units_B)]
+        in_play.extend(player.base_units)
+        for u in in_play:
+            if u.gear:
+                player.trash.extend(u.gear)
+                u.gear.clear()
+        if player.base_gear:
+            player.trash.extend(player.base_gear)
+            player.base_gear.clear()
 
 
 @effect("heal_unit")
@@ -375,23 +413,36 @@ def _heal_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("recall_unit")
 def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    target = str(spec.get("target", "actor"))
-    side = _target_side(ctx, target)
-    units = _bf_units(ctx, side)
-    player = ctx.loop.gs.get_player(side)
-    for unit in _resolve_targets(ctx, spec):
-        if unit in units:
-            units.remove(unit)
-            unit.ready = True
-            unit.reset_damage()
-            player.base_units.append(unit)
+    """Return units to their owner's hand. Every recall_unit card reads
+    'return ... to its owner's hand': the card leaves play (tokens cease to
+    exist) and attached gear is recovered to the owner's base."""
+    gs = ctx.loop.gs
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+        for side in ("A", "B"):
+            units = _bf_units(ctx, side)
+            if unit in units:
+                units.remove(unit)
+                owner = gs.get_player(side)
+                owner.base_gear.extend(unit.gear)
+                unit.gear = []
+                if not getattr(unit, "is_token", False):
+                    owner.hand.append(unit.card)
+                break
 
 
 @effect("move_unit")
 def _move_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     # Minimal: move target friendly unit from current BF to its base (the only
     # destination we can resolve without an explicit target lane from the agent).
-    _recall_unit(ctx, {**spec, "target": spec.get("target", "actor")})
+    side = ctx.actor_side
+    units = _bf_units(ctx, side)
+    player = ctx.loop.gs.get_player(side)
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+        if unit in units:
+            units.remove(unit)
+            unit.ready = True
+            unit.reset_damage()
+            player.base_units.append(unit)
 
 
 @effect("give_keyword")
@@ -438,6 +489,12 @@ def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             break
         if "tag" in tf and tf["tag"] not in getattr(card, "tags", []):
             continue
+        if "card_type" in tf and _card_category_name(card) != str(tf["card_type"]).upper():
+            continue
+        if tf.get("is_spell") and _card_category_name(card) != "SPELL":
+            continue
+        if tf.get("is_unit") and _card_category_name(card) not in ("UNIT", "CHAMPION", "LEGEND"):
+            continue
         player.trash.remove(card)
         player.hand.append(card)
         moved += 1
@@ -461,9 +518,10 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     from .movement_effects import _spawn_token_to_base
     token_name = str(spec.get("token_name", "Recruit"))
     count = int(spec.get("count", spec.get("amount", 1)))
+    ready = _coerce_bool(spec.get("ready", False))
     player = ctx._player_for_target(str(spec.get("target", "actor")))
     for _ in range(count):
-        _spawn_token_to_base(player, token_name, ready=False)
+        _spawn_token_to_base(player, token_name, ready=ready)
 
 
 @effect("attach_gear")

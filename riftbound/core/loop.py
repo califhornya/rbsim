@@ -765,6 +765,32 @@ class GameLoop:
                     return u
         return None
 
+    def _action_fingerprint(self, ap: Player, op: Player):
+        """Cheap signature of everything a turn action can change. Used by the
+        action loop to detect a no-op (an action the engine silently refuses) so
+        the agent can't spin on it forever."""
+        gs = self.gs
+
+        def player_sig(p: Player):
+            return (
+                len(p.hand), len(p.deck.cards), len(p.trash), len(p.banished),
+                len(p.base_units), len(p.base_gear), p.energy,
+                tuple(sorted((d.name, n) for d, n in p.power_pool.items())),
+                p.total_runes_in_play(),
+                tuple(sorted(u.card.name for u in p.base_units if u.ready)),
+            )
+
+        board = tuple(
+            (len(bf.units_A), len(bf.units_B),
+             sum(u.might for u in bf.units_A), sum(u.might for u in bf.units_B))
+            for bf in gs.battlefields
+        )
+        return (
+            player_sig(ap), player_sig(op), board,
+            gs.points_A, gs.points_B, len(gs.chain),
+            gs.get_xp("A"), gs.get_xp("B"),
+        )
+
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
@@ -1636,6 +1662,7 @@ class GameLoop:
 
             # Multi-action turn loop
             cards_played_this_turn = 0
+            actions_this_turn = 0
             while True:
                 if ap.agent is None:
                     act: Action = ("PASS", None, None)
@@ -1645,8 +1672,23 @@ class GameLoop:
                     if self.verbose:
                         print(f"  {ap.name} passes")
                     break
+                # No-op guard: if an action leaves the game state unchanged it can
+                # never be "used up", so an agent that keeps proposing it (e.g. a
+                # MOVE the engine silently refuses) would loop forever. Treat an
+                # action that makes no progress as an implicit PASS. The absolute
+                # cap is a belt-and-suspenders bound; real turns play far fewer.
+                before = self._action_fingerprint(ap, op)
                 self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
                 self._recompute_passives()
+                actions_this_turn += 1
+                if self._action_fingerprint(ap, op) == before:
+                    if self.verbose:
+                        print(f"  {ap.name} no-op action {act} — ending action phase")
+                    break
+                if actions_this_turn > 200:
+                    if self.verbose:
+                        print(f"  {ap.name} hit action cap — ending action phase")
+                    break
                 cards_played_this_turn += 1
                 gs.cards_played_this_turn[gs.active] = cards_played_this_turn
 
