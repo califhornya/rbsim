@@ -2,24 +2,17 @@ import typer
 from rich import print
 import random
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from riftbound.core.models import GameConfig
-from riftbound.core.cards import Card
-from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.loop import GameLoop
-from riftbound.registry.cards_registry import load_deck_json
+from riftbound.core.game_factory import AI_REGISTRY, build_game
 
 # DB logging
 from riftbound.data.analytics import summarize_session
 from riftbound.data.session import make_session
 from riftbound.data.writer import GameRecorder, record_game
-
-# Agents
-from riftbound.ai.heuristics.pyke_agent import PykeAgent
-from riftbound.ai.heuristics.diana_agent import DianaAgent
-from riftbound.ai.heuristics.simple_trade_agent import SimpleTradeAgent
 
 
 app = typer.Typer(help="Riftbound Simulator CLI")
@@ -70,28 +63,6 @@ def analyze(
                 f"  {usage.card_name} ({usage.action}): {usage.plays} plays"
             )
 
-def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card]]:
-    """Load a deck, rune deck, and champion card from a JSON file."""
-    specs, rune_entries, champion_spec = load_deck_json(path)
-    cards: List[Card] = [spec.instantiate() for spec in specs]
-    runes: List[Rune] = []
-    for domain, count in rune_entries:
-        runes.extend(Rune(domain=domain) for _ in range(count))
-    champion = champion_spec.instantiate() if champion_spec is not None else None
-    return Deck(cards=cards), RuneDeck(runes=runes), champion
-
-AI_REGISTRY = {
-    "pyke": PykeAgent,
-    "diana": DianaAgent,
-    "simple_trade": SimpleTradeAgent,
-}
-
-def make_agent(name: str, player: Player):
-    key = name.strip().lower()
-    if key not in AI_REGISTRY:
-        raise typer.BadParameter(f"Unknown AI '{name}'. Available: {', '.join(AI_REGISTRY.keys())}")
-    return AI_REGISTRY[key](player)
-
 @app.command()
 def simulate(
     games: int = typer.Option(100, help="Number of games to simulate"),
@@ -113,6 +84,12 @@ def simulate(
     Two-battlefield Hold/Conquer scoring with simple combat and pluggable agents.
     Adds Rune Channeling/Energy & costs; COMBAT resolves after ACTION.
     """
+    for label, name in (("--aiA", ai_a), ("--aiB", ai_b)):
+        if name.strip().lower() not in AI_REGISTRY:
+            raise typer.BadParameter(
+                f"Unknown AI '{name}'. Available: {', '.join(AI_REGISTRY.keys())}",
+                param_hint=label,
+            )
     if seed is None:
         seed = random.randrange(1 << 30)  # fresh game each run; echoed below for replay
     config = GameConfig(games=games, seed=seed, record_draws=False)
@@ -140,65 +117,25 @@ def simulate(
     base_rng = random.Random(config.seed)
 
     for i in range(config.games):
-        # independent RNG per game
+        # independent RNG per game, derived off the master seed
         game_seed = base_rng.randrange(1 << 30)
-        rng = random.Random(game_seed)
 
-        # Decks & shuffle
-        rune_rng_a = random.Random(rng.randrange(1 << 30))
-        rune_rng_b = random.Random(rng.randrange(1 << 30))
-
-        champion_a: Optional[Card] = None
-        champion_b: Optional[Card] = None
-
-        deckA, rune_deck_a, champion_a = make_deck_from_file(deck_a)
-        rune_rng_a.shuffle(rune_deck_a.runes)
-
-        deckB, rune_deck_b, champion_b = make_deck_from_file(deck_b)
-        rune_rng_b.shuffle(rune_deck_b.runes)
-
-        deckA.shuffle(rng)
-        deckB.shuffle(rng)
-
-        A = Player(
-            name="A",
-            hp=10,
-            deck=deckA,
-            energy=starting_energy,
-            rune_deck=rune_deck_a,
-        )
-        B = Player(
-            name="B",
-            hp=10,
-            deck=deckB,
-            energy=starting_energy,
-            rune_deck=rune_deck_b,
-        )
-
-        # Agents
-        A.agent = make_agent(ai_a, A)
-        B.agent = make_agent(ai_b, B)
-
-        # Choose the starting player. Drawn from the per-game rng AFTER the deck
-        # shuffles, so a given seed keeps identical deck order — only who goes
-        # first changes. Riftbound rewards going first (the die-roll winner almost
-        # always elects to start), so randomizing removes the fixed A-first bias.
-        fp = first_player.strip().lower()
-        if fp == "random":
-            starter = rng.choice(["A", "B"])
-        elif fp in ("a", "b"):
-            starter = fp.upper()
-        else:
-            starter = "A"
-
-        # Game
-        gs = GameState(
-            rng=rng, A=A, B=B,
-            turn=1, max_turns=40, active=starter,
+        # Build a fully-seeded game via the shared factory. The RNG derivation
+        # (rune RNGs, deck shuffles, seeded starter) lives there so the CLI, the
+        # golden-game fixture, and the web layer all construct games identically.
+        gs = build_game(
+            game_seed=game_seed,
+            deck_a_path=deck_a,
+            deck_b_path=deck_b,
+            ai_a=ai_a,
+            ai_b=ai_b,
             victory_score=victory_score,
-            champion_A=champion_a,
-            champion_B=champion_b,
+            starting_energy=starting_energy,
+            first_player=first_player,
+            max_turns=40,
         )
+        starter = gs.active
+
         recorder = None
         game_id = None
         if session:
@@ -211,8 +148,8 @@ def simulate(
                 total_spells=0,
             )
             recorder = GameRecorder(session, game_id)
-            recorder.record_deck("A", deckA.cards, ai_name=ai_a)
-            recorder.record_deck("B", deckB.cards, ai_name=ai_b)
+            recorder.record_deck("A", gs.A.deck.cards, ai_name=ai_a)
+            recorder.record_deck("B", gs.B.deck.cards, ai_name=ai_b)
 
         result = GameLoop(gs, recorder=recorder, verbose=verbose).start()
 

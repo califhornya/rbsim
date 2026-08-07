@@ -34,6 +34,35 @@ convention). Each entry: what, where, why deferred.
 - Not a correctness bug — a heuristic-agent/deck balance artifact. The Step 4
   agents (Greedy/ISMCTS) replace these hand-tuned bots; revisit balance then.
 
+## Step 2 findings (surfaced by the parity-oracle / invariant work)
+
+### (DEFERRED) Resolved spells are never put into the trash
+- **Where:** `loop.py` `_run_chain` resolution loop (~:1407-1422) and the main-phase
+  SPELL branch (`_apply_action`, ~:914-919). A cast spell is removed from hand and
+  placed on the chain; after its effects resolve, the card is dropped — it is never
+  appended to `owner.trash` (or banished). So spell card objects leave every zone.
+- **Impact:** breaks strict card conservation (each game "loses" its cast spells);
+  also means trash-count conditions / recursion (`card_in_trash_count_at_least`,
+  return-from-trash) undercount by the spells that should be there. Units, gear and
+  champions ARE routed to trash correctly, so only spells are affected.
+- **Deferred:** it's a card-lifecycle fix, not part of the pausable-engine refactor.
+  `tests/test_invariants.py` encodes the current reality (only spells may vanish) so
+  a regression that starts leaking *non-spell* cards fires immediately. Fix later by
+  appending the spell card to `owner.trash` after resolution in `_run_chain`.
+
+### (DEFERRED) Baron Nashor's add_battlefield duplicates the played card
+- **Where:** `effects.py` `_add_battlefield` (~:675-694). Baron Nashor's on-play
+  effect creates a new `Battlefield`, sets `bf.card = ctx.card`, and spawns a
+  `UnitInPlay(card=ctx.card)` on it — but the same played card object also remains
+  reachable from the player's hand, so one `Card` occupies two zones (hand +
+  battlefield) at once (observed at `tests/test_invariants.py` seed 1, pyke vs diana).
+- **Impact:** card aliasing / duplication for this one card mechanic. Deterministic,
+  so the golden fixture pins the (buggy) end-state; the invariant test therefore does
+  NOT assert global "one card, one zone" — it would fail on this pre-existing bug.
+- **Deferred:** card-mechanic fix, out of scope for Step 2. Revisit with the Step 3
+  card-completion work; likely the UNIT play path's hand-removal and the on-play
+  battlefield spawn need reconciling (remove the played card from hand exactly once).
+
 ## 0. (FIXED) Unit on_play effects never resolved
 - **Was:** the UNIT play branch only called `_resolve_card_effects` when
   `LEGION and cards_played>0`, so every non-LEGION unit's "When you play me…"

@@ -24,7 +24,7 @@ DECK_DIR = Path(__file__).resolve().parent.parent / "riftbound" / "data" / "deck
 
 
 def _build_game(seed: int) -> GameState:
-    from riftbound.cli.main import make_deck_from_file, make_agent
+    from riftbound.core.game_factory import make_deck_from_file, make_agent
 
     rng = random.Random(seed)
     dA, rA, cA = make_deck_from_file(DECK_DIR / "fury_chaos_pyke.json")
