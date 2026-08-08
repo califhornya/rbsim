@@ -34,7 +34,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["TEMPORARY", "DEATHKNELL"]
 **Status:** EMPTY (flagged)
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -52,7 +52,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["REACTION"]
 **Status:** EMPTY (flagged — expected, `gain_power` verb not yet in engine)
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -71,7 +71,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["EQUIP 1"]
 **Status:** EMPTY (flagged — `EQUIP 1` fix landed, but the rest needs engine work)
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -89,7 +89,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["REACTION", "REPEAT"]
 **Status:** EMPTY — REPEAT + REACTION captured as keywords, but "give your Mechs +N might" needs `target_filter:{subtype:"Mech"}` + an all-friendlies-anywhere target that doesn't exist yet.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -107,7 +107,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** EMPTY — exactly the case my few-shot example targeted; "all friendlies anywhere" needs a new engine target.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -125,7 +125,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["REPEAT"]
 **Status:** EMPTY — "choose one" not engine-supported; correctly flagged.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -152,7 +152,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** POPULATED ✓ — B1 kicker fully wired. Note: `additional_cost.power: 1` reflects the [1] [fury] reading as a POWER cost (which it is). My few-shot example in the prompt used `energy` — that was misleading; the model picked the more accurate `power` key anyway.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -172,7 +172,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** EMPTY — regression vs round 1's populated parse. Likely the prompt's "don't add `here` unless text says so" guidance conflicted with the actual text which DOES say "here". Suspect over-flagging.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -197,7 +197,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** POPULATED — switched from `buff_unit` to `grant_might`, dropped `duration: permanent` (addresses your concern).
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -222,7 +222,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []  *(was ["GANKING"] in round 1)*
 **Status:** POPULATED — fixed: GANKING no longer (incorrectly) on the battlefield's own keywords.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -247,7 +247,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** POPULATED — identical to round 1 (your concern was an engine question, not a parse error).
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -265,7 +265,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** EMPTY — the activated cost includes `kill_self` which isn't a known activated-cost key (engine parses 6 keys; `kill_self` is not one of them). Possibly over-conservative: the on_play `draw 1` alone is parseable.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -288,7 +288,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["EQUIP 1"]
 **Status:** POPULATED — `EQUIP 1` corrected (was 2); `target: enemy_unit` IS the "here" semantics per the parser convention (the engine resolves `enemy_unit` against the current battlefield).
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -308,7 +308,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["EQUIP 1", "ASSAULT 2"]
 **Status:** EMPTY but probably FLAGGED_OK — `EQUIP 1` corrected; equipped effect is a pure keyword grant (ASSAULT 2) so empty `effects[]` is arguably correct (engine grants ASSAULT via the gear's keywords on attach).
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -334,7 +334,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** POPULATED — fixed exactly as you asked: just `token_name`, no redundant might.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -352,7 +352,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** EMPTY — regression. Round 1 had both effects parsed. The `return_from_trash` cost mechanism (`additional_cost: {discard_cards: 1}` on a trigger:on_conquer effect) may have triggered the flag if the prompt didn't connect that pattern.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok, not sure
 **Notes:**
 
 ---
@@ -372,7 +372,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** ["REPEAT"]
 **Status:** POPULATED — exactly your request: bare `REPEAT` keyword; engine defaults REPEAT cost to `card.cost_energy` (tested via `tests/test_repeat_cost.py`).
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** seems ok
 **Notes:**
 
 ---
@@ -390,7 +390,7 @@ Then run `uv run python scripts/spot_check_summary.py` against this file too.
 **New parsed keywords:** []
 **Status:** EMPTY — regression. Round 1 had both `play_token` triggers parsed. The reinforced prompt's "omit redundant token specs" guidance may have caused over-flagging when the model couldn't decide what to keep.
 
-**Round 2 Verdict:** ⬜ TODO
+**Round 2 Verdict:** not sure
 **Notes:**
 
 ---
