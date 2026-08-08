@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING
 import random
@@ -72,3 +73,50 @@ class GameState:
             self.xp_A += amount
         else:
             self.xp_B += amount
+
+    def clone(self) -> "GameState":
+        """A deep, independent copy of the game state — the primitive search
+        (MCTS) and speculative "what if I play this?" evaluation build on.
+
+        Agents are deliberately dropped (the clone's players have ``agent=None``):
+        an agent back-references its ``GameLoop`` and, through it, the DB recorder
+        / SQLAlchemy session, none of which are copyable or meaningful on a clone.
+        Everything else — cards, units, runes, battlefields, chain, counters, and
+        the RNG (copied with its current state) — is duplicated, so mutating the
+        clone never touches the original.
+        """
+        memo: dict[int, object] = {}
+        # Pre-seed the memo so deepcopy substitutes None for each agent instead of
+        # recursing into the loop/recorder graph hanging off it.
+        for player in (self.A, self.B):
+            if player.agent is not None:
+                memo[id(player.agent)] = None
+        return copy.deepcopy(self, memo)
+
+
+def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameState":
+    """Randomise the information hidden from ``observer``, in place, for ISMCTS.
+
+    From the observer's seat the opponent's hand *contents* and both players' deck
+    *orders* are unknown. We keep counts and every public fact (board, trash,
+    points, energy, the observer's own hand) fixed, and resample the hidden parts:
+
+    * the opponent's hand is redealt from their unseen pool (their current hand +
+      deck), so it stays the right size but its identities are randomised;
+    * both decks are shuffled (the observer knows neither order).
+
+    Mutates and returns ``gs`` (normally a :meth:`GameState.clone`). Card objects
+    are only moved between the opponent's own zones, so conservation is preserved.
+    """
+    me = gs.get_player(observer)
+    opp = gs.get_player(gs.other(observer))
+
+    pool = list(opp.hand) + list(opp.deck.cards)
+    rng.shuffle(pool)
+    n_hand = len(opp.hand)
+    opp.hand = pool[:n_hand]
+    opp.deck.cards = pool[n_hand:]
+
+    rng.shuffle(me.deck.cards)
+    rng.shuffle(opp.deck.cards)
+    return gs
