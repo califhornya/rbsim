@@ -63,6 +63,26 @@ convention). Each entry: what, where, why deferred.
   card-completion work; likely the UNIT play path's hand-removal and the on-play
   battlefield spawn need reconciling (remove the played card from hand exactly once).
 
+### (DEFERRED) No stepwise engine → MCTS can't expand arbitrary mid-game nodes
+- **What:** the pausable-engine work (Step 2) delivered `GameState.clone()`,
+  `legal_actions()`, `determinize()`, and a thread-backed `SessionDriver`. Those
+  cover MCTS **1-ply / full-rollout** search (clone → `_apply_action` → evaluate)
+  and interactive web play. What they do NOT cover: continuing a game from a
+  *cloned mid-game state* through the begin/draw/showdown/combat phases — the
+  phase engine (`GameLoop.start`) still only runs a whole game start→finish, and a
+  thread/generator frame isn't cloneable.
+- **Impact:** if Step 4's ISMCTS needs deep information-set trees (expanding node
+  after node), rather than root-parallel rollouts, it needs a **stepwise engine**:
+  move all "where am I in the game" state into `GameState` (a phase/decision
+  cursor) and expose `advance(gs, action) -> gs'`, so a clone can be advanced one
+  decision at a time. That is a substantial rewrite of the phase structure and was
+  deliberately deferred (the golden fixture only weakly protects the reaction/
+  showdown paths, which stub agents don't exercise).
+- **Recommendation:** start ISMCTS with Greedy-policy full rollouts on clones
+  (already supported); build the stepwise engine only if measured strength needs
+  deeper trees. Do it behind the golden fixture, and add reaction/showdown-heavy
+  fixtures first so the refactor is actually covered.
+
 ## 0. (FIXED) Unit on_play effects never resolved
 - **Was:** the UNIT play branch only called `_resolve_card_effects` when
   `LEGION and cards_played>0`, so every non-LEGION unit's "When you play me…"

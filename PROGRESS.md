@@ -111,3 +111,51 @@ in KNOWN_ISSUES #0/#0b for spec-level fixes.
 B1 (additional_cost/kicker) and B2 (more filters/amount_sources) — deferred. B1
 is gated on a green spot-check. Decided defaults recorded for later: kicker =
 never auto-pay; see KNOWN_ISSUES for open rules questions.
+
+## Step 2 — Pausable engine + search primitives (DONE)
+Goal: make the engine consumable by search (Step 4) and an interactive web layer
+(Step 5) without changing how a game plays out. **Every change is additive and
+behaviour-preserving** — the CLI's seed-42 pyke-vs-diana still reports
+A11/B19/avg-15.27, and the golden fixture reproduces byte-identically. Tests:
+**54 → 112**.
+
+- **Parity oracle first.** `riftbound/core/game_factory.py` extracts the
+  deterministic game builder (`build_game` + deck/agent helpers) out of the CLI,
+  which now delegates to it (RNG derivation byte-identical, verified). Frozen the
+  `tests/golden_games.json` fixture: 21 seeded games across all 3 decks / 3 agents,
+  each pinned to a detailed end-state signature (`tests/test_golden_games.py`,
+  regenerate with `RBSIM_REGEN_GOLDEN=1`). Added `tests/test_invariants.py`
+  (no phantom cards, non-spell card conservation, non-negative resources per
+  action, empty chain between actions).
+- **Typed decision protocol** (`riftbound/core/decisions.py`): `DecisionPoint`,
+  `GameAction` (round-trips to the raw engine tuple), `Observation` (information
+  set — hides opponent hand contents + both deck orders, fixing the full-Player
+  info leak for new agents), `DecisionRequest`. All JSON-serialisable.
+- **`legal_actions()`** (`riftbound/core/legality.py`): the validity checks that
+  were implicit in `_apply_action`, made explicit and reusing the engine's own
+  cost helpers (no drift). Tested **sound** (every card-play/move/champion action
+  moves the engine fingerprint) and **complete** (every progress-making
+  heuristic-agent move is offered) across full games.
+- **Search primitives** (`riftbound/core/state.py`): `GameState.clone()`
+  (deep, drops agents, ~1 ms) and `determinize(gs, observer, rng)` for ISMCTS.
+- **Pausable driver** (`riftbound/core/drivers.py`): `SyncDriver` (inline, ==
+  `GameLoop.start`) and `SessionDriver` (runs the loop on a background thread,
+  routes the human seat through a queue-backed `RemoteAgent`, surfaces one
+  `DecisionRequest` at a time via `pending()/state()/submit()/is_over()`).
+
+### Deviation from the plan + what it leaves for Step 4
+The plan called for a *generator* engine (`start()` yields, resume via `.send()`).
+Delivered the same pause/resume **contract** with a thread-backed `SessionDriver`
+instead, because a generator frame isn't cloneable (so it wouldn't help search —
+search uses `clone()` + `legal_actions()`), and threading `yield` through the
+nested phase methods is the highest-risk change with the weakest test coverage
+(reaction/showdown paths are stubbed in the fixture).
+
+Consequence for Step 4: MCTS **1-ply / full-rollout** works today
+(clone → `_apply_action` → evaluate, exactly the Greedy recipe). What is **not**
+yet possible is expanding an *arbitrary mid-game node* of the real engine
+(continuing a game from a cloned mid-state through the begin/draw/showdown/combat
+phases), because the phase engine still only runs start→finish. If ISMCTS needs
+deep trees rather than root rollouts, the remaining work is a **stepwise /
+state-machine engine** (progress cursor lives in `GameState`, `advance(gs, action)`
+is a pure step) — the larger refactor deliberately deferred here. See KNOWN_ISSUES.
