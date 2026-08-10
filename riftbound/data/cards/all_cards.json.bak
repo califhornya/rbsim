@@ -185,7 +185,21 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 3,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "action",
+        "count": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-006",
@@ -1061,7 +1075,15 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 6,
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-035",
@@ -2092,7 +2114,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "activated",
+        "timing": "action",
+        "amount_source": "self_might",
+        "target": "chosen_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-069",
@@ -3651,7 +3684,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play_spell",
+        "token_name": "Recruit"
+      }
+    ]
   },
   {
     "card_id": "OGN-118",
@@ -4327,7 +4366,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "target_filter": {
+          "subtype": "Dragon"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-141",
@@ -4730,7 +4778,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_cast",
+        "target": "opponent",
+        "target_filter": {
+          "card_type": "SPELL"
+        }
+      },
+      {
+        "effect": "recycle_card",
+        "trigger": "on_cast",
+        "target": "opponent"
+      }
+    ]
   },
   {
     "card_id": "OGN-157",
@@ -5997,7 +6059,25 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "you_discarded_card_this_turn"
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "you_discarded_card_this_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-203",
@@ -6768,7 +6848,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_friendly_unit_death",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-229",
@@ -7446,7 +7536,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_friendly_unit_played",
+        "target_filter": {
+          "is_mighty": true
+        },
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-250",
@@ -7524,7 +7626,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 5,
+        "target": "chosen_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-253",
@@ -7912,7 +8021,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "return_from_trash",
+        "trigger": "on_cast",
+        "target_filter": {
+          "has_keyword": "HIDDEN"
+        },
+        "count": 2
+      }
+    ]
   },
   {
     "card_id": "OGN-265",
@@ -10787,7 +10905,13 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
     "keywords": []
   },
   {
@@ -11312,7 +11436,24 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play_spell",
+        "timing": "reaction",
+        "condition": {
+          "type": "you_played_n_spells_this_turn",
+          "params": {
+            "n": 1
+          }
+        },
+        "token_name": "Gold",
+        "cost": {
+          "tap": true
+        },
+        "trigger_override": "on_play_spell"
+      }
+    ]
   },
   {
     "card_id": "SFD-064",
@@ -13009,7 +13150,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_defend",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-127",
@@ -13980,7 +14127,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_play",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "kill_friendly_unit": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-161",
@@ -14739,7 +14897,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "count": 2
+      }
+    ]
   },
   {
     "card_id": "SFD-189",
@@ -18198,7 +18362,14 @@
     "keywords": [
       "ACCELERATE"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_move",
+        "token_name": "Sprite",
+        "ready": true
+      }
+    ]
   },
   {
     "card_id": "UNL-083",
@@ -18908,7 +19079,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell"
+      }
+    ]
   },
   {
     "card_id": "UNL-107",
@@ -19758,7 +19936,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-134",
@@ -21432,7 +21616,18 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "enemy_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-195",
