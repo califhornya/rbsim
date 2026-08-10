@@ -171,3 +171,107 @@ Recurring parser errors identified from the human verdicts in
   not dispatched yet. The parser still emits them (correct) and tags
   `aura:reduce_cost` in suggested_vocab so we can measure coverage before
   building the general dispatch (out of scope for v3 phase A).
+
+## 5. BUFF (object) vs raw might modifier — engine conflates them (found in spot-check R2)
+- **What:** English "buff" collapses two DIFFERENT Riftbound concepts:
+  1. A **Buff** = a specific object placed on a unit, **max 1 per unit, non-stacking**,
+     spendable, checkable (`is_buffed`). Example: **Arena Bar**.
+  2. A raw **"+N might (this turn)" modifier** — freely additive, no object, no
+     one-per-unit limit. Examples: **Discipline**, **Grand Strategem** ("+5 might").
+- **Where:** `riftbound/core/effects.py` `_buff_unit` (~:195) models concept (1):
+  `if unit.might_counters < 1: unit.might_counters += 1` — non-stacking, ignores
+  `amount`. `spend_buff`, filter `is_buffed`, condition `this_is_buffed` all build
+  on this same counter — consistent with the Buff-OBJECT reading.
+- **Problem:** there is currently **NO verb for concept (2)** (raw temporary might
+  modifier). Cards like Grand Strategem / Discipline have nowhere correct to parse.
+  Using `buff_unit` for them is WRONG: caps at +1, places a Buff object, and would
+  wrongly satisfy `is_buffed`.
+- **CORRECTION (found at card 9):** the raw-modifier verb ALREADY EXISTS —
+  `grant_might` (effects.py:31, honors `amount`, folds into passive_might overlay
+  when trigger=passive; contrast buff_unit which caps at 1 and sets might_counters).
+  Negative side also exists: `debuff_might` (effects.py:99), and `grant_might`
+  accepts negative `amount` too (no zero floor in loop.py:134 grant_might). So this
+  is NOT a missing-verb problem — it's a PARSER-ROUTING problem.
+- **Fix (Step 3) — per user, the clean verb set is:**
+  - `buff_unit` = place a BUFF OBJECT (max 1, might_counters). KEEP.
+  - `grant_might` = raw +N might (Discipline, Grand Strategem). Already exists,
+    honors amount, folds as passive. Handles NEGATIVE amount too, so it also
+    covers "-N might" (Stupefy). USE THIS for raw might up OR down.
+  - `debuff_might` (effects.py:99): user says USELESS — do not route cards to it.
+    grant_might(negative) is the canonical raw-reduction path. Deprecate/remove
+    debuff_might.
+  - `spend_buff` (effects.py:202): removes a BUFF counter as a COST, default
+    FRIENDLY ("spend a buff to ..."). KEEP as-is for costs.
+  - `debuff_unit` = NEW verb the user wants, DOES NOT EXIST yet: remove a BUFF
+    TOKEN from a unit as an EFFECT (can target an ENEMY's buffed unit). Distinct
+    from spend_buff (that's your own buff, paid as a cost). Same state poke
+    (might_counters -= 1) but different semantics + default target (enemy/chosen).
+  - Parser routing: "place a buff / gets a +1 buff" -> buff_unit; "gets +N/-N
+    might" -> grant_might; "spend a buff (cost)" -> spend_buff; "remove a buff
+    from a unit (effect)" -> debuff_unit (once built).
+  - Tests: raw grant_might +/- must NOT set is_buffed; buff_unit must; debuff_unit
+    removes a buff from an enemy unit without being a cost.
+
+## 6. No location filter on targets — "at a battlefield" vs "in base" indistinguishable
+- **What:** target resolution (`effects.py` `_resolve_targets` ~:299 +
+  `target_filter` via `_passes_filter`) selects by SIDE and by unit PROPERTIES
+  (is_buffed, is_mighty, subtype, etc.) but has no concept of unit LOCATION.
+  Cards that restrict to "a unit at a battlefield" (excludes base) or "in a base"
+  cannot express that restriction — the target is silently too broad.
+- **Found via:** Blast Corps Cadet ("deal 2 to a unit at a battlefield") parsed
+  with target `chosen_unit` — would wrongly allow hitting a base unit.
+- **Also relevant to:** Rocket Barrage ("a unit in a base" — the opposite
+  restriction), and likely others.
+- **REFINEMENT (found at Yasuo, card 11/13):** location scoping is actually
+  CORRECT for triggered effects whose context is a single battlefield —
+  combat/scoring triggers (on_attack, on_hold, on_conquer) resolve with
+  ctx.battlefield = the relevant battlefield, and enemy_unit/friendly targets go
+  through `_units_for_side` -> `self.battlefield.units_*` (singular), so "here" is
+  enforced by construction. The gap is NARROWER than first stated: it only bites
+  effects where the PLAYER CHOOSES a target that the card restricts by location
+  (e.g. a spell: "deal 2 to a unit AT A BATTLEFIELD" / "a unit IN A BASE"). There
+  the chooser isn't constrained to a location. Scope the Step 3 fix to
+  player-choice targets on non-battlefield-context effects; do NOT chase a
+  location bug in triggered "here" effects — there isn't one.
+- **Fix (Step 3):** add a location dimension — either dedicated targets
+  (`battlefield_unit` / `base_unit`) or a target_filter key
+  (`location: "battlefield" | "base"`). Register in engine_vocab, document in
+  parser prompt, add tests, re-parse affected cards.
+
+## 7. Equipped gear does not fire its own triggered abilities (systemic)
+- **What:** the combat trigger loop (`loop.py` ~:1516-1521) fires
+  on_attack/on_defend on `unit.card` only — it iterates units at the battlefield
+  and resolves THEIR card triggers. It never iterates a unit's attached `gear`
+  cards. So a gear's equipped ability "When I attack/defend, ..." (where "I" =
+  the wearer via the gear) NEVER fires.
+- **Found via:** Recurve Bow (equipped: "When I attack or defend, deal 2 to an
+  enemy unit here"). Parse is correct; the specs are dead because nothing fires
+  gear triggers in combat.
+- **Scope:** likely affects EVERY equipped-gear triggered ability, not just
+  on_attack/on_defend — check on_play/on_hold/on_conquer/on_death paths too:
+  do any of them iterate `unit.gear` and fire the gear card's triggers? The
+  broader trigger dispatch (loop.py:431 `_resolve_triggered_effects`, and the
+  scoring/on_move call sites) all appear to pass `unit.card`, not gear.
+- **Fix (Step 3 / engine correctness):** wherever unit triggers are fired, also
+  iterate `unit.gear` and fire each gear card's matching trigger with the SAME
+  battlefield context (so the gear's enemy_unit/"here" resolves correctly).
+  Add a test: equip Recurve Bow, attack, assert 2 damage dealt to an enemy at
+  that battlefield; move wearer, assert it follows the wearer (not the base).
+- **Note:** this is an ENGINE gap, not a parser gap — no re-parse fixes it.
+  Several "POPULATED" gear cards are currently inert for this reason; the
+  coverage report should not count equipped-trigger gear as "fully playable"
+  until this lands.
+- **EXTENDED (found at Serrated Dirk, card 14): the KEYWORD case, same root.**
+  Equipped gear KEYWORDS (ASSAULT, SHIELD, GANKING, ...) also fail to project
+  onto the wearer. combat.py:162 reads ASSAULT via `keyword_value`, which checks
+  the unit's own card keywords + `passive_keywords` only — NOT `unit.gear`
+  keywords (verified: cards.py `keyword_value`/`has_keyword` and combat.py
+  overrides all ignore attached gear). So Serrated Dirk's "ASSAULT 2" never
+  reaches the wearer; the unit attacks at +0.
+- **Unified fix:** "equipped gear acts through its wearer" has TWO facets that
+  should be fixed together: (a) TRIGGERS — fire each `unit.gear` card's triggers
+  in the wearer's combat/scoring context; (b) KEYWORDS — fold each gear card's
+  keywords into the wearer's effective keyword lookup (has_keyword/keyword_value),
+  or onto passive_keywords on attach. Tests: Serrated Dirk wearer attacks at
+  +2 might; Recurve Bow wearer deals 2 on attack; both stop when the gear is
+  removed / the wearer dies.
