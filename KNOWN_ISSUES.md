@@ -275,3 +275,31 @@ Recurring parser errors identified from the human verdicts in
   or onto passive_keywords on attach. Tests: Serrated Dirk wearer attacks at
   +2 might; Recurve Bow wearer deals 2 on attack; both stop when the gear is
   removed / the wearer dies.
+
+## 8. Recall always heals+exhausts; per rules a generic recall must NOT (found spot-check rescued)
+- **Rule (user):** "Recalls do not affect the state of the Permanent being recalled.
+  Unless otherwise stated by the source, Damage, Exhausted Status, Buffed Status,
+  and applied Layer alterations remain UNAFFECTED by a Recall."
+- **Engine:** `GameLoop._try_replace_death` performs reset_damage() (heal) +
+  ready=False (exhaust) unconditionally on recall. That's correct for cards that
+  STATE it (e.g. Soraka Wanderer: "heal it, exhaust it, recall it"), but wrong as
+  a general recall primitive.
+- **Fix (Step 3):** the generic recall verb (recall_unit / move-to-base) must
+  preserve damage, exhausted, buff (might_counters), and layer alterations by
+  default. Only reset the specific attributes a card explicitly names. Audit
+  recall_unit and _try_replace_death: split "recall" (state-preserving) from
+  Soraka-style "heal+exhaust+recall" (explicit resets).
+
+## 9. `leaves_board` trigger distinct from `on_death` (found spot-check rescued)
+- **What:** "When this leaves the board" fires on death AND on recall/bounce-to-hand
+  (and banish). Engine currently only has on_death; cards like Treasure Trove parse
+  "leaves the board" as on_death, missing the bounce/recall cases.
+- **Fix (Step 3):** add a `leaves_board` (a.k.a. on_leave) trigger that fires on any
+  zone-exit from the board (death, recall-to-base?, return-to-hand, banish), and
+  re-parse affected cards. Clarify which exits count (base is still "on board"?).
+
+## 10. `reduce_cost` verb missing but referenced by populated parses
+- Ornn's Forge parsed with effect `reduce_cost` (trigger cost_modifier) — but NO
+  `reduce_cost` handler exists in effects.py. Populated-but-inert. aura:reduce_cost
+  is in the Step 3 queue (x6). Build the verb + a cost-modifier application path;
+  until then these should be flagged, not emitted as populated.

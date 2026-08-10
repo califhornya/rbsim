@@ -38,8 +38,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** Verb/trigger/amount right (deal_damage, on_start_of_turn=Beginning Phase, 1). BUT target all_units_here resolves FRIENDLY-ONLY (not in _BOTH_SIDES_TARGETS) while card says 'each unit here' = BOTH sides. Same both-sides-here target gap as Trifarian/Windswept (KNOWN_ISSUES #6-adjacent). Also 'each PLAYER's Beginning Phase' = fires on both turns; on_start_of_turn firing needs to be player-agnostic here. MINOR: right shape, target under-scoped to friendly.
 
 ---
 
@@ -65,8 +65,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** Verb reduce_cost DOES NOT EXIST in engine (confirmed: only missing verb in the sample). trigger cost_modifier exists but there's no handler to apply it. Also drops 'first ... each turn' limiter and 'while you control this battlefield' gate. Effectively unsupported -> should be flagged, not emitted as a populated parse referencing a nonexistent verb. NEEDS: reduce_cost verb (aura:reduce_cost is in Step 3 queue x6).
 
 ---
 
@@ -94,8 +94,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** OK
+**Notes:** score_point + on_hold + optional additional_cost power:4 + kicker_paid condition all correct. [rune]x4 = 4 power (rune=power symbol). 'you may pay to score' = optional cost gate, modeled right. Verify score_point exists (it does). Clean.
 
 ---
 
@@ -121,8 +121,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** play_from_trash + on_play + is_spell filter + max_energy:3 correct and all exist EXCEPT target 'chosen_spell' is MISSING as a target key (engine has chosen_unit; no chosen_spell). Likely resolves via target_filter is_spell so may function, but the target name is non-canonical. Also drops the 'Recycle that spell after' clause (recycle-after-play). MINOR: core right, target key non-standard + one trailing clause dropped.
 
 ---
 
@@ -160,8 +160,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['AMBUSH']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_CONDITION
+**Notes:** RULING (user): condition must check the ENEMY unit is alone. Engine this_is_alone (loop.py:628) checks len(units on Kha'Zix's OWN side) <= 1 — that's SELF alone, semantically inverted. Wrong condition. PLUS missing on_defend branch ('when I attack OR defend' — only on_attack emitted). Needs an enemy-is-alone condition + the defend copies. Downgraded MINOR -> WRONG_CONDITION.
 
 ---
 
@@ -189,8 +189,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** First ability (kicker STUN on_play) is correct: stun_unit, kicker_paid, additional_cost power:1 ([calm]=power). BUT the ENTIRE second ability is dropped: 'When I hold, the next time you play a unit this turn, ready it and BUFF it.' That's a whole on_hold triggered ability missing (ready + buff_unit, delayed 'next unit played'). Half the card gone -> MISSING_EFFECT.
 
 ---
 
@@ -216,8 +216,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** RULING (user): Recalls leave damage/exhausted/buff UNAFFECTED unless the card states otherwise. Soraka DOES state otherwise ('heal it, exhaust it'), and engine _try_replace_death does reset_damage()+ready=False — so for THIS card the heal+exhaust is CORRECT. Stays MINOR (only 'must be assigned combat damage last' ordering clause dropped). ENGINE NOTE for Step 3: _try_replace_death ALWAYS heals+exhausts on recall; per the rule a GENERIC recall must leave state untouched unless stated. Soraka is fine; a generic recall verb built on this path would be wrong. Log as recall-semantics issue.
 
 ---
 
@@ -248,8 +248,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** OK
+**Notes:** play_token Mech, activated, cost energy:1 power:1 ([fury]=power) tap, and correctly FLAGS the recycle-a-unit cost via suggested_vocab cost:recycle_unit_from_trash. This is exactly the right partial-parse behavior: emit what's supported, flag the unsupported cost. OK (with honest flag).
 
 ---
 
@@ -272,8 +272,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** Only the on_play 'banish all units from your trash' is parsed (banish_card self scope:all — reasonable). The entire activated ability '[tap]: Play a unit banished with this' is DROPPED. That's the actual engine of the card. Also banish-from-trash targeting 'self' (the gear) is odd — should target your trash. MISSING_EFFECT: second ability gone.
 
 ---
 
@@ -301,8 +301,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['PREDICT 1', 'ACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_AMOUNT
+**Notes:** grant_temporary_might +2 this_turn, activated, chosen_unit — the ACTION ability body is right. BUT: (1) cost is missing 'Kill this' (kill_self cost dropped — only tap kept); (2) keywords say 'PREDICT 1' but card text is VISION — WRONG keyword (VISION vs PREDICT are different); (3) VISION on-play (look at top, may recycle) is entirely dropped. Multiple issues -> at least WRONG_AMOUNT/MISSING; the PREDICT-vs-VISION keyword error is a real parser hallucination. Flag as WRONG.
 
 ---
 
@@ -324,8 +324,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_CONDITION
+**Notes:** draw_cards + on_start_of_turn + count 1 correct, BUT the condition 'if you control a facedown card at a battlefield' is completely dropped — the draw is unconditional in the parse. That's a free draw every turn vs a conditional one. MISSING_CONDITION.
 
 ---
 
@@ -352,8 +352,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_TRIGGER
+**Notes:** RULING (user): 'leaves the board' is BROADER than death — a bounce to hand also triggers it. Parse uses on_death, which misses recall/bounce-to-hand. Wrong trigger scope. Also channel 'exhausted' flag dropped and the activated '[Chaos],[tap]: Kill this' ability dropped. Downgraded MINOR -> WRONG_TRIGGER. NEEDS: a 'leaves_board' trigger distinct from on_death.
 
 ---
 
@@ -395,8 +395,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** Two activated attach_gear abilities, costs right (energy:1+tap; tap). BUT target_filter subtype:Equipment is on the UNIT target — should describe the GEAR being attached, not the unit. The detached-vs-attached distinction between the two abilities is lost (both look identical). MINOR: attaches modeled, but the detached/attached source distinction dropped.
 
 ---
 
@@ -438,8 +438,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** OK
+**Notes:** Three abilities all parsed: gain_xp on_win_combat; buff_unit for spend_xp:1+tap; move_units_to_base for spend_xp:2+tap. All verbs/costs exist and match. Minor typo in card text ('and exhausted' likely 'an exhausted') doesn't affect the parse. Clean OK.
 
 ---
 
@@ -467,8 +467,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** channel_rune + on_friendly_unit_played + is_mighty filter + tap cost — good. 'exhausted' flag on channel dropped (channel 1 rune EXHAUSTED). 'you MAY exhaust me' optional cost modeled as cost tap — reasonable. MINOR: exhausted-channel flag missing.
 
 ---
 
@@ -493,8 +493,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['EQUIP 1']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** EQUIP 1 correct. Equipped effect '+3 Bonus Damage to your spells/abilities' parsed as deal_damage passive amount:3 with a NOTE — but this is a damage-MODIFIER (adds 3 to your other damage sources), not a standalone deal_damage. bonus_damage is a Step 3 queue item and likely has no engine verb yet. Also this is equipped-gear projection (KNOWN_ISSUES #7). MINOR/flag: intent captured in note but no real mechanic.
 
 ---
 
@@ -518,8 +518,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['ACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_TARGET
+**Notes:** Card: choose a friendly unit, IT deals its Might SPLIT AMONG enemy units at battlefieldS (plural, everywhere). Parse: deal_damage self_might to all_enemy_units_here. Wrong on two counts: (1) 'split among' != full might to each (all_enemy_units_here would hit each for full self_might); (2) 'at battlefields' = all battlefields, not just here. Also drops 'for each unit this kills, gain 1 XP'. WRONG_TARGET + MISSING (split semantics + XP clause).
 
 ---
 
@@ -541,8 +541,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** kill_unit + on_cast + chosen_unit correct for the first clause, but drops the entire recursion clause: 'if it had 3 might or less, you may play this from your trash for [rune]' (a conditional play-from-trash). Half the card. Also target should be battlefield-restricted ('at a battlefield'). MISSING_EFFECT.
 
 ---
 
@@ -565,8 +565,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['REACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** Only banish_friendly parsed. The core effect — 'then its owner plays it to any battlefield ignoring its cost' (a banish-then-replay/blink) — is dropped. As parsed this just banishes your own unit (strictly bad). REACTION kept. MISSING_EFFECT: the replay half is the whole point.
 
 ---
 
@@ -599,8 +599,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** stun_unit on_attack with you_control_subtype(all 4 tags) condition — the conditional STUN is right. BUT drops: 'I enter ready' and the cost-reduction-per-tag ability ('Reduce my cost by 1 for each tag among Bird/Cat/Dog/Poro'). Two static/on-enter effects gone. cost-reduction is aura/self-cost — likely unsupported, should be flagged. MISSING_EFFECT.
 
 ---
 
@@ -627,8 +627,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['ACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** stun_unit activated, energy:1+tap correct. Drops 'I enter ready' (on-play ready-self). Target 'enemy unit ATTACKING here' loses the 'attacking' restriction (just enemy_unit). ACTION kept. MINOR: enter-ready dropped + attacking-filter lost.
 
 ---
 
@@ -654,8 +654,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['ACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MISSING_EFFECT
+**Notes:** kill_unit + might_at_most:2 + ACTION correct for the kill. BUT the entire payoff is dropped: 'if enemy -> 1 Gold token; if friendly -> 2 Gold tokens' (conditional play_token with a friendly/enemy branch). That's a mode/branch on what was killed. Also target should be battlefield-restricted. MISSING_EFFECT.
 
 ---
 
@@ -678,8 +678,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** give_keyword TEMPORARY on_cast chosen_unit — right for the unit case. Card also targets 'a unit at a battlefield OR A GEAR' — the gear-target branch is dropped (can only TEMPORARY a unit, not a gear). Also battlefield-location restriction on the unit. MINOR: gear target option missing.
 
 ---
 
@@ -702,8 +702,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['HIDDEN', 'REACTION']
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_EFFECT
+**Notes:** double_might is the WRONG VERB. Engine double_might does unit.temporary_might += unit.might (doubles MIGHT). Card doubles 'all DAMAGE dealt to it this turn' — a damage-taken modifier, totally different (and defensive/harmful, not a buff). No engine verb for 'double incoming damage' exists. HIDDEN+REACTION kept. This is a semantic mis-parse -> flag. (tag as MISSING_EFFECT/PHANTOM: the emitted effect does something the card doesn't say.)
 
 ---
 
@@ -733,8 +733,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** on_conquer, kill_gear (optional 'you may'), then buff_unit self — buff_unit is CORRECT here (card literally says '+1 might buff', the Buff object, max 1). Good. Issues: kill_gear target is 'chosen_unit' with is_gear filter (should be chosen_gear/gear target, minor); the 'if you do' linkage (buff only if a gear was killed) isn't encoded as a condition — buff looks unconditional. MINOR.
 
 ---
 
@@ -757,8 +757,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** on_play, deal_damage self_might to chosen_unit — captures 'I deal my might to it'. BUT card is MUTUAL: 'We deal damage equal to our Mights to EACH OTHER' — the return damage (chosen unit deals ITS might back to me) is dropped. Also 'at a battlefield' restriction. MINOR-to-WRONG: only half the mutual exchange.
 
 ---
 
@@ -786,8 +786,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** WRONG_CONDITION
+**Notes:** grant_temporary_might +2 on_attack this_turn correct. Condition WRONG: card = 'if there is a READY ENEMY unit here', parse = you_have_n_or_more_units_here (that's YOUR units, count-based, no ready/enemy filter). Condition semantics inverted (your units vs ready enemy). WRONG_CONDITION/WRONG_FILTER.
 
 ---
 
@@ -816,8 +816,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** kill_gear (optional, max_energy filter should be there) + play_token Gold — both halves present, good structure. Issues: kill_gear drops the 'Energy cost no more than 1' filter (max_energy:1 on the gear); the 'if you do' linkage (token only if a gear was killed) not encoded — token looks unconditional. Gold token 'exhausted' flag dropped. MINOR.
 
 ---
 
@@ -843,8 +843,8 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** grant_might passive +1 is_token filter — verb/filter right (this is the passive anthem, grant_might correct not buff_unit). BUT target all_friendly_units_here is HERE-scoped while 'Your token units' = ALL your tokens ANYWHERE. Should be all_friendly_units_anywhere (Step 3 queue). MINOR: scope too narrow (here vs anywhere).
 
 ---
 
@@ -871,7 +871,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** ⬜ TODO
-**Notes:** 
+**Verdict:** MINOR
+**Notes:** play_token Bird count:2 activated tap — right. Drops: DEFLECT keyword on the tokens (tokens should enter with DEFLECT); 'use only while I'm at a battlefield' location restriction on the ability. DEFLECT is a Step 3 queue keyword. MINOR: token keyword + activation restriction dropped.
 
 ---
