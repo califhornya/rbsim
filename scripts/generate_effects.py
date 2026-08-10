@@ -2,10 +2,12 @@
 """Parse each card's natural-language `effect` text into structured `effects`
 (EffectSpec list) + `keywords`, enriching all_cards.json in place.
 
-Uses the Anthropic API (Opus 4.7) with prompt caching on the schema/vocabulary
+Uses the Anthropic API (Opus 4.8) with prompt caching on the schema/vocabulary
 system prompt. Batches cards, validates the model output against the engine's
 known effect verbs, retries on bad JSON, saves incrementally (resume-friendly),
-and flags low-confidence cards to scripts/review_needed.txt.
+and flags low-confidence cards to scripts/review_needed.txt. A completeness
+heuristic additionally flags cards whose emitted effect count looks too low for
+their clause count (DISEASE-A dropped-clause safety net).
 
 Usage:
   export ANTHROPIC_API_KEY=...
@@ -20,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -70,6 +73,26 @@ def build_system_prompt() -> str:
     return f"""You are a parser for the Riftbound TCG simulator. Given a card's printed
 rules text (the `effect` field, plus `effect_equipped` for gear), produce a structured
 representation the game engine can execute.
+
+CRITICAL — COVER THE WHOLE CARD (read this before anything else):
+A card's `effect` text often contains MULTIPLE independent abilities and multi-step
+effects, joined by "then", "and", "if you do", "•", or simply written as separate
+sentences. You MUST account for EVERY executable clause — not just the first one.
+Before returning a card, re-read its `effect` (and `effect_equipped`) text SENTENCE BY
+SENTENCE and confirm each sentence maps to at least ONE of:
+  (a) an effect object, (b) a keyword, or (c) an explicit `needs_review` flag +
+  `suggested_vocab` for a clause whose mechanic you cannot support.
+Never stop after the first clause. Silently dropping the back half of a card ("kill X,
+THEN do Y"; a second "When I …" ability; a "[tap]:" activated ability after an on-play
+line) is the single most common and most damaging error — do not do it.
+Reminder text in (parentheses) only restates rules; it never adds a new clause and
+needs no effect of its own.
+Reconciling completeness with faithfulness: emit an effect for every clause that maps
+CLEANLY to the supported vocab. For a clause that maps ONLY via an approximation that
+changes the card's MEANING (see "Semantic disambiguation" below), do NOT emit a wrong
+effect — parse the other clauses and flag ONLY that clause (needs_review +
+suggested_vocab). Partial-but-faithful beats complete-but-wrong, and both beat
+dropping-a-clause-silently.
 
 Return, for each card, two things:
 1. `keywords`: a list of keyword strings. Only from this set: {keywords}.
@@ -158,6 +181,42 @@ with "trigger": "cost_modifier" and an integer `amount`.
   NOTE: the engine currently applies `reduce_cost` only as a flat discount to the card that owns
   the effect; auras that reduce OTHER cards' costs are not dispatched yet, but emitting them is
   still correct — also add `suggested_vocab` tag "aura:reduce_cost" so we track coverage.
+
+Semantic disambiguation — NEVER force-fit an approximation that changes meaning:
+A populated-but-wrong spec is WORSE than an honest flag: it passes validation and then
+runs incorrectly. For each pattern below, if the only available vocab would change the
+card's meaning, set `needs_review: true` + `suggested_vocab` for that clause and do NOT
+emit the approximate effect.
+- "if there is a READY ENEMY unit here" is NOT `you_have_n_or_more_units_here` (that
+  counts YOUR units and ignores ready/enemy). No engine condition matches →
+  needs_review, suggested_vocab "cond:ready_enemy_unit_here".
+- "if the ENEMY unit is alone" is DIFFERENT from "if I am alone". `this_is_alone`
+  evaluates the SOURCE's OWN side only. Use `this_is_alone` ONLY for "if I am alone /
+  if this is the only unit here (on my side)". For an enemy-alone check →
+  needs_review, suggested_vocab "cond:enemy_is_alone".
+- "double all DAMAGE dealt to it" / "damage it would take" is a damage-TAKEN modifier,
+  NOT `double_might` (which doubles the unit's Might — a buff). No verb exists →
+  needs_review, suggested_vocab "effect:double_incoming_damage". Never emit
+  `double_might` for a damage-taken effect.
+- "deals its Might SPLIT AMONG" / "divided among" targets ≠ the full amount to EACH
+  target (`all_enemy_units_here` hits each for the full amount). No split semantics
+  exist → needs_review, suggested_vocab "effect:split_damage".
+- "when this LEAVES THE BOARD" / "leaves play" is BROADER than `on_death` (recall and
+  bounce-to-hand also trigger it). Use `on_death` ONLY for "when I die / when this is
+  killed / DEATHKNELL". For leaves-the-board → needs_review, suggested_vocab
+  "trigger:leaves_board".
+- A GATE you cannot represent: if an effect is conditional ("if you control a facedown
+  card", "if it had 3 [might] or less") and no supported condition type matches, do
+  NOT emit the effect UNGATED — that would run it unconditionally (e.g. a free draw
+  every turn). Flag it → needs_review, suggested_vocab "cond:<name>" (e.g.
+  "cond:controller_has_facedown").
+- Narrowing "your units" / "friendly units" (which mean ANYWHERE) down to
+  `all_friendly_units_here` changes scope — see rule 5: flag with
+  target:all_friendly_units_anywhere, do not substitute the here-scoped target.
+Standing rule: if the closest available condition / verb / target INVERTS a side,
+turns "split" into "each", narrows "anywhere" into "here", drops a gate, or maps a
+damage-taken modifier onto a Might buff, it is MEANING-CHANGING — do not use it. Flag
+that clause instead. A wrong populated parse is worse than an honest flag.
 
 Guidance:
 - A "+N might this turn" buff → grant_temporary_might (amount N). A permanent "+N might" (no "this turn") → grant_might.
@@ -273,6 +332,37 @@ Few-shot examples (from spot-check feedback — follow these patterns):
      "effect:return_self_from_trash"]
    (the damage is supported; a cost-gated triggered ability is not)
 
+10. MULTI-CLAUSE: parse the supported clause AND flag the rest — never drop the
+    back half. "Kill … Then/If … do Y" and "When I …; When I …" are TWO clauses.
+    Text: "Kill a unit at a battlefield with 2 [might] or less. If it was an enemy
+    unit, play a Gold gear token exhausted. If it was a friendly unit, play two Gold
+    gear tokens exhausted." (Blood Money)
+    → effects: [{{"effect":"kill_unit","trigger":"on_cast","timing":"action",
+      "target":"chosen_unit","target_filter":{{"might_at_most":2}}}}],
+      needs_review: true,
+      suggested_vocab: ["effect:mode_choice","cond:killed_was_enemy"]
+    (the kill is supported; the enemy-vs-friendly branch that follows is NOT — flag
+    it, do NOT drop it and do NOT invent it.)
+
+11. MULTI-CLAUSE with "Then": the second sentence is a real clause, not flavor.
+    Text: "Kill a unit at a battlefield. Then, if it had 3 [might] or less, you may
+    play this from your trash for [rune]." (Death from Below)
+    → effects: [{{"effect":"kill_unit","trigger":"on_cast","target":"chosen_unit"}}],
+      needs_review: true,
+      suggested_vocab: ["effect:play_self_from_trash","cond:killed_might_at_most"]
+    (parse clause 1; flag the conditional replay-from-trash — do not silently drop it.)
+
+12. TWO SEPARATE ABILITIES: emit the one you support, flag the other whole ability.
+    Text: "You may pay [calm] as an additional cost to play me. When you play me, if
+    you paid the additional cost, STUN an enemy unit. When I hold, the next time you
+    play a unit this turn, ready it and BUFF it." (Nami Headstrong)
+    → effects: [{{"effect":"stun_unit","trigger":"on_play","target":"enemy_unit",
+      "condition":{{"type":"kicker_paid"}},"additional_cost":{{"power":1}}}}],
+      needs_review: true,
+      suggested_vocab: ["effect:delayed_next_unit_played"]
+    (the kicker STUN is emitted; the ENTIRE second "When I hold …" ability is flagged,
+    not dropped. [calm] is a power symbol → additional_cost power:1.)
+
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]
 Respond with ONLY the JSON array — no prose, no markdown fences."""
@@ -341,6 +431,40 @@ def validate_card_result(entry: dict) -> list[str]:
             if bad:
                 problems.append(f"unknown additional_cost key(s) {bad!r}")
     return problems
+
+
+# Reminder text (parentheses) restates rules and never adds a clause — strip it
+# before counting. Clause boundaries: sentence separators + bullet points.
+_REMINDER_PARENS = re.compile(r"\([^)]*\)")
+_SENTENCE_SPLIT = re.compile(r"[.;]\s+|\s*•\s*")
+# Words that CHAIN an additional executable clause onto a prior effect.
+_CLAUSE_CONTINUATIONS = re.compile(r"\b(?:then|also|if you do)\b", re.IGNORECASE)
+
+
+def check_completeness(card: dict, entry: dict) -> str | None:
+    """Safety net for DISEASE A (dropped clauses): flag cards whose emitted effect
+    count looks too low for the number of clauses in the printed text. Returns a
+    review reason, or None if the parse looks complete enough.
+
+    Heuristic ONLY — deliberately biased toward flagging: a false flag just adds a
+    card to the human review queue, whereas a missed drop ships a half-parsed card.
+    Parenthetical reminder text is stripped first so it can't inflate the count.
+    Cards that emitted zero effects are skipped (they're empty/flagged by other
+    paths already); the caller also skips cards the model itself flagged.
+    """
+    text = " ".join(t for t in (card.get("effect"), card.get("effect_equipped")) if t)
+    if not text:
+        return None
+    text = _REMINDER_PARENS.sub(" ", text)
+    n_effects = len(entry.get("effects") or [])
+    if n_effects == 0:
+        return None
+    sentences = [s for s in _SENTENCE_SPLIT.split(text) if s.strip()]
+    signals = len(sentences) + len(_CLAUSE_CONTINUATIONS.findall(text))
+    if signals > n_effects:
+        return (f"possible dropped clause (~{signals} text clauses vs "
+                f"{n_effects} effect(s) emitted)")
+    return None
 
 
 def call_api(client, system_prompt: str, cards: list[dict], max_retries: int = 2):
@@ -498,6 +622,13 @@ def main() -> int:
                 suggested_vocab[str(v)] += 1
             if problems:
                 review_lines.append(f"{name}\t{'; '.join(problems)}")
+            # DISEASE-A safety net: if the model didn't flag it and it validated,
+            # check the emitted clause count against the printed text. A soft flag
+            # (keeps the partial parse; surfaces a likely dropped clause for review).
+            elif not entry.get("needs_review"):
+                incomplete = check_completeness(card, entry)
+                if incomplete:
+                    review_lines.append(f"{name}\t{incomplete}")
             # Persist the validated effects the model emitted, even when the card
             # is still flagged for review. `needs_review` now marks a PARTIAL parse:
             # the supported abilities are parsed and kept, while the unsupported
