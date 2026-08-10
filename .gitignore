@@ -32,3 +32,6 @@ Thumbs.db
 
 # Test / tooling caches
 .pytest_cache/
+
+# Local session handoff — internal notes, keep out of the public repo
+HANDOFF.md
