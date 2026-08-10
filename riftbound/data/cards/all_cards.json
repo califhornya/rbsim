@@ -3336,13 +3336,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_start_of_turn",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-102",
@@ -4298,19 +4292,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_attack",
-        "target": "self",
-        "amount": 2,
-        "duration": "this_turn",
-        "condition": {
-          "type": "you_have_n_or_more_units_here",
-          "params": {}
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-132",
@@ -4808,14 +4790,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_play",
-        "target": "chosen_unit",
-        "amount_source": "self_might"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-150",
@@ -5712,8 +5687,9 @@
       {
         "effect": "give_keyword",
         "trigger": "on_cast",
-        "keyword": "TEMPORARY",
-        "target": "chosen_unit"
+        "timing": "action",
+        "target": "chosen_unit",
+        "keyword": "TEMPORARY"
       }
     ]
   },
@@ -5881,14 +5857,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "draw_cards",
-        "trigger": "on_death",
-        "count": 1
-      },
-      {
         "effect": "channel_rune",
-        "trigger": "on_death",
-        "amount": 1
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 1,
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
       }
     ]
   },
@@ -7926,10 +7902,10 @@
       {
         "effect": "channel_rune",
         "trigger": "on_friendly_unit_played",
-        "target_filter": {
-          "is_mighty": true
-        },
         "amount": 1,
+        "condition": {
+          "type": "this_is_mighty"
+        },
         "cost": {
           "tap": true
         }
@@ -10749,10 +10725,7 @@
           "energy": 1,
           "power": 1,
           "tap": true
-        },
-        "suggested_vocab": [
-          "cost:recycle_unit_from_trash"
-        ]
+        }
       }
     ]
   },
@@ -12347,6 +12320,7 @@
       {
         "effect": "kill_gear",
         "trigger": "on_play",
+        "target": "chosen_unit",
         "target_filter": {
           "is_gear": true
         }
@@ -14301,17 +14275,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_from_trash",
-        "trigger": "on_play",
-        "target": "chosen_spell",
-        "target_filter": {
-          "is_spell": true
-        },
-        "max_energy": 3
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-141",
@@ -15315,17 +15279,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "replace_death_with_recall",
-        "trigger": "death_replacement",
-        "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true,
-          "might_less_than_self": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-174",
@@ -15833,14 +15787,7 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "passive",
-        "amount": 3,
-        "note": "bonus damage to your spells and abilities while attached"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-192",
@@ -15902,33 +15849,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "attach_gear",
-        "trigger": "activated",
-        "timing": "action",
-        "cost": {
-          "energy": 1,
-          "tap": true
-        },
-        "target": "friendly_unit",
-        "target_filter": {
-          "subtype": "Equipment"
-        }
-      },
-      {
-        "effect": "attach_gear",
-        "trigger": "activated",
-        "timing": "action",
-        "cost": {
-          "tap": true
-        },
-        "target": "friendly_unit",
-        "target_filter": {
-          "subtype": "Equipment"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-194",
@@ -16551,11 +16472,11 @@
         "effect": "score_point",
         "trigger": "on_hold",
         "amount": 1,
-        "condition": {
-          "type": "kicker_paid"
-        },
         "additional_cost": {
           "power": 4
+        },
+        "condition": {
+          "type": "kicker_paid"
         }
       }
     ]
@@ -17240,14 +17161,7 @@
       "HIDDEN",
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "double_might",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "chosen_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-014",
@@ -19420,9 +19334,9 @@
         "effect": "grant_might",
         "trigger": "passive",
         "amount": 1,
-        "target": "all_friendly_units_here",
         "target_filter": {
-          "is_token": true
+          "is_token": true,
+          "is_unit": true
         }
       }
     ]
@@ -21629,29 +21543,7 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_attack",
-        "amount": 2,
-        "target": "self",
-        "duration": "this_turn",
-        "condition": {
-          "type": "this_is_alone",
-          "params": {}
-        }
-      },
-      {
-        "effect": "gain_xp",
-        "trigger": "on_attack",
-        "amount": 2,
-        "target": "self",
-        "condition": {
-          "type": "this_is_alone",
-          "params": {}
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-144",
@@ -22226,6 +22118,11 @@
       "ACTION"
     ],
     "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_play",
+        "amount": 1
+      },
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
@@ -22965,14 +22862,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-185",
@@ -23257,15 +23147,7 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "all_enemy_units_here",
-        "amount_source": "self_might"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-193",
@@ -23336,6 +23218,7 @@
         "target": "enemy_unit",
         "cost": {
           "energy": 1,
+          "power": 1,
           "tap": true
         }
       }
@@ -23397,15 +23280,7 @@
         "trigger": "on_attack",
         "target": "enemy_unit",
         "condition": {
-          "type": "you_control_subtype",
-          "params": {
-            "subtypes": [
-              "Bird",
-              "Cat",
-              "Dog",
-              "Poro"
-            ]
-          }
+          "type": "you_control_subtype"
         }
       }
     ]
@@ -23910,8 +23785,8 @@
       {
         "effect": "deal_damage",
         "trigger": "on_start_of_turn",
-        "amount": 1,
-        "target": "all_units_here"
+        "target": "all_units_here",
+        "amount": 1
       }
     ]
   },
