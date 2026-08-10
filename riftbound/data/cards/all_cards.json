@@ -7524,7 +7524,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 5,
+        "target": "chosen_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-253",
@@ -8471,7 +8478,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_hold",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-286",
@@ -10781,7 +10794,13 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
     "keywords": []
   },
   {
@@ -14843,7 +14862,19 @@
         "rarity": "Epic"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_units",
+        "trigger": "on_play",
+        "target": "all_friendly_units_here"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "GANKING",
+        "target": "all_friendly_units_here"
+      }
+    ],
     "keywords": [
       "EQUIP 1"
     ]
@@ -18066,7 +18097,20 @@
       "TEMPORARY",
       "DEATHKNELL"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Sprite",
+        "ready": true
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_death",
+        "token_name": "Sprite",
+        "ready": true
+      }
+    ]
   },
   {
     "card_id": "UNL-079",
@@ -18214,7 +18258,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Sprite",
+        "ready": true
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_start_of_turn",
+        "token_name": "Sprite",
+        "ready": true
+      }
+    ]
   },
   {
     "card_id": "UNL-085",

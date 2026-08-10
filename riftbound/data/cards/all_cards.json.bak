@@ -85,7 +85,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-003",
@@ -441,7 +453,20 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "highest_might_friendly"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount": 5
+      }
+    ]
   },
   {
     "card_id": "OGN-015",
@@ -531,7 +556,23 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "exhaust_unit",
+        "trigger": "on_play",
+        "target": "self"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount": 2,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-018",
@@ -689,13 +730,9 @@
     ],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "kill_gear",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "battlefield",
-        "target_filter": {
-          "is_gear": true
-        },
         "scope": "all"
       }
     ]
@@ -1084,7 +1121,18 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "self",
+        "amount": 1,
+        "cost": {
+          "recycle": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-037",
@@ -2280,7 +2328,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "target": "enemy_unit",
+        "amount_source": "self_might"
+      }
+    ]
   },
   {
     "card_id": "OGN-077",
@@ -2346,7 +2401,18 @@
     "keywords": [
       "SHIELD 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "tap": true
+        },
+        "target": "self",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-079",
@@ -3207,10 +3273,10 @@
         "target": "friendly_unit"
       },
       {
-        "effect": "add_rune",
+        "effect": "channel_rune",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "opponent",
+        "target": "actor",
         "amount": 1,
         "exhausted": true
       }
@@ -5724,7 +5790,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "trash_count"
+      }
+    ]
   },
   {
     "card_id": "OGN-196",
@@ -5746,7 +5818,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_play",
+        "target_filter": {
+          "is_unit": true
+        },
+        "params": {
+          "ignore_energy_cost": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-197",
@@ -6761,7 +6844,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT",
+      "DEFLECT 1",
       "GANKING"
     ],
     "effects": []
@@ -7040,7 +7123,18 @@
     "keywords": [
       "TANK"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might_per_friendly",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "target_filter": {
+          "is_buffed": true,
+          "exclude_self": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-241",
@@ -7852,7 +7946,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "params": {
+          "token_name": "Recruit"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-266",
@@ -8364,7 +8471,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_hold",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-286",
@@ -8569,7 +8682,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "all_units_here",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-295",
@@ -8639,7 +8759,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "all_units_here",
+        "keyword": "GANKING"
+      }
+    ]
   },
   {
     "card_id": "OGN-298",
@@ -8982,7 +9109,11 @@
       {
         "effect": "return_from_trash",
         "trigger": "on_play",
-        "target": "chosen_spell"
+        "target": "actor",
+        "count": 1,
+        "target_filter": {
+          "is_spell": true
+        }
       }
     ]
   },
@@ -9693,7 +9824,8 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1",
+      "ASSAULT 2"
     ],
     "effects": []
   },
@@ -9790,7 +9922,21 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_play",
+        "amount": 2,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ],
+    "keywords": []
   },
   {
     "card_id": "SFD-014",
@@ -9856,9 +10002,22 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "amount": 2,
+        "target": "enemy_unit"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_defend",
+        "amount": 2,
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "SFD-017",
@@ -9988,8 +10147,7 @@
     ],
     "keywords": [
       "QUICK-DRAW",
-      "REACTION",
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -10201,7 +10359,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -10234,7 +10392,7 @@
         "token_name": "Sand Soldier",
         "might": 2,
         "count": 1,
-        "target": "battlefield"
+        "target": "actor"
       }
     ]
   },
@@ -10535,7 +10693,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -10629,7 +10787,8 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [],
+    "keywords": []
   },
   {
     "card_id": "SFD-047",
@@ -11004,7 +11163,32 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_play",
+        "params": {
+          "count": 4,
+          "filter": {
+            "is_gear": true
+          },
+          "on_choose": "draw",
+          "on_rest": "recycle"
+        }
+      },
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_hold",
+        "params": {
+          "count": 4,
+          "filter": {
+            "is_gear": true
+          },
+          "on_choose": "draw",
+          "on_rest": "recycle"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-059",
@@ -11026,7 +11210,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -11155,10 +11339,16 @@
     ],
     "keywords": [
       "QUICK-DRAW",
-      "EQUIP",
-      "SHIELD 2"
+      "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "SHIELD 2",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-065",
@@ -11418,7 +11608,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -11519,7 +11709,10 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [],
+    "keywords": [
+      "REPEAT"
+    ]
   },
   {
     "card_id": "SFD-078",
@@ -11858,8 +12051,7 @@
       }
     ],
     "keywords": [
-      "EQUIP",
-      "DEATHKNELL"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -11991,7 +12183,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -12498,7 +12690,7 @@
     ],
     "keywords": [
       "ACTION",
-      "REPEAT 3"
+      "REPEAT"
     ],
     "effects": []
   },
@@ -12589,9 +12781,7 @@
         "rarity": "Epic"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": []
   },
   {
@@ -12618,9 +12808,16 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 2"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "add_rune",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "exhausted": true
+      }
+    ]
   },
   {
     "card_id": "SFD-119",
@@ -12881,7 +13078,7 @@
       }
     ],
     "keywords": [
-      "REPEAT 2"
+      "REPEAT"
     ],
     "effects": []
   },
@@ -12909,7 +13106,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_move",
+        "params": {
+          "token_name": "Gold"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-131",
@@ -12989,10 +13194,15 @@
       }
     ],
     "keywords": [
-      "EQUIP",
-      "GANKING"
+      "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "GANKING"
+      }
+    ]
   },
   {
     "card_id": "SFD-134",
@@ -13175,7 +13385,7 @@
     ],
     "keywords": [
       "HIDDEN",
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -13792,7 +14002,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -13973,7 +14183,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "tap": true
+        },
+        "token_name": "Recruit",
+        "count": 3
+      }
+    ]
   },
   {
     "card_id": "SFD-169",
@@ -14256,7 +14477,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -14356,7 +14577,11 @@
         "rarity": "Epic"
       }
     ],
-    "effects": []
+    "effects": [],
+    "keywords": [
+      "REACTION",
+      "REPEAT"
+    ]
   },
   {
     "card_id": "SFD-183",
@@ -14462,9 +14687,9 @@
     ],
     "keywords": [
       "QUICK-DRAW",
-      "EQUIP",
-      "TEMPORARY",
-      "REACTION"
+      "REACTION",
+      "EQUIP 1",
+      "TEMPORARY"
     ],
     "effects": []
   },
@@ -14601,7 +14826,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 1"
     ],
     "effects": []
   },
@@ -14624,7 +14849,22 @@
         "rarity": "Epic"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_units",
+        "trigger": "on_play",
+        "target": "all_friendly_units_here"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "GANKING",
+        "target": "all_friendly_units_here"
+      }
+    ],
+    "keywords": [
+      "EQUIP 1"
+    ]
   },
   {
     "card_id": "SFD-193",
@@ -15695,9 +15935,15 @@
       }
     ],
     "keywords": [
-      "REPEAT 2"
+      "REPEAT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-010",
@@ -15991,7 +16237,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 2"
     ],
     "effects": []
   },
@@ -16179,7 +16425,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 3,
+        "target": "chosen_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-027",
@@ -16856,7 +17114,23 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount_source": "n_distinct_tags_among_friendlies",
+        "params": {
+          "tags": [
+            "Bird",
+            "Cat",
+            "Dog",
+            "Poro"
+          ]
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-047",
@@ -16968,7 +17242,6 @@
       }
     ],
     "keywords": [
-      "REACTION",
       "LEVEL 6"
     ],
     "effects": []
@@ -16993,7 +17266,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_hold",
+        "target": "enemy_unit",
+        "params": {
+          "destination": "this_battlefield",
+          "delay": "start_of_next_main_phase",
+          "optional": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-051",
@@ -17800,7 +18084,20 @@
       "TEMPORARY",
       "DEATHKNELL"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Sprite",
+        "ready": true
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_death",
+        "token_name": "Sprite",
+        "ready": true
+      }
+    ]
   },
   {
     "card_id": "UNL-079",
@@ -17948,7 +18245,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Sprite",
+        "ready": true
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_start_of_turn",
+        "token_name": "Sprite",
+        "ready": true
+      }
+    ]
   },
   {
     "card_id": "UNL-085",
@@ -18565,7 +18875,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_move",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-106",
@@ -18659,7 +18978,29 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_xp",
+        "trigger": "on_friendly_unit_played",
+        "amount": 1,
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      },
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "cost": {
+          "spend_xp": 3,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-110",
@@ -19021,7 +19362,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "on_play",
+        "target": "opponent",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "UNL-122",
@@ -19433,7 +19781,7 @@
     ],
     "keywords": [
       "ACTION",
-      "REPEAT 2"
+      "REPEAT"
     ],
     "effects": []
   },
@@ -19478,9 +19826,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "keywords": [
-      "PREDICT 2"
-    ],
+    "keywords": [],
     "effects": []
   },
   {
@@ -20121,7 +20467,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-160",
@@ -20169,7 +20524,8 @@
       }
     ],
     "keywords": [
-      "PREDICT 1"
+      "PREDICT 1",
+      "ACTION"
     ],
     "effects": []
   },
@@ -20741,7 +21097,7 @@
       }
     ],
     "keywords": [
-      "REPEAT 3"
+      "REPEAT"
     ],
     "effects": []
   },
@@ -20909,7 +21265,7 @@
       }
     ],
     "keywords": [
-      "EQUIP"
+      "EQUIP 4"
     ],
     "effects": []
   },
@@ -21073,7 +21429,9 @@
         "rarity": "Epic"
       }
     ],
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": []
   },
   {
@@ -21782,7 +22140,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT"
+      "DEFLECT 1"
     ],
     "effects": []
   },

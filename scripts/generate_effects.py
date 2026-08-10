@@ -44,7 +44,7 @@ from riftbound.registry.engine_vocab import (  # noqa: E402
 
 CARDS_PATH = Path(__file__).resolve().parent.parent / "riftbound" / "data" / "cards" / "all_cards.json"
 REVIEW_PATH = Path(__file__).resolve().parent / "review_needed.txt"
-MODEL = "claude-opus-4-7"
+MODEL = "claude-opus-4-8"
 BATCH_SIZE = 10
 
 # Sorted views for deterministic prompt text (keeps the cached system prompt stable).
@@ -492,18 +492,24 @@ def main() -> int:
                 e.pop("needs_review", None)
                 e.pop("review_reason", None)
             problems = validate_card_result(entry)
-            flagged = bool(entry.get("needs_review")) or bool(problems)
             if entry.get("needs_review"):
                 review_lines.append(f"{name}\t{entry.get('review_reason', 'model flagged')}")
             for v in entry.get("suggested_vocab") or []:
                 suggested_vocab[str(v)] += 1
             if problems:
                 review_lines.append(f"{name}\t{'; '.join(problems)}")
-            # Safety: never persist approximate/uncertain effects. Flagged cards
-            # keep their (safe) keywords but get NO effects, so we don't silently
-            # execute a wrong approximation. They await a second pass / new verbs.
+            # Persist the validated effects the model emitted, even when the card
+            # is still flagged for review. `needs_review` now marks a PARTIAL parse:
+            # the supported abilities are parsed and kept, while the unsupported
+            # remainder is logged (review_needed.txt + suggested_vocab) to revisit
+            # when the missing verb lands. Previously a flag wiped ALL effects,
+            # which discarded cleanly-parsed abilities on any card that also flagged
+            # one unsupported ability (e.g. Poro Snax's on_play draw, SMDR's deal 5).
+            # Only a structural validation failure (`problems`) forces empty effects,
+            # so we never persist a spec the engine can't execute. Keywords are
+            # always safe to keep.
             card["keywords"] = entry.get("keywords") or []
-            card["effects"] = [] if flagged else effects
+            card["effects"] = [] if problems else effects
             processed += 1
 
         # Incremental save after each batch (resume-friendly).

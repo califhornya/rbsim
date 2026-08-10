@@ -111,7 +111,6 @@ Volibear Relentless Storm	Optional exhaust-self trigger to channel a rune exhaus
 Stormbringer	Targets a friendly unit in your base, deals damage equal to its might to all enemies at a battlefield, then moves that unit there
 Jinx Loose Cannon	Condition 'cards in hand <= 1' not in supported condition list
 Jinx Loose Cannon	unknown condition type 'cards_in_hand_at_most'
-Super Mega Death Rocket!	Second clause: on conquer, may discard 1 to return this spell from trash to hand
 Noxian Guillotine	Delayed conditional kill ('kill the next time it takes damage this turn') and LEGION upgrade to kill immediately; no delayed-trigger verb
 Ahri Nine-Tailed Fox	Trigger 'when an enemy unit attacks a battlefield you control' with -1 might this turn floored at 1
 Fox-Fire	Kill any number of units at a battlefield with total might <= 4 (multi-target with aggregate constraint)
@@ -128,7 +127,6 @@ Sett The Boss	Death replacement that spends a buff to heal/exhaust/recall not su
 Aspirant's Climb	Modifies points needed to win the game
 Bandle Tree	Allows hiding an additional card at this battlefield
 Monastery of Hirana	Conquer here ability with spend-a-buff cost; cost key spend_buff not in allowed set
-Navori Fighting Pit	On-hold-here buff effect; need trigger scoping to this battlefield
 Reckoner's Arena	Activates conquer effects of units here on hold
 Sigil of the Storm	On conquer here, controller must recycle a rune (non-choice)
 The Arena's Greatest	Each player gains 1 point at their first Beginning Phase
@@ -156,7 +154,6 @@ Brutalizer	unknown condition type 'attached_this_turn'
 Legion Quartermaster	Mandatory additional cost to play: return a friendly gear to hand. Not an optional kicker.
 Not So Fast	Counter enemy spell/ability only if it targets a friendly unit or gear — needs target filter for spell's chosen target.
 Not So Fast	unknown target_filter key(s) ['chooses_friendly']
-Poro Snax	Activated cost includes 'kill this' (self-sacrifice); using sacrifice cost flag approximately.
 Azir Ascendant	Swap-positions move with optional gear re-attach; no verb for swapping unit locations or transferring equipment.
 Svellsongur	Copies attached unit's text onto this equipment; no verb for text-copy.
 Tianna Crownguard	Static aura preventing opponents from gaining points while at a battlefield; no verb for point-gain prevention.
@@ -217,7 +214,6 @@ Rek'Sai Void Burrower	On-conquer optional self-exhaust to reveal top 2, banish o
 Void Rush	Reveal top 2, optionally banish-and-play one with cost reduction, draw the rest — no verb yet
 Ornn Fire Below the Mountain	Tap to ADD [rune] restricted to gear plays/abilities — no gain_power verb
 Rabadon's Deathcrown	UNIQUE deckbuilding restriction and 'spells and abilities deal 3 Bonus Damage' aura while attached — no bonus_damage verb
-Shurelya's Requiem	UNIQUE deckbuilding restriction; also 'ready your units' may target everywhere not just here
 Jax Grandmaster at Arms	Activated abilities that attach a controlled Equipment to a unit — no attach_existing_gear verb
 Irelia Blade Dancer	Triggers on 'choose a friendly unit' with optional self-exhaust+rune to ready it; on-conquer optional [1] to ready self — no choose-trigger or pay-to-ready verbs
 Azir Emperor of the Sands	Aura granting WEAPONMASTER to all Sand Soldiers anywhere; conditional restriction is 'played an Equipment this turn' not generic card
@@ -272,13 +268,11 @@ Deadly Flourish	'When it dies this turn, play a Gold gear token exhausted' is a 
 Frigid Jewel	Trigger 'when you draw your second card each turn' not modeled
 Petal Pixie	Self-buff based on count of friendly TEMPORARY units here; n_friendly_with_tag counts by subtype tag, not keyword
 Soul Shepherd	Aura buff to all friendly token units anywhere not fully dispatched
-Sprite Fountain	play_token to base location not standard; DEATHKNELL repeats play effect
 Diana Lunari	Triggered showdown-begin ability with optional energy cost; predict then conditional reveal-and-draw not yet modelable cleanly
 Hwei Brooding Painter	On-move loot then branch by discarded card type (spell/gear/unit) is a mode-by-type choice not supported
 Keeper of Masks	Plays tokens that become copies of self — copy-token mechanic not supported
 Lillia Fae Fawn	Token must be placed at the location moved from, not current; engine play_token location semantics unclear
 Smoke and Mirrors	Swap locations of two chosen friendly units conditional on TEMPORARY, then draw — swap not supported
-Sprite Queen	Token must be placed at controller's base, not current location
 Sumpworks Map	Trigger on opponent scoring not in supported trigger list
 Sumpworks Map	unknown trigger 'on_opponent_scores'
 Zilean Time Mage	Replacement effect that duplicates token plays once per turn — not supported
@@ -385,3 +379,5 @@ Vaults of Helia	On-hold effect that raises opponents'/owner's non-token unit pla
 Baron Pit	Token battlefield that allows units to move here from anywhere; no engine support for movement-rule modification.
 Brush	Static aura giving +1 might to units of specific subtypes here, plus a score-replacement effect; no aura buff verb and no replace-battlefield verb.
 Reflection	Token becomes a copy of another card on play; no copy-card mechanic.
+Super Mega Death Rocket!	cost-gated triggered ability to return self from trash on conquer not supported
+Poro Snax	activated ability with kill-this cost not supported
