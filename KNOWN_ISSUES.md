@@ -290,7 +290,8 @@ Recurring parser errors identified from the human verdicts in
   recall_unit and _try_replace_death: split "recall" (state-preserving) from
   Soraka-style "heal+exhaust+recall" (explicit resets).
 
-## 9. `leaves_board` trigger distinct from `on_death` (found spot-check rescued)
+## 9. (FIXED Step 3) `leaves_board` trigger distinct from `on_death`
+**RESOLVED:** added a `leaves_board` trigger firing on any board exit (combat death + recall-to-hand wired; registered in engine_vocab). Test: test_leaves_board_fires_on_recall. Re-parse affected cards to route them off `on_death`.
 - **What:** "When this leaves the board" fires on death AND on recall/bounce-to-hand
   (and banish). Engine currently only has on_death; cards like Treasure Trove parse
   "leaves the board" as on_death, missing the bounce/recall cases.
@@ -315,7 +316,7 @@ Fail bucket = 6 MISSING_EFFECT + 1 WRONG_CONDITION + 1 FLAGGED_WRONG, dominated 
 parser dropping whole abilities on MULTI-CLAUSE cards (Nami, Cursed Sarcophagus, Treasure
 Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 
-## 11. `all_units_here` mis-resolves to opponent-only on the deal_damage path
+## 11. (OPEN) `all_units_here` mis-resolves to opponent-only on the deal_damage path
 - **Where:** `effects.py` `_deal_damage` (:24-28) -> `loop.py` `ctx.deal_damage`
   (:108-119), which maps only {actor,ally,self} to the friendly side; everything else
   (incl. `all_units_here`, `battlefield`, `both`) falls through to opponent_side.
@@ -329,7 +330,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (Step 3):** make `ctx.deal_damage` honor a both-sides target; unify the three
   resolvers. Add a test: deal 1 to all_units_here damages friendly AND enemy units.
 
-## 12. Triggered effects never pay `cost` / `additional_cost` (kicker)
+## 12. (FIXED Step 3) Triggered effects never pay `cost` / `additional_cost` (kicker)
+**RESOLVED:** `_pay_triggered_cost` pays cost/additional_cost (pay-if-affordable) before the condition check, sets `_kicker_paid`; unaffordable → effect skipped. NB generic domainless [rune] power still isn't affordability-checked (pre-existing power-model gap). Test: test_triggered_kicker_paid_gates_effect.
 - **Where:** `loop.py` `_resolve_triggered_effects` (:447-455) checks only `condition`
   then runs the handler. `_try_pay_additional_costs` / `_parse_activated_cost` are wired
   only into the play path and the activated-ability path, never into on_hold/on_attack/
@@ -343,7 +345,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   (pay-if-affordable for the baseline agents, set `_kicker_paid`), OR mark such abilities
   as "optional triggered" so the effect only fires when the cost is paid.
 
-## 13. `banish_card` ignores `scope:"all"` and has no card-type filter
+## 13. (FIXED Step 3) `banish_card` ignores `scope:"all"` and has no card-type filter
+**RESOLVED:** honors scope:"all" + card-type target_filter (is_unit/is_spell/is_gear); end-order preserved for the count case. Test: test_banish_all_units_from_trash_leaves_non_units. (Replay-from-banish provenance still open.)
 - **Where:** `effects.py` `_banish_card` (:611-622) reads `count` (default 1) and pops
   from one zone; it does not read `scope` and applies no unit/type filter.
 - **What:** "Banish ALL units from your trash" (Cursed Sarcophagus) banishes ONE arbitrary
@@ -352,7 +355,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (Step 3):** honor `scope:"all"` (banish every matching card), add a `card_type`/
   `is_unit` filter, and add a provenance link so cards can replay "a unit banished with this".
 
-## 14. `move_units_to_base` is all-friendly-at-BF only; no single / "exhausted" target
+## 14. (FIXED Step 3) `move_units_to_base` is all-friendly-at-BF only; no single / "exhausted" target
+**RESOLVED:** routes through _resolve_targets (honors scope + is_exhausted filter); added is_exhausted/is_ready filters. Parser should route single "a unit" to move_unit. Test: test_move_units_to_base_only_exhausted.
 - **Where:** `effects.py` `_move_units_to_base` (:138-146) moves EVERY friendly unit at
   ctx.battlefield to base, ignoring `target`/`scope`/filters.
 - **What:** "Move an EXHAUSTED friendly unit ... to its base" (Kha'Zix Voidreaver, 3rd
@@ -362,7 +366,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (Step 3):** parser should route single-unit "move to base" to `move_unit`; add a
   ready/exhausted target_filter (`is_exhausted`) for the "exhausted" restriction.
 
-## 15. `this_is_mighty` checks the SOURCE card, not the triggering unit
+## 15. (FIXED Step 3) `this_is_mighty` checks the SOURCE card, not the triggering unit
+**RESOLVED:** added `triggering_unit_is_mighty` condition + threaded the triggering card through _fire_units_trigger. Test: test_triggering_unit_is_mighty_uses_played_unit.
 - **Where:** `loop.py` `_check_condition` (:634-635): `this_is_mighty` reads
   `card.might` where `card` is the effect's own source.
 - **What:** on an `on_friendly_unit_played` trigger ("When you play a MIGHTY unit ...",
@@ -372,7 +377,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (Step 3):** add a `triggering_unit_is_mighty` (and generally a triggering-unit
   context) so on_friendly_unit_played effects can gate on the played unit's stats.
 
-## 16. `chosen_unit` wrongly filed under FRIENDLY aliases — narrows 82 effects to caster's side
+## 16. (FIXED Step 3) `chosen_unit` wrongly filed under FRIENDLY aliases — narrows 82 effects to caster's side
+**RESOLVED:** chosen_unit now resolves to a both-sides pool with a harmful/beneficial pick bias (kill/stun/exhaust/debuff pick enemy-first). Removed from _FRIENDLY_TARGET_ALIASES; safe fallback for non-unit callers. Tests: test_chosen_unit_kill_hits_enemy_not_own, test_chosen_unit_buff_hits_own_not_enemy.
 - **DESIGN (confirmed by user):** `chosen_unit` = "player picks a unit"; unless the card
   text restricts to friendly/enemy, it may target EITHER side (incl. the caster's own).
   The parser is CORRECT to emit `chosen_unit` for an unrestricted "a unit". This is NOT a
@@ -394,7 +400,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - NB: `_target_side` (effects.py:231) does NOT list `chosen_unit`, so score_point/gain_xp
   resolve it to OPPONENT — a second inconsistency to unify when this is fixed.
 
-## 17. `kill_gear` ignores target/target_filter — always destroys ALL gear, both sides
+## 17. (FIXED Step 3) `kill_gear` ignores target/target_filter — always destroys ALL gear, both sides
+**RESOLVED:** with a filter/single scope/chooser target, kills ONE matching gear (enemy-biased, energy_at_most/at_least filters); plain "kill all gear" still wipes. Test: test_kill_gear_single_energy_filter_enemy_first. (Optional "if you do" gate still open.)
 - **Where:** `effects.py` `_kill_gear` (:389-405) loops every unit on both sides + both
   bases and clears all gear; `target`/`target_filter` (e.g. is_gear, energy<=1) are unused.
 - **What:** "you may kill A gear" (Adaptatron) / "kill a gear with Energy cost <= 1"
@@ -404,7 +411,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   add an energy-cost filter key; add an "if-you-did"/optional-resolution gate for the
   paired token spawn.
 
-## 18. Passive grants ignore `target_filter` (and are BF-local, not board-wide)
+## 18. (FIXED Step 3) Passive grants ignore `target_filter` (and are BF-local, not board-wide)
+**RESOLVED:** _apply_passive_grant applies target_filter; _passive_targets supports a board-wide scope for "your <X> units" anthems. Test: test_passive_anthem_only_tokens.
 - **Where:** `loop.py` `_apply_passive_grant` (:543-572) resolves targets via
   `_passive_targets` (side at the source's battlefield) and folds might/keywords onto them
   WITHOUT applying any `target_filter`.
