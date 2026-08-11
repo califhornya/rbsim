@@ -512,6 +512,8 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 unit.gear = []
                 if not getattr(unit, "is_token", False):
                     owner.hand.append(unit.card)
+                # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
+                ctx.loop._fire_leaves_board(unit.card, side, ctx.battlefield)
                 break
 
 

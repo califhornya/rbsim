@@ -445,3 +445,99 @@ def test_passive_anthem_only_tokens(cleanup_registry):
     loop._recompute_passives()
     assert token.might == 2      # token got +1
     assert normal.might == 3     # non-token untouched
+
+
+# --- KNOWN_ISSUES #15: triggering_unit_is_mighty gates on the PLAYED unit ---
+
+def test_triggering_unit_is_mighty_uses_played_unit(cleanup_registry):
+    """Volibear-style: 'when you play a MIGHTY unit, channel'. The gate must
+    inspect the just-played unit, not the source card."""
+    source = "TST Volibear"
+    _register(source, [{
+        "effect": "channel_rune", "trigger": "on_friendly_unit_played", "amount": 1,
+        "condition": {"type": "triggering_unit_is_mighty"},
+    }], might=2)  # source itself is NOT mighty
+    cleanup_registry.append(source)
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    voli = UnitInPlay(UnitCard(name=source, might=2), ready=True)
+    bf.units_A.append(voli)
+    # Stock the rune deck so channel_rune has runes to bring into play.
+    from riftbound.core.player import Rune
+    from riftbound.core.enums import Domain
+    loop.gs.A.rune_deck.runes.extend([Rune(domain=Domain.FURY), Rune(domain=Domain.FURY)])
+
+    # A mighty (5+) played unit triggers the channel (+1 rune in play).
+    runes_before = loop.gs.A.total_runes_in_play()
+    big = UnitCard(name="BigGuy", might=6)
+    loop._fire_units_trigger("on_friendly_unit_played", "A",
+                             exclude_card=big, triggering_card=big)
+    assert loop.gs.A.total_runes_in_play() == runes_before + 1
+
+    # A non-mighty played unit must NOT trigger the channel.
+    runes_mid = loop.gs.A.total_runes_in_play()
+    runt = UnitCard(name="Runt", might=2)
+    loop._fire_units_trigger("on_friendly_unit_played", "A",
+                             exclude_card=runt, triggering_card=runt)
+    assert loop.gs.A.total_runes_in_play() == runes_mid
+
+
+# --- KNOWN_ISSUES #9: leaves_board fires on recall, not only death ---
+
+def test_leaves_board_fires_on_recall(cleanup_registry):
+    name = "TST Treasure Trove"
+    _register(name, [{
+        "effect": "draw_cards", "trigger": "leaves_board", "amount": 1,
+    }], might=2)
+    cleanup_registry.append(name)
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    trove = UnitInPlay(UnitCard(name=name, might=2), ready=True)
+    bf.units_A.append(trove)
+    loop.gs.A.deck.cards.append(UnitCard(name="Drawn", might=1))
+    hand_before = len(loop.gs.A.hand)
+
+    from riftbound.core.cards import SpellCard
+    from riftbound.core.effects import REGISTRY
+    ctx = EffectContext(loop, SpellCard(name="Bounce"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["recall_unit"](ctx, {"target": "friendly_unit"})
+
+    # Trove returned to hand AND its leaves_board draw fired (+Drawn, +Trove itself).
+    assert any(c.name == "Drawn" for c in loop.gs.A.hand)
+    assert any(c.name == name for c in loop.gs.A.hand)
+    assert len(loop.gs.A.hand) == hand_before + 2
+
+
+# --- KNOWN_ISSUES #12: triggered abilities pay their kicker cost ---
+
+def test_triggered_kicker_paid_gates_effect(cleanup_registry):
+    """Power Nexus-style: score on hold only if the [rune]x4 kicker is paid."""
+    # Uses an ENERGY kicker: generic [rune] power with no domain isn't affordability-
+    # checked by the engine, but the wiring (cost → kicker_paid → gate) is identical.
+    name = "TST Power Nexus"
+    _register(name, [{
+        "effect": "score_point", "trigger": "on_hold", "amount": 1,
+        "additional_cost": {"energy": 4},
+        "condition": {"type": "kicker_paid"},
+    }], might=2)
+    cleanup_registry.append(name)
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    nexus = UnitInPlay(UnitCard(name=name, might=2), ready=True)
+    bf.units_A.append(nexus)
+
+    # No energy → kicker unaffordable → no score.
+    loop.gs.A.energy = 0
+    loop._resolve_triggered_effects(nexus.card, "on_hold", bf, loop.gs.A, loop.gs.B,
+                                    context_extra={"battlefield": bf})
+    assert loop.gs.points_A == 0
+
+    # Enough energy → kicker paid → scores 1 (and the energy is spent).
+    loop.gs.A.energy = 4
+    loop._resolve_triggered_effects(nexus.card, "on_hold", bf, loop.gs.A, loop.gs.B,
+                                    context_extra={"battlefield": bf})
+    assert loop.gs.points_A == 1
+    assert loop.gs.A.energy == 0

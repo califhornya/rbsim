@@ -28,13 +28,14 @@ from riftbound.registry.engine_vocab import (
 # which is the whole point: it keeps the parser's vocabulary honest.
 _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_play", "on_cast", "on_conquer", "on_hold", "on_attack", "on_defend",
-    "on_death", "on_move", "on_start_of_turn", "on_end_of_turn",
+    "on_death", "leaves_board", "on_move", "on_start_of_turn", "on_end_of_turn",
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
-    "spell_cost_at_least", "this_is_alone", "this_is_mighty", "kicker_paid",
+    "spell_cost_at_least", "this_is_alone", "this_is_mighty",
+    "triggering_unit_is_mighty", "kicker_paid",
     "friendly_unit_died_this_turn", "you_played_n_spells_this_turn",
     "you_already_played_another_card_this_turn", "controller_has_xp_at_least",
     "card_in_trash_count_at_least", "this_is_buffed", "you_control_subtype",
@@ -454,6 +455,12 @@ class GameLoop:
         for es in effect_specs:
             if es.trigger != trigger:
                 continue
+            # Pay any cost / additional_cost the triggered ability carries BEFORE
+            # the condition check (so a kicker_paid gate sees the payment). If a
+            # cost exists but is unaffordable, the ability simply doesn't fire
+            # (KNOWN_ISSUES #12).
+            if not self._pay_triggered_cost(card, actor, es):
+                continue
             if not self._check_condition(es.condition, card, actor, opponent, context_extra):
                 continue
             handler = EFFECT_REGISTRY.get(es.effect)
@@ -461,23 +468,73 @@ class GameLoop:
                 continue
             handler(context, es.merged_params())
 
-    def _fire_units_trigger(self, trigger: str, side: str, exclude_card=None) -> None:
+    def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec) -> bool:
+        """Pay a triggered effect's `cost` (activated-style: tap/energy/power/
+        spend_xp/recycle/sacrifice) and/or `additional_cost` (kicker-style).
+        Baseline policy: pay when affordable. Returns True when there was nothing
+        to pay or it was fully paid; False when a cost existed but was
+        unaffordable (the ability then doesn't fire). Sets card._kicker_paid on a
+        successful payment so a `kicker_paid` condition passes. KNOWN_ISSUES #12."""
+        cost = getattr(es, "cost", None)
+        ac = getattr(es, "additional_cost", None)
+        if not cost and not ac:
+            return True
+        side = "A" if actor is self.gs.A else "B"
+        unit = self._find_unit_by_card(card)
+
+        if ac:
+            if not self._pay_one_additional_cost(card, actor, ac):
+                return False
+            card._kicker_paid = True
+
+        if cost:
+            parsed = self._parse_activated_cost(cost)
+            if not self._activated_affordable(actor, unit, parsed):
+                return False
+            if (parsed["energy"] or parsed["power"]) and not actor.pay_cost(
+                parsed["energy"], parsed["power"] or None, None
+            ):
+                return False
+            if parsed["tap"] and unit is not None:
+                unit.ready = False
+            for _ in range(parsed["recycle"]):
+                if actor.trash:
+                    actor.deck.cards.append(actor.trash.pop(0))
+            if parsed["spend_xp"]:
+                self.gs.add_xp(side, -parsed["spend_xp"])
+            if parsed["sacrifice"] and unit is not None:
+                self._remove_unit_from_play(unit, side)
+                actor.trash.append(unit.card)
+            card._kicker_paid = True
+
+        return True
+
+    def _fire_units_trigger(self, trigger: str, side: str, exclude_card=None,
+                            triggering_card=None) -> None:
         """Fire a trigger for every unit a side controls on board + base (and skip
-        an optional excluded card so 'when another friendly unit ...' works)."""
+        an optional excluded card so 'when another friendly unit ...' works).
+
+        `triggering_card` (the card whose play/death caused this fan-out) is
+        exposed to conditions via extra['triggering_card'] — e.g.
+        triggering_unit_is_mighty. Defaults to exclude_card, which for
+        on_friendly_unit_played IS the just-played unit."""
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
+        trig = triggering_card if triggering_card is not None else exclude_card
         for bf in self.gs.battlefields:
             for u in list(bf.units_A if side == "A" else bf.units_B):
                 if u.card is exclude_card:
                     continue
                 self._resolve_triggered_effects(u.card, trigger, bf, actor, opponent,
-                                                context_extra={"battlefield": bf})
+                                                context_extra={"battlefield": bf,
+                                                               "triggering_card": trig})
         anchor = self.gs.battlefields[0]
         for u in list(actor.base_units):
             if u.card is exclude_card:
                 continue
             self._resolve_triggered_effects(u.card, trigger, anchor, actor, opponent,
-                                            context_extra={"battlefield": anchor})
+                                            context_extra={"battlefield": anchor,
+                                                           "triggering_card": trig})
 
     def _all_units_in_play(self):
         """Every UnitInPlay across battlefields and both bases."""
@@ -660,6 +717,11 @@ class GameLoop:
             return len(units) <= 1
         if ctype == "this_is_mighty":
             return int(getattr(card, "might", 0) or 0) >= 5
+        if ctype == "triggering_unit_is_mighty":
+            # Gate on the UNIT THAT JUST TRIGGERED this ability (e.g. the mighty
+            # unit you just played), not the source card (KNOWN_ISSUES #15).
+            trig = extra.get("triggering_card")
+            return int(getattr(trig, "might", 0) or 0) >= 5
         if ctype == "kicker_paid":
             return bool(getattr(card, "_kicker_paid", False))
         if ctype == "friendly_unit_died_this_turn":
@@ -1396,8 +1458,21 @@ class GameLoop:
                 dead_unit.card, "on_death", bf, actor, opponent,
                 context_extra={"battlefield": bf},
             )
+            # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
+            self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
                                      exclude_card=dead_unit.card)
+
+    def _fire_leaves_board(self, card: Card, owner_side: str, bf: Battlefield) -> None:
+        """Fire a card's `leaves_board` triggered effects. 'Leaving the board'
+        covers ANY board exit — death, recall, bounce-to-hand, banish — not just
+        death (KNOWN_ISSUES #9). Callers invoke this at each exit path."""
+        actor = self.gs.get_player(owner_side)
+        opponent = self.gs.get_player(self.gs.other(owner_side))
+        self._resolve_triggered_effects(
+            card, "leaves_board", bf, actor, opponent,
+            context_extra={"battlefield": bf},
+        )
 
     def _run_chain(self, caster: str) -> None:
         """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""

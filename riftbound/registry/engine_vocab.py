@@ -18,6 +18,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_conquer", "on_hold",                    # scoring
     "on_attack", "on_defend",                   # combat designations
     "on_death",                                 # death-knell family
+    "leaves_board",                             # any board exit (death/recall/bounce/banish)
     "on_move",                                  # move-into-battlefield
     "on_start_of_turn", "on_end_of_turn",       # turn boundaries
     "on_friendly_unit_played",
@@ -41,6 +42,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "spell_cost_at_least",
     "this_is_alone",
     "this_is_mighty",
+    "triggering_unit_is_mighty",
     "this_is_buffed",
     "kicker_paid",
     "friendly_unit_died_this_turn",
