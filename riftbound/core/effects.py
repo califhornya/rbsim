@@ -137,13 +137,19 @@ def _score_point(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("move_units_to_base")
 def _move_units_to_base(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    # Default: move ALL friendly units at this battlefield to base. Honors
+    # target_filter (e.g. is_exhausted) and scope=single so callers can move a
+    # single restricted unit instead of over-moving (KNOWN_ISSUES #14).
     side = ctx.actor_side
     bf = ctx.battlefield
-    units = list(ctx._units_for_side(side))
-    for unit in units:
-        bf.remove_unit(side, unit)
-        unit.ready = True
-        ctx.actor.base_units.append(unit)
+    resolved = _resolve_targets(
+        ctx, {**spec, "target": spec.get("target", "actor"),
+              "scope": spec.get("scope", "all")})
+    for unit in resolved:
+        if unit in ctx._units_for_side(side):
+            bf.remove_unit(side, unit)
+            unit.ready = True
+            ctx.actor.base_units.append(unit)
 
 
 @effect("counter_spell")
@@ -244,6 +250,29 @@ def _card_category_name(card) -> str:
     return getattr(cat, "name", str(cat)).upper()
 
 
+def _zone_card_matches(card, tf: Mapping[str, Any]) -> bool:
+    """Card-type filter for cards sitting in a zone (trash/hand/deck), where we
+    have a bare Card rather than a UnitInPlay. Used by banish/recycle-all paths."""
+    if not tf:
+        return True
+    cat = _card_category_name(card)
+    if tf.get("is_unit") and cat not in ("UNIT", "CHAMPION", "LEGEND"):
+        return False
+    if tf.get("is_spell") and cat != "SPELL":
+        return False
+    if tf.get("is_gear") and cat != "GEAR":
+        return False
+    if tf.get("is_champion") and cat != "CHAMPION":
+        return False
+    if tf.get("is_legend") and cat != "LEGEND":
+        return False
+    if "card_type" in tf and cat != str(tf["card_type"]).upper():
+        return False
+    if "subtype" in tf and str(tf["subtype"]) not in (getattr(card, "tags", None) or []):
+        return False
+    return True
+
+
 def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     """Apply a target_filter dict to a single unit (Round 4 Tier 1)."""
     if not tf:
@@ -275,6 +304,10 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     if "subtype" in tf and str(tf["subtype"]) not in (card.tags or []):
         return False
     if tf.get("is_buffed") and getattr(unit, "might_counters", 0) <= 0:
+        return False
+    if tf.get("is_exhausted") and getattr(unit, "ready", True):
+        return False
+    if tf.get("is_ready") and not getattr(unit, "ready", True):
         return False
     if tf.get("is_mighty") and unit.might < 5:
         return False
@@ -399,23 +432,62 @@ def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 break
 
 
-@effect("kill_gear")
-def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Destroy gear in play ('Kill all gear'): attached gear anywhere plus
-    unattached base gear goes to its owner's trash."""
+def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
+    """All gear in play as (owner_side, holder_or_None, gear_card). holder is the
+    UnitInPlay wearing it, or None for unattached base gear."""
     gs = ctx.loop.gs
-    for side in ("A", "B"):
+    # enemy_first means the opponent's side comes first in the pick order.
+    order = (ctx.opponent_side, ctx.actor_side) if enemy_first else (ctx.actor_side, ctx.opponent_side)
+    entries: list[tuple[str, object, object]] = []
+    for side in order:
         player = gs.get_player(side)
         in_play = [u for bf in gs.battlefields
                    for u in (bf.units_A if side == "A" else bf.units_B)]
         in_play.extend(player.base_units)
         for u in in_play:
-            if u.gear:
-                player.trash.extend(u.gear)
-                u.gear.clear()
-        if player.base_gear:
-            player.trash.extend(player.base_gear)
-            player.base_gear.clear()
+            for g in u.gear:
+                entries.append((side, u, g))
+        for g in player.base_gear:
+            entries.append((side, None, g))
+    return entries
+
+
+def _gear_matches(gear_card, tf: Mapping[str, Any]) -> bool:
+    if "energy_at_most" in tf and int(getattr(gear_card, "cost_energy", 0) or 0) > int(tf["energy_at_most"]):
+        return False
+    if "energy_at_least" in tf and int(getattr(gear_card, "cost_energy", 0) or 0) < int(tf["energy_at_least"]):
+        return False
+    return True
+
+
+@effect("kill_gear")
+def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Destroy gear in play. Default ('Kill all gear') wipes every gear both
+    sides; when a target_filter, a single scope, or a chooser target is given,
+    kills ONE matching gear (enemy-biased) instead of board-wiping — KNOWN_ISSUES #17."""
+    gs = ctx.loop.gs
+    tf = spec.get("target_filter") or {}
+    scope = str(spec.get("scope", "")).lower()
+    target = str(spec.get("target", "")).lower()
+    single = bool(tf) or scope == "single" or target in _CHOOSER_TARGETS or target in _ENEMY_GEAR_HINTS
+
+    entries = _gear_entries(ctx, enemy_first=True)
+    entries = [(s, h, g) for (s, h, g) in entries if _gear_matches(g, tf)]
+    if single:
+        entries = entries[:1]
+
+    for side, holder, gear in entries:
+        player = gs.get_player(side)
+        if holder is not None:
+            if gear in holder.gear:
+                holder.gear.remove(gear)
+                player.trash.append(gear)
+        elif gear in player.base_gear:
+            player.base_gear.remove(gear)
+            player.trash.append(gear)
+
+
+_ENEMY_GEAR_HINTS = {"enemy_gear", "chosen_gear", "gear"}
 
 
 @effect("heal_unit")
@@ -623,16 +695,30 @@ def _play_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("banish_card")
 def _banish_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Move card(s) from a zone into the banished zone (removed from the game)."""
+    """Move card(s) from a zone into the banished zone (removed from the game).
+
+    Honors scope:"all" ("banish ALL units from your trash") and a card-type
+    target_filter (is_unit/is_spell/is_gear/card_type) — KNOWN_ISSUES #13.
+    """
     src = str(spec.get("from", "trash")).lower()
-    count = int(spec.get("count", spec.get("amount", 1)))
     player = ctx._player_for_target(str(spec.get("target", "actor")))
     pool = {"trash": player.trash, "hand": player.hand,
             "deck": player.deck.cards}.get(src, player.trash)
-    for _ in range(count):
-        if not pool:
+    tf = spec.get("target_filter") or {}
+    scope = str(spec.get("scope", "")).lower()
+    count = len(pool) if scope == "all" else int(spec.get("count", spec.get("amount", 1)))
+
+    banished = 0
+    # Iterate from the END so the no-filter case matches the historical
+    # `pool.pop()` selection (behaviour-preserving); filter/scope just narrow it.
+    for card in reversed(list(pool)):
+        if banished >= count:
             break
-        player.banished.append(pool.pop())
+        if not _zone_card_matches(card, tf):
+            continue
+        pool.remove(card)
+        player.banished.append(card)
+        banished += 1
 
 
 @effect("play_from_banish")

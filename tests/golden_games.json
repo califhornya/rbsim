@@ -488,7 +488,7 @@
           "CHAOS": 6
         },
         "runes_in_play": 10,
-        "trash": 4
+        "trash": 3
       },
       "points_A": 4,
       "points_B": 8,
@@ -1048,20 +1048,20 @@
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
           "Recruit",
           "Baron Nashor"
         ],
         "deck": 29,
-        "energy": 10,
-        "hand": 2,
+        "energy": 9,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 4,
+          "CHAOS": 3,
           "FURY": 6
         },
-        "runes_in_play": 10,
-        "trash": 5
+        "runes_in_play": 9,
+        "trash": 4
       },
       "player_B": {
         "banished": 0,
@@ -1070,19 +1070,19 @@
           "Lonely Poro",
           "Lonely Poro"
         ],
-        "deck": 23,
+        "deck": 21,
         "energy": 1,
-        "hand": 1,
+        "hand": 3,
         "power_pool": {
           "CALM": 3,
           "CHAOS": 6
         },
         "runes_in_play": 9,
-        "trash": 5
+        "trash": 4
       },
       "points_A": 9,
       "points_B": 3,
-      "spells_cast": 9,
+      "spells_cast": 10,
       "turns": 14,
       "units_played": 9,
       "winner": "A",
@@ -1431,11 +1431,11 @@
           "CHAOS": 6
         },
         "runes_in_play": 11,
-        "trash": 7
+        "trash": 3
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
           "Recruit"
         ],
@@ -1447,7 +1447,7 @@
           "FURY": 3
         },
         "runes_in_play": 8,
-        "trash": 7
+        "trash": 6
       },
       "points_A": 8,
       "points_B": 1,

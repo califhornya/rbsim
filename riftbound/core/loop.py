@@ -11,6 +11,7 @@ from .battlefield import Battlefield
 from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
 from .effects import _amount as _effect_amount
+from .effects import _passes_filter as _effect_passes_filter
 from .enums import Domain
 from .legion_effects import get_legion_cost_reduction
 from .movement_effects import MOVEMENT_REGISTRY
@@ -530,15 +531,29 @@ class GameLoop:
         "opponent", "enemy", "enemy_unit", "all_enemy_units_here",
     }
 
-    def _passive_targets(self, source_unit, bf, side, target):
+    _PASSIVE_BOARD_WIDE_SCOPES = {"board", "all_battlefields", "everywhere", "global", "all"}
+
+    def _passive_targets(self, source_unit, bf, side, target, scope=None):
         """Resolve the units a passive ability applies to, honoring the corpus's
         target vocabulary. Self-targets hit only the source; group targets hit the
-        relevant side(s) at the source's battlefield."""
+        relevant side(s) at the source's battlefield. A board-wide scope (anthems
+        that read 'your <X> units' with no 'here') spans every battlefield + base."""
         key = (target or "self").lower()
-        friendly = bf.units_A if side == "A" else bf.units_B
-        enemy = bf.units_B if side == "A" else bf.units_A
         if key in ("self", "this"):
             return [source_unit]
+
+        board_wide = str(scope or "").lower() in self._PASSIVE_BOARD_WIDE_SCOPES
+        if board_wide:
+            friendly = [u for b in self.gs.battlefields
+                        for u in (b.units_A if side == "A" else b.units_B)]
+            friendly += self.gs.get_player(side).base_units
+            enemy = [u for b in self.gs.battlefields
+                     for u in (b.units_B if side == "A" else b.units_A)]
+            enemy += self.gs.get_player("B" if side == "A" else "A").base_units
+        else:
+            friendly = list(bf.units_A if side == "A" else bf.units_B)
+            enemy = list(bf.units_B if side == "A" else bf.units_A)
+
         if key == "all_units_here":
             return list(friendly) + list(enemy)
         if key in self._PASSIVE_ENEMY_TARGETS:
@@ -553,7 +568,13 @@ class GameLoop:
         params = es.merged_params()
         side = context.actor_side
         bf = context.battlefield
-        targets = self._passive_targets(source_unit, bf, side, es.target)
+        targets = self._passive_targets(source_unit, bf, side, es.target, es.scope)
+
+        # Anthems/"while" buffs restricted to a subset ("your TOKEN units ...")
+        # must honor the target_filter, not blanket every friendly (KNOWN_ISSUES #18).
+        tf = es.target_filter
+        if tf:
+            targets = [u for u in targets if _effect_passes_filter(u, tf, context)]
 
         if es.effect == "give_keyword":
             keyword = str(params.get("keyword", "")).strip()

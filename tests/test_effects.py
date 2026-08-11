@@ -358,3 +358,90 @@ def test_chosen_unit_buff_hits_own_not_enemy(cleanup_registry):
 
     assert mine.temporary_might == 2         # friendly buffed
     assert theirs.temporary_might == 0       # enemy untouched
+
+
+# --- KNOWN_ISSUES #13: banish honors scope:all + card-type filter ---
+
+def test_banish_all_units_from_trash_leaves_non_units():
+    from riftbound.core.cards import SpellCard, GearCard
+    from riftbound.core.effects import REGISTRY
+
+    loop = _make_loop()
+    loop.gs.A.trash.extend([
+        UnitCard(name="U1", might=1), GearCard(name="G1"), UnitCard(name="U2", might=1),
+    ])
+    ctx = EffectContext(loop, SpellCard(name="Sarcophagus"), loop.gs.A, loop.gs.B,
+                        loop.gs.battlefields[0])
+    REGISTRY["banish_card"](ctx, {"from": "trash", "scope": "all",
+                                  "target_filter": {"is_unit": True}})
+    assert sorted(c.name for c in loop.gs.A.banished) == ["U1", "U2"]
+    assert [c.name for c in loop.gs.A.trash] == ["G1"]   # gear stays
+
+
+# --- KNOWN_ISSUES #14: move_units_to_base honors an is_exhausted filter ---
+
+def test_move_units_to_base_only_exhausted():
+    from riftbound.core.cards import SpellCard
+    from riftbound.core.effects import REGISTRY
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    ready_u = UnitInPlay(UnitCard(name="Ready", might=2), ready=True)
+    tired_u = UnitInPlay(UnitCard(name="Tired", might=2), ready=False)
+    bf.units_A.extend([ready_u, tired_u])
+
+    ctx = EffectContext(loop, SpellCard(name="KhaZix"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["move_units_to_base"](ctx, {"target_filter": {"is_exhausted": True}})
+
+    assert tired_u in loop.gs.A.base_units   # exhausted moved
+    assert ready_u in bf.units_A             # ready stayed
+
+
+# --- KNOWN_ISSUES #17: kill_gear kills ONE filtered gear, not a board wipe ---
+
+def test_kill_gear_single_energy_filter_enemy_first():
+    from riftbound.core.cards import SpellCard, GearCard
+    from riftbound.core.effects import REGISTRY
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    mine = UnitInPlay(UnitCard(name="Mine", might=2), ready=True)
+    theirs = UnitInPlay(UnitCard(name="Theirs", might=2), ready=True)
+    mine.gear.append(GearCard(name="MyGear", cost_energy=1))
+    cheap = GearCard(name="CheapEnemyGear", cost_energy=1)
+    dear = GearCard(name="DearEnemyGear", cost_energy=3)
+    theirs.gear.extend([dear, cheap])
+    bf.units_A.append(mine)
+    bf.units_B.append(theirs)
+
+    ctx = EffectContext(loop, SpellCard(name="Pickpocket"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["kill_gear"](ctx, {"target_filter": {"energy_at_most": 1}})
+
+    # Exactly one gear killed: the enemy's cost<=1 gear (enemy-biased).
+    assert cheap in loop.gs.B.trash
+    assert dear in theirs.gear               # too expensive, untouched
+    assert any(g.name == "MyGear" for g in mine.gear)  # own gear spared
+
+
+# --- KNOWN_ISSUES #18: passive anthem honors target_filter ---
+
+def test_passive_anthem_only_tokens(cleanup_registry):
+    name = "TST Soul Shepherd"
+    _register(name, [{
+        "effect": "grant_might", "trigger": "passive", "amount": 1,
+        "target": "all_friendly_units_here",
+        "target_filter": {"is_token": True},
+    }], might=2)
+    cleanup_registry.append(name)
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    shepherd = UnitInPlay(UnitCard(name=name, might=2), ready=True)
+    token = UnitInPlay(UnitCard(name="Sprite", might=1), ready=True)
+    token.is_token = True
+    normal = UnitInPlay(UnitCard(name="Regular", might=3), ready=True)
+    bf.units_A.extend([shepherd, token, normal])
+
+    loop._recompute_passives()
+    assert token.might == 2      # token got +1
+    assert normal.might == 3     # non-token untouched
