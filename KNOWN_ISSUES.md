@@ -294,12 +294,122 @@ Recurring parser errors identified from the human verdicts in
 - **What:** "When this leaves the board" fires on death AND on recall/bounce-to-hand
   (and banish). Engine currently only has on_death; cards like Treasure Trove parse
   "leaves the board" as on_death, missing the bounce/recall cases.
+- **RULING (confirmed by user, spot-check rescued v2):** leaving the board is NOT dying —
+  `leaves_board` fires on death AND recall AND bounce-to-hand AND banish (any board exit).
+  So mapping it to `on_death` is definitively wrong, not merely narrow: recall/bounce cases
+  are silently lost.
 - **Fix (Step 3):** add a `leaves_board` (a.k.a. on_leave) trigger that fires on any
-  zone-exit from the board (death, recall-to-base?, return-to-hand, banish), and
-  re-parse affected cards. Clarify which exits count (base is still "on board"?).
+  board-exit (death, recall, return-to-hand, banish), and re-parse affected cards.
 
 ## 10. `reduce_cost` verb missing but referenced by populated parses
 - Ornn's Forge parsed with effect `reduce_cost` (trigger cost_modifier) — but NO
   `reduce_cost` handler exists in effects.py. Populated-but-inert. aura:reduce_cost
   is in the Step 3 queue (x6). Build the verb + a cost-modifier application path;
   until then these should be flagged, not emitted as populated.
+
+## Spot-check findings (rescued v2, 30/30 reviewed, 73% OK+MINOR+FLAGGED_OK)
+Sample: `scripts/spot_check_rescued_v2.md` (same 30 "rescued" cards re-parsed under the
+reinforced prompt). Recovery-floor sample of previously-hard cards, NOT an RNG-seeded
+representative gate. Result: 1 OK + 11 MINOR + 10 FLAGGED_OK = 22/30 = **73.3% < 80%**.
+Fail bucket = 6 MISSING_EFFECT + 1 WRONG_CONDITION + 1 FLAGGED_WRONG, dominated by the
+parser dropping whole abilities on MULTI-CLAUSE cards (Nami, Cursed Sarcophagus, Treasure
+Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
+
+## 11. `all_units_here` mis-resolves to opponent-only on the deal_damage path
+- **Where:** `effects.py` `_deal_damage` (:24-28) -> `loop.py` `ctx.deal_damage`
+  (:108-119), which maps only {actor,ally,self} to the friendly side; everything else
+  (incl. `all_units_here`, `battlefield`, `both`) falls through to opponent_side.
+- **What:** "deal N to EACH unit here" (both sides) hits only the OPPONENT's units at the
+  battlefield. Friendly units here are never damaged. Found via **Frozen Fortress**.
+- **Also:** `all_units_here` is resolved THREE inconsistent ways across the engine:
+  `_units_for_target` (loop.py:104, FRIENDLY-only), `_target_side` (effects.py:231,
+  OPPONENT-only for deal_damage), `_passive_targets` (loop.py:536, BOTH sides). Pick one
+  canonical meaning ("both sides at this battlefield") and route deal_damage through a
+  both-sides resolver (or add an `all_units_here` case to `ctx.deal_damage`).
+- **Fix (Step 3):** make `ctx.deal_damage` honor a both-sides target; unify the three
+  resolvers. Add a test: deal 1 to all_units_here damages friendly AND enemy units.
+
+## 12. Triggered effects never pay `cost` / `additional_cost` (kicker)
+- **Where:** `loop.py` `_resolve_triggered_effects` (:447-455) checks only `condition`
+  then runs the handler. `_try_pay_additional_costs` / `_parse_activated_cost` are wired
+  only into the play path and the activated-ability path, never into on_hold/on_attack/
+  on_conquer/on_*-triggered effects.
+- **What:** (a) optional/kicker costs on triggered abilities are silently skipped —
+  "you MAY exhaust me" (Volibear) channels for free with no exhaust; "pay [rune]x4 to
+  score on hold" (Power Nexus) is never paid, so a `kicker_paid` gate stays False and the
+  score_point silently no-ops. (b) any triggered effect with a `cost` field is executed
+  cost-free.
+- **Fix (Step 3):** thread cost/additional_cost payment through `_resolve_triggered_effects`
+  (pay-if-affordable for the baseline agents, set `_kicker_paid`), OR mark such abilities
+  as "optional triggered" so the effect only fires when the cost is paid.
+
+## 13. `banish_card` ignores `scope:"all"` and has no card-type filter
+- **Where:** `effects.py` `_banish_card` (:611-622) reads `count` (default 1) and pops
+  from one zone; it does not read `scope` and applies no unit/type filter.
+- **What:** "Banish ALL units from your trash" (Cursed Sarcophagus) banishes ONE arbitrary
+  card (could be a spell/gear). The paired "play a unit banished with this" tap ability is
+  also unrepresented (needs a "banished-by-source" provenance tag + an activated replay).
+- **Fix (Step 3):** honor `scope:"all"` (banish every matching card), add a `card_type`/
+  `is_unit` filter, and add a provenance link so cards can replay "a unit banished with this".
+
+## 14. `move_units_to_base` is all-friendly-at-BF only; no single / "exhausted" target
+- **Where:** `effects.py` `_move_units_to_base` (:138-146) moves EVERY friendly unit at
+  ctx.battlefield to base, ignoring `target`/`scope`/filters.
+- **What:** "Move an EXHAUSTED friendly unit ... to its base" (Kha'Zix Voidreaver, 3rd
+  ability) over-moves (all instead of one) and can't restrict to exhausted units. A
+  single-target `move_unit` (effects.py:433) already exists and is the better route for
+  "move A unit to base".
+- **Fix (Step 3):** parser should route single-unit "move to base" to `move_unit`; add a
+  ready/exhausted target_filter (`is_exhausted`) for the "exhausted" restriction.
+
+## 15. `this_is_mighty` checks the SOURCE card, not the triggering unit
+- **Where:** `loop.py` `_check_condition` (:634-635): `this_is_mighty` reads
+  `card.might` where `card` is the effect's own source.
+- **What:** on an `on_friendly_unit_played` trigger ("When you play a MIGHTY unit ...",
+  Volibear), the gate should test the UNIT JUST PLAYED, but it tests Volibear's own might
+  — so it fires on every unit played iff the source is 5+, else never. There is no
+  condition that inspects the triggering unit, so the parser has no correct option today.
+- **Fix (Step 3):** add a `triggering_unit_is_mighty` (and generally a triggering-unit
+  context) so on_friendly_unit_played effects can gate on the played unit's stats.
+
+## 16. `chosen_unit` wrongly filed under FRIENDLY aliases — narrows 82 effects to caster's side
+- **DESIGN (confirmed by user):** `chosen_unit` = "player picks a unit"; unless the card
+  text restricts to friendly/enemy, it may target EITHER side (incl. the caster's own).
+  The parser is CORRECT to emit `chosen_unit` for an unrestricted "a unit". This is NOT a
+  parser bug and does NOT need a new alias.
+- **BUG (engine):** `loop.py` `_FRIENDLY_TARGET_ALIASES` (:85-88) lists `chosen_unit`, so
+  `_player_for_target`/`_units_for_target` resolve it to the ACTOR's side. Every effect
+  using it (`_resolve_targets` path: kill_unit, deal_damage-via-target, buff, stun, ...)
+  is silently narrowed to friendly-only.
+- **Blast radius:** `target=chosen_unit` appears on **72 cards / 82 effects** (Cleave,
+  Disintegrate, Hextech Ray, Rune Prison, Void Seeker, Falling Star, Death from Below,
+  Blood Money, ...). Enemy-facing removal/damage currently hits the CASTER's own units.
+- **Fix (Step 3):** make `chosen_unit` resolve to a BOTH-SIDES candidate pool (remove it
+  from `_FRIENDLY_TARGET_ALIASES`; add a chosen/both-sides branch in `_resolve_targets`
+  before `_player_for_target` so it doesn't raise). Because Step 2 made the loop pausable,
+  the correct resolution is a real player choice at a DecisionPoint over all units either
+  side; the deterministic baseline needs a sane pick policy (a kill/damage spell must not
+  auto-select the caster's own unit). `chosen_enemy` stays enemy-only; add/keep a
+  friendly-only alias for cards whose text says "a friendly unit".
+- NB: `_target_side` (effects.py:231) does NOT list `chosen_unit`, so score_point/gain_xp
+  resolve it to OPPONENT — a second inconsistency to unify when this is fixed.
+
+## 17. `kill_gear` ignores target/target_filter — always destroys ALL gear, both sides
+- **Where:** `effects.py` `_kill_gear` (:389-405) loops every unit on both sides + both
+  bases and clears all gear; `target`/`target_filter` (e.g. is_gear, energy<=1) are unused.
+- **What:** "you may kill A gear" (Adaptatron) / "kill a gear with Energy cost <= 1"
+  (Pickpocket) becomes a board wipe of ALL gear. Also there's no energy-cost filter key to
+  express "<= 1", and no way to gate the follow-on ("if you do ...") on the optional kill.
+- **Fix (Step 3):** make kill_gear honor target/scope (single chosen gear) + target_filter;
+  add an energy-cost filter key; add an "if-you-did"/optional-resolution gate for the
+  paired token spawn.
+
+## 18. Passive grants ignore `target_filter` (and are BF-local, not board-wide)
+- **Where:** `loop.py` `_apply_passive_grant` (:543-572) resolves targets via
+  `_passive_targets` (side at the source's battlefield) and folds might/keywords onto them
+  WITHOUT applying any `target_filter`.
+- **What:** "Your TOKEN units have +1 [might]" (Soul Shepherd) buffs ALL friendly units at
+  the source's battlefield (non-tokens included) and only there, not the intended
+  token-only, board-wide anthem.
+- **Fix (Step 3):** apply target_filter inside the passive path (reuse `_passes_filter`),
+  and support a board-wide scope for anthems that read "your <X> units" with no "here".
