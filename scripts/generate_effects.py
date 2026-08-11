@@ -203,8 +203,9 @@ emit the approximate effect.
   exist → needs_review, suggested_vocab "effect:split_damage".
 - "when this LEAVES THE BOARD" / "leaves play" is BROADER than `on_death` (recall and
   bounce-to-hand also trigger it). Use `on_death` ONLY for "when I die / when this is
-  killed / DEATHKNELL". For leaves-the-board → needs_review, suggested_vocab
-  "trigger:leaves_board".
+  killed / DEATHKNELL". For leaves-the-board, EMIT the effect with
+  `trigger: "leaves_board"` (now a supported trigger) — do NOT flag it and do NOT
+  fold it into `on_death`.
 - A GATE you cannot represent: if an effect is conditional ("if you control a facedown
   card", "if it had 3 [might] or less") and no supported condition type matches, do
   NOT emit the effect UNGATED — that would run it unconditionally (e.g. a free draw
@@ -362,6 +363,49 @@ Few-shot examples (from spot-check feedback — follow these patterns):
       suggested_vocab: ["effect:delayed_next_unit_played"]
     (the kicker STUN is emitted; the ENTIRE second "When I hold …" ability is flagged,
     not dropped. [calm] is a power symbol → additional_cost power:1.)
+
+STEP 3 — newly-supported mechanics (EMIT these now; older guidance said to flag them):
+
+13. LEAVES-THE-BOARD effect — emit with trigger "leaves_board" (fires on death,
+    recall, bounce, banish). Still flag any genuinely-unsupported sibling clause.
+    Text: "When this leaves the board, draw 1 and channel 1 rune exhausted.
+    [Chaos], [Tap]: Kill this." (Treasure Trove)
+    → effects: [{{"effect":"draw_cards","trigger":"leaves_board","count":1}},
+      {{"effect":"channel_rune","trigger":"leaves_board","amount":1,"exhausted":true}}],
+      needs_review: true, suggested_vocab: ["cost:kill_self"]
+    (the leaves-board draw + channel are now emitted, NOT flagged; only the
+    "[Chaos],[Tap]: Kill this" sacrifice-cost activated ability stays flagged.)
+
+14. BANISH ALL FROM A ZONE — use `banish_card` with `scope:"all"` and a card-type
+    `target_filter` ("all UNITS from your trash" → is_unit).
+    Text: "When you play this, banish all units from your trash. [tap]: Play a unit
+    banished with this." (Cursed Sarcophagus)
+    → effects: [{{"effect":"banish_card","trigger":"on_play","target":"self",
+      "from":"trash","scope":"all","target_filter":{{"is_unit":true}}}}],
+      needs_review: true, suggested_vocab: ["effect:play_banished_by_source"]
+    (banish-all is now emitted with scope+filter; only the tap-replay stays flagged.)
+
+15. "a MIGHTY unit you PLAY" gates on the TRIGGERING unit, not the source — use
+    condition `triggering_unit_is_mighty` on an on_friendly_unit_played trigger.
+    (Contrast `this_is_mighty`, which tests the SOURCE card's own might.)
+    Text: "When you play a MIGHTY unit, you may exhaust me to channel 1 rune
+    exhausted." (Volibear)
+    → effects: [{{"effect":"channel_rune","trigger":"on_friendly_unit_played",
+      "amount":1,"exhausted":true,"condition":{{"type":"triggering_unit_is_mighty"}},
+      "cost":{{"tap":true}}}}]
+    (the optional exhaust-me is a `cost` on the triggered effect; the engine now pays it.)
+
+16. GEAR ENERGY-COST filter + EXHAUSTED-unit filter are now expressible:
+    "a gear with Energy cost no more than [1]" → target_filter {{"energy_at_most":1}}
+    on `kill_gear`; "an exhausted friendly unit" → target_filter {{"is_exhausted":true}}.
+    Text: "Move an exhausted friendly unit from a battlefield to its base."
+    → {{"effect":"move_unit","target":"friendly_unit","target_filter":{{"is_exhausted":true}}}}
+    (single "a unit" → move_unit, not move_units_to_base which moves ALL.)
+
+17. `chosen_unit` = "player picks a unit", EITHER side (the engine no longer forces it
+    to your own side). Use it for an unrestricted "a unit" / "a unit at a battlefield"
+    with no friendly/enemy word. Use `enemy_unit`/`friendly_unit` only when the text
+    says so. (Removal via chosen_unit now correctly targets the opponent.)
 
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]

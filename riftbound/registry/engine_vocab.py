@@ -72,6 +72,8 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     # B2 additions
     "non_token", "is_buffed", "is_mighty", "might_less_than_self",
     "card_type", "is_legend", "is_champion",
+    # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
+    "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
 })
 
 # amount_source values understood by effects._amount.
