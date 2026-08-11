@@ -265,13 +265,14 @@
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 3
+        "trash": 2
       },
       "player_B": {
         "banished": 0,
         "base_gear": 2,
         "base_units": [
-          "Fizz Trickster"
+          "Fizz Trickster",
+          "Tideturner"
         ],
         "deck": 26,
         "energy": 5,
@@ -281,11 +282,11 @@
           "FURY": 5
         },
         "runes_in_play": 8,
-        "trash": 4
+        "trash": 3
       },
-      "points_A": 9,
+      "points_A": 8,
       "points_B": 1,
-      "spells_cast": 9,
+      "spells_cast": 10,
       "turns": 14,
       "units_played": 14,
       "winner": "A",
@@ -306,16 +307,18 @@
       "battlefields": [
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        },
-        {
-          "A": [],
           "B": [
             "Yasuo Remorseful"
           ],
           "controller": "B",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Hwei Brooding Painter"
+          ],
+          "B": [],
+          "controller": "A",
           "last_controller": "A"
         }
       ],
@@ -332,7 +335,7 @@
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 9
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
@@ -348,7 +351,7 @@
         "runes_in_play": 8,
         "trash": 10
       },
-      "points_A": 3,
+      "points_A": 4,
       "points_B": 8,
       "spells_cast": 20,
       "turns": 16,
@@ -1174,19 +1177,19 @@
       "battlefields": [
         {
           "A": [
-            "Stellacorn Herder"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
             "Yasuo Remorseful"
           ],
           "B": [],
           "controller": "A",
           "last_controller": "A"
+        },
+        {
+          "A": [
+            "Stellacorn Herder"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
         }
       ],
       "final_active": "A",
@@ -1209,8 +1212,9 @@
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
+          "Recruit",
           "Recruit",
           "Tideturner"
         ],
@@ -1225,7 +1229,7 @@
         "trash": 7
       },
       "points_A": 8,
-      "points_B": 1,
+      "points_B": 5,
       "spells_cast": 13,
       "turns": 13,
       "units_played": 14,
@@ -1328,12 +1332,12 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Yasuo Remorseful"
+          "A": [],
+          "B": [
+            "Pyke Dockside Butcher"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": "B"
         },
         {
           "A": [
@@ -1349,17 +1353,19 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
+          "Stellacorn Herder",
           "Scuttle Crab",
-          "Stellacorn Herder"
+          "Adaptatron",
+          "Yasuo Remorseful"
         ],
-        "deck": 24,
-        "energy": 10,
-        "hand": 4,
+        "deck": 22,
+        "energy": 12,
+        "hand": 0,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
+        "runes_in_play": 12,
         "trash": 1
       },
       "player_B": {
@@ -1367,23 +1373,24 @@
         "base_gear": 1,
         "base_units": [
           "Recruit",
+          "Noxus Hopeful",
           "Mindsplitter"
         ],
-        "deck": 28,
-        "energy": 0,
+        "deck": 27,
+        "energy": 1,
         "hand": 2,
         "power_pool": {
-          "CHAOS": 1,
+          "CHAOS": 2,
           "FURY": 4
         },
-        "runes_in_play": 5,
-        "trash": 6
+        "runes_in_play": 6,
+        "trash": 5
       },
       "points_A": 8,
-      "points_B": 2,
-      "spells_cast": 6,
-      "turns": 14,
-      "units_played": 12,
+      "points_B": 4,
+      "spells_cast": 11,
+      "turns": 16,
+      "units_played": 16,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
