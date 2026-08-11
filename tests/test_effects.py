@@ -316,3 +316,45 @@ def test_spend_buff_removes_counters():
     ctx = EffectContext(loop, SpellCard(name="Spend"), loop.gs.A, loop.gs.B, bf)
     REGISTRY["spend_buff"](ctx, {"count": 1, "target": "actor", "scope": "all"})
     assert unit.might_counters == 0
+
+
+# --- KNOWN_ISSUES #16: chosen_unit must reach EITHER side, biased by intent ---
+
+def test_chosen_unit_kill_hits_enemy_not_own(cleanup_registry):
+    """A removal spell targeting `chosen_unit` must not auto-kill the caster's
+    own unit — the enemy is the sane baseline pick."""
+    from riftbound.core.cards import SpellCard
+    from riftbound.core.effects import REGISTRY
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    mine = UnitInPlay(UnitCard(name="Mine", might=3), ready=True)
+    theirs = UnitInPlay(UnitCard(name="Theirs", might=3), ready=True)
+    bf.units_A.append(mine)
+    bf.units_B.append(theirs)
+
+    ctx = EffectContext(loop, SpellCard(name="Kill"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["kill_unit"](ctx, {"target": "chosen_unit"})
+
+    assert theirs not in bf.units_B          # enemy died
+    assert mine in bf.units_A                # own unit spared
+    assert theirs.card in loop.gs.B.trash
+
+
+def test_chosen_unit_buff_hits_own_not_enemy(cleanup_registry):
+    """A beneficial `chosen_unit` effect biases to a friendly unit."""
+    from riftbound.core.cards import SpellCard
+    from riftbound.core.effects import REGISTRY
+
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    mine = UnitInPlay(UnitCard(name="Mine", might=2), ready=True)
+    theirs = UnitInPlay(UnitCard(name="Theirs", might=2), ready=True)
+    bf.units_A.append(mine)
+    bf.units_B.append(theirs)
+
+    ctx = EffectContext(loop, SpellCard(name="Pump"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["grant_temporary_might"](ctx, {"target": "chosen_unit", "amount": 2})
+
+    assert mine.temporary_might == 2         # friendly buffed
+    assert theirs.temporary_might == 0       # enemy untouched

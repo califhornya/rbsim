@@ -101,7 +101,7 @@ def _debuff_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Negative this-turn might with an optional floor (min resulting might)."""
     amount = abs(_amount(ctx, spec))
     floor = int(spec.get("min_floor", 0))
-    for unit in _resolve_targets(ctx, spec):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         base = unit.might
         reduction = min(amount, max(0, base - floor))
         unit.temporary_might -= reduction
@@ -115,7 +115,7 @@ def _double_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("exhaust_unit")
 def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         unit.ready = False
 
 
@@ -210,7 +210,7 @@ def _spend_buff(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("stun_unit")
 def _stun_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "opponent")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "opponent")}, bias="enemy"):
         unit.stunned = True
 
 
@@ -295,13 +295,26 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
 # spells like 'Kill all units' / 'return all units with 2 [might] or less').
 _BOTH_SIDES_TARGETS = {"battlefield", "both", "both_players", "everyone", "all_units"}
 
+# "Player picks a unit" — unrestricted, may be on EITHER side (KNOWN_ISSUES #16).
+# These resolve to a both-sides candidate pool; `bias` orders the deterministic
+# single-target pick so a harmful effect doesn't auto-hit the caster's own unit.
+_CHOOSER_TARGETS = {"chosen_unit", "chosen", "any_unit", "a_unit", "unit"}
 
-def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
-    """Return the list of units an effect should hit, honoring target + scope + target_filter."""
-    target = str(spec.get("target", "actor"))
+
+def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str = "none") -> list:
+    """Return the list of units an effect should hit, honoring target + scope + target_filter.
+
+    `bias` ("enemy" | "friendly" | "none") only affects a chooser target ("a unit"):
+    it decides which side the deterministic baseline picks first for a single target.
+    """
+    target = str(spec.get("target", "actor")).lower()
     scope = str(spec.get("scope", "single")).lower()
-    if target.lower() in _BOTH_SIDES_TARGETS:
+    if target in _BOTH_SIDES_TARGETS:
         units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
+    elif target in _CHOOSER_TARGETS:
+        friendly = list(ctx._units_for_side(ctx.actor_side))
+        enemy = list(ctx._units_for_side(ctx.opponent_side))
+        units = enemy + friendly if bias == "enemy" else friendly + enemy
     else:
         units = ctx._units_for_target(target)
     tf = spec.get("target_filter")
@@ -373,7 +386,7 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
 @effect("kill_unit")
 def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     gs = ctx.loop.gs
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         # The owner is found per unit so both-sides targets route each card to
         # the right trash.
         for side in ("A", "B"):

@@ -84,11 +84,15 @@ class EffectContext:
     
     _FRIENDLY_TARGET_ALIASES = {
         "actor", "ally", "allies", "self", "this", "friendly", "friendly_unit",
-        "all_friendly_units_here", "chosen_unit", "all_units_here",
+        "all_friendly_units_here", "all_units_here",
     }
     _ENEMY_TARGET_ALIASES = {
         "opponent", "enemy", "enemy_unit", "all_enemy_units_here", "chosen_enemy",
     }
+    # "Player picks a unit" — unrestricted, may hit EITHER side (KNOWN_ISSUES #16).
+    # Unit-targeting resolves these to a both-sides pool in effects._resolve_targets;
+    # this fallback keeps non-unit direct callers (draw/recycle/etc.) from raising.
+    _CHOOSER_TARGET_ALIASES = {"chosen_unit", "chosen", "any_unit", "a_unit", "unit"}
 
     def _player_for_target(self, target: str) -> Player:
         key = target.lower()
@@ -96,6 +100,8 @@ class EffectContext:
             return self.actor
         if key in self._ENEMY_TARGET_ALIASES:
             return self.opponent
+        if key in self._CHOOSER_TARGET_ALIASES:
+            return self.actor  # safe fallback; real pick happens in _resolve_targets
         raise ValueError(f"Unknown player target '{target}'")
 
     def _units_for_side(self, side: str) -> list[UnitInPlay]:
