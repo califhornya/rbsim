@@ -421,3 +421,28 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   token-only, board-wide anthem.
 - **Fix (Step 3):** apply target_filter inside the passive path (reuse `_passes_filter`),
   and support a board-wide scope for anthems that read "your <X> units" with no "here".
+
+## 19. (OPEN) FLOW play-from-trash deferred; cast spells are not routed to trash
+- **Where:** `loop.py` `_run_chain` resolution (~:1541) removes a cast spell from hand and
+  resolves it but never appends it to `trash` — cast spells effectively vanish.
+- **What:** FLOW (Vendetta) lets you play a spell from your TRASH for an alternate cost,
+  then banish it. Two blockers: (a) the trash isn't populated by spent spells, so FLOW
+  would rarely have a target; (b) playing from trash needs a new action source + banish-
+  after-resolve. FLOW spells still work normally from hand, so the only missing line is the
+  trash-replay bonus. FLOW is recognized as a keyword and parsed cards keep their from-hand
+  body; the replay permission is flagged (suggested_vocab "keyword:flow").
+- **Fix (future):** route cast spells to trash after resolution (regenerate the golden
+  fixture — this changes trash counts), then add a "play FLOW spell from trash" action that
+  pays the FLOW cost and banishes the card. Complex FLOW costs (Kennen "FLOW equal to its
+  cost", Stargazer FLOW discount) need per-card handling.
+
+## 20. (OPEN) EMPOWERED-modifier clauses and on-burn triggers deferred
+- **What:** EMPOWER/EMPOWERED and BURN are implemented (empower_self / this_is_empowered
+  passive bonuses / disempower; burn + cards_burned_this_turn). Two dependent sub-mechanics
+  remain flagged by the parser rather than emitted:
+  - An EMPOWERED clause that MODIFIES another ability ("deal 2 instead if I'm Empowered",
+    "they have +2 instead") — needs a value-swap on a sibling effect (suggested_vocab
+    "effect:empowered_modifier").
+  - A "when a card is burned / when you burn" trigger (suggested_vocab "trigger:on_burn").
+- **Fix (future):** add an empowered-conditional amount/override on effects; add an on_burn
+  trigger fired from Player.burn / the burn effect.
