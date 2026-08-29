@@ -699,16 +699,27 @@ class GameLoop:
         side = "A" if actor is self.gs.A else "B"
         extra = extra or {}
 
+        def _threshold(default: int = 0) -> int:
+            """Read the condition's numeric threshold. The loader canonicalizes
+            this to `n`, but read through the alias list defensively so a spec
+            built outside the loader (or future data drift) can't silently
+            reintroduce the always-true bug (see cards_registry._normalize_condition)."""
+            for key in ("n", "amount", "count", "value", "threshold"):
+                v = params.get(key)
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    return int(v)
+            return default
+
         if ctype == "you_have_n_or_more_runes":
-            return actor.total_runes_in_play() >= int(params.get("n", 0))
+            return actor.total_runes_in_play() >= _threshold()
         if ctype == "you_have_n_or_more_units_here":
             bf = extra.get("battlefield")
             if bf is None:
                 return False
             units = bf.units_A if side == "A" else bf.units_B
-            return len(units) >= int(params.get("n", 0))
+            return len(units) >= _threshold()
         if ctype == "spell_cost_at_least":
-            return int(extra.get("triggering_spell_cost", 0)) >= int(params.get("n", 0))
+            return int(extra.get("triggering_spell_cost", 0)) >= _threshold()
         if ctype == "this_is_alone":
             bf = extra.get("battlefield")
             if bf is None:
@@ -727,13 +738,13 @@ class GameLoop:
         if ctype == "friendly_unit_died_this_turn":
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
-            return self.gs.spells_played_this_turn.get(side, 0) >= int(params.get("n", 0))
+            return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
         if ctype == "you_already_played_another_card_this_turn":
             return self.gs.cards_played_this_turn.get(side, 0) >= 1
         if ctype == "controller_has_xp_at_least":
-            return self.gs.get_xp(side) >= int(params.get("n", 0))
+            return self.gs.get_xp(side) >= _threshold()
         if ctype == "card_in_trash_count_at_least":
-            return len(actor.trash) >= int(params.get("n", 0))
+            return len(actor.trash) >= _threshold()
         # Round 4 Tier 1 conditions
         if ctype == "this_is_buffed":
             unit = self._find_unit_by_card(card)
@@ -747,7 +758,7 @@ class GameLoop:
             return any(tag in (u.card.tags or []) for u in actor.base_units)
         if ctype == "score_within_n_of_victory":
             pts = self.gs.points_A if side == "A" else self.gs.points_B
-            return pts >= self.gs.victory_score - int(params.get("n", 0))
+            return pts >= self.gs.victory_score - _threshold()
         if ctype == "you_discarded_card_this_turn":
             return bool(self.gs.discarded_this_turn.get(side, False))
         # Conditions needing context the engine doesn't track yet → safe False

@@ -75,6 +75,30 @@ _EFFECT_TOP_LEVEL_FIELDS = (
     "scope", "duration", "optional", "cost", "scaling", "additional_cost",
 )
 
+# A conditioned effect's numeric threshold is written under any of these keys in
+# the corpus (parser drift: `amount` 26×, `n` 9×). The engine reads it as `n`,
+# so canonicalize to `n` at load time. Additive: the original key is preserved so
+# anything still reading `amount`/`count`/... keeps working.
+_COND_THRESHOLD_ALIASES = ("n", "amount", "count", "value", "threshold")
+
+
+def _normalize_condition(cond: Any) -> Any:
+    """Copy a condition's numeric threshold to the canonical `n` key.
+
+    The corpus writes the threshold inconsistently (`amount`, `count`, ...). The
+    engine's `_check_condition` reads `params.get("n", 0)`, so a gate like
+    `{"amount": 4}` was silently read as threshold 0 ("always true"). This copies
+    the first alias found to `n` without dropping the original key."""
+    if not isinstance(cond, dict):
+        return cond
+    params = dict(cond.get("params") or {})
+    if "n" not in params:
+        for k in _COND_THRESHOLD_ALIASES[1:]:
+            if isinstance(params.get(k), (int, float)) and not isinstance(params.get(k), bool):
+                params["n"] = params[k]
+                break
+    return {**cond, "params": params}
+
 
 @dataclass(frozen=True)
 class EffectSpec:
@@ -106,6 +130,8 @@ class EffectSpec:
         if not effect:
             raise ValueError("Effect name cannot be blank")
         top = {k: data[k] for k in _EFFECT_TOP_LEVEL_FIELDS if k in data}
+        if "condition" in top:
+            top["condition"] = _normalize_condition(top["condition"])
         params = {
             k: v for k, v in data.items()
             if k != "effect" and k not in _EFFECT_TOP_LEVEL_FIELDS
