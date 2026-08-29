@@ -115,7 +115,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** MISSING_CONDITION
+**Verdict:** ENGINE_BLOCKED  [re-graded MISSING_CONDITION -> ENGINE_BLOCKED: excess_damage_at_least is SAFE_FALSE (unsupportable by engine); parser's reading is reasonable]
 **Notes:** play_token Bird on_conquer is right, but the gate "if you assigned 3+ excess damage" is dropped → token plays on every conquer. (excess_damage_at_least is SAFE_FALSE — unsupportable today — but should still be emitted + flagged.) Also drops DEFLECT on the token, the "1 power" stat, and "here" scope. Same class as Mushroom Pouch (rescued → MISSING_CONDITION).
 
 ---
@@ -136,7 +136,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** MISSING_EFFECT
+**Verdict:** ENGINE_BLOCKED  [re-graded MISSING_EFFECT -> ENGINE_BLOCKED: modal choose-one (no mode_choice effect) + on-attach trigger not representable; judgment call — parser collapse is partly engine-forced]
 **Notes:** Modal on-attach ability collapsed to a bare buff_unit. Dropped: the trigger entirely (on-attach-equipment), the modal "choose one not chosen this turn" structure, and 2 of 3 modes (ready_runes 2; channel_rune 1 exhausted). One mode, no trigger, no cost. Disease A, severe.
 
 ---
@@ -309,7 +309,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** []
 
-**Verdict:** MISSING_CONDITION
+**Verdict:** ENGINE_BLOCKED  [re-graded MISSING_CONDITION -> ENGINE_BLOCKED: usage-counter gate ('chosen twice this turn') has no engine condition]
 **Notes:** Reduced to a bare draw_cards. Dropped: the tap cost, the `activated` trigger, the REACTION timing, and — critically — the entire usage gate ("only if you've chosen enemy units/gear twice this turn"). As parsed it's a free, ungated, repeatable draw. The defining constraint is the missing condition (no engine analogue — would need flagging). MISSING_CONDITION.
 
 ---
@@ -421,7 +421,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['EQUIP 3']
 
-**Verdict:** MISSING_CONDITION
+**Verdict:** ENGINE_BLOCKED  [re-graded MISSING_CONDITION -> ENGINE_BLOCKED: excess_damage_at_least is SAFE_FALSE (unsupportable by engine)]
 **Notes:** draw_cards on_conquer count 1 + EQUIP 3 are right, but "if you assigned 3+ excess damage" is dropped → unconditional draw on conquer. Same excess-damage class as Trapping Grounds (SAFE_FALSE, unsupportable today, should be emitted + flagged). EQUIP cost-reduction-by-chosen-Might not modeled, but EQUIP 3 covers the base. MISSING_CONDITION.
 
 ---
@@ -702,7 +702,7 @@ Soglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.
 
 **Parsed keywords:** ['ACTION']
 
-**Verdict:** WRONG_AMOUNT
+**Verdict:** ENGINE_BLOCKED  [re-graded WRONG_AMOUNT -> ENGINE_BLOCKED: no discarded_card_energy amount source in KNOWN_AMOUNT_SOURCES]
 **Notes:** Two-step structure right (discard 1 → deal damage to chosen_unit), ACTION correct, chosen_unit is the right unrestricted target. But the damage MAGNITUDE — "its Energy cost" (the discarded card's energy) — is entirely missing: no amount, no amount_source, and there's no amount_source for "discarded-card energy" in KNOWN_AMOUNT_SOURCES. deal_damage fires with no/zero magnitude. Classic mancato amount_source → WRONG_AMOUNT.
 
 ---
