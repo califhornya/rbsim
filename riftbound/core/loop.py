@@ -466,7 +466,14 @@ class GameLoop:
             handler = EFFECT_REGISTRY.get(es.effect)
             if not handler:
                 continue
-            handler(context, es.merged_params())
+            # Resilience: mirror the guard in _resolve_card_effects — a single
+            # malformed triggered spec must not abort the whole match. Skip + log.
+            try:
+                handler(context, es.merged_params())
+            except Exception as exc:  # noqa: BLE001
+                if self.verbose:
+                    print(f"  [EFFECT-SKIP] {card.name}: "
+                          f"{es.effect} ({trigger}) failed: {exc}")
 
     def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec) -> bool:
         """Pay a triggered effect's `cost` (activated-style: tap/energy/power/

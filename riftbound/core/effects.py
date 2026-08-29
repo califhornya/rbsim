@@ -606,7 +606,13 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     token_name = str(spec.get("token_name", "Recruit"))
     count = int(spec.get("count", spec.get("amount", 1)))
     ready = _coerce_bool(spec.get("ready", False))
-    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    # You always play YOUR token; `target` here often names the destination
+    # (e.g. "battlefield"), not a player, so fall back to the actor rather than
+    # erroring on a non-player target.
+    try:
+        player = ctx._player_for_target(str(spec.get("target", "actor")))
+    except ValueError:
+        player = ctx.actor
     for _ in range(count):
         _spawn_token_to_base(player, token_name, ready=ready)
 
