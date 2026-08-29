@@ -1954,7 +1954,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_attack",
+        "target": "friendly_unit",
+        "amount": 1,
+        "duration": "this_turn",
+        "condition": {
+          "type": "this_is_alone"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-061",
@@ -10745,9 +10756,16 @@
     ],
     "keywords": [
       "QUICK-DRAW",
-      "EQUIP 1"
+      "EQUIP 1",
+      "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "attach_gear",
+        "trigger": "on_play",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "SFD-023",
@@ -16384,7 +16402,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "on_conquer",
+        "target": "self",
+        "from": "deck",
+        "count": 2
+      }
+    ]
   },
   {
     "card_id": "SFD-213",
@@ -18077,7 +18103,14 @@
       "HIDDEN",
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-043",
@@ -23998,7 +24031,10 @@
     "effect": "EMPOWER [5]. This ability costs [3] less if you control 4 or fewer runes. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have DEFLECT and ASSAULT 2. (Opponents must pay [rune] to choose me with a spell or ability. +2 [might] while I'm an attacker.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "DEFLECT",
+      "ASSAULT 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24043,7 +24079,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-003",
@@ -24152,8 +24197,31 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nAs an additional cost to play this, you may discard 1.\nDeal 3 to a unit at a battlefield. If you paid the additional cost, deal 5 to it instead.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 3,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 5,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-008",
@@ -24175,7 +24243,21 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_attack",
+        "amount": 2,
+        "target": "self",
+        "duration": "this_turn",
+        "additional_cost": {
+          "power": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-009",
@@ -24196,8 +24278,18 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nDeal 2 to a unit at a battlefield. This deals 1 Bonus Damage for each card with this name in your trash.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-010",
@@ -24218,8 +24310,18 @@
     "effect": "EQUIP [Fury] ([Fury]: Attach this to a unit you control.)",
     "effect_equipped": "When I move to a battlefield, give me +2 [might] this turn.",
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-011",
@@ -24241,7 +24343,20 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount": 3,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-012",
@@ -24284,7 +24399,9 @@
     "effect": "EMPOWER [2] [fury] ([2] [fury]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have ASSAULT 3. (+3 [might] while I'm an attacker.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "ASSAULT 3"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24306,8 +24423,21 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nThis can't be countered.\nDeal 4 to an enemy Calm ([calm]) unit.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 4,
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Calm"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-015",
@@ -24328,8 +24458,19 @@
     "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nWhen I move, if you control 4 or fewer runes, draw 1.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_move",
+        "count": 1,
+        "condition": {
+          "type": "you_have_n_or_more_runes"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-016",
@@ -24350,8 +24491,16 @@
     "effect": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play me, deal damage to a unit equal to the damage marked on it.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "AMBUSH"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_play",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-017",
@@ -24394,8 +24543,21 @@
     "effect": "ACCELERATE (You may pay [1] [rune] as an additional cost to have me enter ready.)\nWhen I attack, if you control 4 or fewer runes, deal 2 to all enemy units here.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "amount": 2,
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "condition": {
+          "type": "you_have_n_or_more_runes"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-019",
@@ -24421,7 +24583,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_attack",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-020",
@@ -24443,7 +24614,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_move",
+        "amount": 1,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-021",
@@ -24469,7 +24647,22 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "hand",
+        "scope": "all"
+      },
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "trash",
+        "scope": "all"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-022",
@@ -24491,7 +24684,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Shadow Clone",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-023",
@@ -24561,7 +24766,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "amount": 3,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-026",
@@ -24582,7 +24794,9 @@
     "effect": "EQUIP [calm]: ([calm]: Attach this to a unit you control.)",
     "effect_equipped": "I have +2 [might] while I'm at a battlefield with exactly one other unit you control.",
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "EQUIP 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24671,7 +24885,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-031",
@@ -24736,8 +24957,25 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nREACTION (Play on your turn or in showdowns.)\nChoose a battlefield you control and a unit you control at a different location. Move that unit to that battlefield and give it +2 [might] this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN",
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-034",
@@ -24758,7 +24996,9 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose one —\n- Empower a unit. Disempower it at end of turn.\n- Disempower a unit that's EMPOWERED. Empower it at end of turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24803,7 +25043,22 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "target_filter": {
+          "is_gear": true
+        },
+        "condition": {
+          "type": "you_have_n_or_more_runes",
+          "params": {
+            "count": 7
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-037",
@@ -24825,7 +25080,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-038",
@@ -24850,8 +25112,20 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell if and opponent has played another spell this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell",
+        "condition": {
+          "type": "you_played_n_spells_this_turn"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-039",
@@ -24872,8 +25146,18 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit that's in combat with an enemy Fury ([fury]) unit or that's being chosen by an enemy Fury spell. Give it +4 [might] this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit",
+        "amount": 4
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-040",
@@ -24894,7 +25178,9 @@
     "effect": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it's already attached.)\nWhen I attack, choose an enemy unit here. Deal 2 to it for each Equipment attached to me.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "WEAPONMASTER"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24942,7 +25228,9 @@
     "effect": "DEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)\nEMPOWER [1] ([1]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I HAVE +7 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "DEFLECT"
+    ],
     "effects": [],
     "variants": [
       {
@@ -24965,7 +25253,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-044",
@@ -24987,7 +25284,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": -1,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-045",
@@ -25008,7 +25314,9 @@
     "effect": "DEFLECT 2 (Opponents must pay [Rune][Rune] to choose me with a spell or ability.)\nEMPOWER [8] ([8]: Empower me. Use only if not Empowered.)\nEMPOWERED When i conquer, you score 1 point.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "DEFLECT 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -25057,7 +25365,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-048",
@@ -25079,7 +25393,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-049",
@@ -25123,7 +25443,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Mech"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-051",
@@ -25144,7 +25470,9 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\n\nChoose one -\n· Return a friendly unit to its owner's hand.\n· Give an enemy unit -2[Might] this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -25211,7 +25539,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-055",
@@ -25232,8 +25569,18 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nPREDICT 5. (Look at the top 5 cards of your Main Deck. Recycle any of them and put the rest back in any order.)\nDraw 2.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION",
+      "PREDICT 5"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-056",
@@ -25255,7 +25602,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_move",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-057",
@@ -25298,8 +25651,18 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nThis costs [2] less if you control something that's EMPOWERED.\nDeal 4 to a unit at a battlefield.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-059",
@@ -25342,8 +25705,22 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nIgnore DEFLECT while paying this spell's cost.\nGive an enemy Body ([Body]) unit -5[might] this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Body"
+        },
+        "amount": -5,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-061",
@@ -25387,7 +25764,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_death",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-063",
@@ -25412,8 +25796,17 @@
     "effect": "I cost [1] less for each gear you control.\nDEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "n_friendly_with_tag",
+        "tag": "gear"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-064",
@@ -25434,7 +25827,9 @@
     "effect": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)\nWhen I conquer, if you've played a non-token unit, a non-token gear, and a spell this turn, you score 1 point.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "PREDICT 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -25456,8 +25851,16 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nBanish a unit, then its owner plays it to the same location, ignoring its cost.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-066",
@@ -25479,7 +25882,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_start_of_turn",
+        "amount": 1,
+        "additional_cost": {
+          "kill_friendly_unit": true
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-067",
@@ -25501,7 +25916,17 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "exclude_self": true,
+          "is_exhausted": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-068",
@@ -25527,7 +25952,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-069",
@@ -25575,7 +26006,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "amount": 2,
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-071",
@@ -25596,8 +26034,18 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nGive a unit +2 [might] this turn. If it's EMPOWERED , give it +4 [might] this turn instead.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-072",
@@ -25618,8 +26066,17 @@
     "effect": "Equip [body] ([body]: Attach this to a unit you control.)",
     "effect_equipped": "I can't be moved by enemy spells and abilities.",
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "TANK",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-073",
@@ -25662,7 +26119,9 @@
     "effect": "This enters exhausted.\nEMPOWER — [1], [tap] (Pay the cost: Empower this. Use only if not Empowered.)\nREACTION[>] [tap]: ADD [1]. If this is EMPOWERED, ADD [2] instead.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -25707,7 +26166,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-077",
@@ -25728,7 +26198,9 @@
     "effect": "EMPOWER [1] [rune] [rune] ([1] [rune] [rune] : Empower me. Use only if not Empowered.)\nEMPOWERED I have +2 [might] .\nEMPOWERED DEATHKNELL Channel 2 runes exhausted. (When I die while Empowered, get the effect.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "DEATHKNELL"
+    ],
     "effects": [],
     "variants": [
       {
@@ -25773,7 +26245,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_conquer",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-080",
@@ -25795,7 +26276,15 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount": 6,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-081",
@@ -25839,7 +26328,21 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-083",
@@ -25887,7 +26390,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_cast",
+        "target": "opponent",
+        "target_filter": {
+          "subtype": "Mind"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-085",
@@ -25931,7 +26443,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "token_name": "Mech"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-087",
@@ -25979,7 +26502,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "amount": 5
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-089",
@@ -26023,7 +26552,17 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_attack",
+        "target": "all_enemy_units_here",
+        "target_filter": {
+          "might_at_most": 5
+        },
+        "scope": "all"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-091",
@@ -26045,7 +26584,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 1,
+        "target": "self",
+        "cost": {
+          "energy": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-092",
@@ -26093,7 +26643,20 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_death",
+        "amount": 2,
+        "target": "friendly_unit",
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-094",
@@ -26115,7 +26678,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "amount": 1,
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-095",
@@ -26137,7 +26707,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "trash_count",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-096",
@@ -26158,8 +26735,21 @@
     "effect": "HIDDEN (Hide now for [rune] to react later for [0].)\nI have +1 [might] for each other unit you control here with my name.\nYour deck can have any number of cards named Spiderling.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "amount_source": "n_friendly_with_tag",
+        "tag": "Spiderling",
+        "target": "self",
+        "target_filter": {
+          "exclude_self": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-097",
@@ -26181,7 +26771,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-098",
@@ -26202,7 +26801,9 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me from face down, you may empower something here. Disempower it at end of turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "HIDDEN"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26224,8 +26825,17 @@
     "effect": "Play two 1 [might] Tentacle unit tokens from Bilgewater.\nFLOW [3] (You may play this from your trash for its Flow cost. Then banish it.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "FLOW"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Tentacle",
+        "count": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-100",
@@ -26247,7 +26857,33 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "trash",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "energy": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-101",
@@ -26291,7 +26927,17 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "return_from_trash",
+        "trigger": "on_cast",
+        "scope": "all",
+        "count": 2,
+        "target_filter": {
+          "is_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-103",
@@ -26335,7 +26981,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-105",
@@ -26356,7 +27011,9 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nChoose a unit at a battlefield. If it has 3 [might] or less, banish it. Otherwise, return it to its owner's hand.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26423,7 +27080,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Tentacle"
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Tentacle"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-109",
@@ -26492,8 +27160,16 @@
     "effect": "When I conquer, play a 0 [might] Shadow Clone unit token to your base. (It has \"When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn.\")\nACTION [1] [Chaos]: Move me and a Shadow Clone you control to each other's locations.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Shadow Clone"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-112",
@@ -26567,7 +27243,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "subtype": "Dragon"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-115",
@@ -26610,7 +27295,9 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nI have SHIELD 3 while I'm at a battlefield with exactly one other unit you control. (+3 [might] while I'm a defender.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "HIDDEN"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26632,7 +27319,9 @@
     "effect": "TANK (I must be assigned combat damage first.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "TANK"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26655,7 +27344,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-119",
@@ -26677,7 +27378,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-120",
@@ -26699,7 +27412,15 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_friendly_unit_played",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-121",
@@ -26742,7 +27463,9 @@
     "effect": "AMBUSH  (You may play me as a REACTION to a battlefield where you have units.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "AMBUSH"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26787,7 +27510,28 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "self",
+        "cost": {
+          "power": 1
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn",
+        "cost": {
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-125",
@@ -26808,8 +27552,19 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit. Prevent the next 7 damage that would be dealt to it this turn. (Opponents can assign it extra combat damage to kill it.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_shield",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 7,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-126",
@@ -26831,7 +27586,17 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-127",
@@ -26852,7 +27617,9 @@
     "effect": "EMPOWER [1] [Order] ([1] [Order]: Empower me. Use only if not Empowered.)\nEMPOWERED DEATHKNELL Play two 1 [Might] Recruit unit tokens to your base. (When I die while Empowered, get the effect.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "DEATHKNELL"
+    ],
     "effects": [],
     "variants": [
       {
@@ -26919,7 +27686,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Chaos"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-131",
@@ -26963,7 +27739,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_end_of_turn",
+        "target": "all_friendly_units_here",
+        "amount": 5
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-133",
@@ -27006,8 +27789,33 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me or I attack, you may pay [2] to STUN a unit. (It doesn't deal combat damage this turn.)\nWhile there's a stunned enemy unit here, I have +2 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "energy": 2
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      },
+      {
+        "effect": "stun_unit",
+        "trigger": "on_attack",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "energy": 2
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-135",
@@ -27033,7 +27841,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_attack",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-136",
@@ -27058,7 +27875,9 @@
     "effect": "EQUIP [1] [Order] ([1] [Order]: Attach this to a unit you control.)\nAs this is attached to a unit, choose another friendly unit. The equipped unit becomes a copy of that unit for as long as this is attached to it.",
     "effect_equipped": "(I am a copy of the choosen unit.)",
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "EQUIP 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -27080,8 +27899,23 @@
     "effect": "SHIELD (+1 [might] while I'm a defender.)\nWhen I hold, if there is exactly one other unit you control here, you score 1 point.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHIELD"
+    ],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_hold",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-138",
@@ -27106,7 +27940,9 @@
     "effect": "EMPOWER [3] [Rune] ([3] [Rune]: Empower me. Use only if not Empowered.)\nACTION [tap]: If it's your turn, move a friendly unit in a showdown to base and if I'm EMPOWERED ready it.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -27129,7 +27965,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "amount": 2
+      },
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "friendly_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-140",
@@ -27150,7 +27998,9 @@
     "effect": "REACTION [rune] [rune], [tap]: ADD [2]. Spend this Energy only to play units or activated abilities of units.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -27172,8 +28022,18 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nThis turn, double a unit's Might and give it \"[rune] [rune]: Ready me.\"",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "double_might",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-142",
@@ -27194,8 +28054,29 @@
     "effect": "When you banish a card you own, empower me. (I become Empowered if I'm not already.)\nACTION[>] Disempower me, [tap]: Discard 1, then draw 1.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-143",
@@ -27217,7 +28098,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Shadow Clone"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-144",
@@ -27239,7 +28126,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_runes",
+        "trigger": "on_friendly_unit_played",
+        "amount": 2,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-145",
@@ -27261,7 +28157,32 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 4,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 7,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "you_have_n_or_more_runes",
+          "params": {
+            "count": 7
+          }
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_cast",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-146",
@@ -27282,8 +28203,22 @@
     "effect": "ACTION [tap]: Give a friendly unit TANK this turn. (It must be assigned combat damage first.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "activated",
+        "timing": "action",
+        "keyword": "TANK",
+        "target": "friendly_unit",
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-147",
@@ -27305,7 +28240,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-148",
@@ -27327,7 +28268,21 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_gear": true
+        },
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-149",
@@ -27349,7 +28304,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_units",
+        "trigger": "on_cast",
+        "amount": 4,
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-150",
@@ -27371,7 +28333,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "debuff_might",
+        "trigger": "activated",
+        "timing": null,
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-151",
@@ -27392,7 +28366,9 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -27415,7 +28391,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": null,
+        "target": "chosen_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-153",
@@ -27437,7 +28424,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-154",
@@ -27458,8 +28454,22 @@
     "effect": "When you play a card from anywhere other than your hand, empower me.\nACTION Disempower me, [tap]: Give a unit ASSAULT 2 this turn. (+2 while it's an attacker.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "keyword": "ASSAULT 2",
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-155",
@@ -27481,7 +28491,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "amount": 3,
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-156",
