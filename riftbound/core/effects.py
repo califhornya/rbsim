@@ -617,6 +617,18 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         _spawn_token_to_base(player, token_name, ready=ready)
 
 
+@effect("burn")
+def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Vendetta BURN X: move the top X cards of the target's Main Deck to trash,
+    and track the count this turn (for 'cards burned this turn' conditions)."""
+    amount = int(spec.get("amount", spec.get("count", 1)))
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    burned = player.burn(amount)
+    side = ctx._side_for_player(player)
+    gs = ctx.loop.gs
+    gs.cards_burned_this_turn[side] = gs.cards_burned_this_turn.get(side, 0) + len(burned)
+
+
 @effect("empower_self")
 def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Vendetta EMPOWER: give the source unit the empowered status. Usually an

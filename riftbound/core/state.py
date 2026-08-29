@@ -58,6 +58,7 @@ class GameState:
     spells_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
+    cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
 
     def other(self, who: str) -> str:
         return "B" if who == "A" else "A"

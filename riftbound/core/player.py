@@ -212,5 +212,18 @@ class Player:
             self.hand.append(card)
         return card
 
+    def burn(self, n: int) -> list:
+        """Vendetta BURN X: move the top X cards of the Main Deck to the trash.
+        Returns the list of burned cards (may be shorter than n if the deck runs
+        out). 'Top' of deck is the end of the list (Deck.draw pops from there)."""
+        burned = []
+        for _ in range(max(0, int(n))):
+            card = self.deck.draw()
+            if card is None:
+                break
+            self.trash.append(card)
+            burned.append(card)
+        return burned
+
     def remove_from_hand(self, idx: int) -> None:
         del self.hand[idx]

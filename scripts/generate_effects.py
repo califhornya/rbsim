@@ -433,11 +433,18 @@ STEP 4 — Vendetta mechanics:
     ability, then flag the empowered-modifier clause (suggested_vocab
     "effect:empowered_modifier"); do not drop it.
 
-19. FLOW and BURN are NOT supported yet. FLOW (an alternate cost to play a spell
-    from the trash, then banish it) → keep the on-cast body if it's otherwise
-    parseable, set needs_review, suggested_vocab ["keyword:flow"]. BURN X (put X
-    cards from top of deck into trash) → needs_review, suggested_vocab
-    ["effect:burn"]. Do NOT invent verbs for these.
+19. BURN (now supported — EMIT). "Burn X" = put the top X cards of your Main Deck
+    into your trash. Emit `burn` with `amount` X (target defaults to actor).
+    "cards burned this turn" gates use condition `cards_burned_this_turn_at_least`.
+    Text: "When you play me, burn 2." → effects: [{{"effect":"burn","trigger":"on_play","amount":2}}]
+    The "when a card is burned / when you burn" TRIGGER is not supported yet — emit
+    the burn itself, then flag that dependent trigger (suggested_vocab "trigger:on_burn").
+
+20. FLOW is NOT supported yet. FLOW is a keyword on spells: an alternate cost to
+    play the spell from the trash, then banish it. Emit the spell's normal on-cast
+    body (so it works when played from hand), list "FLOW" in keywords, set
+    needs_review, and add suggested_vocab ["keyword:flow"]. Do NOT invent a
+    play-from-trash verb.
 
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]

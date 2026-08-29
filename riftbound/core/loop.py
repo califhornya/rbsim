@@ -41,6 +41,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "card_in_trash_count_at_least", "this_is_buffed", "this_is_empowered",
     "you_control_subtype",
     "score_within_n_of_victory", "you_discarded_card_this_turn",
+    "cards_burned_this_turn_at_least",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -774,6 +775,8 @@ class GameLoop:
             return pts >= self.gs.victory_score - _threshold()
         if ctype == "you_discarded_card_this_turn":
             return bool(self.gs.discarded_this_turn.get(side, False))
+        if ctype == "cards_burned_this_turn_at_least":
+            return self.gs.cards_burned_this_turn.get(side, 0) >= _threshold()
         # Conditions needing context the engine doesn't track yet → safe False
         # (effects gated on them simply don't fire): excess_damage_at_least,
         # controller_has_facedown_card, target_was_stunned.
@@ -1767,6 +1770,8 @@ class GameLoop:
             gs.friendly_unit_died_this_turn["B"] = False
             gs.discarded_this_turn["A"] = False
             gs.discarded_this_turn["B"] = False
+            gs.cards_burned_this_turn["A"] = 0
+            gs.cards_burned_this_turn["B"] = 0
 
             gained = self._phase_beginning(gs.active)
             if gained:

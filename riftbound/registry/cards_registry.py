@@ -349,9 +349,9 @@ def load_cards_json(base_path: Optional[Path] = None) -> dict[str, CardSpec]:
 _KNOWN_KEYWORDS: frozenset[str] = frozenset({
     "ACCELERATE", "ACTION", "AMBUSH", "ASSAULT", "BACKLINE",
     "DEATHKNELL", "DEFLECT", "EMPOWER", "EMPOWERED", "EQUIP",
-    "GANKING", "HIDDEN", "HUNT", "LEGION", "LEVEL", "PREDICT",
-    "QUICK-DRAW", "REACTION", "REPEAT", "SHIELD", "TANK",
-    "TEMPORARY", "WEAPONMASTER",
+    "FLOW", "GANKING", "HIDDEN", "HUNT", "LEGION", "LEVEL",
+    "PREDICT", "QUICK-DRAW", "REACTION", "REPEAT", "SHIELD",
+    "TANK", "TEMPORARY", "WEAPONMASTER",
 })
 
 
