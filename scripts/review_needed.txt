@@ -1,172 +1,68 @@
-Baccai Sandspinner	EMPOWER alternate cost mechanic and empowered-state keyword grant not supported
-Blade Twirler	First-time-move-each-turn trigger and BURN mechanic not supported
-Brittle Steel	FLOW alternate cost (play from trash then banish) not supported
-Dune Surfer	Ignoring TANK while assigning combat damage not supported
-Forsaken Baccai	Start-of-turn conditional gated on controlling fewer runes than opponent not supported
-Oasis Raider	Start-of-turn conditional gated on controlling fewer runes than opponent not supported
-Punching Poro	EMPOWER discard alternate cost and empowered-state might buff not supported
-Ruthless Strike	possible dropped clause (~3 text clauses vs 2 effect(s) emitted)
-Consuming Curse	Bonus damage per card with this name in trash not supported
-Perfect Execution	model flagged
-Shadow Assassin	Enters ready conditionally on a card with same name in trash
-Shadow Fiend	EMPOWER mechanic and empowered-conditional keyword grant not supported
-Decree of Rage	This can't be countered not expressible
-Eclipse Dragon	Condition is 4 or fewer runes, but supported condition is n-or-more
-Morgana Vindictive	Damage equal to damage already marked on the unit not expressible
-Rage Amplifier	EMPOWER mechanic and aura +might to all your units (anywhere) not supported
-Renekton Rage Fueled	Condition is 4 or fewer runes, but supported condition is n-or-more
-Akali Deadly Weapon	EMPOWER alternate-cost mechanic and the Empowered conditional (deal 2 instead, +1 might while Empowered) are not supported conditions/costs.
-Endless Riches	BURN 7, skip draw phase, play cards from trash static permission, and redirect-to-banish replacement are not supported mechanics.
-Zed From the Shadows	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Affectionate Poro	Trigger on combat-I-was-in-ending gated on not having been dealt damage this turn is not a supported trigger/condition.
-Esteemed Hierophant	Damage-prevention from enemy spells/abilities gated on rune count is not a supported effect.
-Hand Hammer	Conditional +2 might while at a battlefield with exactly one other friendly unit is not a supported conditional buff.
-Mournful Witness	EMPOWER mechanic and combat-I-was-in-ends trigger not supported.
-Ol' Poro	Play restriction based on turn number is not a supported mechanic.
-Serene Ascetic	EMPOWER alternate-cost mechanic and Empowered conditional granting DEFLECT/SHIELD 3 are not supported.
-Twilight Shroud	Cannot-be-chosen protection and FLOW replay-from-trash not supported
-Frostcoat Mother	EMPOWER alternate-cost mechanic and EMPOWERED conditional buff not supported
-Pakaa Protector	Reveal-top-card branching (draw if unit, else trash + buff) not supported as a single mechanic
-Sanction	Choose-one modal effect with Empower/Disempower mechanics not supported
-Sandstone Chimera	Static channel-phase restriction (players only channel 1 rune) not supported
-Tomb-Raider Barbara	Empower/disempower branch on enemy gear not supported; only the kill branch parsed with a rune gate
-Akali Silent	Cannot-be-chosen-unless-in-combat protection not supported
-Crumbling Sands	Counter is gated on OPPONENT having played another spell this turn; no matching condition (you_played_n_spells counts your own spells)
-Decree of Focus	Target restriction (unit in combat with / chosen by an enemy Fury unit/spell) not expressible
-Riven Shattered	damage scales per Equipment attached to me; no matching amount_source
+Baccai Sandspinner	EMPOWER cost reduction conditional on rune count not expressible
+Blade Twirler	'first time I move each turn' limiter and 'choose a player' not fully expressible
+Dune Surfer	Ignoring TANK while assigning combat damage not expressible
+Forsaken Baccai	Condition 'control fewer runes than an opponent' not expressible
+Oasis Raider	Condition 'control fewer runes than an opponent' not expressible
+Punching Poro	EMPOWER via discard cost not cleanly expressible as activated cost
+Shadow Assassin	Enter ready if same-named card in trash not expressible
+Rage Amplifier	'Your units have +1 might' anywhere-scoped aura, with empowered-modifier to +2, not expressible
+Affectionate Poro	'combat I was in ends' and 'if I haven't been dealt damage this turn' not expressible
+Esteemed Hierophant	Prevent all enemy spell/ability damage to me while controlling 7+ runes — no supported verb for prevent-damage-from-source gated by rune count.
+Hand Hammer	Equipped bonus is conditional on being at a battlefield with exactly one other friendly unit — no supported condition matches.
+Mournful Witness	'When a combat that I was in ends' is broader than on_win_combat (fires regardless of win/loss).
+Ol' Poro	Cannot be played on your first, second, or third turns — no supported mechanic for turn-number play restriction.
+Frostcoat Mother	Empower ability cost is reduced by [1] per rune you control — dynamic cost reduction on an activated ability not expressible.
+Pakaa Protector	On move, reveal top card: if unit draw it, otherwise trash it and gain +2 might this turn — branch on revealed card type not expressible.
+Sanction	Choose-one modal effect with delayed end-of-turn reversal — mode choice not dispatched.
+Sandstone Chimera	While at a battlefield, all players channel only 1 rune per Channel Phase — no supported verb for modifying channel-phase rune count.
+Riven Shattered	Damage equals 2 per Equipment attached to me — no supported amount_source for attached equipment count.
 Riven Shattered	unknown amount_source 'attached_equipment_count'
-Shen Scourge of Shadows	on_hold draw gated on exactly one other unit you control here; no matching condition
-Steel Paws	EMPOWER mechanic and empowered-state static might buff not supported
-Astral Heron	reduces cost of the NEXT card you play (not self), gated on first-card-this-turn and being at a battlefield; aura not dispatched
-Helm of Suppression	EMPOWER mechanic and opponents'-spells-cost-more aura (cost increase) not properly dispatched; empowered variant differs
-Nasus Ascended	EMPOWER mechanic not supported; on_conquer score gated on empowered state
-Nasus Ascended	unknown condition type 'empowered'
-Apprentice Mage	EMPOWER mechanic and become-empowered trigger not supported
-Apprentice Mage	unknown trigger 'on_empowered'
-Dredge Up	FLOW alternate-cost play-from-trash not supported
-Grumpy Rockbear	EMPOWER mechanic with rune-scaling cost and empowered-state static keywords not supported
-Iterative Design	model flagged
-Mesmerize	model flagged
-Otterpus	model flagged
-Questionable Tome	model flagged
-Applied Researchers	model flagged
-Clairvoyance	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Covert Informant	model flagged
-Patched Porobot	model flagged
-Shock Blast	model flagged
-Sky Cruiser	model flagged
-Sky Cruiser	unknown activated cost key(s) ['discard_cards']
-Decree of Insight	Ignore DEFLECT while paying cost is not representable
-Hextech Formula	Enters exhausted and empower-another-gear ability not supported
-Nasus Guardian of Knowledge	Trigger is 'when an enemy unit here dies, once each turn' not self-death; no matching trigger
-Plaza Guardian	Cost reduction per gear controlled is dynamic and not a flat discount
-Swain Visionary	Compound condition (non-token unit + non-token gear + spell all this turn) not representable
-Swain Visionary	unknown condition type 'you_played_non_token_unit_gear_and_spell_this_turn'
-Temporal Breach	Owner replays banished unit to same location ignoring cost not supported
-Bottled Constellation	Cost of killing 3 other friendly units/gear to score not fully expressible
-Jayce Brilliant Inventor	Second trigger (first non-token gear played each turn) and 'ready something' including gear not fully supported
-Mel Newly Awakened	EMPOWER mechanic and EMPOWERED static abilities not supported
-Brutal Hunter	EMPOWER mechanic granting +2 might and GANKING when Empowered not supported
-Fretful Feline	'When I become ready' has no matching trigger
-Guttural Roar	EMPOWERED conditional bonus (+4 instead) not representable
-Jagged Cutlass	'can't be moved by enemy spells and abilities' has no matching verb/keyword
-Legion Marauder	EMPOWER mechanic and EMPOWERED static might bonus not supported
-Platewyrm Egg	enters exhausted, EMPOWER mechanic, and ADD power ability not supported
-Repair Specialist	ASSAULT equal to number of gear controlled is a dynamic keyword value not representable
-Tools of Empire	EMPOWER mechanic and EMPOWERED conditional bonus not supported
-Baccai Witherclaw	EMPOWER mechanic and EMPOWERED static might bonus not supported; DEATHKNELL gated on empowered
-Baccai Witherclaw	unknown condition type 'this_is_empowered'
-Dame the Despoiler	EMPOWER mechanic and set-might-to-target's-might effect not supported
-Noxian Demolitionist	gear energy cost gated on my Might (dynamic) not representable
-Onslaught	FLOW alternate-cost play from trash not supported
-Profiteer	disempower/empower mechanic not supported
-Rampage	mutual fight (deal damage equal to Mights to each other) not supported
-Ambessa The Wolf	empower/empowered static bonus and damage-immunity not supported
-Decree of Strength	reveal hand then force recycle of chosen card not cleanly supported
-Gangplank Naval	empower and empowered replacement effect not supported
-Hextech Disc	empower/disempower cost and 3-might Mech token not canonical
-Jayce Hammer in Hand	on-ready choose-one mode selection not supported
-Wild Claw	banish-and-play-with-cost-reduction plus empower not supported
-Cataclysmic Duel	each player keeps one chosen unit and kills the rest not supported
-Corrupted Dragon	conditional 'enter ready' if score not within 3 of victory has no supported representation
-Renekton Brute	empower/empowered mechanic and might-threshold trigger unsupported
-Kinkou Lifeblade	empower mechanic and empowered static bonuses unsupported
-Mask Mother	triggers on being discarded, not on death; no on_discard trigger
-Shadow Order Disciple	BURN cost (mill from own deck) not in cost key list
-Shadowblade Lurker	cost reduction scales by count of same-named cards in trash times 2; dynamic per-name reduction not fully expressible
-Spiderling	self buff per other same-named units here; passive dynamic self-might not cleanly supported
-Stargazer	reduces cost of FLOW spells played from trash, minimum 1; aura and FLOW/from-trash gating not expressible
-Tornado Warrior	empower/disempower mechanic unsupported; hidden-play trigger
-Up from the Deep	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Ravenbloom Prefect	Banish self to banish an opponent's gear on play — no matching trigger/verb.
-Tail-Cloaked Matriarch	EMPOWER keyword and on-empowered play-a-unit-from-hand-ignoring-cost are unsupported.
-Twilight Step	FLOW alternate-cost play-from-trash is unsupported.
-Wind and Ghosts	Conditional branch: banish if 3 might or less, otherwise return to hand — no mode/condition support for this split.
-Decree of Discord	Return any number of enemy Order units with combined total might 5 or less — no total-might budget target selection.
-Forgotten Relic	BURN mechanic and burned-card-Might-based buff are unsupported.
-Illaoi Prophet of the Great Kraken	Second token trigger is 'when I score' (on_conquer used as approximation) and the +1 might per token-unit passive is unsupported.
-Mel Defiant Soul	EMPOWER keyword (discard-a-spell cost) and on-empowered banish are unsupported.
-Minah Swiftfoot	on_move choose-one modal effect not dispatchable
-Zed Without a Sound	Move-me-and-a-token swap-locations activated ability not supported
-Kennen Storm of Shuriken	BURN and FLOW-granting mechanics not supported
-Kharox	EMPOWER keyword, on-empowered trigger, BURN, and play-from-enemy-trash not supported
-Ocean Drake	non-Dragon filter is a negation not expressible; play-to-open-battlefield not supported
-Dragon Form	base Might becomes fixed value, and FLOW replay not supported
-Disciple of Shen	conditional SHIELD 3 gated on exactly one other friendly unit here not expressible as static keyword
-Keeper of Law	cost reduction gated on a battlefield with exactly two units; supported condition is n-or-more not exactly
-Masa Crashing Thunder	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Solari Sunhawk	EMPOWER alternate-cost/state mechanic and EMPOWERED static buff not supported
-Escaped Grayback	EMPOWER with kill-friendly cost and EMPOWERED static might buff not supported
-Hungry Wolf	usage gated on having chosen an enemy unit this turn; no matching condition
-Ki Barrier	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Lacerate	EMPOWERED disempower step and FLOW replay-from-trash not supported; kill is conditional on the disempower/might check
-Noxian Emissary	EMPOWER alternate-cost mechanic; DEATHKNELL is gated on being Empowered which is unsupported
-Sacred Protector	conditional combat-damage suppression based on exactly one other friendly unit here not supported
-Aurok General	EMPOWER alternate-cost mechanic and EMPOWERED aura buff to Empowered units not supported
-Decree of Unity	model flagged
-Fallen Feline	model flagged
-Glowstone	model flagged
-Kayle Justified	model flagged
-Kennen Keeper of Balance	model flagged
-Ambessa Respected and Feared	model flagged
-Shady Spectacles	model flagged
-Shen Leader of the Kinkou Order	model flagged
-Akali Rogue Assassin	model flagged
-Shuriken Flip	model flagged
-Renekton Butcher of the Sands	ADD energy to pool (restricted use) has no supported verb
-Dominus	granting an activated ability to a unit is unsupported
-Zed Master of Shadows	empower/disempower mechanic (empower on banish, disempower as cost) unsupported
-Death Mark	BURN (mill self), token's granted triggered ability, and FLOW replay-from-trash are unsupported
-Nasus Curator of the Sands	trigger gated on energy cost >=7 of played card, and includes gear/activated abilities not just units
-Siphoning Strike	'deal 7 instead' replaces the 4 damage rather than adding; channel is gated on 'when it dies this turn' delayed trigger
-Shadow Dash	move destination is a battlefield where you have units, 'if exactly two units there' conditional buff, and FLOW replay-from-trash are unsupported
-Jayce Defender of Tomorrow	empower/empowered mechanic and 'ready 2 gear' empowered ability unsupported
-Acceleration Gate	readies units, gear, and/or runes together (mixed target types) unsupported by a single verb
-Mel Soul's Reflection	empower/disempower mechanic not supported; the on-empower trigger and disempower cost cannot be modeled
-Rebuttal	no rules text beyond REACTION keyword reminder; card effect body is missing
-Ambessa Matriarch of War	empower/disempower mechanic not supported; on-empower trigger and disempower cost cannot be modeled
-Public Execution	kill targets an enemy with less might than a chosen friendly unit (not the source); FLOW play-from-trash cost not supported
-Kennen Heart of the Tempest	empower mechanic and disempower cost not supported; on-play-from-non-hand trigger cannot be modeled
-Lightning Rush	FLOW play-from-trash cost not supported
-Dragon Roost	battlefield rule modifying where Dragons are played via an optional additional cost not supported
-Heisho Shell of the World	static rule making players ignore DEFLECT when choosing targets here not supported
-Kinkou Temple	static aura buffing units with TANK here not supported
-Mystic Vortex	static cost increase for REACTION cards during showdowns here not supported
-Piltovan Forge	First friendly gear activated ability each turn costs 1 less — conditional cost reduction on another card, not expressible
-Protective Sands	Conquer trigger gated on rune count with optional pay-to-draw
-Risen Altar	EMPOWER cost reduction for units here — unsupported mechanic and aura
-Sandswept Tomb	Spells targeting friendly units here cost less — aura cost reduction on other cards
-Shadow Temple	BURN 3 (mill own deck) on hold — no matching verb
-Threshold of the Gray	Combat start: attacker and defender each ADD 1 (gain power any domain)
-Shadow Clone	On attack, optional banish from trash to gain ASSAULT 4 — cost-gated triggered keyword grant
-Mask of Foresight	Triggers on a friendly unit attacking OR defending alone; engine lacks a combined attack/defend-alone trigger and the alone check refers to the triggering unit not the source.
-Nocturne Horrifying	Banish-from-top-of-deck then play-for-rune alternate cost has no matching verb.
-Tideturner	Swap locations of this unit and a chosen unit at another location; no swap-position verb.
-Void Gate	Passive bonus damage aura for spells/abilities dealing damage to units here; no verb.
-Switcheroo	Swap the Might of two units at the same battlefield; no might-swap verb.
-Ornn Fire Below the Mountain	ADD [rune] resource-generation for gear only; no gain_power verb.
-Minefield	Put top 2 cards of Main Deck into trash (mill); discard_card approximates but from-deck milling may not be supported.
-Back Off	model flagged
-Kinkou Initiate	model flagged
-Rengar Trophy Hunter	model flagged
-Star Spring	model flagged
+Shen Scourge of Shadows	conditional draw gated on exactly one other unit here, no matching condition
+Apprentice Mage	PREDICT 2 triggers 'when I become empowered', a becoming-empowered trigger not directly supported
+Grumpy Rockbear	EMPOWER cost reduced per rune you control, cost-scaling on activated ability not supported
+Mesmerize	Choose one modal spell not dispatchable
+Otterpus	replacement effect turning scoring into drawing during early turns not supported
+Questionable Tome	disempower-this as an additional cost on the draw ability not expressible
+Patched Porobot	draw gated on controlling 3+ other gear, no matching condition
+Sky Cruiser	discard a gear as an additional cost not expressible in cost keys
+Hextech Formula	'This enters exhausted' has no supported effect; empower targets another gear (not self)
+Swain Visionary	conquer condition requires having played a non-token unit AND non-token gear AND a spell this turn — no matching condition
+Legion Marauder	EMPOWER has an alternate cost ([1] OR [body]); only one cost representable
+Platewyrm Egg	'This enters exhausted' unsupported; REACTION tap ADD is a gain_power ability, plus empowered-modifier (ADD 2 instead)
+Repair Specialist	ASSAULT equal to number of gear you control — dynamic keyword value not expressible
+Dame the Despoiler	empowered attack/defend ability sets Might equal to a chosen unit's Might then grants +1 — set-might-to-target not expressible
+Profiteer	disempower something you control as a cost to empower a legend/unit/gear — cost:disempower and empower a chosen target not expressible
+Ambessa The Wolf	empowered 'can't be dealt damage unless in combat' is a damage-prevention modifier not expressible
+Gangplank Naval	EMPOWERED clause is a replacement/protection modifier on effects that would stun/debuff/return me; no supported vocab.
+Jayce Hammer in Hand	On-become-ready 'choose one' modal buff; mode choice not supported, and 'become ready' trigger not supported.
+Cataclysmic Duel	Each player keeps one chosen unit, kill all others; no supported target/mode for symmetric player-choice mass kill.
+Tornado Warrior	'When you play me from face down' is a HIDDEN-specific trigger; empower a chosen 'something here' then disempower at end of turn — the play-from-facedown gate and the delayed disempower are not fully supported.
+Ravenbloom Prefect	'When an opponent plays a gear' trigger with self-banish cost to banish it; trigger and cost unsupported.
+Tail-Cloaked Matriarch	'When I become EMPOWERED' trigger with free-play of a cost-limited unit not supported.
+Wind and Ghosts	Conditional 'otherwise return to hand' branch for units above 3 might not supported as a single mode.
+Decree of Discord	Return any number of enemy Order units with total might 5 or less; multi-target selection with combined-might budget not supported.
+Forgotten Relic	'When you burn a unit this way' dependent trigger granting +might equal to burned card's might not supported.
+Mel Defiant Soul	EMPOWER cost is 'discard a spell' (not an expressible energy/power cost); on-become-empowered trigger approximated.
+Minah Swiftfoot	Choose-one modal effect on move trigger is not dispatchable.
+Kennen Storm of Shuriken	On-conquer 'give a spell in trash FLOW' effect is not expressible.
+Kharox	On-become-empowered trigger approximated; the follow-up 'play a unit from their trash ignoring cost' is not supported.
+Dragon Form	Setting a unit's base Might to a fixed value is not an expressible effect; FLOW not supported.
+Disciple of Shen	Conditional SHIELD while at a battlefield with exactly one other friendly unit is not expressible as a static keyword condition.
+Escaped Grayback	EMPOWER cost is 'kill a friendly unit', not an expressible energy/power cost.
+Sacred Protector	Conditional 'don't deal combat damage unless at a battlefield with exactly one other unit' has no supported verb/condition.
+Aurok General	EMPOWERED aura granting +2 might to your Empowered units (anywhere) has no supported target/condition.
+Fallen Feline	Naming a spell and preventing opponents from playing spells with that name has no supported verb.
+Kayle Justified	Multi-empower stacking (+2 might per empower, DEFLECT 3/GANKING at three stacks) has no supported representation.
+Shady Spectacles	Copy-a-unit equipment effect has no supported verb.
+Akali Rogue Assassin	Move-from-showdown-to-base with conditional empowered-ready has no clean supported representation.
+Renekton Butcher of the Sands	ADD energy restricted to playing units/activated abilities has no supported verb.
+Rebuttal	No effect text beyond REACTION keyword.
+Dragon Roost	Optional additional cost that redirects a Dragon to this battlefield has no supported representation.
+Heisho Shell of the World	Ignoring DEFLECT while paying for spells/abilities is not an expressible static rule modifier.
+Mystic Vortex	Cost increase for REACTION cards during showdowns here is not an expressible aura.
+Piltovan Forge	Reducing the first friendly gear activated ability's cost each turn is not an expressible aura.
+Protective Sands	Optional pay-to-draw on conquer gated on rune count with an energy cost is not cleanly expressible.
+Risen Altar	Reducing EMPOWER costs of friendly units here is not an expressible aura.
+Sandswept Tomb	Reducing cost of spells that choose friendly units here is not an expressible aura.
+Threshold of the Gray	Attacker and defender each ADD [1] (gain power) on combat start is not an expressible verb.
+Shadow Clone	model flagged

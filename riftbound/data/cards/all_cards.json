@@ -24032,10 +24032,36 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
-      "DEFLECT",
-      "ASSAULT 2"
+      "EMPOWER",
+      "EMPOWERED"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 5
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "DEFLECT"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "ASSAULT 2"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-001",
@@ -24057,7 +24083,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_move",
+        "target": "opponent",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-002",
@@ -24132,7 +24165,14 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-005",
@@ -24154,7 +24194,21 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "amount": 2
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "keyword": "GANKING",
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-006",
@@ -24175,8 +24229,28 @@
     "effect": "EMPOWER — Discard 1 (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have +1 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-007",
@@ -24400,9 +24474,28 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
-      "ASSAULT 3"
+      "EMPOWER",
+      "EMPOWERED"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 1
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "ASSAULT 3"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-014",
@@ -24521,8 +24614,19 @@
     "effect": "EMPOWER [6] [Fury]: ([6] [Fury]: Empower this. Use only if not Empowered.)\nYour units have +1[might]. If I'm EMPOWERED, they have +2 [might] instead.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 6,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-018",
@@ -24722,7 +24826,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_win_combat",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-024",
@@ -24818,8 +24928,25 @@
     "effect": "When a combat that I was in ends, empower me. (I become Empowered if I'm not already.)\nEMPOWERED I have +2 [might]",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_win_combat",
+        "target": "self"
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-028",
@@ -24862,8 +24989,37 @@
     "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have DEFLECT and SHIELD 3. (Opponent's must pay [rune] to choose me with a spell or ability. +3 [might] while I'm a defender.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "DEFLECT"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "SHIELD 3"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-030",
@@ -24913,8 +25069,28 @@
     "effect": "EMPOWER [12]. This ability costs [1] less for each rune you control. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +3 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 12
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-032",
@@ -24936,7 +25112,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_move",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-033",
@@ -25229,9 +25411,28 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
-      "DEFLECT"
+      "DEFLECT",
+      "EMPOWER",
+      "EMPOWERED"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 7,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-043",
@@ -25315,9 +25516,28 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
-      "DEFLECT 2"
+      "DEFLECT 2",
+      "EMPOWER",
+      "EMPOWERED"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 8
+        }
+      },
+      {
+        "effect": "score_point",
+        "trigger": "on_conquer",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-046",
@@ -25342,8 +25562,27 @@
     "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle one of them and put the rest back in any order.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "PREDICT 2"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "predict",
+        "trigger": "activated",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-047",
@@ -25420,8 +25659,39 @@
     "effect": "EMPOWER [12]. This ability costs [1] less for each rune you control. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWER[>] I have DEFLECT and SHIELD 3. (Opponent's must pay [rune] to choose me with a spell or ability. +3 [might] while I'm a defender.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT",
+      "SHIELD 3"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 12
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "SHIELD 3",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-050",
@@ -25516,8 +25786,28 @@
     "effect": "EMPOWER — [tap] (Pay the cost: Empower me. Use only if not Empowered.)\nDisempower this, [1], [tap]: Draw 1.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-054",
@@ -25684,7 +25974,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-060",
@@ -25742,7 +26044,21 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_gear": true,
+          "exclude_self": true
+        },
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-062",
@@ -25830,7 +26146,16 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-065",
@@ -25983,8 +26308,38 @@
     "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +2 [might] and GANKING. (I can move from battlefield to battlefield.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "GANKING"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-070",
@@ -26097,8 +26452,28 @@
     "effect": "EMPOWER — [1] or [body] (Pay either cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have +1 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-074",
@@ -26120,9 +26495,20 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-075",
@@ -26199,9 +26585,38 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
       "DEATHKNELL"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_death",
+        "amount": 2,
+        "exhausted": true,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-078",
@@ -26222,8 +26637,20 @@
     "effect": "EMPOWER [5] [body] ([5] [body]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] When I attack or defend, choose a unit here. Increase my Might to its Might this turn, then give me +1 [might] this turn.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 5,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-079",
@@ -26363,8 +26790,29 @@
     "effect": "EMPOWER [3] [Body] (Empower me. Use only when I'm not empowered.)\nEMPOWERED I have +3 [might] and can't be dealt damage unless I'm in combat.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3,
+          "power": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-084",
@@ -26420,8 +26868,19 @@
     "effect": "EMPOWER [body] [body] ([body] [body]: Empower me. Use only if not empowered.)\nEMPOWERED[>] If a spell or ability that chooses me would stun me, give me -[might], or return me to hand, give me +3 [might] this turn instead.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 2
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-086",
@@ -26620,8 +27079,37 @@
     "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +1 [might] and GANKING. (I can move from battlefield to battlefield.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-093",
@@ -26804,7 +27292,13 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_play",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-099",
@@ -26958,8 +27452,20 @@
     "effect": "EMPOWER [2] [chaos] ([2] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, you may choose a unit with Energy cost no more than [3] and Power cost no more than [rune]. Play it to your base, ignoring its cost.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-104",
@@ -27014,7 +27520,17 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-106",
@@ -27058,7 +27574,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_play",
+        "amount": 1
+      },
+      {
+        "effect": "burn",
+        "trigger": "on_start_of_turn",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-108",
@@ -27112,8 +27639,22 @@
     "effect": "EMPOWER — Discard a spell (Pay the cost: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, banish an enemy unit at a battlefield with 3[might] or less.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_at_most": 3
+        },
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-110",
@@ -27194,8 +27735,16 @@
     "effect": "When you play me, BURN 2. (Put the top 2 cards of your Main Deck into your trash.)\nWhen i conquer, give a spell in your trash FLOW equal to its cost this turn. (You may play it from your trash for its Flow cost. Then banish it.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "FLOW"
+    ],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_play",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-113",
@@ -27220,8 +27769,28 @@
     "effect": "EMPOWER [6] [chaos] [chaos] ([6] [chaos] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, choose an opponent. They BURN 3. Then you may do this: Choose a unit in their trash and play it, ignoring its cost. (To Burn 3, they put the top 3 cards of their Main Deck into their trash.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 6,
+          "power": 2
+        }
+      },
+      {
+        "effect": "burn",
+        "trigger": "passive",
+        "target": "opponent",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-114",
@@ -27273,7 +27842,9 @@
     "effect": "Choose a unit. Its base Might becomes 5 this turn.\nFLOW [3] (You may play this from your trash for its Flow cost. Then banish it.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "FLOW"
+    ],
     "effects": [],
     "variants": [
       {
@@ -27441,8 +28012,38 @@
     "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +1 [might] and DEFLECT 2. (Opponents must pay [rune] [rune] to choose me with a spell or ability.)",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT 2",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-122",
@@ -27487,8 +28088,21 @@
     "effect": "EMPOWER — Kill a friendly unit (Pay the cost: Empower me. USe only if not Empowered.)\nEMPOWERED I have +2 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-124",
@@ -27618,9 +28232,30 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
       "DEATHKNELL"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 1
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_death",
+        "target": "self",
+        "token_name": "Recruit",
+        "count": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-128",
@@ -27663,8 +28298,19 @@
     "effect": "EMPOWER [3] [order] ([3] [order]: Empower me. Use only if not Empowered.)\nEMPOWERED Your units that are EMPOWERED have +2 [might] (including me).",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-130",
@@ -27767,8 +28413,21 @@
     "effect": "EMPOWER [3] ([3]: Empower me.)\nI can be EMPOWERED up to three times.\nI have +2 [might] for each time I'm EMPOWERED.\nWhile I'm EMPOWERED three times, I have DEFLECT 3 and GANKING.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT",
+      "GANKING"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-134",
@@ -27941,9 +28600,20 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-139",
@@ -28564,7 +29234,17 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "target_filter": {
+          "has_keyword": "TANK"
+        },
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-159",
@@ -28696,7 +29376,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_hold",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-165",
@@ -28739,7 +29425,9 @@
     "effect": "Use to mark Legends, units, and gear that are EMPOWERED.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [],
+    "keywords": [
+      "EMPOWERED"
+    ],
     "effects": [],
     "variants": [
       {
@@ -28762,7 +29450,24 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_attack",
+        "target": "self",
+        "from": "trash",
+        "target_filter": {
+          "is_unit": true
+        }
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_attack",
+        "target": "self",
+        "amount": 4,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-T05",
