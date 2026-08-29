@@ -22,6 +22,7 @@ class UnitInPlay:
     passive_might: int = 0  # overlay recomputed each cycle by passive (continuous) abilities
     passive_keywords: set = field(default_factory=set)  # keywords granted by passive abilities
     hidden: bool = False  # reserved for future HIDDEN keyword
+    empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
     is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
 
     def reset_damage(self) -> None:

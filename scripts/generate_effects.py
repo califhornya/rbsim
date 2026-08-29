@@ -407,6 +407,38 @@ STEP 3 — newly-supported mechanics (EMIT these now; older guidance said to fla
     with no friendly/enemy word. Use `enemy_unit`/`friendly_unit` only when the text
     says so. (Removal via chosen_unit now correctly targets the opponent.)
 
+STEP 4 — Vendetta mechanics:
+
+18. EMPOWER / EMPOWERED (now supported — EMIT, do NOT flag).
+    "EMPOWER [cost]" is an activated ability that gives the source the empowered
+    status. Emit `empower_self` with `trigger:"activated"` and the cost. The cost
+    inside the parentheses is the same "[N]=energy, [domain]=1 power pip, repeated
+    pip = count" rule as everywhere else.
+    "EMPOWERED <X>" is a DEPENDENT ability that applies only while empowered —
+    emit X as a `passive` effect with `condition:{{"type":"this_is_empowered"}}`,
+    `target:"self"`. Might → grant_might; a keyword → give_keyword.
+    "When ..., empower me" (a trigger, not a cost) → `empower_self` on that trigger.
+    "disempower a unit" (instruction or cost) → `disempower` with the right target.
+    Text: "EMPOWER [2] [Fury] ([2][Fury]: Empower me. Use only if not Empowered.)
+    EMPOWERED[>] I have ASSAULT 3. EMPOWERED I have +1 [might]."
+    → effects: [
+        {{"effect":"empower_self","trigger":"activated","cost":{{"energy":2,"power":1}}}},
+        {{"effect":"give_keyword","trigger":"passive","target":"self",
+          "condition":{{"type":"this_is_empowered"}},"keyword":"ASSAULT 3"}},
+        {{"effect":"grant_might","trigger":"passive","target":"self","amount":1,
+          "condition":{{"type":"this_is_empowered"}}}}]
+    Also list "EMPOWER"/"EMPOWERED" in `keywords` when the card prints them.
+    An EMPOWERED clause that MODIFIES another ability ("deal 2 instead if I'm
+    Empowered", "they have +2 instead") is NOT yet expressible — parse the base
+    ability, then flag the empowered-modifier clause (suggested_vocab
+    "effect:empowered_modifier"); do not drop it.
+
+19. FLOW and BURN are NOT supported yet. FLOW (an alternate cost to play a spell
+    from the trash, then banish it) → keep the on-cast body if it's otherwise
+    parseable, set needs_review, suggested_vocab ["keyword:flow"]. BURN X (put X
+    cards from top of deck into trash) → needs_review, suggested_vocab
+    ["effect:burn"]. Do NOT invent verbs for these.
+
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]
 Respond with ONLY the JSON array — no prose, no markdown fences."""

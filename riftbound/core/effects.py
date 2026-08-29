@@ -617,6 +617,31 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         _spawn_token_to_base(player, token_name, ready=ready)
 
 
+@effect("empower_self")
+def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Vendetta EMPOWER: give the source unit the empowered status. Usually an
+    activated ability (`trigger: activated`) whose cost the player pays first, but
+    also usable from a trigger ("when ..., empower me"). Idempotent."""
+    unit = ctx.loop._find_unit_by_card(ctx.card)
+    if unit is not None:
+        unit.empowered = True
+
+
+@effect("disempower")
+def _disempower(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Remove the empowered status from the resolved target(s). Used as an
+    instruction or a cost ("disempower a unit that's EMPOWERED")."""
+    target = str(spec.get("target", "enemy_unit"))
+    if target in ("self", "this"):
+        unit = ctx.loop._find_unit_by_card(ctx.card)
+        units = [unit] if unit is not None else []
+    else:
+        units = _resolve_targets(ctx, {**spec, "target": target, "scope": spec.get("scope", "single")})
+    for u in units:
+        if getattr(u, "empowered", False):
+            u.empowered = False
+
+
 @effect("attach_gear")
 def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx.actor

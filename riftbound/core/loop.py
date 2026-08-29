@@ -38,7 +38,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_is_mighty", "kicker_paid",
     "friendly_unit_died_this_turn", "you_played_n_spells_this_turn",
     "you_already_played_another_card_this_turn", "controller_has_xp_at_least",
-    "card_in_trash_count_at_least", "this_is_buffed", "you_control_subtype",
+    "card_in_trash_count_at_least", "this_is_buffed", "this_is_empowered",
+    "you_control_subtype",
     "score_within_n_of_victory", "you_discarded_card_this_turn",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
@@ -756,6 +757,11 @@ class GameLoop:
         if ctype == "this_is_buffed":
             unit = self._find_unit_by_card(card)
             return bool(unit and unit.might_counters > 0)
+        if ctype == "this_is_empowered":
+            # Vendetta EMPOWERED dependent ability: fires only while the source
+            # unit carries the empowered status (see UnitInPlay.empowered).
+            unit = self._find_unit_by_card(card)
+            return bool(unit and getattr(unit, "empowered", False))
         if ctype == "you_control_subtype":
             tag = str(params.get("tag", ""))
             for bf in self.gs.battlefields:
@@ -1276,6 +1282,9 @@ class GameLoop:
                         continue
                     if (eff.timing or "").lower() == "reaction":
                         continue
+                    # EMPOWER can only be activated while NOT already empowered.
+                    if eff.effect == "empower_self" and getattr(unit, "empowered", False):
+                        continue
                     out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
         for unit in ap.base_units:
             spec = CARD_REGISTRY.get(unit.card.name)
@@ -1285,6 +1294,8 @@ class GameLoop:
                 if eff.trigger != "activated":
                     continue
                 if (eff.timing or "").lower() == "reaction":
+                    continue
+                if eff.effect == "empower_self" and getattr(unit, "empowered", False):
                     continue
                 out.append({"type": "ability", "unit": unit, "bf_idx": None, "eff": eff})
         for gear in list(ap.base_gear):

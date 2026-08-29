@@ -44,6 +44,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "this_is_mighty",
     "triggering_unit_is_mighty",
     "this_is_buffed",
+    "this_is_empowered",
     "kicker_paid",
     "friendly_unit_died_this_turn",
     "you_played_n_spells_this_turn",
