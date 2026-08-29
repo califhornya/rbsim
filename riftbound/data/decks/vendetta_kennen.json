@@ -1,0 +1,104 @@
+{
+  "name": "Kennen Storm of Shuriken",
+  "legend": "Kennen Heart of the Tempest",
+  "champion": "Kennen Storm of Shuriken",
+  "runes": [
+    {
+      "domain": "ORDER",
+      "count": 3
+    },
+    {
+      "domain": "CHAOS",
+      "count": 9
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Minefield"
+    },
+    {
+      "name": "Sandswept Tomb"
+    },
+    {
+      "name": "Zaun Warrens"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Ride the Wind",
+      "count": 3
+    },
+    {
+      "name": "Stacked Deck",
+      "count": 3
+    },
+    {
+      "name": "Traveling Merchant",
+      "count": 3
+    },
+    {
+      "name": "Rhasa the Sunderer",
+      "count": 3
+    },
+    {
+      "name": "Seal of Discord",
+      "count": 3
+    },
+    {
+      "name": "Treasure Hunter",
+      "count": 3
+    },
+    {
+      "name": "Lightning Rush",
+      "count": 3
+    },
+    {
+      "name": "Switcheroo",
+      "count": 2
+    },
+    {
+      "name": "Last Rites",
+      "count": 2
+    },
+    {
+      "name": "Up from the Deep",
+      "count": 2
+    },
+    {
+      "name": "The Harrowing",
+      "count": 1
+    },
+    {
+      "name": "Tideturner",
+      "count": 1
+    },
+    {
+      "name": "Flash",
+      "count": 1
+    },
+    {
+      "name": "Hard Bargain",
+      "count": 1
+    },
+    {
+      "name": "Star-Crossed",
+      "count": 1
+    },
+    {
+      "name": "Baron Nashor",
+      "count": 1
+    },
+    {
+      "name": "Shadow Order Disciple",
+      "count": 1
+    },
+    {
+      "name": "Nocturne Horrifying",
+      "count": 3
+    },
+    {
+      "name": "Fizz Trickster",
+      "count": 2
+    }
+  ]
+}

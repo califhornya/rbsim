@@ -1,0 +1,104 @@
+{
+  "name": "Ezreal Prodigy",
+  "legend": "Ezreal Prodigal Explorer",
+  "champion": "Ezreal Prodigy",
+  "runes": [
+    {
+      "domain": "CHAOS",
+      "count": 6
+    },
+    {
+      "domain": "MIND",
+      "count": 6
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Sigil of the Storm"
+    },
+    {
+      "name": "Frozen Fortress"
+    },
+    {
+      "name": "Heisho Shell of the World"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Stupefy",
+      "count": 3
+    },
+    {
+      "name": "Pack of Wonders",
+      "count": 3
+    },
+    {
+      "name": "Stacked Deck",
+      "count": 3
+    },
+    {
+      "name": "Bellows Breath",
+      "count": 3
+    },
+    {
+      "name": "Deadly Flourish",
+      "count": 3
+    },
+    {
+      "name": "Bewitching Spirit",
+      "count": 3
+    },
+    {
+      "name": "Thousand-Tailed Watcher",
+      "count": 2
+    },
+    {
+      "name": "Gust",
+      "count": 1
+    },
+    {
+      "name": "Treasure Trove",
+      "count": 2
+    },
+    {
+      "name": "Wages of Pain",
+      "count": 2
+    },
+    {
+      "name": "Star-Crossed",
+      "count": 2
+    },
+    {
+      "name": "The List",
+      "count": 2
+    },
+    {
+      "name": "Hard Bargain",
+      "count": 1
+    },
+    {
+      "name": "Turn to Dust",
+      "count": 1
+    },
+    {
+      "name": "Fizz Trickster",
+      "count": 3
+    },
+    {
+      "name": "Vex Apathetic",
+      "count": 2
+    },
+    {
+      "name": "Sprite Fountain",
+      "count": 1
+    },
+    {
+      "name": "Pickpocket",
+      "count": 1
+    },
+    {
+      "name": "Singularity",
+      "count": 1
+    }
+  ]
+}

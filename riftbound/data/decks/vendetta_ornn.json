@@ -1,0 +1,96 @@
+{
+  "name": "Ornn Blacksmith",
+  "legend": "Ornn Fire Below the Mountain",
+  "champion": "Ornn Blacksmith",
+  "runes": [
+    {
+      "domain": "MIND",
+      "count": 4
+    },
+    {
+      "domain": "CALM",
+      "count": 8
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Seat of Power"
+    },
+    {
+      "name": "Ornn's Forge"
+    },
+    {
+      "name": "Veiled Temple"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Charm",
+      "count": 2
+    },
+    {
+      "name": "Clockwork Keeper",
+      "count": 3
+    },
+    {
+      "name": "Defy",
+      "count": 3
+    },
+    {
+      "name": "Mask of Foresight",
+      "count": 1
+    },
+    {
+      "name": "Lecturing Yordle",
+      "count": 1
+    },
+    {
+      "name": "Pit Crew",
+      "count": 3
+    },
+    {
+      "name": "Brutalizer",
+      "count": 3
+    },
+    {
+      "name": "Poro Snax",
+      "count": 3
+    },
+    {
+      "name": "Guardian Angel",
+      "count": 1
+    },
+    {
+      "name": "Sterak's Gage",
+      "count": 3
+    },
+    {
+      "name": "Aspiring Engineer",
+      "count": 2
+    },
+    {
+      "name": "Cloth Armor",
+      "count": 1
+    },
+    {
+      "name": "Seal of Focus",
+      "count": 3
+    },
+    {
+      "name": "Scuttle Crab",
+      "count": 3
+    },
+    {
+      "name": "Sprite Fountain",
+      "count": 3
+    },
+    {
+      "name": "Helm of Suppression",
+      "count": 1
+    },
+    {
+      "name": "Patched Porobot",
+      "count": 3
+    }
+  ]
+}
