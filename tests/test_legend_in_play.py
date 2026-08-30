@@ -19,7 +19,7 @@ AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
 
 
 def test_load_deck_json_returns_legend():
-    cards, runes, champion, legend = load_deck_json(AKALI)
+    cards, runes, champion, legend, battlefields = load_deck_json(AKALI)
     assert legend is not None
     assert legend.name == "Akali Rogue Assassin"
 

@@ -17,6 +17,7 @@ from typing import List, Optional
 from riftbound.core.cards import Card
 from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
+from riftbound.core.battlefield import Battlefield
 from riftbound.registry.cards_registry import load_deck_json
 
 # Agents. Imported here (not in the CLI) so every entry point builds games the
@@ -33,16 +34,17 @@ AI_REGISTRY = {
 }
 
 
-def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card], Optional[Card]]:
-    """Load a deck, rune deck, champion card, and legend card from a JSON file."""
-    specs, rune_entries, champion_spec, legend_spec = load_deck_json(path)
+def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card], Optional[Card], List[Card]]:
+    """Load a deck, rune deck, champion, legend, and battlefield cards from JSON."""
+    specs, rune_entries, champion_spec, legend_spec, bf_specs = load_deck_json(path)
     cards: List[Card] = [spec.instantiate() for spec in specs]
     runes: List[Rune] = []
     for domain, count in rune_entries:
         runes.extend(Rune(domain=domain) for _ in range(count))
     champion = champion_spec.instantiate() if champion_spec is not None else None
     legend = legend_spec.instantiate() if legend_spec is not None else None
-    return Deck(cards=cards), RuneDeck(runes=runes), champion, legend
+    battlefields = [spec.instantiate() for spec in bf_specs]
+    return Deck(cards=cards), RuneDeck(runes=runes), champion, legend, battlefields
 
 
 def make_agent(name: str, player: Player):
@@ -91,10 +93,10 @@ def build_game(
     rune_rng_a = random.Random(rng.randrange(1 << 30))
     rune_rng_b = random.Random(rng.randrange(1 << 30))
 
-    deck_a, rune_deck_a, champion_a, legend_a = make_deck_from_file(deck_a_path)
+    deck_a, rune_deck_a, champion_a, legend_a, bfs_a = make_deck_from_file(deck_a_path)
     rune_rng_a.shuffle(rune_deck_a.runes)
 
-    deck_b, rune_deck_b, champion_b, legend_b = make_deck_from_file(deck_b_path)
+    deck_b, rune_deck_b, champion_b, legend_b, bfs_b = make_deck_from_file(deck_b_path)
     rune_rng_b.shuffle(rune_deck_b.runes)
 
     deck_a.shuffle(rng)
@@ -110,6 +112,14 @@ def build_game(
 
     starter = resolve_starter(rng, first_player)
 
+    # Battlefields: a single game uses one per player, chosen from the deck's up-to-3.
+    # Use an INDEPENDENT rng so the choice never perturbs deck/rune shuffles above
+    # (keeps existing draw determinism); across many seeds all 3 get exercised.
+    bf_rng = random.Random((game_seed * 2654435761) & 0xFFFFFFFF)
+    bf_slot_A = bf_rng.choice(bfs_a) if bfs_a else None
+    bf_slot_B = bf_rng.choice(bfs_b) if bfs_b else None
+    battlefields = [Battlefield(card=bf_slot_A), Battlefield(card=bf_slot_B)]
+
     return GameState(
         rng=rng,
         A=A,
@@ -122,4 +132,5 @@ def build_game(
         champion_B=champion_b,
         legend_A=legend_a,
         legend_B=legend_b,
+        battlefields=battlefields,
     )

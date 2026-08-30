@@ -463,11 +463,12 @@ def load_master_data(path: Optional[Path] = None) -> dict[str, CardSpec]:
 CARD_REGISTRY: dict[str, CardSpec] = load_cards_json()
 
 
-def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec]]:
+def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:
     """Load a deck JSON file.
 
     Returns (main_deck_specs, [(domain, count)] rune entries, champion_spec_or_None,
-    legend_spec_or_None).
+    legend_spec_or_None, battlefield_specs). The deck may name up to 3 battlefields;
+    a single game uses one per player (chosen at build time).
 
     Deck format:
       {
@@ -497,6 +498,17 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         legend_spec = CARD_REGISTRY.get(legend_name)
         if legend_spec is None:
             raise ValueError(f"Deck legend '{legend_name}' not found in registry")
+
+    # --- Battlefields (the deck names up to 3; one per player is used per game) ---
+    battlefield_specs: list[CardSpec] = []
+    for entry in data.get("battlefields", []):
+        bf_name = str(entry.get("name", "")).strip() if isinstance(entry, dict) else str(entry).strip()
+        if not bf_name:
+            continue
+        bf_spec = CARD_REGISTRY.get(bf_name)
+        if bf_spec is None:
+            raise ValueError(f"Deck battlefield '{bf_name}' not found in registry")
+        battlefield_specs.append(bf_spec)
 
     # --- Main deck cards ---
     cards: list[CardSpec] = []
@@ -535,7 +547,7 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         count = int(entry.get("count", 1))
         runes.append((domain, count))
 
-    return cards, runes, champion_spec, legend_spec
+    return cards, runes, champion_spec, legend_spec, battlefield_specs
 
 
 def iter_cards() -> Iterable[CardSpec]:

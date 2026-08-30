@@ -358,6 +358,13 @@ class GameLoop:
         for unit in list(actor.base_units):
             self._resolve_triggered_effects(unit.card, trigger, anchor, actor, opponent,
                                             context_extra={"battlefield": anchor})
+        # Battlefields' own turn triggers (e.g. Frozen Fortress: deal 1 to all
+        # units here at start of turn). Fire once per battlefield, on the active
+        # player's start/end of turn.
+        for bf in self.gs.battlefields:
+            if bf.card is not None:
+                self._resolve_triggered_effects(bf.card, trigger, bf, actor, opponent,
+                                                context_extra={"battlefield": bf})
 
     def _fire_scoring_trigger(self, trigger: str, bf: Battlefield, side: str) -> None:
         """Fire on_conquer / on_hold for the scoring player's units at this BF
@@ -374,6 +381,13 @@ class GameLoop:
                     print(f"  [HUNT] {side} gains {amount} XP (now {self.gs.get_xp(side)})")
             self._resolve_triggered_effects(
                 unit.card, trigger, bf, actor, opponent,
+                context_extra={"battlefield": bf},
+            )
+        # The battlefield's OWN triggered ability (e.g. "when you conquer here,
+        # draw 1") fires for the scoring player.
+        if bf.card is not None:
+            self._resolve_triggered_effects(
+                bf.card, trigger, bf, actor, opponent,
                 context_extra={"battlefield": bf},
             )
 
