@@ -311,54 +311,64 @@
             "Yasuo Remorseful"
           ],
           "controller": "B",
-          "last_controller": "A"
+          "last_controller": "B"
         },
         {
-          "A": [
-            "Hwei Brooding Painter"
+          "A": [],
+          "B": [
+            "Lonely Poro"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": "B"
         }
       ],
       "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 17,
-        "energy": 8,
-        "hand": 0,
+        "base_units": [
+          "Traveling Merchant",
+          "Vex Apathetic",
+          "Fizz Trickster",
+          "Eager Apprentice",
+          "Diana Lunari"
+        ],
+        "deck": 22,
+        "energy": 0,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 7,
+          "CHAOS": 6,
           "MIND": 5
         },
-        "runes_in_play": 12,
-        "trash": 8
+        "runes_in_play": 11,
+        "trash": 1
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 19,
-        "energy": 1,
-        "hand": 2,
+        "base_units": [
+          "Scuttle Crab",
+          "Adaptatron",
+          "Scuttle Crab"
+        ],
+        "deck": 26,
+        "energy": 10,
+        "hand": 3,
         "power_pool": {
-          "CALM": 2,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 8,
-        "trash": 10
+        "runes_in_play": 10,
+        "trash": 1
       },
       "points_A": 4,
       "points_B": 8,
-      "spells_cast": 20,
-      "turns": 16,
-      "units_played": 17,
+      "spells_cast": 14,
+      "turns": 14,
+      "units_played": 13,
       "winner": "B",
       "xp_A": 0,
-      "xp_B": 2
+      "xp_B": 0
     },
     "spec": {
       "ai_a": "diana",
@@ -374,80 +384,9 @@
       "battlefields": [
         {
           "A": [],
-          "B": [
-            "Stellacorn Herder"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful"
-          ],
-          "controller": "B",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Ravenbloom Student"
-        ],
-        "deck": 21,
-        "energy": 10,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 8
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 4,
-        "base_units": [],
-        "deck": 16,
-        "energy": 0,
-        "hand": 2,
-        "power_pool": {
-          "CALM": 4,
-          "CHAOS": 6
-        },
-        "runes_in_play": 10,
-        "trash": 2
-      },
-      "points_A": 4,
-      "points_B": 8,
-      "spells_cast": 21,
-      "turns": 19,
-      "units_played": 13,
-      "winner": "B",
-      "xp_A": 0,
-      "xp_B": 1
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
-      "seed": 914790882
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Hwei Brooding Painter"
-          ],
           "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": null,
+          "last_controller": null
         },
         {
           "A": [],
@@ -465,7 +404,7 @@
         "base_units": [
           "Tideturner"
         ],
-        "deck": 23,
+        "deck": 19,
         "energy": 8,
         "hand": 0,
         "power_pool": {
@@ -473,32 +412,98 @@
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 5
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Stellacorn Herder",
-          "Lonely Poro",
-          "Lonely Poro"
+          "Stellacorn Herder"
         ],
-        "deck": 23,
-        "energy": 10,
+        "deck": 19,
+        "energy": 12,
         "hand": 3,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 3
+        "runes_in_play": 12,
+        "trash": 1
       },
       "points_A": 4,
       "points_B": 8,
-      "spells_cast": 16,
-      "turns": 14,
-      "units_played": 14,
+      "spells_cast": 21,
+      "turns": 21,
+      "units_played": 13,
       "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
+      "seed": 914790882
+    }
+  },
+  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Tideturner"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Hwei Brooding Painter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Vex Apathetic"
+        ],
+        "deck": 18,
+        "energy": 5,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 7,
+          "MIND": 5
+        },
+        "runes_in_play": 12,
+        "trash": 8
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [],
+        "deck": 26,
+        "energy": 0,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 6
+        },
+        "runes_in_play": 6,
+        "trash": 2
+      },
+      "points_A": 8,
+      "points_B": 5,
+      "spells_cast": 18,
+      "turns": 13,
+      "units_played": 10,
+      "winner": "A",
       "xp_A": 0,
       "xp_B": 1
     },
@@ -515,62 +520,59 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Hwei Brooding Painter"
+          "A": [],
+          "B": [
+            "Scuttle Crab"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
+          "controller": "B",
+          "last_controller": "B"
         },
         {
-          "A": [
-            "Diana Lunari",
-            "Tideturner"
+          "A": [],
+          "B": [
+            "Yasuo Remorseful"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": "B"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [
-          "Ravenbloom Student"
-        ],
-        "deck": 24,
-        "energy": 8,
-        "hand": 0,
+        "base_units": [],
+        "deck": 21,
+        "energy": 10,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 6,
-          "MIND": 4
+          "CHAOS": 7,
+          "MIND": 5
         },
-        "runes_in_play": 10,
-        "trash": 6
+        "runes_in_play": 12,
+        "trash": 9
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 2,
+        "base_gear": 0,
         "base_units": [
-          "Yasuo Remorseful",
-          "Scuttle Crab"
+          "Adaptatron"
         ],
-        "deck": 25,
-        "energy": 0,
+        "deck": 23,
+        "energy": 11,
         "hand": 4,
         "power_pool": {
+          "CALM": 5,
           "CHAOS": 6
         },
-        "runes_in_play": 6,
+        "runes_in_play": 11,
         "trash": 1
       },
-      "points_A": 8,
-      "points_B": 2,
-      "spells_cast": 12,
-      "turns": 12,
-      "units_played": 11,
-      "winner": "A",
+      "points_A": 4,
+      "points_B": 9,
+      "spells_cast": 14,
+      "turns": 15,
+      "units_played": 10,
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 1
     },
@@ -876,66 +878,71 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful"
+          "A": [
+            "Bewitching Spirit"
           ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": "A",
+          "last_controller": null
         },
         {
-          "A": [],
-          "B": [
-            "Stellacorn Herder"
+          "A": [
+            "Pyke Dockside Butcher"
           ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Baron Nashor"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
         }
       ],
-      "final_active": "B",
+      "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
-          "Bewitching Spirit",
-          "Pyke Dockside Butcher"
+          "Baron Nashor"
         ],
-        "deck": 29,
-        "energy": 1,
-        "hand": 3,
+        "deck": 28,
+        "energy": 0,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 3,
-          "FURY": 4
+          "CHAOS": 1,
+          "FURY": 6
         },
         "runes_in_play": 7,
-        "trash": 3
+        "trash": 4
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
-          "Adaptatron",
-          "Lonely Poro",
-          "Adaptatron"
+          "Yasuo Remorseful"
         ],
-        "deck": 24,
-        "energy": 10,
-        "hand": 4,
+        "deck": 28,
+        "energy": 1,
+        "hand": 2,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 1,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 4
+        "runes_in_play": 7,
+        "trash": 5
       },
-      "points_A": 0,
-      "points_B": 9,
+      "points_A": 8,
+      "points_B": 3,
       "spells_cast": 5,
-      "turns": 12,
-      "units_played": 13,
-      "winner": "B",
+      "turns": 13,
+      "units_played": 12,
+      "winner": "A",
       "xp_A": 0,
-      "xp_B": 0
+      "xp_B": 1
     },
     "spec": {
       "ai_a": "pyke",
@@ -950,16 +957,13 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Noxus Hopeful"
-          ],
+          "A": [],
           "B": [],
-          "controller": "A",
-          "last_controller": "B"
+          "controller": null,
+          "last_controller": null
         },
         {
           "A": [
-            "Bewitching Spirit",
             "Sharkling"
           ],
           "B": [],
@@ -972,44 +976,43 @@
         "banished": 0,
         "base_gear": 1,
         "base_units": [
-          "Recruit"
+          "Recruit",
+          "Noxus Hopeful"
         ],
-        "deck": 28,
-        "energy": 9,
+        "deck": 29,
+        "energy": 11,
         "hand": 1,
         "power_pool": {
           "CHAOS": 5,
           "FURY": 6
         },
         "runes_in_play": 11,
-        "trash": 4
+        "trash": 5
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 4,
         "base_units": [
-          "Scuttle Crab",
-          "Lonely Poro",
           "Lonely Poro"
         ],
-        "deck": 20,
-        "energy": 0,
-        "hand": 1,
+        "deck": 25,
+        "energy": 6,
+        "hand": 0,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 5
+        "runes_in_play": 12,
+        "trash": 3
       },
       "points_A": 8,
-      "points_B": 4,
-      "spells_cast": 12,
+      "points_B": 2,
+      "spells_cast": 10,
       "turns": 14,
-      "units_played": 13,
+      "units_played": 10,
       "winner": "A",
       "xp_A": 0,
-      "xp_B": 1
+      "xp_B": 0
     },
     "spec": {
       "ai_a": "pyke",
@@ -1024,20 +1027,18 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Adaptatron"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
           "A": [
-            "Noxus Hopeful"
+            "Bewitching Spirit"
           ],
           "B": [],
           "controller": "A",
           "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
         },
         {
           "A": [
@@ -1051,43 +1052,42 @@
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 2,
         "base_units": [
           "Recruit",
           "Baron Nashor"
         ],
         "deck": 29,
-        "energy": 9,
-        "hand": 1,
+        "energy": 11,
+        "hand": 3,
         "power_pool": {
-          "CHAOS": 3,
+          "CHAOS": 5,
           "FURY": 6
         },
-        "runes_in_play": 9,
-        "trash": 4
+        "runes_in_play": 11,
+        "trash": 3
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 4,
         "base_units": [
-          "Lonely Poro",
           "Lonely Poro"
         ],
-        "deck": 21,
-        "energy": 1,
-        "hand": 3,
+        "deck": 26,
+        "energy": 4,
+        "hand": 0,
         "power_pool": {
-          "CALM": 3,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 9,
-        "trash": 4
+        "runes_in_play": 10,
+        "trash": 3
       },
       "points_A": 9,
-      "points_B": 3,
-      "spells_cast": 10,
+      "points_B": 1,
+      "spells_cast": 8,
       "turns": 14,
-      "units_played": 9,
+      "units_played": 8,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -1107,7 +1107,7 @@
         {
           "A": [],
           "B": [
-            "Yasuo Remorseful"
+            "Stellacorn Herder"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1115,7 +1115,7 @@
         {
           "A": [],
           "B": [
-            "Stellacorn Herder"
+            "Yasuo Remorseful"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1126,14 +1126,15 @@
         "banished": 0,
         "base_gear": 1,
         "base_units": [
-          "Recruit"
+          "Recruit",
+          "Mindsplitter"
         ],
-        "deck": 29,
-        "energy": 5,
+        "deck": 28,
+        "energy": 3,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 3
+          "CHAOS": 3,
+          "FURY": 5
         },
         "runes_in_play": 8,
         "trash": 9
@@ -1142,22 +1143,22 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Adaptatron"
+          "Stellacorn Herder"
         ],
-        "deck": 21,
-        "energy": 9,
-        "hand": 4,
+        "deck": 20,
+        "energy": 10,
+        "hand": 3,
         "power_pool": {
-          "CALM": 3,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 9,
+        "runes_in_play": 10,
         "trash": 3
       },
-      "points_A": 1,
+      "points_A": 4,
       "points_B": 8,
-      "spells_cast": 9,
-      "turns": 13,
+      "spells_cast": 10,
+      "turns": 15,
       "units_played": 13,
       "winner": "B",
       "xp_A": 0,
@@ -1176,64 +1177,66 @@
     "signature": {
       "battlefields": [
         {
+          "A": [],
+          "B": [
+            "Fizz Trickster",
+            "Noxus Hopeful"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
           "A": [
             "Yasuo Remorseful"
           ],
           "B": [],
           "controller": "A",
           "last_controller": "A"
-        },
-        {
-          "A": [
-            "Stellacorn Herder"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "B"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
           "Adaptatron",
-          "Lonely Poro"
+          "Stellacorn Herder",
+          "Adaptatron",
+          "Lonely Poro",
+          "Stellacorn Herder"
         ],
-        "deck": 20,
-        "energy": 1,
+        "deck": 19,
+        "energy": 0,
         "hand": 2,
         "power_pool": {
-          "CALM": 3,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 9,
+        "runes_in_play": 12,
         "trash": 2
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 2,
         "base_units": [
-          "Recruit",
-          "Recruit",
-          "Tideturner"
+          "Recruit"
         ],
-        "deck": 27,
-        "energy": 5,
-        "hand": 3,
+        "deck": 26,
+        "energy": 12,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 3,
-          "FURY": 5
+          "CHAOS": 6,
+          "FURY": 6
         },
-        "runes_in_play": 8,
+        "runes_in_play": 12,
         "trash": 7
       },
-      "points_A": 8,
-      "points_B": 5,
-      "spells_cast": 13,
-      "turns": 13,
-      "units_played": 14,
-      "winner": "A",
+      "points_A": 6,
+      "points_B": 8,
+      "spells_cast": 12,
+      "turns": 16,
+      "units_played": 16,
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
@@ -1251,15 +1254,15 @@
       "battlefields": [
         {
           "A": [
-            "Yasuo Remorseful"
+            "Scuttle Crab"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "A"
+          "last_controller": null
         },
         {
           "A": [
-            "Scuttle Crab"
+            "Yasuo Remorseful"
           ],
           "B": [],
           "controller": "A",
@@ -1280,17 +1283,19 @@
         "base_gear": 0,
         "base_units": [
           "Adaptatron",
-          "Adaptatron"
+          "Adaptatron",
+          "Stellacorn Herder",
+          "Stellacorn Herder"
         ],
-        "deck": 24,
-        "energy": 11,
-        "hand": 3,
+        "deck": 20,
+        "energy": 0,
+        "hand": 6,
         "power_pool": {
-          "CALM": 5,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 11,
-        "trash": 2
+        "runes_in_play": 12,
+        "trash": 1
       },
       "player_B": {
         "banished": 0,
@@ -1298,23 +1303,23 @@
         "base_units": [
           "Recruit",
           "Recruit",
-          "Baron Nashor"
+          "Tideturner"
         ],
-        "deck": 28,
-        "energy": 1,
+        "deck": 27,
+        "energy": 5,
         "hand": 1,
         "power_pool": {
           "CHAOS": 3,
-          "FURY": 5
+          "FURY": 6
         },
-        "runes_in_play": 8,
+        "runes_in_play": 9,
         "trash": 7
       },
       "points_A": 8,
-      "points_B": 2,
+      "points_B": 5,
       "spells_cast": 8,
-      "turns": 13,
-      "units_played": 12,
+      "turns": 15,
+      "units_played": 15,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -1332,67 +1337,60 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Pyke Dockside Butcher"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
           "A": [
             "Stellacorn Herder"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "A"
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Yasuo Remorseful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Stellacorn Herder",
-          "Scuttle Crab",
-          "Adaptatron",
-          "Yasuo Remorseful"
-        ],
-        "deck": 22,
-        "energy": 12,
-        "hand": 0,
+        "base_gear": 1,
+        "base_units": [],
+        "deck": 17,
+        "energy": 1,
+        "hand": 3,
         "power_pool": {
-          "CALM": 6,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 12,
-        "trash": 1
+        "runes_in_play": 10,
+        "trash": 3
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 0,
         "base_units": [
-          "Recruit",
-          "Noxus Hopeful",
-          "Mindsplitter"
+          "Recruit"
         ],
-        "deck": 27,
-        "energy": 1,
-        "hand": 2,
+        "deck": 26,
+        "energy": 6,
+        "hand": 3,
         "power_pool": {
-          "CHAOS": 2,
+          "CHAOS": 6,
           "FURY": 4
         },
-        "runes_in_play": 6,
-        "trash": 5
+        "runes_in_play": 10,
+        "trash": 8
       },
-      "points_A": 8,
+      "points_A": 9,
       "points_B": 4,
-      "spells_cast": 11,
-      "turns": 16,
-      "units_played": 16,
+      "spells_cast": 15,
+      "turns": 18,
+      "units_played": 13,
       "winner": "A",
-      "xp_A": 0,
+      "xp_A": 1,
       "xp_B": 0
     },
     "spec": {
@@ -1408,10 +1406,12 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
+          "A": [
+            "Stellacorn Herder"
+          ],
           "B": [],
-          "controller": null,
-          "last_controller": null
+          "controller": "A",
+          "last_controller": "A"
         },
         {
           "A": [
@@ -1420,48 +1420,58 @@
           "B": [],
           "controller": "A",
           "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Baron Nashor"
+          ],
+          "controller": "B",
+          "last_controller": "B"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
           "Stellacorn Herder",
-          "Lonely Poro"
+          "Stellacorn Herder",
+          "Adaptatron"
         ],
-        "deck": 19,
-        "energy": 11,
-        "hand": 10,
+        "deck": 18,
+        "energy": 0,
+        "hand": 7,
         "power_pool": {
-          "CALM": 5,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 11,
-        "trash": 3
+        "runes_in_play": 12,
+        "trash": 2
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 2,
         "base_units": [
-          "Recruit"
+          "Recruit",
+          "Baron Nashor"
         ],
-        "deck": 26,
-        "energy": 7,
+        "deck": 25,
+        "energy": 9,
         "hand": 2,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 3
+          "CHAOS": 3,
+          "FURY": 6
         },
-        "runes_in_play": 8,
-        "trash": 6
+        "runes_in_play": 9,
+        "trash": 5
       },
-      "points_A": 8,
-      "points_B": 1,
-      "spells_cast": 7,
-      "turns": 15,
-      "units_played": 10,
-      "winner": "A",
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 9,
+      "turns": 18,
+      "units_played": 12,
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },

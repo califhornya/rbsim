@@ -7,6 +7,9 @@ from .player import Player
 from .battlefield import Battlefield
 from .cards import Card
 
+if TYPE_CHECKING:
+    from .combat import UnitInPlay
+
 
 @dataclass
 class ChainItem:
@@ -29,6 +32,15 @@ class GameState:
     # Champion Zone: the Chosen Champion card for each player (not in main deck)
     champion_A: Optional[Card] = None
     champion_B: Optional[Card] = None
+
+    # Legend Zone: identity card, in play from the start. Not a combat unit, but
+    # carries activated abilities (some Vendetta legends EMPOWER themselves) and
+    # can hold the empowered status — represented by a UnitInPlay so it reuses the
+    # activated-ability / passive / empower machinery. Created in GameLoop.start().
+    legend_A: Optional[Card] = None
+    legend_B: Optional[Card] = None
+    legend_unit_A: Optional["UnitInPlay"] = None
+    legend_unit_B: Optional["UnitInPlay"] = None
 
     # Victory points via Hold/Conquer
     points_A: int = 0

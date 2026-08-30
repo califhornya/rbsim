@@ -33,15 +33,16 @@ AI_REGISTRY = {
 }
 
 
-def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card]]:
-    """Load a deck, rune deck, and champion card from a JSON file."""
-    specs, rune_entries, champion_spec = load_deck_json(path)
+def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card], Optional[Card]]:
+    """Load a deck, rune deck, champion card, and legend card from a JSON file."""
+    specs, rune_entries, champion_spec, legend_spec = load_deck_json(path)
     cards: List[Card] = [spec.instantiate() for spec in specs]
     runes: List[Rune] = []
     for domain, count in rune_entries:
         runes.extend(Rune(domain=domain) for _ in range(count))
     champion = champion_spec.instantiate() if champion_spec is not None else None
-    return Deck(cards=cards), RuneDeck(runes=runes), champion
+    legend = legend_spec.instantiate() if legend_spec is not None else None
+    return Deck(cards=cards), RuneDeck(runes=runes), champion, legend
 
 
 def make_agent(name: str, player: Player):
@@ -90,10 +91,10 @@ def build_game(
     rune_rng_a = random.Random(rng.randrange(1 << 30))
     rune_rng_b = random.Random(rng.randrange(1 << 30))
 
-    deck_a, rune_deck_a, champion_a = make_deck_from_file(deck_a_path)
+    deck_a, rune_deck_a, champion_a, legend_a = make_deck_from_file(deck_a_path)
     rune_rng_a.shuffle(rune_deck_a.runes)
 
-    deck_b, rune_deck_b, champion_b = make_deck_from_file(deck_b_path)
+    deck_b, rune_deck_b, champion_b, legend_b = make_deck_from_file(deck_b_path)
     rune_rng_b.shuffle(rune_deck_b.runes)
 
     deck_a.shuffle(rng)
@@ -119,4 +120,6 @@ def build_game(
         victory_score=victory_score,
         champion_A=champion_a,
         champion_B=champion_b,
+        legend_A=legend_a,
+        legend_B=legend_b,
     )

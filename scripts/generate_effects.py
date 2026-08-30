@@ -428,10 +428,22 @@ STEP 4 — Vendetta mechanics:
         {{"effect":"grant_might","trigger":"passive","target":"self","amount":1,
           "condition":{{"type":"this_is_empowered"}}}}]
     Also list "EMPOWER"/"EMPOWERED" in `keywords` when the card prints them.
+    ALWAYS emit `empower_self` whenever the card text has an "EMPOWER [cost]" line
+    — this holds for UNITS, CHAMPIONS, and LEGENDS alike, and even when the card
+    also has other abilities or an empowered-MODIFIER clause. Never drop the
+    EMPOWER activation just because the card is a champion/legend or has more text.
     An EMPOWERED clause that MODIFIES another ability ("deal 2 instead if I'm
     Empowered", "they have +2 instead") is NOT yet expressible — parse the base
-    ability, then flag the empowered-modifier clause (suggested_vocab
-    "effect:empowered_modifier"); do not drop it.
+    ability AND emit empower_self, then flag only the empowered-modifier clause
+    (suggested_vocab "effect:empowered_modifier"); do not drop empower_self.
+    Example (champion): "EMPOWER [2] [Fury]. When I move, deal 1 to a unit. If I'm
+    Empowered, deal 2 instead. Empowered I have +1 [might]."
+    → effects: [
+        {{"effect":"empower_self","trigger":"activated","cost":{{"energy":2,"power":1}}}},
+        {{"effect":"deal_damage","trigger":"on_move","target":"chosen_unit","amount":1}},
+        {{"effect":"grant_might","trigger":"passive","target":"self","amount":1,
+          "condition":{{"type":"this_is_empowered"}}}}],
+      needs_review: true, suggested_vocab: ["effect:empowered_modifier"]
 
 19. BURN (now supported — EMIT). "Burn X" = put the top X cards of your Main Deck
     into your trash. Emit `burn` with `amount` X (target defaults to actor).

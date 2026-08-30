@@ -274,6 +274,9 @@ class GameLoop:
         player.ready_base_units()
         for bf in self.gs.battlefields:
             bf.ready_side(active)
+        legend_unit = self._legend_unit(active)
+        if legend_unit is not None:
+            legend_unit.ready = True
 
     def _phase_beginning(self, active: str) -> int:
         for bf in self.gs.battlefields:
@@ -545,14 +548,21 @@ class GameLoop:
                                             context_extra={"battlefield": anchor,
                                                            "triggering_card": trig})
 
+    def _legend_unit(self, side: str):
+        """The in-play UnitInPlay for a side's Legend, or None."""
+        return self.gs.legend_unit_A if side == "A" else self.gs.legend_unit_B
+
     def _all_units_in_play(self):
-        """Every UnitInPlay across battlefields and both bases."""
+        """Every UnitInPlay across battlefields and both bases, plus legends."""
         units = []
         for bf in self.gs.battlefields:
             units.extend(bf.units_A)
             units.extend(bf.units_B)
         units.extend(self.gs.A.base_units)
         units.extend(self.gs.B.base_units)
+        for lu in (self.gs.legend_unit_A, self.gs.legend_unit_B):
+            if lu is not None:
+                units.append(lu)
         return units
 
     def _recompute_passives(self) -> None:
@@ -575,6 +585,9 @@ class GameLoop:
             opponent = self.gs.get_player(self.gs.other(side))
             for unit in list(actor.base_units):
                 self._apply_unit_passives(unit, side, anchor, actor, opponent)
+            legend_unit = self._legend_unit(side)
+            if legend_unit is not None:
+                self._apply_unit_passives(legend_unit, side, anchor, actor, opponent)
 
     def _apply_unit_passives(self, unit, side, bf, actor, opponent) -> None:
         spec = CARD_REGISTRY.get(unit.card.name)
@@ -879,6 +892,9 @@ class GameLoop:
             for u in p.base_units:
                 if u.card is card:
                     return u
+        for lu in (self.gs.legend_unit_A, self.gs.legend_unit_B):
+            if lu is not None and lu.card is card:
+                return lu
         return None
 
     def _action_fingerprint(self, ap: Player, op: Player):
@@ -1301,6 +1317,18 @@ class GameLoop:
                 if eff.effect == "empower_self" and getattr(unit, "empowered", False):
                     continue
                 out.append({"type": "ability", "unit": unit, "bf_idx": None, "eff": eff})
+        legend_unit = self._legend_unit(side)
+        if legend_unit is not None:
+            spec = CARD_REGISTRY.get(legend_unit.card.name)
+            if spec and spec.effects:
+                for eff in spec.effects:
+                    if eff.trigger != "activated":
+                        continue
+                    if (eff.timing or "").lower() == "reaction":
+                        continue
+                    if eff.effect == "empower_self" and getattr(legend_unit, "empowered", False):
+                        continue
+                    out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
         for gear in list(ap.base_gear):
             out.append({"type": "equip", "gear": gear})
         return out
@@ -1740,6 +1768,14 @@ class GameLoop:
 
     def start(self) -> Result:
         gs = self.gs
+
+        # Legends start in play (Legend Zone). Represented as UnitInPlay so they
+        # reuse the activated-ability / passive / empower machinery, but kept out
+        # of base_units/battlefields so combat and movement never touch them.
+        if gs.legend_A is not None and gs.legend_unit_A is None:
+            gs.legend_unit_A = UnitInPlay(card=gs.legend_A, ready=True)
+        if gs.legend_B is not None and gs.legend_unit_B is None:
+            gs.legend_unit_B = UnitInPlay(card=gs.legend_B, ready=True)
 
         for _ in range(4):
             card_a = gs.A.draw()

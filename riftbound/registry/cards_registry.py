@@ -463,10 +463,11 @@ def load_master_data(path: Optional[Path] = None) -> dict[str, CardSpec]:
 CARD_REGISTRY: dict[str, CardSpec] = load_cards_json()
 
 
-def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec]]:
+def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec]]:
     """Load a deck JSON file.
 
-    Returns (main_deck_specs, [(domain, count)] rune entries, champion_spec_or_None).
+    Returns (main_deck_specs, [(domain, count)] rune entries, champion_spec_or_None,
+    legend_spec_or_None).
 
     Deck format:
       {
@@ -488,6 +489,14 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         champion_spec = CARD_REGISTRY.get(champion_name)
         if champion_spec is None:
             raise ValueError(f"Deck champion '{champion_name}' not found in registry")
+
+    # --- Legend (identity card, starts in play) ---
+    legend_spec: Optional[CardSpec] = None
+    legend_name = str(data.get("legend") or "").strip()
+    if legend_name:
+        legend_spec = CARD_REGISTRY.get(legend_name)
+        if legend_spec is None:
+            raise ValueError(f"Deck legend '{legend_name}' not found in registry")
 
     # --- Main deck cards ---
     cards: list[CardSpec] = []
@@ -526,7 +535,7 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         count = int(entry.get("count", 1))
         runes.append((domain, count))
 
-    return cards, runes, champion_spec
+    return cards, runes, champion_spec, legend_spec
 
 
 def iter_cards() -> Iterable[CardSpec]:
