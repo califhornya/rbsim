@@ -20757,7 +20757,13 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ambush",
+        "trigger": "passive",
+        "enemy_ok": true
+      }
+    ]
   },
   {
     "card_id": "UNL-121",

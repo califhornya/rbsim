@@ -167,6 +167,11 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
+    # AMBUSH: deploy the champion to a legal lane at reaction speed.
+    champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
+    if champ is not None and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
+        for lane in loop._ambush_legal_lanes(ap.name):
+            actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     return actions
 
 
@@ -179,4 +184,9 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
             if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
+    # AMBUSH: deploy the champion into the showdown lane at reaction speed.
+    champ = gs.champion_A if ap.name == "A" else gs.champion_B
+    if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
+            and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain)):
+        actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     return actions

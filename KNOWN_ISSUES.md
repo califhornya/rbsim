@@ -458,3 +458,13 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   clause is unmodeled.
 - **Fix (future):** honor an `enters_exhausted` flag at deploy time (set the UnitInPlay's
   ready=False). Low impact; batch with the parser pass that emits the flag.
+
+## 22. (OPEN) AMBUSH deploy into a contested lane doesn't spawn a nested showdown
+- **What:** AMBUSH (Rengar Trophy Hunter) deploys a champion onto a battlefield lane at
+  reaction speed (`_deploy_ambush_champion`). `Battlefield.add_unit` sets
+  `contested_this_turn`/`showdown_pending`, but the deploy does not itself trigger a nested
+  `_run_showdown` from inside the reaction/showdown loop (unlike the main-phase MOVE branch).
+  Contestation is left to the normal flow. Correct for the common blocker case; a deploy
+  that should immediately force a showdown is under-modeled.
+- **Fix (future):** after an AMBUSH deploy that makes a lane contested outside an existing
+  showdown, mirror the MOVE branch and invoke `_run_showdown(lane, attacker)`.

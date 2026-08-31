@@ -987,6 +987,53 @@ class GameLoop:
                 print(f"  {actor.name} reveals {card.name} from top → banish + play for [rune]")
         return taken
 
+    def _ambush_legal_lanes(self, side: str) -> list:
+        """Battlefield indices where this side's champion may be AMBUSH-deployed
+        (played at reaction speed). Empty unless the champion exists, is undeployed,
+        and has the AMBUSH keyword. A lane qualifies if the friendly side has units
+        there, or — for the extended 'even without your own units' variant (Rengar,
+        marked `enemy_ok` on its `ambush` effect) — if the enemy has units there."""
+        champ = self.gs.champion_A if side == "A" else self.gs.champion_B
+        deployed = self.gs.champion_A_deployed if side == "A" else self.gs.champion_B_deployed
+        if champ is None or deployed or not champ.has_keyword("AMBUSH"):
+            return []
+        spec = CARD_REGISTRY.get(champ.name)
+        enemy_ok = bool(spec and any(
+            e.trigger == "passive" and e.effect == "ambush" and e.params.get("enemy_ok")
+            for e in spec.effects))
+        lanes = []
+        for i, bf in enumerate(self.gs.battlefields):
+            friendly = bf.units_A if side == "A" else bf.units_B
+            enemy = bf.units_B if side == "A" else bf.units_A
+            if friendly or (enemy_ok and enemy):
+                lanes.append(i)
+        return lanes
+
+    def _deploy_ambush_champion(self, side: str, lane: int) -> bool:
+        """Deploy the AMBUSH champion directly onto a battlefield lane at reaction
+        speed. Validates the lane, pays the champion's cost, places it (exhausted),
+        and marks the champion deployed. Returns True on success."""
+        if lane not in self._ambush_legal_lanes(side):
+            return False
+        ap = self.gs.get_player(side)
+        champ = self.gs.champion_A if side == "A" else self.gs.champion_B
+        if not ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
+            return False
+        if not ap.pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
+            return False
+        self.gs.battlefields[lane].add_unit(side, UnitInPlay(card=champ, ready=False))
+        if side == "A":
+            self.gs.champion_A_deployed = True
+        else:
+            self.gs.champion_B_deployed = True
+        self.units_played += 1
+        if self.verbose:
+            print(f"  {side} AMBUSH-deploys CHAMPION {champ.name} @BF{lane}")
+        if self.recorder:
+            self.recorder.record_play(side, self.gs.turn, champ, action="UNIT",
+                                      battlefield_index=lane)
+        return True
+
     # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 
@@ -1739,6 +1786,11 @@ class GameLoop:
                                 player.remove_from_hand(idx)
                                 self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
                                 passes = 0
+                elif kind == "CHAMPION":
+                    # AMBUSH: deploy the champion to a lane at reaction speed. Not a
+                    # spell → resolves immediately (no chain), then priority reopens.
+                    if self._deploy_ambush_champion(active, lane if lane is not None else 0):
+                        passes = 0
 
             active = self.gs.other(active)
 
@@ -1810,6 +1862,10 @@ class GameLoop:
                                 self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
                                 self._run_chain(self.gs.focus_player)
                                 passes = 0
+                elif kind == "CHAMPION":
+                    # AMBUSH: deploy the champion into the showdown lane at reaction speed.
+                    if self._deploy_ambush_champion(self.gs.focus_player, bf_idx):
+                        passes = 0
 
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 
