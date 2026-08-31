@@ -25,12 +25,16 @@ from riftbound.registry.cards_registry import load_deck_json
 from riftbound.ai.heuristics.pyke_agent import PykeAgent
 from riftbound.ai.heuristics.diana_agent import DianaAgent
 from riftbound.ai.heuristics.simple_trade_agent import SimpleTradeAgent
+from riftbound.ai.search.random_agent import RandomAgent
+from riftbound.ai.search.monte_carlo_agent import MonteCarloAgent
 
 
 AI_REGISTRY = {
     "pyke": PykeAgent,
     "diana": DianaAgent,
     "simple_trade": SimpleTradeAgent,
+    "random": RandomAgent,
+    "mc": MonteCarloAgent,
 }
 
 
