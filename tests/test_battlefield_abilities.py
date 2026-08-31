@@ -11,10 +11,10 @@ import random
 from pathlib import Path
 
 from riftbound.core.battlefield import Battlefield
-from riftbound.core.cards import BattlefieldCard, UnitCard
+from riftbound.core.cards import BattlefieldCard, SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.game_factory import build_game
-from riftbound.core.loop import GameLoop
+from riftbound.core.loop import EffectContext, GameLoop
 from riftbound.core.player import Deck, Player, RuneDeck
 from riftbound.core.state import GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec
@@ -56,3 +56,67 @@ def test_battlefield_without_card_is_noop():
     gs = GameState(rng=random.Random(1), A=a, B=b)  # default: cardless battlefields
     loop = GameLoop(gs)
     loop._fire_scoring_trigger("on_conquer", gs.battlefields[0], "A")  # must not raise
+
+
+# --- Slice 3: battlefield rule-modifier passives (Void Gate, Heisho Shell) ----
+
+def _bare_loop() -> GameLoop:
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    return GameLoop(GameState(rng=random.Random(1), A=a, B=b, active="A"))
+
+
+def test_bf_passive_amount_reads_authored_markers():
+    """The query helper reads the passive marker verbs authored on the real
+    Void Gate / Heisho Shell corpus cards; absent/None → default 0."""
+    loop = _bare_loop()
+    void_gate = Battlefield(card=BattlefieldCard(name="Void Gate"))
+    heisho = Battlefield(card=BattlefieldCard(name="Heisho Shell of the World"))
+    plain = Battlefield()  # cardless
+
+    assert loop._bf_passive_amount(void_gate, "bonus_damage_here") == 1
+    assert loop._bf_passive_amount(void_gate, "ignore_deflect_here") == 0
+    assert loop._bf_passive_amount(heisho, "ignore_deflect_here") == 1
+    assert loop._bf_passive_amount(plain, "bonus_damage_here") == 0
+    assert loop._bf_passive_amount(None, "bonus_damage_here") == 0
+
+
+def test_void_gate_adds_bonus_damage_to_units_here():
+    """A might-3 enemy unit survives 2 spell damage on a plain battlefield but dies
+    on Void Gate (2 + 1 bonus = 3 >= 3)."""
+    for bf_name, should_die in (("Void Gate", True), (None, False)):
+        loop = _bare_loop()
+        bf = Battlefield(card=BattlefieldCard(name=bf_name)) if bf_name else Battlefield()
+        victim = UnitInPlay(UnitCard(name="Grunt", might=3), ready=True)
+        bf.units_B.append(victim)
+        ctx = EffectContext(loop=loop, card=SpellCard(name="TST Bolt"),
+                            actor=loop.gs.A, opponent=loop.gs.B, battlefield=bf)
+        ctx.deal_damage(2, target="opponent")
+        died = victim not in bf.units_B
+        assert died is should_die, f"{bf_name!r}: died={died}, expected {should_die}"
+
+
+def test_heisho_shell_waives_deflect_surcharge():
+    """DEFLECT normally surcharges an enemy-targeting spell; Heisho Shell waives it."""
+    spec = CardSpec.from_dict({
+        "name": "TST Deflect Bolt", "category": "Spell",
+        "effects": [{"effect": "deal_damage", "amount": 2}],  # no target → enemy
+    })
+    CARD_REGISTRY[spec.name] = spec
+    try:
+        bolt = SpellCard(name="TST Deflect Bolt")
+        # Plain battlefield with a DEFLECT 2 enemy unit → surcharge 2.
+        plain = _bare_loop()
+        plain.gs.battlefields[0].units_B.append(
+            UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True))
+        assert plain._deflect_surcharge(bolt, 0) == 2
+
+        # Same unit, but the battlefield waives DEFLECT while paying here → 0.
+        heisho = _bare_loop()
+        heisho.gs.battlefields[0] = Battlefield(
+            card=BattlefieldCard(name="Heisho Shell of the World"))
+        heisho.gs.battlefields[0].units_B.append(
+            UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True))
+        assert heisho._deflect_surcharge(bolt, 0) == 0
+    finally:
+        CARD_REGISTRY.pop(spec.name, None)

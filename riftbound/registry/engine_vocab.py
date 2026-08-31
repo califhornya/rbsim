@@ -107,6 +107,10 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
     "kill_friendly_unit", "exhaust_friendly_unit",
 })
 
-# Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere
-# (cost reduction is read directly by Loop._cost_reduction).
-NON_HANDLER_VERBS: frozenset[str] = frozenset({"reduce_cost"})
+# Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere:
+# - reduce_cost           read by Loop._cost_reduction
+# - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
+# - ignore_deflect_here   battlefield passive read by Loop._deflect_surcharge
+NON_HANDLER_VERBS: frozenset[str] = frozenset({
+    "reduce_cost", "bonus_damage_here", "ignore_deflect_here",
+})

@@ -9309,7 +9309,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "bonus_damage_here",
+        "trigger": "passive",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-297",
@@ -29236,7 +29242,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ignore_deflect_here",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-158",

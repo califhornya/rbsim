@@ -129,6 +129,12 @@ class EffectContext:
         else:
             target_side = self.opponent_side
 
+        # Battlefield that adds bonus damage to units here (e.g. Void Gate). This
+        # handler only ever damages units AT self.battlefield, so the bonus never
+        # touches player/base-face damage. Covers spells and abilities alike (both
+        # route through here).
+        amount += self.loop._bf_passive_amount(self.battlefield, "bonus_damage_here")
+
         _, dead = self.battlefield.apply_spell_damage(target_side, amount)
 
         # Route spell-killed units (death replacements applied first) to trash + gear.
@@ -686,10 +692,35 @@ class GameLoop:
 
     _ENEMY_TARGETS = {"opponent", "enemy", "enemy_unit", "all_enemy_units_here"}
 
+    def _bf_passive_amount(self, bf, verb: str, default: int = 0) -> int:
+        """Amount of a battlefield-scoped passive rule-modifier (e.g.
+        ``bonus_damage_here``) carried by this battlefield's card, or ``default``
+        if absent. These marker verbs are NON_HANDLER_VERBS consumed by the
+        relevant subsystem here rather than dispatched via effects.REGISTRY (same
+        pattern as ``reduce_cost``). A flag marker with no ``amount`` reports 1
+        when present. Preserves the ``bf.card is None`` no-op."""
+        if bf is None or bf.card is None:
+            return default
+        spec = CARD_REGISTRY.get(bf.card.name)
+        if not spec:
+            return default
+        for es in spec.effects:
+            if es.trigger == "passive" and es.effect == verb:
+                amt = es.params.get("amount")
+                if isinstance(amt, (int, float)) and not isinstance(amt, bool):
+                    return int(amt)
+                return 1
+        return default
+
     def _deflect_surcharge(self, card: Card, target_lane: int) -> int:
         """Extra energy a spell costs because the opponent has DEFLECT units at
         the target battlefield (§809). Applies only when the spell targets the
         opponent. Returns the max DEFLECT value among eligible enemy units."""
+        # Battlefield that waives DEFLECT while paying here (e.g. Heisho Shell of
+        # the World) → no surcharge regardless of who the spell targets.
+        if 0 <= target_lane < len(self.gs.battlefields):
+            if self._bf_passive_amount(self.gs.battlefields[target_lane], "ignore_deflect_here"):
+                return 0
         spec = CARD_REGISTRY.get(card.name)
         effects = list(spec.effects) if spec and spec.effects else []
         # Determine whether the spell targets enemy units.
