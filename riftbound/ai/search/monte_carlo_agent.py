@@ -19,6 +19,7 @@ Tuning (env overrides so batch sims need no code change):
 
 from __future__ import annotations
 
+import itertools
 import os
 import random
 from typing import Optional
@@ -83,9 +84,13 @@ class MonteCarloAgent(Agent):
         self.max_candidates = (max_candidates if max_candidates is not None
                                else int(os.environ.get("RBSIM_MC_MAXCANDS", "10")))
         self._rng = rng  # seeded lazily from the live game rng (reproducible)
-        # Last decision's per-action win-rate estimates [(label, score)], for the
-        # game tracer / debugging. Highest first. Empty when no search ran.
+        # Mulligan search: rollouts per candidate keep/return combination (it runs
+        # full games, once per game, so fewer by default). 0 disables (keep all).
+        self.k_mulligan = int(os.environ.get("RBSIM_MC_MULL_K", "6"))
+        # Last decision's per-(action|mulligan) win-rate estimates, highest first,
+        # for the game tracer / debugging. Empty when no search ran.
         self.last_eval: list[tuple[str, float]] = []
+        self.last_mulligan_eval: list[tuple[tuple, float]] = []
 
     def _ensure_rng(self) -> None:
         if self._rng is None:
@@ -154,9 +159,46 @@ class MonteCarloAgent(Agent):
             return 0.5
         return 0.0
 
-    # A search agent doesn't search the mulligan yet — keep all (baseline).
     def decide_mulligan(self) -> list:
-        return []
+        """Search the mulligan (Core Rules §117: return up to TWO cards). For each
+        keep/return combination of size 0, 1, or 2, play the game out and keep the
+        one with the best win rate. A mulligan is game-deciding, so it is searched
+        like any other move — no hand-evaluation heuristic. Returns hand indices."""
+        self._ensure_rng()
+        self.last_mulligan_eval = []
+        side = self.player.name
+        n = len(self.player.hand)
+        if n == 0 or self.k_mulligan <= 0:
+            return []
+        # Combinations of at most two cards to return (§117.1), incl. keeping all.
+        combos = [list(c) for r in range(3) for c in itertools.combinations(range(n), r)]
+
+        best_ret, best_score = [], -1.0
+        for ret in combos:
+            score = sum(self._mulligan_rollout(side, ret)
+                        for _ in range(self.k_mulligan)) / self.k_mulligan
+            self.last_mulligan_eval.append((tuple(ret), score))
+            if score > best_score:
+                best_score, best_ret = score, ret
+        return best_ret
+
+    def _mulligan_rollout(self, side: str, return_indices: list) -> float:
+        from riftbound.core.loop import GameLoop  # local import avoids a cycle
+        clone = self.gs.clone()
+        clone.rng = random.Random(self._rng.randrange(1 << 30))
+        # Apply this candidate mulligan on the clone via the shared §117 resolution.
+        clone.get_player(side).mulligan(return_indices, clone.rng)
+        determinize(clone, observer=side, rng=clone.rng)
+        clone.A.agent = self._policy(clone.A)
+        clone.B.agent = self._policy(clone.B)
+        # The clone is a post-deal turn-1 state (legends placed, hands dealt), so
+        # play the turn loop straight through — setup is already done.
+        result = GameLoop(clone)._play_all_turns()
+        if result.winner == side:
+            return 1.0
+        if result.winner == "DRAW":
+            return 0.5
+        return 0.0
 
     def decide_showdown_action(self, opponent, bf_idx: int) -> Action:
         # Showdown/reaction stay policy-simple for now; the turn-action search is

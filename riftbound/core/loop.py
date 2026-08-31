@@ -256,18 +256,10 @@ class GameLoop:
             if player.agent is None:
                 continue
             indices_to_return = player.agent.decide_mulligan()
-            if not indices_to_return:
-                continue
-            indices_to_return.sort(reverse=True)
-            returned_cards = []
-            for idx in indices_to_return:
-                if 0 <= idx < len(player.hand):
-                    returned_cards.append(player.hand.pop(idx))
-            player.deck.cards.extend(returned_cards)
-            for _ in returned_cards:
-                card = player.draw()
-                if not card:
-                    break
+            # Mulligan resolution lives on Player (Core Rules §117: up to two cards,
+            # draw replacements from the top, then recycle the set-aside cards to
+            # the bottom). Shared with the search agent's mulligan rollouts.
+            player.mulligan(indices_to_return or [], self.gs.rng)
 
     def _ready_active_units(self, active: str) -> None:
         player = self.gs.get_player(active)

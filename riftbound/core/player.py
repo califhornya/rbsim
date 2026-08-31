@@ -225,5 +225,32 @@ class Player:
             burned.append(card)
         return burned
 
+    def mulligan(self, indices, rng) -> list:
+        """Riftbound mulligan (Core Rules §117): set aside up to TWO chosen cards,
+        draw that many replacements from the top, THEN Recycle the set-aside cards
+        to the BOTTOM of the deck (random order when 2, §416.5). No shuffle.
+
+        `indices` are hand positions to return; anything past the first two, or
+        out of range, is ignored (§117.1 caps it at two). Returns the cards that
+        were actually set aside (for logging)."""
+        chosen = [i for i in dict.fromkeys(indices) if 0 <= i < len(self.hand)][:2]
+        if not chosen:
+            return []
+        set_aside = [self.hand[i] for i in chosen]
+        for i in sorted(chosen, reverse=True):
+            self.hand.pop(i)
+        # 117.2: draw the replacements from the top FIRST (deck.draw pops the end).
+        for _ in set_aside:
+            c = self.deck.draw()
+            if c is not None:
+                self.hand.append(c)
+        # 117.3: recycle the set-aside cards to the BOTTOM (front of the list, the
+        # opposite end from draw), so they are not the ones just drawn.
+        recycled = list(set_aside)
+        if len(recycled) > 1:
+            rng.shuffle(recycled)
+        self.deck.cards[:0] = recycled
+        return set_aside
+
     def remove_from_hand(self, idx: int) -> None:
         del self.hand[idx]

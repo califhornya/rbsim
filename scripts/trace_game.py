@@ -130,8 +130,17 @@ class TracingAgent(Agent):
 
     def decide_mulligan(self) -> list:
         self._sync()
+        hand = [c.name for c in self.player.hand]
         keep = self.inner.decide_mulligan()
-        print(f"\n[MULLIGAN] {self.player.name} returns hand indices: {keep or 'none (keep all)'}")
+        print(f"\n[MULLIGAN] {self.player.name} hand: {', '.join(hand) or '(empty)'}")
+        ev = getattr(self.inner, "last_mulligan_eval", None)
+        if ev:
+            ranked = sorted(ev, key=lambda kv: -kv[1])[:6]
+            def names(idxs):
+                return "return " + (", ".join(hand[i] for i in idxs) if idxs else "nothing")
+            print("  mulligan eval: " + "  ".join(f"[{names(idxs)}={sc:.2f}]" for idxs, sc in ranked))
+        returned = [hand[i] for i in keep] if keep else []
+        print(f"  → returns: {', '.join(returned) if returned else 'nothing (keep all)'}")
         return keep
 
     def decide_showdown_action(self, opponent, bf_idx: int) -> Action:
