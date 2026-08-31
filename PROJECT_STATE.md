@@ -8,6 +8,16 @@ learning environment** where an agent teaches itself to pilot each deck (mulliga
 Nocturne every time, open the right battlefield, play the correct on-play vs.
 on-draw line) by playing millions of games against itself.
 
+> **Stage 0 progress (this session).** A coverage audit tool now measures exactly
+> which cards the engine models (`scripts/coverage_audit.py` → `COVERAGE_REPORT.md`).
+> Corpus: **666 LIVE / 216 INERT / 48 VANILLA** (was 660 / 222 / 48). More to the
+> point, across the **8 meta decks: 152 LIVE / 5 VANILLA / 9 INERT** — and 5 of 8
+> decks are fully modeled (0 INERT). Shipped: spells→trash (#19a), two on-play
+> conditions, three battlefield rule-modifiers (Void Gate / Heisho Shell /
+> Sandswept Tomb), the optional-effect ("you may") seam, and Nocturne's
+> top-of-deck banish+play. The 9 remaining meta INERT cards need bigger mechanics
+> (HIDDEN, AMBUSH, showdown-restricted resources, Star Spring) — see §4.
+
 ---
 
 ## 1. The goal, stated plainly
@@ -73,10 +83,22 @@ document.
   tracer — the tool for *seeing* what the agent actually does, which is how we
   validate correctness).
 
+### Stage 0 engine-completeness work (this session)
+- **Coverage audit** (`scripts/coverage_audit.py` → `COVERAGE_REPORT.md`): the map
+  of LIVE/INERT/VANILLA per meta deck and corpus-wide.
+- **Spells → trash** (#19a): cast spells no longer vanish (unblocks trash mechanics).
+- **Two on-play conditions** (`friendly_total_might_at_least`,
+  `you_control_n_or_more_gear`) → Kinkou Initiate, Patched Porobot LIVE.
+- **Battlefield rule-modifiers** (data-driven markers): Void Gate (+1 damage here),
+  Heisho Shell (ignore DEFLECT here), Sandswept Tomb (friendly spells cost less here).
+- **Optional-effect seam**: `Agent.decide_optional` gates "you may" effects.
+- **Nocturne**: top-of-deck reveal → banish → play for [rune], via the dig/predict
+  hook. The canonical mulligan card is now modeled.
+
 ### Tests
-- **32 test files, ~169 tests passing**, including the golden-game fixture, plus
-  new coverage for mulligan, empower, burn, legends-in-play, battlefield abilities,
-  the resumable loop, and both search agents.
+- **~34 test files, 178 tests passing**, including the golden-game fixture (kept
+  byte-identical except the one legitimate spells→trash regen), plus new coverage
+  for the conditions, battlefield modifiers, the optional seam, and Nocturne.
 
 ---
 
@@ -88,24 +110,27 @@ document.
   noisy answer each time, and only for decisions the engine models correctly.
 - **Battlefield selection is still random and unsearched.** The opening battlefield
   is picked by a seeded coin flip, not chosen strategically.
-- **Card coverage is incomplete.** 665/932 cards carry parsed `effects[]`, but a
-  meaningful fraction of the corpus is still **inert or misparsed** — some key
-  cards (e.g. Nocturne, per the traces) do nothing in-engine. An agent cannot
-  learn to value a card the simulation ignores.
+- **Card coverage is much improved but not complete.** Corpus **216 INERT** of 932;
+  across the meta decks only **9 INERT** remain (5 of 8 decks fully modeled). The
+  remaining meta INERT cards need bigger, un-scaffolded mechanics:
+  - **HIDDEN** (44 corpus cards; Tideturner, Switcheroo) — a hidden-zone alt-play
+    ("hide now for [rune], react later for [0]"). No scaffolding yet.
+  - **AMBUSH** (14 corpus cards; Rengar Trophy Hunter) — reaction-timing deploy.
+  - **Showdown/gear-restricted resource abilities** (Diana Scorn, Ornn legend) —
+    need "earmarked energy" tracking to avoid a rules deviation.
+  - **Star Spring** — needs a per-BF "first unit here this turn" trigger.
 - **Deferred mechanics** (tracked in `KNOWN_ISSUES.md`):
-  - **FLOW** (play a spell from trash, then banish) — cast spells aren't even
-    routed to the trash yet (#19).
-  - **EMPOWERED-modifier clauses** ("deal 2 instead if Empowered") and
-    **on-burn triggers** (#20).
-  - **Burn Out** (§431, empty deck → shuffle trash back + opponents score) — not
-    implemented.
-  - Battlefield **passives** and token **anthems** — partial (#18).
-- **No Bo3 match layer.** Everything runs Bo1 today. "Always Bo3 unless specified"
-  and **sideboarding** (fixed in/out per matchup, provided later like decklists)
-  are not yet built.
+  - **FLOW play-from-trash** (#19b) — trash is now populated (#19a done); still
+    needs the from-trash play + banish action.
+  - **EMPOWERED-modifier / on-become-empowered / on-burn** (#20) — mostly non-meta
+    corpus cards.
+  - **Burn Out** (§431) — not implemented; gated on reading §431 from the rulebook.
+  - `enters_exhausted` (#21).
+- **Search is still not learning; battlefield selection still random; no Bo3/sideboards.**
 
-Net: the win-rate numbers are **not yet trustworthy as meta reads**, because the
-piloting is memoryless and the engine still misrepresents part of the game.
+Net: meta-deck card fidelity is now high, but the win-rate numbers are **still not
+trustworthy as meta reads** — the piloting is memoryless (search, not learning) and
+battlefield selection is a coin flip. That is Stage 0.5 / the RL stages, not card work.
 
 ---
 
@@ -113,12 +138,15 @@ piloting is memoryless and the engine still misrepresents part of the game.
 
 Ordered. Stage 0 is the gate; do not skip ahead to training on a broken engine.
 
-### Stage 0 — Engine completeness & correctness (the gate) ⬅ start here
+### Stage 0 — Engine completeness & correctness (the gate) ⬅ in progress
 The prerequisite for everything. Until the simulation *is* Riftbound, a learner
-learns the wrong game.
+learns the wrong game. **Meta-deck fidelity is now high (9 INERT left).** The
+remaining meta cards are the big mechanics: **HIDDEN** and **AMBUSH** (each its
+own focused build — no scaffolding today), showdown-restricted resources, and
+Star Spring. Then the corpus long tail via the parser.
 1. **Finish card effects coverage.** Drive the inert/misparsed fraction toward
    zero; verify with `trace_game.py` on real games, not aggregate win-rates.
-   Nocturne (and any other silent key card) must actually do its thing.
+   (Nocturne — the canonical example — is now modeled.)
 2. **Implement the deferred mechanics:** FLOW (route cast spells to trash first —
    this changes trash counts, so regenerate the golden fixture and eyeball the
    diff), EMPOWERED-modifiers, on-burn triggers, **Burn Out**, battlefield
