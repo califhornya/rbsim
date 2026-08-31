@@ -83,6 +83,9 @@ class MonteCarloAgent(Agent):
         self.max_candidates = (max_candidates if max_candidates is not None
                                else int(os.environ.get("RBSIM_MC_MAXCANDS", "10")))
         self._rng = rng  # seeded lazily from the live game rng (reproducible)
+        # Last decision's per-action win-rate estimates [(label, score)], for the
+        # game tracer / debugging. Highest first. Empty when no search ran.
+        self.last_eval: list[tuple[str, float]] = []
 
     def _ensure_rng(self) -> None:
         if self._rng is None:
@@ -99,6 +102,7 @@ class MonteCarloAgent(Agent):
         self._ensure_rng()
         gs, side = self.gs, self.player.name
         other = gs.other(side)
+        self.last_eval = []
         cands = legal_actions(self.loop, DecisionPoint.TURN_ACTION, side)
         if len(cands) <= 1:
             return cands[0].to_engine() if cands else _PASS
@@ -111,8 +115,10 @@ class MonteCarloAgent(Agent):
             cands = pass_actions + rest[: max(1, self.max_candidates - len(pass_actions))]
 
         def evaluate(cand) -> float:
-            return sum(self._rollout_once(side, other, cand.to_engine())
-                       for _ in range(self.k)) / self.k
+            score = sum(self._rollout_once(side, other, cand.to_engine())
+                        for _ in range(self.k)) / self.k
+            self.last_eval.append((cand.label or cand.kind, score))
+            return score
 
         # Evaluate PASS as the baseline, then the best non-PASS action. Only pass
         # if passing is STRICTLY better — otherwise act. This breaks the noisy-tie
