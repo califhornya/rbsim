@@ -450,3 +450,11 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   - A "when a card is burned / when you burn" trigger (suggested_vocab "trigger:on_burn").
 - **Fix (future):** add an empowered-conditional amount/override on effects; add an on_burn
   trigger fired from Player.burn / the burn effect.
+
+## 21. (OPEN) "enters exhausted" play-state not modeled
+- **What:** some units enter play exhausted (e.g. `Patched Porobot` — "(I enter exhausted.)").
+  The engine deploys all units ready, so such a unit can act the turn it arrives when it
+  shouldn't. Porobot's on-play conditional draw IS modeled (Slice 2); only the enter-exhausted
+  clause is unmodeled.
+- **Fix (future):** honor an `enters_exhausted` flag at deploy time (set the UnitInPlay's
+  ready=False). Low impact; batch with the parser pass that emits the flag.

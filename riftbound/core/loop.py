@@ -42,6 +42,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_control_subtype",
     "score_within_n_of_victory", "you_discarded_card_this_turn",
     "cards_burned_this_turn_at_least",
+    "friendly_total_might_at_least", "you_control_n_or_more_gear",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -738,6 +739,18 @@ class GameLoop:
                     return int(v)
             return default
 
+        def _friendly_units():
+            """Units the actor controls: their battlefield units, base units, and
+            legend unit (mirrors the you_control_subtype walk below)."""
+            us = []
+            for bf in self.gs.battlefields:
+                us.extend(bf.units_A if side == "A" else bf.units_B)
+            us.extend(actor.base_units)
+            lu = self.gs.legend_unit_A if side == "A" else self.gs.legend_unit_B
+            if lu is not None:
+                us.append(lu)
+            return us
+
         if ctype == "you_have_n_or_more_runes":
             return actor.total_runes_in_play() >= _threshold()
         if ctype == "you_have_n_or_more_units_here":
@@ -796,6 +809,18 @@ class GameLoop:
             return bool(self.gs.discarded_this_turn.get(side, False))
         if ctype == "cards_burned_this_turn_at_least":
             return self.gs.cards_burned_this_turn.get(side, 0) >= _threshold()
+        if ctype == "friendly_total_might_at_least":
+            # Combined might of the actor's OTHER units (exclude the source card),
+            # e.g. Kinkou Initiate "draw 1 if your other units have total Might 5+".
+            total = sum(int(getattr(u, "might", 0) or 0)
+                        for u in _friendly_units() if u.card is not card)
+            return total >= _threshold()
+        if ctype == "you_control_n_or_more_gear":
+            # Gear the actor controls: attached to their units + loose in base,
+            # e.g. Patched Porobot "if you control 3 or more other gear, draw 1".
+            # The source is a unit, not gear, so nothing to exclude.
+            count = sum(len(u.gear) for u in _friendly_units()) + len(actor.base_gear)
+            return count >= _threshold()
         # Conditions needing context the engine doesn't track yet → safe False
         # (effects gated on them simply don't fire): excess_damage_at_least,
         # controller_has_facedown_card, target_was_stunned.

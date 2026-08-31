@@ -51,6 +51,46 @@ def test_resolved_spell_goes_to_caster_trash():
     assert spell not in loop.gs.B.trash           # not the opponent's
 
 
+def test_friendly_total_might_at_least_condition():
+    """Slice 2: Kinkou Initiate gate — combined might of the actor's OTHER units,
+    excluding the source card itself."""
+    loop = _make_loop()
+    src = UnitCard(name="TST Initiate", might=3)
+    bf = loop.gs.battlefields[0]
+    bf.units_A.append(UnitInPlay(UnitCard(name="TST Ally1", might=3), ready=True))
+    bf.units_A.append(UnitInPlay(UnitCard(name="TST Ally2", might=3), ready=True))
+
+    def check(n):
+        return loop._check_condition(
+            {"type": "friendly_total_might_at_least", "params": {"n": n}},
+            src, loop.gs.A, loop.gs.B, None)
+
+    assert check(5) is True          # 3 + 3 = 6 >= 5
+    assert check(7) is False         # 6 < 7
+    # The source's own might is excluded even when it's on the board.
+    bf.units_A.append(UnitInPlay(src, ready=True))
+    assert check(7) is False         # still 6 (src not counted)
+
+
+def test_you_control_n_or_more_gear_condition():
+    """Slice 2: Patched Porobot gate — gear on the actor's units plus loose base
+    gear."""
+    loop = _make_loop()
+    src = UnitCard(name="TST Porobot", might=2)
+    unit = UnitInPlay(UnitCard(name="TST Bearer", might=2), ready=True)
+    unit.gear.append(UnitCard(name="TST Gear1"))          # 1 gear on a unit
+    loop.gs.battlefields[0].units_A.append(unit)
+    loop.gs.A.base_gear.extend([UnitCard(name="TST Gear2"), UnitCard(name="TST Gear3")])
+
+    def check(n):
+        return loop._check_condition(
+            {"type": "you_control_n_or_more_gear", "params": {"n": n}},
+            src, loop.gs.A, loop.gs.B, None)
+
+    assert check(3) is True           # 1 (on unit) + 2 (base) = 3 >= 3
+    assert check(4) is False          # 3 < 4
+
+
 def test_passive_self_buff_gated_on_condition(cleanup_registry):
     name = "TST Passive Yi"
     _register(name, [{

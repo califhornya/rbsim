@@ -55,6 +55,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_subtype",
     "score_within_n_of_victory",
     "cards_burned_this_turn_at_least",
+    "friendly_total_might_at_least",
+    "you_control_n_or_more_gear",
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
