@@ -8,11 +8,11 @@ import random
 
 import pytest
 
-from riftbound.core.cards import UnitCard
+from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.loop import EffectContext, GameLoop
 from riftbound.core.player import Deck, Player, RuneDeck
-from riftbound.core.state import GameState
+from riftbound.core.state import ChainItem, GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec
 
 
@@ -35,6 +35,20 @@ def cleanup_registry():
     yield added
     for name in added:
         CARD_REGISTRY.pop(name, None)
+
+
+def test_resolved_spell_goes_to_caster_trash():
+    """KNOWN_ISSUES #19a: a cast spell resolves into its caster's trash instead of
+    vanishing, so trash-based mechanics (FLOW / recycle / return-from-trash) have
+    targets. Agent-less players make _run_chain pass straight to resolution."""
+    loop = _make_loop()
+    spell = SpellCard(name="TST Bolt", damage=1)
+    assert loop.gs.A.trash == []
+    loop.gs.chain.append(ChainItem(player="A", card=spell, bf_idx=0))
+    loop._run_chain("A")
+    assert not loop.gs.chain                      # chain fully resolved
+    assert spell in loop.gs.A.trash               # spell landed in the caster's trash
+    assert spell not in loop.gs.B.trash           # not the opponent's
 
 
 def test_passive_self_buff_gated_on_condition(cleanup_registry):

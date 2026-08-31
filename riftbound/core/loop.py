@@ -1588,6 +1588,12 @@ class GameLoop:
             # on_play_spell: notify the caster's units (e.g. Ravenbloom Student).
             if isinstance(item.card, SpellCard):
                 self._fire_units_trigger("on_play_spell", item.player, exclude_card=item.card)
+                # A resolved spell goes to its caster's trash (KNOWN_ISSUES #19a).
+                # Previously cast spells vanished, starving trash-based mechanics
+                # (FLOW / recycle / return-from-trash) of any targets. Countered
+                # spells are popped + trashed by counter_spell before this loop, so
+                # they never reach here — no double-trash.
+                actor.trash.append(item.card)
 
     def _run_showdown(self, bf_idx: int, attacker: str) -> None:
         """Execute a showdown at the given battlefield (§337–345)."""
