@@ -1781,6 +1781,25 @@ class GameLoop:
     # ====== MAIN LOOP ======
 
     def start(self) -> Result:
+        """Run a fresh game start-to-finish. Byte-identical to the historical
+        control flow — the golden fixture (tests/test_golden_games.py) pins this.
+        It is now a thin composition of the resumable pieces below."""
+        self._setup()
+        return self._play_all_turns()
+
+    def resume_to_completion(self) -> Result:
+        """Continue a game from *inside the active player's main action phase* —
+        the point at which an agent's ``decide_action`` fires — to the end. Used
+        by rollout/search agents on a clone: the clone's beginning phase already
+        ran for the current turn, so finish this turn's actions + end, then loop
+        the remaining turns. (Step 1 of the search-agent roadmap.)"""
+        result = self._run_main_actions() or self._end_turn()
+        if result is not None:
+            return result
+        return self._play_all_turns()
+
+    def _setup(self) -> None:
+        """Pre-game setup: place legends, draw opening hands, mulligan. Runs once."""
         gs = self.gs
 
         # Legends start in play (Legend Zone). Represented as UnitInPlay so they
@@ -1809,78 +1828,42 @@ class GameLoop:
         if self.recorder:
             self._snapshot_state(turn_override=0)
 
+    def _play_all_turns(self) -> Result:
+        """The turn loop: begin → main actions → end, until victory or turn cap."""
+        gs = self.gs
         while gs.turn <= gs.max_turns:
-            if self.verbose:
-                print(f"\n=== TURN {gs.turn} ({gs.active}'s turn) ===")
+            result = self._begin_turn()
+            if result is not None:
+                return result
+            result = self._run_main_actions() or self._end_turn()
+            if result is not None:
+                return result
+        return self._final_result()
 
-            # Reset per-turn counters for the condition evaluator.
-            gs.cards_played_this_turn[gs.active] = 0
-            gs.spells_played_this_turn[gs.active] = 0
-            gs.friendly_unit_died_this_turn["A"] = False
-            gs.friendly_unit_died_this_turn["B"] = False
-            gs.discarded_this_turn["A"] = False
-            gs.discarded_this_turn["B"] = False
-            gs.cards_burned_this_turn["A"] = 0
-            gs.cards_burned_this_turn["B"] = 0
+    def _begin_turn(self) -> Optional[Result]:
+        """Turn header + counter reset + beginning phase (channel/ready/hold-score)
+        + start-of-turn triggers + passive recompute + draw. Returns a Result if
+        the beginning phase's Hold scoring wins the game, else None."""
+        gs = self.gs
+        if self.verbose:
+            print(f"\n=== TURN {gs.turn} ({gs.active}'s turn) ===")
 
-            gained = self._phase_beginning(gs.active)
-            if gained:
-                if gs.active == "A":
-                    gs.points_A += gained
-                else:
-                    gs.points_B += gained
-                if gs.points_A >= gs.victory_score:
-                    if self.recorder:
-                        self._snapshot_state()
-                    return Result("A", gs.turn, self.units_played, self.spells_cast)
-                if gs.points_B >= gs.victory_score:
-                    if self.recorder:
-                        self._snapshot_state()
-                    return Result("B", gs.turn, self.units_played, self.spells_cast)
+        # Reset per-turn counters for the condition evaluator.
+        gs.cards_played_this_turn[gs.active] = 0
+        gs.spells_played_this_turn[gs.active] = 0
+        gs.friendly_unit_died_this_turn["A"] = False
+        gs.friendly_unit_died_this_turn["B"] = False
+        gs.discarded_this_turn["A"] = False
+        gs.discarded_this_turn["B"] = False
+        gs.cards_burned_this_turn["A"] = 0
+        gs.cards_burned_this_turn["B"] = 0
 
-
-            self._fire_turn_trigger("on_start_of_turn", gs.active)
-            self._recompute_passives()
-
-            ap: Player = gs.get_player(gs.active)
-            op: Player = gs.get_player(gs.other(gs.active))
-            self._phase_draw(ap)
-
-            # Multi-action turn loop
-            cards_played_this_turn = 0
-            actions_this_turn = 0
-            while True:
-                if ap.agent is None:
-                    act: Action = ("PASS", None, None)
-                else:
-                    act = ap.agent.decide_action(op, cards_played=cards_played_this_turn)
-                if act[0] == "PASS":
-                    if self.verbose:
-                        print(f"  {ap.name} passes")
-                    break
-                # No-op guard: if an action leaves the game state unchanged it can
-                # never be "used up", so an agent that keeps proposing it (e.g. a
-                # MOVE the engine silently refuses) would loop forever. Treat an
-                # action that makes no progress as an implicit PASS. The absolute
-                # cap is a belt-and-suspenders bound; real turns play far fewer.
-                before = self._action_fingerprint(ap, op)
-                self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
-                self._recompute_passives()
-                actions_this_turn += 1
-                if self._action_fingerprint(ap, op) == before:
-                    if self.verbose:
-                        print(f"  {ap.name} no-op action {act} — ending action phase")
-                    break
-                if actions_this_turn > 200:
-                    if self.verbose:
-                        print(f"  {ap.name} hit action cap — ending action phase")
-                    break
-                cards_played_this_turn += 1
-                gs.cards_played_this_turn[gs.active] = cards_played_this_turn
-
-            self._phase_showdown(gs.active, gs.other(gs.active))
-
-            self._phase_combat_and_conquer(gs.active)
+        gained = self._phase_beginning(gs.active)
+        if gained:
+            if gs.active == "A":
+                gs.points_A += gained
+            else:
+                gs.points_B += gained
             if gs.points_A >= gs.victory_score:
                 if self.recorder:
                     self._snapshot_state()
@@ -1890,24 +1873,89 @@ class GameLoop:
                     self._snapshot_state()
                 return Result("B", gs.turn, self.units_played, self.spells_cast)
 
+        self._fire_turn_trigger("on_start_of_turn", gs.active)
+        self._recompute_passives()
+        self._phase_draw(gs.get_player(gs.active))
+        return None
 
-            self._fire_turn_trigger("on_end_of_turn", gs.active)
+    def _run_main_actions(self) -> Optional[Result]:
+        """The active player's multi-action main phase (decide_action → apply until
+        PASS / no-op / cap). Returns None — kept Optional so callers can chain it
+        with `or self._end_turn()`. Re-entrant: cards-played resumes from the live
+        counter, so a mid-turn clone continues LEGION counting correctly."""
+        gs = self.gs
+        ap: Player = gs.get_player(gs.active)
+        op: Player = gs.get_player(gs.other(gs.active))
 
-            # Clear temporary might bonuses (REACTION spells like Discipline)
-            for bf in self.gs.battlefields:
-                for unit in bf.units_A + bf.units_B:
-                    unit.clear_turn_end_bonuses()
+        cards_played_this_turn = gs.cards_played_this_turn.get(gs.active, 0)
+        actions_this_turn = 0
+        while True:
+            if ap.agent is None:
+                act: Action = ("PASS", None, None)
+            else:
+                act = ap.agent.decide_action(op, cards_played=cards_played_this_turn)
+            if act[0] == "PASS":
+                if self.verbose:
+                    print(f"  {ap.name} passes")
+                break
+            # No-op guard: if an action leaves the game state unchanged it can
+            # never be "used up", so an agent that keeps proposing it (e.g. a
+            # MOVE the engine silently refuses) would loop forever. Treat an
+            # action that makes no progress as an implicit PASS. The absolute
+            # cap is a belt-and-suspenders bound; real turns play far fewer.
+            before = self._action_fingerprint(ap, op)
+            self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
+            self._recompute_passives()
+            actions_this_turn += 1
+            if self._action_fingerprint(ap, op) == before:
+                if self.verbose:
+                    print(f"  {ap.name} no-op action {act} — ending action phase")
+                break
+            if actions_this_turn > 200:
+                if self.verbose:
+                    print(f"  {ap.name} hit action cap — ending action phase")
+                break
+            cards_played_this_turn += 1
+            gs.cards_played_this_turn[gs.active] = cards_played_this_turn
+        return None
 
-            if self.verbose:
-                bf0 = gs.battlefields[0]
-                bf1 = gs.battlefields[1]
-                print(f"  [END TURN] Board: BF0={len(bf0.units_A)}A vs {len(bf0.units_B)}B ({bf0.controller() or '?'}) | BF1={len(bf1.units_A)}A vs {len(bf1.units_B)}B ({bf1.controller() or '?'}) | Points: A={gs.points_A} B={gs.points_B}")
+    def _end_turn(self) -> Optional[Result]:
+        """Showdown + combat/conquer (+victory) + end-of-turn triggers + cleanup +
+        advance to the next player/turn. Returns a Result on a combat victory."""
+        gs = self.gs
+        self._phase_showdown(gs.active, gs.other(gs.active))
 
-            gs.active = gs.other(gs.active)
-            gs.turn += 1
+        self._phase_combat_and_conquer(gs.active)
+        if gs.points_A >= gs.victory_score:
             if self.recorder:
                 self._snapshot_state()
+            return Result("A", gs.turn, self.units_played, self.spells_cast)
+        if gs.points_B >= gs.victory_score:
+            if self.recorder:
+                self._snapshot_state()
+            return Result("B", gs.turn, self.units_played, self.spells_cast)
 
+        self._fire_turn_trigger("on_end_of_turn", gs.active)
+
+        # Clear temporary might bonuses (REACTION spells like Discipline)
+        for bf in self.gs.battlefields:
+            for unit in bf.units_A + bf.units_B:
+                unit.clear_turn_end_bonuses()
+
+        if self.verbose:
+            bf0 = gs.battlefields[0]
+            bf1 = gs.battlefields[1]
+            print(f"  [END TURN] Board: BF0={len(bf0.units_A)}A vs {len(bf0.units_B)}B ({bf0.controller() or '?'}) | BF1={len(bf1.units_A)}A vs {len(bf1.units_B)}B ({bf1.controller() or '?'}) | Points: A={gs.points_A} B={gs.points_B}")
+
+        gs.active = gs.other(gs.active)
+        gs.turn += 1
+        if self.recorder:
+            self._snapshot_state()
+        return None
+
+    def _final_result(self) -> Result:
+        """Decide the winner by points once the turn cap is reached."""
+        gs = self.gs
         if gs.points_A > gs.points_B:
             winner = "A"
         elif gs.points_B > gs.points_A:
