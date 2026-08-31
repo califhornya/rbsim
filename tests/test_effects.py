@@ -51,6 +51,45 @@ def test_resolved_spell_goes_to_caster_trash():
     assert spell not in loop.gs.B.trash           # not the opponent's
 
 
+def test_nocturne_reveal_from_top_banish_and_play():
+    """Nocturne Horrifying revealed from the top may banish itself and play for
+    [rune]: it leaves the deck, enters play (exhausted), and 1 power is spent.
+    Declining, or being unable to pay, leaves it in the deck."""
+    from riftbound.core.enums import Domain
+    from riftbound.core.player import Rune
+
+    def _setup(with_power: bool, agent=None):
+        loop = _make_loop()
+        noc = CARD_REGISTRY["Nocturne Horrifying"].instantiate()
+        loop.gs.A.deck.cards.append(noc)   # top of deck = end
+        if with_power:
+            loop.gs.A.power_pool[Domain.CHAOS] = 1
+            loop.gs.A.rune_pool[Domain.CHAOS] = [Rune(domain=Domain.CHAOS)]
+        if agent is not None:
+            loop.gs.A.agent = agent
+        return loop, noc
+
+    # Accept (no agent → default yes) + can pay → banished from deck, into play.
+    loop, noc = _setup(with_power=True)
+    taken = loop._offer_reveal_from_top(loop.gs.A, [noc])
+    assert taken == [noc]
+    assert noc not in loop.gs.A.deck.cards
+    assert any(u.card is noc for u in loop.gs.A.base_units)
+    assert loop.gs.A.power_pool.get(Domain.CHAOS, 0) == 0    # [rune] spent
+
+    # Decline → stays in deck.
+    class _Decliner:
+        def decide_optional(self, card, effect_name): return False
+    loop, noc = _setup(with_power=True, agent=_Decliner())
+    assert loop._offer_reveal_from_top(loop.gs.A, [noc]) == []
+    assert noc in loop.gs.A.deck.cards
+
+    # Can't pay (no power) → stays in deck.
+    loop, noc = _setup(with_power=False)
+    assert loop._offer_reveal_from_top(loop.gs.A, [noc]) == []
+    assert noc in loop.gs.A.deck.cards
+
+
 def test_optional_effect_gated_by_agent(cleanup_registry):
     """An `optional: true` effect runs only if the actor's agent accepts it;
     with no agent (rollouts/tests) it defaults to yes (behavior-preserving)."""

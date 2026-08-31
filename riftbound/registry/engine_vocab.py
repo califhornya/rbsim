@@ -29,6 +29,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "activated",                                # main-phase tap-style
     "cost_modifier",                            # reduce_cost effects
     "death_replacement",                        # Guardian Angel / Zhonya's
+    "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -112,6 +113,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
 # - ignore_deflect_here   battlefield passive read by Loop._deflect_surcharge
 # - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
+# - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
+    "play_from_top",
 })

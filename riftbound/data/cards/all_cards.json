@@ -6137,7 +6137,16 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_top",
+        "trigger": "on_reveal_from_top",
+        "optional": true,
+        "cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-195",

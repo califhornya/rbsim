@@ -932,6 +932,61 @@ class GameLoop:
                 e_red += amt
         return e_red, p_red
 
+    def _can_pay_generic_power(self, actor: Player, n: int) -> bool:
+        """Whether the actor can pay n generic ([rune]) power from a single domain.
+        The engine's power pool is domain-keyed; generic power is modeled as 'any one
+        domain you have enough of' (a documented simplification)."""
+        if n <= 0:
+            return True
+        return any(actor.can_pay_cost(0, n, d) for d in list(actor.power_pool))
+
+    def _pay_generic_power(self, actor: Player, n: int) -> bool:
+        """Pay n generic ([rune]) power from the first domain that can cover it."""
+        if n <= 0:
+            return True
+        for d in list(actor.power_pool):
+            if actor.can_pay_cost(0, n, d):
+                return actor.pay_cost(0, n, d)
+        return False
+
+    def _offer_reveal_from_top(self, actor: Player, cards: list) -> list:
+        """When cards are looked at / revealed from the TOP of `actor`'s deck (dig /
+        predict / scry), offer each card carrying an `on_reveal_from_top` ability the
+        chance to banish itself and play for its alternate cost (Nocturne: banish,
+        then play for [rune]). Optional — routed through decide_optional. Accepted
+        cards are removed from `cards` (and the deck) and put into play as a unit
+        (enters exhausted, like a normal play). Returns the cards taken.
+
+        Simplifications (documented): the card's two nested "may"s collapse into one
+        decision (you only banish in order to play); on-play triggers of the played
+        card are not re-fired here; [rune] is charged as 1 power of any one domain."""
+        taken: list = []
+        for card in list(cards):
+            spec = CARD_REGISTRY.get(card.name)
+            if not spec:
+                continue
+            es = next((e for e in spec.effects if e.trigger == "on_reveal_from_top"), None)
+            if es is None:
+                continue
+            if not self._wants_optional(actor, card, es):
+                continue
+            cost = es.cost or {}
+            energy = int(cost.get("energy", 0))
+            power = int(cost.get("power", 0))
+            if actor.energy < energy or not self._can_pay_generic_power(actor, power):
+                continue
+            actor.energy -= energy
+            self._pay_generic_power(actor, power)
+            if card in actor.deck.cards:
+                actor.deck.cards.remove(card)
+            if card in cards:
+                cards.remove(card)
+            actor.base_units.append(UnitInPlay(card=card, ready=False))
+            taken.append(card)
+            if self.verbose:
+                print(f"  {actor.name} reveals {card.name} from top → banish + play for [rune]")
+        return taken
+
     # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 

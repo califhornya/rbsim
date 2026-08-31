@@ -693,6 +693,8 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     top = deck.cards[-n:]
     rest = deck.cards[:-n]
+    # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now.
+    ctx.loop._offer_reveal_from_top(ctx.actor, top)
     top_sorted = sorted(top, key=lambda c: int(getattr(c, "might", 0) or 0))
     deck.cards[:] = rest + top_sorted  # best might ends up last == drawn next
 
@@ -709,6 +711,11 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     top = deck.cards[-n:]
     del deck.cards[-n:]
+    # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now,
+    # removing themselves from the looked-at set before we keep the best.
+    ctx.loop._offer_reveal_from_top(ctx.actor, top)
+    if not top:
+        return
     best = max(top, key=lambda c: int(getattr(c, "might", 0) or 0))
     top.remove(best)
     ctx.actor.hand.append(best)
