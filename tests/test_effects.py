@@ -51,6 +51,34 @@ def test_resolved_spell_goes_to_caster_trash():
     assert spell not in loop.gs.B.trash           # not the opponent's
 
 
+def test_optional_effect_gated_by_agent(cleanup_registry):
+    """An `optional: true` effect runs only if the actor's agent accepts it;
+    with no agent (rollouts/tests) it defaults to yes (behavior-preserving)."""
+    name = "TST Optional Draw"
+    _register(name, [{"effect": "draw_cards", "trigger": "on_play", "amount": 1, "optional": True}])
+    cleanup_registry.append(name)
+
+    class _Decliner:
+        def decide_optional(self, card, effect_name): return False
+
+    class _Accepter:
+        def decide_optional(self, card, effect_name): return True
+
+    def _run(agent):
+        loop = _make_loop()
+        loop.gs.A.deck.cards.extend(UnitCard(name=f"D{i}", might=1) for i in range(3))
+        if agent is not None:
+            loop.gs.A.agent = agent
+        before = len(loop.gs.A.hand)
+        loop._resolve_card_effects(UnitCard(name=name, might=2),
+                                   loop.gs.battlefields[0], loop.gs.A, loop.gs.B)
+        return len(loop.gs.A.hand) - before
+
+    assert _run(_Decliner()) == 0        # declined → no draw
+    assert _run(_Accepter()) == 1        # accepted → drew 1
+    assert _run(None) == 1               # no agent → default yes
+
+
 def test_friendly_total_might_at_least_condition():
     """Slice 2: Kinkou Initiate gate — combined might of the actor's OTHER units,
     excluding the source card itself."""

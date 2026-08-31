@@ -433,6 +433,8 @@ class GameLoop:
         try:
             for _ in range(runs):
                 for effect_spec in play_specs:
+                    if not self._wants_optional(actor, card, effect_spec):
+                        continue
                     if not self._check_condition(effect_spec.condition, card, actor, opponent, None):
                         continue
                     handler = EFFECT_REGISTRY.get(effect_spec.effect)
@@ -454,6 +456,18 @@ class GameLoop:
             if getattr(card, "_kicker_paid", False):
                 card._kicker_paid = False
 
+    def _wants_optional(self, actor: Player, card: Card, es: "EffectSpec") -> bool:
+        """Gate an optional ("you may ...") effect through the actor's agent. A
+        non-optional effect always runs. When the actor has no agent (rollouts,
+        tests) or the agent doesn't implement decide_optional, default to yes,
+        preserving the engine's historical always-resolve behavior."""
+        if not getattr(es, "optional", False):
+            return True
+        agent = getattr(actor, "agent", None)
+        if agent is None or not hasattr(agent, "decide_optional"):
+            return True
+        return bool(agent.decide_optional(card, es.effect))
+
     def _resolve_triggered_effects(
         self,
         card: Card,
@@ -472,6 +486,10 @@ class GameLoop:
         context = EffectContext(self, card, actor, opponent, battlefield)
         for es in effect_specs:
             if es.trigger != trigger:
+                continue
+            # Optional ("you may ...") effects: let the actor decline BEFORE paying
+            # any cost. Default (no agent / heuristic agents) is yes.
+            if not self._wants_optional(actor, card, es):
                 continue
             # Pay any cost / additional_cost the triggered ability carries BEFORE
             # the condition check (so a kicker_paid gate sees the payment). If a

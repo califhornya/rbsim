@@ -34,3 +34,9 @@ class Agent(ABC):
     def decide_reaction(self, opponent: Player, chain: list) -> Action:
         """Return REACTION spell to play in response to chain, or PASS."""
         return ("PASS", None, None)
+
+    def decide_optional(self, card, effect_name: str) -> bool:
+        """Whether to take an optional ("you may ...") effect. Default: yes — this
+        preserves the engine's historical "optional effects always resolve"
+        behavior. Agents (esp. search) may override to decline or branch."""
+        return True
