@@ -111,6 +111,7 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - reduce_cost           read by Loop._cost_reduction
 # - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
 # - ignore_deflect_here   battlefield passive read by Loop._deflect_surcharge
+# - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
-    "reduce_cost", "bonus_damage_here", "ignore_deflect_here",
+    "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
 })

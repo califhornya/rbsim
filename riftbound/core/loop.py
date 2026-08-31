@@ -876,6 +876,44 @@ class GameLoop:
             total += int(es.params.get("amount", 0))
         return max(0, total)
 
+    def _spell_chooses_friendly(self, card: Card) -> bool:
+        """True if the spell EXPLICITLY targets a friendly unit — used by
+        battlefield cost auras like Sandswept Tomb ("spells that choose friendly
+        units here"). Only explicit friendly targets count; we never assume a
+        handler's default target, so the discount under-applies rather than
+        misfiring on, say, a self-defaulting buff."""
+        spec = CARD_REGISTRY.get(card.name)
+        if not (spec and spec.effects):
+            return False
+        return any((es.target or "").lower() in self._PASSIVE_FRIENDLY_TARGETS
+                   for es in spec.effects)
+
+    def _bf_cost_reduction(self, card: Card, target_lane: int) -> tuple[int, int]:
+        """(energy, power) cost reduction the TARGET battlefield grants this spell,
+        e.g. Sandswept Tomb: a spell choosing friendly units here costs 1 power
+        ([rune]) less. Data-driven marker `reduce_cost_here` {amount, resource:
+        'power'|'energy' (default energy), requires_target: 'friendly'|None}."""
+        if not (0 <= target_lane < len(self.gs.battlefields)):
+            return 0, 0
+        bf = self.gs.battlefields[target_lane]
+        if bf is None or bf.card is None:
+            return 0, 0
+        spec = CARD_REGISTRY.get(bf.card.name)
+        if not spec:
+            return 0, 0
+        e_red = p_red = 0
+        for es in spec.effects:
+            if es.trigger != "passive" or es.effect != "reduce_cost_here":
+                continue
+            if es.params.get("requires_target") == "friendly" and not self._spell_chooses_friendly(card):
+                continue
+            amt = int(es.params.get("amount", 1))
+            if es.params.get("resource") == "power":
+                p_red += amt
+            else:
+                e_red += amt
+        return e_red, p_red
+
     # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 
@@ -1074,11 +1112,15 @@ class GameLoop:
                 # controls DEFLECT units at the target battlefield, the spell
                 # costs that much more energy (additional cost, §809).
                 deflect_surcharge = self._deflect_surcharge(card, target_lane)
+                bf_e_red, bf_p_red = self._bf_cost_reduction(card, target_lane)
                 base_energy = max(0, card.cost_energy + deflect_surcharge
-                                  - self._cost_reduction(card, ap))
-                if not ap.can_pay_cost(base_energy, card.cost_power, card.cost_power_domain):
+                                  - self._cost_reduction(card, ap) - bf_e_red)
+                power_cost = card.cost_power
+                if power_cost is not None and bf_p_red:
+                    power_cost = max(0, power_cost - bf_p_red)
+                if not ap.can_pay_cost(base_energy, power_cost, card.cost_power_domain):
                     return
-                if not ap.pay_cost(base_energy, card.cost_power, card.cost_power_domain):
+                if not ap.pay_cost(base_energy, power_cost, card.cost_power_domain):
                     return
                 # B1: optional additional cost (kicker), paid before chain resolution.
                 self._try_pay_additional_costs(card, ap)

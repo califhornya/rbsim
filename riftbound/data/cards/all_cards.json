@@ -29389,7 +29389,15 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost_here",
+        "trigger": "passive",
+        "amount": 1,
+        "resource": "power",
+        "requires_target": "friendly"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-164",

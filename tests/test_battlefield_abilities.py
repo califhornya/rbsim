@@ -96,6 +96,37 @@ def test_void_gate_adds_bonus_damage_to_units_here():
         assert died is should_die, f"{bf_name!r}: died={died}, expected {should_die}"
 
 
+def test_sandswept_tomb_reduces_power_for_friendly_targeting_spells():
+    """Sandswept Tomb: a spell that chooses friendly units here costs 1 power less;
+    a spell that doesn't choose friendly units (e.g. plain damage) is unaffected,
+    and neither is discounted at a plain battlefield."""
+    friendly = CardSpec.from_dict({
+        "name": "TST Friendly Buff", "category": "Spell",
+        "effects": [{"effect": "grant_might", "target": "ally", "amount": 2}],
+    })
+    enemy = CardSpec.from_dict({
+        "name": "TST Enemy Bolt", "category": "Spell",
+        "effects": [{"effect": "deal_damage", "amount": 2}],  # no target → enemy
+    })
+    CARD_REGISTRY[friendly.name] = friendly
+    CARD_REGISTRY[enemy.name] = enemy
+    try:
+        loop = _bare_loop()
+        loop.gs.battlefields[0] = Battlefield(card=BattlefieldCard(name="Sandswept Tomb"))
+        buff = SpellCard(name="TST Friendly Buff")
+        bolt = SpellCard(name="TST Enemy Bolt")
+
+        # Friendly-targeting spell at the Tomb → 1 power off.
+        assert loop._bf_cost_reduction(buff, 0) == (0, 1)
+        # Non-friendly spell → no reduction (requires_target: friendly).
+        assert loop._bf_cost_reduction(bolt, 0) == (0, 0)
+        # Plain battlefield → no reduction for anyone.
+        assert loop._bf_cost_reduction(buff, 1) == (0, 0)
+    finally:
+        CARD_REGISTRY.pop(friendly.name, None)
+        CARD_REGISTRY.pop(enemy.name, None)
+
+
 def test_heisho_shell_waives_deflect_surcharge():
     """DEFLECT normally surcharges an enemy-targeting spell; Heisho Shell waives it."""
     spec = CardSpec.from_dict({

@@ -77,8 +77,12 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
         elif isinstance(card, SpellCard):
             for lane in range(n_bf):
                 surcharge = loop._deflect_surcharge(card, lane)
-                energy = max(0, card.cost_energy + surcharge - loop._cost_reduction(card, ap))
-                if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+                bf_e_red, bf_p_red = loop._bf_cost_reduction(card, lane)
+                energy = max(0, card.cost_energy + surcharge - loop._cost_reduction(card, ap) - bf_e_red)
+                power = card.cost_power
+                if power is not None and bf_p_red:
+                    power = max(0, power - bf_p_red)
+                if ap.can_pay_cost(energy, power, card.cost_power_domain):
                     actions.append(GameAction.play("SPELL", idx, lane, f"Cast {card.name} @BF{lane}"))
         elif isinstance(card, GearCard):
             energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
