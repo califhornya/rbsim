@@ -27,6 +27,7 @@ from riftbound.ai.heuristics.diana_agent import DianaAgent
 from riftbound.ai.heuristics.simple_trade_agent import SimpleTradeAgent
 from riftbound.ai.search.random_agent import RandomAgent
 from riftbound.ai.search.monte_carlo_agent import MonteCarloAgent
+from riftbound.ai.search.ismcts_agent import ISMCTSAgent
 
 
 AI_REGISTRY = {
@@ -35,6 +36,7 @@ AI_REGISTRY = {
     "simple_trade": SimpleTradeAgent,
     "random": RandomAgent,
     "mc": MonteCarloAgent,
+    "ismcts": ISMCTSAgent,
 }
 
 

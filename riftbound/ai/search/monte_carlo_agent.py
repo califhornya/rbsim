@@ -75,7 +75,8 @@ class MonteCarloAgent(Agent):
     name = "mc"
 
     def __init__(self, player, k: Optional[int] = None, rollout: Optional[str] = None,
-                 max_candidates: Optional[int] = None, rng: Optional[random.Random] = None):
+                 max_candidates: Optional[int] = None, rng: Optional[random.Random] = None,
+                 k_mulligan: Optional[int] = None):
         super().__init__(player)
         self.k = k if k is not None else int(os.environ.get("RBSIM_MC_K", "5"))
         # simple_trade rollouts give a much stronger, faster-terminating signal
@@ -86,7 +87,8 @@ class MonteCarloAgent(Agent):
         self._rng = rng  # seeded lazily from the live game rng (reproducible)
         # Mulligan search: rollouts per candidate keep/return combination (it runs
         # full games, once per game, so fewer by default). 0 disables (keep all).
-        self.k_mulligan = int(os.environ.get("RBSIM_MC_MULL_K", "6"))
+        self.k_mulligan = (k_mulligan if k_mulligan is not None
+                           else int(os.environ.get("RBSIM_MC_MULL_K", "6")))
         # Last decision's per-(action|mulligan) win-rate estimates, highest first,
         # for the game tracer / debugging. Empty when no search ran.
         self.last_eval: list[tuple[str, float]] = []
