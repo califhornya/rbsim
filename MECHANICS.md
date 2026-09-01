@@ -19,7 +19,7 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 
 | # | keyword | § | status | engine location | test | note / rule nuance to verify |
 |---|---------|---|--------|-----------------|------|------------------------------|
-| 731 | Accelerate | §731 | PARTIAL | `loop.py:1289` | — | optional cost 1 energy + 1 domain-power → enter ready. Verify domain-match (§731.1.a.1/2: single-domain must match; 0/multi uses [A]) and enters-ready-not-exhausted (§731.6). Ties to `enters_exhausted` KNOWN_ISSUES #21. Needs `test_accelerate.py`. |
+| 731 | Accelerate | §731 | DONE | `loop.py:1312` | `test_accelerate.py` | OPTIONAL cost [1] + 1 domain-power → enter ready. Now routed through `decide_optional` (§731.2 "may"; default yes preserves prior play). Single-domain match is enforced; **caveat**: for a domainless/multi-domain unit the [A] power isn't charged (can_pay/pay skip power when domain=None) — minor undercharge, see the [A]-power row below. |
 | 732 | Action | §732 | PARTIAL | `loop.py:1982`, `legality.py:201` | — | permission to play/activate during showdowns on any turn. Verify units-with-Action still respect play-location limits (§732.3). Needs a dedicated assertion. |
 | 733 | Assault | §733 | DONE | `combat.py:171` | `test_combat_keywords.py` | +X might while attacker only; bare = 1 (§733.1.b.3). Combat bonus + lethality asserted. |
 | 734 | Deathknell | §734 | DONE | `loop.py:_route_combat_deaths` (`on_death`) | `test_deathknell.py` | "when I die, [Effect]"; fires on true death, correctly **suppressed** when death is replaced by recall (§734.1.d.1) — replacement `continue`s before `truly_dead`. |
@@ -54,6 +54,7 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 | Attachments / gear | §716 | DONE | `loop.py:1739` | equip + Weaponmaster (partial). |
 | Deck-out / **Burn Out** | §431 | GAP | `_phase_draw` | empty-deck handling not implemented. Changes deck/trash/points → golden regen. |
 | Modal "choose one" | — | GAP | — | no modal-choice effect (`suggested_vocab: mode_choice`×9). |
+| `[A]` any-domain power payment | §resources | PARTIAL | `player.py:184` | paying "1 Power of ANY domain" ([A]) isn't modeled — `can_pay_cost`/`pay_cost` treat `domain=None` as "no power required", so any [A] portion of a cost is silently free (e.g. Accelerate on a domainless unit). Under-charges → too cheap. Needs an any-domain power spend. Ties to `suggested_vocab: gain_power_any_domain`. |
 | Enters-exhausted | — | PARTIAL | — | units that should enter exhausted enter ready (KNOWN_ISSUES #21). |
 
 ## Wrong-LIVE sweep — cost-reduction class (slice 1, DONE)

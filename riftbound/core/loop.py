@@ -477,6 +477,16 @@ class GameLoop:
             return True
         return bool(agent.decide_optional(card, es.effect))
 
+    def _wants_optional_keyword(self, actor: Player, card: Card, name: str) -> bool:
+        """Gate an optional KEYWORD choice (e.g. Accelerate §731.2 "you may pay")
+        through the actor's agent. Same default-yes semantics as `_wants_optional`
+        (no agent / no `decide_optional` → yes), so heuristic and rollout play is
+        unchanged while a learning agent gets the decision."""
+        agent = getattr(actor, "agent", None)
+        if agent is None or not hasattr(agent, "decide_optional"):
+            return True
+        return bool(agent.decide_optional(card, name))
+
     def _resolve_triggered_effects(
         self,
         card: Card,
@@ -1295,11 +1305,14 @@ class GameLoop:
                     return
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}")
-                # ACCELERATE: optional additional cost of 1 energy + 1 power of the unit's domain
+                # ACCELERATE (§731): OPTIONAL additional cost of [1] + 1 Power of the
+                # unit's domain ([A] if no/multi domain) to enter ready. Optional per
+                # §731.2 — routed through the agent (default yes preserves prior play).
                 enters_ready = False
                 if card.has_keyword("ACCELERATE"):
                     accel_domain = card.domain
-                    if ap.can_pay_cost(1, 1, accel_domain):
+                    if (ap.can_pay_cost(1, 1, accel_domain)
+                            and self._wants_optional_keyword(ap, card, "accelerate")):
                         ap.pay_cost(1, 1, accel_domain)
                         enters_ready = True
                 unit = UnitInPlay(card=card, ready=enters_ready)
