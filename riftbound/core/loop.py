@@ -997,20 +997,80 @@ class GameLoop:
                 "generic": generic, "complex": complex_extra}
 
     def _can_pay_equip(self, ap: Player, cost: dict) -> bool:
+        # Ornn's earmarked gear-power (generic) may cover any power position.
+        earmark = ap.earmarked_power_gear
         if ap.energy < cost["energy"]:
             return False
+        gen = max(0, cost["generic"] - earmark)
+        earmark = max(0, earmark - cost["generic"])
+        if not self._can_pay_generic_power(ap, gen):
+            return False
         for d, n in cost["domain_power"].items():
-            if not ap.can_pay_cost(0, n, Domain[d.upper()]):
+            need = max(0, n - earmark)
+            earmark = max(0, earmark - n)
+            if need and not ap.can_pay_cost(0, need, Domain[d.upper()]):
                 return False
-        return self._can_pay_generic_power(ap, cost["generic"])
+        return True
 
     def _pay_equip(self, ap: Player, cost: dict) -> bool:
         if not self._can_pay_equip(ap, cost):
             return False
         ap.energy -= cost["energy"]
+        # Spend earmarked gear-power first (generic portion, then domain portions).
+        gen = cost["generic"]
+        use = min(gen, ap.earmarked_power_gear)
+        ap.earmarked_power_gear -= use
+        self._pay_generic_power(ap, gen - use)
         for d, n in cost["domain_power"].items():
-            ap.pay_cost(0, n, Domain[d.upper()])
-        self._pay_generic_power(ap, cost["generic"])
+            use = min(n, ap.earmarked_power_gear)
+            ap.earmarked_power_gear -= use
+            if n - use:
+                ap.pay_cost(0, n - use, Domain[d.upper()])
+        return True
+
+    def _can_pay_showdown(self, p: Player, energy: int, power, domain) -> bool:
+        """Affordability during a showdown: Diana Scorn's earmarked energy adds to
+        available energy (spendable only here)."""
+        if p.energy + p.earmarked_energy_showdown < energy:
+            return False
+        if power and domain is not None:
+            return p.can_pay_cost(0, power, domain)
+        return True
+
+    def _pay_showdown(self, p: Player, energy: int, power, domain) -> bool:
+        if not self._can_pay_showdown(p, energy, power, domain):
+            return False
+        from_earmark = min(energy, p.earmarked_energy_showdown)
+        p.earmarked_energy_showdown -= from_earmark
+        return p.pay_cost(energy - from_earmark, power, domain)
+
+    def _can_pay_gear(self, ap: Player, energy: int, power, domain) -> bool:
+        """Affordability of a gear cost: Ornn's earmarked gear-power (generic) may
+        cover the power portion."""
+        if ap.energy < energy:
+            return False
+        if not power:
+            return True
+        remaining = max(0, power - ap.earmarked_power_gear)
+        if remaining == 0:
+            return True
+        if domain is None:
+            return self._can_pay_generic_power(ap, remaining)
+        return ap.can_pay_cost(0, remaining, domain)
+
+    def _pay_gear(self, ap: Player, energy: int, power, domain) -> bool:
+        if not self._can_pay_gear(ap, energy, power, domain):
+            return False
+        ap.energy -= energy
+        if power:
+            from_earmark = min(power, ap.earmarked_power_gear)
+            ap.earmarked_power_gear -= from_earmark
+            remaining = power - from_earmark
+            if remaining:
+                if domain is None:
+                    self._pay_generic_power(ap, remaining)
+                else:
+                    ap.pay_cost(0, remaining, domain)
         return True
 
     def _spell_chooses_friendly(self, card: Card) -> bool:
@@ -1517,9 +1577,8 @@ class GameLoop:
             card = ap.hand[idx]
             if isinstance(card, GearCard):
                 gear_energy = max(0, card.cost_energy - self._cost_reduction(card, ap))
-                if not ap.can_pay_cost(gear_energy, card.cost_power, card.cost_power_domain):
-                    return
-                if not ap.pay_cost(gear_energy, card.cost_power, card.cost_power_domain):
+                # Ornn's earmarked gear-power may cover the power portion.
+                if not self._pay_gear(ap, gear_energy, card.cost_power, card.cost_power_domain):
                     return
                 # §146.1.a.1: gear is played to the controller's BASE (unattached).
                 # Equipment attaches later via its Equip ability — a separate action
@@ -1908,15 +1967,14 @@ class GameLoop:
             parsed = self._parse_activated_cost(eff.cost)
             if parsed["tap"] and getattr(gear, "tapped", False):
                 return                              # already tapped this turn
-            if (parsed["energy"] or parsed["power"]) and not ap.can_pay_cost(
-                    parsed["energy"], parsed["power"] or None, None):
+            # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
+            if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], None):
                 return
             if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
                 return
             if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
                 return
-            if (parsed["energy"] or parsed["power"]) and not ap.pay_cost(
-                    parsed["energy"], parsed["power"] or None, None):
+            if not self._pay_gear(ap, parsed["energy"], parsed["power"], None):
                 return
             if parsed["tap"]:
                 gear.tapped = True
@@ -2161,10 +2219,10 @@ class GameLoop:
                     card = focus_player.hand[idx]
                     if isinstance(card, SpellCard):
                         has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
-                        if has_action_or_reaction and focus_player.can_pay_cost(
-                            card.cost_energy, card.cost_power, card.cost_power_domain
+                        if has_action_or_reaction and self._can_pay_showdown(
+                            focus_player, card.cost_energy, card.cost_power, card.cost_power_domain
                         ):
-                            if focus_player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+                            if self._pay_showdown(focus_player, card.cost_energy, card.cost_power, card.cost_power_domain):
                                 focus_player.remove_from_hand(idx)
                                 if self.verbose:
                                     print(f"    {self.gs.focus_player} plays SPELL in showdown: {card.name}")

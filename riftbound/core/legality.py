@@ -86,7 +86,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     actions.append(GameAction.play("SPELL", idx, lane, f"Cast {card.name} @BF{lane}"))
         elif isinstance(card, GearCard):
             energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
-            if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Play gear {card.name} @BF{lane}"))
 
@@ -169,8 +169,7 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
             gear, eff = entry["gear"], entry["eff"]
             parsed = loop._parse_activated_cost(eff.cost)
             tap_ok = not (parsed["tap"] and getattr(gear, "tapped", False))
-            pay_ok = not (parsed["energy"] or parsed["power"]) or ap.can_pay_cost(
-                parsed["energy"], parsed["power"] or None, None)
+            pay_ok = loop._can_pay_gear(ap, parsed["energy"], parsed["power"], None)
             rec_ok = not parsed["recycle"] or len(ap.trash) >= parsed["recycle"]
             xp_ok = not parsed["spend_xp"] or loop.gs.get_xp(side) >= parsed["spend_xp"]
             if (gear in ap.base_gear and tap_ok and pay_ok and rec_ok and xp_ok
@@ -212,7 +211,7 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     actions: list[GameAction] = [GameAction.pass_()]
     for idx, card in enumerate(ap.hand):
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
-            if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+            if loop._can_pay_showdown(ap, card.cost_energy, card.cost_power, card.cost_power_domain):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
     champ = gs.champion_A if ap.name == "A" else gs.champion_B
