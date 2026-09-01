@@ -46,3 +46,8 @@ class Agent(ABC):
         bottom of the deck. Default: no (keep it, the neutral null action). Search
         / learning agents may override to recycle a bad top card."""
         return False
+
+    def decide_mode(self, card, n_modes: int) -> int:
+        """Modal "choose one": pick which mode (0..n_modes-1) to resolve. Default:
+        the first mode. Search / learning agents may override to branch."""
+        return 0

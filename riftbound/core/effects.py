@@ -50,6 +50,30 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.gain_energy(amount, target=target)
 
 
+@effect("mode_choice")
+def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Modal "choose one" (§ modal): the actor picks one mode; its sub-effect(s)
+    resolve. A mode is either a single effect dict or a list of effect dicts.
+    Default (heuristic / no agent): the first mode."""
+    modes = spec.get("modes") or []
+    if not modes:
+        return
+    agent = getattr(ctx.actor, "agent", None)
+    i = 0
+    if agent is not None and hasattr(agent, "decide_mode"):
+        try:
+            i = int(agent.decide_mode(ctx.card, len(modes)))
+        except Exception:  # noqa: BLE001
+            i = 0
+    i = max(0, min(i, len(modes) - 1))
+    chosen = modes[i]
+    subs = chosen if isinstance(chosen, list) else [chosen]
+    for sub in subs:
+        handler = REGISTRY.get(sub.get("effect"))
+        if handler:
+            handler(ctx, sub)
+
+
 @effect("reveal_top_draw_if_spell")
 def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))

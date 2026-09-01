@@ -28069,7 +28069,38 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_move",
+        "modes": [
+          [
+            {
+              "effect": "discard_card",
+              "target": "self",
+              "count": 1
+            },
+            {
+              "effect": "discard_card",
+              "target": "opponent",
+              "count": 1
+            }
+          ],
+          [
+            {
+              "effect": "draw_cards",
+              "target": "self",
+              "count": 1
+            },
+            {
+              "effect": "draw_cards",
+              "target": "opponent",
+              "count": 1
+            }
+          ]
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-111",
