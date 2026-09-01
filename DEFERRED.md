@@ -37,25 +37,34 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   `Riftbound Core Rules v1.2.pdf` (extractable now via `uv run --with pypdf`); confirm
   §431 exactly, then implement. Changes deck/trash/points → golden regen.
 
-- **Corpus long tail — needs the LLM parser (209 empty-effects cards).** ALL
-  remaining INERT cards have `effects: []` (the parser never emitted effects). The
-  fix is re-running `scripts/generate_effects.py`, which calls the Anthropic API and
-  therefore needs `ANTHROPIC_API_KEY` (not available in the dev/CI session — run on a
-  machine/box that has a key). Turnkey:
+- **Corpus long tail — the bottleneck is engine PRIMITIVES, not the parser model.**
+  A Sonnet-5 parse pass (`--only-empty`, commit `29da7bb`) took the corpus from
+  672 → **706 LIVE / 176 INERT** (+34 cards). It flagged **188** cards to
+  `scripts/review_needed.txt`; **168 of those are still empty** because they need
+  verbs the engine does not yet have. This is the key finding: re-parsing the
+  failures with a stronger model (e.g. Opus) will NOT help — the model is
+  constrained to the allowed vocab, so it flags the same cards. The lever is
+  **adding the missing primitives, then re-parsing the cards that need them.**
+  Highest-leverage missing primitives (live counts from `scripts/suggested_vocab.txt`):
+  `effect:gain_power_any_domain` (10), `effect:mode_choice` (9, modal "choose one"),
+  `cost_gated_trigger` (4), `aura:reduce_cost` (3), `effect:play_to_open_battlefield`
+  (3), `effect:reveal_top_n_banish_play` (3), then a long one-off tail. Each new
+  primitive = engine_vocab entry + handler/condition + a targeted re-parse of the
+  cards that need it (a primitive alone flips nothing until those cards are re-parsed).
+  Turnkey for a future parse (needs `ANTHROPIC_API_KEY`; not available in dev/CI):
   ```
   export ANTHROPIC_API_KEY=...            # required by generate_effects.py
-  uv run python scripts/generate_effects.py   # emits effects[]; flags un-expressible
+  RBSIM_PARSER_MODEL=claude-sonnet-5 \
+    uv run python scripts/generate_effects.py --retry-review   # reprocess flagged
   uv run python scripts/coverage_audit.py      # re-measure; eyeball COVERAGE_REPORT.md
   RBSIM_REGEN_GOLDEN=1 uv run pytest tests/test_golden_games.py -q  # if gameplay changed
   uv run pytest -q                             # must stay green
   ```
-  Before/alongside a parse, add the **highest-leverage missing engine primitives** so
-  the parser can express more (counts from `scripts/suggested_vocab.txt`): top are
-  `target:all_friendly_units_anywhere` (13), `effect:mode_choice` (8, modal "choose
-  one"), `effect:gain_power_any_domain` (7), `cost:kill_self` (7), `aura:reduce_cost`
-  (6). Each new primitive = engine_vocab entry + handler/condition + a re-parse of the
-  cards that need it. Prioritize any card that enters a meta deck. Note: adding a
-  primitive alone flips nothing until those cards are re-parsed to use it.
+  Note on cost/model: Sonnet-5 parsed the ~209-card empty tail for ≈ $2.3. A full
+  Opus pass on the same set is ~5× (≈ $9+), and the evidence above says it buys
+  little — reserve Opus (if ever) for a small, curated set of cards you have a
+  specific reason to believe are model-misses rather than vocab gaps. Prioritize
+  any card that enters a meta deck.
 - **Meta INERT (2 left, need subsystems):** Diana Scorn / Ornn legends (earmarked-
   resource: energy only in showdowns / power only for gear) and Diana Lunari
   (showdown-begin predict/draw on the golden champion → golden regen).
