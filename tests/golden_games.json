@@ -3,12 +3,12 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Tideturner"
+          "A": [],
+          "B": [
+            "Bewitching Spirit"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": null
         },
         {
           "A": [],
@@ -17,47 +17,46 @@
           "last_controller": null
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Traveling Merchant"
+          "Tideturner"
         ],
-        "deck": 20,
-        "energy": 12,
+        "deck": 23,
+        "energy": 10,
         "hand": 0,
         "power_pool": {
           "CHAOS": 7,
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 18
+        "trash": 16
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
           "Gold",
-          "Recruit",
-          "Noxus Hopeful"
+          "Recruit"
         ],
-        "deck": 23,
-        "energy": 8,
-        "hand": 2,
+        "deck": 24,
+        "energy": 10,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 6,
           "FURY": 6
         },
         "runes_in_play": 12,
-        "trash": 14
+        "trash": 13
       },
-      "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 17,
-      "turns": 20,
-      "units_played": 22,
-      "winner": "A",
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 15,
+      "turns": 17,
+      "units_played": 20,
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
@@ -585,7 +584,7 @@
         },
         {
           "A": [
-            "Pyke Dockside Butcher"
+            "Tideturner"
           ],
           "B": [],
           "controller": "A",
@@ -860,69 +859,59 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Bewitching Spirit"
+          "A": [],
+          "B": [
+            "Yasuo Remorseful"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
+          "controller": "B",
+          "last_controller": "A"
         },
         {
-          "A": [
-            "Pyke Dockside Butcher"
+          "A": [],
+          "B": [
+            "Adaptatron"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Baron Nashor"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
+          "controller": "B",
+          "last_controller": "A"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 1,
-        "base_units": [
-          "Baron Nashor"
-        ],
+        "base_units": [],
         "deck": 28,
-        "energy": 0,
-        "hand": 2,
+        "energy": 6,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 1,
-          "FURY": 6
+          "CHAOS": 4,
+          "FURY": 5
         },
-        "runes_in_play": 7,
-        "trash": 6
+        "runes_in_play": 9,
+        "trash": 10
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 0,
         "base_units": [
-          "Yasuo Remorseful"
+          "Adaptatron"
         ],
-        "deck": 28,
-        "energy": 1,
+        "deck": 23,
+        "energy": 0,
         "hand": 2,
         "power_pool": {
-          "CALM": 1,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 7,
-        "trash": 8
+        "runes_in_play": 10,
+        "trash": 11
       },
-      "points_A": 8,
-      "points_B": 3,
-      "spells_cast": 5,
-      "turns": 13,
+      "points_A": 6,
+      "points_B": 8,
+      "spells_cast": 10,
+      "turns": 14,
       "units_played": 12,
-      "winner": "A",
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 1
     },
@@ -1195,7 +1184,7 @@
           "Noxus Hopeful"
         ],
         "deck": 25,
-        "energy": 4,
+        "energy": 0,
         "hand": 1,
         "power_pool": {
           "CHAOS": 4,
@@ -1419,7 +1408,7 @@
           "Noxus Hopeful"
         ],
         "deck": 24,
-        "energy": 9,
+        "energy": 7,
         "hand": 1,
         "power_pool": {
           "CHAOS": 4,

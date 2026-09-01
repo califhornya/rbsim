@@ -13,7 +13,6 @@ from .effects import REGISTRY as EFFECT_REGISTRY
 from .effects import _amount as _effect_amount
 from .effects import _passes_filter as _effect_passes_filter
 from .enums import Domain
-from .legion_effects import get_legion_cost_reduction
 from .movement_effects import MOVEMENT_REGISTRY
 from riftbound.registry.engine_vocab import (
     KNOWN_TRIGGERS,
@@ -1293,12 +1292,11 @@ class GameLoop:
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, (UnitCard, LegendCard)):
-                effective_energy = card.cost_energy
-                if card.has_keyword("LEGION") and cards_played_this_turn > 0:
-                    legion_reduction = get_legion_cost_reduction(card.name)
-                    if legion_reduction is not None:
-                        effective_energy = max(0, card.cost_energy - legion_reduction)
-                effective_energy = max(0, effective_energy - self._cost_reduction(card, ap))
+                # LEGION cost reductions are handled generically by _cost_reduction
+                # (the reduce_cost effect gated on you_already_played_another_card_
+                # this_turn). The old hardcoded get_legion_cost_reduction path was
+                # redundant and double-counted (Noxus Hopeful cost 0 instead of 2).
+                effective_energy = max(0, card.cost_energy - self._cost_reduction(card, ap))
                 if not ap.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
                     return
                 if not ap.pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
