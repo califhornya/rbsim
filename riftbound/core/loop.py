@@ -1447,18 +1447,25 @@ class GameLoop:
                     return
                 if not ap.pay_cost(gear_energy, card.cost_power, card.cost_power_domain):
                     return
-                target_bf = self.gs.battlefields[lane if lane is not None else 0]
-                friendly_units = target_bf.units_A if self.gs.active == "A" else target_bf.units_B
-
-                if friendly_units:
-                    target_unit = friendly_units[0]
-                    target_unit.gear.append(card)
-                    if self.verbose:
-                        print(f"  {ap.name} plays GEAR: {card.name} -> {target_unit.card.name}")
-                else:
+                # §146.1.a.1: gear is played to the controller's BASE (unattached).
+                # Equipment attaches later via its Equip ability — a separate action
+                # that pays the Equip cost. It must NOT auto-attach for free on play.
+                # EXCEPTION: QUICK-DRAW (§745.1.d) attaches to a unit you control as
+                # it is played.
+                attached_to = None
+                if card.has_keyword("QUICK-DRAW"):
+                    target_bf = self.gs.battlefields[lane if lane is not None else 0]
+                    friendly_units = target_bf.units_A if self.gs.active == "A" else target_bf.units_B
+                    if friendly_units:
+                        attached_to = friendly_units[0]
+                        attached_to.gear.append(card)
+                if attached_to is None:
                     ap.base_gear.append(card)
-                    if self.verbose:
-                        print(f"  {ap.name} plays GEAR: {card.name} (staged at base)")
+                if self.verbose:
+                    if attached_to is not None:
+                        print(f"  {ap.name} plays GEAR (QUICK-DRAW): {card.name} -> {attached_to.card.name}")
+                    else:
+                        print(f"  {ap.name} plays GEAR: {card.name} (to base)")
 
                 ap.remove_from_hand(idx)
                 if self.recorder:
