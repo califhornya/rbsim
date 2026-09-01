@@ -9,6 +9,16 @@ dependencies = [
     "pydantic>=2.8.2",
     "sqlalchemy>=2.0.35",
     "anthropic>=0.103.1",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+# The reinforcement-learning / self-play training stack. Kept optional so the core
+# engine stays light and fast; install on a (rented, GPU) training machine with:
+#   uv sync --extra rl
+# torch selects CUDA automatically when available (see riftbound/ai — CUDA-aware).
+rl = [
+    "torch>=2.2",
 ]
 
 [project.scripts]
