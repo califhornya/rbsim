@@ -50,6 +50,18 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.gain_energy(amount, target=target)
 
 
+@effect("add_earmarked_energy")
+def _add_earmarked_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.add_earmarked_energy(int(spec.get("amount", 1)),
+                             target=str(spec.get("target", "actor")))
+
+
+@effect("add_earmarked_power")
+def _add_earmarked_power(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.add_earmarked_power(int(spec.get("amount", 1)),
+                            target=str(spec.get("target", "actor")))
+
+
 @effect("ready_units")
 def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))

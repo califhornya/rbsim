@@ -15939,7 +15939,17 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "add_earmarked_power",
+        "trigger": "activated",
+        "target": "actor",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-190",
@@ -23571,7 +23581,17 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "add_earmarked_energy",
+        "trigger": "activated",
+        "target": "actor",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-198",

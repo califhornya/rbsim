@@ -62,6 +62,9 @@ class Player:
     base_gear: List[Card] = field(default_factory=list)
 
     energy: int = 0
+    # Earmarked resources (§ restricted-use). Cleared each turn with energy/power.
+    earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
+    earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)

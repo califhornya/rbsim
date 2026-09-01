@@ -195,6 +195,18 @@ class EffectContext:
         player = self._player_for_target(target)
         player.energy += amount
 
+    def add_earmarked_energy(self, amount: int, *, target: str = "actor") -> None:
+        """Add energy usable only during showdowns (Diana Scorn, §earmark)."""
+        if amount == 0:
+            return
+        self._player_for_target(target).earmarked_energy_showdown += amount
+
+    def add_earmarked_power(self, amount: int, *, target: str = "actor") -> None:
+        """Add generic power usable only to play/use gear (Ornn, §earmark)."""
+        if amount == 0:
+            return
+        self._player_for_target(target).earmarked_power_gear += amount
+
     def ready_units(self, *, target: str = "actor", scope: str = "all") -> None:
         units = self._units_for_target(target)
         if not units:
@@ -328,6 +340,8 @@ class GameLoop:
         # Clear leftover resources from last turn before channeling
         active_player.energy = 0
         active_player.power_pool.clear()
+        active_player.earmarked_energy_showdown = 0
+        active_player.earmarked_power_gear = 0
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
