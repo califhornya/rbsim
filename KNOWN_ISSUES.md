@@ -461,15 +461,13 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Test:** `tests/test_accelerate.py` asserts a normally-played unit enters `ready
   is False`; combat/ready-up paths cover the ready transitions.
 
-## 22. (OPEN) AMBUSH deploy into a contested lane doesn't spawn a nested showdown
-- **What:** AMBUSH (Rengar Trophy Hunter) deploys a champion onto a battlefield lane at
-  reaction speed (`_deploy_ambush_champion`). `Battlefield.add_unit` sets
-  `contested_this_turn`/`showdown_pending`, but the deploy does not itself trigger a nested
-  `_run_showdown` from inside the reaction/showdown loop (unlike the main-phase MOVE branch).
-  Contestation is left to the normal flow. Correct for the common blocker case; a deploy
-  that should immediately force a showdown is under-modeled.
-- **Fix (future):** after an AMBUSH deploy that makes a lane contested outside an existing
-  showdown, mirror the MOVE branch and invoke `_run_showdown(lane, attacker)`.
+## 22. (RESOLVED) AMBUSH deploy into a contested lane spawns a showdown
+- **Fix:** `_deploy_ambush_champion` now, after placing the champion, checks whether the
+  lane is contested (both sides have units) and calls `_run_showdown(lane, attacker)` —
+  mirroring the main-phase MOVE branch. `_run_showdown` self-guards on `showdown_active`,
+  so a deploy made DURING an existing showdown does not nest: the champion joins the
+  current lane's combat (resolved at end of turn via `contested_this_turn`).
+- **Test:** `tests/test_nested_ambush.py` (spawns on contest; no nesting mid-showdown).
 
 ## 23. (PARTIAL) HIDDEN keyword — core loop done; two faithful nuances deferred
 - **Done (§737/§408/§106.4):** Hide (main phase, Open State, pay 1 power, place facedown at

@@ -37,19 +37,18 @@ DONE this pass:
 - [DONE] **Attached-gear [tap] abilities** (2.5) — `_controlled_attached_gear` /
   `_controls_gear`.
 
-Open, each a slice to schedule (none is meta — the meta decks are fully modeled):
-- **Quick-Draw §745 reaction-speed timing** — attach-on-play is done and gated on the
-  keyword; still missing: playing a Quick-Draw gear during a reaction / showdown
-  window (its Reaction half). Meta gear exists (Long Sword, Sterak's Gage, Cloth
-  Armor) but the attach itself already works; only the reaction timing is absent.
-- **Modal "choose one"** effect (`mode_choice`, 9 non-meta cards) — a new effect that
-  offers the modes as a decision.
-- **Action §732 on units** — units with ACTION can't be played in showdowns (only
-  spells). No current deck has an ACTION unit, but §732.1.c.1 requires it.
-- **Vision §743 faithful** — authored as `predict 1`, which no-ops (safe "keep top");
-  a true look-at-top-1-with-optional-recycle needs a primitive + an agent decision.
-- **Nested AMBUSH showdown (#22)** — an AMBUSH deploy into a contested lane sets the
-  contested flags but doesn't spawn a nested showdown.
+- [DONE] **Quick-Draw §745 reaction timing** (2.2) — offered/played in reaction +
+  showdown windows.
+- [DONE] **Modal "choose one"** (2.6) — `mode_choice` effect + `decide_mode`; Minah
+  authored (the other ~8 modal cards are now parser-authorable).
+- [DONE] **Action §732 on units** (2.7) — ACTION units playable in showdowns.
+- [DONE] **Vision §743** (2.8) — predict n==1 now looks + optionally recycles.
+- [DONE] **Nested AMBUSH showdown** (2.9, #22) — AMBUSH into a contested lane spawns a
+  showdown; no nesting during an existing showdown.
+
+**Item 2 is complete — every §731–747 keyword and every core-system row in
+MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse below
+(non-meta empty-effects cards), which needs an API key; it does not gate the meta.
 
 ## Engine mechanics (KNOWN_ISSUES)
 - **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`

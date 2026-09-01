@@ -47,7 +47,7 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 | **on_showdown_begin** (Diana Lunari) | — | DONE | `loop.py:_run_showdown` + `reveal_top_draw_if_spell` | when a showdown begins at a unit's battlefield, its controller's trigger fires; Diana Lunari optionally pays [1] to reveal the top card and draw it if a spell. `test_diana_lunari.py`. (Predict-recycle half simplified.) |
 | Combat + damage-assignment order | §437/§460 | DONE | `combat.py` | Tank/backline order; conservation invariant (`test_invariants.py`, #24 fix). |
 | Showdowns | §450s | DONE | `loop.py` `_run_showdown` | ACTION/REACTION timing. |
-| Nested showdown from AMBUSH | — | GAP | — | AMBUSH into a contested lane sets flags but doesn't spawn a nested showdown (KNOWN_ISSUES #22). |
+| Nested showdown from AMBUSH | — | DONE | `_deploy_ambush_champion` | an AMBUSH deploy into a contested lane spawns a showdown (mirrors move-into-contested); `_run_showdown` self-guards on `showdown_active`, so a deploy during an existing showdown joins the current combat rather than nesting. `test_nested_ambush.py`. (#22 resolved.) |
 | Conquer / hold / scoring | §450s | DONE | `loop.py` | `test_hold_conquer.py`. |
 | Movement | §430s | DONE | `loop.py`, `legality.py` | incl. Ganking bf→bf. |
 | Triggers / timing windows | §360s | DONE | `loop.py` trigger dispatch | KNOWN_TRIGGERS in `engine_vocab.py`. |

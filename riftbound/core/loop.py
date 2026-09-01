@@ -1255,7 +1255,8 @@ class GameLoop:
             return False
         if not ap.pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
             return False
-        self.gs.battlefields[lane].add_unit(side, UnitInPlay(card=champ, ready=False))
+        bf = self.gs.battlefields[lane]
+        bf.add_unit(side, UnitInPlay(card=champ, ready=False))
         if side == "A":
             self.gs.champion_A_deployed = True
         else:
@@ -1266,6 +1267,13 @@ class GameLoop:
         if self.recorder:
             self.recorder.record_play(side, self.gs.turn, champ, action="UNIT",
                                       battlefield_index=lane)
+        # If the AMBUSH deploy contests the lane, spawn a showdown (#22) — mirrors
+        # the move-into-contested path. _run_showdown self-guards on showdown_active,
+        # so a deploy made DURING a showdown does NOT nest: the champion simply joins
+        # the current combat, which resolves at end of turn (contested_this_turn).
+        if bf.units_A and bf.units_B:
+            bf.contested_this_turn = True
+            self._run_showdown(lane, attacker=side)
         return True
 
     def _fire_first_unit_here(self, side: str, bf: Battlefield, just_moved) -> None:
