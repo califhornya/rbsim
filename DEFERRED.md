@@ -27,15 +27,38 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   contested flags but doesn't itself spawn a nested showdown.
 - **HIDDEN nuances** (#23) — champion-zone hiding (Pyke); from-Hidden targeting
   restriction (on-play effects lane-restricted).
-- **`grant_*` verb parser fix** — `grant_assault`/`grant_shield`/`grant_keyword` are
-  misparses (static keyword vs temporary grant); per-card parser cleanup, not aliases.
+- [DONE] **`grant_*` verb misparses** — fixed the 5 cards: Blood Rush → LIVE
+  (`give_temporary_assault`), Gem Jammer → LIVE (`give_keyword` GANKING; permanent
+  vs "this turn" is a minor documented approximation), and 3 static-keyword misparses
+  (Laurent Duelist, Rengar Pouncing, Needlessly Large Yordle) had their spurious
+  grant effect removed (the ASSAULT/SHIELD is a printed static keyword). Result:
+  **0 engine-fixable INERT remain** — every remaining INERT card is empty-effects.
 - **Burn Out (§431)** — empty-deck handling in `_phase_draw`. The rule text is in
   `Riftbound Core Rules v1.2.pdf` (extractable now via `uv run --with pypdf`); confirm
   §431 exactly, then implement. Changes deck/trash/points → golden regen.
-- **Corpus long tail** — ~212 INERT cards outside the meta decks. Drive with
-  `scripts/generate_effects.py` + new verbs/conditions; prioritize any that later
-  enter a meta deck. Use `scripts/coverage_audit.py` → `COVERAGE_REPORT.md` as the
-  worklist.
+
+- **Corpus long tail — needs the LLM parser (209 empty-effects cards).** ALL
+  remaining INERT cards have `effects: []` (the parser never emitted effects). The
+  fix is re-running `scripts/generate_effects.py`, which calls the Anthropic API and
+  therefore needs `ANTHROPIC_API_KEY` (not available in the dev/CI session — run on a
+  machine/box that has a key). Turnkey:
+  ```
+  export ANTHROPIC_API_KEY=...            # required by generate_effects.py
+  uv run python scripts/generate_effects.py   # emits effects[]; flags un-expressible
+  uv run python scripts/coverage_audit.py      # re-measure; eyeball COVERAGE_REPORT.md
+  RBSIM_REGEN_GOLDEN=1 uv run pytest tests/test_golden_games.py -q  # if gameplay changed
+  uv run pytest -q                             # must stay green
+  ```
+  Before/alongside a parse, add the **highest-leverage missing engine primitives** so
+  the parser can express more (counts from `scripts/suggested_vocab.txt`): top are
+  `target:all_friendly_units_anywhere` (13), `effect:mode_choice` (8, modal "choose
+  one"), `effect:gain_power_any_domain` (7), `cost:kill_self` (7), `aura:reduce_cost`
+  (6). Each new primitive = engine_vocab entry + handler/condition + a re-parse of the
+  cards that need it. Prioritize any card that enters a meta deck. Note: adding a
+  primitive alone flips nothing until those cards are re-parsed to use it.
+- **Meta INERT (2 left, need subsystems):** Diana Scorn / Ornn legends (earmarked-
+  resource: energy only in showdowns / power only for gear) and Diana Lunari
+  (showdown-begin predict/draw on the golden champion → golden regen).
 
 ## Stage 0.5 (match layer)
 - **Strategic / searched battlefield selection.** `play_match` has a pluggable

@@ -10270,7 +10270,7 @@
     ],
     "effects": [
       {
-        "effect": "grant_assault",
+        "effect": "give_temporary_assault",
         "amount": 2
       }
     ]
@@ -10387,7 +10387,7 @@
     ],
     "effects": [
       {
-        "effect": "grant_keyword",
+        "effect": "give_keyword",
         "keyword": "GANKING"
       }
     ]
@@ -10857,12 +10857,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_assault",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-026",
@@ -11729,12 +11724,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_shield",
-        "amount": 5
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-056",
@@ -14711,12 +14701,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_assault",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-157",
