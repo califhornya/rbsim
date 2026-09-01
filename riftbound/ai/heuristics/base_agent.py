@@ -40,3 +40,9 @@ class Agent(ABC):
         preserves the engine's historical "optional effects always resolve"
         behavior. Agents (esp. search) may override to decline or branch."""
         return True
+
+    def decide_predict_recycle(self, card) -> bool:
+        """VISION / PREDICT 1: whether to recycle the revealed top card to the
+        bottom of the deck. Default: no (keep it, the neutral null action). Search
+        / learning agents may override to recycle a bad top card."""
+        return False

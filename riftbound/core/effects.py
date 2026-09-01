@@ -787,13 +787,26 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
-    if n <= 1:
+    if n == 0:
         return
-    top = deck.cards[-n:]
-    rest = deck.cards[:-n]
+    look = deck.cards[-n:]
     # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now.
-    ctx.loop._offer_reveal_from_top(ctx.actor, top)
-    top_sorted = sorted(top, key=lambda c: int(getattr(c, "might", 0) or 0))
+    ctx.loop._offer_reveal_from_top(ctx.actor, look)
+    if n == 1:
+        # PREDICT 1 / VISION (§743): look at the top card; you MAY recycle it to
+        # the bottom of the deck. Deterministic default is to keep (a null action);
+        # a learning agent can override decide_predict_recycle.
+        if not deck.cards:
+            return
+        top = deck.cards[-1]
+        agent = getattr(ctx.actor, "agent", None)
+        if agent is not None and hasattr(agent, "decide_predict_recycle") \
+                and agent.decide_predict_recycle(top):
+            deck.cards.pop()
+            deck.cards.insert(0, top)   # recycle to bottom (front of the list)
+        return
+    rest = deck.cards[:-n]
+    top_sorted = sorted(look, key=lambda c: int(getattr(c, "might", 0) or 0))
     deck.cards[:] = rest + top_sorted  # best might ends up last == drawn next
 
 
