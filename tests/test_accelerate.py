@@ -26,14 +26,18 @@ class _RefuseAccelerate:
         return effect_name != "accelerate"
 
 
-def _play_accel_unit(agent=None, energy=2):
+def _play_accel_unit(agent=None, energy=2, power=1):
+    from riftbound.core.enums import Domain
+    from riftbound.core.player import Rune
     loop = _loop(); ap = loop.gs.A; loop.gs.active = "A"
     if agent is not None:
         ap.agent = agent
-    # domainless ACCELERATE unit: engine charges the [1] energy (the [A] power is a
-    # documented undercharge for domainless units — see MECHANICS.md Accelerate note).
+    # domainless ACCELERATE unit: cost is [1] energy + 1 Power of ANY domain ([A]).
     ap.hand.append(UnitCard(name="Swift Recruit", cost_energy=0, keywords=["ACCELERATE"]))
     ap.energy = energy
+    if power:
+        ap.power_pool[Domain.FURY] = power
+        ap.rune_pool[Domain.FURY] = [Rune(domain=Domain.FURY) for _ in range(power)]
     loop._apply_action(ap, ("UNIT", 0, 0, None))
     units = ap.base_units                       # units play to base (lane ignored)
     assert len(units) == 1
@@ -41,18 +45,29 @@ def _play_accel_unit(agent=None, energy=2):
 
 
 def test_accelerate_enters_ready_when_paid_by_default():
+    from riftbound.core.enums import Domain
     unit, ap = _play_accel_unit()             # no agent -> default yes
     assert unit.ready is True
-    assert ap.energy == 1                      # 2 - 1 (accelerate) = 1
+    assert ap.energy == 1                      # 2 - 1 (accelerate energy)
+    assert ap.power_pool.get(Domain.FURY, 0) == 0   # the [A] power was spent
 
 
 def test_accelerate_is_optional_agent_can_decline():
+    from riftbound.core.enums import Domain
     unit, ap = _play_accel_unit(agent=_RefuseAccelerate())
     assert unit.ready is False                 # declined -> enters exhausted
     assert ap.energy == 2                       # nothing spent on accelerate
+    assert ap.power_pool.get(Domain.FURY, 0) == 1   # power kept
 
 
-def test_accelerate_skipped_when_unaffordable():
+def test_accelerate_skipped_when_no_energy():
     unit, ap = _play_accel_unit(energy=0)
     assert unit.ready is False
     assert ap.energy == 0
+
+
+def test_accelerate_needs_A_power():
+    # energy is available but no Power -> the [A] portion can't be paid -> not ready.
+    unit, ap = _play_accel_unit(energy=2, power=0)
+    assert unit.ready is False
+    assert ap.energy == 2                       # nothing spent (couldn't pay [A])

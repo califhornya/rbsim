@@ -1480,9 +1480,16 @@ class GameLoop:
                 enters_ready = False
                 if card.has_keyword("ACCELERATE"):
                     accel_domain = card.domain
-                    if (ap.can_pay_cost(1, 1, accel_domain)
-                            and self._wants_optional_keyword(ap, card, "accelerate")):
-                        ap.pay_cost(1, 1, accel_domain)
+                    if accel_domain is not None:               # single-domain: match it
+                        can_accel = ap.can_pay_cost(1, 1, accel_domain)
+                    else:                                       # no/multi domain: [A]
+                        can_accel = ap.energy >= 1 and self._can_pay_generic_power(ap, 1)
+                    if can_accel and self._wants_optional_keyword(ap, card, "accelerate"):
+                        if accel_domain is not None:
+                            ap.pay_cost(1, 1, accel_domain)
+                        else:
+                            ap.energy -= 1
+                            self._pay_generic_power(ap, 1)
                         enters_ready = True
                 unit = UnitInPlay(card=card, ready=enters_ready)
                 ap.base_units.append(unit)
