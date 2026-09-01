@@ -50,6 +50,11 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.gain_energy(amount, target=target)
 
 
+@effect("reveal_top_draw_if_spell")
+def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
+
+
 @effect("add_earmarked_energy")
 def _add_earmarked_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.add_earmarked_energy(int(spec.get("amount", 1)),

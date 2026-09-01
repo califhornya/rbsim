@@ -31,6 +31,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "death_replacement",                        # Guardian Angel / Zhonya's
     "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
     "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
+    "on_showdown_begin",                         # a showdown begins at this unit's battlefield (Diana Lunari)
 })
 
 # Condition types accepted by Loop._check_condition.

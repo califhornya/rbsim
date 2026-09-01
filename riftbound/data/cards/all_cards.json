@@ -19676,7 +19676,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_top_draw_if_spell",
+        "trigger": "on_showdown_begin",
+        "target": "actor",
+        "optional": true,
+        "additional_cost": {
+          "energy": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-080",

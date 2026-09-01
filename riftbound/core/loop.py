@@ -195,6 +195,16 @@ class EffectContext:
         player = self._player_for_target(target)
         player.energy += amount
 
+    def reveal_top_draw_if_spell(self, *, target: str = "actor") -> None:
+        """Reveal the top card of the target's Main Deck; if it's a Spell, draw it
+        (Diana Lunari). Top of deck = end of the cards list."""
+        player = self._player_for_target(target)
+        if not player.deck.cards:
+            return
+        top = player.deck.cards[-1]
+        if isinstance(top, SpellCard):
+            player.draw()
+
     def add_earmarked_energy(self, amount: int, *, target: str = "actor") -> None:
         """Add energy usable only during showdowns (Diana Scorn, §earmark)."""
         if amount == 0:
@@ -2196,6 +2206,17 @@ class GameLoop:
         self.gs.showdown_active = True
         self.gs.showdown_bf_idx = bf_idx
         self.gs.focus_player = attacker
+
+        # on_showdown_begin (§Diana Lunari): fire for units at the showdown lane,
+        # each routed to its controller (attacker first, mirroring focus order).
+        sd_bf = self.gs.battlefields[bf_idx]
+        for side in (attacker, self.gs.other(attacker)):
+            actor = self.gs.get_player(side)
+            opponent = self.gs.get_player(self.gs.other(side))
+            for u in list(sd_bf.units_A if side == "A" else sd_bf.units_B):
+                self._resolve_triggered_effects(u.card, "on_showdown_begin", sd_bf,
+                                                actor, opponent,
+                                                context_extra={"battlefield": sd_bf})
 
         passes = 0
         while passes < 2:
