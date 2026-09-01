@@ -2324,6 +2324,14 @@ class GameLoop:
                                 self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
                                 self._run_chain(self.gs.focus_player)
                                 passes = 0
+                elif kind == "UNIT" and idx is not None and 0 <= idx < len(focus_player.hand):
+                    # ACTION unit (§732.1.c.1): played during a showdown (to base).
+                    card = focus_player.hand[idx]
+                    if isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+                        before = len(focus_player.base_units)
+                        self._apply_action(focus_player, ("UNIT", idx, bf_idx, None))
+                        if len(focus_player.base_units) > before:
+                            passes = 0
                 elif kind == "CHAMPION":
                     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
                     if self._deploy_ambush_champion(self.gs.focus_player, bf_idx):

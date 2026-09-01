@@ -213,6 +213,11 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
             if loop._can_pay_showdown(ap, card.cost_energy, card.cost_power, card.cost_power_domain):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
+        # ACTION units (§732.1.c.1): may be played during showdowns (to base).
+        elif isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+                actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
     champ = gs.champion_A if ap.name == "A" else gs.champion_B
     if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
