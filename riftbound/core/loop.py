@@ -291,6 +291,15 @@ class GameLoop:
                 player.trash.append(u.card)
                 player.base_gear.extend(u.gear)
 
+        # Remove unattached TEMPORARY gear at base (§742.1.b; e.g. Spinning Axe:
+        # "if unattached, kill it at the start of its controller's Beginning
+        # Phase"). Attached gear rides its host unit and is left alone.
+        actor = self.gs.get_player(active)
+        temp_gear = [g for g in actor.base_gear if g.has_keyword("TEMPORARY")]
+        for g in temp_gear:
+            actor.base_gear.remove(g)
+            actor.trash.append(g)
+
         # Clear STUN status at the start of the active player's turn
         for bf in self.gs.battlefields:
             for unit in bf.units_A + bf.units_B:
