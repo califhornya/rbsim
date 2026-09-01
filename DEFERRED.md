@@ -16,22 +16,46 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   forces a golden regen (and, like Tideturner did, may surface further latent bugs
   — do it carefully).
 
-## Mechanics gate — remaining (see MECHANICS.md for the full burn-down)
-Keywords §731–747: **13/17 DONE-tested**. Real bugs fixed en route: Legion
-double cost-reduction (Noxus Hopeful cost 0), 3 over-applying cost cards,
-Temporary gear cleanup, Accelerate forced-not-optional. Core systems added:
-Burn Out §418, enters-exhausted confirmed. Still open:
-- **Earmarked resources** (Ornn/Diana legends) — the one META subsystem gap
-  (energy only in showdowns / power only for gear). Needs a restricted pool
-  checked per spend site. Biggest remaining item.
-- **Quick-Draw §745** reaction-speed gear play + gate attach-on-play on the
-  keyword (attach-on-play currently fires for all gear; revisit vs §146.1.a.1
-  "gear plays to base"). Meta gear: Long Sword, Sterak's Gage, Cloth Armor.
-- **`[A]` any-domain power payment** — the [A] portion of a cost is silently
-  free (can_pay/pay treat domain=None as no-power). Minor undercharge.
-- **Modal "choose one"** effect; **Action on units** in showdowns (no meta unit
-  affected); **Vision** faithful look-at-top-1-may-recycle; **nested AMBUSH
-  showdown** (#22). All lower impact / deferred.
+## Mechanics gate — remaining backlog (see MECHANICS.md for the full burn-down)
+These are all REQUIRED for a fully rules-correct engine — none is optional. They
+are ordered by current impact on self-play, but every one must eventually be done;
+"lower impact today" is not "skip". Keywords §731–747: **13/17 DONE-tested**. Bugs
+fixed en route: Legion double cost-reduction (Noxus Hopeful cost 0), gear auto-equip
+for free, equip charging the play cost, 3 over-applying cost cards, Temporary gear
+cleanup, Accelerate forced-not-optional. Systems added: Burn Out §418, gear→base +
+real Equip cost + gear [tap] abilities, enters-exhausted (units + gear).
+
+Open, each a slice to schedule:
+- **Earmarked resources** (Ornn/Diana legends) — META. Energy usable only during
+  showdowns / power usable only for gear. Needs a restricted-pool sub-system checked
+  at each spend site. The one remaining meta-deck gap; biggest single item.
+- **Quick-Draw §745 reaction-speed timing** — attach-on-play is done and correctly
+  gated on the keyword; still missing: playing a Quick-Draw gear during a reaction /
+  showdown window (its Reaction half). Meta gear: Long Sword, Sterak's Gage, Cloth
+  Armor.
+- **`[A]` any-domain power payment** — paying "1 Power of ANY domain" isn't modeled:
+  `can_pay_cost`/`pay_cost` treat `domain=None` as "no power required", so any [A]
+  portion of a cost is silently free (undercharge). Affects Accelerate on domainless
+  units and any [A] cost. (`_pay_generic_power` already exists and is used for
+  `[rune]` equip costs — generalize it to all [A] spends.)
+- **Weaponmaster §747 `[A]` discount accuracy** — the on-play equip approximates the
+  reduced cost as `max(0, gear.cost_energy - 1)` and auto-picks `base_gear[0]`;
+  should choose an Equipment and reduce its real Equip cost by [A].
+- **Complex Equip extra-costs** — a few Equipment pair the resource Equip cost with an
+  additional cost (recycle N / kill a unit / spend XP): Last Rites, Blade of the
+  Ruined King, Shepherd's Heirloom. `_equip_cost` flags these `complex` and charges
+  only the resource part.
+- **Attached-gear [tap] abilities** — `activatable_abilities` scans only `base_gear`
+  for gear abilities; an Equipment with a [tap] ability usable while attached to a
+  unit isn't offered.
+- **Modal "choose one"** effect (`mode_choice`, 9 cards).
+- **Action §732 on units** — units with ACTION can't be played in showdowns (only
+  spells). No current deck has an ACTION unit, but the rule (§732.1.c.1) requires it.
+- **Vision §743 faithful** — currently authored as `predict 1`, which no-ops (safe
+  "keep top"); a true look-at-top-1-with-optional-recycle needs a primitive + an
+  agent decision.
+- **Nested AMBUSH showdown (#22)** — an AMBUSH deploy into a contested lane sets the
+  contested flags but doesn't spawn a nested showdown.
 
 ## Engine mechanics (KNOWN_ISSUES)
 - **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`
@@ -47,8 +71,9 @@ Burn Out §418, enters-exhausted confirmed. Still open:
   from-trash play action + banish-after-resolve.
 - **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
   corpus cards; value-swap in `_amount`, a trigger after `player.burn`.
-- **`enters_exhausted`** (#21) — units that enter exhausted (e.g. Patched Porobot's
-  reminder) currently enter ready.
+- [DONE] **`enters_exhausted`** (#21) — units already enter exhausted per §142.4
+  (UnitInPlay.ready defaults False, all deploy paths use it); and "This enters
+  exhausted" gear now enters tapped. KNOWN_ISSUES #21 marked RESOLVED.
 - **AMBUSH nested showdown** (#22) — an AMBUSH deploy into a contested lane sets the
   contested flags but doesn't itself spawn a nested showdown.
 - **HIDDEN nuances** (#23) — champion-zone hiding (Pyke); from-Hidden targeting

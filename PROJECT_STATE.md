@@ -1,6 +1,6 @@
 # State of the Project & What Comes Next
 
-_Last updated: 2026-08-31 · branch `claude/handoff-60239e`_
+_Last updated: 2026-09-01 · branch `claude/handoff-60239e`_
 
 This document is the single honest snapshot of where the Riftbound simulator
 stands, what was built recently, and the road to the real goal: a **self-play
@@ -8,36 +8,45 @@ learning environment** where an agent teaches itself to pilot each deck (mulliga
 Nocturne every time, open the right battlefield, play the correct on-play vs.
 on-draw line) by playing millions of games against itself.
 
-> **Stage 0 progress (this session).** A coverage audit tool now measures exactly
-> which cards the engine models (`scripts/coverage_audit.py` → `COVERAGE_REPORT.md`).
-> Corpus: **669 LIVE / 213 INERT / 48 VANILLA** (was 660 / 222 / 48). Across the
-> **8 meta decks: 6 of 8 decks are now fully modeled**, with only **4 distinct
-> INERT cards left**. Shipped this session: spells→trash (#19a), two on-play
-> conditions, three battlefield rule-modifiers (Void Gate / Heisho Shell /
-> Sandswept Tomb), the optional-effect ("you may") seam, Nocturne's top-of-deck
-> banish+play, **AMBUSH** (reaction-speed champion deploy), the **HIDDEN** keyword
-> (hide / play-from-hidden / cleanup), **Switcheroo** (might-swap), and **Star
-> Spring** (first-unit-here retreat). ~200 tests; golden green throughout.
+> **This session — the engine CORRECTNESS gate.** We shifted from "how many cards
+> are modeled" to "are the game DYNAMICS correct", because a self-play agent exploits
+> any wrong rule. Built `MECHANICS.md` — a burn-down of every rules-defined mechanic
+> (keywords §731–747 + core systems), status per row, grounded in the Core Rules PDF.
+> The insight: the coverage audit only proves a verb is *recognized*, never that it
+> matches the rules — so "LIVE" hid real bugs. Auditing against the rules caught and
+> fixed several **exploitable** bugs:
+>   - **Legion double cost-reduction** — Noxus Hopeful (pyke meta deck) cost **0
+>     instead of 2**.
+>   - **Gear auto-equipped for FREE on play** — skipped the Equip cost and action.
+>   - **Equip charged the play cost**, not the real EQUIP-ability cost.
+>   - **3 cost cards too cheap** (Concentrate stacking, Drag Under, Keeper of Law).
+>   - **Accelerate forced**, not the optional choice §731.2 requires.
+>   - **Temporary gear** never cleaned off the board; **26 gear cards' [tap] abilities
+>     were unreachable** (completely inert).
 >
-> **Tideturner is now LIVE** — the blocking bug (KNOWN_ISSUES #24: UnitInPlay value
-> equality causing wrong-duplicate removal / card loss) was root-caused and fixed by
-> making UnitInPlay identity-equal, which also hardened every `in`/`remove` unit site
-> in the engine against silent card loss.
+> Also implemented **Burn Out §418** (deck-out: recycle trash + award a point) and a
+> full **gear overhaul** (play→base, real Equip cost, Quick-Draw attach-on-play,
+> gear [tap] abilities with tap-state, enters-exhausted). Verified: Assault / Shield /
+> Tank / Deathknell / Ganking / Equip / Deflect / enters-exhausted.
 >
-> **Remaining 3 meta INERT cards** (all niche, deferred): **Diana Scorn** & **Ornn**
-> legends — need an earmarked-resource sub-system (energy only in showdowns / power
-> only for gear); a loose version would deviate from the rules. **Diana Lunari** — a
-> showdown-begin predict/draw ability on the golden diana champion.
+> Keywords: **13/17 DONE-tested**. **Suite ~258 green**; golden regenerated twice for
+> legitimate rule fixes (Legion, gear), conservation intact throughout. ~15 commits,
+> all pushed.
 >
-> **Stage 0.5 + RL env skeleton are now in.** `riftbound/core/match.py` plays Bo3
-> matches (§458: one battlefield per player per game, no reuse, loser chooses first);
-> `riftbound/ai/env.py` (`RiftboundEnv`) is a gym-style single-agent RL environment
-> over the real engine (reset/step/legal_actions/observation/reward vs a fixed
-> opponent), built on the existing `SessionDriver` + information-set `Observation`.
-> **Everything parked for later is consolidated in `DEFERRED.md`** — the clean
-> resume point (remaining meta cards, engine long-tail, sideboards + searched
-> battlefield selection, and the RL path: tensor encoding → policy/value net →
-> guided MCTS → self-play training).
+> **The remaining backlog is tracked in `DEFERRED.md` and `MECHANICS.md`, and every
+> item there is required — none is optional.** Top of the list: **earmarked resources**
+> (Ornn/Diana legends — the last *meta* subsystem), then the gear/keyword remainders
+> (Quick-Draw reaction timing, `[A]` power payment, Weaponmaster [A] discount, complex
+> Equip costs, attached-gear tap abilities, modal choose-one, Action-on-units, Vision,
+> nested AMBUSH), then the corpus long-tail (needs engine primitives + an API-key
+> parse), then **scaling the RL training** (the pipeline is built and verified; this is
+> the "run it big on a GPU" phase).
+>
+> **Earlier milestones (still true):** coverage audit + `COVERAGE_REPORT.md`; corpus
+> **706 LIVE / 176 INERT** after a Sonnet parse; Tideturner + the #24 conservation fix;
+> AMBUSH / HIDDEN / Switcheroo / Star Spring; Stage 0.5 Bo3 match layer
+> (`riftbound/core/match.py`, §458); and the full RL path — `riftbound/ai/`
+> encoding → net → guided MCTS → self-play training, plus learned mulligan/battlefield.
 
 ---
 
