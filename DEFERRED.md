@@ -56,9 +56,12 @@ Progress:
    CUDA-aware, masked policy, checkpoint save/load; tests in `tests/test_net.py` are
    torch-gated and run after `uv sync --extra rl`).
 
+3. [DONE] **Network-guided MCTS** (PUCT) — `riftbound/ai/net_mcts.py`
+   (`NetGuidedMCTSAgent`): net priors steer selection, net value evaluates leaves
+   (no rollout), most-visited root action chosen; exposes `last_visits` (the policy
+   target for training). torch-gated tests in `tests/test_net_mcts.py`.
+
 Still to build, in order:
-3. **Network-guided MCTS** (PUCT) — reuse the tree machinery from `ismcts_agent.py`,
-   using `net.predict` for priors + value instead of random rollouts.
 4. **Self-play + training loop** — a headless script (clone → `uv sync --extra rl` →
    run on a rented GPU box) that generates games with the guided MCTS, stores
    (state, policy target, outcome), and trains the net. Where the agent finally
