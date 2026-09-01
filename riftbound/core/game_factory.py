@@ -76,6 +76,30 @@ def resolve_starter(rng: random.Random, first_player: str) -> str:
     return "A"
 
 
+def _select_battlefield(bfs, choice, rng):
+    """Pick one battlefield card from a deck's up-to-3. ``choice`` may be None
+    (random, historical default), an int index, or a battlefield card name. An
+    out-of-range / unknown choice falls back to random so callers can't crash a
+    build on a bad selection."""
+    if not bfs:
+        return None
+    if choice is None:
+        return rng.choice(bfs)
+    if isinstance(choice, int):
+        return bfs[choice] if 0 <= choice < len(bfs) else rng.choice(bfs)
+    for card in bfs:
+        if card.name == choice:
+            return card
+    return rng.choice(bfs)
+
+
+def deck_battlefield_names(path: Path) -> list[str]:
+    """The battlefield card names a deck declares (its up-to-3 choices), for a
+    match harness / UI to pick from."""
+    _cards, _runes, _champ, _legend, bfs = make_deck_from_file(path)
+    return [c.name for c in bfs]
+
+
 def build_game(
     *,
     game_seed: int,
@@ -87,12 +111,19 @@ def build_game(
     starting_energy: int = 0,
     first_player: str = "random",
     max_turns: int = 40,
+    bf_a: "Optional[object]" = None,
+    bf_b: "Optional[object]" = None,
 ) -> GameState:
     """Build a fully-seeded :class:`GameState` from decks + agent names.
 
     ``ai_a``/``ai_b`` may be ``None`` to leave a seat agent-less (the loop treats
     a ``None`` agent as an always-PASS player — used by drivers that inject their
     own decisions). The RNG order matches the historical CLI exactly.
+
+    ``bf_a``/``bf_b`` optionally force each seat's battlefield choice (a battlefield
+    card name, or an index into the deck's up-to-3). Left as ``None`` the choice is
+    random (historical behaviour, unchanged). Explicit selection is what the Bo3
+    match harness uses to implement §458 "players choose, no reuse".
     """
     rng = random.Random(game_seed)
 
@@ -122,8 +153,8 @@ def build_game(
     # Use an INDEPENDENT rng so the choice never perturbs deck/rune shuffles above
     # (keeps existing draw determinism); across many seeds all 3 get exercised.
     bf_rng = random.Random((game_seed * 2654435761) & 0xFFFFFFFF)
-    bf_slot_A = bf_rng.choice(bfs_a) if bfs_a else None
-    bf_slot_B = bf_rng.choice(bfs_b) if bfs_b else None
+    bf_slot_A = _select_battlefield(bfs_a, bf_a, bf_rng)
+    bf_slot_B = _select_battlefield(bfs_b, bf_b, bf_rng)
     battlefields = [Battlefield(card=bf_slot_A), Battlefield(card=bf_slot_B)]
 
     return GameState(
