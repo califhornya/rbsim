@@ -23840,7 +23840,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_ally_here_to_base",
+        "trigger": "on_first_unit_here",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "UNL-216",

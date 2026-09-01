@@ -31,6 +31,9 @@ class Battlefield:
     contested_this_turn: bool = False
     scored_this_turn_A: bool = False
     scored_this_turn_B: bool = False
+    # "First non-token unit played here this turn" per side (Star Spring trigger).
+    first_unit_here_A: bool = False
+    first_unit_here_B: bool = False
 
     last_controller: Optional[str] = None
     showdown_pending: bool = False
@@ -60,6 +63,8 @@ class Battlefield:
         self.contested_this_turn = False
         self.scored_this_turn_A = False
         self.scored_this_turn_B = False
+        self.first_unit_here_A = False
+        self.first_unit_here_B = False
         self.showdown_pending = False
 
     def ready_side(self, who: str) -> None:

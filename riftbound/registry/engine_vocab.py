@@ -30,6 +30,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "cost_modifier",                            # reduce_cost effects
     "death_replacement",                        # Guardian Angel / Zhonya's
     "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
+    "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -115,7 +116,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
 # - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
+# - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
-    "play_from_top", "ambush",
+    "play_from_top", "ambush", "move_ally_here_to_base",
 })

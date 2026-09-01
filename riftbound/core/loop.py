@@ -1034,6 +1034,39 @@ class GameLoop:
                                       battlefield_index=lane)
         return True
 
+    def _fire_first_unit_here(self, side: str, bf: Battlefield, just_moved) -> None:
+        """Battlefield 'first non-token unit played here each turn' trigger (Star
+        Spring: 'they may move another unit they control here to its base'). Fires
+        once per side per turn. Optional (decide_optional). Deterministic stand-in:
+        retreat the lowest-might OTHER friendly unit here to base."""
+        if just_moved is None or just_moved.is_token:
+            return
+        already = bf.first_unit_here_A if side == "A" else bf.first_unit_here_B
+        if already:
+            return
+        if side == "A":
+            bf.first_unit_here_A = True
+        else:
+            bf.first_unit_here_B = True
+        spec = CARD_REGISTRY.get(bf.card.name) if bf.card is not None else None
+        if spec is None:
+            return
+        es = next((e for e in spec.effects
+                   if e.trigger == "on_first_unit_here" and e.effect == "move_ally_here_to_base"), None)
+        if es is None:
+            return
+        if not self._wants_optional(self.gs.get_player(side), bf.card, es):
+            return
+        here = bf.units_A if side == "A" else bf.units_B
+        others = [u for u in here if u is not just_moved and not u.is_token]
+        if not others:
+            return
+        victim = min(others, key=lambda u: u.might)
+        bf.remove_unit(side, victim)
+        self.gs.get_player(side).base_units.append(victim)
+        if self.verbose:
+            print(f"  Star Spring: {side} retreats {victim.card.name} to base")
+
     # ------------------------------------------------------------------
     # HIDDEN keyword (Core Rules §737 / §408 / §106.4)
 
@@ -1478,6 +1511,9 @@ class GameLoop:
                     handler(ap, opponent, self.gs, unit, "base", "bf", target_bf)
                 self._resolve_triggered_effects(unit.card, "on_move", target_bf, ap, opponent,
                                                 context_extra={"battlefield": target_bf})
+                # Battlefield "first non-token unit played here this turn" trigger
+                # (Star Spring). Fires once per side per turn at this battlefield.
+                self._fire_first_unit_here(side, target_bf, unit)
 
             elif dst == base_index:
                 src_bf = self.gs.battlefields[src]
