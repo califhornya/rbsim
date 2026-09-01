@@ -16,6 +16,23 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   forces a golden regen (and, like Tideturner did, may surface further latent bugs
   — do it carefully).
 
+## Mechanics gate — remaining (see MECHANICS.md for the full burn-down)
+Keywords §731–747: **13/17 DONE-tested**. Real bugs fixed en route: Legion
+double cost-reduction (Noxus Hopeful cost 0), 3 over-applying cost cards,
+Temporary gear cleanup, Accelerate forced-not-optional. Core systems added:
+Burn Out §418, enters-exhausted confirmed. Still open:
+- **Earmarked resources** (Ornn/Diana legends) — the one META subsystem gap
+  (energy only in showdowns / power only for gear). Needs a restricted pool
+  checked per spend site. Biggest remaining item.
+- **Quick-Draw §745** reaction-speed gear play + gate attach-on-play on the
+  keyword (attach-on-play currently fires for all gear; revisit vs §146.1.a.1
+  "gear plays to base"). Meta gear: Long Sword, Sterak's Gage, Cloth Armor.
+- **`[A]` any-domain power payment** — the [A] portion of a cost is silently
+  free (can_pay/pay treat domain=None as no-power). Minor undercharge.
+- **Modal "choose one"** effect; **Action on units** in showdowns (no meta unit
+  affected); **Vision** faithful look-at-top-1-may-recycle; **nested AMBUSH
+  showdown** (#22). All lower impact / deferred.
+
 ## Engine mechanics (KNOWN_ISSUES)
 - **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`
   only to the card being played (self-cost, `loop.py:878`); it has no AURA form that
