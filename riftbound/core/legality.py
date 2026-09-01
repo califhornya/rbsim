@@ -192,6 +192,12 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
+        # QUICK-DRAW gear (§745): has Reaction — playable at reaction speed.
+        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
+                for lane in range(n_bf):
+                    actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion to a legal lane at reaction speed.
     champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
     if champ is not None and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
@@ -218,6 +224,11 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
             energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
             if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
                 actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
+        # QUICK-DRAW gear (§745): has Reaction — playable during a showdown.
+        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
+                actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
     champ = gs.champion_A if ap.name == "A" else gs.champion_B
     if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)

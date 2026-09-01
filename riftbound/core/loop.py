@@ -2233,6 +2233,14 @@ class GameLoop:
                                 player.remove_from_hand(idx)
                                 self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
                                 passes = 0
+                elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
+                    # QUICK-DRAW gear (§745): played at reaction speed.
+                    card = player.hand[idx]
+                    if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+                        before = len(player.hand)
+                        self._apply_action(player, ("GEAR", idx, lane if lane is not None else 0, None))
+                        if len(player.hand) < before:
+                            passes = 0
                 elif kind == "CHAMPION":
                     # AMBUSH: deploy the champion to a lane at reaction speed. Not a
                     # spell → resolves immediately (no chain), then priority reopens.
@@ -2331,6 +2339,14 @@ class GameLoop:
                         before = len(focus_player.base_units)
                         self._apply_action(focus_player, ("UNIT", idx, bf_idx, None))
                         if len(focus_player.base_units) > before:
+                            passes = 0
+                elif kind == "GEAR" and idx is not None and 0 <= idx < len(focus_player.hand):
+                    # QUICK-DRAW gear (§745): played during a showdown.
+                    card = focus_player.hand[idx]
+                    if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+                        before = len(focus_player.hand)
+                        self._apply_action(focus_player, ("GEAR", idx, bf_idx, None))
+                        if len(focus_player.hand) < before:
                             passes = 0
                 elif kind == "CHAMPION":
                     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
