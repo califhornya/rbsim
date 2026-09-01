@@ -42,9 +42,9 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   (Laurent Duelist, Rengar Pouncing, Needlessly Large Yordle) had their spurious
   grant effect removed (the ASSAULT/SHIELD is a printed static keyword). Result:
   **0 engine-fixable INERT remain** — every remaining INERT card is empty-effects.
-- **Burn Out (§431)** — empty-deck handling in `_phase_draw`. The rule text is in
-  `Riftbound Core Rules v1.2.pdf` (extractable now via `uv run --with pypdf`); confirm
-  §431 exactly, then implement. Changes deck/trash/points → golden regen.
+- [DONE] **Burn Out** — implemented per §418 (not §431, which is Move cleanup):
+  `loop.py:_draw_one`/`_burn_out` recycle trash into the deck (randomized), award an
+  opponent 1 point, then complete the draw. `tests/test_burnout.py`. Golden unaffected.
 
 - **Corpus long tail — the bottleneck is engine PRIMITIVES, not the parser model.**
   A Sonnet-5 parse pass (`--only-empty`, commit `29da7bb`) took the corpus from

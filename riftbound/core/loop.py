@@ -177,7 +177,7 @@ class EffectContext:
 
         player = self._player_for_target(target)
         for _ in range(count):
-            card = player.draw()
+            card = self.loop._draw_one(player)   # Burn Out (§418) when deck empties
             if not card:
                 break
             if self.loop.recorder:
@@ -398,8 +398,35 @@ class GameLoop:
                 context_extra={"battlefield": bf},
             )
 
+    def _draw_one(self, player: Player):
+        """Draw one card, applying Burn Out (§418) when the Main Deck is empty:
+        draw what's possible, recycle the trash into the deck (randomized), an
+        opponent gains 1 point, then complete the draw. Returns the card, or None
+        only when both deck AND trash are empty (a fully decked-out player still
+        hands the opponent a point — the deck-out loss vector)."""
+        card = player.draw()
+        if card is not None:
+            return card
+        self._burn_out(player)
+        return player.draw()
+
+    def _burn_out(self, player: Player) -> None:
+        # §418.2.b: recycle trash into the Main Deck, randomizing (reminder note).
+        if player.trash:
+            player.deck.cards.extend(player.trash)
+            player.trash.clear()
+            self.gs.rng.shuffle(player.deck.cards)
+        # §418.2.c: an opponent gains 1 point (2-player: the other player).
+        side = "A" if player is self.gs.A else "B"
+        if self.gs.other(side) == "A":
+            self.gs.points_A += 1
+        else:
+            self.gs.points_B += 1
+        if self.verbose:
+            print(f"  {player.name} BURNS OUT (§418): opponent +1 point, trash recycled")
+
     def _phase_draw(self, ap: Player) -> None:
-        card = ap.draw()
+        card = self._draw_one(ap)
         if card and self.recorder:
             self.recorder.record_draw(ap.name, self.gs.turn, card)
 

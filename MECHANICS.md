@@ -52,7 +52,7 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 | Triggers / timing windows | §360s | DONE | `loop.py` trigger dispatch | KNOWN_TRIGGERS in `engine_vocab.py`. |
 | Targeting + Deflect surcharge | §400s | PARTIAL | `loop.py:_deflect_surcharge` | see Deflect row. |
 | Attachments / gear | §716 | DONE | `loop.py:1739` | equip + Weaponmaster (partial). |
-| Deck-out / **Burn Out** | §431 | GAP | `_phase_draw` | empty-deck handling not implemented. Changes deck/trash/points → golden regen. |
+| Deck-out / **Burn Out** | §418 | DONE | `loop.py:_draw_one`/`_burn_out` | drawing from an empty deck recycles trash into the deck (randomized), an opponent gains 1 point, then the draw completes (§418.2 / §315.4.b). `test_burnout.py`. (Was mislabeled §431 in earlier notes.) |
 | Modal "choose one" | — | GAP | — | no modal-choice effect (`suggested_vocab: mode_choice`×9). |
 | `[A]` any-domain power payment | §resources | PARTIAL | `player.py:184` | paying "1 Power of ANY domain" ([A]) isn't modeled — `can_pay_cost`/`pay_cost` treat `domain=None` as "no power required", so any [A] portion of a cost is silently free (e.g. Accelerate on a domainless unit). Under-charges → too cheap. Needs an any-domain power spend. Ties to `suggested_vocab: gain_power_any_domain`. |
 | Enters-exhausted | — | PARTIAL | — | units that should enter exhausted enter ready (KNOWN_ISSUES #21). |
