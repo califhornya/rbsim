@@ -109,6 +109,40 @@ def test_switcheroo_swap_might():
     assert weak.might == 1 and strong.might == 7      # reverts at end of turn
 
 
+def test_unitinplay_identity_equality():
+    """KNOWN_ISSUES #24: UnitInPlay uses identity equality, so field-identical
+    copies of a card are distinct — list.remove/`in` target the exact object."""
+    a = UnitInPlay(UnitCard(name="Clone", might=2), ready=True)
+    b = UnitInPlay(UnitCard(name="Clone", might=2), ready=True)
+    assert a != b and a is not b
+    lst = [a, b]
+    lst.remove(b)
+    assert lst == [a] and lst[0] is a          # removed the exact object, not the first equal
+
+
+def test_swap_position_conserves_with_duplicate_units():
+    """Regression for #24: swap_position must not lose/duplicate a card when
+    field-identical unit copies coexist (the shape that previously vanished a
+    base unit). Two 'Ravenbloom' copies: one at base, one at bf0."""
+    loop = _make_loop()
+    tide = UnitInPlay(UnitCard(name="Tideturner", might=2), ready=True)
+    rav_base = UnitInPlay(UnitCard(name="Ravenbloom Student", might=2), ready=True)
+    rav_bf = UnitInPlay(UnitCard(name="Ravenbloom Student", might=2), ready=True)
+    loop.gs.A.base_units.extend([rav_base, tide])          # base: dup + the played Tideturner
+    loop.gs.battlefields[0].units_A.append(rav_bf)          # bf0: the other dup
+    ids_before = {id(rav_base.card), id(rav_bf.card), id(tide.card)}
+    ctx = EffectContext(loop=loop, card=tide.card, actor=loop.gs.A,
+                        opponent=loop.gs.B, battlefield=loop.gs.battlefields[0])
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_position"](ctx, {})
+    present = {id(u.card) for u in loop.gs.A.base_units}
+    present |= {id(u.card) for bf in loop.gs.battlefields for u in bf.units_A}
+    assert ids_before <= present               # every card still somewhere — nothing vanished
+    # And no accidental duplication: exactly 3 unit-cards in play.
+    total = len(loop.gs.A.base_units) + sum(len(bf.units_A) for bf in loop.gs.battlefields)
+    assert total == 3
+
+
 def test_tideturner_swap_position():
     """swap_position: Tideturner swaps location with the strongest friendly unit at
     another location (here: base ↔ battlefield)."""

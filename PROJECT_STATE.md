@@ -19,14 +19,17 @@ on-draw line) by playing millions of games against itself.
 > (hide / play-from-hidden / cleanup), **Switcheroo** (might-swap), and **Star
 > Spring** (first-unit-here retreat). ~200 tests; golden green throughout.
 >
-> **Remaining 4 meta INERT cards** (all niche, deliberately deferred):
-> **Tideturner** — HIGH PRIORITY per user; blocked on a latent move-during-play
-> conservation bug (KNOWN_ISSUES #24). **Diana Scorn** & **Ornn** legends — need an
-> earmarked-resource sub-system (energy only in showdowns / power only for gear); a
-> loose version would deviate from the rules. **Diana Lunari** — a showdown-begin
-> predict/draw ability on the golden diana champion (touching it forces a golden
-> regen and risks surfacing more latent bugs). Card-by-card work has hit strong
-> diminishing returns; the highest-leverage next step is Stage 0.5 / the RL env.
+> **Tideturner is now LIVE** — the blocking bug (KNOWN_ISSUES #24: UnitInPlay value
+> equality causing wrong-duplicate removal / card loss) was root-caused and fixed by
+> making UnitInPlay identity-equal, which also hardened every `in`/`remove` unit site
+> in the engine against silent card loss.
+>
+> **Remaining 3 meta INERT cards** (all niche, deferred): **Diana Scorn** & **Ornn**
+> legends — need an earmarked-resource sub-system (energy only in showdowns / power
+> only for gear); a loose version would deviate from the rules. **Diana Lunari** — a
+> showdown-begin predict/draw ability on the golden diana champion. Card-by-card work
+> has hit strong diminishing returns; the highest-leverage next step is Stage 0.5 /
+> the RL env.
 
 ---
 

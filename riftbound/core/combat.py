@@ -6,9 +6,17 @@ from typing import Iterable, List
 from .cards import UnitCard
 
 
-@dataclass
+@dataclass(eq=False)
 class UnitInPlay:
-    """Runtime representation of a unit on the battlefield or at base."""
+    """Runtime representation of a unit on the battlefield or at base.
+
+    IDENTITY equality (``eq=False``): two UnitInPlay objects are equal only if they
+    are the SAME object. This is load-bearing — a unit is a mutable runtime entity,
+    and multiple copies of the same card produce field-identical objects. With the
+    dataclass's default value-equality, ``unit in list`` / ``list.remove(unit)``
+    (used throughout battlefield.py, effects.py, loop.py) would match/remove the
+    WRONG duplicate, silently losing or duplicating a card (KNOWN_ISSUES #24).
+    Identity equality makes those operations, and ``is`` checks, correct."""
 
     card: UnitCard
     damage: int = 0

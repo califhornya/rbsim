@@ -482,26 +482,20 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   Hidden must target/enter its own battlefield; the play's on-play effects should be
   restricted to that battlefield. The unit is correctly placed at that lane, but on-play
   effect targeting is resolved normally rather than lane-restricted.
-- **Note:** Switcheroo's body (might-swap) is now implemented (`swap_might`, LIVE). Tideturner's
-  body (`swap_position`, position-swap) is implemented and unit-tested in isolation but NOT
-  yet wired onto the card — see #24.
+- **Note:** Switcheroo's body (might-swap, `swap_might`) and Tideturner's body (position-swap,
+  `swap_position`) are both implemented and LIVE (Tideturner unblocked once #24 was fixed).
 
-## 24. (OPEN, HIGH PRIORITY) Tideturner deferred — swap_position exposes a latent unit-loss on relocation
-- **Priority:** Tideturner is a high-impact meta card (user: "crazily important"). Come back to
-  this and finish it. The underlying defect (a unit vanishing when relocated during its own
-  on_play) is also a GENERAL engine-correctness risk: any move-during-play effect could silently
-  lose a card, which would corrupt self-play training data. Root-cause and fix the conservation
-  hole, not just Tideturner.
-- **What:** the `swap_position` effect (Tideturner: "move me to its location and it to my
-  original location") is implemented in effects.py and passes an isolated conservation test,
-  but authoring it onto Tideturner makes a diana-vs-yasuo golden/invariant game lose a card
-  (a base UnitCard vanishes from all zones). The swap itself conserves in isolation; the loss
-  appears AFTER the swap relocates the just-played unit during on_play, in a later same-action
-  step — a latent conservation bug triggered by mid-play relocation (not on_friendly_unit_played,
-  which no diana card carries). Root cause not yet pinned.
-- **Deferred:** Tideturner left INERT (effects []) so the engine never corrupts state. The
-  `swap_position` handler + its isolated test are kept so re-authoring is a one-line data change
-  once the latent relocation/conservation bug is found and fixed.
-- **Fix (future):** trace the exact same-action step that drops the unit when a unit is moved
-  off `base_units` during its own on_play resolution; fix the conservation hole, then re-author
-  Tideturner's `swap_position` effect and re-run the invariant + golden suites.
+## 24. (FIXED) UnitInPlay value-equality caused wrong-duplicate removal / card loss
+- **Root cause:** `UnitInPlay` was a `@dataclass` with the default VALUE equality, so two
+  field-identical copies of the same card compared equal. Every `unit in list` /
+  `list.remove(unit)` in the engine (battlefield.remove_unit, effects.py, loop.py, and
+  swap_position) then matched/removed the WRONG duplicate — silently losing or duplicating a
+  card whenever two same-valued units coexisted. This surfaced via Tideturner's `swap_position`
+  (a base unit vanished) but was a GENERAL correctness hazard that could have corrupted
+  self-play training data.
+- **Fix:** `@dataclass(eq=False)` on `UnitInPlay` (combat.py) → identity equality (and identity
+  hash). `in` / `remove` / `is` now target the exact object. Regression tests:
+  `test_effects.py::test_unitinplay_identity_equality` and
+  `::test_swap_position_conserves_with_duplicate_units`. Golden regenerated (a few games shifted
+  in detail from now-correct duplicate handling + Tideturner; no winner flips). With this fixed,
+  Tideturner is wired (`swap_position`, LIVE).

@@ -6297,7 +6297,13 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "swap_position",
+        "trigger": "on_play",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "OGN-200",

@@ -230,7 +230,7 @@
         },
         {
           "A": [
-            "Fizz Trickster"
+            "Eager Apprentice"
           ],
           "B": [],
           "controller": "A",
@@ -367,7 +367,7 @@
       "battlefields": [
         {
           "A": [
-            "Tideturner",
+            "Hwei Brooding Painter",
             "Thousand-Tailed Watcher"
           ],
           "B": [],
@@ -376,7 +376,7 @@
         },
         {
           "A": [
-            "Hwei Brooding Painter"
+            "Tideturner"
           ],
           "B": [],
           "controller": "A",
@@ -388,7 +388,7 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [],
-        "deck": 21,
+        "deck": 20,
         "energy": 4,
         "hand": 0,
         "power_pool": {
@@ -396,7 +396,7 @@
           "MIND": 3
         },
         "runes_in_play": 10,
-        "trash": 16
+        "trash": 17
       },
       "player_B": {
         "banished": 0,
@@ -439,7 +439,7 @@
       "battlefields": [
         {
           "A": [
-            "Tideturner"
+            "Eager Apprentice"
           ],
           "B": [],
           "controller": "A",
@@ -577,12 +577,11 @@
       "battlefields": [
         {
           "A": [
-            "Tideturner",
-            "Treasure Hunter"
+            "Noxus Hopeful"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": null
+          "last_controller": "A"
         },
         {
           "A": [
@@ -599,16 +598,17 @@
         "base_gear": 0,
         "base_units": [
           "Recruit",
-          "Recruit"
+          "Treasure Hunter"
         ],
-        "deck": 27,
-        "energy": 6,
+        "deck": 28,
+        "energy": 8,
         "hand": 2,
         "power_pool": {
-          "CHAOS": 6
+          "CHAOS": 6,
+          "FURY": 2
         },
-        "runes_in_play": 6,
-        "trash": 10
+        "runes_in_play": 8,
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
@@ -629,7 +629,7 @@
       },
       "points_A": 8,
       "points_B": 1,
-      "spells_cast": 14,
+      "spells_cast": 13,
       "turns": 11,
       "units_played": 11,
       "winner": "A",
@@ -649,19 +649,17 @@
     "signature": {
       "battlefields": [
         {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
+        },
+        {
           "A": [
             "Sharkling"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Vex Apathetic"
-          ],
-          "controller": "B",
           "last_controller": "B"
         }
       ],
@@ -700,10 +698,10 @@
           "MIND": 4
         },
         "runes_in_play": 10,
-        "trash": 15
+        "trash": 16
       },
       "points_A": 8,
-      "points_B": 2,
+      "points_B": 1,
       "spells_cast": 12,
       "turns": 12,
       "units_played": 16,
@@ -1229,19 +1227,11 @@
       "battlefields": [
         {
           "A": [
-            "Scuttle Crab"
+            "Adaptatron"
           ],
           "B": [],
           "controller": "A",
           "last_controller": null
-        },
-        {
-          "A": [
-            "Yasuo Remorseful"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
         },
         {
           "A": [],
@@ -1250,6 +1240,14 @@
           ],
           "controller": "B",
           "last_controller": "B"
+        },
+        {
+          "A": [
+            "Adaptatron"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
         }
       ],
       "final_active": "A",
@@ -1257,28 +1255,25 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Adaptatron",
-          "Adaptatron",
-          "Stellacorn Herder",
-          "Stellacorn Herder"
+          "Yasuo Remorseful",
+          "Scuttle Crab"
         ],
-        "deck": 20,
-        "energy": 0,
-        "hand": 6,
+        "deck": 21,
+        "energy": 1,
+        "hand": 3,
         "power_pool": {
           "CALM": 6,
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 5
+        "trash": 10
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 2,
+        "base_gear": 0,
         "base_units": [
           "Recruit",
-          "Recruit",
-          "Tideturner"
+          "Recruit"
         ],
         "deck": 27,
         "energy": 5,
@@ -1288,13 +1283,13 @@
           "FURY": 6
         },
         "runes_in_play": 9,
-        "trash": 11
+        "trash": 14
       },
       "points_A": 8,
-      "points_B": 5,
-      "spells_cast": 8,
+      "points_B": 6,
+      "spells_cast": 12,
       "turns": 15,
-      "units_played": 15,
+      "units_played": 13,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
