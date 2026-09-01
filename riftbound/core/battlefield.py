@@ -8,6 +8,18 @@ from .combat import CombatStats, UnitInPlay, deal_direct_damage, resolve_might_c
 if TYPE_CHECKING:
     from .cards import Card
 
+
+@dataclass
+class FacedownCard:
+    """A card in a battlefield's Facedown Zone (Core Rules §106.4), placed there by
+    the Hidden keyword's Hide action. Max one per battlefield; may only exist while
+    ``owner`` controls the battlefield. ``turn_hidden`` gates the "playable from the
+    NEXT turn onward" rule (§737.1.b)."""
+    card: "Card"
+    owner: str          # "A" / "B"
+    turn_hidden: int
+
+
 @dataclass
 class Battlefield:
 
@@ -23,6 +35,7 @@ class Battlefield:
     last_controller: Optional[str] = None
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
+    facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
 
     kills_A: int = 0
     kills_B: int = 0

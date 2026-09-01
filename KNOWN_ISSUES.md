@@ -468,3 +468,20 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   that should immediately force a showdown is under-modeled.
 - **Fix (future):** after an AMBUSH deploy that makes a lane contested outside an existing
   showdown, mirror the MOVE branch and invoke `_run_showdown(lane, attacker)`.
+
+## 23. (PARTIAL) HIDDEN keyword — core loop done; two faithful nuances deferred
+- **Done (§737/§408/§106.4):** Hide (main phase, Open State, pay 1 power, place facedown at
+  a controlled battlefield with an empty Facedown Zone), play-from-hidden for [0] from the
+  next turn at reaction speed (units enter that lane; spells open a chain), and cleanup
+  removal to trash when the owner loses control. Facedown identity is resampled for the
+  opponent in `determinize` (search fairness). Golden untouched (heuristic agents never hide).
+- **Deferred nuance 1 — Champion-Zone hiding (§737.1.b):** a Hidden card in the Champion
+  Zone (e.g. Pyke Dockside Butcher) may also be hidden. Only hand cards can be hidden today;
+  champion-zone hiding needs champion-zone bookkeeping and is not wired.
+- **Deferred nuance 2 — from-Hidden targeting restriction (§737.1.d):** a card played from
+  Hidden must target/enter its own battlefield; the play's on-play effects should be
+  restricted to that battlefield. The unit is correctly placed at that lane, but on-play
+  effect targeting is resolved normally rather than lane-restricted.
+- **Note:** Tideturner (move-swap) and Switcheroo (might-swap) remain INERT in the coverage
+  audit because their EFFECT BODIES are unimplemented verbs — separate from the HIDDEN
+  keyword, which now works for them (they can be hidden and played for [0]).

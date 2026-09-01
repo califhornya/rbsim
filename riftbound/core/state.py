@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING
 import random
 from .player import Player
-from .battlefield import Battlefield
+from .battlefield import Battlefield, FacedownCard
 from .cards import Card
 
 if TYPE_CHECKING:
@@ -123,9 +123,24 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     """
     me = gs.get_player(observer)
     opp = gs.get_player(gs.other(observer))
+    other = gs.other(observer)
 
-    pool = list(opp.hand) + list(opp.deck.cards)
+    # The opponent's face-down (Hidden) cards are hidden information too: the
+    # observer knows a card is hidden there, but not which. Fold them into the
+    # unseen pool and resample, preferring a HIDDEN-keyword identity so the public
+    # "a card is hidden here" fact stays consistent.
+    opp_facedowns = [bf for bf in gs.battlefields
+                     if bf.facedown is not None and bf.facedown.owner == other]
+    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedown.card for bf in opp_facedowns]
     rng.shuffle(pool)
+    for bf in opp_facedowns:
+        pick = next((c for c in pool if c.has_keyword("HIDDEN")), pool[0] if pool else None)
+        if pick is None:
+            continue
+        pool.remove(pick)
+        bf.facedown = FacedownCard(card=pick, owner=bf.facedown.owner,
+                                   turn_hidden=bf.facedown.turn_hidden)
+
     n_hand = len(opp.hand)
     opp.hand = pool[:n_hand]
     opp.deck.cards = pool[n_hand:]

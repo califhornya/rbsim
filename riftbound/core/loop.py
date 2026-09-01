@@ -7,7 +7,7 @@ from .state import GameState, ChainItem
 from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
 from .combat import UnitInPlay
 from .player import Player
-from .battlefield import Battlefield
+from .battlefield import Battlefield, FacedownCard
 from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
 from .effects import REGISTRY as EFFECT_REGISTRY
 from .effects import _amount as _effect_amount
@@ -1035,6 +1035,84 @@ class GameLoop:
         return True
 
     # ------------------------------------------------------------------
+    # HIDDEN keyword (Core Rules §737 / §408 / §106.4)
+
+    def _hide_lanes(self, side: str) -> list:
+        """Battlefields where `side` may Hide a card: it must control the
+        battlefield (§106.4.c) and the Facedown Zone must be empty (§106.4.b)."""
+        return [i for i, bf in enumerate(self.gs.battlefields)
+                if bf.controller() == side and bf.facedown is None]
+
+    def _hide_card(self, side: str, idx: int, lane: int) -> bool:
+        """Hide the hand card at `idx` facedown at battlefield `lane` for the cost
+        of 1 generic power (§737.1.b). Hiding is not a Play and opens no chain
+        (§737.1.c.2). Returns True on success."""
+        ap = self.gs.get_player(side)
+        if not (0 <= idx < len(ap.hand)):
+            return False
+        card = ap.hand[idx]
+        if not card.has_keyword("HIDDEN"):
+            return False
+        if lane not in self._hide_lanes(side):
+            return False
+        if not self._can_pay_generic_power(ap, 1):
+            return False
+        self._pay_generic_power(ap, 1)
+        ap.remove_from_hand(idx)
+        self.gs.battlefields[lane].facedown = FacedownCard(
+            card=card, owner=side, turn_hidden=self.gs.turn)
+        if self.verbose:
+            print(f"  {side} HIDEs {card.name} facedown @BF{lane}")
+        return True
+
+    def _cleanup_hidden_cards(self) -> None:
+        """§106.4.d / §322.8: a face-down card whose owner no longer controls its
+        battlefield is removed to its owner's trash. Called during end-of-turn
+        cleanup."""
+        for bf in self.gs.battlefields:
+            fd = bf.facedown
+            if fd is not None and bf.controller() != fd.owner:
+                self.gs.get_player(fd.owner).trash.append(fd.card)
+                bf.facedown = None
+
+    def _hidden_playable_lanes(self, side: str) -> list:
+        """Battlefields where `side` has a face-down card it may now play for [0]:
+        it owns the facedown card and at least one turn has passed since hiding
+        (§737.1.b 'beginning on the next turn'). Current control is NOT required —
+        the facedown persists until the next Cleanup even if control is lost
+        (§106.4.d), and playing a hidden card into a now-contested lane is the
+        keyword's whole point. Loss-of-control removal is handled at cleanup."""
+        lanes = []
+        for i, bf in enumerate(self.gs.battlefields):
+            fd = bf.facedown
+            if fd is not None and fd.owner == side and self.gs.turn > fd.turn_hidden:
+                lanes.append(i)
+        return lanes
+
+    def _play_from_hidden(self, side: str, lane: int) -> bool:
+        """Play a face-down card from its Facedown Zone for [0] (§737.1.b). A unit
+        enters at that battlefield; a spell resolves on a fresh chain aimed at that
+        battlefield (§737.1.c.3 / §737.1.d). Returns True on success."""
+        if lane not in self._hidden_playable_lanes(side):
+            return False
+        bf = self.gs.battlefields[lane]
+        fd = bf.facedown
+        card = fd.card
+        bf.facedown = None
+        ap = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        if isinstance(card, SpellCard):
+            self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+            self._run_chain(side)
+        else:  # unit / champion / gear-as-unit → enters at that battlefield
+            bf.add_unit(side, UnitInPlay(card=card, ready=False))
+            self.units_played += 1
+            self._resolve_card_effects(card, bf, ap, opponent)
+        if self.verbose:
+            print(f"  {side} plays {card.name} from Hidden @BF{lane} for [0]")
+        return True
+
+    # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 
     def _first_friendly_unit_on_board(self, ap: Player):
@@ -1339,6 +1417,16 @@ class GameLoop:
                     action="UNIT",
                     battlefield_index=lane if lane is not None else 0,
                 )
+
+        elif kind == "HIDE" and idx is not None and isinstance(lane, int):
+            # HIDDEN keyword: place a hand card facedown at a controlled battlefield.
+            side = "A" if ap is self.gs.A else "B"
+            self._hide_card(side, idx, lane)
+
+        elif kind == "HIDDEN_PLAY" and isinstance(lane, int):
+            # Play a previously-hidden card for [0] during your own main phase.
+            side = "A" if ap is self.gs.A else "B"
+            self._play_from_hidden(side, lane)
 
         elif kind == "MOVE":
             # Illegal during Showdown or Closed State (active chain)
@@ -1791,6 +1879,10 @@ class GameLoop:
                     # spell → resolves immediately (no chain), then priority reopens.
                     if self._deploy_ambush_champion(active, lane if lane is not None else 0):
                         passes = 0
+                elif kind == "HIDDEN_PLAY":
+                    # Play a facedown card for [0] at reaction speed (§737.1.b).
+                    if self._play_from_hidden(active, lane if lane is not None else 0):
+                        passes = 0
 
             active = self.gs.other(active)
 
@@ -1865,6 +1957,10 @@ class GameLoop:
                 elif kind == "CHAMPION":
                     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
                     if self._deploy_ambush_champion(self.gs.focus_player, bf_idx):
+                        passes = 0
+                elif kind == "HIDDEN_PLAY":
+                    # Play a facedown card for [0] into the showdown lane (§737.1.b).
+                    if self._play_from_hidden(self.gs.focus_player, bf_idx):
                         passes = 0
 
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
@@ -2166,6 +2262,10 @@ class GameLoop:
         for bf in self.gs.battlefields:
             for unit in bf.units_A + bf.units_B:
                 unit.clear_turn_end_bonuses()
+
+        # Cleanup: a facedown card whose owner no longer controls its battlefield is
+        # removed to its owner's trash (§106.4.d / §322.8).
+        self._cleanup_hidden_cards()
 
         if self.verbose:
             bf0 = gs.battlefields[0]

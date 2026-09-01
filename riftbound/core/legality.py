@@ -116,6 +116,19 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     if dst != src:
                         actions.append(GameAction.move(src, dst, f"Move BF{src}→BF{dst}"))
 
+    # --- HIDDEN keyword (Open State only) ---
+    if not gs.showdown_active and not gs.chain:
+        hide_lanes = loop._hide_lanes(side)
+        if hide_lanes and loop._can_pay_generic_power(ap, 1):
+            for idx, card in enumerate(ap.hand):
+                if card.has_keyword("HIDDEN"):
+                    for lane in hide_lanes:
+                        actions.append(GameAction.hide(idx, lane, f"Hide {card.name} @BF{lane}"))
+        # Play a card you hid on a previous turn, for [0].
+        for lane in loop._hidden_playable_lanes(side):
+            fd = gs.battlefields[lane].facedown
+            actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+
     # --- abilities ---
     actions.extend(_ability_actions(loop, ap, side))
     return actions
@@ -172,6 +185,10 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
     if champ is not None and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
         for lane in loop._ambush_legal_lanes(ap.name):
             actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
+    # HIDDEN: play a facedown card for [0] at reaction speed (§737.1.b).
+    for lane in loop._hidden_playable_lanes(ap.name):
+        fd = loop.gs.battlefields[lane].facedown
+        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
     return actions
 
 
@@ -189,4 +206,8 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
             and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain)):
         actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
+    # HIDDEN: play a facedown card into the showdown lane for [0] (§737.1.b).
+    if lane in loop._hidden_playable_lanes(ap.name):
+        fd = gs.battlefields[lane].facedown
+        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
     return actions
