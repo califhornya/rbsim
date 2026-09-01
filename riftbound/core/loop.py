@@ -1002,16 +1002,25 @@ class GameLoop:
                 domain_power[t] = domain_power.get(t, 0) + 1
             elif t == "rune":
                 generic += 1
-        complex_extra = bool(re.search(r"(?i)recycle|kill|spend|xp", clause))
-        return {"energy": energy, "domain_power": domain_power,
-                "generic": generic, "complex": complex_extra}
+        # Additional non-resource Equip costs (Last Rites / Blade of the Ruined
+        # King / Shepherd's Heirloom): recycle N from trash, kill a friendly unit,
+        # spend N XP.
+        rec = re.search(r"(?i)recycle\s+(\d+)", clause)
+        recycle = int(rec.group(1)) if rec else 0
+        kill_friendly = bool(re.search(r"(?i)kill a friendly", clause))
+        xp = re.search(r"(?i)spend\s+(\d+)\s*xp", clause)
+        spend_xp = int(xp.group(1)) if xp else 0
+        # `complex` now means an extra cost we still can't model (none currently).
+        return {"energy": energy, "domain_power": domain_power, "generic": generic,
+                "recycle": recycle, "kill_friendly": kill_friendly,
+                "spend_xp": spend_xp, "complex": False}
 
     @staticmethod
     def _equip_cost_minus_A(cost: dict) -> dict:
         """An Equip cost reduced by [A] (1 Power of any domain) — Weaponmaster's
         discount. Drops one power position: generic first, else one domain unit."""
-        c = {"energy": cost["energy"], "domain_power": dict(cost["domain_power"]),
-             "generic": cost["generic"], "complex": cost["complex"]}
+        c = dict(cost)
+        c["domain_power"] = dict(cost["domain_power"])
         if c["generic"] > 0:
             c["generic"] -= 1
         else:
@@ -1036,11 +1045,20 @@ class GameLoop:
             earmark = max(0, earmark - n)
             if need and not ap.can_pay_cost(0, need, Domain[d.upper()]):
                 return False
+        # Additional Equip costs.
+        side = "A" if ap is self.gs.A else "B"
+        if cost.get("recycle", 0) and len(ap.trash) < cost["recycle"]:
+            return False
+        if cost.get("kill_friendly") and self._first_friendly_unit_on_board(side) is None:
+            return False
+        if cost.get("spend_xp", 0) and self.gs.get_xp(side) < cost["spend_xp"]:
+            return False
         return True
 
     def _pay_equip(self, ap: Player, cost: dict) -> bool:
         if not self._can_pay_equip(ap, cost):
             return False
+        side = "A" if ap is self.gs.A else "B"
         ap.energy -= cost["energy"]
         # Spend earmarked gear-power first (generic portion, then domain portions).
         gen = cost["generic"]
@@ -1052,6 +1070,17 @@ class GameLoop:
             ap.earmarked_power_gear -= use
             if n - use:
                 ap.pay_cost(0, n - use, Domain[d.upper()])
+        # Additional Equip costs.
+        for _ in range(cost.get("recycle", 0)):
+            if ap.trash:
+                ap.deck.cards.append(ap.trash.pop(0))
+        if cost.get("kill_friendly"):
+            victim = self._first_friendly_unit_on_board(side)
+            if victim is not None:
+                self._remove_unit_from_play(victim, side)
+                ap.trash.append(victim.card)
+        if cost.get("spend_xp", 0):
+            self.gs.add_xp(side, -cost["spend_xp"])
         return True
 
     def _can_pay_showdown(self, p: Player, energy: int, power, domain) -> bool:

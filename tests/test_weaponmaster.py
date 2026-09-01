@@ -27,8 +27,8 @@ def test_equip_cost_minus_A_drops_one_power():
     loop = _loop()
     # "[1] [fury]" -> energy 1 + 1 Fury; minus [A] drops the Fury.
     cost = {"energy": 1, "domain_power": {"fury": 1}, "generic": 0, "complex": False}
-    assert loop._equip_cost_minus_A(cost) == {
-        "energy": 1, "domain_power": {}, "generic": 0, "complex": False}
+    reduced = loop._equip_cost_minus_A(cost)
+    assert reduced["energy"] == 1 and reduced["domain_power"] == {}
     # "[rune]" -> generic 1; minus [A] drops the generic.
     assert loop._equip_cost_minus_A(
         {"energy": 0, "domain_power": {}, "generic": 1, "complex": False}

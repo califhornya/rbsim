@@ -28,13 +28,23 @@ def _cost(loop, name):
 
 def test_equip_cost_parses_domain_and_energy():
     loop = _loop()
-    assert _cost(loop, "Serrated Dirk") == {          # "Equip [fury]"
-        "energy": 0, "domain_power": {"fury": 1}, "generic": 0, "complex": False}
+    dirk = _cost(loop, "Serrated Dirk")                           # "Equip [fury]"
+    assert dirk["energy"] == 0 and dirk["domain_power"] == {"fury": 1} and dirk["generic"] == 0
     assert _cost(loop, "Skyfall of Areion")["energy"] == 1        # "Equip [1] [fury]"
     assert _cost(loop, "Skyfall of Areion")["domain_power"] == {"fury": 1}
     assert _cost(loop, "Spinning Axe")["generic"] == 1            # "Equip [rune]"
-    assert _cost(loop, "Blighted Battleaxe") == {                 # "Equip [1] [fury]"
-        "energy": 1, "domain_power": {"fury": 1}, "generic": 0, "complex": False}
+    bb = _cost(loop, "Blighted Battleaxe")                        # "Equip [1] [fury]"
+    assert bb["energy"] == 1 and bb["domain_power"] == {"fury": 1}
+
+
+def test_equip_cost_parses_additional_costs():
+    loop = _loop()
+    lr = _cost(loop, "Last Rites")            # "Equip — [chaos], Recycle 2 cards..."
+    assert lr and lr["recycle"] == 2 and lr["domain_power"] == {"chaos": 1}
+    brk = _cost(loop, "Blade of the Ruined King")   # "Equip — [order], Kill a friendly unit"
+    assert brk and brk["kill_friendly"] is True and brk["domain_power"] == {"order": 1}
+    sh = _cost(loop, "Shepherd's Heirloom")         # "Equip — Spend 1 XP"
+    assert sh and sh["spend_xp"] == 1
 
 
 def test_non_equipment_gear_has_no_equip_cost():
