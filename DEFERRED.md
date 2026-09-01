@@ -25,35 +25,29 @@ for free, equip charging the play cost, 3 over-applying cost cards, Temporary ge
 cleanup, Accelerate forced-not-optional. Systems added: Burn Out §418, gear→base +
 real Equip cost + gear [tap] abilities, enters-exhausted (units + gear).
 
-Open, each a slice to schedule:
-- **Earmarked resources** (Ornn/Diana legends) — META. Energy usable only during
-  showdowns / power usable only for gear. Needs a restricted-pool sub-system checked
-  at each spend site. The one remaining meta-deck gap; biggest single item.
-- **Quick-Draw §745 reaction-speed timing** — attach-on-play is done and correctly
-  gated on the keyword; still missing: playing a Quick-Draw gear during a reaction /
-  showdown window (its Reaction half). Meta gear: Long Sword, Sterak's Gage, Cloth
-  Armor.
-- **`[A]` any-domain power payment** — paying "1 Power of ANY domain" isn't modeled:
-  `can_pay_cost`/`pay_cost` treat `domain=None` as "no power required", so any [A]
-  portion of a cost is silently free (undercharge). Affects Accelerate on domainless
-  units and any [A] cost. (`_pay_generic_power` already exists and is used for
-  `[rune]` equip costs — generalize it to all [A] spends.)
-- **Weaponmaster §747 `[A]` discount accuracy** — the on-play equip approximates the
-  reduced cost as `max(0, gear.cost_energy - 1)` and auto-picks `base_gear[0]`;
-  should choose an Equipment and reduce its real Equip cost by [A].
-- **Complex Equip extra-costs** — a few Equipment pair the resource Equip cost with an
-  additional cost (recycle N / kill a unit / spend XP): Last Rites, Blade of the
-  Ruined King, Shepherd's Heirloom. `_equip_cost` flags these `complex` and charges
-  only the resource part.
-- **Attached-gear [tap] abilities** — `activatable_abilities` scans only `base_gear`
-  for gear abilities; an Equipment with a [tap] ability usable while attached to a
-  unit isn't offered.
-- **Modal "choose one"** effect (`mode_choice`, 9 cards).
+DONE this pass:
+- [DONE] **Earmarked resources** (Ornn/Diana legends) — the META subsystem. See the
+  "Meta-deck cards" section above; 0 meta INERT remain.
+- [DONE] **`[A]` any-domain power payment** (item 2.1) — charged via `_pay_generic_power`
+  at every current [A] site (Accelerate domainless, gear `[rune]`, Ornn earmark).
+- [DONE] **Weaponmaster §747 `[A]` discount** (2.3) — real Equip cost minus [A]
+  (`_equip_cost_minus_A`), first affordable Equipment.
+- [DONE] **Complex Equip extra-costs** (2.4) — recycle N / kill a friendly unit /
+  spend XP parsed and charged.
+- [DONE] **Attached-gear [tap] abilities** (2.5) — `_controlled_attached_gear` /
+  `_controls_gear`.
+
+Open, each a slice to schedule (none is meta — the meta decks are fully modeled):
+- **Quick-Draw §745 reaction-speed timing** — attach-on-play is done and gated on the
+  keyword; still missing: playing a Quick-Draw gear during a reaction / showdown
+  window (its Reaction half). Meta gear exists (Long Sword, Sterak's Gage, Cloth
+  Armor) but the attach itself already works; only the reaction timing is absent.
+- **Modal "choose one"** effect (`mode_choice`, 9 non-meta cards) — a new effect that
+  offers the modes as a decision.
 - **Action §732 on units** — units with ACTION can't be played in showdowns (only
-  spells). No current deck has an ACTION unit, but the rule (§732.1.c.1) requires it.
-- **Vision §743 faithful** — currently authored as `predict 1`, which no-ops (safe
-  "keep top"); a true look-at-top-1-with-optional-recycle needs a primitive + an
-  agent decision.
+  spells). No current deck has an ACTION unit, but §732.1.c.1 requires it.
+- **Vision §743 faithful** — authored as `predict 1`, which no-ops (safe "keep top");
+  a true look-at-top-1-with-optional-recycle needs a primitive + an agent decision.
 - **Nested AMBUSH showdown (#22)** — an AMBUSH deploy into a contested lane sets the
   contested flags but doesn't spawn a nested showdown.
 
