@@ -165,6 +165,17 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
                 and loop._first_friendly_unit_on_board(side) is not None
             ):
                 out.append(GameAction.ability("ACTIVATED", i, f"Equip {gear.name}"))
+        elif entry["type"] == "gear_ability":
+            gear, eff = entry["gear"], entry["eff"]
+            parsed = loop._parse_activated_cost(eff.cost)
+            tap_ok = not (parsed["tap"] and getattr(gear, "tapped", False))
+            pay_ok = not (parsed["energy"] or parsed["power"]) or ap.can_pay_cost(
+                parsed["energy"], parsed["power"] or None, None)
+            rec_ok = not parsed["recycle"] or len(ap.trash) >= parsed["recycle"]
+            xp_ok = not parsed["spend_xp"] or loop.gs.get_xp(side) >= parsed["spend_xp"]
+            if (gear in ap.base_gear and tap_ok and pay_ok and rec_ok and xp_ok
+                    and EFFECT_REGISTRY.get(eff.effect) is not None):
+                out.append(GameAction.ability("ACTIVATED", i, f"Gear {eff.effect} ({gear.name})"))
         else:
             unit, eff = entry["unit"], entry["eff"]
             parsed = loop._parse_activated_cost(eff.cost)

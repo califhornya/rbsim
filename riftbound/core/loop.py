@@ -275,6 +275,16 @@ class GameLoop:
         legend_unit = self._legend_unit(active)
         if legend_unit is not None:
             legend_unit.ready = True
+        # Untap the player's gear (base + attached) so its [tap] abilities recharge.
+        for g in player.base_gear:
+            g.tapped = False
+        for u in player.base_units:
+            for g in u.gear:
+                g.tapped = False
+        for bf in self.gs.battlefields:
+            for u in (bf.units_A if active == "A" else bf.units_B):
+                for g in u.gear:
+                    g.tapped = False
 
     def _phase_beginning(self, active: str) -> int:
         for bf in self.gs.battlefields:
@@ -1785,6 +1795,17 @@ class GameLoop:
             # Only Equipment (gear with an Equip ability) can be equipped.
             if self._equip_cost(gear) is not None:
                 out.append({"type": "equip", "gear": gear})
+            # Gear's own activated [tap] abilities (Seals, Iron Ballista, …).
+            spec = CARD_REGISTRY.get(gear.name)
+            if spec and spec.effects:
+                for eff in spec.effects:
+                    if eff.trigger != "activated":
+                        continue
+                    if (eff.timing or "").lower() == "reaction":
+                        continue
+                    if EFFECT_REGISTRY.get(eff.effect) is None:
+                        continue
+                    out.append({"type": "gear_ability", "gear": gear, "eff": eff})
         return out
 
     @staticmethod
@@ -1858,6 +1879,40 @@ class GameLoop:
             target_unit.gear.append(gear)
             if self.verbose:
                 print(f"  {ap.name} EQUIP: {gear.name} -> {target_unit.card.name}")
+            return
+
+        if entry["type"] == "gear_ability":
+            gear = entry["gear"]
+            eff = entry["eff"]
+            if gear not in ap.base_gear:
+                return
+            parsed = self._parse_activated_cost(eff.cost)
+            if parsed["tap"] and getattr(gear, "tapped", False):
+                return                              # already tapped this turn
+            if (parsed["energy"] or parsed["power"]) and not ap.can_pay_cost(
+                    parsed["energy"], parsed["power"] or None, None):
+                return
+            if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
+                return
+            if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
+                return
+            if (parsed["energy"] or parsed["power"]) and not ap.pay_cost(
+                    parsed["energy"], parsed["power"] or None, None):
+                return
+            if parsed["tap"]:
+                gear.tapped = True
+            for _ in range(parsed["recycle"]):
+                if ap.trash:
+                    ap.deck.cards.append(ap.trash.pop(0))
+            if parsed["spend_xp"]:
+                self.gs.add_xp(side, -parsed["spend_xp"])
+            handler = EFFECT_REGISTRY.get(eff.effect)
+            if handler is None:
+                return
+            context = EffectContext(self, gear, ap, opponent, self.gs.battlefields[0])
+            handler(context, eff.merged_params())
+            if self.verbose:
+                print(f"  {ap.name} GEAR ABILITY: {eff.effect} ({gear.name})")
             return
 
         # Unit/legend activated ability.

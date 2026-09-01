@@ -21,6 +21,7 @@ class Card:
     might: Optional[int] = None
     effects: list[dict[str, object]] = field(default_factory=list)
     uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
+    tapped: bool = field(default=False, compare=False)  # gear exhausted-state for [tap] abilities
 
     def has_keyword(self, keyword: str) -> bool:
         kw = keyword.upper()
