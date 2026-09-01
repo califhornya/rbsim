@@ -360,15 +360,24 @@ def test_equip_via_activated_path():
     loop = _make_loop()
     unit = UnitInPlay(UnitCard(name="Bearer", might=2), ready=True)
     loop.gs.battlefields[0].units_A.append(unit)
-    gear = GearCard(name="TST Blade", cost_energy=0)
-    loop.gs.A.base_gear.append(gear)
+    # Real Equipment: an Equip ability is required for the gear to be equippable.
+    CARD_REGISTRY["TST Blade"] = CardSpec.from_dict({
+        "name": "TST Blade", "category": "Gear", "cost_energy": 0,
+        "effect": "Equip [1] ([1]: Attach this to a unit you control.)"})
+    try:
+        gear = GearCard(name="TST Blade", cost_energy=0)
+        loop.gs.A.base_gear.append(gear)
+        loop.gs.A.energy = 1                     # pay the Equip cost ([1])
 
-    abilities = loop.activatable_abilities("A")
-    equip_idx = next(i for i, e in enumerate(abilities) if e["type"] == "equip")
-    loop._apply_activated_ability(loop.gs.A, loop.gs.B, equip_idx)
+        abilities = loop.activatable_abilities("A")
+        equip_idx = next(i for i, e in enumerate(abilities) if e["type"] == "equip")
+        loop._apply_activated_ability(loop.gs.A, loop.gs.B, equip_idx)
 
-    assert gear in unit.gear
-    assert gear not in loop.gs.A.base_gear
+        assert gear in unit.gear
+        assert gear not in loop.gs.A.base_gear
+        assert loop.gs.A.energy == 0             # Equip cost paid
+    finally:
+        CARD_REGISTRY.pop("TST Blade", None)
 
 
 def test_static_cost_reduction(cleanup_registry):

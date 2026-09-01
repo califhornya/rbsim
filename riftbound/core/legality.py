@@ -157,9 +157,11 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
     for i, entry in enumerate(loop.activatable_abilities(side)):
         if entry["type"] == "equip":
             gear = entry["gear"]
+            cost = loop._equip_cost(gear)
             if (
                 gear in ap.base_gear
-                and ap.can_pay_cost(gear.cost_energy, gear.cost_power, gear.cost_power_domain)
+                and cost is not None
+                and loop._can_pay_equip(ap, cost)
                 and loop._first_friendly_unit_on_board(side) is not None
             ):
                 out.append(GameAction.ability("ACTIVATED", i, f"Equip {gear.name}"))

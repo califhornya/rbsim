@@ -939,6 +939,56 @@ class GameLoop:
             total += int(es.params.get("amount", 0))
         return max(0, total)
 
+    _EQUIP_DOMAINS = ("fury", "calm", "mind", "body", "chaos", "order")
+
+    def _equip_cost(self, gear: Card) -> Optional[dict]:
+        """Parse a gear's EQUIP-ability cost from its rules text (§744), e.g.
+        "Equip [fury]" → 1 Fury power; "Equip [1] [fury]" → 1 energy + 1 Fury;
+        "Equip [rune]" → 1 generic power. Returns None if the gear has no Equip
+        ability (i.e. it is not Equipment and cannot be equipped). `complex` flags
+        an additional non-resource cost (recycle / kill / spend XP) we don't yet
+        charge — a documented undercharge for those few cards."""
+        import re
+        spec = CARD_REGISTRY.get(gear.name)
+        text = (spec.raw.get("effect") if spec and getattr(spec, "raw", None) else None)
+        if not text:
+            text = getattr(gear, "equip_text", "") or ""
+        m = re.search(r"(?i)\bequip\b(.*?)\(", text)   # cost = between 'equip' and reminder '('
+        if not m:
+            return None
+        clause = m.group(1)
+        energy = 0
+        domain_power: dict[str, int] = {}
+        generic = 0
+        for tok in re.findall(r"\[([^\]]+)\]", clause):
+            t = tok.strip().lower()
+            if t.isdigit():
+                energy += int(t)
+            elif t in self._EQUIP_DOMAINS:
+                domain_power[t] = domain_power.get(t, 0) + 1
+            elif t == "rune":
+                generic += 1
+        complex_extra = bool(re.search(r"(?i)recycle|kill|spend|xp", clause))
+        return {"energy": energy, "domain_power": domain_power,
+                "generic": generic, "complex": complex_extra}
+
+    def _can_pay_equip(self, ap: Player, cost: dict) -> bool:
+        if ap.energy < cost["energy"]:
+            return False
+        for d, n in cost["domain_power"].items():
+            if not ap.can_pay_cost(0, n, Domain[d.upper()]):
+                return False
+        return self._can_pay_generic_power(ap, cost["generic"])
+
+    def _pay_equip(self, ap: Player, cost: dict) -> bool:
+        if not self._can_pay_equip(ap, cost):
+            return False
+        ap.energy -= cost["energy"]
+        for d, n in cost["domain_power"].items():
+            ap.pay_cost(0, n, Domain[d.upper()])
+        self._pay_generic_power(ap, cost["generic"])
+        return True
+
     def _spell_chooses_friendly(self, card: Card) -> bool:
         """True if the spell EXPLICITLY targets a friendly unit — used by
         battlefield cost auras like Sandswept Tomb ("spells that choose friendly
@@ -1732,7 +1782,9 @@ class GameLoop:
                         continue
                     out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
         for gear in list(ap.base_gear):
-            out.append({"type": "equip", "gear": gear})
+            # Only Equipment (gear with an Equip ability) can be equipped.
+            if self._equip_cost(gear) is not None:
+                out.append({"type": "equip", "gear": gear})
         return out
 
     @staticmethod
@@ -1794,12 +1846,13 @@ class GameLoop:
             gear = entry["gear"]
             if gear not in ap.base_gear:
                 return
-            if not ap.can_pay_cost(gear.cost_energy, gear.cost_power, gear.cost_power_domain):
-                return
+            cost = self._equip_cost(gear)              # the EQUIP-ability cost (§744)
+            if cost is None:
+                return                                  # not Equipment — cannot equip
             target_unit = self._first_friendly_unit_on_board(side)
             if target_unit is None:
                 return
-            if not ap.pay_cost(gear.cost_energy, gear.cost_power, gear.cost_power_domain):
+            if not self._pay_equip(ap, cost):
                 return
             ap.base_gear.remove(gear)
             target_unit.gear.append(gear)
