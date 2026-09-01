@@ -27,9 +27,17 @@ on-draw line) by playing millions of games against itself.
 > **Remaining 3 meta INERT cards** (all niche, deferred): **Diana Scorn** & **Ornn**
 > legends — need an earmarked-resource sub-system (energy only in showdowns / power
 > only for gear); a loose version would deviate from the rules. **Diana Lunari** — a
-> showdown-begin predict/draw ability on the golden diana champion. Card-by-card work
-> has hit strong diminishing returns; the highest-leverage next step is Stage 0.5 /
-> the RL env.
+> showdown-begin predict/draw ability on the golden diana champion.
+>
+> **Stage 0.5 + RL env skeleton are now in.** `riftbound/core/match.py` plays Bo3
+> matches (§458: one battlefield per player per game, no reuse, loser chooses first);
+> `riftbound/ai/env.py` (`RiftboundEnv`) is a gym-style single-agent RL environment
+> over the real engine (reset/step/legal_actions/observation/reward vs a fixed
+> opponent), built on the existing `SessionDriver` + information-set `Observation`.
+> **Everything parked for later is consolidated in `DEFERRED.md`** — the clean
+> resume point (remaining meta cards, engine long-tail, sideboards + searched
+> battlefield selection, and the RL path: tensor encoding → policy/value net →
+> guided MCTS → self-play training).
 
 ---
 
