@@ -47,7 +47,10 @@ from riftbound.registry.engine_vocab import (  # noqa: E402
 
 CARDS_PATH = Path(__file__).resolve().parent.parent / "riftbound" / "data" / "cards" / "all_cards.json"
 REVIEW_PATH = Path(__file__).resolve().parent / "review_needed.txt"
-MODEL = "claude-opus-4-8"
+# Default Opus 4.8 for best parse quality; override with RBSIM_PARSER_MODEL
+# (e.g. a Sonnet id) to trade some quality for much lower cost on a budget. The
+# per-card validation (validate_card_result) + human-review flagging guard either way.
+MODEL = os.environ.get("RBSIM_PARSER_MODEL", "claude-opus-4-8")
 BATCH_SIZE = 10
 
 # Sorted views for deterministic prompt text (keeps the cached system prompt stable).
