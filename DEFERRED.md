@@ -49,15 +49,24 @@ Nothing here is a blocker for what's already shipped — these are the next chun
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
 the real engine (reset/step/legal_actions/observation/reward vs a fixed opponent).
+Progress:
+1. [DONE] **Tensor encoding** — `riftbound/ai/encoding.py` (OBS_DIM=3884 state vector
+   + ACTION_DIM=113 canonical action space + legal mask + mulligan head).
+2. [DONE] **Policy + value network** — `riftbound/ai/net.py` (PyTorch dual-head MLP,
+   CUDA-aware, masked policy, checkpoint save/load; tests in `tests/test_net.py` are
+   torch-gated and run after `uv sync --extra rl`).
+
 Still to build, in order:
-1. **Tensor encoding** of `Observation` + a canonical fixed action space (what the
-   network reads/writes). Today `obs` is the structured `Observation`.
-2. **Policy + value network** mapping encoded state → (action policy, value).
-3. **Network-guided MCTS** (PUCT) — reuse the tree machinery from `ismcts_agent.py`.
-4. **Self-play + training loop** — generate games, train on outcomes, iterate. This
-   is where the agent finally *improves every game*.
+3. **Network-guided MCTS** (PUCT) — reuse the tree machinery from `ismcts_agent.py`,
+   using `net.predict` for priors + value instead of random rollouts.
+4. **Self-play + training loop** — a headless script (clone → `uv sync --extra rl` →
+   run on a rented GPU box) that generates games with the guided MCTS, stores
+   (state, policy target, outcome), and trains the net. Where the agent finally
+   *improves every game*.
 5. **True self-play driver** — both seats sharing the learning policy (a
    two-controller driver; the current env is single-agent-vs-fixed).
+6. Fold **mulligan** and **battlefield choice** into the learned decision space
+   (the user's original examples: mulligan Nocturne, open the right battlefield).
 - Also fold the battlefield choice and mulligan into the learned decision space so
   the agent learns those (the user's original examples: mulligan Nocturne, open the
   right battlefield).
