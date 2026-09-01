@@ -31,11 +31,11 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 | 741 | Tank | §741 | DONE | `combat.py:96` | `test_combat_keywords.py` | assigned lethal first (§460.2.c) — order + lethal-absorption asserted. Tank+Backline conflict resolved deterministically as Tank (documented simplification vs "controller chooses"). |
 | 742 | Temporary | §742 | DONE | `loop.py:284-300` | `test_temporary.py` | kills TEMPORARY units AND unattached TEMPORARY gear at base at the controller's beginning phase; attached gear rides its host (Spinning Axe "if unattached"). Note: moves direct-to-trash (no death trigger) — acceptable, no TEMPORARY permanent has a Deathknell. |
 | 743 | Vision | §743 | PARTIAL | parser → `predict` | — | "look at top card, may recycle it" (§743.1.b). Verify `predict`/`scry` semantics match (recycle = to bottom/shuffle per rules) and multi-instance behavior (§743.2). |
-| 744 | Equip | §744 | PARTIAL | `loop.py:1739` | — | attach to a controlled unit, cost from card cost fields. Equip action path present; needs a dedicated assertion (attach + cost paid + gear-bonus applied). |
+| 744 | Equip | §744 | DONE | `loop.py:1739`, `combat.py:46` | `test_equip_deflect.py` | attach to a controlled unit (cost from card cost fields); attached gear grants might via its `grant_might` effect (verified +3). |
 | 745 | Quick-Draw | §745 | PARTIAL | (gear play path) | — | grants Reaction inherently + attach-on-play at reaction timing (§745.1.d). Verify gear can actually be played at reaction speed and auto-attaches. Needs a test. |
 | 746 | Repeat | §746 | DONE | additional-cost path | `test_repeat_cost.py` | optional additional cost → execute spell effect one extra time. |
 | 747 | Weaponmaster | §747 | PARTIAL | `loop.py:1308-1319` | — | on-play: choose controlled Equipment, pay its Equip cost reduced by [A], attach (§747.1.c). Verify the [A] discount and failure fallbacks (§747.1.c.5). Needs a test. |
-| — | Deflect | §408/§735-adj | PARTIAL | `give_temporary_deflect`, `_deflect_surcharge`, Heisho Shell | — | opponents pay extra rune to target; bare = 1. Verify the surcharge applies to targeting by both spells and abilities. |
+| — | Deflect | §408/§809 | DONE | `_deflect_surcharge` (`loop.py:778`) | `test_equip_deflect.py` | a spell targeting an opponent's battlefield is surcharged by the max DEFLECT among enemy units there; friendly-targeting spells are not surcharged; `ignore_deflect_here` battlefields waive it. (Ability-targeting surcharge still TODO — spells covered.) |
 
 ## Core systems
 
