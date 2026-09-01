@@ -33,14 +33,22 @@ on-draw line) by playing millions of games against itself.
 > legitimate rule fixes (Legion, gear), conservation intact throughout. ~15 commits,
 > all pushed.
 >
-> **The remaining backlog is tracked in `DEFERRED.md` and `MECHANICS.md`, and every
-> item there is required — none is optional.** Top of the list: **earmarked resources**
-> (Ornn/Diana legends — the last *meta* subsystem), then the gear/keyword remainders
-> (Quick-Draw reaction timing, `[A]` power payment, Weaponmaster [A] discount, complex
-> Equip costs, attached-gear tap abilities, modal choose-one, Action-on-units, Vision,
-> nested AMBUSH), then the corpus long-tail (needs engine primitives + an API-key
-> parse), then **scaling the RL training** (the pipeline is built and verified; this is
-> the "run it big on a GPU" phase).
+> **Follow-up session — the mechanics gate is now COMPLETE.** Shipped the
+> **earmarked-resource subsystem** (Ornn / Diana Scorn energy+power earmarks, Diana
+> Lunari's `on_showdown_begin`) → **0 meta INERT cards; every meta deck fully
+> modeled**. Then closed the entire gear/keyword remainder list: `[A]` power payment,
+> Quick-Draw reaction timing, Weaponmaster `[A]` discount, complex Equip costs
+> (recycle/kill/XP), attached-gear tap abilities, modal `choose one` (`mode_choice`),
+> Action-on-units in showdowns, Vision (predict-1 look/recycle), and nested AMBUSH
+> showdown (#22). **Every §731–747 keyword and every core-system row in `MECHANICS.md`
+> is DONE**; suite **288 green**; golden regenerated only for the legitimate Diana-deck
+> rule additions (conservation intact).
+>
+> **The remaining backlog is tracked in `DEFERRED.md` and `MECHANICS.md`.** What's left
+> is NOT mechanics: (1) the **corpus long-tail** — ~200 non-meta empty-effects cards
+> that need an API-key parse (+ a few new primitives); it does not gate the meta. Then
+> (2) **scaling the RL training** (the pipeline is built and verified — the "run it big
+> on a GPU" phase), which the user gated behind "cards all correct".
 >
 > **Earlier milestones (still true):** coverage audit + `COVERAGE_REPORT.md`; corpus
 > **706 LIVE / 176 INERT** after a Sonnet parse; Tideturner + the #24 conservation fix;
