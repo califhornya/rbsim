@@ -390,7 +390,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_friendly_unit_played"
+      }
+    ]
   },
   {
     "card_id": "OGN-012",
@@ -784,7 +789,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "replace_death_with_recall",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "cost": {
+          "recycle": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-024",
@@ -1042,16 +1058,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "on_play",
-        "amount": 5,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-032",
@@ -1328,15 +1335,7 @@
     "keywords": [
       "DEFLECT 2"
     ],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_attack",
-        "amount": 5,
-        "target": "all_enemy_units_here",
-        "scope": "all"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-042",
@@ -1833,7 +1832,10 @@
       {
         "effect": "buff_unit",
         "trigger": "on_conquer",
-        "target": "self"
+        "target": "self",
+        "condition": {
+          "type": "kicker_paid"
+        }
       }
     ]
   },
@@ -1933,7 +1935,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "target": "self"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn"
+      }
+    ]
   },
   {
     "card_id": "OGN-060",
@@ -1959,7 +1974,7 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "on_attack",
-        "target": "self",
+        "target": "friendly_unit",
         "amount": 1,
         "duration": "this_turn",
         "condition": {
@@ -2033,7 +2048,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "amount": 5
+      }
+    ]
   },
   {
     "card_id": "OGN-063",
@@ -2059,8 +2080,7 @@
       {
         "effect": "buff_unit",
         "trigger": "on_play",
-        "target": "friendly_unit",
-        "amount": 1
+        "target": "friendly_unit"
       }
     ]
   },
@@ -3360,7 +3380,14 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-103",
@@ -3670,15 +3697,7 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": [
-      {
-        "effect": "play_from_trash",
-        "trigger": "on_conquer",
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-113",
@@ -3815,7 +3834,8 @@
     "effects": [
       {
         "effect": "play_token",
-        "trigger": "on_play",
+        "trigger": "on_play_spell",
+        "timing": null,
         "token_name": "Recruit"
       }
     ]
@@ -3969,13 +3989,7 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_defend",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-122",
@@ -3997,7 +4011,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "OGN-123",
@@ -4345,7 +4365,16 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 1,
+        "target": "all_units_here",
+        "scope": "all"
+      }
+    ]
   },
   {
     "card_id": "OGN-134",
@@ -4367,7 +4396,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_cast",
+        "amount": 1,
+        "exhausted": true
+      }
+    ]
   },
   {
     "card_id": "OGN-135",
@@ -4481,7 +4517,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_cast",
+        "amount": 2,
+        "exhausted": true
+      }
+    ]
   },
   {
     "card_id": "OGN-139",
@@ -4534,16 +4577,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2,
-        "target_filter": {
-          "subtype": "Dragon"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-141",
@@ -4621,9 +4655,9 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "activated",
-        "target": "friendly_unit",
+        "trigger": "on_friendly_unit_played",
         "amount": 1,
+        "target": "friendly_unit",
         "duration": "this_turn"
       }
     ]
@@ -4650,7 +4684,22 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "friendly_unit_died_this_turn"
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 2
+      }
+    ]
   },
   {
     "card_id": "OGN-145",
@@ -4727,18 +4776,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
-      },
-      {
-        "effect": "spend_buff",
-        "trigger": "on_play",
-        "target": "self"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-148",
@@ -4880,7 +4918,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_friendly_unit_played",
+        "target": "friendly_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-153",
@@ -4904,7 +4952,15 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "all_friendly_units_here",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-154",
@@ -4961,7 +5017,19 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_conquer",
+        "count": 1
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "exhausted": true
+      }
+    ]
   },
   {
     "card_id": "OGN-156",
@@ -4983,7 +5051,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "recycle_card",
+        "trigger": "on_cast",
+        "target": "opponent",
+        "target_filter": {
+          "card_type": "SPELL"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-157",
@@ -5038,8 +5115,7 @@
       {
         "effect": "draw_cards",
         "trigger": "on_move",
-        "count": 1,
-        "target": "actor"
+        "count": 1
       }
     ]
   },
@@ -5148,7 +5224,8 @@
         "trigger": "on_move",
         "target": "chosen_unit",
         "target_filter": {
-          "exclude_self": true
+          "exclude_self": true,
+          "is_exhausted": true
         }
       }
     ]
@@ -5594,13 +5671,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_friendly_unit_played",
-        "target": "self"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-178",
@@ -5687,7 +5758,6 @@
       {
         "effect": "give_keyword",
         "trigger": "on_cast",
-        "timing": "action",
         "target": "chosen_unit",
         "keyword": "TEMPORARY"
       }
@@ -5857,14 +5927,15 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "draw_cards",
+        "trigger": "leaves_board",
+        "count": 1
+      },
+      {
         "effect": "channel_rune",
-        "trigger": "activated",
-        "timing": "action",
+        "trigger": "leaves_board",
         "amount": 1,
-        "cost": {
-          "power": 1,
-          "tap": true
-        }
+        "exhausted": true
       }
     ]
   },
@@ -6082,7 +6153,16 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_top",
+        "trigger": "on_reveal_from_top",
+        "optional": true,
+        "cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-195",
@@ -6233,7 +6313,13 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "swap_position",
+        "trigger": "on_play",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "OGN-200",
@@ -6277,20 +6363,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "discard_card",
-        "trigger": "on_cast",
-        "target": "actor",
-        "scope": "all"
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "on_cast",
-        "target": "actor",
-        "count": 4
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-202",
@@ -6327,7 +6400,7 @@
     "effects": [
       {
         "effect": "ready_unit",
-        "trigger": "on_end_of_turn",
+        "trigger": "activated",
         "target": "self",
         "condition": {
           "type": "you_discarded_card_this_turn"
@@ -6335,7 +6408,7 @@
       },
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_end_of_turn",
+        "trigger": "activated",
         "target": "self",
         "amount": 1,
         "duration": "this_turn",
@@ -6576,13 +6649,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "on_cast",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-210",
@@ -7127,15 +7194,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_from_trash",
-        "trigger": "on_play",
-        "target_filter": {
-          "card_type": "UNIT"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-227",
@@ -7267,22 +7326,10 @@
       }
     ],
     "keywords": [
-      "DEFLECT",
+      "DEFLECT 1",
       "GANKING"
     ],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "on_play",
-        "target": "friendly_unit",
-        "additional_cost": {
-          "kill_friendly_unit": true
-        },
-        "condition": {
-          "type": "kicker_paid"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-232",
@@ -7420,7 +7467,7 @@
     "effects": [
       {
         "effect": "buff_unit",
-        "trigger": "activated",
+        "trigger": "on_play",
         "target": "friendly_unit"
       }
     ]
@@ -7764,8 +7811,7 @@
         "trigger": "on_friendly_unit_death",
         "target_filter": {
           "exclude_self": true,
-          "subtype": "Recruit",
-          "lacks_keyword": ""
+          "lacks_keyword": "Recruit"
         },
         "token_name": "Recruit"
       }
@@ -7903,8 +7949,9 @@
         "effect": "channel_rune",
         "trigger": "on_friendly_unit_played",
         "amount": 1,
+        "exhausted": true,
         "condition": {
-          "type": "this_is_mighty"
+          "type": "triggering_unit_is_mighty"
         },
         "cost": {
           "tap": true
@@ -7932,7 +7979,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "all_enemy_units_here",
+        "amount_source": "self_might"
+      }
+    ]
   },
   {
     "card_id": "OGN-251",
@@ -7966,17 +8020,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_start_of_turn",
-        "count": 1,
-        "condition": {
-          "type": "card_in_trash_count_at_least",
-          "params": {}
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-252",
@@ -8079,7 +8123,17 @@
       "ACTION",
       "LEGION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-255",
@@ -8113,15 +8167,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "debuff_might",
-        "trigger": "on_defend",
-        "target": "enemy_unit",
-        "amount": 1,
-        "duration": "this_turn"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-256",
@@ -8293,13 +8339,8 @@
       {
         "effect": "ready_unit",
         "trigger": "on_cast",
+        "timing": "action",
         "target": "friendly_unit"
-      },
-      {
-        "effect": "deal_damage",
-        "trigger": "on_cast",
-        "target": "enemy_unit",
-        "amount_source": "self_might"
       }
     ]
   },
@@ -8338,7 +8379,7 @@
     "effects": [
       {
         "effect": "buff_unit",
-        "trigger": "activated",
+        "trigger": "passive",
         "target": "friendly_unit"
       }
     ]
@@ -8440,6 +8481,7 @@
       {
         "effect": "return_from_trash",
         "trigger": "on_cast",
+        "target": "self",
         "target_filter": {
           "has_keyword": "HIDDEN"
         },
@@ -8605,7 +8647,15 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "all_enemy_units_here",
+        "scope": "all"
+      }
+    ]
   },
   {
     "card_id": "OGN-269",
@@ -8640,23 +8690,6 @@
     ],
     "keywords": [],
     "effects": [
-      {
-        "effect": "replace_death_with_recall",
-        "trigger": "death_replacement",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_buffed": true
-        },
-        "cost": {
-          "power": 1,
-          "tap": true
-        },
-        "suggested_vocab": [
-          "cost:spend_buff",
-          "cost:exhaust_self",
-          "effect:heal_exhaust_recall"
-        ]
-      },
       {
         "effect": "ready_unit",
         "trigger": "on_conquer",
@@ -9009,7 +9042,8 @@
       {
         "effect": "draw_cards",
         "trigger": "on_conquer",
-        "count": 1
+        "count": 1,
+        "cost": {}
       }
     ]
   },
@@ -9087,10 +9121,8 @@
       {
         "effect": "recycle_card",
         "trigger": "on_conquer",
-        "target": "actor",
-        "target_filter": {
-          "card_type": "RUNE"
-        }
+        "target": "self",
+        "amount": 1
       }
     ]
   },
@@ -9201,13 +9233,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "scry",
-        "trigger": "on_conquer",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-293",
@@ -9233,18 +9259,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "score_point",
-        "trigger": "on_hold",
-        "condition": {
-          "type": "you_have_n_or_more_units_here",
-          "params": {
-            "count": 7
-          }
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-294",
@@ -9325,7 +9340,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "bonus_damage_here",
+        "trigger": "passive",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-297",
@@ -10003,17 +10024,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "passive",
-        "condition": {
-          "type": "this_is_alone"
-        },
-        "target": "friendly_unit",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGS-020",
@@ -10275,7 +10286,7 @@
     ],
     "effects": [
       {
-        "effect": "grant_assault",
+        "effect": "give_temporary_assault",
         "amount": 2
       }
     ]
@@ -10392,7 +10403,7 @@
     ],
     "effects": [
       {
-        "effect": "grant_keyword",
+        "effect": "give_keyword",
         "keyword": "GANKING"
       }
     ]
@@ -10471,13 +10482,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-011",
@@ -10720,12 +10725,13 @@
         "effect": "play_token",
         "trigger": "activated",
         "timing": "action",
-        "token_name": "Mech",
         "cost": {
           "energy": 1,
           "power": 1,
+          "recycle": 1,
           "tap": true
-        }
+        },
+        "token_name": "Mech"
       }
     ]
   },
@@ -10787,9 +10793,16 @@
     ],
     "keywords": [
       "QUICK-DRAW",
-      "EQUIP 1"
+      "EQUIP 1",
+      "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "attach_gear",
+        "trigger": "on_play",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "SFD-023",
@@ -10860,12 +10873,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_assault",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-026",
@@ -10891,17 +10899,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "keyword": "ASSAULT",
-        "target": "all_friendly_units_here",
-        "target_filter": {
-          "subtype": "Mech"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-027",
@@ -11328,12 +11326,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reveal_and_choose",
-        "trigger": "on_move"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-042",
@@ -11747,12 +11740,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_shield",
-        "amount": 5
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-056",
@@ -11996,7 +11984,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play_spell",
+        "timing": "reaction",
+        "token_name": "Gold",
+        "exhausted": true,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-064",
@@ -12322,13 +12321,15 @@
         "trigger": "on_play",
         "target": "chosen_unit",
         "target_filter": {
-          "is_gear": true
+          "is_gear": true,
+          "energy_at_most": 1
         }
       },
       {
         "effect": "play_token",
         "trigger": "on_play",
-        "token_name": "Gold"
+        "token_name": "Gold",
+        "exhausted": true
       }
     ]
   },
@@ -12462,20 +12463,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_play",
-        "condition": {
-          "type": "kicker_paid"
-        },
-        "additional_cost": {
-          "exhaust_friendly_unit": true
-        },
-        "scope": "all",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-080",
@@ -12523,13 +12511,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "on_play",
-        "token_name": "Gold"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-082",
@@ -12571,7 +12553,7 @@
         "amount_source": "self_might"
       },
       {
-        "effect": "move_unit",
+        "effect": "move_units_to_base",
         "trigger": "activated",
         "timing": "action",
         "target": "self",
@@ -12807,19 +12789,10 @@
       }
     ],
     "keywords": [
-      "EQUIP 1"
+      "EQUIP 1",
+      "DEATHKNELL"
     ],
-    "effects": [
-      {
-        "effect": "play_from_banish",
-        "trigger": "activated",
-        "timing": "action",
-        "scope": "all",
-        "cost": {
-          "power": 3
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-091",
@@ -13278,8 +13251,9 @@
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
+        "timing": "action",
         "target": "enemy_unit",
-        "amount_source": "highest_might_friendly"
+        "amount_source": "self_might"
       }
     ]
   },
@@ -13338,7 +13312,7 @@
     ],
     "effects": [
       {
-        "effect": "take_control",
+        "effect": "move_unit",
         "trigger": "on_play",
         "target": "enemy_unit",
         "target_filter": {
@@ -13377,20 +13351,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "double_might",
-        "trigger": "on_attack",
-        "target": "self",
-        "duration": "this_turn"
-      },
-      {
-        "effect": "double_might",
-        "trigger": "on_defend",
-        "target": "self",
-        "duration": "this_turn"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-111",
@@ -13717,8 +13678,9 @@
     "effects": [
       {
         "effect": "play_token",
-        "trigger": "on_play",
-        "token_name": "Gold"
+        "trigger": "on_play_spell",
+        "token_name": "Gold",
+        "exhausted": true
       }
     ]
   },
@@ -13896,9 +13858,12 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "move_units_to_base",
+        "effect": "move_unit",
         "trigger": "on_defend",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "cost": {
+          "sacrifice": true
+        }
       }
     ]
   },
@@ -13924,13 +13889,7 @@
     "keywords": [
       "REPEAT"
     ],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_cast",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-130",
@@ -14275,7 +14234,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_play",
+        "target_filter": {
+          "is_spell": true,
+          "energy_at_most": 3
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-141",
@@ -14301,16 +14269,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-142",
@@ -14416,7 +14375,12 @@
       "HIDDEN",
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "swap_might",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "SFD-146",
@@ -14753,12 +14717,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_assault",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-157",
@@ -15041,8 +15000,9 @@
         "effect": "play_from_trash",
         "trigger": "on_death",
         "target_filter": {
-          "card_type": "UNIT"
-        }
+          "energy_at_most": 3
+        },
+        "ignore_cost": true
       }
     ]
   },
@@ -15279,7 +15239,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "replace_death_with_recall",
+        "trigger": "death_replacement",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true,
+          "might_less_than_self": true
+        },
+        "heal": true,
+        "exhaust": true
+      }
+    ]
   },
   {
     "card_id": "SFD-174",
@@ -15472,7 +15444,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_friendly_unit_played",
+        "target": "friendly_unit",
+        "condition": {
+          "type": "triggering_unit_is_mighty"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-181",
@@ -15502,8 +15486,7 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
-        "keyword": "SHIELD 1",
-        "target": "all_friendly_units_here",
+        "keyword": "SHIELD",
         "target_filter": {
           "subtype": "Mech"
         }
@@ -15529,7 +15512,19 @@
         "rarity": "Epic"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "all_friendly_units_here",
+        "target_filter": {
+          "subtype": "Mech"
+        },
+        "amount": 1,
+        "duration": "this_turn"
+      }
+    ],
     "keywords": [
       "REACTION",
       "REPEAT"
@@ -15961,11 +15956,11 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
-        "keyword": "WEAPONMASTER",
+        "target": "all_friendly_units_here",
         "target_filter": {
           "subtype": "Sand Soldier"
         },
-        "note": "aura to your Sand Soldiers"
+        "keyword": "WEAPONMASTER"
       },
       {
         "effect": "play_token",
@@ -15975,10 +15970,7 @@
           "energy": 1,
           "tap": true
         },
-        "token_name": "Sand Soldier",
-        "condition": {
-          "type": "you_already_played_another_card_this_turn"
-        }
+        "token_name": "Sand Soldier"
       }
     ]
   },
@@ -16087,7 +16079,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_hold",
+        "token_name": "Gold",
+        "exhausted": true,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-202",
@@ -16156,10 +16158,17 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "play_token",
+        "trigger": "activated",
+        "token_name": "Gold",
+        "cost": {
+          "tap": true
+        }
+      },
+      {
         "effect": "ready_unit",
         "trigger": "on_death",
-        "target": "self",
-        "note": "when one or more enemy units die, ready me"
+        "target": "self"
       }
     ]
   },
@@ -16183,14 +16192,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_units",
-        "trigger": "on_cast",
-        "target": "all_friendly_units_here",
-        "note": "ready your units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-205",
@@ -16216,7 +16218,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_friendly_unit_played",
+        "amount": 1,
+        "exhausted": true,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-206",
@@ -16240,7 +16252,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell"
+      }
+    ]
   },
   {
     "card_id": "SFD-207",
@@ -16266,7 +16285,10 @@
       {
         "effect": "recall_unit",
         "trigger": "on_conquer",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "additional_cost": {
+          "energy": 1
+        }
       },
       {
         "effect": "play_token",
@@ -16274,9 +16296,6 @@
         "token_name": "Sand Soldier",
         "condition": {
           "type": "kicker_paid"
-        },
-        "additional_cost": {
-          "energy": 1
         }
       }
     ]
@@ -16349,15 +16368,12 @@
       {
         "effect": "ready_unit",
         "trigger": "on_conquer",
-        "target": "self",
-        "condition": {
-          "type": "kicker_paid"
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_legend": true
         },
         "additional_cost": {
           "energy": 1
-        },
-        "target_filter": {
-          "is_legend": true
         }
       }
     ]
@@ -16413,7 +16429,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "on_conquer",
+        "target": "self",
+        "from": "deck",
+        "count": 2
+      }
+    ]
   },
   {
     "card_id": "SFD-213",
@@ -16472,11 +16496,8 @@
         "effect": "score_point",
         "trigger": "on_hold",
         "amount": 1,
-        "additional_cost": {
+        "cost": {
           "power": 4
-        },
-        "condition": {
-          "type": "kicker_paid"
         }
       }
     ]
@@ -16597,7 +16618,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_hold",
+        "amount": 1,
+        "exhausted": true,
+        "target": "actor"
+      }
+    ]
   },
   {
     "card_id": "SFD-220",
@@ -17099,9 +17128,8 @@
         "effect": "draw_cards",
         "trigger": "on_friendly_unit_played",
         "count": 1,
-        "condition": {
-          "type": "you_played_n_spells_this_turn",
-          "params": {}
+        "cost": {
+          "tap": true
         }
       }
     ]
@@ -18102,7 +18130,14 @@
       "HIDDEN",
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-043",
@@ -18419,20 +18454,12 @@
       {
         "effect": "dig",
         "trigger": "on_play",
-        "amount": 3,
-        "count": 1,
-        "target_filter": {
-          "is_unit": true
-        }
+        "amount": 3
       },
       {
         "effect": "dig",
         "trigger": "on_hold",
-        "amount": 3,
-        "count": 1,
-        "target_filter": {
-          "is_unit": true
-        }
+        "amount": 3
       }
     ]
   },
@@ -18551,7 +18578,7 @@
       }
     ],
     "keywords": [
-      "SHIELD 1",
+      "SHIELD",
       "TANK"
     ],
     "effects": []
@@ -18670,16 +18697,14 @@
     "effects": [
       {
         "effect": "grant_might",
-        "trigger": "passive",
+        "trigger": "on_friendly_unit_played",
+        "target": "self",
         "amount": 1,
-        "target": "self"
-      },
-      {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "keyword": "TANK",
-        "target_filter": {
-          "is_token": true
+        "condition": {
+          "type": "you_control_subtype",
+          "params": {
+            "subtype": "token"
+          }
         }
       }
     ]
@@ -18707,7 +18732,9 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [],
+    "keywords": [
+      "LEVEL 3"
+    ],
     "effects": [
       {
         "effect": "reduce_cost",
@@ -18887,11 +18914,7 @@
       {
         "effect": "dig",
         "trigger": "on_play",
-        "count": 4,
-        "target_filter": {
-          "is_spell": true,
-          "might_at_least": 4
-        }
+        "amount": 4
       }
     ]
   },
@@ -19218,9 +19241,9 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "activated",
-        "amount": 2,
+        "trigger": "on_start_of_turn",
         "target": "friendly_unit",
+        "amount": 2,
         "duration": "this_turn"
       }
     ]
@@ -19299,15 +19322,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_might",
-        "trigger": "passive",
-        "target": "self",
-        "amount_source": "n_friendly_with_tag",
-        "tag": "TEMPORARY"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-077",
@@ -19331,13 +19346,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "grant_might",
+        "effect": "buff_unit",
         "trigger": "passive",
-        "amount": 1,
+        "target": "all_friendly_units_here",
         "target_filter": {
-          "is_token": true,
-          "is_unit": true
-        }
+          "is_token": true
+        },
+        "amount": 1
       }
     ]
   },
@@ -19597,8 +19612,7 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "reaction",
+        "trigger": "on_conquer",
         "count": 1
       }
     ]
@@ -19673,20 +19687,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "activated",
-        "timing": "action",
-        "cost": {
-          "tap": true
-        },
-        "additional_cost": {
-          "discard_cards": 1
-        },
-        "token_name": "Bird"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-089",
@@ -19928,8 +19929,9 @@
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
         "timing": "action",
+        "target": "friendly_unit",
         "amount": 3,
-        "target": "friendly_unit"
+        "duration": "this_turn"
       }
     ]
   },
@@ -19989,10 +19991,12 @@
       {
         "effect": "draw_cards",
         "trigger": "on_play",
-        "count": 1,
+        "amount": 1,
         "condition": {
-          "type": "this_is_alone",
-          "params": {}
+          "type": "friendly_total_might_at_least",
+          "params": {
+            "n": 5
+          }
         }
       }
     ]
@@ -20111,10 +20115,7 @@
       {
         "effect": "move_unit",
         "trigger": "on_cast",
-        "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        }
+        "target": "friendly_unit"
       }
     ]
   },
@@ -20335,9 +20336,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "keywords": [
-      "GANKING"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "grant_might",
@@ -20730,7 +20729,7 @@
       }
     ],
     "keywords": [
-      "HUNT 1"
+      "HUNT"
     ],
     "effects": [
       {
@@ -20770,7 +20769,13 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ambush",
+        "trigger": "passive",
+        "enemy_ok": true
+      }
+    ]
   },
   {
     "card_id": "UNL-121",
@@ -20894,6 +20899,7 @@
       {
         "effect": "move_unit",
         "trigger": "on_cast",
+        "timing": "action",
         "target": "enemy_unit"
       }
     ]
@@ -21250,10 +21256,7 @@
         "effect": "stun_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "enemy_unit",
-        "target_filter": {
-          "has_keyword": "ATTACKING"
-        }
+        "target": "enemy_unit"
       }
     ]
   },
@@ -21277,7 +21280,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_play",
+        "target": "opponent"
+      }
+    ]
   },
   {
     "card_id": "UNL-136",
@@ -21298,39 +21307,10 @@
         "rarity": "Uncommon"
       }
     ],
-    "keywords": [],
-    "effects": [
-      {
-        "effect": "predict",
-        "trigger": "activated",
-        "timing": "action",
-        "amount": 2,
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "action",
-        "count": 1,
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
-      },
-      {
-        "effect": "gain_xp",
-        "trigger": "activated",
-        "timing": "action",
-        "amount": 1,
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
-      }
-    ]
+    "keywords": [
+      "PREDICT 2"
+    ],
+    "effects": []
   },
   {
     "card_id": "UNL-137",
@@ -21397,7 +21377,6 @@
         "timing": "action",
         "amount": -2,
         "target": "chosen_unit",
-        "duration": "this_turn",
         "cost": {
           "tap": true
         }
@@ -21448,7 +21427,29 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "take_control",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      },
+      {
+        "effect": "exhaust_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "enemy_unit"
+      },
+      {
+        "effect": "recall_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-141",
@@ -21477,10 +21478,7 @@
       {
         "effect": "move_unit",
         "trigger": "on_play",
-        "target": "enemy_unit",
-        "target_filter": {
-          "exclude_self": true
-        }
+        "target": "enemy_unit"
       }
     ]
   },
@@ -21511,6 +21509,7 @@
         "effect": "play_from_trash",
         "trigger": "on_cast",
         "timing": "reaction",
+        "target": "self",
         "additional_cost": {
           "kill_friendly_unit": true
         }
@@ -21598,7 +21597,8 @@
       {
         "effect": "play_token",
         "trigger": "on_death",
-        "token_name": "Gold"
+        "token_name": "Gold",
+        "exhausted": true
       }
     ]
   },
@@ -21682,7 +21682,11 @@
         "effect": "banish_card",
         "trigger": "on_play",
         "target": "self",
-        "scope": "all"
+        "from": "trash",
+        "scope": "all",
+        "target_filter": {
+          "is_unit": true
+        }
       }
     ]
   },
@@ -21752,9 +21756,15 @@
       }
     ],
     "keywords": [
-      "DEFLECT 1"
+      "DEFLECT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-151",
@@ -21877,15 +21887,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_attack",
-        "target": "self",
-        "amount": 2,
-        "duration": "this_turn"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-155",
@@ -21991,7 +21993,6 @@
       {
         "effect": "gain_xp",
         "trigger": "on_play",
-        "target": "self",
         "amount_source": "friendly_units_here"
       }
     ]
@@ -22086,11 +22087,11 @@
         "effect": "play_token",
         "trigger": "activated",
         "timing": "action",
+        "token_name": "Bird",
+        "count": 2,
         "cost": {
           "tap": true
-        },
-        "token_name": "Bird",
-        "count": 2
+        }
       }
     ]
   },
@@ -22114,22 +22115,15 @@
       }
     ],
     "keywords": [
-      "PREDICT 1",
-      "ACTION"
+      "PREDICT 1"
     ],
     "effects": [
-      {
-        "effect": "predict",
-        "trigger": "on_play",
-        "amount": 1
-      },
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
         "timing": "action",
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn",
         "cost": {
           "tap": true
         }
@@ -22212,13 +22206,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "on_play",
-        "target": "all_units_here"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-165",
@@ -22305,6 +22293,7 @@
       {
         "effect": "return_from_trash",
         "trigger": "on_play",
+        "target": "self",
         "target_filter": {
           "subtype": "Dog"
         }
@@ -22339,8 +22328,10 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
         "target_filter": {
-          "card_type": "UNIT"
+          "energy_at_most": 2
         }
       }
     ]
@@ -22393,13 +22384,7 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "on_attack",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-171",
@@ -22450,7 +22435,7 @@
       }
     ],
     "keywords": [
-      "ASSAULT 1",
+      "ASSAULT",
       "DEATHKNELL"
     ],
     "effects": [
@@ -22488,16 +22473,14 @@
         "effect": "draw_cards",
         "trigger": "on_cast",
         "timing": "reaction",
-        "count": 2,
-        "additional_cost": {
-          "kill_friendly_unit": true
-        }
+        "count": 2
       },
       {
         "effect": "channel_rune",
         "trigger": "on_cast",
         "timing": "reaction",
-        "amount": 1
+        "amount": 1,
+        "exhausted": true
       }
     ]
   },
@@ -22622,8 +22605,7 @@
         "trigger": "on_conquer",
         "amount": 1,
         "condition": {
-          "type": "you_control_subtype",
-          "params": {}
+          "type": "you_control_subtype"
         }
       },
       {
@@ -22631,8 +22613,7 @@
         "trigger": "on_hold",
         "amount": 1,
         "condition": {
-          "type": "you_control_subtype",
-          "params": {}
+          "type": "you_control_subtype"
         }
       }
     ]
@@ -22664,19 +22645,7 @@
       "AMBUSH",
       "TANK"
     ],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "on_play",
-        "amount": 3,
-        "condition": {
-          "type": "kicker_paid"
-        },
-        "additional_cost": {
-          "energy": 0
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-179",
@@ -22708,14 +22677,10 @@
       {
         "effect": "dig",
         "trigger": "on_move",
-        "count": 3,
+        "amount": 3,
         "target_filter": {
-          "card_type": "UNIT"
+          "is_unit": true
         }
-      },
-      {
-        "effect": "play_from_trash",
-        "trigger": "on_death"
       }
     ]
   },
@@ -22862,7 +22827,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-185",
@@ -22939,6 +22911,7 @@
       {
         "effect": "kill_unit",
         "trigger": "on_cast",
+        "timing": "action",
         "target": "chosen_unit"
       }
     ]
@@ -23004,7 +22977,13 @@
     "keywords": [
       "EQUIP 3"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_conquer",
+        "count": 1
+      }
+    ]
   },
   {
     "card_id": "UNL-189",
@@ -23039,12 +23018,12 @@
         "effect": "play_token",
         "trigger": "activated",
         "timing": "action",
-        "token_name": "Sprite",
-        "ready": true,
         "cost": {
           "energy": 4,
           "tap": true
-        }
+        },
+        "token_name": "Sprite",
+        "ready": true
       }
     ]
   },
@@ -23112,16 +23091,16 @@
     ],
     "effects": [
       {
-        "effect": "grant_might",
+        "effect": "buff_unit",
         "trigger": "passive",
-        "amount": 1,
-        "target": "all_friendly_units_here",
         "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
             "amount": 6
           }
-        }
+        },
+        "target": "all_friendly_units_here",
+        "amount": 1
       }
     ]
   },
@@ -23218,7 +23197,6 @@
         "target": "enemy_unit",
         "cost": {
           "energy": 1,
-          "power": 1,
           "tap": true
         }
       }
@@ -23280,7 +23258,8 @@
         "trigger": "on_attack",
         "target": "enemy_unit",
         "condition": {
-          "type": "you_control_subtype"
+          "type": "you_control_subtype",
+          "params": {}
         }
       }
     ]
@@ -23454,10 +23433,13 @@
         }
       },
       {
-        "effect": "move_units_to_base",
+        "effect": "move_unit",
         "trigger": "activated",
         "timing": "action",
         "target": "friendly_unit",
+        "target_filter": {
+          "is_exhausted": true
+        },
         "cost": {
           "spend_xp": 2,
           "tap": true
@@ -23865,7 +23847,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_ally_here_to_base",
+        "trigger": "on_first_unit_here",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "UNL-216",
@@ -23909,7 +23897,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Bird"
+      }
+    ]
   },
   {
     "card_id": "UNL-218",
@@ -24074,5 +24068,5509 @@
     ],
     "keywords": [],
     "effects": []
+  },
+  {
+    "card_id": "VEN-001",
+    "name": "Baccai Sandspinner",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [5]. This ability costs [3] less if you control 4 or fewer runes. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have DEFLECT and ASSAULT 2. (Opponents must pay [rune] to choose me with a spell or ability. +2 [might] while I'm an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 5
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "DEFLECT"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "ASSAULT 2"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-001",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-002",
+    "name": "Blade Twirler",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Ionia, Yordle",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "The first time I move each turn, choose a player.\nThey BURN 1. (They put the top card of their Main Deck into their trash.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_move",
+        "target": "opponent",
+        "amount": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-002",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-003",
+    "name": "Brittle Steel",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Kill a gear.\nFLOW [4] [fury] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-003",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-004",
+    "name": "Dune Surfer",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You ignore TANK while assigning combat damage here.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-004",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-005",
+    "name": "Forsaken Baccai",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "IF you control fewer runes than an opponent at the start of your Beginning Phase, give me +1 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "amount": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-005",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-006",
+    "name": "Oasis Raider",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "If you control fewer runes than an opponent at the start of your Beginning Phase, give me +2 [might] and GANKING this turn. (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "amount": 2
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "on_start_of_turn",
+        "target": "self",
+        "keyword": "GANKING",
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-006",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-007",
+    "name": "Punching Poro",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Ionia, Poro",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — Discard 1 (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have +1 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-007",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-008",
+    "name": "Ruthless Strike",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nAs an additional cost to play this, you may discard 1.\nDeal 3 to a unit at a battlefield. If you paid the additional cost, deal 5 to it instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 3,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 5,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-008",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-009",
+    "name": "Baccai Reaper",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "When I attack, you may pay [fury] to give me ASSAULT 2 this turn. (+2 while I'm an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_attack",
+        "amount": 2,
+        "target": "self",
+        "duration": "this_turn",
+        "additional_cost": {
+          "power": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-009",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-010",
+    "name": "Consuming Curse",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nDeal 2 to a unit at a battlefield. This deals 1 Bonus Damage for each card with this name in your trash.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-010",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-011",
+    "name": "Pendulum Blade",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EQUIP [Fury] ([Fury]: Attach this to a unit you control.)",
+    "effect_equipped": "When I move to a battlefield, give me +2 [might] this turn.",
+    "set": "Vendetta",
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-011",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-012",
+    "name": "Perfect Execution",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "Ready a unit and give it ASSAULT 3 this turn. (+3 [might] while it's an attacker.)\nFLOW [3] [Fury] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount": 3,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-012",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-013",
+    "name": "Shadow Assassin",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I enter ready if you have a card with my name in your trash.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-013",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-014",
+    "name": "Shadow Fiend",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] [fury] ([2] [fury]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have ASSAULT 3. (+3 [might] while I'm an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 1
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "ASSAULT 3"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-014",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-015",
+    "name": "Decree of Rage",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nThis can't be countered.\nDeal 4 to an enemy Calm ([calm]) unit.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 4,
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Calm"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-015",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-016",
+    "name": "Eclipse Dragon",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Dragon, Mount Targon",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nWhen I move, if you control 4 or fewer runes, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_move",
+        "count": 1,
+        "condition": {
+          "type": "you_have_n_or_more_runes"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-016",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-017",
+    "name": "Morgana Vindictive",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Demacia, Morgana",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play me, deal damage to a unit equal to the damage marked on it.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "AMBUSH"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_play",
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-017",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-018",
+    "name": "Rage Amplifier",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "EMPOWER [6] [Fury]: ([6] [Fury]: Empower this. Use only if not Empowered.)\nYour units have +1[might]. If I'm EMPOWERED, they have +2 [might] instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 6,
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-018",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-019",
+    "name": "Renekton Rage Fueled",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Shurima, Renekton",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACCELERATE (You may pay [1] [rune] as an additional cost to have me enter ready.)\nWhen I attack, if you control 4 or fewer runes, deal 2 to all enemy units here.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "amount": 2,
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "condition": {
+          "type": "you_have_n_or_more_runes"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-019",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-019a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-020",
+    "name": "Twilight Reveler",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I attack, ready another friendly unit.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_attack",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-020",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-021",
+    "name": "Akali Deadly Weapon",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Ionia, Akali",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] [Fury] ([2][Fury]: Empower me. Use only if not Empowered.)\nWhen I move, you may deal 1 to a unit at a battlefield I moved to or from. If I'm [Empowered], deal 2 instead.\n[Empowered] I have +1 [Might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_move",
+        "amount": 1,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-021",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-021a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-022",
+    "name": "Endless Riches",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "When you play this, banish your hand and trash, then BURN 7.\nSkip your Draw Phase.\nYou may play cards from your trash.\nIf a card would go to your trash from anywhere other than your Main Deck, banish it instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "hand",
+        "scope": "all"
+      },
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "trash",
+        "scope": "all"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-022",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-023",
+    "name": "Zed From the Shadows",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Ionia, Zed",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "You may discard 1 as an additional cost to play me.\nWhen you play me, if you paid the additional cost, play a 0 [might] Shadow Clone unit token. (It has \"When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn.\")",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Shadow Clone",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-023",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-023a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-024",
+    "name": "Affectionate Poro",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Noxus, Poro",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When a combat that I was in ends, if I haven't been dealt damage this turn, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_win_combat",
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-024",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-025",
+    "name": "Esteemed Hierophant",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "While you control 7 or more runes, prevent all damage that enemy spells and abilities would deal to me.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-025",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-026",
+    "name": "Field Musicians",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, give a unit +3 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "amount": 3,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-026",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-027",
+    "name": "Hand Hammer",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EQUIP [calm]: ([calm]: Attach this to a unit you control.)",
+    "effect_equipped": "I have +2 [might] while I'm at a battlefield with exactly one other unit you control.",
+    "set": "Vendetta",
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-027",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-028",
+    "name": "Mournful Witness",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Ionia, Fae",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When a combat that I was in ends, empower me. (I become Empowered if I'm not already.)\nEMPOWERED I have +2 [might]",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_win_combat",
+        "target": "self"
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-028",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-029",
+    "name": "Ol' Poro",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Bandle City, Poro",
+    "might": 4,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I can't be played on your first, second, or third turns.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-029",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-030",
+    "name": "Serene Ascetic",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have DEFLECT and SHIELD 3. (Opponent's must pay [rune] to choose me with a spell or ability. +3 [might] while I'm a defender.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "DEFLECT"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "this_is_empowered"
+        },
+        "keyword": "SHIELD 3"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-030",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-031",
+    "name": "Twilight Shroud",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Give a friendly unit +1 [might] this turn. It can't be chosen by enemy spells and abilities this turn.\nFLOW 2 (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "amount": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-031",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-032",
+    "name": "Frostcoat Mother",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Freljord, Dog",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [12]. This ability costs [1] less for each rune you control. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +3 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 12
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-032",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-033",
+    "name": "Pakaa Protector",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shurima, Cat",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I move, reveal the top card of your Main Deck. If it's a unit, draw it. Otherwise, put it in your trash and give me +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_move",
+        "target": "self"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-033",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-034",
+    "name": "Resonating Strike",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nREACTION (Play on your turn or in showdowns.)\nChoose a battlefield you control and a unit you control at a different location. Move that unit to that battlefield and give it +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN",
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-034",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-035",
+    "name": "Sanction",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose one —\n- Empower a unit. Disempower it at end of turn.\n- Disempower a unit that's EMPOWERED. Empower it at end of turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-035",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-036",
+    "name": "Sandstone Chimera",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 8,
+    "cost_energy": 7,
+    "cost_power": 2,
+    "cost_power_domain": "Calm",
+    "effect": "While I'm at a battlefield, players only channel 1 rune at the start of their Channel Phase.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-036",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-037",
+    "name": "Tomb-Raider Barbara",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, if you control 7 or more runes, choose an enemy gear. If it's EMPOWERED, disempower it. Otherwise, kill it.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "target_filter": {
+          "is_gear": true
+        },
+        "condition": {
+          "type": "you_have_n_or_more_runes",
+          "params": {
+            "count": 7
+          }
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-037",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-038",
+    "name": "Akali Silent",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Ionia, Akali",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "I can't be chosen by enemy spells and abilities unless I'm in combat.\nWhen I move to a battlefield, give me +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-038",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-038a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-039",
+    "name": "Crumbling Sands",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell if and opponent has played another spell this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell",
+        "condition": {
+          "type": "you_played_n_spells_this_turn"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-039",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-040",
+    "name": "Decree of Focus",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit that's in combat with an enemy Fury ([fury]) unit or that's being chosen by an enemy Fury spell. Give it +4 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit",
+        "amount": 4
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-040",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-041",
+    "name": "Riven Shattered",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Noxus, Riven",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "WEAPONMASTER (When you play me, you may EQUIP one of your Equipment to me for [rune] less, even if it's already attached.)\nWhen I attack, choose an enemy unit here. Deal 2 to it for each Equipment attached to me.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "WEAPONMASTER"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-041",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-042",
+    "name": "Shen Scourge of Shadows",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Ionia, Shen",
+    "might": 6,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "When I hold, if there is exactly one other unit you control here, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-042",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-042a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-043",
+    "name": "Steel Paws",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Piltover, Cat",
+    "might": 0,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)\nEMPOWER [1] ([1]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I HAVE +7 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "DEFLECT",
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 7,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-043",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-044",
+    "name": "Astral Heron",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Bird, Mount Targon",
+    "might": 7,
+    "cost_energy": 7,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play your first card each turn, if I'm at a battlefield, the next card you play this turn costs [2] [rune] [rune] less.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-044",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-045",
+    "name": "Helm of Suppression",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "EMPOWER [4] [calm] ([4] [calm]: Empower this: Use only if not Empowered.)\nOpponents' spells cost [1] more. If this is EMPOWERED, they cost [1] [rune] more instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": -1,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-045",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-046",
+    "name": "Nasus Ascended",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Shurima, Dog, Nasus",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "DEFLECT 2 (Opponents must pay [Rune][Rune] to choose me with a spell or ability.)\nEMPOWER [8] ([8]: Empower me. Use only if not Empowered.)\nEMPOWERED When i conquer, you score 1 point.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "DEFLECT 2",
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 8
+        }
+      },
+      {
+        "effect": "score_point",
+        "trigger": "on_conquer",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-046",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-046a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-047",
+    "name": "Apprentice Mage",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle one of them and put the rest back in any order.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "PREDICT 2"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "predict",
+        "trigger": "activated",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-047",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-048",
+    "name": "Cloud Drake",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Dragon, Demacia",
+    "might": 5,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-048",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-049",
+    "name": "Dredge Up",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Draw 1.\nFLOW [2] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-049",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-050",
+    "name": "Grumpy Rockbear",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [12]. This ability costs [1] less for each rune you control. (Pay the cost: Empower me. Use only if not Empowered.)\nEMPOWER[>] I have DEFLECT and SHIELD 3. (Opponent's must pay [rune] to choose me with a spell or ability. +3 [might] while I'm a defender.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT",
+      "SHIELD 3"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 12
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "SHIELD 3",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-050",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-051",
+    "name": "Iterative Design",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Play a 3 [might] Mech unit token.\n[Flow] [2] [Mind] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Mech"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-051",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-052",
+    "name": "Mesmerize",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\n\nChoose one -\n· Return a friendly unit to its owner's hand.\n· Give an enemy unit -2[Might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-052",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-053",
+    "name": "Otterpus",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Bandle City",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "If a player would score 1 point from conquering or holding during their first and second turn, they draw 1 instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-053",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-054",
+    "name": "Questionable Tome",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — [tap] (Pay the cost: Empower me. Use only if not Empowered.)\nDisempower this, [1], [tap]: Draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-054",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-055",
+    "name": "Applied Researchers",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED Your spells cost [1] [rune] less, to a minimum of [1].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-055",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-056",
+    "name": "Clairvoyance",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 7,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nPREDICT 5. (Look at the top 5 cards of your Main Deck. Recycle any of them and put the rest back in any order.)\nDraw 2.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION",
+      "PREDICT 5"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-056",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-057",
+    "name": "Covert Informant",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] When I move, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_move",
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-057",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-058",
+    "name": "Patched Porobot",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Mech, Piltover, Poro",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "(I enter exhausted.)\nWhen you play me, if you control 3 or more other gear, draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "amount": 1,
+        "condition": {
+          "type": "you_control_n_or_more_gear",
+          "params": {
+            "n": 3
+          }
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-058",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-059",
+    "name": "Shock Blast",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nThis costs [2] less if you control something that's EMPOWERED.\nDeal 4 to a unit at a battlefield.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-059",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-060",
+    "name": "Sky Cruiser",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Piltover",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "Discard a gear, [1], [tap]: Deal 4 to a unit at a battlefield.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-060",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-061",
+    "name": "Decree of Insight",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nIgnore DEFLECT while paying this spell's cost.\nGive an enemy Body ([Body]) unit -5[might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Body"
+        },
+        "amount": -5,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-061",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-062",
+    "name": "Hextech Formula",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "This enters exhausted.\n[tap]: Empower another gear. (It becomes Empowered if it's not already.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_gear": true,
+          "exclude_self": true
+        },
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-062",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-063",
+    "name": "Nasus Guardian of Knowledge",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Shurima, Dog, Nasus",
+    "might": 6,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "Once each turn, when an enemy unit here dies, channel 1 rune exhausted.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_death",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-063",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-063a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-064",
+    "name": "Plaza Guardian",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Mech, Piltover",
+    "might": 8,
+    "cost_energy": 10,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I cost [1] less for each gear you control.\nDEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "n_friendly_with_tag",
+        "tag": "gear"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-064",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-065",
+    "name": "Swain Visionary",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Noxus, Demon, Swain",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)\nWhen I conquer, if you've played a non-token unit, a non-token gear, and a spell this turn, you score 1 point.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "PREDICT 1"
+    ],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-065",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-066",
+    "name": "Temporal Breach",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nBanish a unit, then its owner plays it to the same location, ignoring its cost.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-066",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-067",
+    "name": "Bottled Constellation",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 10,
+    "cost_power": 2,
+    "cost_power_domain": "Mind",
+    "effect": "At the start of your Main Phase, you may kill 3 other friendly units and/or gear to score 1 point.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_start_of_turn",
+        "amount": 1,
+        "additional_cost": {
+          "kill_friendly_unit": true
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-067",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-068",
+    "name": "Jayce Brilliant Inventor",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Piltover, Jayce",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "When you play me or the first time you play a non-token gear each turn, you may ready something besides me that's exhausted.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "exclude_self": true,
+          "is_exhausted": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-068",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-068a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-069",
+    "name": "Mel Newly Awakened",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Noxus, Mel",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "When you play me, draw 1.\nEMPOWER 3 ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] Your spells and abilities can't be countered. If a spell or ability you control would give -[might] to a unit it chooses, it gives an additional -1[might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-069",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-069a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-070",
+    "name": "Brutal Hunter",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "EMPOWER [3] ([3]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +2 [might] and GANKING. (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "GANKING"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-070",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-071",
+    "name": "Fretful Feline",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Piltover, Cat",
+    "might": 5,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I become ready, give +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "amount": 2,
+        "target": "self"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-071",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-072",
+    "name": "Guttural Roar",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive a unit +2 [might] this turn. If it's EMPOWERED , give it +4 [might] this turn instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-072",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-073",
+    "name": "Jagged Cutlass",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Equip [body] ([body]: Attach this to a unit you control.)",
+    "effect_equipped": "I can't be moved by enemy spells and abilities.",
+    "set": "Vendetta",
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "keyword": "TANK",
+        "target": "self"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-073",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-074",
+    "name": "Legion Marauder",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Noxus, Trifarian",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — [1] or [body] (Pay either cost: Empower me. Use only if not Empowered.)\nEMPOWERED I have +1 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-074",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-075",
+    "name": "Platewyrm Egg",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "This enters exhausted.\nEMPOWER — [1], [tap] (Pay the cost: Empower this. Use only if not Empowered.)\nREACTION[>] [tap]: ADD [1]. If this is EMPOWERED, ADD [2] instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-075",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-076",
+    "name": "Repair Specialist",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Zaun",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I have ASSAULT equal to the number of gear you control. (+1 [might] while I’m an attacker for each instance of Assault.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-076",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-077",
+    "name": "Tools of Empire",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] ([2]: Empower this. Use only if not Empowered.)\n[tap]: Give a unit +2[might] this turn. If this is EMPOWERED, give that unit +4[might] this turn instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 2,
+        "target": "chosen_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-077",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-078",
+    "name": "Baccai Witherclaw",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [1] [rune] [rune] ([1] [rune] [rune] : Empower me. Use only if not Empowered.)\nEMPOWERED I have +2 [might] .\nEMPOWERED DEATHKNELL Channel 2 runes exhausted. (When I die while Empowered, get the effect.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_death",
+        "amount": 2,
+        "exhausted": true,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-078",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-079",
+    "name": "Dame the Despoiler",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [5] [body] ([5] [body]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] When I attack or defend, choose a unit here. Increase my Might to its Might this turn, then give me +1 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 5,
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-079",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-080",
+    "name": "Noxian Demolitionist",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I conquer, you may kill a gear with Energy cost no more than my Might.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_conquer",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-080",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-081",
+    "name": "Onslaught",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Give a unit +6 [might] this turn.\nFLOW [4] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount": 6,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-081",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-082",
+    "name": "Profiteer",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, you may disempower something you control to empower a legend, unit, or gear.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-082",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-083",
+    "name": "Rampage",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "As you play this, you may pay [body] as an additional cost.\nChoose a friendly unit and an enemy unit. If you paid the additional cost, give the friendly unit +2 [might] this turn. They deal damage equal to their Mights to each other.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-083",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-084",
+    "name": "Ambessa The Wolf",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Noxus, Ambessa",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] [Body] (Empower me. Use only when I'm not empowered.)\nEMPOWERED I have +3 [might] and can't be dealt damage unless I'm in combat.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3,
+          "power": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-084",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-084a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-085",
+    "name": "Decree of Strength",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Choose an opponent. They reveal their hand and you choose a Mind ([mind]) card from it. They recycle that card.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reveal_and_choose",
+        "trigger": "on_cast",
+        "target": "opponent",
+        "target_filter": {
+          "subtype": "Mind"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-085",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-086",
+    "name": "Gangplank Naval",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Bilgewater, Pirate, Gangplank",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [body] [body] ([body] [body]: Empower me. Use only if not empowered.)\nEMPOWERED[>] If a spell or ability that chooses me would stun me, give me -[might], or return me to hand, give me +3 [might] this turn instead.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 2
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-086",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-087",
+    "name": "Hextech Disc",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "EMPOWER — [tap] (Pay the cost: Empower this. Use only if not Empowered.)\nDisempower this, [1], [tap]: Play a 3 [might] Mech unit token to your base.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "token_name": "Mech"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-087",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-088",
+    "name": "Jayce Hammer in Hand",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Piltover, Jayce",
+    "might": 5,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "When I become ready, choose one to give me this turn —\n• ASSAULT 2 (+2 [might] while I'm an attacker)\n• DEFLECT 2 (Opponents must pay [rune] [rune] to choose me with a spell or ability.)\n• GANKING (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-088",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-088a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-089",
+    "name": "Wild Claw",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "Look at the top 5 cards of your Main Deck. You may banish a unit or gear from among them and play it, reducing its Energy cost by [5]. Recycle the rest. Then you may do this: Empower it. (It becomes Empowered if it's not already.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "amount": 5
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-089",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-090",
+    "name": "Cataclysmic Duel",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 8,
+    "cost_power": 3,
+    "cost_power_domain": "Body",
+    "effect": "Each play chooses a unit they control. Kill the rest.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-090",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-091",
+    "name": "Corrupted Dragon",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Dragon, Shadow Isles",
+    "might": 10,
+    "cost_energy": 10,
+    "cost_power": 2,
+    "cost_power_domain": "Body",
+    "effect": "If your score is not within 3 points of the Victory Score, I enter ready.\nWhen I attack, you may move any number of enemy units here each with 5 [might] or less to their base.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_attack",
+        "target": "all_enemy_units_here",
+        "target_filter": {
+          "might_at_most": 5
+        },
+        "scope": "all"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-091",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-092",
+    "name": "Renekton Brute",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Shurima, Renekton",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[1]: Give me +1 [might] this turn.\nWhen my Might becomes 10 or more, empower me. (I become Empowered if I'm not already.)\nEMPOWERED[>] I have DEFLECT and GANKING. (Opponent's must pay [rune] to choose me with a spell or ability. I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 1,
+        "target": "self",
+        "cost": {
+          "energy": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-092",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-092a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-093",
+    "name": "Kinkou Lifeblade",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +1 [might] and GANKING. (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-093",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-094",
+    "name": "Mask Mother",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spirit",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you discard me, you may pay [1] to give a friendly unit +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_death",
+        "amount": 2,
+        "target": "friendly_unit",
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-094",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-095",
+    "name": "Shadow Order Disciple",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I move, you may BURN 1] to give me +1 [might] this turn. (To Burn 1, put the top card of your Main Deck into your trash.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "amount": 1,
+        "target": "self"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-095",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-096",
+    "name": "Shadowblade Lurker",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I cost [2] less for each card with my name in your trash.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount_source": "trash_count",
+        "amount": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-096",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-097",
+    "name": "Spiderling",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spider",
+    "might": 1,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react later for [0].)\nI have +1 [might] for each other unit you control here with my name.\nYour deck can have any number of cards named Spiderling.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "amount_source": "n_friendly_with_tag",
+        "tag": "Spiderling",
+        "target": "self",
+        "target_filter": {
+          "exclude_self": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-097",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-098",
+    "name": "Stargazer",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Mount Targon",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Spells with FLOW you play from your trash cost [2] less, to a minimum of [1].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "target_filter": {
+          "is_spell": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-098",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-099",
+    "name": "Tornado Warrior",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me from face down, you may empower something here. Disempower it at end of turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_play",
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-099",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-100",
+    "name": "Up from the Deep",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Play two 1 [might] Tentacle unit tokens from Bilgewater.\nFLOW [3] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "FLOW"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Tentacle",
+        "count": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-100",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-101",
+    "name": "Gust Monk",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You may pay [1] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, banish a card from any trash to give a unit ASSAULT 2 this turn. (+2 [might] while it's an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "trash",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "energy": 1
+        }
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "energy": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-101",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-102",
+    "name": "Ravenbloom Prefect",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When an opponent plays a gear, you may banish me to banish it.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-102",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-103",
+    "name": "Shadows of the Past",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "Return up to 2 units from trashes to their owners' hands.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "return_from_trash",
+        "trigger": "on_cast",
+        "scope": "all",
+        "count": 2,
+        "target_filter": {
+          "is_unit": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-103",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-104",
+    "name": "Tail-Cloaked Matriarch",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] [chaos] ([2] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, you may choose a unit with Energy cost no more than [3] and Power cost no more than [rune]. Play it to your base, ignoring its cost.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-104",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-105",
+    "name": "Twilight Step",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "Move a unit with 3 [might] or less.\nFLOW [4] [Chaos] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-105",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-106",
+    "name": "Wind and Ghosts",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nChoose a unit at a battlefield. If it has 3 [might] or less, banish it. Otherwise, return it to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-106",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-107",
+    "name": "Decree of Discord",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "Return any number of enemy Order {[order]) units with total Might 5 or less to their owners' hands.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-107",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-108",
+    "name": "Forgotten Relic",
+    "domain": "Chaos",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play this or at the start of your Beginning Phase, BURN 1. When you burn a unit this way, do this: Give a friendly unit +[might] equal to the burned card's Might this turn. (To Burn 1, put the top card of your Main Deck into your trash.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_play",
+        "amount": 1
+      },
+      {
+        "effect": "burn",
+        "trigger": "on_start_of_turn",
+        "amount": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-108",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-109",
+    "name": "Illaoi Prophet of the Great Kraken",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Bilgewater, Illaoi",
+    "might": 4,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me or when I score, play a 1 [might] Tentacle unit token from Bilgewater.\nI have +1 [might] for each token unit your control.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Tentacle"
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Tentacle"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-109",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-110",
+    "name": "Mel Defiant Soul",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Noxus, Mel",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — Discard a spell (Pay the cost: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, banish an enemy unit at a battlefield with 3[might] or less.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_at_most": 3
+        },
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-110",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-110a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-111",
+    "name": "Minah Swiftfoot",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "When I move to a battlefield, choose one —\n• Each player discards 1.\n• Each player draws 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-111",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-112",
+    "name": "Zed Without a Sound",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Ionia, Zed",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I conquer, play a 0 [might] Shadow Clone unit token to your base. (It has \"When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn.\")\nACTION [1] [Chaos]: Move me and a Shadow Clone you control to each other's locations.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Shadow Clone"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-112",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-112a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-113",
+    "name": "Kennen Storm of Shuriken",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Ionia, Yordle, Kennen",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "When you play me, BURN 2. (Put the top 2 cards of your Main Deck into your trash.)\nWhen i conquer, give a spell in your trash FLOW equal to its cost this turn. (You may play it from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "FLOW"
+    ],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_play",
+        "amount": 2
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-113",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-113a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-114",
+    "name": "Kharox",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spirit",
+    "might": 5,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [6] [chaos] [chaos] ([6] [chaos] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, choose an opponent. They BURN 3. Then you may do this: Choose a unit in their trash and play it, ignoring its cost. (To Burn 3, they put the top 3 cards of their Main Deck into their trash.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 6,
+          "power": 2
+        }
+      },
+      {
+        "effect": "burn",
+        "trigger": "passive",
+        "target": "opponent",
+        "amount": 3,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-114",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-115",
+    "name": "Ocean Drake",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Dragon, Ionia",
+    "might": 7,
+    "cost_energy": 8,
+    "cost_power": 2,
+    "cost_power_domain": "Chaos",
+    "effect": "You may play me to an open battlefield.\nWhen you play me, you may return a non-Dragon unit to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "subtype": "Dragon"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-115",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-116",
+    "name": "Dragon Form",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Choose a unit. Its base Might becomes 5 this turn.\nFLOW [3] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "FLOW"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-116",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-117",
+    "name": "Disciple of Shen",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nI have SHIELD 3 while I'm at a battlefield with exactly one other unit you control. (+3 [might] while I'm a defender.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-117",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-118",
+    "name": "Horns of the Dragon",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "TANK (I must be assigned combat damage first.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "TANK"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-118",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-119",
+    "name": "Keeper of Law",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "I cost [2] [order] less if you control a battlefield with exactly two units there.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-119",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-120",
+    "name": "Masa Crashing Thunder",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You may pay [order] as an additional cost to play me.\nWhen you play me, if you paid the additional cost, STUN an enemy unit at a battlefield. (It doesn't deal combat damage this turn.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-120",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-121",
+    "name": "Reluctant Leader",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Ionia",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "When you play another unit, give me +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_friendly_unit_played",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-121",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-122",
+    "name": "Solari Sunhawk",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Bird, Mount Targon",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have +1 [might] and DEFLECT 2. (Opponents must pay [rune] [rune] to choose me with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT 2",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-122",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-123",
+    "name": "Soulspinner",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spider",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "AMBUSH  (You may play me as a REACTION to a battlefield where you have units.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "AMBUSH"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-123",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-124",
+    "name": "Escaped Grayback",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — Kill a friendly unit (Pay the cost: Empower me. USe only if not Empowered.)\nEMPOWERED I have +2 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-124",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-125",
+    "name": "Hungry Wolf",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Freljord, Dog",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[order]: Ready me and give me +1 [might] this turn. Use only if you've chosen an enemy unit this turn and only once each turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "self",
+        "cost": {
+          "power": 1
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn",
+        "cost": {
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-125",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-126",
+    "name": "Ki Barrier",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a unit. Prevent the next 7 damage that would be dealt to it this turn. (Opponents can assign it extra combat damage to kill it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_shield",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 7,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-126",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-127",
+    "name": "Lacerate",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "Choose a unit. If it's EMPOWERED, disempower it. Then kill it if it has 3 [might] or less.\nFLOW [4] [Order] [Order] (You may play this from your trash for its FLow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-127",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-128",
+    "name": "Noxian Emissary",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [1] [Order] ([1] [Order]: Empower me. Use only if not Empowered.)\nEMPOWERED DEATHKNELL Play two 1 [Might] Recruit unit tokens to your base. (When I die while Empowered, get the effect.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 1
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_death",
+        "target": "self",
+        "token_name": "Recruit",
+        "count": 2,
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-128",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-129",
+    "name": "Sacred Protector",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Ionia, Fae",
+    "might": 6,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "I don't deal combat damage unless I'm at a battlefield with exactly one other unit you control.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-129",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-130",
+    "name": "Aurok General",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Noxus, Trifarian",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] [order] ([3] [order]: Empower me. Use only if not Empowered.)\nEMPOWERED Your units that are EMPOWERED have +2 [might] (including me).",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 3
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-130",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-131",
+    "name": "Decree of Unity",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "Kill an enemy Chaos ([chaos]) unit or gear.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "target_filter": {
+          "subtype": "Chaos"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-131",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-132",
+    "name": "Fallen Feline",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Piltover, Cat",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "When you play me, name a spell.\\nWhile I'm at a battlefield, opponents can't play spells with that name.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-132",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-133",
+    "name": "Glowstone",
+    "domain": "Order",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [rune] [rune] ([rune][rune]: Empower me, Use only if not Empowered.)\nDisempower this, [tap]: Choose a player. They gain control of this and recall it. (Send it to their base.)\nAt the end of your turn, kill this and deal 5 to all units you control.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_end_of_turn",
+        "target": "all_friendly_units_here",
+        "amount": 5
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-133",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-134",
+    "name": "Kayle Justified",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Mount Targon, Kayle",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] ([3]: Empower me.)\nI can be EMPOWERED up to three times.\nI have +2 [might] for each time I'm EMPOWERED.\nWhile I'm EMPOWERED three times, I have DEFLECT 3 and GANKING.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "DEFLECT",
+      "GANKING"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-134",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-135",
+    "name": "Kennen Keeper of Balance",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Ionia, Yordle, Kennen",
+    "might": 2,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me or I attack, you may pay [2] to STUN a unit. (It doesn't deal combat damage this turn.)\nWhile there's a stunned enemy unit here, I have +2 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "energy": 2
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      },
+      {
+        "effect": "stun_unit",
+        "trigger": "on_attack",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "energy": 2
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-135",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "VEN-135a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-136",
+    "name": "Ambessa Respected and Feared",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Noxus, Ambessa",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [1] [Order] [Order] ([1][Order][Order]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I have [Assault 2]. (+2 [Might] while I'm an attacker.)\nEMPOWERED[>] When I attack, kill an enemy unit here with less Might than me.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_attack",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-136",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-136a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-137",
+    "name": "Shady Spectacles",
+    "domain": "Order",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EQUIP [1] [Order] ([1] [Order]: Attach this to a unit you control.)\nAs this is attached to a unit, choose another friendly unit. The equipped unit becomes a copy of that unit for as long as this is attached to it.",
+    "effect_equipped": "(I am a copy of the choosen unit.)",
+    "set": "Vendetta",
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-137",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-138",
+    "name": "Shen Leader of the Kinkou Order",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Ionia, Shen",
+    "might": 7,
+    "cost_energy": 6,
+    "cost_power": 2,
+    "cost_power_domain": "Order",
+    "effect": "SHIELD (+1 [might] while I'm a defender.)\nWhen I hold, if there is exactly one other unit you control here, you score 1 point.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "SHIELD"
+    ],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_hold",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-138",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "VEN-138a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-139",
+    "name": "Akali Rogue Assassin",
+    "domain": "Fury Calm",
+    "category": "Legend",
+    "sub_type": "Akali",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [3] [Rune] ([3] [Rune]: Empower me. Use only if not Empowered.)\nACTION [tap]: If it's your turn, move a friendly unit in a showdown to base and if I'm EMPOWERED ready it.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWER",
+      "EMPOWERED",
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3,
+          "power": 1
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-139",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-140",
+    "name": "Shuriken Flip",
+    "domain": "Fury Calm",
+    "category": "Signature Spell",
+    "sub_type": "Akali",
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Fury/Calm",
+    "effect": "Deal 2 to up to one enemy unit at a battlefield, then move a friendly unit.\nFLOW [3] [rune] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "amount": 2
+      },
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "friendly_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-140",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-141",
+    "name": "Renekton Butcher of the Sands",
+    "domain": "Fury Body",
+    "category": "Legend",
+    "sub_type": "Renekton",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION [rune] [rune], [tap]: ADD [2]. Spend this Energy only to play units or activated abilities of units.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-141",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-142",
+    "name": "Dominus",
+    "domain": "Fury Body",
+    "category": "Signature Spell",
+    "sub_type": "Renekton",
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nThis turn, double a unit's Might and give it \"[rune] [rune]: Ready me.\"",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "double_might",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-142",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-143",
+    "name": "Zed Master of Shadows",
+    "domain": "Fury Chaos",
+    "category": "Legend",
+    "sub_type": "Zed",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you banish a card you own, empower me. (I become Empowered if I'm not already.)\nACTION[>] Disempower me, [tap]: Discard 1, then draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-143",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-144",
+    "name": "Death Mark",
+    "domain": "Fury Chaos",
+    "category": "Signature Spell",
+    "sub_type": "Zed",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Fury/Chaos",
+    "effect": "BURN 3. (Put the top 3 cards of your Main Deck into your trash.)\nPlay a 0 [might] Shadow Clone unit token. (It has \"When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn.\")\nFLOW [1] [Rune] [Rune] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Shadow Clone"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-144",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-145",
+    "name": "Nasus Curator of the Sands",
+    "domain": "Calm Mind",
+    "category": "Legend",
+    "sub_type": "Nasus",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a unit, gear or activated ability with Energy cost [7] or more, you may exhaust me to ready up to 2 runes.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_runes",
+        "trigger": "on_friendly_unit_played",
+        "amount": 2,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-145",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-146",
+    "name": "Siphoning Strike",
+    "domain": "Calm Mind",
+    "category": "Signature Spell",
+    "sub_type": "Nasus",
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Deal 4 to a unit at a battlefield. If you control 7 or more runes, deal 7 to it instead. When it dies this turn, channel 1 rune exhausted.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 4,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 7,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "you_have_n_or_more_runes",
+          "params": {
+            "count": 7
+          }
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_cast",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-146",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-147",
+    "name": "Shen Eye of Twilight",
+    "domain": "Calm Order",
+    "category": "Legend",
+    "sub_type": "Shen",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION [tap]: Give a friendly unit TANK this turn. (It must be assigned combat damage first.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "activated",
+        "timing": "action",
+        "keyword": "TANK",
+        "target": "friendly_unit",
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-147",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-148",
+    "name": "Shadow Dash",
+    "domain": "Calm Order",
+    "category": "Signature Spell",
+    "sub_type": "Shen",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Calm/Order",
+    "effect": "Move an enemy unit to a battlefield where you have units. If you have exactly two units there, they each get +1 [might] this turn.\nFLOW [5] [rune] [rune] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-148",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-149",
+    "name": "Jayce Defender of Tomorrow",
+    "domain": "Mind Body",
+    "category": "Legend",
+    "sub_type": "Jayce",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER [2] [rune] [rune] ([2] [rune][rune]: Empower me. Use only if not Empowered.)\n[1], [tap]: Ready a gear.\nEMPOWERED[>] [1], [tap]: Ready 2 gear.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_gear": true
+        },
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-149",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-150",
+    "name": "Acceleration Gate",
+    "domain": "Mind Body",
+    "category": "Signature Spell",
+    "sub_type": "Jayce",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Mind/Body",
+    "effect": "Ready up to 4 units, gear, and/or runes.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_units",
+        "trigger": "on_cast",
+        "amount": 4,
+        "target": "chosen_unit"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-150",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-151",
+    "name": "Mel Soul's Reflection",
+    "domain": "Mind Chaos",
+    "category": "Legend",
+    "sub_type": "Mel",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you empower something else, empower me. (I become Empowered if I'm not already.)\nDisempower me, [tap]: Give a unit at a battlefield -2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "debuff_might",
+        "trigger": "activated",
+        "timing": null,
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-151",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-152",
+    "name": "Rebuttal",
+    "domain": "Mind Chaos",
+    "category": "Signature Spell",
+    "sub_type": "Mel",
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Mind/Chaos",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-152",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-153",
+    "name": "Ambessa Matriarch of War",
+    "domain": "Body Order",
+    "category": "Legend",
+    "sub_type": "Ambessa",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you empower something else, empower me. (I become Empowered if I'm not already.)\nDisempower me, [rune], [tap]: Ready a unit.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "timing": null,
+        "target": "chosen_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-153",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-154",
+    "name": "Public Execution",
+    "domain": "Body Order",
+    "category": "Signature Spell",
+    "sub_type": "Ambessa",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Body/Order",
+    "effect": "Choose a friendly unit. Kill an enemy unit with less Might than it.\nFLOW [5] [rune] [rune] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-154",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-155",
+    "name": "Kennen Heart of the Tempest",
+    "domain": "Chaos Order",
+    "category": "Legend",
+    "sub_type": "Kennen",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a card from anywhere other than your hand, empower me.\nACTION Disempower me, [tap]: Give a unit ASSAULT 2 this turn. (+2 while it's an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "keyword": "ASSAULT 2",
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-155",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-156",
+    "name": "Lightning Rush",
+    "domain": "Chaos Order",
+    "category": "Signature Spell",
+    "sub_type": "Kennen",
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Look at the top 3 cards of your Main Deck. You may choose a card from among them and draw it. Put the rest into your trash.\nFLOW [2] [rune] (You may play this from your trash for its Flow cost. Then banish it.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_cast",
+        "amount": 3,
+        "count": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-156",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-157",
+    "name": "Dragon Roost",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Any player may pay [rune] [rune] as an additional cost to play a Dragon. If they do, they play it to this battlefield.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-157",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-158",
+    "name": "Heisho Shell of the World",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Players ignore DEFLECT while paying for spells and abilities choosing something here.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "ignore_deflect_here",
+        "trigger": "passive"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-158",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-159",
+    "name": "Kinkou Temple",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Units here with TANK have +1 [might].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "target_filter": {
+          "has_keyword": "TANK"
+        },
+        "amount": 1
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-159",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-160",
+    "name": "Mystic Vortex",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "During showdowns here, cards with REACTION cost [rune] more to play. (Hidden cards have REACTION.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-160",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-161",
+    "name": "Piltovan Forge",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "While you control this battlefield, the first friendly gear activated ability played each turn costs [1] less.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-161",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-162",
+    "name": "Protective Sands",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you conquer here, if you control 4 or fewer runes, you may pay [1] to draw 1.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-162",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-163",
+    "name": "Risen Altar",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER costs of your units here cost [1] or [Rune] less.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-163",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-164",
+    "name": "Sandswept Tomb",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Each spell that chooses one or more units here that are friendly to it costs [rune] less.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "reduce_cost_here",
+        "trigger": "passive",
+        "amount": 1,
+        "resource": "power",
+        "requires_target": "friendly"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-164",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-165",
+    "name": "Shadow Temple",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you hold here, BURN 3. (Put the top 3 cards of your Main Deck into your trash.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "burn",
+        "trigger": "on_hold",
+        "amount": 3
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-165",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-166",
+    "name": "Threshold of the Gray",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When combat starts here, the attacker and defender each ADD [1].",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-166",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-T01",
+    "name": "Empowered",
+    "domain": null,
+    "category": "Token",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Use to mark Legends, units, and gear that are EMPOWERED.",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [
+      "EMPOWERED"
+    ],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-T01",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-T05",
+    "name": "Shadow Clone",
+    "domain": null,
+    "category": "Token",
+    "sub_type": null,
+    "might": 0,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn. (+4 [might] while I'm an attacker.)",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_attack",
+        "target": "self",
+        "from": "trash",
+        "target_filter": {
+          "is_unit": true
+        }
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_attack",
+        "target": "self",
+        "amount": 4,
+        "duration": "this_turn"
+      }
+    ],
+    "variants": [
+      {
+        "variant_id": "VEN-T05",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "VEN-T06",
+    "name": "Tentacle",
+    "domain": null,
+    "category": "Token",
+    "sub_type": "Bilgewater",
+    "might": 1,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "",
+    "effect_equipped": null,
+    "set": "Vendetta",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "VEN-T06",
+        "rarity": "Common"
+      }
+    ]
   }
 ]

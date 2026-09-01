@@ -1,68 +1,188 @@
-Baccai Sandspinner	EMPOWER cost reduction conditional on rune count not expressible
-Blade Twirler	'first time I move each turn' limiter and 'choose a player' not fully expressible
-Dune Surfer	Ignoring TANK while assigning combat damage not expressible
-Forsaken Baccai	Condition 'control fewer runes than an opponent' not expressible
-Oasis Raider	Condition 'control fewer runes than an opponent' not expressible
-Punching Poro	EMPOWER via discard cost not cleanly expressible as activated cost
-Shadow Assassin	Enter ready if same-named card in trash not expressible
-Rage Amplifier	'Your units have +1 might' anywhere-scoped aura, with empowered-modifier to +2, not expressible
-Affectionate Poro	'combat I was in ends' and 'if I haven't been dealt damage this turn' not expressible
-Esteemed Hierophant	Prevent all enemy spell/ability damage to me while controlling 7+ runes — no supported verb for prevent-damage-from-source gated by rune count.
-Hand Hammer	Equipped bonus is conditional on being at a battlefield with exactly one other friendly unit — no supported condition matches.
-Mournful Witness	'When a combat that I was in ends' is broader than on_win_combat (fires regardless of win/loss).
-Ol' Poro	Cannot be played on your first, second, or third turns — no supported mechanic for turn-number play restriction.
-Frostcoat Mother	Empower ability cost is reduced by [1] per rune you control — dynamic cost reduction on an activated ability not expressible.
-Pakaa Protector	On move, reveal top card: if unit draw it, otherwise trash it and gain +2 might this turn — branch on revealed card type not expressible.
-Sanction	Choose-one modal effect with delayed end-of-turn reversal — mode choice not dispatched.
-Sandstone Chimera	While at a battlefield, all players channel only 1 rune per Channel Phase — no supported verb for modifying channel-phase rune count.
-Riven Shattered	Damage equals 2 per Equipment attached to me — no supported amount_source for attached equipment count.
-Riven Shattered	unknown amount_source 'attached_equipment_count'
-Shen Scourge of Shadows	conditional draw gated on exactly one other unit here, no matching condition
-Apprentice Mage	PREDICT 2 triggers 'when I become empowered', a becoming-empowered trigger not directly supported
-Grumpy Rockbear	EMPOWER cost reduced per rune you control, cost-scaling on activated ability not supported
-Mesmerize	Choose one modal spell not dispatchable
-Otterpus	replacement effect turning scoring into drawing during early turns not supported
-Questionable Tome	disempower-this as an additional cost on the draw ability not expressible
-Patched Porobot	draw gated on controlling 3+ other gear, no matching condition
-Sky Cruiser	discard a gear as an additional cost not expressible in cost keys
-Hextech Formula	'This enters exhausted' has no supported effect; empower targets another gear (not self)
-Swain Visionary	conquer condition requires having played a non-token unit AND non-token gear AND a spell this turn — no matching condition
-Legion Marauder	EMPOWER has an alternate cost ([1] OR [body]); only one cost representable
-Platewyrm Egg	'This enters exhausted' unsupported; REACTION tap ADD is a gain_power ability, plus empowered-modifier (ADD 2 instead)
-Repair Specialist	ASSAULT equal to number of gear you control — dynamic keyword value not expressible
-Dame the Despoiler	empowered attack/defend ability sets Might equal to a chosen unit's Might then grants +1 — set-might-to-target not expressible
-Profiteer	disempower something you control as a cost to empower a legend/unit/gear — cost:disempower and empower a chosen target not expressible
-Ambessa The Wolf	empowered 'can't be dealt damage unless in combat' is a damage-prevention modifier not expressible
-Gangplank Naval	EMPOWERED clause is a replacement/protection modifier on effects that would stun/debuff/return me; no supported vocab.
-Jayce Hammer in Hand	On-become-ready 'choose one' modal buff; mode choice not supported, and 'become ready' trigger not supported.
-Cataclysmic Duel	Each player keeps one chosen unit, kill all others; no supported target/mode for symmetric player-choice mass kill.
-Tornado Warrior	'When you play me from face down' is a HIDDEN-specific trigger; empower a chosen 'something here' then disempower at end of turn — the play-from-facedown gate and the delayed disempower are not fully supported.
-Ravenbloom Prefect	'When an opponent plays a gear' trigger with self-banish cost to banish it; trigger and cost unsupported.
-Tail-Cloaked Matriarch	'When I become EMPOWERED' trigger with free-play of a cost-limited unit not supported.
-Wind and Ghosts	Conditional 'otherwise return to hand' branch for units above 3 might not supported as a single mode.
-Decree of Discord	Return any number of enemy Order units with total might 5 or less; multi-target selection with combined-might budget not supported.
-Forgotten Relic	'When you burn a unit this way' dependent trigger granting +might equal to burned card's might not supported.
-Mel Defiant Soul	EMPOWER cost is 'discard a spell' (not an expressible energy/power cost); on-become-empowered trigger approximated.
-Minah Swiftfoot	Choose-one modal effect on move trigger is not dispatchable.
-Kennen Storm of Shuriken	On-conquer 'give a spell in trash FLOW' effect is not expressible.
-Kharox	On-become-empowered trigger approximated; the follow-up 'play a unit from their trash ignoring cost' is not supported.
-Dragon Form	Setting a unit's base Might to a fixed value is not an expressible effect; FLOW not supported.
-Disciple of Shen	Conditional SHIELD while at a battlefield with exactly one other friendly unit is not expressible as a static keyword condition.
-Escaped Grayback	EMPOWER cost is 'kill a friendly unit', not an expressible energy/power cost.
-Sacred Protector	Conditional 'don't deal combat damage unless at a battlefield with exactly one other unit' has no supported verb/condition.
-Aurok General	EMPOWERED aura granting +2 might to your Empowered units (anywhere) has no supported target/condition.
-Fallen Feline	Naming a spell and preventing opponents from playing spells with that name has no supported verb.
-Kayle Justified	Multi-empower stacking (+2 might per empower, DEFLECT 3/GANKING at three stacks) has no supported representation.
-Shady Spectacles	Copy-a-unit equipment effect has no supported verb.
-Akali Rogue Assassin	Move-from-showdown-to-base with conditional empowered-ready has no clean supported representation.
-Renekton Butcher of the Sands	ADD energy restricted to playing units/activated abilities has no supported verb.
-Rebuttal	No effect text beyond REACTION keyword.
-Dragon Roost	Optional additional cost that redirects a Dragon to this battlefield has no supported representation.
-Heisho Shell of the World	Ignoring DEFLECT while paying for spells/abilities is not an expressible static rule modifier.
-Mystic Vortex	Cost increase for REACTION cards during showdowns here is not an expressible aura.
-Piltovan Forge	Reducing the first friendly gear activated ability's cost each turn is not an expressible aura.
-Protective Sands	Optional pay-to-draw on conquer gated on rune count with an energy cost is not cleanly expressible.
-Risen Altar	Reducing EMPOWER costs of friendly units here is not an expressible aura.
-Sandswept Tomb	Reducing cost of spells that choose friendly units here is not an expressible aura.
-Threshold of the Gray	Attacker and defender each ADD [1] (gain power) on combat start is not an expressible verb.
-Shadow Clone	model flagged
+Flame Chompers	model flagged
+Noxus Saboteur	model flagged
+Sun Disc	model flagged
+Blind Fury	model flagged
+Brynhir Thundersong	model flagged
+Raging Firebrand	model flagged
+Ravenborn Tome	model flagged
+Vayne Hunter	model flagged
+Immortal Phoenix	model flagged
+Volibear Furious	model flagged
+Mageseeker Warden	model flagged
+Party Favors	model flagged
+Mushroom Pouch	model flagged
+Ava Achiever	model flagged
+Convergent Mutation	model flagged
+Heimerdinger Inventor	model flagged
+Kai'Sa Evolutionary	model flagged
+Malzahar Fanatic	model flagged
+Promising Future	model flagged
+Teemo Strategist	model flagged
+Challenge	model flagged
+Dune Drake	model flagged
+Herald of Scales	model flagged
+Unyielding Spirit	model flagged
+Carnivorous Snapvine	model flagged
+Kraken Hunter	model flagged
+Udyr Wildman	model flagged
+Warwick Hunter	model flagged
+Dazzling Aurora	model flagged
+Deadbloom Predator	model flagged
+Sai Scout	model flagged
+Sneaky Deckhand	model flagged
+Stealthy Pursuer	model flagged
+Whirlwind	model flagged
+Kayn Unleashed	model flagged
+Miss Fortune Buccaneer	model flagged
+Twisted Fate Gambler	model flagged
+Yasuo Windrider	model flagged
+Imperial Decree	model flagged
+Solari Chief	model flagged
+Spectral Matron	Play-from-trash restricted to cost <= your rune count is a dynamic game-state limit not expressible via target_filter
+Symbol of the Solari	Combat-tie-as-attacker replacement effect (recall all units) has no matching trigger/verb
+Albus Ferros	Channeling runes scaled per buff spent has no dynamic amount_source for 'buffs spent'
+Commander Ledros	Optional kill-any-number-of-friendly-units additional cost with scaling cost reduction per unit killed is not expressible with current additional_cost/reduce_cost vocab
+Grand Strategem	Buff applies to all friendly units anywhere, not scoped to a battlefield
+Karthus Eternal	No verb exists to duplicate DEATHKNELL trigger resolution an additional time
+Baited Hook	The look-at-top-5/banish-and-play conditional on relative might, plus recycling the rest, is a multi-step combo with a dynamic might comparison the engine can't express
+Divine Judgment	Mass 'each player keeps N of each category, recycle the rest' effect has no matching verb
+Seal of Unity	model flagged
+Kai'Sa Daughter of the Void	model flagged
+Jinx Loose Cannon	model flagged
+Fox-Fire	model flagged
+Teemo Swift Scout	model flagged
+Aspirant's Climb	No verb exists for increasing the points needed to win the game.
+Bandle Tree	No verb exists for allowing an additional hidden card at a battlefield.
+Reckoner's Arena	No verb exists for triggering the conquer effects of units already here.
+The Arena's Greatest	The trigger is gated on 'each player's first Beginning Phase', which has no matching condition type; emitting the score_point effect ungated would change the card's meaning.
+The Candlelit Sanctum	possible dropped clause (~3 text clauses vs 1 effect(s) emitted)
+The Grand Plaza	No verb exists to win the game; cannot emit the condition without the effect it gates.
+Vilemaw's Lair	No verb exists for a static movement restriction preventing units from moving to base.
+Annie Fiery	No verb exists for a passive bonus-damage aura on your spells and abilities.
+Void Drone	model flagged
+Battering Ram	model flagged
+Minotaur Reckoner	model flagged
+Perched Grimwyrm	model flagged
+Void Hatchling	model flagged
+Rell Magnetic	possible dropped clause (~4 text clauses vs 1 effect(s) emitted)
+Rengar Pouncing	model flagged
+Rumble Hotheaded	model flagged
+Skyfall of Areion	model flagged
+Apprentice Smith	possible dropped clause (~3 text clauses vs 1 effect(s) emitted)
+Legion Quartermaster	model flagged
+Azir Ascendant	model flagged
+Needlessly Large Yordle	model flagged
+Svellsongur	model flagged
+Tianna Crownguard	model flagged
+Rocket Barrage	model flagged
+Temporal Portal	model flagged
+Bard Mercurial	model flagged
+Card Sharp	model flagged
+Hextech Anomaly	model flagged
+Jayce Man of Progress	model flagged
+The Zero Drive	model flagged
+Ruin Runner	No verb for a static targeting-protection ability
+Fiora Peerless	No condition captures 'one on one' combat (requires exactly one unit on each side, not just source alone)
+Here to Help	Playing a unit from hand with a cost reduction is not a supported verb
+Marching Orders	No verb for mutual damage exchange based on each unit's own Might
+Ancient Henge	ADD [rune] with variable Energy payment is a gain-power mechanic not yet supported
+Sivir Ambitious	No condition tracks 'excess damage assigned to enemy units' amount
+Temptation	Move destination logic (a location with a unit of matching controller) is not expressible with move_unit
+Irelia Graceful	Cost reduction targets spells that choose this specific champion, and offers an alternate resource ('or [rune]'), neither of which is expressible
+Downwell	No verb for a mass bounce of all units and gear to hand
+Rek'Sai Swarm Queen	model flagged
+Blade of the Ruined King	model flagged
+Rek'Sai Void Burrower	model flagged
+Void Rush	model flagged
+Ornn Fire Below the Mountain	model flagged
+Rabadon's Deathcrown	model flagged
+Jax Grandmaster at Arms	model flagged
+Irelia Blade Dancer	No trigger for 'when you choose a friendly unit' and no vocab for optional pay-to-ready gated on a non-activated trigger (on_conquer).
+Forge of the Fluft	Granting friendly legends a new activated ability is not supported by any effect verb.
+Forgotten Monument	No verb exists for preventing scoring at a battlefield.
+Ravenbloom Conservatory	Reveal-top-card with a conditional branch based on card type (spell vs. not) has no matching condition or effect.
+Rockfall Path	No verb exists for preventing units from being played at a battlefield.
+Gold	ADD [rune] grants power of any domain, which has no matching verb; the kill-this activation cost also has no matching cost key.
+Lotus Trap	model flagged
+Yeti Brawler	model flagged
+Blighted Battleaxe	model flagged
+Dancing Grenade	model flagged
+Katarina Reckless	model flagged
+Red Brambleback	model flagged
+Monch	model flagged
+Forgotten Signpost	model flagged
+Honeyfruit	model flagged
+Tricksy Tentacles	model flagged
+Vex Mocking	model flagged
+Alpha Wildclaw	model flagged
+Petal Pixie	model flagged
+Diana Lunari	model flagged
+Zilean Time Mage	model flagged
+Blue Sentinel	model flagged
+Gutter Palace	model flagged
+Jhin Meticulous Killer	model flagged
+Leblanc Everywhere at Once	model flagged
+Disposal Order	model flagged
+Clash of Giants	model flagged
+Determined Sentry	model flagged
+Arachnoid Horror	model flagged
+Scryer's Bloom	model flagged
+Bone Skewer	model flagged
+Kha'Zix Mutating Horror	model flagged
+Maduli the Gatekeeper	model flagged
+Syndra Transcendent	model flagged
+Crimson Pigeons	model flagged
+Mageseeker Investigator	model flagged
+Safety Inspector	model flagged
+Stalking Wolf	model flagged
+Ashe Focused	model flagged
+Atakhan	model flagged
+Galio Indefatigable	model flagged
+Shard of Undoing	model flagged
+Poppy Defender of the Meek	model flagged
+Jhin Virtuoso	model flagged
+Curtain Call	model flagged
+Alpha Strike	model flagged
+Ivern Green Father	model flagged
+Diana Scorn of the Moon	model flagged
+Leblanc Deceiver	model flagged
+Mirror Image	model flagged
+Keeper's Verdict	No supported verb for placing a unit into its owner's deck (top or bottom).
+Altar of Blood	Cost to trigger the replacement (pay 3 runes) is not expressible with supported cost keys.
+Dusk Rose Lab	Optional sacrifice-a-friendly-unit-here cost gating a draw at start of turn cannot be expressed (cost dict only supported on activated triggers).
+Forbidding Waste	Debuff applies to whichever unit is defending alone (either side), which is broader/different than the source-centric this_is_alone condition.
+Ripper's Bay	No trigger exists for 'when a unit here is returned to a player's hand'.
+Valley of Idols	Trigger applies to any player's unit played here (not just friendly), and includes an optional pay-to-buff cost not expressible with current triggers/costs.
+Vaults of Helia	No verb exists for increasing (rather than reducing) the cost of units.
+Baron Pit	No verb exists for a passive rule allowing units to move here from anywhere.
+Brush	model flagged
+Dune Surfer	model flagged
+Shadow Assassin	model flagged
+Esteemed Hierophant	model flagged
+Hand Hammer	model flagged
+Ol' Poro	model flagged
+Sanction	model flagged
+Sandstone Chimera	model flagged
+Riven Shattered	on-attack damage scales with equipped gear count, no matching amount_source
+Shen Scourge of Shadows	requires exact count of other units here, not an at-least threshold
+Mesmerize	choose one of two modes, mode-choice not dispatchable
+Otterpus	conditional score-to-draw replacement tied to turn number, no matching condition/effect
+Repair Specialist	ASSAULT value scales with gear controlled, no dynamic keyword value support
+Profiteer	optional disempower-self-to-empower-other combo ability not supported
+Jayce Hammer in Hand	mode choice ability triggered by becoming ready; no on_ready trigger and no mode-choice dispatch
+Cataclysmic Duel	each player selects a unit to spare then all others are killed - no selection-then-mass-kill mechanic
+Ravenbloom Prefect	triggers off opponent playing a gear, no matching trigger type
+Decree of Discord	multi-target return constrained by total might sum, no supported mechanic
+Minah Swiftfoot	model flagged
+Dragon Form	model flagged
+Disciple of Shen	model flagged
+Sacred Protector	model flagged
+Fallen Feline	model flagged
+Shady Spectacles	model flagged
+Renekton Butcher of the Sands	model flagged
+Dragon Roost	model flagged
+Mystic Vortex	model flagged
+Piltovan Forge	model flagged
+Protective Sands	model flagged
+Risen Altar	model flagged
+Threshold of the Gray	model flagged
