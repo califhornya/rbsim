@@ -486,7 +486,12 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   body (`swap_position`, position-swap) is implemented and unit-tested in isolation but NOT
   yet wired onto the card — see #24.
 
-## 24. (OPEN) Tideturner deferred — swap_position exposes a latent unit-loss on relocation
+## 24. (OPEN, HIGH PRIORITY) Tideturner deferred — swap_position exposes a latent unit-loss on relocation
+- **Priority:** Tideturner is a high-impact meta card (user: "crazily important"). Come back to
+  this and finish it. The underlying defect (a unit vanishing when relocated during its own
+  on_play) is also a GENERAL engine-correctness risk: any move-during-play effect could silently
+  lose a card, which would corrupt self-play training data. Root-cause and fix the conservation
+  hole, not just Tideturner.
 - **What:** the `swap_position` effect (Tideturner: "move me to its location and it to my
   original location") is implemented in effects.py and passes an isolated conservation test,
   but authoring it onto Tideturner makes a diana-vs-yasuo golden/invariant game lose a card

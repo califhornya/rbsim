@@ -10,13 +10,23 @@ on-draw line) by playing millions of games against itself.
 
 > **Stage 0 progress (this session).** A coverage audit tool now measures exactly
 > which cards the engine models (`scripts/coverage_audit.py` → `COVERAGE_REPORT.md`).
-> Corpus: **666 LIVE / 216 INERT / 48 VANILLA** (was 660 / 222 / 48). More to the
-> point, across the **8 meta decks: 152 LIVE / 5 VANILLA / 9 INERT** — and 5 of 8
-> decks are fully modeled (0 INERT). Shipped: spells→trash (#19a), two on-play
+> Corpus: **669 LIVE / 213 INERT / 48 VANILLA** (was 660 / 222 / 48). Across the
+> **8 meta decks: 6 of 8 decks are now fully modeled**, with only **4 distinct
+> INERT cards left**. Shipped this session: spells→trash (#19a), two on-play
 > conditions, three battlefield rule-modifiers (Void Gate / Heisho Shell /
-> Sandswept Tomb), the optional-effect ("you may") seam, and Nocturne's
-> top-of-deck banish+play. The 9 remaining meta INERT cards need bigger mechanics
-> (HIDDEN, AMBUSH, showdown-restricted resources, Star Spring) — see §4.
+> Sandswept Tomb), the optional-effect ("you may") seam, Nocturne's top-of-deck
+> banish+play, **AMBUSH** (reaction-speed champion deploy), the **HIDDEN** keyword
+> (hide / play-from-hidden / cleanup), **Switcheroo** (might-swap), and **Star
+> Spring** (first-unit-here retreat). ~200 tests; golden green throughout.
+>
+> **Remaining 4 meta INERT cards** (all niche, deliberately deferred):
+> **Tideturner** — HIGH PRIORITY per user; blocked on a latent move-during-play
+> conservation bug (KNOWN_ISSUES #24). **Diana Scorn** & **Ornn** legends — need an
+> earmarked-resource sub-system (energy only in showdowns / power only for gear); a
+> loose version would deviate from the rules. **Diana Lunari** — a showdown-begin
+> predict/draw ability on the golden diana champion (touching it forces a golden
+> regen and risks surfacing more latent bugs). Card-by-card work has hit strong
+> diminishing returns; the highest-leverage next step is Stage 0.5 / the RL env.
 
 ---
 
