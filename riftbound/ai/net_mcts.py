@@ -24,6 +24,7 @@ from typing import Optional
 import numpy as np
 
 from riftbound.ai.encoding import (
+    ACTION_DIM,
     action_to_index,
     encode_observation,
     legal_mask,
@@ -62,6 +63,10 @@ class NetGuidedMCTSAgent(Agent):
         # Last root visit distribution (action_tuple -> visit share), for the
         # self-play trainer's policy target and for debugging.
         self.last_visits: dict = {}
+        # When set to a list, decide_action appends a training example per searched
+        # decision: {"state","policy","mask","player"} (value target z filled later
+        # by the self-play driver from the game outcome).
+        self.record: Optional[list] = None
 
     def _ensure_rng(self) -> None:
         if self._rng is None:
@@ -125,9 +130,29 @@ class NetGuidedMCTSAgent(Agent):
             return _PASS
         total = sum(c.N for c in root.children.values()) or 1
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
+        if self.record is not None:
+            self._record_example(side, root_legal)
         # Most-visited action (AlphaZero's move choice).
         best = max(root.children.items(), key=lambda kv: kv[1].N)[0]
         return best
+
+    def _record_example(self, side: str, root_legal: list) -> None:
+        """Append (state, MCTS visit policy, legal mask, player) for training."""
+        obs = Observation.from_state(self.gs, side)
+        policy = np.zeros(ACTION_DIM, dtype=np.float32)
+        for a_tuple, share in self.last_visits.items():
+            idx = action_to_index(a_tuple)
+            if idx is not None:
+                policy[idx] += share
+        s = policy.sum()
+        if s > 1e-8:
+            policy /= s
+        self.record.append({
+            "state": encode_observation(obs),
+            "policy": policy,
+            "mask": legal_mask(root_legal),
+            "player": side,
+        })
 
     def _iterate(self, root: _Node, side: str, cards_played: int) -> None:
         from riftbound.core.loop import GameLoop

@@ -61,14 +61,19 @@ Progress:
    (no rollout), most-visited root action chosen; exposes `last_visits` (the policy
    target for training). torch-gated tests in `tests/test_net_mcts.py`.
 
-Still to build, in order:
-4. **Self-play + training loop** — a headless script (clone → `uv sync --extra rl` →
-   run on a rented GPU box) that generates games with the guided MCTS, stores
-   (state, policy target, outcome), and trains the net. Where the agent finally
-   *improves every game*.
-5. **True self-play driver** — both seats sharing the learning policy (a
-   two-controller driver; the current env is single-agent-vs-fixed).
-6. Fold **mulligan** and **battlefield choice** into the learned decision space
+4. [DONE] **Self-play + training loop** — `riftbound/ai/selfplay.py` +
+   `scripts/train_selfplay.py`: guided-MCTS self-play on both seats records
+   (state, visit policy, mask, outcome z); train_step = policy cross-entropy +
+   value MSE; `run_training` iterates generate→train→checkpoint (CUDA-aware,
+   headless). Verified end-to-end (loss decreases across iterations).
+
+Still to build / tune:
+5. **Scale + tune the training** on a rented GPU box (more games/iters/MCTS sims,
+   LR schedule, larger net, eval vs. baselines). This is the "run it big" phase.
+6. **True self-play refinements** — Dirichlet exploration noise at the root,
+   temperature schedule for move selection, and (optionally) a two-controller
+   driver. The current loop already self-plays (both seats = the net's MCTS).
+7. Fold **mulligan** and **battlefield choice** into the learned decision space
    (the user's original examples: mulligan Nocturne, open the right battlefield).
 - Also fold the battlefield choice and mulligan into the learned decision space so
   the agent learns those (the user's original examples: mulligan Nocturne, open the
