@@ -1521,6 +1521,11 @@ class GameLoop:
                         attached_to.gear.append(card)
                 if attached_to is None:
                     ap.base_gear.append(card)
+                # "This enters exhausted" gear cannot use its [tap] ability the turn
+                # it is played (§ enters exhausted) — it untaps on the next turn.
+                _gspec = CARD_REGISTRY.get(card.name)
+                if _gspec and "enters exhausted" in ((_gspec.raw or {}).get("effect") or "").lower():
+                    card.tapped = True
                 if self.verbose:
                     if attached_to is not None:
                         print(f"  {ap.name} plays GEAR (QUICK-DRAW): {card.name} -> {attached_to.card.name}")

@@ -75,3 +75,26 @@ def test_tapped_gear_cannot_reactivate_until_untap():
         assert ap.energy == 6
     finally:
         CARD_REGISTRY.pop(TAP, None)
+
+
+def test_enters_exhausted_gear_taps_on_play():
+    name = "TST Enters Exhausted"
+    CARD_REGISTRY[name] = CardSpec.from_dict({
+        "name": name, "category": "Gear", "cost_energy": 0,
+        "effect": "This enters exhausted. [tap]: ADD energy.",
+        "effects": [{"effect": "gain_energy", "trigger": "activated",
+                     "target": "actor", "amount": 3, "cost": {"tap": True}}]})
+    try:
+        loop = _loop(); ap = loop.gs.A; loop.gs.active = "A"
+        ap.hand.append(CARD_REGISTRY[name].instantiate())
+        ap.energy = 1
+        loop._apply_action(ap, ("GEAR", 0, 0, None))           # play to base
+        gear = ap.base_gear[0]
+        assert gear.tapped is True                             # entered exhausted
+        # its tap ability is present but not usable this turn
+        idx = _equip_idx(loop, gear)
+        ap.energy = 0
+        loop._apply_activated_ability(ap, loop.gs.B, idx)
+        assert ap.energy == 0                                  # tapped -> no-op
+    finally:
+        CARD_REGISTRY.pop(name, None)
