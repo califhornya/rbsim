@@ -90,6 +90,42 @@ def test_nocturne_reveal_from_top_banish_and_play():
     assert noc in loop.gs.A.deck.cards
 
 
+def test_switcheroo_swap_might():
+    """swap_might: the caster's weakest unit and the enemy's strongest unit at the
+    same battlefield swap effective Might for the turn (temporary)."""
+    from riftbound.core.battlefield import Battlefield
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    weak = UnitInPlay(UnitCard(name="Weakling", might=1), ready=True)   # A, min
+    strong = UnitInPlay(UnitCard(name="Bruiser", might=7), ready=True)  # B, max
+    bf.units_A.append(weak)
+    bf.units_B.append(strong)
+    ctx = EffectContext(loop=loop, card=SpellCard(name="Switcheroo"),
+                        actor=loop.gs.A, opponent=loop.gs.B, battlefield=bf)
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_might"](ctx, {})
+    assert weak.might == 7 and strong.might == 1      # swapped for the turn
+    weak.clear_turn_end_bonuses(); strong.clear_turn_end_bonuses()
+    assert weak.might == 1 and strong.might == 7      # reverts at end of turn
+
+
+def test_tideturner_swap_position():
+    """swap_position: Tideturner swaps location with the strongest friendly unit at
+    another location (here: base ↔ battlefield)."""
+    loop = _make_loop()
+    tide = UnitInPlay(UnitCard(name="Tideturner", might=2), ready=True)
+    ally = UnitInPlay(UnitCard(name="Ally", might=5), ready=True)
+    loop.gs.A.base_units.append(tide)                 # Tideturner at base
+    loop.gs.battlefields[1].units_A.append(ally)      # ally at BF1
+    ctx = EffectContext(loop=loop, card=tide.card,
+                        actor=loop.gs.A, opponent=loop.gs.B, battlefield=loop.gs.battlefields[1])
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_position"](ctx, {})
+    assert tide in loop.gs.battlefields[1].units_A    # moved to ally's location
+    assert ally in loop.gs.A.base_units               # ally moved to Tideturner's
+    assert tide not in loop.gs.A.base_units
+
+
 def test_optional_effect_gated_by_agent(cleanup_registry):
     """An `optional: true` effect runs only if the actor's agent accepts it;
     with no agent (rollouts/tests) it defaults to yes (behavior-preserving)."""

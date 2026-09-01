@@ -14363,7 +14363,12 @@
       "HIDDEN",
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "swap_might",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "SFD-146",

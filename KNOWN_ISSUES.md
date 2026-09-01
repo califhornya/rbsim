@@ -482,6 +482,21 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   Hidden must target/enter its own battlefield; the play's on-play effects should be
   restricted to that battlefield. The unit is correctly placed at that lane, but on-play
   effect targeting is resolved normally rather than lane-restricted.
-- **Note:** Tideturner (move-swap) and Switcheroo (might-swap) remain INERT in the coverage
-  audit because their EFFECT BODIES are unimplemented verbs — separate from the HIDDEN
-  keyword, which now works for them (they can be hidden and played for [0]).
+- **Note:** Switcheroo's body (might-swap) is now implemented (`swap_might`, LIVE). Tideturner's
+  body (`swap_position`, position-swap) is implemented and unit-tested in isolation but NOT
+  yet wired onto the card — see #24.
+
+## 24. (OPEN) Tideturner deferred — swap_position exposes a latent unit-loss on relocation
+- **What:** the `swap_position` effect (Tideturner: "move me to its location and it to my
+  original location") is implemented in effects.py and passes an isolated conservation test,
+  but authoring it onto Tideturner makes a diana-vs-yasuo golden/invariant game lose a card
+  (a base UnitCard vanishes from all zones). The swap itself conserves in isolation; the loss
+  appears AFTER the swap relocates the just-played unit during on_play, in a later same-action
+  step — a latent conservation bug triggered by mid-play relocation (not on_friendly_unit_played,
+  which no diana card carries). Root cause not yet pinned.
+- **Deferred:** Tideturner left INERT (effects []) so the engine never corrupts state. The
+  `swap_position` handler + its isolated test are kept so re-authoring is a one-line data change
+  once the latent relocation/conservation bug is found and fixed.
+- **Fix (future):** trace the exact same-action step that drops the unit when a unit is moved
+  off `base_units` during its own on_play resolution; fix the conservation hole, then re-author
+  Tideturner's `swap_position` effect and re-run the invariant + golden suites.

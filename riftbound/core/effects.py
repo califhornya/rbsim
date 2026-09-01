@@ -564,6 +564,87 @@ def _give_temporary_deflect(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     _give_temp_keyword(ctx, spec, "DEFLECT")
 
 
+@effect("swap_might")
+def _swap_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Switcheroo: 'Swap the Might of two units at the same battlefield this turn.'
+    Deterministic stand-in for the player's choice (like dig/predict): pick the
+    battlefield and the (friendly, enemy) pair maximizing the caster's gain —
+    raise the caster's weakest to the enemy's strongest and vice versa — and swap
+    their effective Might for the turn via temporary_might (cleared at end of turn).
+    No beneficial pair → no-op."""
+    gs = ctx.loop.gs
+    side = ctx.actor_side
+    best = None
+    best_gain = 0
+    for bf in gs.battlefields:
+        friendly = bf.units_A if side == "A" else bf.units_B
+        enemy = bf.units_B if side == "A" else bf.units_A
+        if not friendly or not enemy:
+            continue
+        u_f = min(friendly, key=lambda u: u.might)
+        u_e = max(enemy, key=lambda u: u.might)
+        gain = u_e.might - u_f.might
+        if gain > best_gain:
+            best_gain, best = gain, (u_f, u_e)
+    if best is not None:
+        u_f, u_e = best
+        m_f, m_e = u_f.might, u_e.might
+        u_f.temporary_might += (m_e - m_f)
+        u_e.temporary_might += (m_f - m_e)
+
+
+@effect("swap_position")
+def _swap_position(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Tideturner: 'Move me to its location and it to my original location.'
+    Deterministic stand-in: swap this unit's position with the highest-might
+    friendly non-token unit at a DIFFERENT location (base or another battlefield).
+    No eligible other-location unit → no-op."""
+    loop = ctx.loop
+    gs = loop.gs
+    side = ctx.actor_side
+    me = loop._find_unit_by_card(ctx.card)
+    if me is None:
+        return
+
+    def locate(unit):
+        if unit in ctx.actor.base_units:
+            return ("base", ctx.actor.base_units)
+        for i, bf in enumerate(gs.battlefields):
+            lst = bf.units_A if side == "A" else bf.units_B
+            if unit in lst:
+                return (("bf", i), lst)
+        return (None, None)
+
+    my_loc, my_list = locate(me)
+    if my_loc is None:
+        return
+    # Friendly, non-token units at a different location; pick the strongest.
+    candidates = []
+    for i, bf in enumerate(gs.battlefields):
+        lst = bf.units_A if side == "A" else bf.units_B
+        for u in lst:
+            if u is not me and not u.is_token and ("bf", i) != my_loc:
+                candidates.append(u)
+    for u in ctx.actor.base_units:
+        if u is not me and not u.is_token and my_loc != "base":
+            candidates.append(u)
+    if not candidates:
+        return
+    target = max(candidates, key=lambda u: u.might)
+    tgt_loc, tgt_list = locate(target)
+
+    def place(unit, loc):
+        if loc == "base":
+            ctx.actor.base_units.append(unit)
+        else:
+            gs.battlefields[loc[1]].add_unit(side, unit)
+
+    my_list.remove(me)
+    tgt_list.remove(target)
+    place(me, tgt_loc)
+    place(target, my_loc)
+
+
 @effect("return_from_trash")
 def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
