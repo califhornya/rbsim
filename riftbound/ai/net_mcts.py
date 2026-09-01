@@ -17,6 +17,7 @@ deferrals — folding them into the learned policy is later work).
 
 from __future__ import annotations
 
+import itertools
 import math
 import random
 from typing import Optional
@@ -54,11 +55,13 @@ class NetGuidedMCTSAgent(Agent):
     name = "net_mcts"
 
     def __init__(self, player, net: RiftboundNet, iterations: int = 100,
-                 c_puct: float = 1.5, rng: Optional[random.Random] = None):
+                 c_puct: float = 1.5, rng: Optional[random.Random] = None,
+                 mulligan_samples: int = 3):
         super().__init__(player)
         self.net = net
         self.iterations = iterations
         self.c_puct = c_puct
+        self.mulligan_samples = mulligan_samples
         self._rng = rng
         # Last root visit distribution (action_tuple -> visit share), for the
         # self-play trainer's policy target and for debugging.
@@ -106,6 +109,13 @@ class NetGuidedMCTSAgent(Agent):
         # value is independent of the mask; pass the current legal mask for cheapness.
         legal_ga = legal_actions(self._loop_for(clone), DecisionPoint.TURN_ACTION, side)
         _probs, value = predict(self.net, vec, legal_mask(legal_ga))
+        return value
+
+    def _value_only(self, clone, side: str) -> float:
+        """Net value of a state, mask-independent — used for pre-turn (mulligan)
+        choices where turn-action legality isn't meaningful yet."""
+        vec = encode_observation(Observation.from_state(clone, side))
+        _probs, value = predict(self.net, vec, np.ones(ACTION_DIM, dtype=bool))
         return value
 
     @staticmethod
@@ -234,7 +244,31 @@ class NetGuidedMCTSAgent(Agent):
     # -- other decision points (simple in v1; documented deferral) -----------
 
     def decide_mulligan(self) -> list:
-        return []   # keep all — learned mulligan is deferred (DEFERRED.md)
+        """Learned mulligan: for every keep/return combination (§117: up to two
+        cards), apply it on a determinized clone and score the resulting opening by
+        the net's VALUE; keep the best. No hand-crafted rule — as the value net
+        learns that a dead card in hand loses, it learns to mulligan it (e.g.
+        Nocturne). Averaged over a few determinized draws to cut variance."""
+        self._ensure_rng()
+        side = self.player.name
+        n = len(self.player.hand)
+        if n == 0:
+            return []
+        from riftbound.core.state import determinize
+        combos = [list(c) for r in range(3) for c in itertools.combinations(range(n), r)]
+        best_combo, best_v = [], -1e30
+        for combo in combos:
+            vals = []
+            for _ in range(max(1, self.mulligan_samples)):
+                clone = self.gs.clone()
+                clone.rng = random.Random(self._rng.randrange(1 << 30))
+                clone.get_player(side).mulligan(combo, clone.rng)
+                determinize(clone, observer=side, rng=clone.rng)
+                vals.append(self._value_only(clone, side))
+            v = sum(vals) / len(vals)
+            if v > best_v:
+                best_v, best_combo = v, combo
+        return best_combo
 
     def decide_showdown_action(self, opponent, bf_idx: int) -> Action:
         return _PASS

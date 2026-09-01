@@ -73,8 +73,15 @@ Still to build / tune:
 6. **True self-play refinements** — Dirichlet exploration noise at the root,
    temperature schedule for move selection, and (optionally) a two-controller
    driver. The current loop already self-plays (both seats = the net's MCTS).
-7. Fold **mulligan** and **battlefield choice** into the learned decision space
-   (the user's original examples: mulligan Nocturne, open the right battlefield).
+7. [DONE] **Learned mulligan + battlefield** — both are now net-value-guided (they
+   use the trained net, so they improve as it learns):
+   - `NetGuidedMCTSAgent.decide_mulligan` scores every keep/return combo by the net's
+     value on a determinized opening and keeps the best (→ "mulligan Nocturne" once
+     the net learns it's a dead card).
+   - `riftbound/ai/pregame.py` scores each battlefield the deck can bring by the net's
+     opening value; `make_net_bf_chooser` plugs into `match.play_match`.
+   Refinement (deferred): a stronger battlefield signal from a few net-guided games
+   per candidate rather than the static opening value.
 - Also fold the battlefield choice and mulligan into the learned decision space so
   the agent learns those (the user's original examples: mulligan Nocturne, open the
   right battlefield).
