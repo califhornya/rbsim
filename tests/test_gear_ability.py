@@ -77,6 +77,27 @@ def test_tapped_gear_cannot_reactivate_until_untap():
         CARD_REGISTRY.pop(TAP, None)
 
 
+def test_attached_gear_tap_ability_is_usable():
+    _register()
+    try:
+        from riftbound.core.cards import UnitCard
+        from riftbound.core.combat import UnitInPlay
+        loop = _loop(); ap = loop.gs.A; loop.gs.active = "A"
+        unit = UnitInPlay(UnitCard(name="Host", might=2), ready=True)
+        loop.gs.battlefields[0].units_A.append(unit)
+        gear = CARD_REGISTRY[TAP].instantiate()
+        unit.gear.append(gear)                       # gear attached to a controlled unit
+        ap.energy = 0
+
+        idx = _equip_idx(loop, gear)                 # gear_ability entry exists
+        assert idx is not None
+        loop._apply_activated_ability(ap, loop.gs.B, idx)
+        assert ap.energy == 3                        # resolved from attached gear
+        assert gear.tapped is True
+    finally:
+        CARD_REGISTRY.pop(TAP, None)
+
+
 def test_enters_exhausted_gear_taps_on_play():
     name = "TST Enters Exhausted"
     CARD_REGISTRY[name] = CardSpec.from_dict({

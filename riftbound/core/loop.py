@@ -1886,22 +1886,41 @@ class GameLoop:
                     if eff.effect == "empower_self" and getattr(legend_unit, "empowered", False):
                         continue
                     out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
+        def _add_gear_abilities(gear):
+            # Gear's own activated [tap] abilities (Seals, Iron Ballista, …).
+            spec = CARD_REGISTRY.get(gear.name)
+            if not (spec and spec.effects):
+                return
+            for eff in spec.effects:
+                if eff.trigger != "activated":
+                    continue
+                if (eff.timing or "").lower() == "reaction":
+                    continue
+                if EFFECT_REGISTRY.get(eff.effect) is None:
+                    continue
+                out.append({"type": "gear_ability", "gear": gear, "eff": eff})
+
         for gear in list(ap.base_gear):
             # Only Equipment (gear with an Equip ability) can be equipped.
             if self._equip_cost(gear) is not None:
                 out.append({"type": "equip", "gear": gear})
-            # Gear's own activated [tap] abilities (Seals, Iron Ballista, …).
-            spec = CARD_REGISTRY.get(gear.name)
-            if spec and spec.effects:
-                for eff in spec.effects:
-                    if eff.trigger != "activated":
-                        continue
-                    if (eff.timing or "").lower() == "reaction":
-                        continue
-                    if EFFECT_REGISTRY.get(eff.effect) is None:
-                        continue
-                    out.append({"type": "gear_ability", "gear": gear, "eff": eff})
+            _add_gear_abilities(gear)
+        # Attached gear (on controlled units) can also use its [tap] abilities.
+        for gear in self._controlled_attached_gear(side):
+            _add_gear_abilities(gear)
         return out
+
+    def _controlled_attached_gear(self, side: str) -> list:
+        ap = self.gs.get_player(side)
+        gears = [g for u in ap.base_units for g in u.gear]
+        for bf in self.gs.battlefields:
+            for u in (bf.units_A if side == "A" else bf.units_B):
+                gears.extend(u.gear)
+        return gears
+
+    def _controls_gear(self, ap: Player, gear) -> bool:
+        side = "A" if ap is self.gs.A else "B"
+        return gear in ap.base_gear or gear in self._controlled_attached_gear(side)
 
     @staticmethod
     def _parse_activated_cost(cost) -> dict:
@@ -1979,7 +1998,7 @@ class GameLoop:
         if entry["type"] == "gear_ability":
             gear = entry["gear"]
             eff = entry["eff"]
-            if gear not in ap.base_gear:
+            if not self._controls_gear(ap, gear):
                 return
             parsed = self._parse_activated_cost(eff.cost)
             if parsed["tap"] and getattr(gear, "tapped", False):
