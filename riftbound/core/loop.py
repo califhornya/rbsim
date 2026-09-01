@@ -1006,6 +1006,22 @@ class GameLoop:
         return {"energy": energy, "domain_power": domain_power,
                 "generic": generic, "complex": complex_extra}
 
+    @staticmethod
+    def _equip_cost_minus_A(cost: dict) -> dict:
+        """An Equip cost reduced by [A] (1 Power of any domain) — Weaponmaster's
+        discount. Drops one power position: generic first, else one domain unit."""
+        c = {"energy": cost["energy"], "domain_power": dict(cost["domain_power"]),
+             "generic": cost["generic"], "complex": cost["complex"]}
+        if c["generic"] > 0:
+            c["generic"] -= 1
+        else:
+            for d in list(c["domain_power"]):
+                c["domain_power"][d] -= 1
+                if c["domain_power"][d] == 0:
+                    del c["domain_power"][d]
+                break
+        return c
+
     def _can_pay_equip(self, ap: Player, cost: dict) -> bool:
         # Ornn's earmarked gear-power (generic) may cover any power position.
         earmark = ap.earmarked_power_gear
@@ -1503,18 +1519,21 @@ class GameLoop:
                 # benefit is the cost reduction applied above, not effect gating.)
                 self._resolve_card_effects(card, self.gs.battlefields[0], ap, opponent)
 
-                # WEAPONMASTER: choose an Equipment you control and pay its Equip
-                # cost reduced by 1 Power of any domain to attach it to this unit.
-                # We approximate the reduced cost as max(0, gear.cost_energy - 1)
-                # and only attach when affordable (no free auto-attach).
-                if card.has_keyword("WEAPONMASTER") and ap.base_gear:
-                    gear_card = ap.base_gear[0]
-                    reduced = max(0, int(getattr(gear_card, "cost_energy", 0)) - 1)
-                    if ap.can_pay_cost(reduced, None, None) and ap.pay_cost(reduced, None, None):
-                        ap.base_gear.pop(0)
-                        unit.gear.append(gear_card)
-                        if self.verbose:
-                            print(f"  {ap.name} WEAPONMASTER attaches {gear_card.name} to {card.name}")
+                # WEAPONMASTER (§747): choose an Equipment you control, pay its real
+                # Equip cost reduced by [A] (1 Power of any domain), and attach it to
+                # this unit. First affordable Equipment among base gear.
+                if card.has_keyword("WEAPONMASTER"):
+                    for gear_card in list(ap.base_gear):
+                        base_cost = self._equip_cost(gear_card)
+                        if base_cost is None:
+                            continue
+                        reduced = self._equip_cost_minus_A(base_cost)
+                        if self._can_pay_equip(ap, reduced) and self._pay_equip(ap, reduced):
+                            ap.base_gear.remove(gear_card)
+                            unit.gear.append(gear_card)
+                            if self.verbose:
+                                print(f"  {ap.name} WEAPONMASTER attaches {gear_card.name} to {card.name}")
+                            break
 
                 # Recompute by identity: a kicker `discard_cards` cost may have
                 # popped another hand card, shifting the original index.
