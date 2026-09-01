@@ -17,6 +17,15 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   — do it carefully).
 
 ## Engine mechanics (KNOWN_ISSUES)
+- **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`
+  only to the card being played (self-cost, `loop.py:878`); it has no AURA form that
+  reduces the cost of *other* cards while a source is in play. So cards like Eager
+  Apprentice ("spells you play cost [1] less"), Herald of Scales, Vex, Marai Spire,
+  Ornn's Forge, Helm of Suppression, Applied Researchers, Stargazer are silently
+  **inert** (safe — they just don't grant the discount; NOT a correctness landmine).
+  Eager Apprentice sits in the golden Diana deck, so this is a fidelity gap there.
+  Fix = an aura pass at cost-computation time that scans in-play sources; then re-parse
+  these cards to the aura form. Also enables `aura:reduce_cost` from suggested_vocab.
 - **FLOW play-from-trash + banish** (#19b) — trash is now populated; still needs the
   from-trash play action + banish-after-resolve.
 - **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta

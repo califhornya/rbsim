@@ -56,13 +56,31 @@ for AlphaZero. Card authoring (the long tail) is **not** tracked here.
 | Modal "choose one" | — | GAP | — | no modal-choice effect (`suggested_vocab: mode_choice`×9). |
 | Enters-exhausted | — | PARTIAL | — | units that should enter exhausted enter ready (KNOWN_ISSUES #21). |
 
-## WRONG (confirmed landmines — fix or downgrade to honest-INERT)
+## Wrong-LIVE sweep — cost-reduction class (slice 1, DONE)
 
-| card | id | problem | rule | action |
-|------|----|---------|------|--------|
-| Raging Firebrand | OGN-031 | "the **next** spell you play costs [5] less" authored as a **permanent, all-spell** `reduce_cost` (`amount:5`, `cost_modifier`) — a persistent global discount the agent would abuse. | one-shot next-spell reduction | downgrade to INERT (no one-shot-cost primitive) or gate to a single use. |
+The engine applies `reduce_cost`/`cost_modifier` **only to the card being played**
+(`loop.py:878` self-cost; `amount_source` dynamic reductions are ignored; auras are
+NOT implemented). So the only *exploitable* errors are self-cost reductions that
+**over-apply** (make a card too cheap). Fixed by honest downgrade (commit below):
 
-_(The wrong-LIVE sweep, task D2/slice1, extends this table.)_
+| card | id | problem | rule | action taken |
+|------|----|---------|------|--------------|
+| Concentrate | UNL-091 | LEVEL 6 "−2" + LEVEL 11 "−4 **instead**" authored as two modifiers that **stack to −6** at xp≥11 (should be −4). | §"instead" tiers | dropped the xp≥11 (−4) modifier; keeps xp≥6 (−2) → never over-applies (correct 6–10, under by 2 at 11+). |
+| Drag Under | SFD-164 | "−2 to play from **anywhere other than hand**" authored **unconditionally** → too cheap from hand. | zone-gated cost | removed the `reduce_cost` (no zone condition) → under-applies from trash (safe); kept `kill_unit`. |
+| Keeper of Law | VEN-119 | "**exactly** two units" modeled as "≥2" → too cheap at 3+ units. | exactly-N | removed the `reduce_cost` (no exactly-N condition) → INERT (safe). |
+
+**Safe (no action):** self-cost reductions with `amount_source` (Sky Splitter,
+Rhasa, Plaza Guardian, Shadowblade Lurker) under-apply — the engine ignores dynamic
+amounts, so they cost *more* than real (agent undervalues → safe). **Aura**
+reductions on a non-self card (Eager Apprentice, Herald of Scales, Vex, Marai Spire,
+Ornn's Forge, Helm of Suppression, Applied Researchers, Stargazer) are silently
+**inert** — the self-only engine never applies them (safe, but a fidelity gap). This
+includes OGN-031 Raging Firebrand ("next spell costs [5] less" on a unit): inert, not
+the permanent global discount first suspected. **Deferred:** an `aura:reduce_cost`
+primitive would make these functional — tracked in DEFERRED.md (a separate slice; not
+a correctness landmine).
+
+_Later slices extend the sweep to other effect classes (durations, targets, "instead" tiers generally)._
 
 ## How this drives work
 Each `PARTIAL`/`GAP`/`WRONG` row → one incremental slice: read the rule, make the
