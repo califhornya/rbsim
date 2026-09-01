@@ -451,13 +451,15 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (future):** add an empowered-conditional amount/override on effects; add an on_burn
   trigger fired from Player.burn / the burn effect.
 
-## 21. (OPEN) "enters exhausted" play-state not modeled
-- **What:** some units enter play exhausted (e.g. `Patched Porobot` — "(I enter exhausted.)").
-  The engine deploys all units ready, so such a unit can act the turn it arrives when it
-  shouldn't. Porobot's on-play conditional draw IS modeled (Slice 2); only the enter-exhausted
-  clause is unmodeled.
-- **Fix (future):** honor an `enters_exhausted` flag at deploy time (set the UnitInPlay's
-  ready=False). Low impact; batch with the parser pass that emits the flag.
+## 21. (RESOLVED) "enters exhausted" play-state
+- **Status:** not actually an issue. Per §142.4 "Units enter the Board exhausted",
+  and the engine already honors this: `UnitInPlay.ready` defaults `False` and every
+  deploy path (main play `loop.py:1343`, play_from_trash/banish, tokens, AMBUSH/
+  champion `ready=False`) enters exhausted. Only Accelerate / ready-up effects set
+  ready. So `Patched Porobot`'s "I enter exhausted" is already the default. The old
+  claim that "the engine deploys all units ready" was stale.
+- **Test:** `tests/test_accelerate.py` asserts a normally-played unit enters `ready
+  is False`; combat/ready-up paths cover the ready transitions.
 
 ## 22. (OPEN) AMBUSH deploy into a contested lane doesn't spawn a nested showdown
 - **What:** AMBUSH (Rengar Trophy Hunter) deploys a champion onto a battlefield lane at
