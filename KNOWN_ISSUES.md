@@ -421,3 +421,81 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   token-only, board-wide anthem.
 - **Fix (Step 3):** apply target_filter inside the passive path (reuse `_passes_filter`),
   and support a board-wide scope for anthems that read "your <X> units" with no "here".
+
+## 19. (PARTIAL) cast spells now routed to trash (a, FIXED); FLOW play-from-trash still deferred (b)
+- **(a) FIXED:** `_run_chain`'s LIFO resolve loop (`loop.py`, after the `on_play_spell`
+  trigger) now appends each resolved `SpellCard` to its caster's `trash` — spells no
+  longer vanish. Countered spells are popped + trashed by `counter_spell` before the
+  resolve loop, so there is no double-trash. Golden fixture regenerated (trash counts
+  rise; 3/20 games shifted outcome because the agents' `_action_fingerprint` counts
+  trash and trash-based card effects now have targets — expected, not a regression).
+  `test_invariants.py` strengthened to full card conservation; new
+  `test_effects.py::test_resolved_spell_goes_to_caster_trash`.
+- **(b) OPEN:** FLOW (Vendetta) lets you play a spell from your TRASH for an alternate
+  cost, then banish it. Now that (a) populates trash, FLOW targets exist; still missing:
+  a new action source (`legality.py`) + `_apply_action` branch that pays the FLOW cost,
+  plays from trash, and BANISHES after resolve (needs `ChainItem` provenance so the
+  resolve loop banishes rather than trashes that instance). FLOW spells still work
+  normally from hand; the replay permission is flagged (suggested_vocab "keyword:flow").
+  Complex FLOW costs (Kennen "FLOW equal to its cost", Stargazer FLOW discount) need
+  per-card handling.
+
+## 20. (OPEN) EMPOWERED-modifier clauses and on-burn triggers deferred
+- **What:** EMPOWER/EMPOWERED and BURN are implemented (empower_self / this_is_empowered
+  passive bonuses / disempower; burn + cards_burned_this_turn). Two dependent sub-mechanics
+  remain flagged by the parser rather than emitted:
+  - An EMPOWERED clause that MODIFIES another ability ("deal 2 instead if I'm Empowered",
+    "they have +2 instead") — needs a value-swap on a sibling effect (suggested_vocab
+    "effect:empowered_modifier").
+  - A "when a card is burned / when you burn" trigger (suggested_vocab "trigger:on_burn").
+- **Fix (future):** add an empowered-conditional amount/override on effects; add an on_burn
+  trigger fired from Player.burn / the burn effect.
+
+## 21. (RESOLVED) "enters exhausted" play-state
+- **Status:** not actually an issue. Per §142.4 "Units enter the Board exhausted",
+  and the engine already honors this: `UnitInPlay.ready` defaults `False` and every
+  deploy path (main play `loop.py:1343`, play_from_trash/banish, tokens, AMBUSH/
+  champion `ready=False`) enters exhausted. Only Accelerate / ready-up effects set
+  ready. So `Patched Porobot`'s "I enter exhausted" is already the default. The old
+  claim that "the engine deploys all units ready" was stale.
+- **Test:** `tests/test_accelerate.py` asserts a normally-played unit enters `ready
+  is False`; combat/ready-up paths cover the ready transitions.
+
+## 22. (RESOLVED) AMBUSH deploy into a contested lane spawns a showdown
+- **Fix:** `_deploy_ambush_champion` now, after placing the champion, checks whether the
+  lane is contested (both sides have units) and calls `_run_showdown(lane, attacker)` —
+  mirroring the main-phase MOVE branch. `_run_showdown` self-guards on `showdown_active`,
+  so a deploy made DURING an existing showdown does not nest: the champion joins the
+  current lane's combat (resolved at end of turn via `contested_this_turn`).
+- **Test:** `tests/test_nested_ambush.py` (spawns on contest; no nesting mid-showdown).
+
+## 23. (PARTIAL) HIDDEN keyword — core loop done; two faithful nuances deferred
+- **Done (§737/§408/§106.4):** Hide (main phase, Open State, pay 1 power, place facedown at
+  a controlled battlefield with an empty Facedown Zone), play-from-hidden for [0] from the
+  next turn at reaction speed (units enter that lane; spells open a chain), and cleanup
+  removal to trash when the owner loses control. Facedown identity is resampled for the
+  opponent in `determinize` (search fairness). Golden untouched (heuristic agents never hide).
+- **Deferred nuance 1 — Champion-Zone hiding (§737.1.b):** a Hidden card in the Champion
+  Zone (e.g. Pyke Dockside Butcher) may also be hidden. Only hand cards can be hidden today;
+  champion-zone hiding needs champion-zone bookkeeping and is not wired.
+- **Deferred nuance 2 — from-Hidden targeting restriction (§737.1.d):** a card played from
+  Hidden must target/enter its own battlefield; the play's on-play effects should be
+  restricted to that battlefield. The unit is correctly placed at that lane, but on-play
+  effect targeting is resolved normally rather than lane-restricted.
+- **Note:** Switcheroo's body (might-swap, `swap_might`) and Tideturner's body (position-swap,
+  `swap_position`) are both implemented and LIVE (Tideturner unblocked once #24 was fixed).
+
+## 24. (FIXED) UnitInPlay value-equality caused wrong-duplicate removal / card loss
+- **Root cause:** `UnitInPlay` was a `@dataclass` with the default VALUE equality, so two
+  field-identical copies of the same card compared equal. Every `unit in list` /
+  `list.remove(unit)` in the engine (battlefield.remove_unit, effects.py, loop.py, and
+  swap_position) then matched/removed the WRONG duplicate — silently losing or duplicating a
+  card whenever two same-valued units coexisted. This surfaced via Tideturner's `swap_position`
+  (a base unit vanished) but was a GENERAL correctness hazard that could have corrupted
+  self-play training data.
+- **Fix:** `@dataclass(eq=False)` on `UnitInPlay` (combat.py) → identity equality (and identity
+  hash). `in` / `remove` / `is` now target the exact object. Regression tests:
+  `test_effects.py::test_unitinplay_identity_equality` and
+  `::test_swap_position_conserves_with_duplicate_units`. Golden regenerated (a few games shifted
+  in detail from now-correct duplicate handling + Tideturner; no winner flips). With this fixed,
+  Tideturner is wired (`swap_position`, LIVE).

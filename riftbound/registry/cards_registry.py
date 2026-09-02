@@ -75,6 +75,30 @@ _EFFECT_TOP_LEVEL_FIELDS = (
     "scope", "duration", "optional", "cost", "scaling", "additional_cost",
 )
 
+# A conditioned effect's numeric threshold is written under any of these keys in
+# the corpus (parser drift: `amount` 26×, `n` 9×). The engine reads it as `n`,
+# so canonicalize to `n` at load time. Additive: the original key is preserved so
+# anything still reading `amount`/`count`/... keeps working.
+_COND_THRESHOLD_ALIASES = ("n", "amount", "count", "value", "threshold")
+
+
+def _normalize_condition(cond: Any) -> Any:
+    """Copy a condition's numeric threshold to the canonical `n` key.
+
+    The corpus writes the threshold inconsistently (`amount`, `count`, ...). The
+    engine's `_check_condition` reads `params.get("n", 0)`, so a gate like
+    `{"amount": 4}` was silently read as threshold 0 ("always true"). This copies
+    the first alias found to `n` without dropping the original key."""
+    if not isinstance(cond, dict):
+        return cond
+    params = dict(cond.get("params") or {})
+    if "n" not in params:
+        for k in _COND_THRESHOLD_ALIASES[1:]:
+            if isinstance(params.get(k), (int, float)) and not isinstance(params.get(k), bool):
+                params["n"] = params[k]
+                break
+    return {**cond, "params": params}
+
 
 @dataclass(frozen=True)
 class EffectSpec:
@@ -106,6 +130,8 @@ class EffectSpec:
         if not effect:
             raise ValueError("Effect name cannot be blank")
         top = {k: data[k] for k in _EFFECT_TOP_LEVEL_FIELDS if k in data}
+        if "condition" in top:
+            top["condition"] = _normalize_condition(top["condition"])
         params = {
             k: v for k, v in data.items()
             if k != "effect" and k not in _EFFECT_TOP_LEVEL_FIELDS
@@ -322,10 +348,10 @@ def load_cards_json(base_path: Optional[Path] = None) -> dict[str, CardSpec]:
 
 _KNOWN_KEYWORDS: frozenset[str] = frozenset({
     "ACCELERATE", "ACTION", "AMBUSH", "ASSAULT", "BACKLINE",
-    "DEATHKNELL", "DEFLECT", "EQUIP", "GANKING", "HIDDEN",
-    "HUNT", "LEGION", "LEVEL", "PREDICT", "QUICK-DRAW",
-    "REACTION", "REPEAT", "SHIELD", "TANK", "TEMPORARY",
-    "WEAPONMASTER",
+    "DEATHKNELL", "DEFLECT", "EMPOWER", "EMPOWERED", "EQUIP",
+    "FLOW", "GANKING", "HIDDEN", "HUNT", "LEGION", "LEVEL",
+    "PREDICT", "QUICK-DRAW", "REACTION", "REPEAT", "SHIELD",
+    "TANK", "TEMPORARY", "WEAPONMASTER",
 })
 
 
@@ -437,10 +463,12 @@ def load_master_data(path: Optional[Path] = None) -> dict[str, CardSpec]:
 CARD_REGISTRY: dict[str, CardSpec] = load_cards_json()
 
 
-def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec]]:
+def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:
     """Load a deck JSON file.
 
-    Returns (main_deck_specs, [(domain, count)] rune entries, champion_spec_or_None).
+    Returns (main_deck_specs, [(domain, count)] rune entries, champion_spec_or_None,
+    legend_spec_or_None, battlefield_specs). The deck may name up to 3 battlefields;
+    a single game uses one per player (chosen at build time).
 
     Deck format:
       {
@@ -462,6 +490,25 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         champion_spec = CARD_REGISTRY.get(champion_name)
         if champion_spec is None:
             raise ValueError(f"Deck champion '{champion_name}' not found in registry")
+
+    # --- Legend (identity card, starts in play) ---
+    legend_spec: Optional[CardSpec] = None
+    legend_name = str(data.get("legend") or "").strip()
+    if legend_name:
+        legend_spec = CARD_REGISTRY.get(legend_name)
+        if legend_spec is None:
+            raise ValueError(f"Deck legend '{legend_name}' not found in registry")
+
+    # --- Battlefields (the deck names up to 3; one per player is used per game) ---
+    battlefield_specs: list[CardSpec] = []
+    for entry in data.get("battlefields", []):
+        bf_name = str(entry.get("name", "")).strip() if isinstance(entry, dict) else str(entry).strip()
+        if not bf_name:
+            continue
+        bf_spec = CARD_REGISTRY.get(bf_name)
+        if bf_spec is None:
+            raise ValueError(f"Deck battlefield '{bf_name}' not found in registry")
+        battlefield_specs.append(bf_spec)
 
     # --- Main deck cards ---
     cards: list[CardSpec] = []
@@ -500,7 +547,7 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         count = int(entry.get("count", 1))
         runes.append((domain, count))
 
-    return cards, runes, champion_spec
+    return cards, runes, champion_spec, legend_spec, battlefield_specs
 
 
 def iter_cards() -> Iterable[CardSpec]:

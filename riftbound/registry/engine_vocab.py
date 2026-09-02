@@ -29,6 +29,9 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "activated",                                # main-phase tap-style
     "cost_modifier",                            # reduce_cost effects
     "death_replacement",                        # Guardian Angel / Zhonya's
+    "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
+    "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
+    "on_showdown_begin",                         # a showdown begins at this unit's battlefield (Diana Lunari)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -44,6 +47,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "this_is_mighty",
     "triggering_unit_is_mighty",
     "this_is_buffed",
+    "this_is_empowered",
     "kicker_paid",
     "friendly_unit_died_this_turn",
     "you_played_n_spells_this_turn",
@@ -53,6 +57,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "card_in_trash_count_at_least",
     "you_control_subtype",
     "score_within_n_of_victory",
+    "cards_burned_this_turn_at_least",
+    "friendly_total_might_at_least",
+    "you_control_n_or_more_gear",
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -103,6 +110,15 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
     "kill_friendly_unit", "exhaust_friendly_unit",
 })
 
-# Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere
-# (cost reduction is read directly by Loop._cost_reduction).
-NON_HANDLER_VERBS: frozenset[str] = frozenset({"reduce_cost"})
+# Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere:
+# - reduce_cost           read by Loop._cost_reduction
+# - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
+# - ignore_deflect_here   battlefield passive read by Loop._deflect_surcharge
+# - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
+# - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
+# - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
+# - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
+NON_HANDLER_VERBS: frozenset[str] = frozenset({
+    "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
+    "play_from_top", "ambush", "move_ally_here_to_base",
+})

@@ -4,9 +4,10 @@ fixture pins *exact* outcomes, these pin *structural* properties over many games
 
 Checked:
   * No phantom cards — a real (non-token) card never materialises from nowhere.
-  * Only spells may leave the card pool — units / gear / champions are strictly
-    conserved. (Resolved spells are *not* trashed today; see KNOWN_ISSUES — this
-    test encodes that reality so a regression that starts leaking units fires.)
+  * Full card conservation — no real (non-token) card ever leaves the pool. As of
+    KNOWN_ISSUES #19a resolved spells are routed to their caster's trash (they used
+    to vanish), so every card that starts in play is still findable in some zone
+    (deck / hand / trash / banished / board) at game end.
   * No negative resources — energy / power / points / xp stay >= 0 after every
     action.
   * Chain empty between turn actions.
@@ -24,7 +25,7 @@ from pathlib import Path
 
 import pytest
 
-from riftbound.core.cards import Card, SpellCard
+from riftbound.core.cards import Card
 from riftbound.core.game_factory import build_game
 from riftbound.core.loop import GameLoop
 
@@ -121,7 +122,9 @@ def test_card_conservation_and_no_aliasing(ai_a, deck_a, ai_b, deck_b, seed):
     phantom = end_ids - start_ids
     assert not phantom, f"phantom cards appeared: {[t[1:] for t in end if t[0] in phantom]}"
 
-    # Only spells may leave the pool; units / gear / champions are conserved.
+    # Full conservation: no real card leaves the pool. Resolved spells now land in
+    # trash (KNOWN_ISSUES #19a) rather than vanishing, so nothing — spell or unit —
+    # should disappear.
     vanished = start_ids - end_ids
-    non_spell_lost = [t[1:] for t in start if t[0] in vanished and t[1] != "SpellCard"]
-    assert not non_spell_lost, f"non-spell cards vanished: {non_spell_lost}"
+    lost = [t[1:] for t in start if t[0] in vanished]
+    assert not lost, f"cards vanished: {lost}"

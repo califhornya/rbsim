@@ -1,0 +1,96 @@
+{
+  "name": "Rengar Trophy Hunter",
+  "legend": "Rengar Pridestalker",
+  "champion": "Rengar Trophy Hunter",
+  "runes": [
+    {
+      "domain": "FURY",
+      "count": 4
+    },
+    {
+      "domain": "BODY",
+      "count": 8
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Seat of Power"
+    },
+    {
+      "name": "Star Spring"
+    },
+    {
+      "name": "Emperor's Dais"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Noxus Hopeful",
+      "count": 3
+    },
+    {
+      "name": "Darius Trifarian",
+      "count": 1
+    },
+    {
+      "name": "Kai'Sa Survivor",
+      "count": 3
+    },
+    {
+      "name": "First Mate",
+      "count": 2
+    },
+    {
+      "name": "Pakaa Cub",
+      "count": 1
+    },
+    {
+      "name": "Pit Rookie",
+      "count": 3
+    },
+    {
+      "name": "Sabotage",
+      "count": 2
+    },
+    {
+      "name": "Ferrous Forerunner",
+      "count": 1
+    },
+    {
+      "name": "Punch First",
+      "count": 3
+    },
+    {
+      "name": "Inferna",
+      "count": 3
+    },
+    {
+      "name": "Grim Apothecary",
+      "count": 3
+    },
+    {
+      "name": "Pyke Dockside Butcher",
+      "count": 1
+    },
+    {
+      "name": "Kinkou Initiate",
+      "count": 3
+    },
+    {
+      "name": "Irresistible Faefolk",
+      "count": 3
+    },
+    {
+      "name": "Nidalee Cat Form",
+      "count": 2
+    },
+    {
+      "name": "Thrill of the Hunt",
+      "count": 3
+    },
+    {
+      "name": "Rampage",
+      "count": 2
+    }
+  ]
+}

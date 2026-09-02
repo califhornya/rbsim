@@ -4,8 +4,11 @@ from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING
 import random
 from .player import Player
-from .battlefield import Battlefield
+from .battlefield import Battlefield, FacedownCard
 from .cards import Card
+
+if TYPE_CHECKING:
+    from .combat import UnitInPlay
 
 
 @dataclass
@@ -29,6 +32,15 @@ class GameState:
     # Champion Zone: the Chosen Champion card for each player (not in main deck)
     champion_A: Optional[Card] = None
     champion_B: Optional[Card] = None
+
+    # Legend Zone: identity card, in play from the start. Not a combat unit, but
+    # carries activated abilities (some Vendetta legends EMPOWER themselves) and
+    # can hold the empowered status — represented by a UnitInPlay so it reuses the
+    # activated-ability / passive / empower machinery. Created in GameLoop.start().
+    legend_A: Optional[Card] = None
+    legend_B: Optional[Card] = None
+    legend_unit_A: Optional["UnitInPlay"] = None
+    legend_unit_B: Optional["UnitInPlay"] = None
 
     # Victory points via Hold/Conquer
     points_A: int = 0
@@ -58,6 +70,7 @@ class GameState:
     spells_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
+    cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
 
     def other(self, who: str) -> str:
         return "B" if who == "A" else "A"
@@ -110,9 +123,24 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     """
     me = gs.get_player(observer)
     opp = gs.get_player(gs.other(observer))
+    other = gs.other(observer)
 
-    pool = list(opp.hand) + list(opp.deck.cards)
+    # The opponent's face-down (Hidden) cards are hidden information too: the
+    # observer knows a card is hidden there, but not which. Fold them into the
+    # unseen pool and resample, preferring a HIDDEN-keyword identity so the public
+    # "a card is hidden here" fact stays consistent.
+    opp_facedowns = [bf for bf in gs.battlefields
+                     if bf.facedown is not None and bf.facedown.owner == other]
+    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedown.card for bf in opp_facedowns]
     rng.shuffle(pool)
+    for bf in opp_facedowns:
+        pick = next((c for c in pool if c.has_keyword("HIDDEN")), pool[0] if pool else None)
+        if pick is None:
+            continue
+        pool.remove(pick)
+        bf.facedown = FacedownCard(card=pick, owner=bf.facedown.owner,
+                                   turn_hidden=bf.facedown.turn_hidden)
+
     n_hand = len(opp.hand)
     opp.hand = pool[:n_hand]
     opp.deck.cards = pool[n_hand:]

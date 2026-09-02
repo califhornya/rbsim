@@ -27,8 +27,8 @@ def _build_game(seed: int) -> GameState:
     from riftbound.core.game_factory import make_deck_from_file, make_agent
 
     rng = random.Random(seed)
-    dA, rA, cA = make_deck_from_file(DECK_DIR / "fury_chaos_pyke.json")
-    dB, rB, cB = make_deck_from_file(DECK_DIR / "chaos_mind_diana.json")
+    dA, rA, cA, lA, bfA = make_deck_from_file(DECK_DIR / "fury_chaos_pyke.json")
+    dB, rB, cB, lB, bfB = make_deck_from_file(DECK_DIR / "chaos_mind_diana.json")
     random.Random(seed + 1).shuffle(rA.runes)
     random.Random(seed + 2).shuffle(rB.runes)
     dA.shuffle(rng)

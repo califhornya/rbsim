@@ -1,0 +1,84 @@
+{
+  "name": "Akali Deadly Weapon",
+  "legend": "Akali Rogue Assassin",
+  "champion": "Akali Deadly Weapon",
+  "runes": [
+    {
+      "domain": "FURY",
+      "count": 7
+    },
+    {
+      "domain": "CALM",
+      "count": 5
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Back-Alley Bar"
+    },
+    {
+      "name": "Targon's Peak"
+    },
+    {
+      "name": "Void Gate"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Falling Star",
+      "count": 3
+    },
+    {
+      "name": "Defy",
+      "count": 3
+    },
+    {
+      "name": "Discipline",
+      "count": 3
+    },
+    {
+      "name": "Zhonya's Hourglass",
+      "count": 3
+    },
+    {
+      "name": "Long Sword",
+      "count": 3
+    },
+    {
+      "name": "Lonely Poro",
+      "count": 3
+    },
+    {
+      "name": "Stellacorn Herder",
+      "count": 3
+    },
+    {
+      "name": "Scuttle Crab",
+      "count": 3
+    },
+    {
+      "name": "Astral Heron",
+      "count": 3
+    },
+    {
+      "name": "Shuriken Flip",
+      "count": 3
+    },
+    {
+      "name": "Sky Splitter",
+      "count": 2
+    },
+    {
+      "name": "En Garde",
+      "count": 2
+    },
+    {
+      "name": "Back Off",
+      "count": 2
+    },
+    {
+      "name": "Irelia Fervent",
+      "count": 3
+    }
+  ]
+}

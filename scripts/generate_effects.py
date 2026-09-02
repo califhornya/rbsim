@@ -47,7 +47,10 @@ from riftbound.registry.engine_vocab import (  # noqa: E402
 
 CARDS_PATH = Path(__file__).resolve().parent.parent / "riftbound" / "data" / "cards" / "all_cards.json"
 REVIEW_PATH = Path(__file__).resolve().parent / "review_needed.txt"
-MODEL = "claude-opus-4-8"
+# Default Opus 4.8 for best parse quality; override with RBSIM_PARSER_MODEL
+# (e.g. a Sonnet id) to trade some quality for much lower cost on a budget. The
+# per-card validation (validate_card_result) + human-review flagging guard either way.
+MODEL = os.environ.get("RBSIM_PARSER_MODEL", "claude-opus-4-8")
 BATCH_SIZE = 10
 
 # Sorted views for deterministic prompt text (keeps the cached system prompt stable).
@@ -406,6 +409,57 @@ STEP 3 — newly-supported mechanics (EMIT these now; older guidance said to fla
     to your own side). Use it for an unrestricted "a unit" / "a unit at a battlefield"
     with no friendly/enemy word. Use `enemy_unit`/`friendly_unit` only when the text
     says so. (Removal via chosen_unit now correctly targets the opponent.)
+
+STEP 4 — Vendetta mechanics:
+
+18. EMPOWER / EMPOWERED (now supported — EMIT, do NOT flag).
+    "EMPOWER [cost]" is an activated ability that gives the source the empowered
+    status. Emit `empower_self` with `trigger:"activated"` and the cost. The cost
+    inside the parentheses is the same "[N]=energy, [domain]=1 power pip, repeated
+    pip = count" rule as everywhere else.
+    "EMPOWERED <X>" is a DEPENDENT ability that applies only while empowered —
+    emit X as a `passive` effect with `condition:{{"type":"this_is_empowered"}}`,
+    `target:"self"`. Might → grant_might; a keyword → give_keyword.
+    "When ..., empower me" (a trigger, not a cost) → `empower_self` on that trigger.
+    "disempower a unit" (instruction or cost) → `disempower` with the right target.
+    Text: "EMPOWER [2] [Fury] ([2][Fury]: Empower me. Use only if not Empowered.)
+    EMPOWERED[>] I have ASSAULT 3. EMPOWERED I have +1 [might]."
+    → effects: [
+        {{"effect":"empower_self","trigger":"activated","cost":{{"energy":2,"power":1}}}},
+        {{"effect":"give_keyword","trigger":"passive","target":"self",
+          "condition":{{"type":"this_is_empowered"}},"keyword":"ASSAULT 3"}},
+        {{"effect":"grant_might","trigger":"passive","target":"self","amount":1,
+          "condition":{{"type":"this_is_empowered"}}}}]
+    Also list "EMPOWER"/"EMPOWERED" in `keywords` when the card prints them.
+    ALWAYS emit `empower_self` whenever the card text has an "EMPOWER [cost]" line
+    — this holds for UNITS, CHAMPIONS, and LEGENDS alike, and even when the card
+    also has other abilities or an empowered-MODIFIER clause. Never drop the
+    EMPOWER activation just because the card is a champion/legend or has more text.
+    An EMPOWERED clause that MODIFIES another ability ("deal 2 instead if I'm
+    Empowered", "they have +2 instead") is NOT yet expressible — parse the base
+    ability AND emit empower_self, then flag only the empowered-modifier clause
+    (suggested_vocab "effect:empowered_modifier"); do not drop empower_self.
+    Example (champion): "EMPOWER [2] [Fury]. When I move, deal 1 to a unit. If I'm
+    Empowered, deal 2 instead. Empowered I have +1 [might]."
+    → effects: [
+        {{"effect":"empower_self","trigger":"activated","cost":{{"energy":2,"power":1}}}},
+        {{"effect":"deal_damage","trigger":"on_move","target":"chosen_unit","amount":1}},
+        {{"effect":"grant_might","trigger":"passive","target":"self","amount":1,
+          "condition":{{"type":"this_is_empowered"}}}}],
+      needs_review: true, suggested_vocab: ["effect:empowered_modifier"]
+
+19. BURN (now supported — EMIT). "Burn X" = put the top X cards of your Main Deck
+    into your trash. Emit `burn` with `amount` X (target defaults to actor).
+    "cards burned this turn" gates use condition `cards_burned_this_turn_at_least`.
+    Text: "When you play me, burn 2." → effects: [{{"effect":"burn","trigger":"on_play","amount":2}}]
+    The "when a card is burned / when you burn" TRIGGER is not supported yet — emit
+    the burn itself, then flag that dependent trigger (suggested_vocab "trigger:on_burn").
+
+20. FLOW is NOT supported yet. FLOW is a keyword on spells: an alternate cost to
+    play the spell from the trash, then banish it. Emit the spell's normal on-cast
+    body (so it works when played from hand), list "FLOW" in keywords, set
+    needs_review, and add suggested_vocab ["keyword:flow"]. Do NOT invent a
+    play-from-trash verb.
 
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]

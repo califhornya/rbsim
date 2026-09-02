@@ -90,6 +90,14 @@ class GameAction:
         return cls("CHAMPION", None, lane, None, label)
 
     @classmethod
+    def hide(cls, hand_idx: int, lane: int, label: str) -> "GameAction":
+        return cls("HIDE", hand_idx, lane, None, label)
+
+    @classmethod
+    def hidden_play(cls, lane: int, label: str) -> "GameAction":
+        return cls("HIDDEN_PLAY", None, lane, None, label)
+
+    @classmethod
     def move(cls, src: int, dst: int, label: str) -> "GameAction":
         return cls("MOVE", None, src, dst, label)
 

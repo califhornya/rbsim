@@ -77,12 +77,16 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
         elif isinstance(card, SpellCard):
             for lane in range(n_bf):
                 surcharge = loop._deflect_surcharge(card, lane)
-                energy = max(0, card.cost_energy + surcharge - loop._cost_reduction(card, ap))
-                if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+                bf_e_red, bf_p_red = loop._bf_cost_reduction(card, lane)
+                energy = max(0, card.cost_energy + surcharge - loop._cost_reduction(card, ap) - bf_e_red)
+                power = card.cost_power
+                if power is not None and bf_p_red:
+                    power = max(0, power - bf_p_red)
+                if ap.can_pay_cost(energy, power, card.cost_power_domain):
                     actions.append(GameAction.play("SPELL", idx, lane, f"Cast {card.name} @BF{lane}"))
         elif isinstance(card, GearCard):
             energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
-            if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Play gear {card.name} @BF{lane}"))
 
@@ -112,6 +116,19 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     if dst != src:
                         actions.append(GameAction.move(src, dst, f"Move BF{src}→BF{dst}"))
 
+    # --- HIDDEN keyword (Open State only) ---
+    if not gs.showdown_active and not gs.chain:
+        hide_lanes = loop._hide_lanes(side)
+        if hide_lanes and loop._can_pay_generic_power(ap, 1):
+            for idx, card in enumerate(ap.hand):
+                if card.has_keyword("HIDDEN"):
+                    for lane in hide_lanes:
+                        actions.append(GameAction.hide(idx, lane, f"Hide {card.name} @BF{lane}"))
+        # Play a card you hid on a previous turn, for [0].
+        for lane in loop._hidden_playable_lanes(side):
+            fd = gs.battlefields[lane].facedown
+            actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+
     # --- abilities ---
     actions.extend(_ability_actions(loop, ap, side))
     return actions
@@ -140,12 +157,24 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
     for i, entry in enumerate(loop.activatable_abilities(side)):
         if entry["type"] == "equip":
             gear = entry["gear"]
+            cost = loop._equip_cost(gear)
             if (
                 gear in ap.base_gear
-                and ap.can_pay_cost(gear.cost_energy, gear.cost_power, gear.cost_power_domain)
+                and cost is not None
+                and loop._can_pay_equip(ap, cost)
                 and loop._first_friendly_unit_on_board(side) is not None
             ):
                 out.append(GameAction.ability("ACTIVATED", i, f"Equip {gear.name}"))
+        elif entry["type"] == "gear_ability":
+            gear, eff = entry["gear"], entry["eff"]
+            parsed = loop._parse_activated_cost(eff.cost)
+            tap_ok = not (parsed["tap"] and getattr(gear, "tapped", False))
+            pay_ok = loop._can_pay_gear(ap, parsed["energy"], parsed["power"], None)
+            rec_ok = not parsed["recycle"] or len(ap.trash) >= parsed["recycle"]
+            xp_ok = not parsed["spend_xp"] or loop.gs.get_xp(side) >= parsed["spend_xp"]
+            if (gear in ap.base_gear and tap_ok and pay_ok and rec_ok and xp_ok
+                    and EFFECT_REGISTRY.get(eff.effect) is not None):
+                out.append(GameAction.ability("ACTIVATED", i, f"Gear {eff.effect} ({gear.name})"))
         else:
             unit, eff = entry["unit"], entry["eff"]
             parsed = loop._parse_activated_cost(eff.cost)
@@ -163,6 +192,21 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
+        # QUICK-DRAW gear (§745): has Reaction — playable at reaction speed.
+        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
+                for lane in range(n_bf):
+                    actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
+    # AMBUSH: deploy the champion to a legal lane at reaction speed.
+    champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
+    if champ is not None and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
+        for lane in loop._ambush_legal_lanes(ap.name):
+            actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
+    # HIDDEN: play a facedown card for [0] at reaction speed (§737.1.b).
+    for lane in loop._hidden_playable_lanes(ap.name):
+        fd = loop.gs.battlefields[lane].facedown
+        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
     return actions
 
 
@@ -173,6 +217,25 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     actions: list[GameAction] = [GameAction.pass_()]
     for idx, card in enumerate(ap.hand):
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
-            if ap.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+            if loop._can_pay_showdown(ap, card.cost_energy, card.cost_power, card.cost_power_domain):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
+        # ACTION units (§732.1.c.1): may be played during showdowns (to base).
+        elif isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if ap.can_pay_cost(energy, card.cost_power, card.cost_power_domain):
+                actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
+        # QUICK-DRAW gear (§745): has Reaction — playable during a showdown.
+        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            energy = max(0, card.cost_energy - loop._cost_reduction(card, ap))
+            if loop._can_pay_gear(ap, energy, card.cost_power, card.cost_power_domain):
+                actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
+    # AMBUSH: deploy the champion into the showdown lane at reaction speed.
+    champ = gs.champion_A if ap.name == "A" else gs.champion_B
+    if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
+            and ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain)):
+        actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
+    # HIDDEN: play a facedown card into the showdown lane for [0] (§737.1.b).
+    if lane in loop._hidden_playable_lanes(ap.name):
+        fd = gs.battlefields[lane].facedown
+        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
     return actions

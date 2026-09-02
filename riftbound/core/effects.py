@@ -50,6 +50,47 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.gain_energy(amount, target=target)
 
 
+@effect("mode_choice")
+def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Modal "choose one" (§ modal): the actor picks one mode; its sub-effect(s)
+    resolve. A mode is either a single effect dict or a list of effect dicts.
+    Default (heuristic / no agent): the first mode."""
+    modes = spec.get("modes") or []
+    if not modes:
+        return
+    agent = getattr(ctx.actor, "agent", None)
+    i = 0
+    if agent is not None and hasattr(agent, "decide_mode"):
+        try:
+            i = int(agent.decide_mode(ctx.card, len(modes)))
+        except Exception:  # noqa: BLE001
+            i = 0
+    i = max(0, min(i, len(modes) - 1))
+    chosen = modes[i]
+    subs = chosen if isinstance(chosen, list) else [chosen]
+    for sub in subs:
+        handler = REGISTRY.get(sub.get("effect"))
+        if handler:
+            handler(ctx, sub)
+
+
+@effect("reveal_top_draw_if_spell")
+def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
+
+
+@effect("add_earmarked_energy")
+def _add_earmarked_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.add_earmarked_energy(int(spec.get("amount", 1)),
+                             target=str(spec.get("target", "actor")))
+
+
+@effect("add_earmarked_power")
+def _add_earmarked_power(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    ctx.add_earmarked_power(int(spec.get("amount", 1)),
+                            target=str(spec.get("target", "actor")))
+
+
 @effect("ready_units")
 def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
@@ -564,6 +605,87 @@ def _give_temporary_deflect(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     _give_temp_keyword(ctx, spec, "DEFLECT")
 
 
+@effect("swap_might")
+def _swap_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Switcheroo: 'Swap the Might of two units at the same battlefield this turn.'
+    Deterministic stand-in for the player's choice (like dig/predict): pick the
+    battlefield and the (friendly, enemy) pair maximizing the caster's gain —
+    raise the caster's weakest to the enemy's strongest and vice versa — and swap
+    their effective Might for the turn via temporary_might (cleared at end of turn).
+    No beneficial pair → no-op."""
+    gs = ctx.loop.gs
+    side = ctx.actor_side
+    best = None
+    best_gain = 0
+    for bf in gs.battlefields:
+        friendly = bf.units_A if side == "A" else bf.units_B
+        enemy = bf.units_B if side == "A" else bf.units_A
+        if not friendly or not enemy:
+            continue
+        u_f = min(friendly, key=lambda u: u.might)
+        u_e = max(enemy, key=lambda u: u.might)
+        gain = u_e.might - u_f.might
+        if gain > best_gain:
+            best_gain, best = gain, (u_f, u_e)
+    if best is not None:
+        u_f, u_e = best
+        m_f, m_e = u_f.might, u_e.might
+        u_f.temporary_might += (m_e - m_f)
+        u_e.temporary_might += (m_f - m_e)
+
+
+@effect("swap_position")
+def _swap_position(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Tideturner: 'Move me to its location and it to my original location.'
+    Deterministic stand-in: swap this unit's position with the highest-might
+    friendly non-token unit at a DIFFERENT location (base or another battlefield).
+    No eligible other-location unit → no-op."""
+    loop = ctx.loop
+    gs = loop.gs
+    side = ctx.actor_side
+    me = loop._find_unit_by_card(ctx.card)
+    if me is None:
+        return
+
+    def locate(unit):
+        if unit in ctx.actor.base_units:
+            return ("base", ctx.actor.base_units)
+        for i, bf in enumerate(gs.battlefields):
+            lst = bf.units_A if side == "A" else bf.units_B
+            if unit in lst:
+                return (("bf", i), lst)
+        return (None, None)
+
+    my_loc, my_list = locate(me)
+    if my_loc is None:
+        return
+    # Friendly, non-token units at a different location; pick the strongest.
+    candidates = []
+    for i, bf in enumerate(gs.battlefields):
+        lst = bf.units_A if side == "A" else bf.units_B
+        for u in lst:
+            if u is not me and not u.is_token and ("bf", i) != my_loc:
+                candidates.append(u)
+    for u in ctx.actor.base_units:
+        if u is not me and not u.is_token and my_loc != "base":
+            candidates.append(u)
+    if not candidates:
+        return
+    target = max(candidates, key=lambda u: u.might)
+    tgt_loc, tgt_list = locate(target)
+
+    def place(unit, loc):
+        if loc == "base":
+            ctx.actor.base_units.append(unit)
+        else:
+            gs.battlefields[loc[1]].add_unit(side, unit)
+
+    my_list.remove(me)
+    tgt_list.remove(target)
+    place(me, tgt_loc)
+    place(target, my_loc)
+
+
 @effect("return_from_trash")
 def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
@@ -606,9 +728,52 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     token_name = str(spec.get("token_name", "Recruit"))
     count = int(spec.get("count", spec.get("amount", 1)))
     ready = _coerce_bool(spec.get("ready", False))
-    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    # You always play YOUR token; `target` here often names the destination
+    # (e.g. "battlefield"), not a player, so fall back to the actor rather than
+    # erroring on a non-player target.
+    try:
+        player = ctx._player_for_target(str(spec.get("target", "actor")))
+    except ValueError:
+        player = ctx.actor
     for _ in range(count):
         _spawn_token_to_base(player, token_name, ready=ready)
+
+
+@effect("burn")
+def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Vendetta BURN X: move the top X cards of the target's Main Deck to trash,
+    and track the count this turn (for 'cards burned this turn' conditions)."""
+    amount = int(spec.get("amount", spec.get("count", 1)))
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    burned = player.burn(amount)
+    side = ctx._side_for_player(player)
+    gs = ctx.loop.gs
+    gs.cards_burned_this_turn[side] = gs.cards_burned_this_turn.get(side, 0) + len(burned)
+
+
+@effect("empower_self")
+def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Vendetta EMPOWER: give the source unit the empowered status. Usually an
+    activated ability (`trigger: activated`) whose cost the player pays first, but
+    also usable from a trigger ("when ..., empower me"). Idempotent."""
+    unit = ctx.loop._find_unit_by_card(ctx.card)
+    if unit is not None:
+        unit.empowered = True
+
+
+@effect("disempower")
+def _disempower(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Remove the empowered status from the resolved target(s). Used as an
+    instruction or a cost ("disempower a unit that's EMPOWERED")."""
+    target = str(spec.get("target", "enemy_unit"))
+    if target in ("self", "this"):
+        unit = ctx.loop._find_unit_by_card(ctx.card)
+        units = [unit] if unit is not None else []
+    else:
+        units = _resolve_targets(ctx, {**spec, "target": target, "scope": spec.get("scope", "single")})
+    for u in units:
+        if getattr(u, "empowered", False):
+            u.empowered = False
 
 
 @effect("attach_gear")
@@ -646,11 +811,26 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
-    if n <= 1:
+    if n == 0:
         return
-    top = deck.cards[-n:]
+    look = deck.cards[-n:]
+    # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now.
+    ctx.loop._offer_reveal_from_top(ctx.actor, look)
+    if n == 1:
+        # PREDICT 1 / VISION (§743): look at the top card; you MAY recycle it to
+        # the bottom of the deck. Deterministic default is to keep (a null action);
+        # a learning agent can override decide_predict_recycle.
+        if not deck.cards:
+            return
+        top = deck.cards[-1]
+        agent = getattr(ctx.actor, "agent", None)
+        if agent is not None and hasattr(agent, "decide_predict_recycle") \
+                and agent.decide_predict_recycle(top):
+            deck.cards.pop()
+            deck.cards.insert(0, top)   # recycle to bottom (front of the list)
+        return
     rest = deck.cards[:-n]
-    top_sorted = sorted(top, key=lambda c: int(getattr(c, "might", 0) or 0))
+    top_sorted = sorted(look, key=lambda c: int(getattr(c, "might", 0) or 0))
     deck.cards[:] = rest + top_sorted  # best might ends up last == drawn next
 
 
@@ -666,6 +846,11 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     top = deck.cards[-n:]
     del deck.cards[-n:]
+    # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now,
+    # removing themselves from the looked-at set before we keep the best.
+    ctx.loop._offer_reveal_from_top(ctx.actor, top)
+    if not top:
+        return
     best = max(top, key=lambda c: int(getattr(c, "might", 0) or 0))
     top.remove(best)
     ctx.actor.hand.append(best)

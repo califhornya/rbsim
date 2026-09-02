@@ -62,6 +62,9 @@ class Player:
     base_gear: List[Card] = field(default_factory=list)
 
     energy: int = 0
+    # Earmarked resources (§ restricted-use). Cleared each turn with energy/power.
+    earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
+    earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
@@ -211,6 +214,46 @@ class Player:
         if card:
             self.hand.append(card)
         return card
+
+    def burn(self, n: int) -> list:
+        """Vendetta BURN X: move the top X cards of the Main Deck to the trash.
+        Returns the list of burned cards (may be shorter than n if the deck runs
+        out). 'Top' of deck is the end of the list (Deck.draw pops from there)."""
+        burned = []
+        for _ in range(max(0, int(n))):
+            card = self.deck.draw()
+            if card is None:
+                break
+            self.trash.append(card)
+            burned.append(card)
+        return burned
+
+    def mulligan(self, indices, rng) -> list:
+        """Riftbound mulligan (Core Rules §117): set aside up to TWO chosen cards,
+        draw that many replacements from the top, THEN Recycle the set-aside cards
+        to the BOTTOM of the deck (random order when 2, §416.5). No shuffle.
+
+        `indices` are hand positions to return; anything past the first two, or
+        out of range, is ignored (§117.1 caps it at two). Returns the cards that
+        were actually set aside (for logging)."""
+        chosen = [i for i in dict.fromkeys(indices) if 0 <= i < len(self.hand)][:2]
+        if not chosen:
+            return []
+        set_aside = [self.hand[i] for i in chosen]
+        for i in sorted(chosen, reverse=True):
+            self.hand.pop(i)
+        # 117.2: draw the replacements from the top FIRST (deck.draw pops the end).
+        for _ in set_aside:
+            c = self.deck.draw()
+            if c is not None:
+                self.hand.append(c)
+        # 117.3: recycle the set-aside cards to the BOTTOM (front of the list, the
+        # opposite end from draw), so they are not the ones just drawn.
+        recycled = list(set_aside)
+        if len(recycled) > 1:
+            rng.shuffle(recycled)
+        self.deck.cards[:0] = recycled
+        return set_aside
 
     def remove_from_hand(self, idx: int) -> None:
         del self.hand[idx]

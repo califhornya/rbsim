@@ -8,6 +8,18 @@ from .combat import CombatStats, UnitInPlay, deal_direct_damage, resolve_might_c
 if TYPE_CHECKING:
     from .cards import Card
 
+
+@dataclass
+class FacedownCard:
+    """A card in a battlefield's Facedown Zone (Core Rules §106.4), placed there by
+    the Hidden keyword's Hide action. Max one per battlefield; may only exist while
+    ``owner`` controls the battlefield. ``turn_hidden`` gates the "playable from the
+    NEXT turn onward" rule (§737.1.b)."""
+    card: "Card"
+    owner: str          # "A" / "B"
+    turn_hidden: int
+
+
 @dataclass
 class Battlefield:
 
@@ -19,10 +31,14 @@ class Battlefield:
     contested_this_turn: bool = False
     scored_this_turn_A: bool = False
     scored_this_turn_B: bool = False
+    # "First non-token unit played here this turn" per side (Star Spring trigger).
+    first_unit_here_A: bool = False
+    first_unit_here_B: bool = False
 
     last_controller: Optional[str] = None
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
+    facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
 
     kills_A: int = 0
     kills_B: int = 0
@@ -47,6 +63,8 @@ class Battlefield:
         self.contested_this_turn = False
         self.scored_this_turn_A = False
         self.scored_this_turn_B = False
+        self.first_unit_here_A = False
+        self.first_unit_here_B = False
         self.showdown_pending = False
 
     def ready_side(self, who: str) -> None:

@@ -31,13 +31,16 @@ PER_CATEGORY = 3
 TAXONOMY = [
     ("OK", "interpretazione corretta"),
     ("MINOR", "verb principale giusto ma manca una clausola secondaria"),
+    ("ENGINE_BLOCKED", "la lettura del parser è corretta/ragionevole; l'unico buco "
+                       "è una meccanica che il MOTORE non sa rappresentare (non è "
+                       "colpa del parser). Conta come promosso per l'accuratezza del parser."),
     ("WRONG_TRIGGER", "verb giusto, trigger sbagliato"),
     ("WRONG_TARGET", "target sbagliato"),
     ("WRONG_AMOUNT", "quantità sbagliata / mancato amount_source"),
     ("WRONG_FILTER", "filtro mancante o sbagliato"),
-    ("MISSING_EFFECT", "clausole intere ignorate"),
+    ("MISSING_EFFECT", "clausole intere ignorate (meccanica SUPPORTATA dal motore)"),
     ("PHANTOM_EFFECT", "effetto inventato non presente nel testo"),
-    ("MISSING_CONDITION", "condition non riconosciuta"),
+    ("MISSING_CONDITION", "condition non riconosciuta (meccanica SUPPORTATA dal motore)"),
     ("UNCERTAIN", "il testo è genuinamente ambiguo"),
 ]
 
@@ -109,7 +112,11 @@ def render(cards: list[dict]) -> str:
     out.append("**Tassonomia verdict:**\n")
     for code, desc in TAXONOMY:
         out.append(f"- `{code}` — {desc}")
-    out.append("\nSoglia di accettazione: OK+MINOR ≥ 80% → PROSEGUI; altrimenti RIPARSARE.\n")
+    out.append("\nDue tassi vengono calcolati da `spot_check_summary.py`:\n"
+               "- **Parser accuracy** = OK+MINOR+ENGINE_BLOCKED (misura il parser). "
+               "Soglia gate: ≥ 80% → PROSEGUI; altrimenti RIPARSARE.\n"
+               "- **Sim-ready** = OK+MINOR (quante carte il motore esegue davvero oggi). "
+               "Il divario con parser accuracy è il backlog di copertura del MOTORE, non un problema del parser.\n")
     out.append("---\n")
 
     for c in sorted(cards, key=lambda x: (str(x.get("category")), str(x.get("name")))):

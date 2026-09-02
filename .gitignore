@@ -35,3 +35,7 @@ Thumbs.db
 
 # Local session handoff — internal notes, keep out of the public repo
 HANDOFF.md
+riftbound/data/cards/all_cards.json.preimport.bak
+
+# game trace outputs (scripts/trace_game.py)
+*trace*.log

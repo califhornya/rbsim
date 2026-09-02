@@ -8,11 +8,11 @@ import random
 
 import pytest
 
-from riftbound.core.cards import UnitCard
+from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.loop import EffectContext, GameLoop
 from riftbound.core.player import Deck, Player, RuneDeck
-from riftbound.core.state import GameState
+from riftbound.core.state import ChainItem, GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec
 
 
@@ -35,6 +35,197 @@ def cleanup_registry():
     yield added
     for name in added:
         CARD_REGISTRY.pop(name, None)
+
+
+def test_resolved_spell_goes_to_caster_trash():
+    """KNOWN_ISSUES #19a: a cast spell resolves into its caster's trash instead of
+    vanishing, so trash-based mechanics (FLOW / recycle / return-from-trash) have
+    targets. Agent-less players make _run_chain pass straight to resolution."""
+    loop = _make_loop()
+    spell = SpellCard(name="TST Bolt", damage=1)
+    assert loop.gs.A.trash == []
+    loop.gs.chain.append(ChainItem(player="A", card=spell, bf_idx=0))
+    loop._run_chain("A")
+    assert not loop.gs.chain                      # chain fully resolved
+    assert spell in loop.gs.A.trash               # spell landed in the caster's trash
+    assert spell not in loop.gs.B.trash           # not the opponent's
+
+
+def test_nocturne_reveal_from_top_banish_and_play():
+    """Nocturne Horrifying revealed from the top may banish itself and play for
+    [rune]: it leaves the deck, enters play (exhausted), and 1 power is spent.
+    Declining, or being unable to pay, leaves it in the deck."""
+    from riftbound.core.enums import Domain
+    from riftbound.core.player import Rune
+
+    def _setup(with_power: bool, agent=None):
+        loop = _make_loop()
+        noc = CARD_REGISTRY["Nocturne Horrifying"].instantiate()
+        loop.gs.A.deck.cards.append(noc)   # top of deck = end
+        if with_power:
+            loop.gs.A.power_pool[Domain.CHAOS] = 1
+            loop.gs.A.rune_pool[Domain.CHAOS] = [Rune(domain=Domain.CHAOS)]
+        if agent is not None:
+            loop.gs.A.agent = agent
+        return loop, noc
+
+    # Accept (no agent → default yes) + can pay → banished from deck, into play.
+    loop, noc = _setup(with_power=True)
+    taken = loop._offer_reveal_from_top(loop.gs.A, [noc])
+    assert taken == [noc]
+    assert noc not in loop.gs.A.deck.cards
+    assert any(u.card is noc for u in loop.gs.A.base_units)
+    assert loop.gs.A.power_pool.get(Domain.CHAOS, 0) == 0    # [rune] spent
+
+    # Decline → stays in deck.
+    class _Decliner:
+        def decide_optional(self, card, effect_name): return False
+    loop, noc = _setup(with_power=True, agent=_Decliner())
+    assert loop._offer_reveal_from_top(loop.gs.A, [noc]) == []
+    assert noc in loop.gs.A.deck.cards
+
+    # Can't pay (no power) → stays in deck.
+    loop, noc = _setup(with_power=False)
+    assert loop._offer_reveal_from_top(loop.gs.A, [noc]) == []
+    assert noc in loop.gs.A.deck.cards
+
+
+def test_switcheroo_swap_might():
+    """swap_might: the caster's weakest unit and the enemy's strongest unit at the
+    same battlefield swap effective Might for the turn (temporary)."""
+    from riftbound.core.battlefield import Battlefield
+    loop = _make_loop()
+    bf = loop.gs.battlefields[0]
+    weak = UnitInPlay(UnitCard(name="Weakling", might=1), ready=True)   # A, min
+    strong = UnitInPlay(UnitCard(name="Bruiser", might=7), ready=True)  # B, max
+    bf.units_A.append(weak)
+    bf.units_B.append(strong)
+    ctx = EffectContext(loop=loop, card=SpellCard(name="Switcheroo"),
+                        actor=loop.gs.A, opponent=loop.gs.B, battlefield=bf)
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_might"](ctx, {})
+    assert weak.might == 7 and strong.might == 1      # swapped for the turn
+    weak.clear_turn_end_bonuses(); strong.clear_turn_end_bonuses()
+    assert weak.might == 1 and strong.might == 7      # reverts at end of turn
+
+
+def test_unitinplay_identity_equality():
+    """KNOWN_ISSUES #24: UnitInPlay uses identity equality, so field-identical
+    copies of a card are distinct — list.remove/`in` target the exact object."""
+    a = UnitInPlay(UnitCard(name="Clone", might=2), ready=True)
+    b = UnitInPlay(UnitCard(name="Clone", might=2), ready=True)
+    assert a != b and a is not b
+    lst = [a, b]
+    lst.remove(b)
+    assert lst == [a] and lst[0] is a          # removed the exact object, not the first equal
+
+
+def test_swap_position_conserves_with_duplicate_units():
+    """Regression for #24: swap_position must not lose/duplicate a card when
+    field-identical unit copies coexist (the shape that previously vanished a
+    base unit). Two 'Ravenbloom' copies: one at base, one at bf0."""
+    loop = _make_loop()
+    tide = UnitInPlay(UnitCard(name="Tideturner", might=2), ready=True)
+    rav_base = UnitInPlay(UnitCard(name="Ravenbloom Student", might=2), ready=True)
+    rav_bf = UnitInPlay(UnitCard(name="Ravenbloom Student", might=2), ready=True)
+    loop.gs.A.base_units.extend([rav_base, tide])          # base: dup + the played Tideturner
+    loop.gs.battlefields[0].units_A.append(rav_bf)          # bf0: the other dup
+    ids_before = {id(rav_base.card), id(rav_bf.card), id(tide.card)}
+    ctx = EffectContext(loop=loop, card=tide.card, actor=loop.gs.A,
+                        opponent=loop.gs.B, battlefield=loop.gs.battlefields[0])
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_position"](ctx, {})
+    present = {id(u.card) for u in loop.gs.A.base_units}
+    present |= {id(u.card) for bf in loop.gs.battlefields for u in bf.units_A}
+    assert ids_before <= present               # every card still somewhere — nothing vanished
+    # And no accidental duplication: exactly 3 unit-cards in play.
+    total = len(loop.gs.A.base_units) + sum(len(bf.units_A) for bf in loop.gs.battlefields)
+    assert total == 3
+
+
+def test_tideturner_swap_position():
+    """swap_position: Tideturner swaps location with the strongest friendly unit at
+    another location (here: base ↔ battlefield)."""
+    loop = _make_loop()
+    tide = UnitInPlay(UnitCard(name="Tideturner", might=2), ready=True)
+    ally = UnitInPlay(UnitCard(name="Ally", might=5), ready=True)
+    loop.gs.A.base_units.append(tide)                 # Tideturner at base
+    loop.gs.battlefields[1].units_A.append(ally)      # ally at BF1
+    ctx = EffectContext(loop=loop, card=tide.card,
+                        actor=loop.gs.A, opponent=loop.gs.B, battlefield=loop.gs.battlefields[1])
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["swap_position"](ctx, {})
+    assert tide in loop.gs.battlefields[1].units_A    # moved to ally's location
+    assert ally in loop.gs.A.base_units               # ally moved to Tideturner's
+    assert tide not in loop.gs.A.base_units
+
+
+def test_optional_effect_gated_by_agent(cleanup_registry):
+    """An `optional: true` effect runs only if the actor's agent accepts it;
+    with no agent (rollouts/tests) it defaults to yes (behavior-preserving)."""
+    name = "TST Optional Draw"
+    _register(name, [{"effect": "draw_cards", "trigger": "on_play", "amount": 1, "optional": True}])
+    cleanup_registry.append(name)
+
+    class _Decliner:
+        def decide_optional(self, card, effect_name): return False
+
+    class _Accepter:
+        def decide_optional(self, card, effect_name): return True
+
+    def _run(agent):
+        loop = _make_loop()
+        loop.gs.A.deck.cards.extend(UnitCard(name=f"D{i}", might=1) for i in range(3))
+        if agent is not None:
+            loop.gs.A.agent = agent
+        before = len(loop.gs.A.hand)
+        loop._resolve_card_effects(UnitCard(name=name, might=2),
+                                   loop.gs.battlefields[0], loop.gs.A, loop.gs.B)
+        return len(loop.gs.A.hand) - before
+
+    assert _run(_Decliner()) == 0        # declined → no draw
+    assert _run(_Accepter()) == 1        # accepted → drew 1
+    assert _run(None) == 1               # no agent → default yes
+
+
+def test_friendly_total_might_at_least_condition():
+    """Slice 2: Kinkou Initiate gate — combined might of the actor's OTHER units,
+    excluding the source card itself."""
+    loop = _make_loop()
+    src = UnitCard(name="TST Initiate", might=3)
+    bf = loop.gs.battlefields[0]
+    bf.units_A.append(UnitInPlay(UnitCard(name="TST Ally1", might=3), ready=True))
+    bf.units_A.append(UnitInPlay(UnitCard(name="TST Ally2", might=3), ready=True))
+
+    def check(n):
+        return loop._check_condition(
+            {"type": "friendly_total_might_at_least", "params": {"n": n}},
+            src, loop.gs.A, loop.gs.B, None)
+
+    assert check(5) is True          # 3 + 3 = 6 >= 5
+    assert check(7) is False         # 6 < 7
+    # The source's own might is excluded even when it's on the board.
+    bf.units_A.append(UnitInPlay(src, ready=True))
+    assert check(7) is False         # still 6 (src not counted)
+
+
+def test_you_control_n_or_more_gear_condition():
+    """Slice 2: Patched Porobot gate — gear on the actor's units plus loose base
+    gear."""
+    loop = _make_loop()
+    src = UnitCard(name="TST Porobot", might=2)
+    unit = UnitInPlay(UnitCard(name="TST Bearer", might=2), ready=True)
+    unit.gear.append(UnitCard(name="TST Gear1"))          # 1 gear on a unit
+    loop.gs.battlefields[0].units_A.append(unit)
+    loop.gs.A.base_gear.extend([UnitCard(name="TST Gear2"), UnitCard(name="TST Gear3")])
+
+    def check(n):
+        return loop._check_condition(
+            {"type": "you_control_n_or_more_gear", "params": {"n": n}},
+            src, loop.gs.A, loop.gs.B, None)
+
+    assert check(3) is True           # 1 (on unit) + 2 (base) = 3 >= 3
+    assert check(4) is False          # 3 < 4
 
 
 def test_passive_self_buff_gated_on_condition(cleanup_registry):
@@ -169,15 +360,24 @@ def test_equip_via_activated_path():
     loop = _make_loop()
     unit = UnitInPlay(UnitCard(name="Bearer", might=2), ready=True)
     loop.gs.battlefields[0].units_A.append(unit)
-    gear = GearCard(name="TST Blade", cost_energy=0)
-    loop.gs.A.base_gear.append(gear)
+    # Real Equipment: an Equip ability is required for the gear to be equippable.
+    CARD_REGISTRY["TST Blade"] = CardSpec.from_dict({
+        "name": "TST Blade", "category": "Gear", "cost_energy": 0,
+        "effect": "Equip [1] ([1]: Attach this to a unit you control.)"})
+    try:
+        gear = GearCard(name="TST Blade", cost_energy=0)
+        loop.gs.A.base_gear.append(gear)
+        loop.gs.A.energy = 1                     # pay the Equip cost ([1])
 
-    abilities = loop.activatable_abilities("A")
-    equip_idx = next(i for i, e in enumerate(abilities) if e["type"] == "equip")
-    loop._apply_activated_ability(loop.gs.A, loop.gs.B, equip_idx)
+        abilities = loop.activatable_abilities("A")
+        equip_idx = next(i for i, e in enumerate(abilities) if e["type"] == "equip")
+        loop._apply_activated_ability(loop.gs.A, loop.gs.B, equip_idx)
 
-    assert gear in unit.gear
-    assert gear not in loop.gs.A.base_gear
+        assert gear in unit.gear
+        assert gear not in loop.gs.A.base_gear
+        assert loop.gs.A.energy == 0             # Equip cost paid
+    finally:
+        CARD_REGISTRY.pop("TST Blade", None)
 
 
 def test_static_cost_reduction(cleanup_registry):
