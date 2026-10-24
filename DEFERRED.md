@@ -64,6 +64,25 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   from-trash play action + banish-after-resolve.
 - **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
   corpus cards; value-swap in `_amount`, a trigger after `player.burn`.
+  Radiance adds stacking EMPOWER (§442.1.c.1 / §827.1.c.5) — currently binary.
+- **Radiance keywords (2026-10-24, CORE_RULES.md)** — all GAP, 168 Radiance cards
+  imported with empty effects[]:
+  - **DEPLOY** (§830) — gear playable/creatable to any battlefield, not recalled in
+    cleanup, killed when an opponent holds there, movable. Needed by the Bomb token
+    (RAD-T02, §187.12: Deathknell → deal 2 to an enemy unit here, kill other Bombs here).
+  - **DISARM X** (§831) — attack trigger, −X [M] to an enemy unit here this turn;
+    instances sum and trigger once.
+  - **SHOW OFF [Object]** (§832) — as you play the card, reveal from hand and/or pick
+    friendly board objects; linked abilities read snapshotted info.
+  - Data: RAD-142 Hexplosive Minefield has EMPTY rules text (missing in the RiftMana
+    HTML too) — needs the text from the user before parsing. RAD-167 Neeko Blending In
+    ("Neutral") stored as domainless with 1 power pip = [A]; the main card-play path
+    doesn't charge [A] for a domainless card (power pip free) — small undercharge,
+    Neeko is the only such card. Neeko's "choose up to 3 legends at deckbuilding" is a
+    deck-construction choice (§103.1) the match layer doesn't model yet.
+  - Also new in the rules: copy effects get their own first layer (§479.1), "pick" vs
+    "choose" (non-targeting, §355.7), ignored vs negated instructions (§359.3.e.6),
+    mandatory requirements vs restrictions (§355.17).
 - [DONE] **`enters_exhausted`** (#21) — units already enter exhausted per §142.4
   (UnitInPlay.ready defaults False, all deploy paths use it); and "This enters
   exhausted" gear now enters tapped. KNOWN_ISSUES #21 marked RESOLVED.

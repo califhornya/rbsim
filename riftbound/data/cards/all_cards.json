@@ -29915,5 +29915,3773 @@
         "rarity": "Common"
       }
     ]
+  },
+  {
+    "card_id": "RAD-001",
+    "name": "Amateur Demolitionist",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, play a Bomb gear token to a battlefield. (It has DEPLOY. When it dies, deal 2 to an enemy there and kill your other Bombs there.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-001",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-002",
+    "name": "Banner of Conquest",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nFriendly units here have ASSAULT. (+1 [might] while they're attackers.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-002",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-003",
+    "name": "Bilgewater Tracker",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, deal 1 to each of up to 2 units.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-003",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-004",
+    "name": "Brawl",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive a unit ASSAULT this turn equal to its Might. (+1 [might] for each instance of Assault while it's an attacker.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-004",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-005",
+    "name": "Lingering Animus",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spirit",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I enter ready if a friendly unit or gear died this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-005",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-006",
+    "name": "Scorched Earth",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nDeal 5 damage split among units at a single battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-006",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-007",
+    "name": "Rally for War",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "Choose an occupied enemy battlefield. Play three 1 [might] Recruit unit tokens there.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-007",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-008",
+    "name": "War Scout",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Demacia, Yordle",
+    "might": 2,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nWhen you play me, give a unit +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-008",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-009",
+    "name": "Antagonistic Apparatus",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Bandle City, Mech, Yordle",
+    "might": 3,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "I enter ready.\nWhen you play me, play a ready 3 [might] Mech unit token here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-009",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-010",
+    "name": "Forbidden Technique",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Ready a unit.\nWhen you play a card with Energy cost [7] or more, you may play this from your trash for [1][fury][fury]. Then banish this.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-010",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-011",
+    "name": "Incorrigible Construct",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Mech, Piltover",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHOW OFF a Mech. (As you play me, you may reveal a Mech from hand or pick another friendly Mech.)\nI enter ready if you showed off.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-011",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-012",
+    "name": "Runeblade Anvil",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play this or when this leaves the board, banish the top card of your Main Deck.\nUntil your next Ending Phase, you may play that card. (You still pay its costs.)\n[2] [fury], [tap]: Kill this.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-012",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-013",
+    "name": "Lost to the Sands",
+    "domain": "Fury",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nChoose one —\n• Deal 4 to a unit at a battlefield.\n• Kill a gear.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-013",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-014",
+    "name": "Shimmering Swimmer",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You may kill a friendly unit or gear as an additional cost to play me.\nWhen you play me, if you paid the additional cost, deal 2 to a unit.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-014",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-015",
+    "name": "Akali Brash",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Ionia, Akali",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "The first time I move each turn, ADD [1] [rune].\nThe second time I move each turn, banish the top card of your Main Deck. Until your next Ending Phase, you may play that card. (You still pay its costs.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-015",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-016",
+    "name": "Coalesced Energy",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 2,
+    "cost_power_domain": "Fury",
+    "effect": "At the end of your turn, recycle all your runes, then channel 4 runes exhausted.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-016",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-017",
+    "name": "Detonation Amplifier",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may kill another friendly unit or gear to draw 1.\nFriendly DEATHKNELL effects here trigger an additional time.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-017",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-018",
+    "name": "Drakehound Packmaster",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 9,
+    "cost_energy": 9,
+    "cost_power": 2,
+    "cost_power_domain": "Fury",
+    "effect": "When you play me, reveal the top card of each opponent's Main Deck. Choose one and banish it, then play it, ignoring its cost. Recycle the rest.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-018",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-019",
+    "name": "Firebrand Raider",
+    "domain": "Fury",
+    "category": "Unit",
+    "sub_type": "Freljord",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "I enter ready.\nWhen you play me, ready all enemy units.\nOther units enter ready.\nUnits don;t ready during the Awaken Phase.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-019",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-020",
+    "name": "Mordekaiser Twice Slain",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Noxus, Spirit, Mordekaiser",
+    "might": 5,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nASSAULT 3 (+3 [might] while I'm an attacker.)\nOnce each turn, if I would die, you may kill a friendly unit to heal me, exhaust me, and recall me instead.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-020",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-020a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-021",
+    "name": "Ekko Revolutionary",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Zaun, Ekko",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "I enter ready.\nASSAULT (+1 [Might] while I'm an attacker.)\nACTION Discard 1, [1] [fury]: Banish me, then play me to your base, ignoring my cost.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-021",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-021a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-022",
+    "name": "Whirling Twirligig",
+    "domain": "Fury",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "[tap]: Play a Gold gear token exhausted. (It has \"REACTION Kill this, [tap]: ADD [Rune].\")\nKill a friendly gear, [tap]: Play a 1 [might] Recruit unit token.\nKill a friendly unit, [tap]: Play a 3 [might] Mech unit token.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-022",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-023",
+    "name": "Ziggs Short-Fused",
+    "domain": "Fury",
+    "category": "Champion",
+    "sub_type": "Zaun, Yordle, Ziggs",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
+    "effect": "When you play me, play a Bomb gear token to a battlefield.\nAbilities of friendly gear deal 1 Bonus Damage.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-023",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-023a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-024",
+    "name": "Blossoming Dreamroot",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\n\nWhen you win a combat here, draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-024",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-025",
+    "name": "Consult the Heavens",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit SHIELD 2 this turn. (+2 [might] while it's a defender.)\nPREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-025",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-026",
+    "name": "Entrenched Boar",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Freljord",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You may have me enter ready. If you do, I can't move this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-026",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-027",
+    "name": "Iridescent Avian",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Bird, Ixtal",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[tap]: BUFF a unit. If it's already buffed, give it +2 [might] this turn instead. (To buff a unit, give it a +1 [might] buff if it doesn't have one.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-027",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-028",
+    "name": "Ki Burst",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nAs an additional cost to play this, exhaust a friendly unit.\nSTUN a unit. (It doesn't deal combat damage this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-028",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-029",
+    "name": "Life from Stone",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nAs an additional cost to play this, exhaust a friendly unit.\nDraw 1 and channel 1 rune exhausted.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-029",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-030",
+    "name": "Sanctum Conservator",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a card with Energy cost [7] or more, ready me.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-030",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-031",
+    "name": "Stoic Ferryman",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Bilgewater, Sentinel",
+    "might": 2,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHIELD 3 (+3 [might] while I'm a defender.)\nWhen you play me to a battlefield, you may move another unit you control here to your base.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-031",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-032",
+    "name": "Battle Preparations",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nSHOW OFF a gear. (As you play this, you may reveal a gear from hand or pick a friendly gear.)\nGive a unit +2 [might] this turn. If you showed off, ready up to 2 runes.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-032",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-033",
+    "name": "Command: Attack",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "Choose one —\n• Move a friendly gear with DEPLOY to a battlefield.\n• Look at the top 5 cards of your Main Deck. You may reveal a gear from among them and draw it. Recycle the rest.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-033",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-034",
+    "name": "Hunker Down",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nReady a friendly unit. It can't move this turn. Draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-034",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-035",
+    "name": "Invigorating Bloom",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play this, give a friendly unit +3 [might] this turn.\nExhaust a friendly MIGHTY unit, [tap]: Draw 1. (A unit is Mighty while it has 5+ [might].)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-035",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-036",
+    "name": "Storm Raptor",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Freljord, Bird",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEFLECT (Opponents must pay [Rune] to choose me with a spell or ability.)\nWhen a stunned enemy unit dies here, draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-036",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-037",
+    "name": "Watchful Curator",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Piltover",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "Your gear have DEFLECT. (Opponents must pay [rune] to choose each with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-037",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-038",
+    "name": "Ahri Confident",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Ionia, Ahri",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "DISARM (When I attack, give an enemy unit here -1 [might] this turn.)\nWhen you reduce the Might of an enemy unit here by 1 or more, give me +1 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-038",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-039",
+    "name": "Ephemeral Ward",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 2,
+    "cost_power_domain": "Calm",
+    "effect": "Your units have +2 [might].\nWhen you play a unit, kill this.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-039",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-040",
+    "name": "Heartening Soul",
+    "domain": "Calm",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spirit",
+    "might": 7,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "When you play me, ready a friendly legend.\nFriendly legends have \"[tap]: Give a unit +3 [might] this turn.\"",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-040",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-041",
+    "name": "Hush",
+    "domain": "Calm",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 2,
+    "cost_power_domain": "Calm",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell with Power cost [rune] [rune] or more.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-041",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-042",
+    "name": "Orianna Exquisite",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Piltover, Orianna",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHIELD (+1 [might] while I'm a defender.)\nI don't deal combat damage unless there's a friendly gear here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-042",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-042a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-043",
+    "name": "Riven Broken Blade",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Noxus, Riven",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I become exhausted, choose one that hasn't been chosen this turn —\n• BUFF me. (Give me a +1 [might] buff if I don't have one.)\n• Spend my buff to STUN an enemy unit. (It doesn't deal combat damage this turn.)\n• Spend my buff to ready me.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-043",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-043a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-044",
+    "name": "Hunting Blind",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 2,
+    "cost_power_domain": "Calm",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may move an enemy unit to this battlefield.\nFriendly units here have SHIELD 2. (+2 [might] while they're defenders.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-044",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-045",
+    "name": "K'Sante Dauntless",
+    "domain": "Calm",
+    "category": "Champion",
+    "sub_type": "Shurima, K'Sante",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "SHIELD (+1 [Might] while I'm a defender.)\nWhen I attack or defend, double the SHIELD of a unit you control here this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-045",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-045a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-046",
+    "name": "Resplendent Rostrum",
+    "domain": "Calm",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 8,
+    "cost_power": 1,
+    "cost_power_domain": "Calm",
+    "effect": "[tap]: Draw 1 and channel 1 rune exhausted.\nWhen this become exhausted, give a friendly unit +3 [Might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-046",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-047",
+    "name": "Fanfare",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "The next three times you play a unit this turn, draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-047",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-048",
+    "name": "High Note",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit -[might] this turn equal to the number of exhausted units you control.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-048",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-049",
+    "name": "Industrious Mechsmith",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Zaun",
+    "might": 1,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, play a 3 [might] Mech unit token here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-049",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-050",
+    "name": "Mysterious Chronomancer",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle any of them and put the rest back in any order.)\nDISARM 2 (When I attack, give an enemy unit here -2 [might] this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-050",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-051",
+    "name": "Parallel Convergence",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "As an additional cost to play this, return a friendly unit to its owner's hand.\nDeal 5 to a unit at a battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-051",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-052",
+    "name": "Resource Extractor",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nAt the end of your turn, if you control this battlefield, play a Gold gear token exhausted. (It has \"REACTION Kill this, [tap]: ADD [rune].\")",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-052",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-053",
+    "name": "Strigian Oracle",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Freljord, Bird",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I become exhausted, PREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-053",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-054",
+    "name": "Trinket Peddler",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DISARM (When I attack, give an enemy unit here -1 [might] this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-054",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-055",
+    "name": "Clanging Sentry",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Mech, Piltover",
+    "might": 2,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Your Mechs have DISARM. (When each of us attacks, give an enemy unit there -1 [might] this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-055",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-056",
+    "name": "Improvised Projectile",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nChoose a friendly gear. Deal damage equal to its Energy cost to a unit at a battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-056",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-057",
+    "name": "Piltovan Guidebot",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Mech, Piltover",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a card, you may have my base Might become equal to that card's Energy cost this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-057",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-058",
+    "name": "Riptide Mage",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "ACCELERATE (You may pay as an additional cost to have me enter ready.)\nWhen you play me, give an enemy unit -3 [Might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-058",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-059",
+    "name": "Supernova",
+    "domain": "Mind",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 9,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "Deal 10 to a unit. Draw 2.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-059",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-060",
+    "name": "The Empyrean",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Dragon, Ionia",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHOW OFF a card. (As you play me, you may reveal a card from your hand or pick another friendly one.)\nWhen you play me, if you showed off a card, [Predict] equal to its Power cost, then draw 2. (Look at that many cards from your Main Deck. Recycle any of them and put the rest back in any order.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-060",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-061",
+    "name": "Ekko Ingenious",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Zaun, Ekko",
+    "might": 4,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "As an additional cost to play me, return a friendly unit to its owner's hand.\nGANKING (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-061",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-061a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-062",
+    "name": "Gravity Field",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds where, kill this.)\nOpponents must pay [1] [rune] to move one or more units to this battlefield.\nDEATHKNELL Draw 1. (When I die, get the effect.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-062",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-063",
+    "name": "Kai'Sa Rebel",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Kai'Sa, The Void",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "DISARM (When I attack, give an enemy unit here -1[Might] this turn.)\nWhile I'm in a showdown, your spells have REACTION. (Play them any time, even before spells and abilities resolve.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-063",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-064",
+    "name": "Scrutinizing Scope",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[1], [tap]: Choose an opponent. They guess a card type. Reveal the top card of your Main Deck. If it has that type, recycle it. Otherwise, draw it. (Unit, gear and spell are types.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-064",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-065",
+    "name": "Seraphine Inspiring",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Piltover, Seraphine",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "DISARM (When I attack, give an enemy unit here -2 [Might] this turn.)\nOnce each turn, when you exhaust three or more friendly units at the same time, you may draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-065",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-065a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-066",
+    "name": "Spirit of the Forge",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Freljord, Spirit",
+    "might": 4,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Mind",
+    "effect": "You may return a friendly gear to its owner's hand as an additional cost to play me.\nWhen you play me, if you paid the additional cost, ready me and give me +[might] this turn equal to the Energy cost of the gear you returned.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-066",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-067",
+    "name": "Clocktower Guardian",
+    "domain": "Mind",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 2,
+    "cost_power_domain": "Mind",
+    "effect": "When you play me or when I hold, [Predict 3].\nDEATHKNELL Banish the top card of your Main Deck. You may play it, ignoring its Energy cost.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-067",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-068",
+    "name": "Orianna Mechanical Marvel",
+    "domain": "Mind",
+    "category": "Champion",
+    "sub_type": "Piltover, Orianna",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Once each turn, while I'm at a battlefield, you may pay [1] [rune] less to play a gear.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-068",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-068a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-069",
+    "name": "Zero Point Inflection",
+    "domain": "Mind",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 9,
+    "cost_power": 2,
+    "cost_power_domain": "Mind",
+    "effect": "When you play a card, draw 2.\nWhen you draw 1 or more cards with 9 or more other cards in your hand, discard your hand, kill this, and choose an opponent.\nThey score 1 point.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-069",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-070",
+    "name": "Hold 'Em",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nThis costs [2] less if you've played a unit or gear to a battlefield this turn.\nGive a unit +3 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-070",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-071",
+    "name": "Nazuman Ntofo",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EQUIP 1 ([1]: Attach this to a unit you control.)",
+    "effect_equipped": "SHIELD 2 (+2 [might] while I'm a defender.)",
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-071",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-072",
+    "name": "Overloaded Traveler",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-072",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-073",
+    "name": "Pillaged Armory",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this or when you conquer here,\nBUFF a friendly unit. (Give it a +1[Might] buff if it doesn't have one.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-073",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-074",
+    "name": "Raving Witness",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Freljord",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I move, reveal the top card of your Main Deck. If it's MIGHTY, draw it. Otherwise, recycle it. (A unit is Mighty while it has 5+ [might].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-074",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-075",
+    "name": "Skystrike Squadron",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Demacia, Bird, Elite",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "You may return a friendly gear to its owner's hand as an additional cost to play me. If you do, I cost [2] less.\nDEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-075",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-076",
+    "name": "Sneaky Zeebles",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Mount Targon",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I conquer, ADD [rune]. (Abilities that add resources can't be reacted to.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-076",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-077",
+    "name": "Wrath of the Freljord",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Freljord, Spirit",
+    "might": 7,
+    "cost_energy": 9,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I enter ready.\nSHIELD 3 (+3 [might] while I'm a defender.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-077",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-078",
+    "name": "Armored Tusker",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Noxus",
+    "might": 4,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "SHIELD 3 (+3 [might] while I'm a defender.)\nTANK (I must be assigned combat damage first.)\nWhen I move, you may deal damage equal to my SHIELD to a unit at a battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-078",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-079",
+    "name": "Avalanche",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 2,
+    "cost_power_domain": "Body",
+    "effect": "Deal 3 to all units in bases.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-079",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-080",
+    "name": "Bloodscent Swarm",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 2,
+    "cost_power_domain": "Body",
+    "effect": "I cost [2] less for each battlefield you've conquered this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-080",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-081",
+    "name": "Elnuk Herd",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Freljord",
+    "might": 5,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nWhen you play me, give another friendly unit +3 [might] this turn, then recycle me if I was played from face down.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-081",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-082",
+    "name": "Primordial Roar",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 2,
+    "cost_power_domain": "Body",
+    "effect": "SHOW OFF a unit (As you play this, you may reveal a unit from your hand or pick a friendly unit.)\nIf you showed off a unit, deal damage equal to that unit's Might to a unit.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-082",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-083",
+    "name": "Stalwart Goatherd",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Mount Targon",
+    "might": 2,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHIELD 2 (+2 [might] while I'm a defender.)\nWhen you play me, you may kill a gear with Energy cost [4] or less.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-083",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-084",
+    "name": "Cataclysm",
+    "domain": "Body",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "Opponents can't play spells this turn.\nMove a friendly unit to an occupied enemy battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-084",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-085",
+    "name": "Graves Blasting Through",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Bilgewater, Graves",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "When I attack or defend, deal damage equal to my Might to all enemy units here.\nI don't deal combat damage.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-085",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-086",
+    "name": "K'Sante Courageous",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Shurima, K'Sante",
+    "might": 4,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACCELERATE (You may pay [1] [Body] as an additional cost to have me enter ready.)\nSHIELD 2 (+2 [Might] while I'm a defender.)\nWhen I hold, channel 1 rune.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-086",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-086a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-087",
+    "name": "Portable Portal",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may pay [body] to ready a unit here.\nFriendly units here have GANKING. (They can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-087",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-088",
+    "name": "Staunch Survivor",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Freljord",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "ASSAULT 2, SHIELD 2 (+2 [might] while I'm an attacker or defender.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-088",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-089",
+    "name": "Titanic Shrine",
+    "domain": "Body",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a unit with Might greater than each other unit on the board, exhaust me to draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-089",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-090",
+    "name": "Evelynn Consuming",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Demon, Evelynn",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play a card from face down, ready me and give me +1 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-090",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-090a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-091",
+    "name": "Jarvan IV Martial Paragon",
+    "domain": "Body",
+    "category": "Champion",
+    "sub_type": "Demacia, Jarvan IV",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Body",
+    "effect": "Your gear with DEPLOY have ACTION. (They can be played on your turn or in showdowns.)\nWhen I conquer, if there is a friendly gear with DEPLOY here, channel 1 rune exhausted.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-091",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-091a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-092",
+    "name": "Seraphic Wyvern",
+    "domain": "Body",
+    "category": "Unit",
+    "sub_type": "Dragon, Mount Targon",
+    "might": 7,
+    "cost_energy": 7,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "If you would channel runes, channel that many runes plus 1 exhausted rune instead.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-092",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-093",
+    "name": "Disposal Expert",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bandle City, Yordle",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "I enter ready if you control no other units.\nDISARM 2 (When I attack, give an enemy unit here -2 [Might] this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-093",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-094",
+    "name": "Explosimian",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Zaun",
+    "might": 6,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I hold, play three Bomb gear tokens to a single battlefield. (They have DEPLOY. When each dies, deal 2 to an enemy there and kill your other Bombs there.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-094",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-095",
+    "name": "Momentary Companion",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Demon",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me, if it's not your turn, give me TEMPORARY. (Kill me at the start of my controller's Beginning Phase, before scoring.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-095",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-096",
+    "name": "Satchel Charge",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nMove a friendly unit, then play a Bomb gear token to a battlefield. (It has DEPLOY. When it dies, deal 2 to an enemy there and kill your other Bombs there.)\nFlavor text: It's more fun if nobody knows how long the fuse is.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-096",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-097",
+    "name": "Siren of the Shallows",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DISARM (When I attack, give an enemy unit here -1 [Might] this turn.)\nGANKING (I can move from battlefield to battlefield.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-097",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-098",
+    "name": "Siren's Song",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nMove an enemy unit that moved this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-098",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-099",
+    "name": "Suave Negotiator",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bilgewater, Demon",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, choose an opponent. You and that player each draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-099",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-100",
+    "name": "The Waters' Wage",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nPlay a Gold gear token exhausted. If it's your turn and you played this from face down, play three ready Gold gear tokens instead. (Gold tokens have \"REACTION Kill this,[tap] : ADD [rune].\")",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-100",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-101",
+    "name": "An Offer You Can't Refuse",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nKill a gear. Its controller plays a Gold gear token exhausted. (Gold has \"REACTION Kill this, [tap]: ADD [rune].\")",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-101",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-102",
+    "name": "Demon Shade",
+    "domain": "Chaos",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nChoose a friendly unit, then choose one –\n• Move it to an open battlefield.\n• Give it GANKING this turn if there are no open battlefields. (It can move from battlefield to battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-102",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-103",
+    "name": "Gutter Guardian",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Zaun",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react later for [0].)\nSHOW OFF a card with HIDDEN. (As you play me, you may reveal such a card from your hand or pick another friendly one on the board.)\nWhen you play me, if you showed off, ADD [rune].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-103",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-104",
+    "name": "Pitiless Stalker",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Cat",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "[tap]: STUN an enemy unit. (It doesn't deal combat damage this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-104",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-105",
+    "name": "Reckless Innovator",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Piltover",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACCELERATE (You may pay [1] [chaos] as an additional cost to have me enter ready.)\nWhen I become exhausted, choose one —\n• Play a Gold gear token exhausted. (It has \"REACTION[>] Kill this, [tap]: ADD [rune].\")\n• Pay [chaos] to draw 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-105",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-106",
+    "name": "The Good Stuff",
+    "domain": "Chaos",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, discard 1, then draw 3.\nWhen you hold here, return this to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-106",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-107",
+    "name": "Bedeviling Stranger",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Demon",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me, choose a battlefield. If there are 4 or more units there, you may return an enemy unit there to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-107",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-108",
+    "name": "Bushwhack Trap",
+    "domain": "Chaos",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhile you or an ally control this battlefield, that player may hide an additional card here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-108",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-109",
+    "name": "Evelynn in Control",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Demon, Evelynn",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "DISARM\nWhen I hold, if you control a facedown card here, score 1 point.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-109",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-109a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-110",
+    "name": "Lulu Whimsical",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Bandle City, Yordle, Lulu",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When I move, you may have another unit's base Might become 4 this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-110",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-111",
+    "name": "Mechanical Bandit",
+    "domain": "Chaos",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 4,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "At the start of your Beginning Phase, each player reveals the top card of their Main Deck. If you revealed a card with the lowest Energy cost, draw it. Recycle the rest.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-111",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-112",
+    "name": "Ziggs Explosive",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Zaun, Yordle, Ziggs",
+    "might": 4,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[1], [tap]: Play a Bomb gear token to a battlefield. (It has DEPLOY. When it dies deal 2 to an enemy there and kill your other Bombs there.)\nWhen I defend, you may kill a friendly gear to give me +2 [might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-112",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-112a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-113",
+    "name": "Angler Wyrm",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Dragon, Bilgewater",
+    "might": 8,
+    "cost_energy": 8,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEFLECT (Opponents must pay [Any Power] to choose me with a spell or ability.)\n[tap]: Choose an opponent. They must move a unit they control to my battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-113",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-114",
+    "name": "Riven Deserter",
+    "domain": "Chaos",
+    "category": "Champion",
+    "sub_type": "Noxus, Riven",
+    "might": 5,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Chaos",
+    "effect": "When another friendly unit becomes exhausted, give me +1 [might] this turn.\nExhaust a friendly unit: Ready a unit. Use this ability only once each turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-114",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-114a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-115",
+    "name": "Transpositionist",
+    "domain": "Chaos",
+    "category": "Unit",
+    "sub_type": "Bilgewater",
+    "might": 4,
+    "cost_energy": 6,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[chaos], [tap]: Return a friendly unit to its owner's hand. You may play a unit with less Might than that unit had, ignoring its cost.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-115",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-116",
+    "name": "Concert Poster",
+    "domain": "Order",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 1,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this or when you conquer here, you may pay [1] to play a 1 [might] Recruit unit token to your base.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-116",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-117",
+    "name": "For Demacia!",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a battlefield. Give friendly units there SHIELD 2 this turn. (+2 [might] while they're defenders.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-117",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-118",
+    "name": "Herald of the Emperor",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Shurima",
+    "might": 3,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, choose a friendly unit. Its base Might becomes 5 this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-118",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-119",
+    "name": "Hunting Dog",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Demacia, Dog",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEATHKNELL Play a 1 [might] Bird unit token with DEFLECT to your base. (When I die, get the efefct. Opponents must pay [rune] to choose a DEFLECT unit with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-119",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-120",
+    "name": "Meticulous Restorationist",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Piltover",
+    "might": 2,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a card with Energy cost [7] or more, you may play me from your trash for [order].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-120",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-121",
+    "name": "One-Two Punch",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "ACTION (Play on your turn or in showdowns.)\nBUFF a friendly unit and STUN an enemy unit. (Give the friendly unit a +1 [might] buff if it doesn't have one. The enemy unit doesn't deal combat damage this turn.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-121",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-122",
+    "name": "Party Crasher",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Zaun",
+    "might": 6,
+    "cost_energy": 9,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "I cost [1] less for each exhausted unit you control.\nTANK (I must be assigned combat damage first.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-122",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-123",
+    "name": "Protector's Shield",
+    "domain": "Order",
+    "category": "Gear",
+    "sub_type": "Equipment",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "QUICK-DRAW (This has REACTION. When you play it, attach it to a unit you control.)\nEQUIP [1] ([1]: Attach this to a unit you control.)",
+    "effect_equipped": "TANK (I must be assigned combat damage first.)",
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-123",
+        "rarity": "Common"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-124",
+    "name": "Burn Away",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "Banish a unit with 3 [might] or less or a gear. BURN 2. (Put the top 2 cards of your Main Deck into your trash.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-124",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-125",
+    "name": "Dune Devourer",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "The Void",
+    "might": 7,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "You may kill a friendly unit as an additional cost to play me. If you do, I cost [2] less.\nDEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-125",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-126",
+    "name": "Mournful Spirit",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Shadow Isles, Spirit",
+    "might": 1,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEATHKNELL You may kill a unit or gear here. (When I die, get the effect.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-126",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-127",
+    "name": "Rousing Display",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "SHOW OFF a card with Energy cost [7] or more. (As you play this, you may reveal such a card from your hand or pick a friendly one.)\nPlay two 1 [Might] Recruit unit tokens to your base. If you showed off, play four to your base instead.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-127",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-128",
+    "name": "Steadfast Outrider",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Demacia",
+    "might": 3,
+    "cost_energy": 4,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "TANK (I must be assigned combat damage first.)\nWhile there are 2 or more other friendly units and/or gear at my battlefield, I have +2 [might].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-128",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-129",
+    "name": "Trifarian Captain",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Trifarian",
+    "might": 1,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play me, look at the top 4 cards of your Main Deck. You may reveal from among them a unit or gear with Energy cost no more than [3] and with Power cost no more than [rune] and draw it. Recycle the rest.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-129",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-130",
+    "name": "Battlefield Armorer",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Demacia",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When a friendly gear at a battlefield dies, you may pay [1] to return it to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-130",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-131",
+    "name": "Demacian Illuminators",
+    "domain": "Order",
+    "category": "Unit",
+    "sub_type": "Demacia",
+    "might": 3,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "When one or more friendly units die, BUFF a friendly unit. (Give it a +1 [might] buff if it doesn't have one.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-131",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-132",
+    "name": "Heimerdinger Academy Instructor",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Piltover, Yordle, Heimerdinger",
+    "might": 5,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "If you would play a unit token to a lcoation while I'm at a battlefield, you may play a 3 [might] Mech unit token to that same location instead.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-132",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-133",
+    "name": "Jarvan IV Royal Heir",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Demacia, Jarvan IV",
+    "might": 7,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "ASSAULT (+1 [might] while I'm an attacker.)\nTANK (I must be assigned combat damage first.)\nWhen I attack, you may move a unit you control to my battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-133",
+        "rarity": "Rare"
+      },
+      {
+        "variant_id": "RAD-133a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-134",
+    "name": "Raucous Anthem",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 7,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "Ready your units and give them +3 [Might] this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-134",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-135",
+    "name": "Remember the Fallen",
+    "domain": "Order",
+    "category": "Spell",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 8,
+    "cost_power": 2,
+    "cost_power_domain": "Order",
+    "effect": "Play up to 3 units and/or gear from your trash, each with Energy cost no more than [3] and Power cost no more than [rune], ignoring their costs.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-135",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-136",
+    "name": "Dockside Lock-Up",
+    "domain": "Order",
+    "category": "Gear",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": 6,
+    "cost_power": 2,
+    "cost_power_domain": "Order",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, banish a unit here.\nWhen you hold here, kill this to play the banished card, ignoring its cost. (Tokens aren't cards.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-136",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-137",
+    "name": "Mordekaiser Dominating",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Noxus, Spirit, Mordekaiser",
+    "might": 8,
+    "cost_energy": 9,
+    "cost_power": 2,
+    "cost_power_domain": "Order",
+    "effect": "When you play me or when I attack, you may discard 1 to kill a unit or gear.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-137",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-137a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-138",
+    "name": "Seraphine Not Alone",
+    "domain": "Order",
+    "category": "Champion",
+    "sub_type": "Piltover, Seraphine",
+    "might": 1,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Order",
+    "effect": "When you play me or when I become exhausted, play a 1 [might] Recruit unit token to your base.\nI have +1 [might] for each other exhausted unit you control.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-138",
+        "rarity": "Epic"
+      },
+      {
+        "variant_id": "RAD-138a",
+        "rarity": "Showcase"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-139",
+    "name": "Ekko Boy Who Shattered Time",
+    "domain": "Fury Mind",
+    "category": "Legend",
+    "sub_type": "Ekko",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "EMPOWER — [1], [tap] (Use only if not Empowered.)\nDisempower me, [tap]: Reduce the cost of the next unit you play this turn by [2] [rune] and give it \"Kill me at end of the turn.\"",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-139",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-140",
+    "name": "Chronobreak",
+    "domain": "Fury Mind",
+    "category": "Signature Spell",
+    "sub_type": "Ekko",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "As an additional cost to play this, play any amount of Power.\nBanish that many units you control, then for each, its owner plays that unit back to the same location or to their, ignoring its cost. (You choose the order.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-140",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-141",
+    "name": "Ziggs Hexplosives Expert",
+    "domain": "Fury Chaos",
+    "category": "Legend",
+    "sub_type": "Ziggs",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[1] [rune], [tap]: Play a Bomb gear token to a battlefield.\n(It has DEPLOY. When it dies, deal 2 to an enemy there and kill your other Bombs there.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-141",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-142",
+    "name": "Hexplosive Minefield",
+    "domain": "Fury Chaos",
+    "category": "Signature Spell",
+    "sub_type": "Ziggs",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Fury/Chaos",
+    "effect": "",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-142",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-143",
+    "name": "Mordekaiser Iron Revenant",
+    "domain": "Fury Order",
+    "category": "Legend",
+    "sub_type": "Mordekaiser",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION Banish a unit or gear from your trash, [tap]: ADD [rune]. Spend this Power only to play units or gear. (Abilities that add resources can't be reacted to.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-143",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-144",
+    "name": "Realm of Death",
+    "domain": "Fury Order",
+    "category": "Signature Spell",
+    "sub_type": "Mordekaiser",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Fury/Order",
+    "effect": "Give an enemy unit -2 [might] this turn and a friendly unit +2 [might] this turn. They deal damage equal to their Mights to each other.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-144",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-145",
+    "name": "Orianna Lady of Clockwork",
+    "domain": "Calm Mind",
+    "category": "Legend",
+    "sub_type": "Orianna",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "At the start of your Main Phase, you may pay [1] to choose a friendly gear.\nIt becomes a unit gear with Might equal to its Energy cost until you choose another gear with me.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-145",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-146",
+    "name": "The Ball",
+    "domain": "Calm Mind",
+    "category": "Signature Gear",
+    "sub_type": "Orianna",
+    "might": null,
+    "cost_energy": 5,
+    "cost_power": 1,
+    "cost_power_domain": "Calm/Mind",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nGANKING (While this is a unit, it can move from battlefield to battlefield.)\nWhen you play or move this, choose one —\n• Draw 1.\n• Deal 2 to enemy units here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-146",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-147",
+    "name": "K'Sante Pride of Nazumah",
+    "domain": "Calm Body",
+    "category": "Legend",
+    "sub_type": "K'Sante",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[1], [tap]: Give a friendly unit \"I have ASSAULT equal to my SHIELD\" this turn.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-147",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-148",
+    "name": "Ntofo Strikes",
+    "domain": "Calm Body",
+    "category": "Signature Spell",
+    "sub_type": "K'Sante",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Calm/Body",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive a friendly unit SHIELD 2 this turn, then deal damage equal to its SHIELD to an enemy unit. (A unit with Shield has a +1 [might] for each instance of Shield while it's a defender.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-148",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-149",
+    "name": "Riven The Exile",
+    "domain": "Calm Chaos",
+    "category": "Legend",
+    "sub_type": "Riven",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Units you play to battlefields you control enter ready.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-149",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-150",
+    "name": "Blade of the Exile",
+    "domain": "Calm Chaos",
+    "category": "Signature Gear",
+    "sub_type": "Equipment, Riven",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Calm/Chaos",
+    "effect": "EQUIP  — [rune] or exhaust a friendly unit (Pay the cost: Attach this to a unit you control.)",
+    "effect_equipped": "GANKING (I can move from battlefield to battlefield.)",
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-150",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-151",
+    "name": "Seraphine Starry-Eyed Songstress",
+    "domain": "Mind Order",
+    "category": "Legend",
+    "sub_type": "Seraphine",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "As an additional cost to play a spell, you may exhaust me and three friendly units to reduce the cost of that spell by [2].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-151",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-152",
+    "name": "Encore",
+    "domain": "Mind Order",
+    "category": "Signature Spell",
+    "sub_type": "Seraphine",
+    "might": null,
+    "cost_energy": 3,
+    "cost_power": 1,
+    "cost_power_domain": "Mind/Order",
+    "effect": "Choose two —\nDeal 2 to a unit.\nPlay two 1 [Might] Recruit unit tokens.\nGive up to two units each +1 [Might] this turn.\nLook at the top 2 cards of your Main Deck, draw 1 and recycle the other.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-152",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-153",
+    "name": "Evelynn Agony's Embrace",
+    "domain": "Body Chaos",
+    "category": "Legend",
+    "sub_type": "Evelynn",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Once each turn, when you play a card from face down, draw 1. Then, if it;s not your turn, discard 1.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-153",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-154",
+    "name": "Last Caress",
+    "domain": "Body Chaos",
+    "category": "Signature Spell",
+    "sub_type": "Evelynn",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nThe next unit you play this turn, even from face down, can be played to any battlefield. When you play it, BUFF it. (Give it a +1 [might] buff if it doesn't have one.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-154",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-155",
+    "name": "Jarvan IV Exemplar of Demacia",
+    "domain": "Body Order",
+    "category": "Legend",
+    "sub_type": "Jarvan IV",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you play a gear with DEPLOY, you may exhaust me and pay [Rune] to move a friendly unit to that battlefield.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-155",
+        "rarity": "Rare"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-156",
+    "name": "Demacian Standard",
+    "domain": "Body Order",
+    "category": "Signature Gear",
+    "sub_type": "Jarvan IV",
+    "might": null,
+    "cost_energy": 2,
+    "cost_power": 1,
+    "cost_power_domain": "Body/Order",
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen one or more friendly units attack here, give one of them +2 [might] this turn.\nWhen you hold here, you may return this to its owner's hand.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-156",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-157",
+    "name": "Bandle Scouts' Academy",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you hide a card here, play a Gold gear token exhausted, (It has \"REACTION[>] Kill this, [tap]: ADD [rune].\")",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-157",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-158",
+    "name": "Black Market",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "[rune] [rune]: Draw 1. Each player may use this ability once on their turn (even if they don't control this battlefield.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-158",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-159",
+    "name": "Black Rose Sanctum",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "For each player, the first time each turn a non-token unit they control dies here, they play a 1 [might] Recruit unit token to their base.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-159",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-160",
+    "name": "Cosmic Vista",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you hold here, if your Rune Deck is empty, you score 1 point.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-160",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-161",
+    "name": "Durand Memorial",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you defend here, choose a unit you control here. Give it TANK this combat. (It must be assigned combat damage first.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-161",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-162",
+    "name": "Firelights' Hideout",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you conquer here, the next unit you play this turn has ACCELERATE. (You may pay [1] and a Power of its Domain as an additional cost to have it enter ready.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-162",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-163",
+    "name": "Hunters' Circle",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "For each player, the first unit or gear they play here on their turn costs [1] less.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-163",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-164",
+    "name": "Packed Amphitheater",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "Champion units here have +1 [might].",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-164",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-165",
+    "name": "Rakelstake",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "For each player, the first time they play a unit or a gear here each turn, they PREDICT. (They look at the top card of their Main Deck. They may recycle it.)",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-165",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-166",
+    "name": "Ruined Monastery",
+    "domain": null,
+    "category": "Battlefield",
+    "sub_type": null,
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "When you conquer here, you may discard 1 and channel 1 rune exhausted.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-166",
+        "rarity": "Uncommon"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-167",
+    "name": "Neeko Blending In",
+    "domain": null,
+    "category": "Champion",
+    "sub_type": "Ixtal, Neeko",
+    "might": 4,
+    "cost_energy": 6,
+    "cost_power": 1,
+    "cost_power_domain": null,
+    "effect": "(Neutral cards can go in decks of any Domain.)\nIf Neeko is in your deck, choose up to 3 different legends in addition to your starting legend. (Different means none match names.)\nWhen you play me, choose one of those Legends and add it to your Legend Zone while I'm on the board.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-167",
+        "rarity": "Epic"
+      }
+    ]
+  },
+  {
+    "card_id": "RAD-T02",
+    "name": "Bomb",
+    "domain": null,
+    "category": "Token",
+    "sub_type": "Bomb",
+    "might": null,
+    "cost_energy": null,
+    "cost_power": 0,
+    "cost_power_domain": null,
+    "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nDEATHKNELL Deal 2 to an enemy unit here and kill all other Bombs you control here.",
+    "effect_equipped": null,
+    "set": "Radiance",
+    "keywords": [],
+    "effects": [],
+    "variants": [
+      {
+        "variant_id": "RAD-T02",
+        "rarity": "Common"
+      }
+    ]
   }
 ]
