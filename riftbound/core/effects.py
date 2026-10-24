@@ -83,6 +83,30 @@ def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
     ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
 
 
+@effect("gain_power_any_domain")
+def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ADD [rune] (§ "add"): gain `amount` Power of a domain of the player's
+    choice into the pool. Baseline policy: the domain the hand most lacks (power
+    cost still unpayable from the pool), else the most plentiful rune domain."""
+    from collections import Counter
+    from .enums import Domain
+    amount = int(spec.get("amount", 1))
+    if amount <= 0:
+        return
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    need: Counter = Counter()
+    for c in player.hand:
+        d, n = getattr(c, "cost_power_domain", None), int(getattr(c, "cost_power", 0) or 0)
+        if d is not None and n > player.power_pool.get(d, 0):
+            need[d] += n - player.power_pool.get(d, 0)
+    if need:
+        domain = need.most_common(1)[0][0]
+    else:
+        runes = {d: len(rs) for d, rs in player.rune_pool.items() if rs}
+        domain = max(runes, key=runes.get) if runes else next(iter(Domain))
+    player.power_pool[domain] = player.power_pool.get(domain, 0) + amount
+
+
 @effect("add_earmarked_energy")
 def _add_earmarked_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.add_earmarked_energy(int(spec.get("amount", 1)),
@@ -458,6 +482,10 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for u in _friendly_units(ctx) if tag in (u.card.tags or []))
     if src == "n_distinct_tags_among_friendlies":
         return len({t for u in _friendly_units(ctx) for t in (u.card.tags or [])})
+    if src == "cards_played_this_turn":
+        return int(ctx.loop.gs.cards_played_this_turn.get(ctx.actor_side, 0))
+    if src == "friendly_exhausted_units":
+        return sum(1 for u in _friendly_units(ctx) if not u.ready)
     if src in ("shown_might", "shown_power_cost", "shown_energy_cost"):
         shown = getattr(ctx.card, "_shown", None) or {}
         return int(shown.get(src[len("shown_"):], 0))

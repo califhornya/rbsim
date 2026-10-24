@@ -42,7 +42,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "score_within_n_of_victory", "you_discarded_card_this_turn",
     "cards_burned_this_turn_at_least",
     "friendly_total_might_at_least", "you_control_n_or_more_gear",
-    "showed_off",
+    "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
+    "card_with_my_name_in_trash", "opponent_controls_stunned_unit",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1112,8 +1113,21 @@ class GameLoop:
             # Gear the actor controls: attached to their units + loose in base,
             # e.g. Patched Porobot "if you control 3 or more other gear, draw 1".
             # The source is a unit, not gear, so nothing to exclude.
-            count = sum(len(u.gear) for u in _friendly_units()) + len(actor.base_gear)
+            count = (sum(len(u.gear) for u in _friendly_units()) + len(actor.base_gear)
+                     + sum(len(bf.gear_for(side)) for bf in self.gs.battlefields))
             return count >= _threshold()
+        if ctype == "opponent_controls_a_battlefield":
+            other = self.gs.other(side)
+            return any(bf.controller() == other for bf in self.gs.battlefields)
+        if ctype == "you_control_no_other_units":
+            return not [u for u in _friendly_units()
+                        if u.card is not card and u is not self._legend_unit(side)]
+        if ctype == "card_with_my_name_in_trash":
+            return any(c.name == card.name and c is not card for c in actor.trash)
+        if ctype == "opponent_controls_stunned_unit":
+            other = self.gs.other(side)
+            return any(u.stunned for bf in self.gs.battlefields
+                       for u in (bf.units_A if other == "A" else bf.units_B))
         # Conditions needing context the engine doesn't track yet → safe False
         # (effects gated on them simply don't fire): excess_damage_at_least,
         # controller_has_facedown_card, target_was_stunned.
@@ -1123,7 +1137,9 @@ class GameLoop:
         """Static / conditional flat energy cost reduction (Round 4 Tier 2).
         Sums every `reduce_cost` effect (trigger `cost_modifier`) on the card whose
         optional condition currently holds. Dynamic (amount_source) reductions are
-        out of scope. Returns a non-negative energy amount to subtract."""
+        A reduction with an `amount_source` scales: "I cost [1] less for each card
+        you've played this turn" → amount_source cards_played_this_turn (times
+        `amount`, default 1). Returns a non-negative energy amount to subtract."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return 0
@@ -1135,7 +1151,12 @@ class GameLoop:
                 continue
             if not self._check_condition(es.condition, card, actor, opponent, None):
                 continue
-            total += int(es.params.get("amount", 0))
+            if es.params.get("amount_source"):
+                ctx = EffectContext(self, card, actor, opponent, self.gs.battlefields[0])
+                per = int(es.params.get("amount", 1) or 1)
+                total += per * _effect_amount(ctx, {"amount_source": es.params["amount_source"]})
+            else:
+                total += int(es.params.get("amount", 0))
         return max(0, total)
 
     _EQUIP_DOMAINS = ("fury", "calm", "mind", "body", "chaos", "order")

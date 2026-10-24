@@ -61,6 +61,10 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "friendly_total_might_at_least",
     "you_control_n_or_more_gear",
     "showed_off",                    # SHOW OFF (§832) happened as this card was played
+    "opponent_controls_a_battlefield",   # "If an opponent controls a battlefield, I enter ready"
+    "you_control_no_other_units",        # "I enter ready if you control no other units"
+    "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
+    "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -93,6 +97,8 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "n_friendly_with_tag", "n_distinct_tags_among_friendlies",
     # SHOW OFF (§832): the shown object's info, snapshotted as the card was played.
     "shown_might", "shown_power_cost", "shown_energy_cost",
+    # Per-count cost reductions ("I cost [1] less for each ...").
+    "cards_played_this_turn", "friendly_exhausted_units",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
