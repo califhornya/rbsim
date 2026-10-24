@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Optional
 import json
 import re
+import warnings
 
 from riftbound.core.cards import (
     Card,
@@ -465,6 +466,19 @@ def load_master_data(path: Optional[Path] = None) -> dict[str, CardSpec]:
 # Load all card data from /data/cards/ (origins.json, unleashed.json, spiritforged.json, and overlays/)
 CARD_REGISTRY: dict[str, CardSpec] = load_cards_json()
 
+_BANNED_PATH = Path(__file__).resolve().parent.parent / "data" / "banned_cards.json"
+
+
+def load_banned_cards() -> frozenset[str]:
+    """Names of cards banned in competitive play (riftbound/data/banned_cards.json)."""
+    if not _BANNED_PATH.exists():
+        return frozenset()
+    with _BANNED_PATH.open("r", encoding="utf-8") as fh:
+        return frozenset(json.load(fh).get("cards", []))
+
+
+BANNED_CARDS: frozenset[str] = load_banned_cards()
+
 
 def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:
     """Load a deck JSON file.
@@ -482,6 +496,7 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         "cards": [{"name": "...", "count": N}, ...]   # exactly 39 cards
       }
     Rules enforced: ≥39 main deck cards, ≤3 copies per named card, champion not in cards list.
+    Banned cards (BANNED_CARDS) only raise a warning, so older decks still load.
     """
     with path.open("r", encoding="utf-8") as fh:
         data = json.load(fh)
@@ -527,6 +542,8 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         spec = CARD_REGISTRY.get(name)
         if spec is None:
             raise ValueError(f"Deck references unknown card '{name}'")
+        if name in BANNED_CARDS:
+            warnings.warn(f"Deck '{path.name}' contains banned card '{name}'", stacklevel=2)
         copy_counts[name] = copy_counts.get(name, 0) + count
         if copy_counts[name] > 3:
             raise ValueError(
