@@ -199,3 +199,17 @@ def test_failed_condition_does_not_spend_cost(monkeypatch):
     bf.card = BattlefieldCard(name="Test Sands")
     loop._fire_scoring_trigger("on_conquer", bf, "A")
     assert a.energy == 1 and not a.hand
+
+
+def test_annie_legend_readies_up_to_two_runes_at_end_of_turn():
+    loop = _loop()
+    a = loop.gs.A
+    loop.gs.legend_unit_A = UnitInPlay(UnitCard(name="Annie Dark Child"))
+    for _ in range(4):
+        a.add_rune(Domain.FURY)
+    for r in a.rune_pool[Domain.FURY]:
+        r.ready = False
+    loop._fire_turn_trigger("on_start_of_turn", "A")   # Annie's is an END-of-turn ability
+    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 0
+    loop._fire_turn_trigger("on_end_of_turn", "A")
+    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 2   # up to 2, not all

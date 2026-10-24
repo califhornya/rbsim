@@ -897,10 +897,19 @@ def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("ready_runes")
 def _ready_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Ready exhausted runes: "ready up to N runes" honors `amount`; without one
+    ("ready your runes") every rune is readied."""
     player = ctx._player_for_target(str(spec.get("target", "actor")))
+    left = spec.get("amount")
+    left = None if left is None else int(left)
     for runes in player.rune_pool.values():
         for rune in runes:
-            rune.refresh()
+            if left is not None and left <= 0:
+                return
+            if not rune.ready:
+                rune.refresh()
+                if left is not None:
+                    left -= 1
 
 
 @effect("gain_xp")
