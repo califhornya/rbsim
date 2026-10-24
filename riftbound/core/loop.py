@@ -50,6 +50,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
     "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
     "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
+    "fewer_runes_than_opponent",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1220,6 +1221,8 @@ class GameLoop:
         if ctype == "this_is_at_battlefield":
             return any(u.card is card for bf in self.gs.battlefields
                        for u in (bf.units_A if side == "A" else bf.units_B))
+        if ctype == "fewer_runes_than_opponent":
+            return actor.total_runes_in_play() < opponent.total_runes_in_play()
         if ctype == "triggering_unit_has_subtype":
             trig = extra.get("triggering_card")
             tag = str(params.get("subtype") or params.get("tag") or "")

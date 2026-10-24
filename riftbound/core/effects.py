@@ -497,6 +497,8 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for u in _friendly_units(ctx) if tag in (u.card.tags or []))
     if src == "n_distinct_tags_among_friendlies":
         return len({t for u in _friendly_units(ctx) for t in (u.card.tags or [])})
+    if src == "cards_with_my_name_in_trash":
+        return sum(1 for c in ctx.actor.trash if c.name == ctx.card.name and c is not ctx.card)
     if src == "battlefields_conquered_this_turn":
         return int(ctx.loop.gs.conquered_this_turn.get(ctx.actor_side, 0))
     if src == "hold_points_this_turn":

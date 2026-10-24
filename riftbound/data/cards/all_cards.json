@@ -9783,7 +9783,7 @@
     ],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self"
       }
@@ -9922,7 +9922,10 @@
         "effect": "grant_might",
         "trigger": "passive",
         "target": "all_friendly_units_here",
-        "amount": 1
+        "amount": 1,
+        "target_filter": {
+          "exclude_self": true
+        }
       }
     ]
   },
@@ -10017,7 +10020,7 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self"
       }
@@ -24547,7 +24550,10 @@
         "effect": "grant_temporary_might",
         "trigger": "on_start_of_turn",
         "target": "self",
-        "amount": 1
+        "amount": 1,
+        "condition": {
+          "type": "fewer_runes_than_opponent"
+        }
       }
     ],
     "variants": [
@@ -24576,14 +24582,20 @@
         "effect": "grant_temporary_might",
         "trigger": "on_start_of_turn",
         "target": "self",
-        "amount": 2
+        "amount": 2,
+        "condition": {
+          "type": "fewer_runes_than_opponent"
+        }
       },
       {
         "effect": "give_keyword",
         "trigger": "on_start_of_turn",
         "target": "self",
         "keyword": "GANKING",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "condition": {
+          "type": "fewer_runes_than_opponent"
+        }
       }
     ],
     "variants": [
@@ -24663,7 +24675,7 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "timing": "action",
-        "amount": 5,
+        "amount": 2,
         "target": "chosen_unit",
         "condition": {
           "type": "kicker_paid"
@@ -24946,7 +24958,10 @@
         "trigger": "on_move",
         "count": 1,
         "condition": {
-          "type": "you_have_n_or_more_runes"
+          "type": "you_have_n_or_fewer_runes",
+          "params": {
+            "n": 4
+          }
         }
       }
     ],
@@ -25044,7 +25059,10 @@
         "target": "all_enemy_units_here",
         "scope": "all",
         "condition": {
-          "type": "you_have_n_or_more_runes"
+          "type": "you_have_n_or_fewer_runes",
+          "params": {
+            "n": 4
+          }
         }
       }
     ],
@@ -25137,22 +25155,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_play",
-        "target": "self",
-        "from": "hand",
-        "scope": "all"
-      },
-      {
-        "effect": "banish_card",
-        "trigger": "on_play",
-        "target": "self",
-        "from": "trash",
-        "scope": "all"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-022",
@@ -25502,7 +25505,10 @@
       {
         "effect": "reveal_and_choose",
         "trigger": "on_move",
-        "target": "self"
+        "count": 1,
+        "target_filter": {
+          "is_unit": true
+        }
       }
     ],
     "variants": [
@@ -25870,16 +25876,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2,
-        "condition": {
-          "type": "you_already_played_another_card_this_turn"
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-044",
@@ -26223,25 +26220,7 @@
     "keywords": [
       "EMPOWER"
     ],
-    "effects": [
-      {
-        "effect": "empower_self",
-        "trigger": "activated",
-        "cost": {
-          "tap": true
-        }
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "action",
-        "count": 1,
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-054",
@@ -26263,16 +26242,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-055",
@@ -26328,9 +26298,19 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
         "effect": "draw_cards",
         "trigger": "on_move",
-        "count": 1
+        "count": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -26420,19 +26400,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "activated",
-        "timing": "action",
-        "amount": 4,
-        "target": "chosen_unit",
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-060",
@@ -26526,14 +26494,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "channel_rune",
-        "trigger": "on_death",
-        "amount": 1,
-        "exhausted": true
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-063",
@@ -26592,16 +26553,7 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": [
-      {
-        "effect": "score_point",
-        "trigger": "on_conquer",
-        "amount": 1,
-        "condition": {
-          "type": "you_already_played_another_card_this_turn"
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-065",
@@ -26625,13 +26577,7 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_cast",
-        "target": "chosen_unit"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-066",
@@ -27122,9 +27068,9 @@
       {
         "effect": "kill_gear",
         "trigger": "on_conquer",
-        "target": "chosen_unit",
+        "target": "enemy_gear",
         "target_filter": {
-          "is_gear": true
+          "energy_at_most": 1
         }
       }
     ],
@@ -27359,18 +27305,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "activated",
-        "timing": "action",
-        "cost": {
-          "energy": 1,
-          "tap": true
-        },
-        "token_name": "Mech"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-087",
@@ -27588,20 +27523,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_death",
-        "amount": 2,
-        "target": "friendly_unit",
-        "additional_cost": {
-          "energy": 1
-        },
-        "condition": {
-          "type": "kicker_paid"
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-094",
@@ -27625,10 +27547,18 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "grant_temporary_might",
+        "effect": "burn",
         "trigger": "on_move",
         "amount": 1,
-        "target": "self"
+        "optional": true
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn",
+        "optional": true
       }
     ],
     "variants": [
@@ -27656,8 +27586,8 @@
       {
         "effect": "reduce_cost",
         "trigger": "cost_modifier",
-        "amount_source": "trash_count",
-        "amount": 2
+        "amount": 2,
+        "amount_source": "cards_with_my_name_in_trash"
       }
     ],
     "variants": [
@@ -27716,16 +27646,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-098",
@@ -27749,13 +27670,7 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "empower_self",
-        "trigger": "on_play",
-        "target": "chosen_unit"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-099",
@@ -28634,28 +28549,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "self",
-        "cost": {
-          "power": 1
-        }
-      },
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "self",
-        "amount": 1,
-        "duration": "this_turn",
-        "cost": {
-          "power": 1
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-125",
@@ -28679,16 +28573,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "give_temporary_shield",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "chosen_unit",
-        "amount": 7,
-        "duration": "this_turn"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-126",
@@ -29012,11 +28897,31 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 2
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "ASSAULT 2",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
         "effect": "kill_unit",
         "trigger": "on_attack",
         "target": "enemy_unit",
         "target_filter": {
           "might_less_than_self": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
         }
       }
     ],
@@ -29247,26 +29152,7 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [
-      {
-        "effect": "discard_card",
-        "trigger": "activated",
-        "timing": "action",
-        "count": 1,
-        "cost": {
-          "tap": true
-        }
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "action",
-        "count": 1,
-        "cost": {
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-143",
@@ -29357,7 +29243,7 @@
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
-        "amount": 7,
+        "amount": 3,
         "target": "chosen_unit",
         "condition": {
           "type": "you_have_n_or_more_runes",
@@ -29365,12 +29251,6 @@
             "count": 7
           }
         }
-      },
-      {
-        "effect": "channel_rune",
-        "trigger": "on_cast",
-        "amount": 1,
-        "exhausted": true
       }
     ],
     "variants": [
@@ -29523,19 +29403,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "debuff_might",
-        "trigger": "activated",
-        "timing": null,
-        "target": "chosen_unit",
-        "amount": 2,
-        "duration": "this_turn",
-        "cost": {
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-151",
@@ -29581,18 +29449,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "activated",
-        "timing": null,
-        "target": "chosen_unit",
-        "cost": {
-          "power": 1,
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-153",
@@ -29647,19 +29504,7 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [
-      {
-        "effect": "give_keyword",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "chosen_unit",
-        "keyword": "ASSAULT 2",
-        "duration": "this_turn",
-        "cost": {
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-155",
@@ -30009,24 +29854,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_attack",
-        "target": "self",
-        "from": "trash",
-        "target_filter": {
-          "is_unit": true
-        }
-      },
-      {
-        "effect": "give_temporary_assault",
-        "trigger": "on_attack",
-        "target": "self",
-        "amount": 4,
-        "duration": "this_turn"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-T05",

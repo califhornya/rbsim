@@ -307,3 +307,19 @@ def test_subtype_conditions_read_the_subtype_key():
     assert check("triggering_unit_has_subtype", {"triggering_card": dragon}, subtype="Dragon")
     assert not check("triggering_unit_has_subtype", {"triggering_card": UnitCard(name="X")},
                      subtype="Dragon")
+
+
+def test_fewer_runes_and_same_name_trash_count():
+    loop = _loop()
+    a, b = loop.gs.A, loop.gs.B
+    check = lambda: loop._check_condition({"type": "fewer_runes_than_opponent"},  # noqa: E731
+                                          UnitCard(name="Baccai"), a, b, None)
+    assert not check()
+    b.add_rune(Domain.FURY)
+    assert check()
+    me = UnitCard(name="Shadowblade Lurker")
+    a.trash.extend([UnitCard(name="Shadowblade Lurker"), UnitCard(name="Shadowblade Lurker"),
+                    UnitCard(name="Other")])
+    from riftbound.core.effects import _amount
+    ctx = EffectContext(loop, me, a, b, loop.gs.battlefields[0])
+    assert _amount(ctx, {"amount_source": "cards_with_my_name_in_trash"}) == 2

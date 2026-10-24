@@ -81,6 +81,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "this_is_at_battlefield",            # the source unit is at a battlefield (not in base)
     "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
     "triggering_unit_has_subtype",       # subtype: the unit that caused the trigger has this tag ("another Dragon")
+    "fewer_runes_than_opponent",         # "if you control fewer runes than an opponent"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -116,6 +117,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     # Per-count cost reductions ("I cost [1] less for each ...").
     "cards_played_this_turn", "friendly_exhausted_units",
     "battlefields_conquered_this_turn", "hold_points_this_turn",
+    "cards_with_my_name_in_trash",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
