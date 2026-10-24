@@ -44,6 +44,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "friendly_total_might_at_least", "you_control_n_or_more_gear",
     "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
     "card_with_my_name_in_trash", "opponent_controls_stunned_unit",
+    "you_control_this_battlefield",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1124,6 +1125,9 @@ class GameLoop:
                         if u.card is not card and u is not self._legend_unit(side)]
         if ctype == "card_with_my_name_in_trash":
             return any(c.name == card.name and c is not card for c in actor.trash)
+        if ctype == "you_control_this_battlefield":
+            bf = extra.get("battlefield")
+            return bf is not None and bf.controller() == side
         if ctype == "opponent_controls_stunned_unit":
             other = self.gs.other(side)
             return any(u.stunned for bf in self.gs.battlefields

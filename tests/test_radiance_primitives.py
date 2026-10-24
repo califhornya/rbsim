@@ -99,3 +99,15 @@ def test_cards_played_cost_reduction(monkeypatch):
     loop = _loop()
     loop.gs.cards_played_this_turn["A"] = 3
     assert loop._cost_reduction(UnitCard(name=spec.name, cost_energy=6), loop.gs.A) == 3
+
+
+def test_you_control_this_battlefield():
+    loop = _loop()
+    a = loop.gs.A
+    bf = loop.gs.battlefields[1]
+    check = lambda: loop._check_condition(  # noqa: E731
+        {"type": "you_control_this_battlefield"}, UnitCard(name="Extractor"), a, loop.gs.B,
+        {"battlefield": bf})
+    assert not check()
+    bf.add_unit("A", UnitInPlay(UnitCard(name="Holder")))
+    assert check()

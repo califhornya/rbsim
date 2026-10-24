@@ -511,7 +511,9 @@ STEP 4 — Vendetta mechanics:
 24. "I enter ready if <condition>" → {{"effect":"ready_unit","trigger":"on_play",
     "target":"self","condition":{{...}}}}. Conditions available for this pattern
     include opponent_controls_a_battlefield, you_control_no_other_units,
-    card_with_my_name_in_trash, opponent_controls_stunned_unit (and any other
+    card_with_my_name_in_trash, opponent_controls_stunned_unit,
+    you_control_this_battlefield ("if you control this battlefield", for DEPLOY
+    gear and battlefields) (and any other
     condition type listed above). "I enter ready." with no condition → the same
     effect without a condition.
 

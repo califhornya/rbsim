@@ -65,6 +65,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_no_other_units",        # "I enter ready if you control no other units"
     "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
     "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
+    "you_control_this_battlefield",      # "... if you control this battlefield" (DEPLOY gear, battlefields)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
