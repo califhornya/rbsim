@@ -30,7 +30,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_death", "leaves_board", "on_move", "on_start_of_turn", "on_end_of_turn",
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
-    "on_exhaust",
+    "on_exhaust", "on_friendly_exhaust", "on_hide_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -46,6 +46,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
     "card_with_my_name_in_trash", "opponent_controls_stunned_unit",
     "you_control_this_battlefield",
+    "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty", "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units", "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -406,6 +407,11 @@ class GameLoop:
         for unit in list(actor.base_units):
             self._resolve_triggered_effects(unit.card, trigger, anchor, actor, opponent,
                                             context_extra={"battlefield": anchor})
+        # The player's Legend (e.g. Jinx Loose Cannon: draw at the start of turn).
+        legend_unit = self._legend_unit(side)
+        if legend_unit is not None:
+            self._resolve_triggered_effects(legend_unit.card, trigger, anchor, actor, opponent,
+                                            context_extra={"battlefield": anchor})
         # Deployed gear's turn triggers ("at the end of your turn, if you control
         # this battlefield ..."), with their battlefield as "here".
         for bf in self.gs.battlefields:
@@ -423,6 +429,10 @@ class GameLoop:
         (plus their deployed champion). Also grants HUNT XP."""
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
+        if trigger == "on_conquer":
+            self.gs.conquered_this_turn[side] = self.gs.conquered_this_turn.get(side, 0) + 1
+        elif trigger == "on_hold":
+            self.gs.hold_points_this_turn[side] = self.gs.hold_points_this_turn.get(side, 0) + 1
         units = list(bf.units_A if side == "A" else bf.units_B)
         for unit in units:
             # HUNT keyword grants XP on Conquer or Hold.
@@ -461,6 +471,7 @@ class GameLoop:
             self._resolve_triggered_effects(unit.card, "on_exhaust", bf, actor,
                                             self.gs.get_player(self.gs.other(side)),
                                             context_extra={"battlefield": bf})
+            self._fire_units_trigger("on_friendly_exhaust", side, exclude_card=unit.card)
             return
 
     def _exhaust_gear(self, gear, actor: Player) -> None:
@@ -749,13 +760,20 @@ class GameLoop:
             # any cost. Default (no agent / heuristic agents) is yes.
             if not self._wants_optional(actor, card, es):
                 continue
+            # A condition that doesn't depend on the payment is checked first, so
+            # a failed "if ..." never wastes the cost ("if you control 4 or fewer
+            # runes, you may pay [1] to draw 1").
+            kicker_gate = (es.condition or {}).get("type") == "kicker_paid"
+            if not kicker_gate and not self._check_condition(
+                    es.condition, card, actor, opponent, context_extra):
+                continue
             # Pay any cost / additional_cost the triggered ability carries BEFORE
-            # the condition check (so a kicker_paid gate sees the payment). If a
-            # cost exists but is unaffordable, the ability simply doesn't fire
-            # (KNOWN_ISSUES #12).
+            # a kicker_paid check (so the gate sees the payment). If a cost exists
+            # but is unaffordable, the ability simply doesn't fire (KNOWN_ISSUES #12).
             if not self._pay_triggered_cost(card, actor, es):
                 continue
-            if not self._check_condition(es.condition, card, actor, opponent, context_extra):
+            if kicker_gate and not self._check_condition(
+                    es.condition, card, actor, opponent, context_extra):
                 continue
             handler = EFFECT_REGISTRY.get(es.effect)
             if not handler:
@@ -861,6 +879,7 @@ class GameLoop:
         for u in self._all_units_in_play():
             u.passive_might = 0
             u.passive_keywords = set()
+            u.no_combat_damage = False
 
         for bf in self.gs.battlefields:
             for side in ("A", "B"):
@@ -959,6 +978,11 @@ class GameLoop:
         tf = es.target_filter
         if tf:
             targets = [u for u in targets if _effect_passes_filter(u, tf, context)]
+
+        if es.effect == "no_combat_damage":
+            for u in targets:
+                u.no_combat_damage = True
+            return
 
         if es.effect == "give_keyword":
             keyword = str(params.get("keyword", "")).strip()
@@ -1155,6 +1179,31 @@ class GameLoop:
                         if u.card is not card and u is not self._legend_unit(side)]
         if ctype == "card_with_my_name_in_trash":
             return any(c.name == card.name and c is not card for c in actor.trash)
+        if ctype == "cards_in_hand_at_most":
+            return len(actor.hand) <= _threshold()
+        if ctype == "first_turn_of_player":
+            return self.gs.turn <= 2
+        if ctype == "rune_deck_empty":
+            return not actor.rune_deck.runes
+        if ctype in ("enemy_alone_here", "one_on_one_here"):
+            bf = extra.get("battlefield")
+            if bf is None:
+                return False
+            other = self.gs.other(side)
+            enemies = bf.units_A if other == "A" else bf.units_B
+            if ctype == "enemy_alone_here":
+                return len(enemies) == 1
+            friends = bf.units_A if side == "A" else bf.units_B
+            return len(enemies) == 1 and len(friends) == 1
+        if ctype == "you_control_bf_with_exactly_n_units":
+            n = _threshold(2)
+            return any(bf.controller() == side and len(bf.units_A) + len(bf.units_B) == n
+                       for bf in self.gs.battlefields)
+        if ctype == "you_have_n_or_fewer_runes":
+            return actor.total_runes_in_play() <= _threshold()
+        if ctype == "friendly_deployed_gear_here":
+            bf = extra.get("battlefield")
+            return bf is not None and bool(bf.gear_for(side))
         if ctype == "you_control_this_battlefield":
             bf = extra.get("battlefield")
             return bf is not None and bf.controller() == side
@@ -1554,10 +1603,14 @@ class GameLoop:
             return False
         self._pay_generic_power(ap, 1)
         ap.remove_from_hand(idx)
-        self.gs.battlefields[lane].facedown = FacedownCard(
-            card=card, owner=side, turn_hidden=self.gs.turn)
+        bf = self.gs.battlefields[lane]
+        bf.facedown = FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn)
         if self.verbose:
             print(f"  {side} HIDEs {card.name} facedown @BF{lane}")
+        if bf.card is not None:
+            self._resolve_triggered_effects(bf.card, "on_hide_here", bf, ap,
+                                            self.gs.get_player(self.gs.other(side)),
+                                            context_extra={"battlefield": bf})
         return True
 
     def _cleanup_hidden_cards(self) -> None:
@@ -1610,8 +1663,9 @@ class GameLoop:
     # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 
-    def _first_friendly_unit_on_board(self, ap: Player):
-        """First friendly UnitInPlay on any battlefield, else a base unit, else None."""
+    def _first_friendly_unit_for_cost(self, ap: Player):
+        """First friendly UnitInPlay on any battlefield, else a base unit, else None
+        (the unit an additional cost kills / exhausts / returns)."""
         side = "A" if ap is self.gs.A else "B"
         for bf in self.gs.battlefields:
             units = bf.units_A if side == "A" else bf.units_B
@@ -1647,6 +1701,7 @@ class GameLoop:
         discard_n = int(ac.get("discard_cards", 0) or 0)
         kill = bool(ac.get("kill_friendly_unit"))
         exhaust = bool(ac.get("exhaust_friendly_unit"))
+        bounce = bool(ac.get("return_friendly_unit"))
 
         # --- affordability check (no mutation yet) ---
         if (energy or power) and not ap.can_pay_cost(energy, power or None, None):
@@ -1654,8 +1709,8 @@ class GameLoop:
         # +1: never discard the very card being played.
         if discard_n and len(ap.hand) < discard_n + 1:
             return False
-        target_unit = self._first_friendly_unit_on_board(ap) if (kill or exhaust) else None
-        if (kill or exhaust) and target_unit is None:
+        target_unit = self._first_friendly_unit_for_cost(ap) if (kill or exhaust or bounce) else None
+        if (kill or exhaust or bounce) and target_unit is None:
             return False
 
         # --- payment ---
@@ -1669,10 +1724,10 @@ class GameLoop:
         if target_unit is not None:
             if exhaust:
                 self._exhaust(target_unit)
-            if kill:
+            if kill or bounce:
                 side = "A" if ap is self.gs.A else "B"
                 self._remove_unit_from_play(target_unit, side)
-                ap.trash.append(target_unit.card)
+                (ap.hand if bounce else ap.trash).append(target_unit.card)
         return True
 
     def _find_unit_by_card(self, card: Card):
@@ -2815,6 +2870,8 @@ class GameLoop:
         gs.discarded_this_turn["B"] = False
         gs.cards_burned_this_turn["A"] = 0
         gs.cards_burned_this_turn["B"] = 0
+        gs.conquered_this_turn["A"] = gs.conquered_this_turn["B"] = 0
+        gs.hold_points_this_turn["A"] = gs.hold_points_this_turn["B"] = 0
 
         gained = self._phase_beginning(gs.active)
         if gained:

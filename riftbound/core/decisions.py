@@ -130,6 +130,9 @@ class BattlefieldView:
     B: tuple[UnitView, ...]
     controller: Optional[str]
     named: Optional[str]
+    # Gear deployed here (DEPLOY §830), by name, per controlling side. Public.
+    gear_A: tuple[str, ...] = ()
+    gear_B: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         return {
@@ -137,6 +140,8 @@ class BattlefieldView:
             "B": [u.to_dict() for u in self.B],
             "controller": self.controller,
             "named": self.named,
+            "gear_A": list(self.gear_A),
+            "gear_B": list(self.gear_B),
         }
 
 
@@ -192,6 +197,8 @@ class Observation:
                 B=tuple(cls._uview(u) for u in bf.units_B),
                 controller=bf.controller(),
                 named=getattr(bf.card, "name", None) if bf.card else None,
+                gear_A=tuple(dg.card.name for dg in bf.gear_A),
+                gear_B=tuple(dg.card.name for dg in bf.gear_B),
             )
 
         my_pts, opp_pts = (gs.points_A, gs.points_B) if viewer == "A" else (gs.points_B, gs.points_A)

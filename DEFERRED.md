@@ -73,18 +73,21 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     you win a combat here" (RAD-024), "when one or more friendly units attack here"
     (RAD-156), Deploy gear that become units (RAD-146 The Ball), "your gear with
     DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
-    of turn, play that many Bombs". The RL observation encoding doesn't include
-    deployed gear yet (changing it changes the net's input shape).
-  - **Parse of the long tail (2026-10-24, 3 runs, Opus 4.8):** hand review emptied
-    every spec that made a card STRONGER than printed (dropped condition/cost,
-    wrong trigger, cost-less activated abilities). These cards are empty on purpose
-    and a plain `--only-empty` re-parse tends to break them the same way — only
-    re-parse after the engine gains what they need: OGN-025, OGN-113, OGN-200,
-    OGN-251, OGN-256, OGN-290, SFD-055, SFD-083, SFD-110, SFD-117, SFD-141,
-    UNL-018, UNL-045, UNL-054, UNL-136, UNL-143, VEN-088, VEN-119, VEN-162,
-    RAD-016, RAD-043*, RAD-051, RAD-053*, RAD-071, RAD-105*, RAD-107, RAD-114,
-    RAD-149, RAD-157 (* = since fixed via on_exhaust). Cards from the first
-    Radiance run were only spot-checked.
+    of turn, play that many Bombs". (The RL observation now includes deployed
+    gear — 2026-10-25.)
+  - **Parse of the long tail (2026-10-24/25, 3 runs, Opus 4.8) + full Radiance
+    hand review:** every spec that made a card STRONGER than printed was emptied
+    (dropped condition/cost, wrong trigger, cost-less activated abilities). These
+    cards are empty on purpose and a plain `--only-empty` re-parse tends to break
+    them the same way — hand-author them once the engine has what they need:
+    OGN-025, OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
+    UNL-045, UNL-054, UNL-136, VEN-088, RAD-012, RAD-015, RAD-016, RAD-020,
+    RAD-026, RAD-030, RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
+    RAD-071, RAD-079, RAD-089, RAD-090, RAD-095, RAD-098, RAD-107, RAD-130,
+    RAD-142, RAD-149, RAD-155.
+    Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
+    SFD-110, UNL-143, VEN-119, VEN-162, RAD-041, RAD-051, RAD-080, RAD-085,
+    RAD-091, RAD-114, RAD-157, RAD-160.
   - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
     keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
   - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In

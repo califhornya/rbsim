@@ -1,0 +1,8 @@
+{
+  "note": "Cards banned in competitive play. Decks containing them still load (with a warning) so existing training decks keep working until they are rebuilt.",
+  "updated": "2026-10-25",
+  "cards": [
+    "Ekko Recurrent",
+    "Stacked Deck"
+  ]
+}

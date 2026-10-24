@@ -3,58 +3,59 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        },
-        {
           "A": [
             "Diana Lunari"
           ],
           "B": [],
           "controller": "A",
           "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 19,
-        "energy": 1,
-        "hand": 2,
+        "base_units": [
+          "Tideturner"
+        ],
+        "deck": 24,
+        "energy": 6,
+        "hand": 0,
         "power_pool": {
           "CHAOS": 6,
           "MIND": 5
         },
         "runes_in_play": 11,
-        "trash": 18
+        "trash": 14
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
           "Gold",
-          "Recruit",
-          "Bewitching Spirit"
+          "Recruit"
         ],
-        "deck": 25,
-        "energy": 4,
-        "hand": 1,
+        "deck": 26,
+        "energy": 9,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
+          "CHAOS": 5,
+          "FURY": 4
         },
-        "runes_in_play": 11,
-        "trash": 13
+        "runes_in_play": 9,
+        "trash": 12
       },
       "points_A": 8,
-      "points_B": 7,
-      "spells_cast": 18,
-      "turns": 16,
-      "units_played": 19,
+      "points_B": 5,
+      "spells_cast": 14,
+      "turns": 14,
+      "units_played": 18,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -62,8 +63,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#0",
       "seed": 123700868
     }
@@ -129,8 +130,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#1",
       "seed": 672578907
     }
@@ -139,78 +140,72 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Hwei Brooding Painter"
+          "A": [],
+          "B": [
+            "Treasure Hunter"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
-          "A": [
-            "Ravenbloom Student"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": null
         },
         {
           "A": [],
           "B": [
-            "Baron Nashor"
+            "Pyke Dockside Butcher"
           ],
           "controller": "B",
           "last_controller": "B"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Eager Apprentice"
+          "Ravenbloom Student",
+          "Diana Lunari"
         ],
-        "deck": 22,
-        "energy": 12,
+        "deck": 27,
+        "energy": 0,
         "hand": 0,
         "power_pool": {
-          "CHAOS": 7,
+          "CHAOS": 5,
           "MIND": 5
         },
-        "runes_in_play": 12,
-        "trash": 15
+        "runes_in_play": 10,
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Recruit",
-          "Baron Nashor"
+          "Bewitching Spirit",
+          "Gold",
+          "Recruit"
         ],
-        "deck": 25,
-        "energy": 2,
+        "deck": 27,
+        "energy": 6,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 3,
-          "FURY": 6
+          "CHAOS": 5,
+          "FURY": 4
         },
         "runes_in_play": 9,
-        "trash": 14
+        "trash": 9
       },
-      "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 15,
-      "turns": 16,
-      "units_played": 18,
-      "winner": "A",
+      "points_A": 2,
+      "points_B": 8,
+      "spells_cast": 13,
+      "turns": 11,
+      "units_played": 13,
+      "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
       "ai_a": "diana",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2",
       "seed": 927649558
     }
@@ -281,8 +276,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3",
       "seed": 1022487120
     }
@@ -355,8 +350,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0",
       "seed": 194461789
     }
@@ -427,8 +422,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
       "seed": 914790882
     }
@@ -496,8 +491,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2",
       "seed": 125686143
     }
@@ -561,8 +556,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3",
       "seed": 913268135
     }
@@ -634,8 +629,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
       "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0",
       "seed": 71834130
     }
@@ -708,8 +703,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
       "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1",
       "seed": 712744719
     }
@@ -719,15 +714,19 @@
       "battlefields": [
         {
           "A": [],
-          "B": [
-            "Hwei Brooding Painter"
-          ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": null,
+          "last_controller": null
+        },
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
         },
         {
           "A": [
-            "Bewitching Spirit"
+            "Baron Nashor"
           ],
           "B": [],
           "controller": "A",
@@ -739,37 +738,39 @@
         "banished": 0,
         "base_gear": 2,
         "base_units": [
-          "Treasure Hunter"
+          "Recruit"
         ],
-        "deck": 26,
-        "energy": 12,
-        "hand": 2,
+        "deck": 21,
+        "energy": 11,
+        "hand": 3,
         "power_pool": {
           "CHAOS": 6,
-          "FURY": 6
+          "FURY": 5
         },
-        "runes_in_play": 12,
-        "trash": 8
+        "runes_in_play": 11,
+        "trash": 15
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 18,
-        "energy": 10,
+        "base_units": [
+          "Fizz Trickster"
+        ],
+        "deck": 12,
+        "energy": 7,
         "hand": 0,
         "power_pool": {
           "CHAOS": 6,
           "MIND": 5
         },
         "runes_in_play": 11,
-        "trash": 21
+        "trash": 27
       },
       "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 17,
-      "turns": 17,
-      "units_played": 14,
+      "points_B": 7,
+      "spells_cast": 24,
+      "turns": 27,
+      "units_played": 19,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -777,8 +778,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
       "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2",
       "seed": 776578904
     }
@@ -846,8 +847,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
       "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3",
       "seed": 958980926
     }
@@ -916,8 +917,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0",
       "seed": 181392704
     }
@@ -986,8 +987,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#1",
       "seed": 122476301
     }
@@ -1057,8 +1058,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2",
       "seed": 493981850
     }
@@ -1129,8 +1130,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#3",
       "seed": 316088351
     }
@@ -1200,8 +1201,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#0",
       "seed": 621118472
     }
@@ -1281,8 +1282,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#1",
       "seed": 1006899465
     }
@@ -1351,8 +1352,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#2",
       "seed": 782733317
     }
@@ -1423,8 +1424,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#3",
       "seed": 166370321
     }
