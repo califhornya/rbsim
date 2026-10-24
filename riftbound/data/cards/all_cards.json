@@ -17225,7 +17225,7 @@
     ],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
         "condition": {
@@ -17498,7 +17498,7 @@
         }
       },
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
         "condition": {
@@ -17676,7 +17676,12 @@
     ],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "gain_energy",
+        "trigger": "on_move",
+        "amount": 1
+      },
+      {
+        "effect": "gain_power_any_domain",
         "trigger": "on_move",
         "amount": 1
       }
@@ -17802,6 +17807,9 @@
         "cost": {
           "power": 1,
           "tap": true
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
         }
       }
     ]
@@ -17865,12 +17873,15 @@
     ],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
         "condition": {
           "type": "kicker_paid",
           "params": {}
+        },
+        "additional_cost": {
+          "power": 1
         }
       },
       {
@@ -17882,6 +17893,9 @@
         "condition": {
           "type": "kicker_paid",
           "params": {}
+        },
+        "additional_cost": {
+          "power": 1
         }
       }
     ]
@@ -17995,7 +18009,7 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "chosen_unit",
-        "amount": 3,
+        "amount": 2,
         "duration": "this_turn",
         "condition": {
           "type": "controller_has_xp_at_least",
@@ -18033,9 +18047,9 @@
         "effect": "reveal_and_choose",
         "trigger": "on_cast",
         "count": 3,
-        "filter": "unit",
-        "action": "draw",
-        "rest_action": "recycle"
+        "target_filter": {
+          "is_unit": true
+        }
       }
     ]
   },
@@ -18193,7 +18207,7 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
         "condition": {
@@ -18444,22 +18458,20 @@
     ],
     "effects": [
       {
-        "effect": "reveal_and_choose",
+        "effect": "mode_choice",
         "trigger": "on_cast",
         "timing": "reaction",
-        "choices": [
+        "modes": [
           {
             "effect": "counter_spell",
-            "target": "chosen_spell"
+            "target": "chosen_spell",
+            "max_energy": 99,
+            "max_power": 99
           },
           {
             "effect": "play_token",
             "token_name": "Bird",
-            "count": 4,
-            "might": 1,
-            "keywords": [
-              "DEFLECT"
-            ]
+            "count": 4
           }
         ]
       }
@@ -18511,23 +18523,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "chosen_unit",
-        "amount_source": "n_distinct_tags_among_friendlies",
-        "params": {
-          "tags": [
-            "Bird",
-            "Cat",
-            "Dog",
-            "Poro"
-          ]
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-047",
@@ -18728,12 +18724,18 @@
       {
         "effect": "dig",
         "trigger": "on_play",
-        "amount": 3
+        "amount": 3,
+        "target_filter": {
+          "is_unit": true
+        }
       },
       {
         "effect": "dig",
         "trigger": "on_hold",
-        "amount": 3
+        "amount": 3,
+        "target_filter": {
+          "is_unit": true
+        }
       }
     ]
   },
@@ -18968,20 +18970,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_might",
-        "trigger": "on_friendly_unit_played",
-        "target": "self",
-        "amount": 1,
-        "condition": {
-          "type": "you_control_subtype",
-          "params": {
-            "subtype": "token"
-          }
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-059",
@@ -19188,7 +19177,11 @@
       {
         "effect": "dig",
         "trigger": "on_play",
-        "amount": 4
+        "amount": 4,
+        "target_filter": {
+          "is_spell": true,
+          "energy_at_least": 4
+        }
       }
     ]
   },
@@ -19383,14 +19376,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "give_keyword",
-        "trigger": "on_cast",
-        "target": "chosen_unit",
-        "keyword": "TEMPORARY"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-071",
@@ -20517,9 +20503,11 @@
         "effect": "ready_runes",
         "trigger": "on_friendly_unit_played",
         "amount": 2,
-        "target_filter": {
-          "subtype": "Dragon",
-          "exclude_self": true
+        "condition": {
+          "type": "triggering_unit_has_subtype",
+          "params": {
+            "subtype": "Dragon"
+          }
         }
       }
     ]
@@ -20610,22 +20598,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "move_units_to_base",
-        "trigger": "on_cast",
-        "target": "all_enemy_units_here",
-        "target_filter": {
-          "might_less_than_self": true
-        }
-      },
-      {
-        "effect": "gain_xp",
-        "trigger": "on_cast",
-        "target": "actor",
-        "amount": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-108",
@@ -20647,32 +20620,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_might",
-        "trigger": "passive",
-        "amount": 1,
-        "target": "self",
-        "condition": {
-          "type": "controller_has_xp_at_least",
-          "params": {
-            "amount": 1
-          }
-        }
-      },
-      {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "keyword": "GANKING",
-        "target": "self",
-        "condition": {
-          "type": "controller_has_xp_at_least",
-          "params": {
-            "amount": 1
-          }
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-109",
@@ -21590,13 +21538,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reveal_and_choose",
-        "trigger": "on_play",
-        "target": "opponent"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-136",
@@ -21713,13 +21655,7 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "reveal_and_choose",
-        "trigger": "on_cast",
-        "target": "opponent"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-140",
@@ -21741,29 +21677,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "take_control",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "enemy_unit",
-        "target_filter": {
-          "might_at_most": 3
-        }
-      },
-      {
-        "effect": "exhaust_unit",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "enemy_unit"
-      },
-      {
-        "effect": "recall_unit",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-141",
@@ -21788,13 +21702,7 @@
       "HIDDEN",
       "BACKLINE"
     ],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_play",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-142",
@@ -21944,14 +21852,7 @@
       "HIDDEN",
       "BACKLINE"
     ],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "on_death",
-        "token_name": "Gold",
-        "exhausted": true
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-146",
@@ -22109,13 +22010,7 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": [
-      {
-        "effect": "stun_unit",
-        "trigger": "on_play",
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-151",
@@ -22442,6 +22337,9 @@
         "count": 2,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
         }
       }
     ]
@@ -22468,18 +22366,7 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "chosen_unit",
-        "amount": 2,
-        "cost": {
-          "tap": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-162",
@@ -22558,6 +22445,11 @@
     ],
     "keywords": [],
     "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit"
+      },
       {
         "effect": "kill_unit",
         "trigger": "on_play",
@@ -22717,19 +22609,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reveal_and_choose",
-        "trigger": "on_play",
-        "target": "opponent"
-      },
-      {
-        "effect": "banish_card",
-        "trigger": "on_play",
-        "target": "opponent",
-        "from": "hand"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-170",
@@ -22848,14 +22728,26 @@
         "effect": "draw_cards",
         "trigger": "on_cast",
         "timing": "reaction",
-        "count": 2
+        "count": 2,
+        "additional_cost": {
+          "kill_friendly_unit": true
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
       },
       {
         "effect": "channel_rune",
         "trigger": "on_cast",
         "timing": "reaction",
         "amount": 1,
-        "exhausted": true
+        "exhausted": true,
+        "additional_cost": {
+          "kill_friendly_unit": true
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
       }
     ]
   },
@@ -22974,24 +22866,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "score_point",
-        "trigger": "on_conquer",
-        "amount": 1,
-        "condition": {
-          "type": "you_control_subtype"
-        }
-      },
-      {
-        "effect": "score_point",
-        "trigger": "on_hold",
-        "amount": 1,
-        "condition": {
-          "type": "you_control_subtype"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-178",
@@ -23241,14 +23116,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-185",
@@ -24340,13 +24208,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "on_conquer",
-        "token_name": "Bird"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-218",

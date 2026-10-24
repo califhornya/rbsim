@@ -983,9 +983,12 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     tf = spec.get("target_filter") or spec.get("reveal_filter") or spec.get("filter")
     tf = tf if isinstance(tf, Mapping) else {}
-    keepable = [c for c in top if _zone_card_matches(c, tf)
-                and ("energy_at_most" not in tf
-                     or int(getattr(c, "cost_energy", 0) or 0) <= int(tf["energy_at_most"]))]
+    def _energy_ok(c) -> bool:
+        e = int(getattr(c, "cost_energy", 0) or 0)
+        return (("energy_at_most" not in tf or e <= int(tf["energy_at_most"]))
+                and ("energy_at_least" not in tf or e >= int(tf["energy_at_least"])))
+
+    keepable = [c for c in top if _zone_card_matches(c, tf) and _energy_ok(c)]
     if keepable:
         best = max(keepable, key=lambda c: int(getattr(c, "might", 0) or 0))
         top.remove(best)

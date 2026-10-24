@@ -292,3 +292,18 @@ def test_draw_cards_amount_source():
     ctx = EffectContext(loop, SpellCard(name="Show of Strength"), a, loop.gs.B, loop.gs.battlefields[0])
     REGISTRY["draw_cards"](ctx, {"amount_source": "friendly_mighty_units"})
     assert len(a.hand) == 2
+
+
+def test_subtype_conditions_read_the_subtype_key():
+    loop = _loop()
+    a = loop.gs.A
+    check = lambda t, extra=None, **kw: loop._check_condition(  # noqa: E731
+        {"type": t, "params": kw}, UnitCard(name="Src"), a, loop.gs.B, extra)
+    assert not check("you_control_subtype", subtype="Poro")
+    a.base_units.append(UnitInPlay(UnitCard(name="Snax", tags=["Poro"])))
+    assert check("you_control_subtype", subtype="Poro")
+    assert not check("you_control_subtype")                 # no tag → never true
+    dragon = UnitCard(name="Wyrm", tags=["Dragon"])
+    assert check("triggering_unit_has_subtype", {"triggering_card": dragon}, subtype="Dragon")
+    assert not check("triggering_unit_has_subtype", {"triggering_card": UnitCard(name="X")},
+                     subtype="Dragon")

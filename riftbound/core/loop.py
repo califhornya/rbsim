@@ -49,7 +49,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty",
     "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
     "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
-    "this_is_at_battlefield", "triggering_unit_not_named",
+    "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1158,7 +1158,10 @@ class GameLoop:
             unit = self._find_unit_by_card(card)
             return bool(unit and getattr(unit, "empowered", False))
         if ctype == "you_control_subtype":
-            tag = str(params.get("tag", ""))
+            # The corpus writes the tag as "subtype" (older specs as "tag").
+            tag = str(params.get("tag") or params.get("subtype") or "")
+            if not tag:
+                return False
             for bf in self.gs.battlefields:
                 for u in (bf.units_A if side == "A" else bf.units_B):
                     if tag in (u.card.tags or []):
@@ -1217,6 +1220,10 @@ class GameLoop:
         if ctype == "this_is_at_battlefield":
             return any(u.card is card for bf in self.gs.battlefields
                        for u in (bf.units_A if side == "A" else bf.units_B))
+        if ctype == "triggering_unit_has_subtype":
+            trig = extra.get("triggering_card")
+            tag = str(params.get("subtype") or params.get("tag") or "")
+            return trig is not None and bool(tag) and tag in (getattr(trig, "tags", None) or [])
         if ctype == "triggering_unit_not_named":
             trig = extra.get("triggering_card")
             return trig is None or getattr(trig, "name", None) != params.get("name")
