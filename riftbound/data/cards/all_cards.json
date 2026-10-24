@@ -31435,6 +31435,12 @@
         "cost": {
           "tap": true
         }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_exhaust",
+        "target": "friendly_unit",
+        "amount": 3
       }
     ],
     "variants": [

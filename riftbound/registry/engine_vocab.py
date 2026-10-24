@@ -32,6 +32,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
     "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
     "on_showdown_begin",                         # a showdown begins at this unit's battlefield (Diana Lunari)
+    "on_exhaust",                                # this unit/gear becomes exhausted (Reckless Innovator)
 })
 
 # Condition types accepted by Loop._check_condition.

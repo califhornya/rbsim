@@ -111,3 +111,35 @@ def test_you_control_this_battlefield():
     assert not check()
     bf.add_unit("A", UnitInPlay(UnitCard(name="Holder")))
     assert check()
+
+
+def test_on_exhaust_fires_once_on_ready_to_exhausted(monkeypatch):
+    spec = CardSpec.from_dict({
+        "name": "Test Innovator", "category": "Unit", "might": 2,
+        "effects": [{"effect": "draw_cards", "trigger": "on_exhaust", "count": 1}]})
+    monkeypatch.setitem(CARD_REGISTRY, spec.name, spec)
+    loop = _loop()
+    a = loop.gs.A
+    a.deck.cards.extend(UnitCard(name=f"C{i}") for i in range(3))
+    unit = UnitInPlay(UnitCard(name=spec.name, might=2), ready=True)
+    loop.gs.battlefields[0].add_unit("A", unit)
+
+    REGISTRY["exhaust_unit"](_ctx(loop), {"target": "friendly_unit"})
+    assert unit.ready is False and len(a.hand) == 1
+    loop._exhaust(unit)                      # already exhausted: no new trigger
+    assert len(a.hand) == 1
+
+
+def test_gear_on_exhaust(monkeypatch):
+    from riftbound.core.cards import GearCard
+    spec = CardSpec.from_dict({
+        "name": "Test Rostrum", "category": "Gear",
+        "effects": [{"effect": "draw_cards", "trigger": "on_exhaust", "count": 1}]})
+    monkeypatch.setitem(CARD_REGISTRY, spec.name, spec)
+    loop = _loop()
+    a = loop.gs.A
+    a.deck.cards.append(UnitCard(name="C"))
+    gear = GearCard(name=spec.name)
+    a.base_gear.append(gear)
+    loop._exhaust_gear(gear, a)
+    assert gear.tapped and len(a.hand) == 1

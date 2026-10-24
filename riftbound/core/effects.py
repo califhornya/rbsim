@@ -185,7 +185,7 @@ def _double_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("exhaust_unit")
 def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
-        unit.ready = False
+        ctx.loop._exhaust(unit)
 
 
 @effect("ready_unit")

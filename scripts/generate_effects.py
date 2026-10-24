@@ -508,6 +508,11 @@ STEP 4 — Vendetta mechanics:
         {{"effect":"deal_damage","trigger":"on_cast","target":"chosen_unit",
           "amount_source":"shown_might","condition":{{"type":"showed_off"}}}}]
 
+25. "When I become exhausted" / "When this becomes exhausted" → trigger
+    "on_exhaust" (NOT "activated": it is a triggered ability with no cost).
+    "When another friendly unit becomes exhausted" is not supported → flag
+    (suggested_vocab "trigger:on_friendly_exhaust").
+
 24. "I enter ready if <condition>" → {{"effect":"ready_unit","trigger":"on_play",
     "target":"self","condition":{{...}}}}. Conditions available for this pattern
     include opponent_controls_a_battlefield, you_control_no_other_units,

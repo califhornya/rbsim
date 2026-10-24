@@ -30,6 +30,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_death", "leaves_board", "on_move", "on_start_of_turn", "on_end_of_turn",
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
+    "on_exhaust",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -444,6 +445,35 @@ class GameLoop:
                 context_extra={"battlefield": bf},
             )
 
+    def _exhaust(self, unit) -> None:
+        """Exhaust a unit. A ready → exhausted change fires its "when I become
+        exhausted" (on_exhaust) abilities for its controller."""
+        if not unit.ready:
+            return
+        unit.ready = False
+        for side in ("A", "B"):
+            actor = self.gs.get_player(side)
+            bf = next((b for b in self.gs.battlefields
+                       if unit in (b.units_A if side == "A" else b.units_B)), None)
+            if bf is None and unit not in actor.base_units and unit is not self._legend_unit(side):
+                continue
+            bf = bf or self.gs.battlefields[0]
+            self._resolve_triggered_effects(unit.card, "on_exhaust", bf, actor,
+                                            self.gs.get_player(self.gs.other(side)),
+                                            context_extra={"battlefield": bf})
+            return
+
+    def _exhaust_gear(self, gear, actor: Player) -> None:
+        """Tap a gear for its [tap] ability; fires its on_exhaust abilities."""
+        if getattr(gear, "tapped", False):
+            return
+        gear.tapped = True
+        side = "A" if actor is self.gs.A else "B"
+        anchor = self.gs.battlefields[0]
+        self._resolve_triggered_effects(gear, "on_exhaust", anchor, actor,
+                                        self.gs.get_player(self.gs.other(side)),
+                                        context_extra={"battlefield": anchor})
+
     @staticmethod
     def _disarm_value(unit) -> int:
         """Total DISARM X on a unit (§831): a bare keyword counts 1 and every
@@ -767,7 +797,7 @@ class GameLoop:
             ):
                 return False
             if parsed["tap"] and unit is not None:
-                unit.ready = False
+                self._exhaust(unit)
             for _ in range(parsed["recycle"]):
                 if actor.trash:
                     actor.deck.cards.append(actor.trash.pop(0))
@@ -1638,7 +1668,7 @@ class GameLoop:
             ap.trash.append(ap.hand.pop(idx))
         if target_unit is not None:
             if exhaust:
-                target_unit.ready = False
+                self._exhaust(target_unit)
             if kill:
                 side = "A" if ap is self.gs.A else "B"
                 self._remove_unit_from_play(target_unit, side)
@@ -1958,7 +1988,7 @@ class GameLoop:
                     return
                 if self.verbose:
                     print(f"  {ap.name} moves UNIT: {unit.card.name} to BF{dst}")
-                unit.ready = False
+                self._exhaust(unit)
                 target_bf = self.gs.battlefields[dst]
 
                 # Check if this move establishes contested status (moving to a BF the player doesn't control)
@@ -2009,7 +2039,7 @@ class GameLoop:
                     src_bf.add_unit(side, unit)
                     unit.ready = True
                     return
-                unit.ready = False
+                self._exhaust(unit)
 
                 # Check if this move establishes contested status (moving to a BF the player doesn't control)
                 prev_controller = dst_bf.controller()
@@ -2061,7 +2091,7 @@ class GameLoop:
         if not ap.can_pay_cost(1, None, None):
             return
         ap.pay_cost(1, None, None)
-        pyke_unit.ready = False
+        self._exhaust(pyke_unit)
 
         # Return a friendly unit from a battlefield to hand (prefer non-Pyke units)
         for bf in self.gs.battlefields:
@@ -2273,7 +2303,7 @@ class GameLoop:
             if not self._pay_gear(ap, parsed["energy"], parsed["power"], None):
                 return
             if parsed["tap"]:
-                gear.tapped = True
+                self._exhaust_gear(gear, ap)
             for _ in range(parsed["recycle"]):
                 if ap.trash:
                     ap.deck.cards.append(ap.trash.pop(0))
@@ -2299,7 +2329,7 @@ class GameLoop:
             if not ap.pay_cost(parsed["energy"], parsed["power"] or None, None):
                 return
         if parsed["tap"] and unit is not None:
-            unit.ready = False
+            self._exhaust(unit)
         for _ in range(parsed["recycle"]):
             if ap.trash:
                 ap.deck.cards.append(ap.trash.pop(0))
