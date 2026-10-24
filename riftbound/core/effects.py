@@ -287,8 +287,13 @@ def _spend_buff(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("stun_unit")
 def _stun_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    enemies = ctx._units_for_side(ctx.opponent_side)
+    stunned_enemy = False
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "opponent")}, bias="enemy"):
         unit.stunned = True
+        stunned_enemy = stunned_enemy or any(unit is e for e in enemies)
+    if stunned_enemy:
+        ctx.loop._fire_stun_enemy(ctx.actor_side)
 
 
 @effect("recycle_card")

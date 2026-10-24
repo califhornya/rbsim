@@ -30,7 +30,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_death", "leaves_board", "on_move", "on_start_of_turn", "on_end_of_turn",
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
-    "on_exhaust", "on_friendly_exhaust", "on_hide_here",
+    "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -46,7 +46,10 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
     "card_with_my_name_in_trash", "opponent_controls_stunned_unit",
     "you_control_this_battlefield",
-    "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty", "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units", "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
+    "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty",
+    "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
+    "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
+    "this_is_at_battlefield", "triggering_unit_not_named",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -473,6 +476,18 @@ class GameLoop:
                                             context_extra={"battlefield": bf})
             self._fire_units_trigger("on_friendly_exhaust", side, exclude_card=unit.card)
             return
+
+    def _fire_stun_enemy(self, side: str) -> None:
+        """`side` stunned one or more enemy units: fire on_stun_enemy for its units
+        and its Legend."""
+        self._fire_units_trigger("on_stun_enemy", side)
+        legend_unit = self._legend_unit(side)
+        if legend_unit is not None:
+            anchor = self.gs.battlefields[0]
+            self._resolve_triggered_effects(legend_unit.card, "on_stun_enemy", anchor,
+                                            self.gs.get_player(side),
+                                            self.gs.get_player(self.gs.other(side)),
+                                            context_extra={"battlefield": anchor})
 
     def _exhaust_gear(self, gear, actor: Player) -> None:
         """Tap a gear for its [tap] ability; fires its on_exhaust abilities."""
@@ -1201,6 +1216,12 @@ class GameLoop:
                        for bf in self.gs.battlefields)
         if ctype == "you_have_n_or_fewer_runes":
             return actor.total_runes_in_play() <= _threshold()
+        if ctype == "this_is_at_battlefield":
+            return any(u.card is card for bf in self.gs.battlefields
+                       for u in (bf.units_A if side == "A" else bf.units_B))
+        if ctype == "triggering_unit_not_named":
+            trig = extra.get("triggering_card")
+            return trig is None or getattr(trig, "name", None) != params.get("name")
         if ctype == "friendly_deployed_gear_here":
             bf = extra.get("battlefield")
             return bf is not None and bool(bf.gear_for(side))
@@ -2190,7 +2211,12 @@ class GameLoop:
         `trigger: activated`, plus EQUIP entries for gear waiting at base. The
         list order is stable for a given board, so an agent can pick by index and
         the engine re-resolves the same entry. Affordability is NOT filtered here
-        (so indices stay stable) — payment fails gracefully if unaffordable."""
+        (so indices stay stable) — payment fails gracefully if unaffordable.
+
+        A spec tagged `activated` with no cost is never offered: every printed
+        activated ability has a cost, so a cost-less one is a misparsed trigger
+        ("When you stun an enemy unit, ready me" read as a button) that would
+        otherwise be usable for free, without limit."""
         ap = self.gs.get_player(side)
         out: list = []
         for bf_idx, bf in enumerate(self.gs.battlefields):
@@ -2201,6 +2227,8 @@ class GameLoop:
                 for eff in spec.effects:
                     if eff.trigger != "activated":
                         continue
+                    if not eff.cost:
+                        continue  # cost-less "activated" = misparsed trigger (see docstring)
                     if (eff.timing or "").lower() == "reaction":
                         continue
                     # EMPOWER can only be activated while NOT already empowered.
@@ -2214,6 +2242,8 @@ class GameLoop:
             for eff in spec.effects:
                 if eff.trigger != "activated":
                     continue
+                if not eff.cost:
+                    continue  # cost-less "activated" = misparsed trigger (see docstring)
                 if (eff.timing or "").lower() == "reaction":
                     continue
                 if eff.effect == "empower_self" and getattr(unit, "empowered", False):
@@ -2226,6 +2256,8 @@ class GameLoop:
                 for eff in spec.effects:
                     if eff.trigger != "activated":
                         continue
+                    if not eff.cost:
+                        continue  # cost-less "activated" = misparsed trigger (see docstring)
                     if (eff.timing or "").lower() == "reaction":
                         continue
                     if eff.effect == "empower_self" and getattr(legend_unit, "empowered", False):
@@ -2239,6 +2271,8 @@ class GameLoop:
             for eff in spec.effects:
                 if eff.trigger != "activated":
                     continue
+                if not eff.cost:
+                    continue  # cost-less "activated" = misparsed trigger (see docstring)
                 if (eff.timing or "").lower() == "reaction":
                     continue
                 if EFFECT_REGISTRY.get(eff.effect) is None:

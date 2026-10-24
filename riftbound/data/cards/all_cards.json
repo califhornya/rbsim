@@ -192,12 +192,6 @@
         "timing": "action",
         "amount": 3,
         "target": "chosen_unit"
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "on_cast",
-        "timing": "action",
-        "count": 1
       }
     ]
   },
@@ -390,12 +384,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_friendly_unit_played"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-012",
@@ -1058,16 +1047,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 5,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-032",
@@ -1113,15 +1093,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "amount": 6,
-        "target": "enemy_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-035",
@@ -1465,7 +1437,10 @@
           "type": "kicker_paid",
           "params": {}
         },
-        "count": 1
+        "count": 1,
+        "additional_cost": {
+          "power": 1
+        }
       }
     ]
   },
@@ -1517,8 +1492,12 @@
     ],
     "effects": [
       {
-        "effect": "grant_might",
-        "amount": 1
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit",
+        "amount": 1,
+        "duration": "this_turn"
       },
       {
         "effect": "grant_temporary_might_if_alone",
@@ -1956,12 +1935,12 @@
     "effects": [
       {
         "effect": "ready_unit",
-        "trigger": "activated",
+        "trigger": "on_stun_enemy",
         "target": "self"
       },
       {
         "effect": "grant_temporary_might",
-        "trigger": "activated",
+        "trigger": "on_stun_enemy",
         "target": "self",
         "amount": 1,
         "duration": "this_turn"
@@ -2129,7 +2108,9 @@
         "effect": "counter_spell",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "chosen_spell"
+        "target": "chosen_spell",
+        "max_energy": 99,
+        "max_power": 99
       }
     ]
   },
@@ -2382,21 +2363,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "action",
-        "amount": 1,
-        "cost": {
-          "tap": true
-        },
-        "suggested_vocab": [
-          "cond:killed_stunned_enemy_this_turn",
-          "trigger:on_kill_stunned_enemy"
-        ]
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-073",
@@ -2422,7 +2389,10 @@
       {
         "effect": "ready_runes",
         "trigger": "on_end_of_turn",
-        "amount": 4
+        "amount": 4,
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
       }
     ]
   },
@@ -2483,7 +2453,7 @@
     ],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "channel_rune",
         "trigger": "on_death",
         "amount": 2,
         "exhausted": true
@@ -2815,21 +2785,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "is_spell": true
-        },
-        "suggested_vocab": [
-          "aura:reduce_cost",
-          "cond:self_at_battlefield",
-          "effect:reduce_cost_with_min"
-        ]
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-085",
@@ -3398,14 +3354,7 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-103",
@@ -3849,14 +3798,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "on_play_spell",
-        "timing": null,
-        "token_name": "Recruit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-118",
@@ -3878,13 +3820,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_friendly_unit_death",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-119",
@@ -4098,7 +4034,13 @@
         "effect": "buff_unit",
         "trigger": "activated",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "cost": {
+          "tap": true
+        },
+        "target_filter": {
+          "is_exhausted": true
+        }
       }
     ]
   },
@@ -4354,10 +4296,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
-        "target": "friendly_unit",
-        "amount": 1
+        "target": "friendly_unit"
       }
     ]
   },
@@ -4595,16 +4536,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2,
-        "target_filter": {
-          "subtype": "Dragon"
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-141",
@@ -4803,23 +4735,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "spend_buff",
-        "trigger": "on_play",
-        "target": "self"
-      },
-      {
-        "effect": "buff_unit",
-        "trigger": "on_play",
-        "target": "self"
-      },
-      {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-148",
@@ -4871,14 +4787,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_play",
-        "target": "chosen_unit",
-        "amount_source": "self_might"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-150",
@@ -5069,15 +4978,19 @@
     ],
     "effects": [
       {
-        "effect": "draw_cards",
+        "effect": "mode_choice",
         "trigger": "on_conquer",
-        "count": 1
-      },
-      {
-        "effect": "channel_rune",
-        "trigger": "on_conquer",
-        "amount": 1,
-        "exhausted": true
+        "modes": [
+          {
+            "effect": "draw_cards",
+            "count": 1
+          },
+          {
+            "effect": "channel_rune",
+            "amount": 1,
+            "exhausted": true
+          }
+        ]
       }
     ]
   },
@@ -5163,13 +5076,7 @@
       "SHIELD 3",
       "TANK"
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_move",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-159",
@@ -5487,14 +5394,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_play_spell",
-        "target": "self",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-169",
@@ -5660,7 +5560,7 @@
         "target": "friendly_unit"
       },
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_cast",
         "timing": "action",
         "target": "friendly_unit"
@@ -6748,10 +6648,7 @@
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "friendly_unit",
-        "additional_cost": {
-          "kill_friendly_unit": true
-        }
+        "target": "friendly_unit"
       }
     ]
   },
@@ -7019,7 +6916,7 @@
     ],
     "effects": [
       {
-        "effect": "gain_energy",
+        "effect": "channel_rune",
         "trigger": "on_death",
         "amount": 1,
         "exhausted": true
@@ -7053,7 +6950,10 @@
         "effect": "buff_unit",
         "trigger": "on_play",
         "target": "self",
-        "amount": 1
+        "amount": 1,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
       }
     ]
   },
@@ -7244,7 +7144,12 @@
         "trigger": "on_play",
         "target": "all_friendly_units_here",
         "amount": 1,
-        "note": "excluding self; only if at a battlefield"
+        "target_filter": {
+          "exclude_self": true
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
       }
     ]
   },
@@ -7272,18 +7177,14 @@
     ],
     "effects": [
       {
-        "effect": "kill_unit",
-        "trigger": "on_play",
+        "effect": "kill_gear",
+        "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit",
-        "target_filter": {
-          "is_gear": true
-        },
-        "scope": "single"
+        "target": "enemy_gear"
       },
       {
         "effect": "draw_cards",
-        "trigger": "on_play",
+        "trigger": "on_cast",
         "timing": "action",
         "amount": 1
       }
@@ -7616,13 +7517,7 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": [
-      {
-        "effect": "buff_unit",
-        "trigger": "on_play",
-        "target": "friendly_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-236",
@@ -7822,19 +7717,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "friendly_unit",
-        "cost": {
-          "energy": 1,
-          "power": 1,
-          "tap": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-243",
@@ -7872,12 +7755,11 @@
     ],
     "effects": [
       {
-        "effect": "ready_units",
+        "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
         "condition": {
-          "type": "you_already_played_another_card_this_turn",
-          "params": {}
+          "type": "you_already_played_another_card_this_turn"
         }
       },
       {
@@ -7885,7 +7767,9 @@
         "trigger": "passive",
         "target": "all_friendly_units_here",
         "amount": 1,
-        "exclude_self": true
+        "target_filter": {
+          "exclude_self": true
+        }
       }
     ]
   },
@@ -7982,11 +7866,13 @@
       {
         "effect": "play_token",
         "trigger": "on_friendly_unit_death",
-        "target_filter": {
-          "exclude_self": true,
-          "lacks_keyword": "Recruit"
-        },
-        "token_name": "Recruit"
+        "token_name": "Recruit",
+        "condition": {
+          "type": "triggering_unit_not_named",
+          "params": {
+            "name": "Recruit"
+          }
+        }
       }
     ]
   },
@@ -8582,7 +8468,7 @@
     "effects": [
       {
         "effect": "buff_unit",
-        "trigger": "passive",
+        "trigger": "on_stun_enemy",
         "target": "friendly_unit"
       }
     ]
@@ -9241,14 +9127,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_conquer",
-        "count": 1,
-        "cost": {}
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-283",
@@ -9355,9 +9234,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "channel_rune",
         "trigger": "on_hold",
-        "target": "actor",
         "amount": 1,
         "exhausted": true,
         "optional": true
@@ -9384,15 +9262,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_runes",
-        "trigger": "on_conquer",
-        "target": "actor",
-        "amount": 2,
-        "timing": "end_of_turn"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "OGN-290",

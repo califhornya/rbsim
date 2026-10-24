@@ -35,6 +35,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_exhaust",                                # this unit/gear becomes exhausted (Reckless Innovator)
     "on_friendly_exhaust",                       # another friendly unit becomes exhausted (Riven Deserter)
     "on_hide_here",                              # a card is hidden at this battlefield (Bandle Scouts' Academy)
+    "on_stun_enemy",                             # you stun one or more enemy units (Eclipse Herald, Leona legend)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -77,6 +78,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there"
     "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
     "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
+    "this_is_at_battlefield",            # the source unit is at a battlefield (not in base)
+    "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).

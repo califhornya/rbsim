@@ -213,3 +213,50 @@ def test_annie_legend_readies_up_to_two_runes_at_end_of_turn():
     assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 0
     loop._fire_turn_trigger("on_end_of_turn", "A")
     assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 2   # up to 2, not all
+
+
+def test_costless_activated_ability_is_never_offered(monkeypatch):
+    # A trigger misread as a cost-less "button" must not be usable for free.
+    _register(monkeypatch, "Test Misread", [
+        {"effect": "ready_unit", "trigger": "activated", "target": "self"},
+        {"effect": "draw_cards", "trigger": "activated", "count": 1, "cost": {"tap": True}}])
+    loop = _loop()
+    loop.gs.A.base_units.append(UnitInPlay(UnitCard(name="Test Misread"), ready=True))
+    effects = [entry["eff"].effect for entry in loop.activatable_abilities("A")
+               if entry.get("type") == "ability"]
+    assert effects == ["draw_cards"]
+
+
+def test_on_stun_enemy_readies_eclipse_herald(monkeypatch):
+    _register(monkeypatch, "Test Herald", [
+        {"effect": "ready_unit", "trigger": "on_stun_enemy", "target": "self"}])
+    loop = _loop()
+    gs = loop.gs
+    herald = UnitInPlay(UnitCard(name="Test Herald", might=7), ready=False)
+    gs.A.base_units.append(herald)
+    bf = gs.battlefields[0]
+    ally = UnitInPlay(UnitCard(name="Ally"))
+    bf.add_unit("A", ally)
+    bf.add_unit("B", UnitInPlay(UnitCard(name="Victim")))
+    ctx = EffectContext(loop, SpellCard(name="Rune Prison"), gs.A, gs.B, bf)
+    REGISTRY["stun_unit"](ctx, {"target": "friendly_unit"})   # stunning my own unit: no
+    assert not herald.ready
+    REGISTRY["stun_unit"](ctx, {"target": "enemy_unit"})
+    assert herald.ready
+
+
+def test_at_battlefield_and_not_named_conditions():
+    loop = _loop()
+    a = loop.gs.A
+    me = UnitInPlay(UnitCard(name="Sona"))
+    a.base_units.append(me)
+    check = lambda t, extra=None, **kw: loop._check_condition(  # noqa: E731
+        {"type": t, "params": kw}, me.card, a, loop.gs.B, extra)
+    assert not check("this_is_at_battlefield")
+    a.base_units.remove(me)
+    loop.gs.battlefields[1].add_unit("A", me)
+    assert check("this_is_at_battlefield")
+    assert not check("triggering_unit_not_named", {"triggering_card": UnitCard(name="Recruit")},
+                     name="Recruit")
+    assert check("triggering_unit_not_named", {"triggering_card": UnitCard(name="Viktor")},
+                 name="Recruit")
