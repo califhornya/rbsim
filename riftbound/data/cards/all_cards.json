@@ -33100,7 +33100,7 @@
     "cost_energy": 2,
     "cost_power": 1,
     "cost_power_domain": "Fury/Chaos",
-    "effect": "",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nKill any number of friendly Bomb tokens. At end of turn, play that many Bomb tokens to a single battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
