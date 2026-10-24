@@ -29930,7 +29930,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Bomb"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-001",
@@ -29951,8 +29957,17 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nFriendly units here have ASSAULT. (+1 [might] while they're attackers.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "keyword": "ASSAULT"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-002",
@@ -29974,7 +29989,15 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "amount": 1,
+        "count": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-003",
@@ -29995,8 +30018,19 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nGive a unit ASSAULT this turn equal to its Might. (+1 [might] for each instance of Assault while it's an attacker.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount_source": "self_might",
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-004",
@@ -30018,7 +30052,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "friendly_unit_died_this_turn"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-005",
@@ -30039,7 +30082,9 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nDeal 5 damage split among units at a single battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -30062,7 +30107,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Recruit",
+        "count": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-007",
@@ -30083,8 +30135,18 @@
     "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nWhen you play me, give a unit +2 [might] this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-008",
@@ -30106,7 +30168,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Mech",
+        "ready": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-009",
@@ -30128,7 +30197,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-010",
@@ -30149,8 +30224,26 @@
     "effect": "SHOW OFF a Mech. (As you play me, you may reveal a Mech from hand or pick another friendly Mech.)\nI enter ready if you showed off.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_play",
+        "target_filter": {
+          "subtype": "Mech"
+        }
+      },
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "showed_off"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-011",
@@ -30172,7 +30265,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "self",
+        "from": "deck_top"
+      },
+      {
+        "effect": "banish_card",
+        "trigger": "leaves_board",
+        "target": "self",
+        "from": "deck_top"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-012",
@@ -30193,7 +30299,9 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nChoose one —\n• Deal 4 to a unit at a battlefield.\n• Kill a gear.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -30216,7 +30324,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_play",
+        "amount": 2,
+        "target": "chosen_unit",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "kill_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-014",
@@ -30238,7 +30359,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_move",
+        "target": "self",
+        "from": "deck_top"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-015",
@@ -30281,8 +30409,22 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may kill another friendly unit or gear to draw 1.\nFriendly DEATHKNELL effects here trigger an additional time.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 1,
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "kill_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-017",
@@ -30326,7 +30468,18 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
+      },
+      {
+        "effect": "ready_units",
+        "trigger": "on_play",
+        "target": "all_enemy_units_here"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-019",
@@ -30347,8 +30500,20 @@
     "effect": "ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)\nASSAULT 3 (+3 [might] while I'm an attacker.)\nOnce each turn, if I would die, you may kill a friendly unit to heal me, exhaust me, and recall me instead.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE",
+      "ASSAULT 3"
+    ],
+    "effects": [
+      {
+        "effect": "replace_death_with_recall",
+        "trigger": "death_replacement",
+        "target": "self",
+        "cost": {
+          "sacrifice": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-020",
@@ -30373,7 +30538,10 @@
     "effect": "I enter ready.\nASSAULT (+1 [Might] while I'm an attacker.)\nACTION Discard 1, [1] [fury]: Banish me, then play me to your base, ignoring my cost.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "ASSAULT",
+      "ACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -30400,7 +30568,18 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "token_name": "Gold",
+        "exhausted": true,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-022",
@@ -30422,7 +30601,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Bomb"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-023",
@@ -30447,8 +30632,16 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\n\nWhen you win a combat here, draw 1.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_win_combat",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-024",
@@ -30469,8 +30662,26 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit SHIELD 2 this turn. (+2 [might] while it's a defender.)\nPREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION",
+      "PREDICT 1"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_shield",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      },
+      {
+        "effect": "predict",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-025",
@@ -30514,7 +30725,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-027",
@@ -30535,8 +30756,20 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nAs an additional cost to play this, exhaust a friendly unit.\nSTUN a unit. (It doesn't deal combat damage this turn.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "exhaust_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-028",
@@ -30557,8 +30790,30 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nAs an additional cost to play this, exhaust a friendly unit.\nDraw 1 and channel 1 rune exhausted.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 1,
+        "additional_cost": {
+          "exhaust_friendly_unit": true
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 1,
+        "exhausted": true,
+        "additional_cost": {
+          "exhaust_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-029",
@@ -30580,7 +30835,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_friendly_unit_played",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-030",
@@ -30601,8 +30862,19 @@
     "effect": "SHIELD 3 (+3 [might] while I'm a defender.)\nWhen you play me to a battlefield, you may move another unit you control here to your base.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHIELD 3"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-031",
@@ -30623,8 +30895,37 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nSHOW OFF a gear. (As you play this, you may reveal a gear from hand or pick a friendly gear.)\nGive a unit +2 [might] this turn. If you showed off, ready up to 2 runes.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION",
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target_filter": {
+          "is_gear": true
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      },
+      {
+        "effect": "ready_runes",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 2,
+        "condition": {
+          "type": "showed_off"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-032",
@@ -30667,8 +30968,23 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nReady a friendly unit. It can't move this turn. Draw 1.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-034",
@@ -30690,7 +31006,24 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "amount": 3,
+        "duration": "this_turn"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-035",
@@ -30711,8 +31044,16 @@
     "effect": "DEFLECT (Opponents must pay [Rune] to choose me with a spell or ability.)\nWhen a stunned enemy unit dies here, draw 1.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_death",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-036",
@@ -30734,7 +31075,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target_filter": {
+          "is_gear": true
+        },
+        "keyword": "DEFLECT",
+        "scope": "board"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-037",
@@ -30755,8 +31106,18 @@
     "effect": "DISARM (When I attack, give an enemy unit here -1 [might] this turn.)\nWhen you reduce the Might of an enemy unit here by 1 or more, give me +1 [might] this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DISARM"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-038",
@@ -30778,7 +31139,22 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target_filter": {
+          "is_unit": true
+        },
+        "amount": 2,
+        "scope": "board"
+      },
+      {
+        "effect": "kill_unit",
+        "trigger": "on_friendly_unit_played",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-039",
@@ -30800,7 +31176,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_legend": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-040",
@@ -30821,8 +31206,18 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nCounter a spell with Power cost [rune] [rune] or more.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell",
+        "min_power": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-041",
@@ -30843,7 +31238,9 @@
     "effect": "SHIELD (+1 [might] while I'm a defender.)\nI don't deal combat damage unless there's a friendly gear here.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "SHIELD 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -30895,8 +31292,22 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may move an enemy unit to this battlefield.\nFriendly units here have SHIELD 2. (+2 [might] while they're defenders.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "keyword": "SHIELD 2"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-044",
@@ -30917,7 +31328,9 @@
     "effect": "SHIELD (+1 [Might] while I'm a defender.)\nWhen I attack or defend, double the SHIELD of a unit you control here this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "SHIELD 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -30944,7 +31357,33 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 1,
+        "exhausted": true,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "target": "friendly_unit",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-046",
@@ -30987,7 +31426,9 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nGive a unit -[might] this turn equal to the number of exhausted units you control.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31010,7 +31451,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Mech"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-049",
@@ -31031,8 +31478,16 @@
     "effect": "When you play me, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle any of them and put the rest back in any order.)\nDISARM 2 (When I attack, give an enemy unit here -2 [might] this turn.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DISARM 2"
+    ],
+    "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_play",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-050",
@@ -31075,7 +31530,9 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nAt the end of your turn, if you control this battlefield, play a Gold gear token exhausted. (It has \"REACTION Kill this, [tap]: ADD [rune].\")",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DEPLOY"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31097,7 +31554,9 @@
     "effect": "When I become exhausted, PREDICT. (Look at the top card of your Main Deck. You may recycle it.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "PREDICT 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31119,7 +31578,9 @@
     "effect": "DISARM (When I attack, give an enemy unit here -1 [might] this turn.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31142,7 +31603,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target_filter": {
+          "subtype": "Mech"
+        },
+        "scope": "board",
+        "keyword": "DISARM"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-055",
@@ -31163,8 +31634,18 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nChoose a friendly gear. Deal damage equal to its Energy cost to a unit at a battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount_source": "shown_energy_cost"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-056",
@@ -31207,8 +31688,18 @@
     "effect": "ACCELERATE (You may pay as an additional cost to have me enter ready.)\nWhen you play me, give an enemy unit -3 [Might] this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "amount": -3,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-058",
@@ -31230,7 +31721,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "amount": 10,
+        "target": "chosen_unit"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "count": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-059",
@@ -31251,8 +31754,32 @@
     "effect": "SHOW OFF a card. (As you play me, you may reveal a card from your hand or pick another friendly one.)\nWhen you play me, if you showed off a card, [Predict] equal to its Power cost, then draw 2. (Look at that many cards from your Main Deck. Recycle any of them and put the rest back in any order.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_play",
+        "target_filter": {}
+      },
+      {
+        "effect": "predict",
+        "trigger": "on_play",
+        "amount_source": "shown_power_cost",
+        "condition": {
+          "type": "showed_off"
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 2,
+        "condition": {
+          "type": "showed_off"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-060",
@@ -31273,8 +31800,19 @@
     "effect": "As an additional cost to play me, return a friendly unit to its owner's hand.\nGANKING (I can move from battlefield to battlefield.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "GANKING"
+    ],
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "additional_cost": {
+          "kill_friendly_unit": false
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-061",
@@ -31299,8 +31837,17 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds where, kill this.)\nOpponents must pay [1] [rune] to move one or more units to this battlefield.\nDEATHKNELL Draw 1. (When I die, get the effect.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY",
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_death",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-062",
@@ -31321,7 +31868,9 @@
     "effect": "DISARM (When I attack, give an enemy unit here -1[Might] this turn.)\nWhile I'm in a showdown, your spells have REACTION. (Play them any time, even before spells and abilities resolve.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31365,7 +31914,9 @@
     "effect": "DISARM (When I attack, give an enemy unit here -2 [Might] this turn.)\nOnce each turn, when you exhaust three or more friendly units at the same time, you may draw 1.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31392,7 +31943,28 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "energy": 0
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "self",
+        "amount_source": "shown_energy_cost",
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-066",
@@ -31413,8 +31985,21 @@
     "effect": "When you play me or when I hold, [Predict 3].\nDEATHKNELL Banish the top card of your Main Deck. You may play it, ignoring its Energy cost.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_play",
+        "amount": 3
+      },
+      {
+        "effect": "predict",
+        "trigger": "on_hold",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-067",
@@ -31436,7 +32021,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-068",
@@ -31462,7 +32056,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play_spell",
+        "count": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-069",
@@ -31483,8 +32083,26 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nThis costs [2] less if you've played a unit or gear to a battlefield this turn.\nGive a unit +3 [might] this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-070",
@@ -31505,7 +32123,10 @@
     "effect": "EQUIP 1 ([1]: Attach this to a unit you control.)",
     "effect_equipped": "SHIELD 2 (+2 [might] while I'm a defender.)",
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "EQUIP 1",
+      "SHIELD 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31549,8 +32170,21 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this or when you conquer here,\nBUFF a friendly unit. (Give it a +1[Might] buff if it doesn't have one.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit"
+      },
+      {
+        "effect": "buff_unit",
+        "trigger": "on_conquer",
+        "target": "friendly_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-073",
@@ -31572,7 +32206,12 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reveal_top_draw_if_spell",
+        "trigger": "on_move"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-074",
@@ -31593,7 +32232,9 @@
     "effect": "You may return a friendly gear to its owner's hand as an additional cost to play me. If you do, I cost [2] less.\nDEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DEFLECT"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31637,8 +32278,16 @@
     "effect": "I enter ready.\nSHIELD 3 (+3 [might] while I'm a defender.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHIELD 3"
+    ],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-077",
@@ -31659,8 +32308,18 @@
     "effect": "SHIELD 3 (+3 [might] while I'm a defender.)\nTANK (I must be assigned combat damage first.)\nWhen I move, you may deal damage equal to my SHIELD to a unit at a battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHIELD 3",
+      "TANK"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_move",
+        "target": "chosen_unit",
+        "amount_source": "self_might"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-078",
@@ -31682,7 +32341,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "all_units_here",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-079",
@@ -31704,7 +32370,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-080",
@@ -31725,8 +32397,20 @@
     "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nWhen you play me, give another friendly unit +3 [might] this turn, then recycle me if I was played from face down.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-081",
@@ -31747,8 +32431,27 @@
     "effect": "SHOW OFF a unit (As you play this, you may reveal a unit from your hand or pick a friendly unit.)\nIf you showed off a unit, deal damage equal to that unit's Might to a unit.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_cast",
+        "target_filter": {
+          "is_unit": true
+        }
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount_source": "shown_might",
+        "condition": {
+          "type": "showed_off"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-082",
@@ -31769,8 +32472,20 @@
     "effect": "SHIELD 2 (+2 [might] while I'm a defender.)\nWhen you play me, you may kill a gear with Energy cost [4] or less.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHIELD 2"
+    ],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true,
+          "energy_at_most": 4
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-083",
@@ -31792,7 +32507,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "friendly_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-084",
@@ -31814,7 +32535,22 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "amount_source": "self_might"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_defend",
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "amount_source": "self_might"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-085",
@@ -31835,8 +32571,17 @@
     "effect": "ACCELERATE (You may pay [1] [Body] as an additional cost to have me enter ready.)\nSHIELD 2 (+2 [Might] while I'm a defender.)\nWhen I hold, channel 1 rune.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACCELERATE",
+      "SHIELD 2"
+    ],
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_hold",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-086",
@@ -31861,8 +32606,28 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, you may pay [body] to ready a unit here.\nFriendly units here have GANKING. (They can move from battlefield to battlefield.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "additional_cost": {
+          "power": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "keyword": "GANKING"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-087",
@@ -31883,7 +32648,10 @@
     "effect": "ASSAULT 2, SHIELD 2 (+2 [might] while I'm an attacker or defender.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "ASSAULT 2",
+      "SHIELD 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -31906,7 +32674,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_friendly_unit_played",
+        "count": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-089",
@@ -31927,8 +32704,22 @@
     "effect": "AMBUSH (You may play me as a REACTION to a battlefield where you have units.)\nWhen you play a card from face down, ready me and give me +1 [might] this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "AMBUSH"
+    ],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_play",
+        "target": "self",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-090",
@@ -31954,7 +32745,24 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target_filter": {
+          "has_keyword": "DEPLOY",
+          "is_gear": true
+        },
+        "keyword": "ACTION",
+        "scope": "board"
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-091",
@@ -32001,7 +32809,9 @@
     "effect": "I enter ready if you control no other units.\nDISARM 2 (When I attack, give an enemy unit here -2 [Might] this turn.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM 2"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32024,7 +32834,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_hold",
+        "token_name": "Bomb",
+        "count": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-094",
@@ -32045,7 +32862,9 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me, if it's not your turn, give me TEMPORARY. (Kill me at the start of my controller's Beginning Phase, before scoring.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "HIDDEN"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32067,8 +32886,23 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nMove a friendly unit, then play a Bomb gear token to a battlefield. (It has DEPLOY. When it dies, deal 2 to an enemy there and kill your other Bombs there.)\nFlavor text: It's more fun if nobody knows how long the fuse is.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "friendly_unit"
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "timing": "action",
+        "token_name": "Bomb"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-096",
@@ -32089,7 +32923,10 @@
     "effect": "DISARM (When I attack, give an enemy unit here -1 [Might] this turn.)\nGANKING (I can move from battlefield to battlefield.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM",
+      "GANKING"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32111,8 +32948,17 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nMove an enemy unit that moved this turn.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "enemy_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-098",
@@ -32134,7 +32980,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "target": "self",
+        "count": 1
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "target": "opponent",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-099",
@@ -32155,8 +33014,17 @@
     "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nPlay a Gold gear token exhausted. If it's your turn and you played this from face down, play three ready Gold gear tokens instead. (Gold tokens have \"REACTION Kill this,[tap] : ADD [rune].\")",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Gold",
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-100",
@@ -32177,8 +33045,20 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nKill a gear. Its controller plays a Gold gear token exhausted. (Gold has \"REACTION Kill this, [tap]: ADD [rune].\")",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "kill_gear",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "chosen_unit",
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-101",
@@ -32199,7 +33079,9 @@
     "effect": "HIDDEN (Hide now for [Rune] to react with later for [0].)\nChoose a friendly unit, then choose one –\n• Move it to an open battlefield.\n• Give it GANKING this turn if there are no open battlefields. (It can move from battlefield to battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "HIDDEN"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32221,8 +33103,19 @@
     "effect": "HIDDEN (Hide now for [rune] to react later for [0].)\nSHOW OFF a card with HIDDEN. (As you play me, you may reveal such a card from your hand or pick another friendly one on the board.)\nWhen you play me, if you showed off, ADD [rune].",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "HIDDEN",
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_play",
+        "target_filter": {
+          "has_keyword": "HIDDEN"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-103",
@@ -32244,7 +33137,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "enemy_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-104",
@@ -32265,7 +33168,9 @@
     "effect": "ACCELERATE (You may pay [1] [chaos] as an additional cost to have me enter ready.)\nWhen I become exhausted, choose one —\n• Play a Gold gear token exhausted. (It has \"REACTION[>] Kill this, [tap]: ADD [rune].\")\n• Pay [chaos] to draw 1.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "ACCELERATE"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32287,8 +33192,26 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, discard 1, then draw 3.\nWhen you hold here, return this to its owner's hand.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "on_play",
+        "count": 1
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_play",
+        "count": 3
+      },
+      {
+        "effect": "recall_unit",
+        "trigger": "on_hold",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-106",
@@ -32309,7 +33232,9 @@
     "effect": "HIDDEN (Hide now for [rune] to react with later for [0].)\nWhen you play me, choose a battlefield. If there are 4 or more units there, you may return an enemy unit there to its owner's hand.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "HIDDEN"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32331,7 +33256,9 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhile you or an ally control this battlefield, that player may hide an additional card here.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DEPLOY"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32353,7 +33280,9 @@
     "effect": "DISARM\nWhen I hold, if you control a facedown card here, score 1 point.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DISARM"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32424,7 +33353,27 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "token_name": "Bomb"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_defend",
+        "target": "self",
+        "amount": 2,
+        "cost": {
+          "sacrifice": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-112",
@@ -32449,7 +33398,9 @@
     "effect": "DEFLECT (Opponents must pay [Any Power] to choose me with a spell or ability.)\n[tap]: Choose an opponent. They must move a unit they control to my battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DEFLECT"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32498,7 +33449,18 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "friendly_unit",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-115",
@@ -32519,8 +33481,33 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this or when you conquer here, you may pay [1] to play a 1 [might] Recruit unit token to your base.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Recruit",
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_conquer",
+        "token_name": "Recruit",
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-116",
@@ -32541,8 +33528,19 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a battlefield. Give friendly units there SHIELD 2 this turn. (+2 [might] while they're defenders.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_shield",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "all_friendly_units_here",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-117",
@@ -32585,8 +33583,16 @@
     "effect": "DEATHKNELL Play a 1 [might] Bird unit token with DEFLECT to your base. (When I die, get the efefct. Opponents must pay [rune] to choose a DEFLECT unit with a spell or ability.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_death",
+        "token_name": "Bird"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-119",
@@ -32629,8 +33635,24 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nBUFF a friendly unit and STUN an enemy unit. (Give the friendly unit a +1 [might] buff if it doesn't have one. The enemy unit doesn't deal combat damage this turn.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "friendly_unit",
+        "amount": 1
+      },
+      {
+        "effect": "stun_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "enemy_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-121",
@@ -32651,7 +33673,9 @@
     "effect": "I cost [1] less for each exhausted unit you control.\nTANK (I must be assigned combat damage first.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "TANK"
+    ],
     "effects": [],
     "variants": [
       {
@@ -32673,8 +33697,19 @@
     "effect": "QUICK-DRAW (This has REACTION. When you play it, attach it to a unit you control.)\nEQUIP [1] ([1]: Attach this to a unit you control.)",
     "effect_equipped": "TANK (I must be assigned combat damage first.)",
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "QUICK-DRAW",
+      "EQUIP 1",
+      "TANK"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "TANK"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-123",
@@ -32696,7 +33731,21 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "target_filter": {
+          "might_at_most": 3
+        }
+      },
+      {
+        "effect": "burn",
+        "trigger": "on_cast",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-124",
@@ -32717,8 +33766,22 @@
     "effect": "You may kill a friendly unit as an additional cost to play me. If you do, I cost [2] less.\nDEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEFLECT"
+    ],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "kill_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-125",
@@ -32739,8 +33802,16 @@
     "effect": "DEATHKNELL You may kill a unit or gear here. (When I die, get the effect.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEATHKNELL"
+    ],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_death",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-126",
@@ -32761,8 +33832,33 @@
     "effect": "SHOW OFF a card with Energy cost [7] or more. (As you play this, you may reveal such a card from your hand or pick a friendly one.)\nPlay two 1 [Might] Recruit unit tokens to your base. If you showed off, play four to your base instead.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "SHOW OFF"
+    ],
+    "effects": [
+      {
+        "effect": "show_off",
+        "trigger": "on_cast",
+        "target_filter": {
+          "energy_at_least": 7
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Recruit",
+        "count": 2
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Recruit",
+        "count": 2,
+        "condition": {
+          "type": "showed_off"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-127",
@@ -32783,8 +33879,23 @@
     "effect": "TANK (I must be assigned combat damage first.)\nWhile there are 2 or more other friendly units and/or gear at my battlefield, I have +2 [might].",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "TANK"
+    ],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "count": 3
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-128",
@@ -32806,7 +33917,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_play",
+        "count": 4,
+        "target_filter": {
+          "energy_at_most": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-129",
@@ -32828,7 +33948,18 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "return_from_trash",
+        "trigger": "on_friendly_unit_death",
+        "target_filter": {
+          "is_gear": true
+        },
+        "cost": {
+          "energy": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-130",
@@ -32850,7 +33981,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_friendly_unit_death",
+        "target": "friendly_unit",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-131",
@@ -32893,8 +34031,17 @@
     "effect": "ASSAULT (+1 [might] while I'm an attacker.)\nTANK (I must be assigned combat damage first.)\nWhen I attack, you may move a unit you control to my battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ASSAULT 1",
+      "TANK"
+    ],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_attack",
+        "target": "friendly_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-133",
@@ -32942,7 +34089,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_cast",
+        "target": "self",
+        "count": 3,
+        "target_filter": {
+          "energy_at_most": 3
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-135",
@@ -32963,8 +34120,17 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen you play this, banish a unit here.\nWhen you hold here, kill this to play the banished card, ignoring its cost. (Tokens aren't cards.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "banish_card",
+        "trigger": "on_play",
+        "target": "enemy_unit",
+        "from": "board"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-136",
@@ -32986,7 +34152,24 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      },
+      {
+        "effect": "kill_unit",
+        "trigger": "on_attack",
+        "target": "chosen_unit",
+        "additional_cost": {
+          "discard_cards": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-137",
@@ -33012,7 +34195,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_play",
+        "token_name": "Recruit"
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount_source": "self_might"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-138",
@@ -33037,8 +34232,19 @@
     "effect": "EMPOWER — [1], [tap] (Use only if not Empowered.)\nDisempower me, [tap]: Reduce the cost of the next unit you play this turn by [2] [rune] and give it \"Kill me at end of the turn.\"",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EMPOWER"
+    ],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-139",
@@ -33082,7 +34288,18 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "token_name": "Bomb"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-141",
@@ -33103,8 +34320,22 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nKill any number of friendly Bomb tokens. At end of turn, play that many Bomb tokens to a single battlefield.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "kill_unit",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "all_friendly_units_here",
+        "scope": "all",
+        "target_filter": {
+          "subtype": "Bomb",
+          "is_token": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-142",
@@ -33125,7 +34356,9 @@
     "effect": "REACTION Banish a unit or gear from your trash, [tap]: ADD [rune]. Spend this Power only to play units or gear. (Abilities that add resources can't be reacted to.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -33148,7 +34381,22 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "amount": -2,
+        "duration": "this_turn"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-144",
@@ -33191,7 +34439,10 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nGANKING (While this is a unit, it can move from battlefield to battlefield.)\nWhen you play or move this, choose one —\n• Draw 1.\n• Deal 2 to enemy units here.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "DEPLOY",
+      "GANKING"
+    ],
     "effects": [],
     "variants": [
       {
@@ -33235,8 +34486,19 @@
     "effect": "ACTION (Play on your turn or in showdowns.)\nGive a friendly unit SHIELD 2 this turn, then deal damage equal to its SHIELD to an enemy unit. (A unit with Shield has a +1 [might] for each instance of Shield while it's a defender.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "ACTION"
+    ],
+    "effects": [
+      {
+        "effect": "give_temporary_shield",
+        "trigger": "on_cast",
+        "timing": "action",
+        "target": "friendly_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-148",
@@ -33279,8 +34541,17 @@
     "effect": "EQUIP  — [rune] or exhaust a friendly unit (Pay the cost: Attach this to a unit you control.)",
     "effect_equipped": "GANKING (I can move from battlefield to battlefield.)",
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "EQUIP 1"
+    ],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-150",
@@ -33302,7 +34573,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "target_filter": {
+          "is_spell": true
+        },
+        "additional_cost": {
+          "exhaust_friendly_unit": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-151",
@@ -33367,7 +34650,9 @@
     "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nThe next unit you play this turn, even from face down, can be played to any battlefield. When you play it, BUFF it. (Give it a +1 [might] buff if it doesn't have one.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "REACTION"
+    ],
     "effects": [],
     "variants": [
       {
@@ -33390,7 +34675,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_friendly_unit_played",
+        "target": "friendly_unit",
+        "cost": {
+          "tap": true,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-155",
@@ -33411,8 +34706,18 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nWhen one or more friendly units attack here, give one of them +2 [might] this turn.\nWhen you hold here, you may return this to its owner's hand.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_attack",
+        "target": "friendly_unit",
+        "amount": 2,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-156",
@@ -33434,7 +34739,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "token_name": "Gold",
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-157",
@@ -33456,7 +34768,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "power": 2
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-158",
@@ -33478,7 +34800,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_friendly_unit_death",
+        "token_name": "Recruit",
+        "target_filter": {
+          "non_token": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-159",
@@ -33500,7 +34831,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_hold",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-160",
@@ -33522,7 +34859,15 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "on_defend",
+        "target": "friendly_unit",
+        "keyword": "TANK",
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-161",
@@ -33566,7 +34911,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-163",
@@ -33588,7 +34939,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "all_units_here",
+        "target_filter": {
+          "is_champion": true
+        },
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-164",
@@ -33609,7 +34970,9 @@
     "effect": "For each player, the first time they play a unit or a gear here each turn, they PREDICT. (They look at the top card of their Main Deck. They may recycle it.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
+    "keywords": [
+      "PREDICT 1"
+    ],
     "effects": [],
     "variants": [
       {
@@ -33632,7 +34995,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "discard_card",
+        "trigger": "on_conquer",
+        "count": 1
+      },
+      {
+        "effect": "channel_rune",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "exhausted": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-166",

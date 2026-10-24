@@ -877,7 +877,10 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """PREDICT/SCRY X: look at the top X cards of your deck and reorder them.
     Deterministic policy: arrange so the highest-might card is drawn next (placed
     on top). No card leaves the deck. Top of deck = end of the cards list."""
-    amount = int(spec.get("amount", spec.get("count", 1)))
+    if spec.get("amount_source"):
+        amount = _amount(ctx, spec)  # e.g. The Empyrean: shown_power_cost
+    else:
+        amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
     if n == 0:
