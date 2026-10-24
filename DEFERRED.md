@@ -75,6 +75,16 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
     of turn, play that many Bombs". The RL observation encoding doesn't include
     deployed gear yet (changing it changes the net's input shape).
+  - **Parse of the long tail (2026-10-24, 3 runs, Opus 4.8):** hand review emptied
+    every spec that made a card STRONGER than printed (dropped condition/cost,
+    wrong trigger, cost-less activated abilities). These cards are empty on purpose
+    and a plain `--only-empty` re-parse tends to break them the same way — only
+    re-parse after the engine gains what they need: OGN-025, OGN-113, OGN-200,
+    OGN-251, OGN-256, OGN-290, SFD-055, SFD-083, SFD-110, SFD-117, SFD-141,
+    UNL-018, UNL-045, UNL-054, UNL-136, UNL-143, VEN-088, VEN-119, VEN-162,
+    RAD-016, RAD-043*, RAD-051, RAD-053*, RAD-071, RAD-105*, RAD-107, RAD-114,
+    RAD-149, RAD-157 (* = since fixed via on_exhaust). Cards from the first
+    Radiance run were only spot-checked.
   - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
     keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
   - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In

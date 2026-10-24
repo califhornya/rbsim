@@ -459,7 +459,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT 1"
+      "DEFLECT"
     ],
     "effects": []
   },
@@ -1153,7 +1153,16 @@
     "keywords": [
       "ASSAULT 3"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "opponent_controls_a_battlefield"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-036",
@@ -2875,7 +2884,7 @@
     ],
     "keywords": [
       "PREDICT 1",
-      "SHIELD 1"
+      "SHIELD"
     ],
     "effects": []
   },
@@ -4892,7 +4901,7 @@
     ],
     "keywords": [
       "ACCELERATE",
-      "ASSAULT 1"
+      "ASSAULT"
     ],
     "effects": []
   },
@@ -5122,7 +5131,9 @@
         "rarity": "Rare"
       }
     ],
-    "keywords": [],
+    "keywords": [
+      "GANKING"
+    ],
     "effects": []
   },
   {
@@ -7298,7 +7309,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "stun_unit",
+        "trigger": "on_play",
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-226",
@@ -7320,7 +7337,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_play",
+        "target_filter": {
+          "energy_at_most": 3,
+          "is_unit": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-227",
@@ -7452,7 +7478,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT 1",
+      "DEFLECT",
       "GANKING"
     ],
     "effects": []
@@ -7909,7 +7935,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-246",
@@ -7989,7 +8024,17 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "timing": "reaction",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-248",
@@ -9712,7 +9757,7 @@
       }
     ],
     "keywords": [
-      "SHIELD 1"
+      "SHIELD"
     ],
     "effects": []
   },
@@ -10696,7 +10741,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "amount_source": "cards_played_this_turn"
+      }
+    ]
   },
   {
     "card_id": "SFD-013",
@@ -11080,7 +11132,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target_filter": {
+          "subtype": "Mech"
+        },
+        "scope": "all",
+        "keyword": "ASSAULT"
+      }
+    ]
   },
   {
     "card_id": "SFD-027",
@@ -12110,7 +12172,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT"
+      "DEFLECT 1"
     ],
     "effects": []
   },
@@ -12612,7 +12674,26 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_cast",
+        "modes": [
+          {
+            "effect": "deal_damage",
+            "target": "chosen_unit",
+            "amount": 4
+          },
+          {
+            "effect": "kill_gear",
+            "target": "chosen_unit",
+            "target_filter": {
+              "is_gear": true
+            }
+          }
+        ]
+      }
+    ],
     "keywords": [
       "REPEAT"
     ]
@@ -12667,7 +12748,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "scope": "all",
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "additional_cost": {
+          "exhaust_friendly_unit": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-080",
@@ -13089,9 +13183,7 @@
         "rarity": "Common"
       }
     ],
-    "keywords": [
-      "GANKING"
-    ],
+    "keywords": [],
     "effects": []
   },
   {
@@ -15367,7 +15459,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "dig",
+        "trigger": "on_attack",
+        "amount": 2
+      }
+    ]
   },
   {
     "card_id": "SFD-171",
@@ -15860,6 +15958,7 @@
     ],
     "keywords": [
       "QUICK-DRAW",
+      "REACTION",
       "EQUIP 1",
       "TEMPORARY"
     ],
@@ -16128,7 +16227,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_conquer",
+        "target": "self",
+        "cost": {
+          "energy": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-196",
@@ -16755,7 +16863,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_top_draw_if_spell",
+        "trigger": "on_defend",
+        "target": "actor"
+      }
+    ]
   },
   {
     "card_id": "SFD-216",
@@ -16993,8 +17107,20 @@
         "rarity": "Common"
       }
     ],
-    "keywords": [],
-    "effects": []
+    "keywords": [
+      "REACTION"
+    ],
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "timing": "reaction",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-001",
@@ -18147,7 +18273,24 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "opponent_controls_stunned_unit"
+        }
+      },
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "opponent_controls_stunned_unit"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-036",
@@ -18649,7 +18792,30 @@
       "REACTION",
       "LEVEL 6"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "controller_has_xp_at_least",
+          "params": {
+            "amount": 6
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-050",
@@ -19580,7 +19746,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount_source": "n_friendly_with_tag",
+        "tag": "TEMPORARY"
+      }
+    ]
   },
   {
     "card_id": "UNL-077",
@@ -19933,7 +20107,13 @@
     "keywords": [
       "SHIELD 2"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "on_hold",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "UNL-088",
@@ -19983,7 +20163,13 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_play",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "UNL-090",
@@ -20432,7 +20618,24 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "modes": [
+          {
+            "effect": "recycle_card",
+            "target": "opponent",
+            "count": 3
+          },
+          {
+            "effect": "draw_cards",
+            "count": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "card_id": "UNL-104",
@@ -23062,7 +23265,34 @@
     "keywords": [
       "REPEAT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_cast",
+        "modes": [
+          {
+            "effect": "draw_cards",
+            "count": 1
+          },
+          {
+            "effect": "deal_damage",
+            "target": "chosen_unit",
+            "amount": 2
+          },
+          {
+            "effect": "deal_damage",
+            "target": "chosen_unit",
+            "amount": 3
+          },
+          {
+            "effect": "grant_temporary_might",
+            "target": "chosen_unit",
+            "amount": -4,
+            "duration": "this_turn"
+          }
+        ]
+      }
+    ]
   },
   {
     "card_id": "UNL-183",
@@ -24273,7 +24503,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "on_hold",
+        "amount": -1,
+        "target_filter": {
+          "non_token": true,
+          "is_unit": true
+        },
+        "duration": "this_turn"
+      }
+    ]
   },
   {
     "card_id": "UNL-T01",
@@ -24321,7 +24562,7 @@
       }
     ],
     "keywords": [
-      "DEFLECT 1"
+      "DEFLECT"
     ],
     "effects": []
   },
@@ -24349,7 +24590,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "passive",
+        "target": "all_units_here",
+        "target_filter": {
+          "subtype": "Bird"
+        },
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "UNL-T06",
@@ -24829,7 +25080,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "card_with_my_name_in_trash"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-013",
@@ -25558,7 +25818,37 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "modes": [
+          [
+            {
+              "effect": "empower_self",
+              "target": "chosen_unit"
+            },
+            {
+              "effect": "disempower",
+              "target": "chosen_unit",
+              "trigger": "on_end_of_turn"
+            }
+          ],
+          [
+            {
+              "effect": "disempower",
+              "target": "chosen_unit"
+            },
+            {
+              "effect": "empower_self",
+              "target": "chosen_unit",
+              "trigger": "on_end_of_turn"
+            }
+          ]
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-035",
@@ -26120,7 +26410,25 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "modes": [
+          {
+            "effect": "recall_unit",
+            "target": "friendly_unit"
+          },
+          {
+            "effect": "grant_temporary_might",
+            "target": "enemy_unit",
+            "amount": -2,
+            "duration": "this_turn"
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-052",
@@ -27122,7 +27430,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "disempower",
+        "trigger": "on_play",
+        "target": "friendly_unit"
+      },
+      {
+        "effect": "empower_self",
+        "trigger": "on_play",
+        "target": "chosen_unit"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-082",
@@ -27941,7 +28260,16 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "on_cast",
+        "target": "all_enemy_units_here",
+        "target_filter": {
+          "subtype": "Order"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-107",
@@ -28289,7 +28617,20 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "SHIELD 3",
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "count": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-117",
@@ -29079,7 +29420,17 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "gain_energy",
+        "trigger": "activated",
+        "amount": 2,
+        "cost": {
+          "power": 2,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-141",
@@ -29701,7 +30052,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "condition": {
+          "type": "you_control_this_battlefield"
+        },
+        "target_filter": {
+          "is_gear": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-161",
@@ -31326,7 +31689,27 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_exhaust",
+        "modes": [
+          {
+            "effect": "buff_unit",
+            "target": "self",
+            "amount": 1
+          },
+          {
+            "effect": "stun_unit",
+            "target": "enemy_unit"
+          },
+          {
+            "effect": "ready_unit",
+            "target": "self"
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-043",
@@ -31634,7 +32017,13 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_exhaust",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-053",
@@ -32001,7 +32390,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [
-      "DISARM"
+      "DISARM 2"
     ],
     "effects": [],
     "variants": [
@@ -32210,8 +32599,7 @@
     "effect_equipped": "SHIELD 2 (+2 [might] while I'm a defender.)",
     "set": "Radiance",
     "keywords": [
-      "EQUIP 1",
-      "SHIELD 2"
+      "EQUIP 1"
     ],
     "effects": [],
     "variants": [
@@ -33308,7 +33696,25 @@
     "keywords": [
       "ACCELERATE"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_exhaust",
+        "modes": [
+          {
+            "effect": "play_token",
+            "token_name": "Gold"
+          },
+          {
+            "effect": "draw_cards",
+            "count": 1,
+            "additional_cost": {
+              "power": 1
+            }
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-105",
@@ -33538,7 +33944,17 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "enemy_unit",
+        "cost": {
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-113",
@@ -34211,7 +34627,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_units",
+        "trigger": "on_cast",
+        "target": "all_friendly_units_here"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "all_friendly_units_here",
+        "amount": 3,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-134",
@@ -35207,10 +35636,15 @@
     "effect": "For each player, the first time they play a unit or a gear here each turn, they PREDICT. (They look at the top card of their Main Deck. They may recycle it.)",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [
-      "PREDICT 1"
+    "keywords": [],
+    "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_first_unit_here",
+        "target": "actor",
+        "amount": 1
+      }
     ],
-    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-165",

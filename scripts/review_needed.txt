@@ -67,58 +67,235 @@ Ntofo Strikes	model flagged
 Seraphine Starry-Eyed Songstress	Additional-cost exhaust me plus three friendly units to reduce spell cost; complex multi-unit exhaust cost not fully expressible.
 Jarvan IV Exemplar of Demacia	Trigger specifically on playing a gear with DEPLOY and moving unit to that battlefield; trigger scope and destination not precisely expressible.
 Demacian Standard	When friendly units attack here give one +2; and when you hold here optionally return this to hand.
-Bandle Scouts' Academy	Trigger is 'when you hide a card here'; no supported hide trigger.
 Black Market	Ability usable by each player once per turn regardless of control; shared-ability semantics not expressible.
 Black Rose Sanctum	Applies to each player's first non-token unit death here per turn; per-player first-time-each-turn tracking not fully expressible.
 Cosmic Vista	Score conditional on empty Rune Deck; no supported condition.
 Durand Memorial	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
 Hunters' Circle	First unit/gear each player plays here costs 1 less; aura affecting cards played here, not the source.
 Ruined Monastery	The discard is an optional cost gating the channel; cost-gated trigger not fully expressible.
-Scorched Earth	split damage among units at a battlefield is not expressible
 Lost to the Sands	possible dropped clause (~3 text clauses vs 1 effect(s) emitted)
-Coalesced Energy	recycling all runes then channeling as a sequenced action; recycle of runes not cleanly expressible
-Drakehound Packmaster	reveal top of each opponent deck, choose one to banish and play ignoring cost, recycle rest — not expressible
 Ekko Revolutionary	activated banish-self then replay ignoring cost not expressible
 Entrenched Boar	optional enter-ready with a can't-move drawback not expressible
 Command: Attack	possible dropped clause (~5 text clauses vs 1 effect(s) emitted)
-Orianna Exquisite	conditional combat damage prevention unless friendly gear here not expressible
-Riven Broken Blade	when-I-become-exhausted trigger and spend-buff costs on modes, with no-repeat-choice constraint not cleanly expressible
-K'Sante Dauntless	double the SHIELD value of a friendly unit here this turn not expressible
-Fanfare	Delayed trigger granting a draw the next three times you play a unit this turn is not expressible.
-Parallel Convergence	Mandatory additional cost of returning a friendly unit to hand is not an expressible additional_cost key.
 Resource Extractor	The end-of-turn trigger is gated on 'if you control this battlefield', for which no matching condition exists.
-Strigian Oracle	The PREDICT triggers specifically 'when I become exhausted', for which no matching trigger exists.
-Piltovan Guidebot	Setting base Might equal to a played card's Energy cost this turn is not an expressible effect.
 Kai'Sa Rebel	Granting your spells REACTION while in a showdown is an aura/conditional static effect that is not dispatched; the DISARM reminder is a keyword.
-Scrutinizing Scope	Opponent guesses a card type and the top card is recycled or drawn accordingly; this interactive guess mechanic is not expressible.
-Seraphine Inspiring	Once-per-turn draw triggered when you exhaust three or more friendly units simultaneously is not an expressible trigger.
 Skystrike Squadron	additional cost 'return a friendly gear to hand' not expressible as a cost key
-Seraphic Wyvern	channel-replacement modifier (channel extra exhausted rune) not expressible
 Disposal Expert	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
 Momentary Companion	'if it's not your turn' gate for giving TEMPORARY not expressible
 Demon Shade	mode conditions ('to an open battlefield' / 'if there are no open battlefields') not expressible
-Reckless Innovator	'When I become exhausted' trigger not supported; second mode gated on paying [chaos]
-Bedeviling Stranger	return to hand gated on a battlefield having 4+ units; condition not supported
-Bushwhack Trap	ability to hide an additional card while controlling the battlefield not modeled
-Evelynn in Control	on_hold score gated on controlling a facedown card here; condition not supported
-Lulu Whimsical	setting another unit's base Might to a fixed value is not supported
-Mechanical Bandit	each-player reveal + draw lowest-cost + recycle rest not supported
-Angler Wyrm	forcing an opponent to move a unit to my battlefield not supported
-Riven Deserter	first trigger is 'becomes exhausted' not death; activated cost is exhaust-a-friendly-unit and once-per-turn limit not modeled
-Herald of the Emperor	setting a friendly unit's base Might to a fixed value is not supported
-Meticulous Restorationist	play self from trash on playing a high-cost card not supported
 Party Crasher	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
-Heimerdinger Academy Instructor	Token-replacement effect (play a Mech token instead of any unit token) is not expressible.
-Raucous Anthem	'Your units' means everywhere (ready + buff all friendly units anywhere); no anywhere-scoped target.
-Chronobreak	Variable additional power cost banishing that many friendly units then replaying them is not expressible.
 Mordekaiser Iron Revenant	Cost 'banish a unit or gear from trash' and the spending restriction are not expressible.
-Orianna Lady of Clockwork	Making a friendly gear into a unit gear with Might equal to its Energy cost is not expressible.
 The Ball	possible dropped clause (~3 text clauses vs 2 effect(s) emitted)
 K'Sante Pride of Nazumah	Granting 'ASSAULT equal to my SHIELD' (dynamic keyword value) is not expressible.
-Riven The Exile	Static effect making units you play enter ready (passive aura on played units) is not expressible.
 Encore	possible dropped clause (~4 text clauses vs 1 effect(s) emitted)
-Evelynn Agony's Embrace	Trigger on playing a card from face down, once-per-turn, with a conditional discard if not your turn — no supported trigger/condition.
-Last Caress	Grants the next unit played this turn the ability to be played to any battlefield and buffs it when played — no supported verb for a delayed next-unit-played modifier.
-Firelights' Hideout	On conquer, the next unit played this turn gains ACCELERATE — delayed grant to the next unit played is not supported.
-Rakelstake	Per-player first-unit-or-gear-played-here-each-turn triggered PREDICT — no supported trigger for each player's first play here.
-Neeko Blending In	Deckbuilding rule choosing extra legends and adding a chosen legend to the Legend Zone on play — no supported verb for manipulating the Legend Zone.
+Flame Chompers	'When you discard me, you may pay to play me' is a discard-triggered optional play from a non-standard zone with a cost not modeled.
+Noxus Saboteur	'Opponents' HIDDEN cards can't be revealed here' is a static restriction on opponent HIDDEN reveal; no verb for it.
+Sun Disc	'The next unit you play this turn enters ready' is a delayed modifier on the next unit played; not modeled.
+Blind Fury	Reveal top of each opponent's deck, banish chosen then play it ignoring cost, then recycle the rest — multi-step cross-zone play-from-banish not fully modeled.
+Brynhir Thundersong	'Opponents can't play cards this turn' is a global play-lock effect; no verb for it.
+Ravenborn Tome	Granting bonus damage to the next spell played this turn is not supported.
+Vayne Hunter	The 'when I conquer, you may pay [1] to return me to hand' ability uses an optional energy cost on a triggered recall that isn't expressible.
+Immortal Phoenix	The 'when you kill a unit with a spell, pay [1][fury] to play me from trash' is a cost-gated triggered play-from-trash that isn't expressible.
+Volibear Furious	The attack deals 5 damage split among any number of enemy units here; split damage has no engine semantics.
+Mageseeker Warden	Both static abilities (restricting where opponents can play units, and preventing spells/abilities from readying enemy units/gears) have no matching effect vocab.
+Party Favors	Each other player chooses Cards or Runes, and both you and that player draw or channel accordingly; this multi-player choice mechanic isn't expressible.
+Mushroom Pouch	Draw gated on controlling a facedown card at a battlefield; no matching condition type.
+Ava Achiever	On-attack optional cost to play a HIDDEN card from hand ignoring its cost; no matching play-from-hand verb.
+Convergent Mutation	Set a friendly unit's Might equal to another friendly unit's Might this turn; no matching set-might verb.
+Heimerdinger Inventor	Gains all tap abilities of all friendly legends, units, and gears; no matching verb.
+Kai'Sa Evolutionary	On-conquer play a spell from trash with Energy cost less than your points without paying Energy cost, then recycle it; no matching verb/condition.
+Malzahar Fanatic	Activated cost requires killing a friendly unit or gear, which is not an expressible cost key.
+Promising Future	Each-player deck manipulation (look, banish, recycle, then play ignoring energy costs) has no supported verbs.
+Teemo Strategist	On-defend reveal top 5, deal 1 per HIDDEN card revealed, then recycle — damage scaling off revealed-card keyword count and the reveal-and-recycle sequence are not supported.
+Challenge	Choose a friendly and an enemy unit; they deal damage equal to their Mights to each other — mutual-might combat is not expressible.
+Dune Drake	+2 might this turn gated on there being a READY ENEMY unit here — no matching condition.
+Unyielding Spirit	Prevent all spell and ability damage this turn — no damage-prevention verb.
+Kraken Hunter	Reduce cost by [body] (1 power) for each buff spent as additional cost — spend-any-number-of-buffs scaling discount not cleanly expressible.
+Kraken Hunter	unknown additional_cost key(s) ['spend_buff']
+Udyr Wildman	The 'choose one you've not chosen this turn' once-per-mode restriction is not modeled.
+Udyr Wildman	unknown activated cost key(s) ['spend_buff']
+Dazzling Aurora	Reveal-until-unit, banish and play ignoring cost, recycle rest — no supported verb for this sequence.
+Deadbloom Predator	Alternate-play location (occupied enemy battlefield) is not modeled.
+Sai Scout	Alternate-play to an open battlefield not modeled.
+Sneaky Deckhand	Alternate-play to an open battlefield not modeled.
+Stealthy Pursuer	Optional move-along when a friendly unit moves from my location not modeled.
+Whirlwind	Each player may return a unit to owner's hand — multiplayer sequential optional recall not modeled.
+Kayn Unleashed	Damage-immunity if moved twice this turn — damage-prevention conditional on move count not modeled.
+Miss Fortune Buccaneer	Play-to-open-battlefield placement rules not expressible
+The Harrowing	No effect text provided
+Twisted Fate Gambler	Reveal-top-rune-and-recycle then branch on its domain not expressible
+Yasuo Windrider	Score on the third move in a turn not expressible
+Imperial Decree	Delayed 'when any unit takes damage this turn, kill it' trigger not expressible
+Solari Chief	Single-target choice that conditionally kills-if-stunned-else-stuns the SAME chosen unit not cleanly expressible; emitted approximations
+Spectral Matron	play from trash gated also on power cost no more than 1, ignoring cost
+Symbol of the Solari	conditional combat-tie replacement recalling all units is not representable
+Albus Ferros	spend any number of buffs then channel per buff spent is a coupled magnitude
+Albus Ferros	unknown amount_source 'spent_buffs'
+Commander Ledros	kill any number as additional cost reducing cost per kill is not cleanly representable
+Commander Ledros	unknown amount_source 'friendly_units_killed_as_cost'
+Grand Strategem	buff to all friendly units anywhere has no target
+Karthus Eternal	static effect making DEATHKNELL effects trigger an additional time is not representable
+King's Edict	no effect text provided
+Divine Judgment	each player keeps a chosen subset and recycles the rest across multiple zones; not representable
+Seal of Unity	ADD [0][order] is a domain power pip usable any time; domain-restricted gain not fully modeled
+Kai'Sa Daughter of the Void	spend restriction (only to play spells) not modeled
+Jinx Loose Cannon	condition 'one or fewer cards in hand' not supported
+Fox-Fire	kill any number of units with total Might 4 or less (combined-might selection) not fully modeled
+Teemo Swift Scout	alternate hide cost and returning a Teemo unit from Champion Zone to hand not supported
+Aspirant's Climb	increase points needed to win not supported
+Bandle Tree	hide an additional card here not supported
+Reckoner's Arena	activating conquer effects of units here on hold is not an expressible effect
+The Arena's Greatest	triggers only on each player's first Beginning Phase, not every start of turn
+The Grand Plaza	win the game when holding with 7+ units here is not an expressible effect
+Vilemaw's Lair	static restriction preventing units from moving to base is not expressible
+Annie Fiery	static bonus damage to your spells and abilities is not expressible
+Void Drone	cost reduction only when played from somewhere other than hand is not expressible
+Battering Ram	minimum cost floor of [1] is not expressible
+Minotaur Reckoner	Static rule preventing units from moving to base is not an expressible effect.
+Perched Grimwyrm	Play restriction (only to a battlefield you conquered this turn) is not expressible.
+Void Hatchling	Reveal-replacement with look-and-recycle is not expressible.
+Rengar Pouncing	'I can be played to a battlefield you're attacking' is a play-location permission, not an expressible effect.
+Rumble Hotheaded	On-conquer recycle-to-play-Mech-from-trash with cost reduction by recycled unit's might is not expressible.
+Skyfall of Areion	Equipped effect swapping hold/conquer triggers is not expressible.
+Legion Quartermaster	Mandatory additional cost (return a friendly gear) is not expressible as an additional_cost key.
+Needlessly Large Yordle	Cost reduction scales per point scored from holding this turn ([2][calm] less per point); the specific source and domain-pip discount are not accurately expressible.
+Svellsongur	Copying the attached unit's text to the equipment is not expressible.
+Tianna Crownguard	While at a battlefield, opponents can't gain points — no supported verb.
+Rocket Barrage	possible dropped clause (~3 text clauses vs 1 effect(s) emitted)
+Temporal Portal	Grant the next spell you play REPEAT equal to its cost — no supported verb for granting keywords to future spells.
+Bard Mercurial	Additional cost is 'exhaust your legend' (not a generic friendly unit), and 'any number of your units to an open battlefield' is a flexible multi-move.
+Card Sharp	Optional symmetric Gold gear token play by all players, then you play one per opponent who did — no supported verb for the conditional count.
+Hextech Anomaly	Pay any amount of [rune] to ADD that much Energy — variable X cost not expressible.
+Premonition	Card has no body effect text.
+Dauntless Vanguard	May play me to an occupied enemy battlefield — alternate placement rule, no supported verb.
+Ruin Runner	Cannot be chosen by enemy spells/abilities is not an expressible static effect.
+Fiora Peerless	Double Might applies on attack OR defend one-on-one; on_defend variant and the one-on-one gate not fully expressible.
+Here to Help	Play a unit from hand to a battlefield you control with a cost reduction is not an expressible effect.
+Marching Orders	Choosing a friendly and enemy unit that deal their Mights to each other is not expressible.
+Ancient Henge	Pay any amount of Energy to add that much power is a variable self-paid cost not fully expressible.
+Sivir Ambitious	Conditional excess-damage redirection on conquer not expressible.
+Temptation	Move an enemy unit to a location sharing a controller is not expressible.
+Irelia Graceful	Discount applies only to your spells that choose this unit; target-choosing filter and the [1]-or-[rune] option not expressible.
+Downwell	Return ALL units and gear to owners' hands is a board-wide bounce not expressible with supported verbs.
+Rek'Sai Swarm Queen	Reveal top 2, optionally banish and play one (here if unit), recycle rest — complex multi-step not fully expressible
+Blade of the Ruined King	EQUIP cost includes killing a friendly unit, which isn't expressible in the EQUIP keyword cost
+Rek'Sai Void Burrower	On-conquer optional exhaust-me to reveal top 2, banish and play one, recycle rest — multi-step reveal/banish/play not expressible
+Void Rush	Reveal top 2, optionally banish and play one with cost reduction, draw the rest — multi-step reveal/banish/play not expressible
+Rabadon's Deathcrown	Equipped unit's spells and abilities deal 3 bonus damage — bonus damage modifier not expressible
+Jax Grandmaster at Arms	Both activated abilities attach/re-attach Equipment, which isn't an expressible effect
+Irelia Blade Dancer	First ability triggers 'when you choose a friendly unit', an unsupported trigger; ready-me-on-conquer with optional pay is approximated
+Forge of the Fluft	Grants an activated attach ability to friendly legends while controlling this battlefield; granting activated abilities to other cards is not supported.
+Forgotten Monument	Prevents scoring here until a player's third turn; no scoring-restriction mechanic supported.
+Ravenbloom Conservatory	possible dropped clause (~3 text clauses vs 1 effect(s) emitted)
+Rockfall Path	Prevents units being played here; no play-restriction mechanic supported.
+Gold	The 'Kill this' is an additional cost on the activated ADD ability; kill-self cost not supported.
+Lotus Trap	Doubles all damage that would be dealt to a chosen unit this turn — a damage-taken modifier, not a Might buff; no verb supported.
+Yeti Brawler	excess damage condition on conquer not expressible
+Blighted Battleaxe	end-of-turn self-unattach-and-damage gated on not conquering not expressible
+Katarina Reckless	when-you-hide and when-you-play-from-facedown triggers not supported
+Katarina Reckless	unknown trigger 'on_play_from_facedown'
+Forgotten Signpost	exhaust-a-unit cost and move-to-location-of-exhausted-unit semantics not expressible
+Tricksy Tentacles	move multiple enemy units with same controller and total might <= 8 to a single location not expressible
+Vex Mocking	when-you-stun-enemy move-me-to-that-battlefield trigger not supported
+Alpha Wildclaw	Granting untargetability to friendly units with less might than me has no supported verb.
+Zilean Time Mage	Replacing a token play with the token plus an additional copy has no supported verb.
+Blue Sentinel	Doubling hold-effect triggers has no supported verb; the ADD timing (at start of next Main Phase) is also not modeled.
+Gutter Palace	The alternate win condition is not supported; discard cost key for activated abilities is not available.
+Gutter Palace	unknown activated cost key(s) ['discard_cards']
+Jhin Meticulous Killer	Alternate cost to play me for [mind] if you've spent 4+ on a spell this turn is not modeled.
+Leblanc Everywhere at Once	Suppressing TEMPORARY-effect triggers at my battlefield has no supported verb.
+Disposal Order	First mode recycles up to 3 cards from opponents' trashes (owners recycle them); recycling from trash is an approximation.
+Clash of Giants	Choose two units that deal damage equal to their Mights to each other — mutual simultaneous combat between two chosen units not expressible.
+Determined Sentry	'I can't move to base' is a movement restriction with no supported verb.
+Arachnoid Horror	'can be played to an occupied battlefield if an enemy unit is alone there' is a play-restriction modifier for self and friendly units; not expressible.
+Scryer's Bloom	This enters exhausted; activated ability also has a 'Kill this' and '1' energy cost component not fully expressible.
+Kha'Zix Mutating Horror	'if an enemy unit is alone here' gate not expressible (enemy-alone check); and on_defend trigger not represented alongside on_attack.
+Maduli the Gatekeeper	'I can't be readied' restriction unsupported; conditional move to enemy battlefield gated on Might comparison unsupported.
+Syndra Transcendent	'While I'm in a showdown, your spells have REPEAT' is a conditional aura granting REPEAT to other cards; not dispatchable.
+Crimson Pigeons	'+2 might while attacking with another unit' is a conditional attack-time self buff with no matching condition.
+Mageseeker Investigator	Opponent movement tax (pay 1 per extra unit moved to my battlefield) is not expressible.
+Stalking Wolf	Additional cost to kill a friendly Bird/Cat/Dog/Poro and play me to its battlefield is not expressible.
+Galio Indefatigable	'I don't deal combat damage' has no supported verb
+Shard of Undoing	first-friendly-death-during-beginning-phase trigger forcing each opponent to sacrifice is not supported
+Poppy Defender of the Meek	spend-XP additional cost tied to cost reduction; additional_cost spend_xp key not available
+Poppy Defender of the Meek	unknown additional_cost key(s) ['spend_xp']
+Curtain Call	REPEAT with non-standard costs ([1]/[rune]/1[rune]) and 'choose one you haven't already chosen' plus battlefield-vs-base targeting not fully expressible
+Alpha Strike	deals Might split among enemy units (split semantics unsupported) and gains XP per kill
+Ivern Green Father	replace battlefield with a Brush battlefield token on conquer/hold (exhaust-me cost) is not supported
+Leblanc Deceiver	play Reflection token that copies another unit, with discard+exhaust cost, is not supported
+Keeper's Verdict	place enemy unit on top/bottom of its owner's Main Deck is not supported
+Dusk Rose Lab	optional kill-your-unit-here cost to draw at start of Beginning Phase is a cost-gated trigger not supported
+Forbidding Waste	defending-alone conditional -2 might passive on units here is not expressible
+Ripper's Bay	Triggered ability on a unit being returned to hand with optional energy cost to channel
+Valley of Idols	Optional pay-to-buff on any player playing a unit here
+Vaults of Helia	Cost increase (negative discount) on hold for non-token units this turn; aura affecting other cards
+Baron Pit	Allows units to move here from anywhere
+Brush	Buff applies to multiple subtypes (Bird/Cat/Dog/Poro/Ivern); replace-on-score battlefield mechanic unsupported
+Reflection	Becomes a copy of something when played
+Dune Surfer	Ignore TANK while assigning combat damage here
+Esteemed Hierophant	Prevent damage from enemy spells/abilities while controlling 7+ runes; no supported verb/condition for damage prevention gated on rune count.
+Hand Hammer	Equipped unit gains +2 might conditionally on exactly one other friendly unit at its battlefield; no supported condition for 'exactly one other unit here'.
+Ol' Poro	Play restriction on first/second/third turns; no supported play-restriction mechanic.
+Sanction	Empower/disempower a chosen unit (not self) with delayed end-of-turn reversal; empower_self/disempower targeting and delayed reversal not cleanly expressible.
+Sandstone Chimera	Static reduction of channel amount during Channel Phase; no supported verb for altering channel rate.
+Riven Shattered	Damage scales per Equipment attached to me; no supported amount_source for attached equipment count.
+Riven Shattered	unknown amount_source 'equipment_attached'
+Shen Scourge of Shadows	On-hold draw gated on exactly one other friendly unit here; no supported condition for 'exactly one other unit here'.
+Shen Scourge of Shadows	unknown condition type 'exactly_one_other_unit_here'
+Mesmerize	possible dropped clause (~2 text clauses vs 1 effect(s) emitted)
+Otterpus	Replace scoring a point from conquer/hold on first/second turn with drawing a card; no supported score-replacement mechanic.
+Repair Specialist	ASSAULT value equals number of gear you control; no supported amount_source for gear count on a keyword value.
+Repair Specialist	unknown amount_source 'you_control_n_or_more_gear'
+Profiteer	disempower-to-empower is an optional coupled cost; empower target is any friendly legend/unit/gear
+Jayce Hammer in Hand	trigger is 'when I become ready', not on_exhaust
+Cataclysmic Duel	each player keeps one chosen unit and kills all others; no supported verb for this symmetric multi-player keep-one-kill-rest effect
+Ravenbloom Prefect	when opponent plays a gear, may banish self to banish it; no on_opponent_gear_played trigger and cost banish-self not supported
+Decree of Discord	returns any number of enemy Order units anywhere with total combined Might 5 or less; no target for 'anywhere' and no total-might budget selection
+Dragon Form	sets a chosen unit's base Might to 5 this turn; no verb for setting base might, and FLOW alt-cost not supported
+Disciple of Shen	SHIELD applies only while at a battlefield with EXACTLY one other friendly unit (exactly two total); condition only supports 'n or more', not exact
+Keeper of Law	cost reduction is [2][order] (power) less, conditional on controlling a battlefield with exactly two units there; reduce_cost models flat energy only and condition is unsupported
+Sacred Protector	Conditional combat-damage suppression based on exactly one other friendly unit at battlefield is not expressible.
+Fallen Feline	Name a spell then prevent opponents from playing spells with that name while here is not expressible.
+Shady Spectacles	Copy-another-friendly-unit while attached is not expressible.
+Renekton Butcher of the Sands	Spending restriction (only to play units or activated abilities of units) is not modeled.
+Rebuttal	Card has only reminder text; no executable effect specified.
+Dragon Roost	Optional additional-cost to play a Dragon to this battlefield is a battlefield-wide play modifier not expressible.
+Mystic Vortex	Cost increase for REACTION cards during showdowns here is not expressible (only flat reductions supported).
+Piltovan Forge	Discount applies only to the first friendly gear activated ability each turn and to OTHER cards; approximated as a gear cost reduction gated on controlling this battlefield.
+Protective Sands	Condition should be 'you control 4 or fewer runes'; no at-most rune condition exists, and the kicker-style optional pay is approximated.
+Risen Altar	Reducing EMPOWER costs of your units here is not expressible.
+Threshold of the Gray	ADD [1] to both attacker and defender on combat start here; no target for 'each' player and trigger on_showdown_begin exists but affects two opposing players
+Scorched Earth	5 damage split among units at a single battlefield; split semantics not supported
+Coalesced Energy	recycle all your runes is an unusual target; channel is supported
+Drakehound Packmaster	reveal top of each opponent's deck, banish and play one ignoring cost, recycle the rest; not expressible
+Orianna Exquisite	'I don't deal combat damage unless there's a friendly gear here' is a conditional combat-damage prevention not expressible
+Riven Broken Blade	'that hasn't been chosen this turn' restriction and 'spend my buff' cost on modes not expressible
+K'Sante Dauntless	double the SHIELD of a unit here this turn; no verb for doubling shield value
+Fanfare	delayed triggered draw the next three times you play a unit this turn
+Parallel Convergence	Additional cost of returning a friendly unit to hand is mandatory, not optional; no key for mandatory recall additional cost.
+Parallel Convergence	unknown additional_cost key(s) ['recall_friendly_unit']
+Piltovan Guidebot	Setting base Might equal to a played card's Energy cost this turn is not expressible.
+Scrutinizing Scope	Opponent guesses a card type, then reveal/recycle-or-draw based on match; not expressible.
+Seraphine Inspiring	Trigger when exhausting three or more friendly units at the same time is not supported.
+Seraphic Wyvern	Replacement modifying rune channeling to add an extra exhausted rune is not expressible.
+Reckless Innovator	model flagged
+Bedeviling Stranger	choose a battlefield, conditional return based on unit count there
+Bushwhack Trap	hide an additional card here while controlling battlefield
+Evelynn in Control	score gated on controlling a facedown card here
+Lulu Whimsical	set another unit's base Might to a fixed value this turn
+Mechanical Bandit	reveal top of each deck, draw lowest-cost revealed, recycle rest
+Angler Wyrm	model flagged
+Riven Deserter	trigger on another friendly unit becoming exhausted; activated cost is exhaust a friendly unit; once-per-turn restriction
+Herald of the Emperor	set chosen friendly unit's base Might to a fixed value this turn
+Meticulous Restorationist	play-self-from-trash gated on playing a high-cost card is not supported
+Heimerdinger Academy Instructor	token-play replacement effect not supported
+Raucous Anthem	"your units" means everywhere, not just here
+Chronobreak	banish-and-replay X units based on power paid as additional cost is not supported
+Orianna Lady of Clockwork	turning a gear into a unit gear with might equal to energy cost is not supported
+Riven The Exile	static 'units you play to battlefields you control enter ready' applies to the played unit, not the source; approximated
+Evelynn Agony's Embrace	once-per-turn trigger on playing a facedown card, then conditional discard off-turn, not supported
+Last Caress	next-unit-played-this-turn delayed buff and play-to-any-battlefield modifier not supported
+Bandle Scouts' Academy	'when you hide a card here' trigger approximated; actual trigger is hiding a card
+Firelights' Hideout	'next unit you play this turn has ACCELERATE' delayed grant not supported
+Rakelstake	'first time they play a unit OR a gear here each turn' applies per-player including opponent, and triggers on gear as well as units; on_first_unit_here may not fully capture the gear/per-player scope.
+Neeko Blending In	Deckbuilding rule choosing extra legends and the on-play effect of adding a chosen Legend to the Legend Zone are not expressible with supported verbs.
