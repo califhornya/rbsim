@@ -825,9 +825,7 @@ class GameLoop:
             parsed = self._parse_activated_cost(cost)
             if not self._activated_affordable(actor, unit, parsed):
                 return False
-            if (parsed["energy"] or parsed["power"]) and not actor.pay_cost(
-                parsed["energy"], parsed["power"] or None, None
-            ):
+            if not self._pay_energy_and_generic(actor, parsed["energy"], parsed["power"]):
                 return False
             if parsed["tap"] and unit is not None:
                 self._exhaust(unit)
@@ -1464,6 +1462,18 @@ class GameLoop:
             return True
         return any(actor.can_pay_cost(0, n, d) for d in list(actor.power_pool))
 
+    def _can_pay_energy_and_generic(self, actor: Player, energy: int, power: int) -> bool:
+        """Affordability of an ability / additional cost: Energy plus generic power.
+        (Player.can_pay_cost with no domain ignores power entirely — that made
+        every such power cost free.)"""
+        return actor.energy >= (energy or 0) and self._can_pay_generic_power(actor, power or 0)
+
+    def _pay_energy_and_generic(self, actor: Player, energy: int, power: int) -> bool:
+        if not self._can_pay_energy_and_generic(actor, energy, power):
+            return False
+        actor.energy -= energy or 0
+        return self._pay_generic_power(actor, power or 0)
+
     def _pay_generic_power(self, actor: Player, n: int) -> bool:
         """Pay n generic ([rune]) power from the first domain that can cover it."""
         if n <= 0:
@@ -1725,7 +1735,7 @@ class GameLoop:
         bounce = bool(ac.get("return_friendly_unit"))
 
         # --- affordability check (no mutation yet) ---
-        if (energy or power) and not ap.can_pay_cost(energy, power or None, None):
+        if not self._can_pay_energy_and_generic(ap, energy, power):
             return False
         # +1: never discard the very card being played.
         if discard_n and len(ap.hand) < discard_n + 1:
@@ -1735,7 +1745,7 @@ class GameLoop:
             return False
 
         # --- payment ---
-        if (energy or power) and not ap.pay_cost(energy, power or None, None):
+        if not self._pay_energy_and_generic(ap, energy, power):
             return False
         for _ in range(discard_n):
             idx = next((i for i, c in enumerate(ap.hand) if c is not card), None)
@@ -2335,9 +2345,7 @@ class GameLoop:
         side = "A" if ap is self.gs.A else "B"
         if parsed["tap"] and unit is not None and not unit.ready:
             return False
-        if (parsed["energy"] or parsed["power"]) and not ap.can_pay_cost(
-            parsed["energy"], parsed["power"] or None, None
-        ):
+        if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
             return False
         if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
             return False
@@ -2414,9 +2422,8 @@ class GameLoop:
         if not self._activated_affordable(ap, unit, parsed):
             return
         # Pay.
-        if parsed["energy"] or parsed["power"]:
-            if not ap.pay_cost(parsed["energy"], parsed["power"] or None, None):
-                return
+        if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
+            return
         if parsed["tap"] and unit is not None:
             self._exhaust(unit)
         for _ in range(parsed["recycle"]):

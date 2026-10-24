@@ -41,7 +41,10 @@ def _grant_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("draw_cards")
 def _draw_cards(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    count = int(spec.get("count", spec.get("amount", 1)))
+    if spec.get("amount_source"):
+        count = _amount(ctx, spec)  # "draw 1 for each of your MIGHTY units"
+    else:
+        count = int(spec.get("count", spec.get("amount", 1)))
     target = str(spec.get("target", "actor"))
     source = str(spec.get("source", "effect"))
     ctx.draw_cards(count, target=target, source=source)
@@ -963,7 +966,9 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("reveal_and_choose")
 def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Look at the top N cards, keep the best (highest might) into hand, recycle
-    the rest to the bottom of the deck. Deterministic stand-in for player choice."""
+    the rest to the bottom of the deck. Deterministic stand-in for player choice.
+    A card filter ("reveal a gear from among them") limits what may be kept; with
+    no match, nothing is kept."""
     amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
@@ -976,9 +981,15 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.loop._offer_reveal_from_top(ctx.actor, top)
     if not top:
         return
-    best = max(top, key=lambda c: int(getattr(c, "might", 0) or 0))
-    top.remove(best)
-    ctx.actor.hand.append(best)
+    tf = spec.get("target_filter") or spec.get("reveal_filter") or spec.get("filter")
+    tf = tf if isinstance(tf, Mapping) else {}
+    keepable = [c for c in top if _zone_card_matches(c, tf)
+                and ("energy_at_most" not in tf
+                     or int(getattr(c, "cost_energy", 0) or 0) <= int(tf["energy_at_most"]))]
+    if keepable:
+        best = max(keepable, key=lambda c: int(getattr(c, "might", 0) or 0))
+        top.remove(best)
+        ctx.actor.hand.append(best)
     deck.cards[:0] = top  # recycle remainder to the bottom
 
 

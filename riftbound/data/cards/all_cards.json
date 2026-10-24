@@ -10333,7 +10333,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might_per_enemy",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -10356,11 +10357,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-003",
@@ -10384,7 +10381,8 @@
     "effects": [
       {
         "effect": "give_temporary_assault",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -10407,11 +10405,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-005",
@@ -10471,7 +10465,9 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
       }
     ]
   },
@@ -10501,7 +10497,8 @@
     "effects": [
       {
         "effect": "give_keyword",
-        "keyword": "GANKING"
+        "keyword": "GANKING",
+        "trigger": "on_play"
       }
     ]
   },
@@ -10524,11 +10521,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-009",
@@ -10609,7 +10602,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "count": 1,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -10784,7 +10778,8 @@
     "effects": [
       {
         "effect": "deal_damage",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -10936,7 +10931,8 @@
     "effects": [
       {
         "effect": "deal_damage",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -11057,11 +11053,20 @@
     ],
     "effects": [
       {
-        "effect": "draw_cards",
-        "count": 2
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "cards_in_hand_at_most",
+          "params": {
+            "n": 2
+          }
+        }
       },
       {
-        "effect": "ready_units"
+        "effect": "draw_cards",
+        "trigger": "on_hold",
+        "count": 2
       }
     ]
   },
@@ -11096,7 +11101,7 @@
         "effect": "deal_damage",
         "trigger": "on_attack",
         "target": "enemy_unit",
-        "amount_source": "self_might"
+        "amount": 1
       }
     ]
   },
@@ -11123,11 +11128,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-030",
@@ -11208,10 +11209,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "kill_gear",
         "trigger": "on_play",
-        "target": "chosen_unit",
-        "filter": "gear",
+        "target": "enemy_gear",
         "optional": true
       }
     ]
@@ -11274,7 +11274,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -11330,12 +11331,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-037",
@@ -11387,7 +11383,13 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 1
+        "trigger": "on_move",
+        "target": "friendly_unit",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "amount": 1,
+        "duration": "this_turn"
       }
     ]
   },
@@ -11410,11 +11412,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-040",
@@ -11437,7 +11435,8 @@
     ],
     "effects": [
       {
-        "effect": "stun_unit"
+        "effect": "stun_unit",
+        "trigger": "on_cast"
       }
     ]
   },
@@ -11524,7 +11523,8 @@
     ],
     "effects": [
       {
-        "effect": "move_units_to_base"
+        "effect": "move_units_to_base",
+        "trigger": "on_cast"
       }
     ]
   },
@@ -11628,11 +11628,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [
-      {
-        "effect": "buff_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-048",
@@ -11660,6 +11656,7 @@
     "effects": [
       {
         "effect": "draw_cards",
+        "trigger": "on_move",
         "count": 1
       }
     ]
@@ -11691,11 +11688,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "buff_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-050",
@@ -11794,7 +11787,14 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 3
+        "trigger": "activated",
+        "timing": "action",
+        "target": "chosen_unit",
+        "amount": 3,
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
       }
     ]
   },
@@ -11969,12 +11969,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "amount": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-058",
@@ -12004,25 +11999,17 @@
       {
         "effect": "reveal_and_choose",
         "trigger": "on_play",
-        "params": {
-          "count": 4,
-          "filter": {
-            "is_gear": true
-          },
-          "on_choose": "draw",
-          "on_rest": "recycle"
+        "count": 4,
+        "target_filter": {
+          "is_gear": true
         }
       },
       {
         "effect": "reveal_and_choose",
         "trigger": "on_hold",
-        "params": {
-          "count": 4,
-          "filter": {
-            "is_gear": true
-          },
-          "on_choose": "draw",
-          "on_rest": "recycle"
+        "count": 4,
+        "target_filter": {
+          "is_gear": true
         }
       }
     ]
@@ -12125,7 +12112,13 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "target_filter": {
+          "subtype": "Mech",
+          "exclude_self": true
+        }
       }
     ]
   },
@@ -12298,7 +12291,10 @@
         },
         "target": "chosen_unit",
         "amount": -2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "additional_cost": {
+          "power": 1
+        }
       }
     ]
   },
@@ -12321,11 +12317,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-069",
@@ -12382,7 +12374,14 @@
     "effects": [
       {
         "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
         "amount": 3
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Gold"
       }
     ]
   },
@@ -12407,7 +12406,24 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "target_filter": {
+          "subtype": "Mech"
+        },
+        "keyword": "DEFLECT"
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "target_filter": {
+          "subtype": "Mech"
+        },
+        "keyword": "GANKING"
       }
     ]
   },
@@ -12432,7 +12448,15 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "you_control_n_or_more_gear",
+          "params": {
+            "n": 2
+          }
+        }
       }
     ]
   },
@@ -12517,12 +12541,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "amount": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-076",
@@ -12549,7 +12568,24 @@
     ],
     "effects": [
       {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_control_subtype",
+          "params": {
+            "subtype": "Mech"
+          }
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Mech"
+      },
+      {
         "effect": "draw_cards",
+        "trigger": "on_cast",
         "count": 1
       }
     ]
@@ -12684,7 +12720,8 @@
     "effects": [
       {
         "effect": "deal_damage",
-        "amount": 1
+        "amount": 1,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -12757,6 +12794,11 @@
         "cost": {
           "power": 1
         }
+      },
+      {
+        "effect": "no_combat_damage",
+        "trigger": "passive",
+        "target": "self"
       }
     ]
   },
@@ -12804,16 +12846,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "kill_gear",
-        "trigger": "on_play",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_gear": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-085",
@@ -12838,11 +12871,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-086",
@@ -12930,7 +12959,16 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "energy": 1,
+          "power": 1
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
       }
     ]
   },
@@ -13027,14 +13065,18 @@
     ],
     "effects": [
       {
-        "effect": "draw_cards",
-        "count": 1
-      },
-      {
-        "effect": "ready_units"
-      },
-      {
-        "effect": "buff_unit"
+        "effect": "mode_choice",
+        "trigger": "on_play",
+        "modes": [
+          {
+            "effect": "draw_cards",
+            "count": 1
+          },
+          {
+            "effect": "buff_unit",
+            "target": "self"
+          }
+        ]
       }
     ]
   },
@@ -13057,11 +13099,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-093",
@@ -13104,11 +13142,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-095",
@@ -13184,7 +13218,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 5
+        "amount": 5,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -13213,10 +13248,15 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
-      },
-      {
-        "effect": "buff_unit"
+        "effect": "buff_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "additional_cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
       }
     ]
   },
@@ -13243,11 +13283,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-100",
@@ -13268,12 +13304,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-101",
@@ -13300,7 +13331,8 @@
     ],
     "effects": [
       {
-        "effect": "buff_unit"
+        "effect": "buff_unit",
+        "trigger": "on_play"
       }
     ]
   },
@@ -13356,7 +13388,10 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "amount_source": "friendly_mighty_units"
       }
     ]
   },
@@ -13435,7 +13470,9 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount_source": "friendly_mighty_units"
       }
     ]
   },
@@ -13667,11 +13704,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-114",
@@ -13760,11 +13793,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-117",
@@ -13848,15 +13877,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      },
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-120",
@@ -13906,14 +13927,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "on_play_spell",
-        "token_name": "Gold",
-        "exhausted": true
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-123",
@@ -13936,7 +13950,13 @@
     ],
     "effects": [
       {
+        "effect": "discard_card",
+        "trigger": "on_move",
+        "count": 1
+      },
+      {
         "effect": "draw_cards",
+        "trigger": "on_win_combat",
         "count": 1
       }
     ]
@@ -14061,11 +14081,7 @@
         "rarity": "Common"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-128",
@@ -14092,8 +14108,9 @@
         "effect": "move_unit",
         "trigger": "on_defend",
         "target": "enemy_unit",
+        "optional": true,
         "cost": {
-          "sacrifice": true
+          "sacrifice_self": true
         }
       }
     ]
@@ -14175,11 +14192,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-132",
@@ -14365,12 +14378,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "amount": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-138",
@@ -14521,12 +14529,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-143",
@@ -14551,11 +14554,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-144",
@@ -14576,12 +14575,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-145",
@@ -14633,16 +14627,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "is_spell": true
-        }
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-147",
@@ -14732,7 +14717,13 @@
     ],
     "effects": [
       {
+        "effect": "discard_card",
+        "trigger": "on_play",
+        "count": 1
+      },
+      {
         "effect": "draw_cards",
+        "trigger": "on_play",
         "count": 2
       }
     ]
@@ -14798,7 +14789,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 1
+        "amount": 1,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -14889,7 +14881,9 @@
     ],
     "effects": [
       {
-        "effect": "ready_units"
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Sand Soldier"
       }
     ]
   },
@@ -15167,7 +15161,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "count": 1,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -15257,10 +15252,9 @@
     "effects": [
       {
         "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "action",
         "count": 1
-      },
-      {
-        "effect": "buff_unit"
       }
     ]
   },
@@ -15287,12 +15281,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 2
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-168",
@@ -15346,12 +15335,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-170",
@@ -15408,11 +15392,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-172",
@@ -15540,7 +15520,14 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 2
+        "trigger": "on_play",
+        "target": "all_friendly_units_here",
+        "scope": "all",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "amount": 2,
+        "duration": "this_turn"
       }
     ]
   },
@@ -15563,11 +15550,7 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-177",
@@ -15592,11 +15575,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-178",
@@ -15649,11 +15628,7 @@
         "rarity": "Epic"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-180",
@@ -15788,11 +15763,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "buff_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-184",
@@ -15848,12 +15819,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-186",
@@ -16113,7 +16079,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "count": 1,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -16178,7 +16145,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "amount": 2
+        "amount": 2,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -16247,11 +16215,7 @@
         "rarity": "Epic"
       }
     ],
-    "effects": [
-      {
-        "effect": "ready_units"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-199",
@@ -16276,12 +16240,7 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "count": 1
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-200",
@@ -16305,7 +16264,8 @@
     "effects": [
       {
         "effect": "deal_damage",
-        "amount": 3
+        "amount": 3,
+        "trigger": "on_cast"
       }
     ]
   },
@@ -16367,24 +16327,7 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "take_control",
-        "trigger": "on_cast",
-        "target": "enemy_unit",
-        "duration": "this_turn"
-      },
-      {
-        "effect": "ready_unit",
-        "trigger": "on_cast",
-        "target": "chosen_unit"
-      },
-      {
-        "effect": "recall_unit",
-        "trigger": "on_end_of_turn",
-        "target": "chosen_unit"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-203",
@@ -16410,21 +16353,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "play_token",
-        "trigger": "activated",
-        "token_name": "Gold",
-        "cost": {
-          "tap": true
-        }
-      },
-      {
-        "effect": "ready_unit",
-        "trigger": "on_death",
-        "target": "self"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "SFD-204",
@@ -16485,6 +16414,9 @@
         "exhausted": true,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "triggering_unit_is_mighty"
         }
       }
     ]
@@ -16690,11 +16622,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "discard_card",
+        "effect": "burn",
         "trigger": "on_conquer",
-        "target": "self",
-        "from": "deck",
-        "count": 2
+        "amount": 2
       }
     ]
   },
@@ -16833,7 +16763,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "count": 1,
+        "trigger": "on_play"
       }
     ]
   },
@@ -16859,7 +16790,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1
+        "count": 1,
+        "trigger": "on_play"
       }
     ]
   },

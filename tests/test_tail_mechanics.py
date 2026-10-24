@@ -260,3 +260,35 @@ def test_at_battlefield_and_not_named_conditions():
                      name="Recruit")
     assert check("triggering_unit_not_named", {"triggering_card": UnitCard(name="Viktor")},
                  name="Recruit")
+
+
+def test_generic_power_in_costs_is_charged():
+    # Regression: Player.can_pay_cost with no domain ignored power, so every
+    # "power" cost on abilities / additional costs was free.
+    loop = _loop()
+    a = loop.gs.A
+    assert not loop._pay_one_additional_cost(SpellCard(name="Kicker"), a, {"power": 1})
+    a.add_rune(Domain.CALM)
+    a.power_pool[Domain.CALM] = 1
+    assert loop._pay_one_additional_cost(SpellCard(name="Kicker"), a, {"power": 1})
+    assert not a.power_pool.get(Domain.CALM)
+
+
+def test_reveal_and_choose_honors_filter():
+    from riftbound.core.cards import GearCard
+    loop = _loop(deck_cards=0)
+    a = loop.gs.A
+    a.deck.cards.extend([GearCard(name="Hammer"), UnitCard(name="Big", might=9)])
+    ctx = EffectContext(loop, UnitCard(name="Ornn"), a, loop.gs.B, loop.gs.battlefields[0])
+    REGISTRY["reveal_and_choose"](ctx, {"count": 2, "target_filter": {"is_gear": True}})
+    assert [c.name for c in a.hand] == ["Hammer"]
+
+
+def test_draw_cards_amount_source():
+    loop = _loop()
+    a = loop.gs.A
+    for m in (5, 6, 2):
+        loop.gs.battlefields[0].add_unit("A", UnitInPlay(UnitCard(name=f"U{m}", might=m)))
+    ctx = EffectContext(loop, SpellCard(name="Show of Strength"), a, loop.gs.B, loop.gs.battlefields[0])
+    REGISTRY["draw_cards"](ctx, {"amount_source": "friendly_mighty_units"})
+    assert len(a.hand) == 2

@@ -334,7 +334,10 @@ class SimpleTradeAgent(Agent):
             # Only resource-consuming abilities — never spin on a free/no-op one.
             if not (parsed["tap"] or parsed["energy"] or parsed["power"]):
                 continue
-            if not loop._activated_affordable(self.player, entry["unit"], parsed):
+            # Gear abilities have no "unit"; their [tap] is the gear's own state.
+            if entry["type"] == "gear_ability" and parsed["tap"] and getattr(entry["gear"], "tapped", False):
+                continue
+            if not loop._activated_affordable(self.player, entry.get("unit"), parsed):
                 continue
             return ("ABILITY", "ACTIVATED", idx)
         return None
