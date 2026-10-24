@@ -73,8 +73,8 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     you win a combat here" (RAD-024), "when one or more friendly units attack here"
     (RAD-156), Deploy gear that become units (RAD-146 The Ball), "your gear with
     DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
-    of turn, play that many Bombs". The RL observation encoding doesn't include
-    deployed gear yet (changing it changes the net's input shape).
+    of turn, play that many Bombs". (The RL observation now includes deployed
+    gear — 2026-10-25.)
   - **Parse of the long tail (2026-10-24/25, 3 runs, Opus 4.8) + full Radiance
     hand review:** every spec that made a card STRONGER than printed was emptied
     (dropped condition/cost, wrong trigger, cost-less activated abilities). These

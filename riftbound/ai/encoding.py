@@ -47,8 +47,9 @@ _BF_VOCAB: tuple[str, ...] = tuple(sorted(
 _BF_INDEX = {name: i for i, name in enumerate(_BF_VOCAB)}
 _BF_ONEHOT = len(_BF_VOCAB) + 1  # last slot = unnamed / unknown
 
-# Per-battlefield feature width: counts(2) + mights(2) + controller one-hot(3) + named one-hot.
-_PER_BF = 2 + 2 + 3 + _BF_ONEHOT
+# Per-battlefield feature width: counts(2) + mights(2) + controller one-hot(3) +
+# deployed-gear counts(2) + named one-hot.
+_PER_BF = 2 + 2 + 3 + 2 + _BF_ONEHOT
 
 # Scalar features (see _scalars); kept in a list so the count is self-documenting.
 _N_SCALARS = 14 + 2 * N_DOM
@@ -106,10 +107,13 @@ def _bf_features(bfview, me_side: str) -> np.ndarray:
     named = np.zeros(_BF_ONEHOT, dtype=np.float32)
     idx = _BF_INDEX.get(bfview.named) if bfview.named else None
     named[idx if idx is not None else _BF_ONEHOT - 1] = 1.0
+    my_gear = bfview.gear_A if me_side == "A" else bfview.gear_B
+    opp_gear = bfview.gear_B if me_side == "A" else bfview.gear_A
     head = np.asarray([
         len(mine) / 6.0, len(opp) / 6.0,
         sum(u.might for u in mine) / 20.0, sum(u.might for u in opp) / 20.0,
         ctrl_me, ctrl_opp, ctrl_none,
+        len(my_gear) / 4.0, len(opp_gear) / 4.0,
     ], dtype=np.float32)
     return np.concatenate([head, named])
 
@@ -126,11 +130,13 @@ def encode_observation(obs: Observation) -> np.ndarray:
         else:
             parts.append(np.zeros(_PER_BF, dtype=np.float32))
 
-    # Bag-of-counts: my hand, my trash, my board units, opp board units.
+    # Bag-of-counts: my hand, my trash, my board, opp board (units + deployed gear).
     my_board = [u.name for bf in bfs for u in (bf.A if me == "A" else bf.B)]
     my_board += [u.name for u in obs.my_base_units]
+    my_board += [g for bf in bfs for g in (bf.gear_A if me == "A" else bf.gear_B)]
     opp_board = [u.name for bf in bfs for u in (bf.B if me == "A" else bf.A)]
     opp_board += [u.name for u in obs.opp_base_units]
+    opp_board += [g for bf in bfs for g in (bf.gear_B if me == "A" else bf.gear_A)]
     parts.append(_bag(obs.my_hand))
     parts.append(_bag(obs.my_trash))
     parts.append(_bag(my_board))
