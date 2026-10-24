@@ -64,6 +64,37 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   from-trash play action + banish-after-resolve.
 - **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
   corpus cards; value-swap in `_amount`, a trigger after `player.burn`.
+  Radiance adds stacking EMPOWER (§442.1.c.1 / §827.1.c.5) — currently binary.
+- **Radiance keywords (2026-10-24, CORE_RULES.md)** — engine support added
+  2026-10-24 (see MECHANICS 830–832); Radiance effects[] still to be parsed:
+  - [DONE] **DISARM X** (§831), **SHOW OFF** (§832).
+  - [PARTIAL] **DEPLOY** (§830) + Bomb token (RAD-T02, §187.12). Still missing:
+    "Friendly DEATHKNELLs here trigger twice" (RAD-017 Detonation Amplifier), "when
+    you win a combat here" (RAD-024), "when one or more friendly units attack here"
+    (RAD-156), Deploy gear that become units (RAD-146 The Ball), "your gear with
+    DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
+    of turn, play that many Bombs". The RL observation encoding doesn't include
+    deployed gear yet (changing it changes the net's input shape).
+  - **Parse of the long tail (2026-10-24, 3 runs, Opus 4.8):** hand review emptied
+    every spec that made a card STRONGER than printed (dropped condition/cost,
+    wrong trigger, cost-less activated abilities). These cards are empty on purpose
+    and a plain `--only-empty` re-parse tends to break them the same way — only
+    re-parse after the engine gains what they need: OGN-025, OGN-113, OGN-200,
+    OGN-251, OGN-256, OGN-290, SFD-055, SFD-083, SFD-110, SFD-117, SFD-141,
+    UNL-018, UNL-045, UNL-054, UNL-136, UNL-143, VEN-088, VEN-119, VEN-162,
+    RAD-016, RAD-043*, RAD-051, RAD-053*, RAD-071, RAD-105*, RAD-107, RAD-114,
+    RAD-149, RAD-157 (* = since fixed via on_exhaust). Cards from the first
+    Radiance run were only spot-checked.
+  - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
+    keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
+  - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In
+    ("Neutral") stored as domainless with 1 power pip = [A]; the main card-play path
+    doesn't charge [A] for a domainless card (power pip free) — small undercharge,
+    Neeko is the only such card. Neeko's "choose up to 3 legends at deckbuilding" is a
+    deck-construction choice (§103.1) the match layer doesn't model yet.
+  - Also new in the rules: copy effects get their own first layer (§479.1), "pick" vs
+    "choose" (non-targeting, §355.7), ignored vs negated instructions (§359.3.e.6),
+    mandatory requirements vs restrictions (§355.17).
 - [DONE] **`enters_exhausted`** (#21) — units already enter exhausted per §142.4
   (UnitInPlay.ready defaults False, all deploy paths use it); and "This enters
   exhausted" gear now enters tapped. KNOWN_ISSUES #21 marked RESOLVED.

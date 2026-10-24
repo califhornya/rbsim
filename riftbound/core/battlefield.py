@@ -20,6 +20,15 @@ class FacedownCard:
     turn_hidden: int
 
 
+@dataclass(eq=False)
+class DeployedGear:
+    """A gear on a battlefield via DEPLOY (Core Rules §830). Compared by identity:
+    several copies of the same card (e.g. Bomb tokens) can sit here at once.
+    ``is_token`` gear cease to exist when killed instead of going to the trash."""
+    card: "Card"
+    is_token: bool = False
+
+
 @dataclass
 class Battlefield:
 
@@ -39,6 +48,9 @@ class Battlefield:
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
     facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
+    # Gear deployed here (DEPLOY §830), per controlling side.
+    gear_A: List[DeployedGear] = field(default_factory=list)
+    gear_B: List[DeployedGear] = field(default_factory=list)
 
     kills_A: int = 0
     kills_B: int = 0
@@ -47,6 +59,9 @@ class Battlefield:
 
     def _units_for(self, who: str) -> List[UnitInPlay]:
         return self.units_A if who == "A" else self.units_B
+
+    def gear_for(self, who: str) -> List[DeployedGear]:
+        return self.gear_A if who == "A" else self.gear_B
 
     def count(self, who: str) -> int:
         return len(self._units_for(who))

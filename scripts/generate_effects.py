@@ -181,6 +181,10 @@ Cost modification (`reduce_cost`) — for static/conditional flat discounts. Use
 with "trigger": "cost_modifier" and an integer `amount`.
   Example: "Spells you play cost [1] less" → {{"effect": "reduce_cost", "trigger": "cost_modifier",
   "amount": 1, "target_filter": {{"is_spell": true}}}}.
+  A discount that scales ("I cost [1] less for each card you've played this turn" / "for each
+  exhausted unit you control") → add "amount_source" ("cards_played_this_turn" /
+  "friendly_exhausted_units"); `amount` is then the discount per count (default 1). A conditional
+  discount ("If an opponent controls a stunned unit, I cost [2] less") → add a `condition`.
   NOTE: the engine currently applies `reduce_cost` only as a flat discount to the card that owns
   the effect; auras that reduce OTHER cards' costs are not dispatched yet, but emitting them is
   still correct — also add `suggested_vocab` tag "aura:reduce_cost" so we track coverage.
@@ -258,17 +262,26 @@ Few-shot examples (from spot-check feedback — follow these patterns):
    ("EQUIP [2] [fury]" → "EQUIP 2", but the bare "EQUIP [fury]" is 1.)
 
 3. `ADD [rune]` / `ADD [power]` is NOT `add_rune`. `add_rune` puts cards into
-   the rune deck. "ADD" in a rune-tap ability means "tap to add 1 power of any
-   domain to your pool" — a `gain_power` verb the engine doesn't have yet.
-   Until it exists: leave `effects: []`, set `needs_review: true`, and add the
-   tag `effect:gain_power_any_domain` to `suggested_vocab`. Do NOT emit
-   `add_rune` for these.
-   Text: "[tap] REACTION — ADD [rune]. Use only to play spells." → flag.
+   the rune deck. "ADD [rune]" means "add 1 power of any domain to your pool":
+   emit `gain_power_any_domain` with `amount` = the number of [rune] symbols.
+   "ADD [N]" (a number) adds Energy → `gain_energy` with amount N. For an
+   activated ADD ability do NOT set "timing" (it must stay usable in your main
+   phase). A spending restriction ("Use only to play spells", "Spend this only
+   to play units") is not modeled: emit the gain anyway and set needs_review
+   with suggested_vocab "cost:restricted_resource".
+   Text: "When I conquer, ADD [rune]." → {{"effect":"gain_power_any_domain",
+   "trigger":"on_conquer","amount":1}}
 
-4. "Choose one — …" multi-modal effects. The engine doesn't dispatch a
-   mode-choice yet, so do NOT flatten the branches into stacked effects (that
-   would run both). Leave `effects: []`, set `needs_review: true`, and add the
-   tag `effect:mode_choice` to `suggested_vocab`.
+4. "Choose one — …" multi-modal effects → ONE `mode_choice` effect whose
+   `modes` is a list; each mode is an effect object, or a list of effect objects
+   when the mode does several things. Do NOT flatten the branches into stacked
+   effects (that would run all of them). Mode effects use the same fields as any
+   effect, minus trigger.
+   Text: "Choose one — • Deal 2 to a unit. • Draw 1." → {{"effect":"mode_choice",
+   "trigger":"on_cast","modes":[{{"effect":"deal_damage","target":"chosen_unit",
+   "amount":2}},{{"effect":"draw_cards","count":1}}]}}
+   A mode the engine can't express → still emit the others' supported modes only
+   if dropping it doesn't change the choice's meaning; otherwise flag.
 
 5. "here" scoping. If the text says "here" / "a unit here" / "an enemy here" /
    "units here", the resolution location IS this battlefield — use
@@ -460,6 +473,54 @@ STEP 4 — Vendetta mechanics:
     body (so it works when played from hand), list "FLOW" in keywords, set
     needs_review, and add suggested_vocab ["keyword:flow"]. Do NOT invent a
     play-from-trash verb.
+
+21. DEPLOY (supported — EMIT). A gear with DEPLOY is played to a battlefield and
+    the engine kills it when an opponent holds there; just list "DEPLOY" in
+    keywords. Its abilities that say "here" act at its battlefield: "Friendly
+    units here have ASSAULT" → {{"effect":"give_keyword","trigger":"passive",
+    "target":"all_friendly_units_here","keyword":"ASSAULT"}}; "When you
+    hold here" / "when you conquer here" → trigger on_hold / on_conquer; "When you
+    play this" → on_play; "DEATHKNELL ..." → on_death.
+    "Play a Bomb gear token to a battlefield" → {{"effect":"play_token","trigger":...,
+    "token_name":"Bomb"}} (add "count" for several; the engine places DEPLOY
+    tokens on a battlefield itself). "Move a friendly gear with DEPLOY to a
+    battlefield" → `move_deployed_gear`. "Kill all other Bombs you control here"
+    → {{"effect":"kill_other_deployed_here","trigger":"on_death","name":"Bomb"}}.
+    Only the card's OWN keywords go in `keywords`: a keyword named inside
+    reminder text "(It has DEPLOY ...)" or granted to others ("Your gear with
+    DEPLOY have ACTION") is not the card's keyword.
+
+22. DISARM (supported — keyword only). "DISARM" / "DISARM 2" is handled by the
+    engine on attack; list it in keywords ("DISARM", "DISARM 2") and emit no effect
+    for it. "Your Mechs have DISARM" → passive give_keyword with target_filter
+    {{"subtype":"Mech"}} and scope "board".
+
+23. SHOW OFF (supported — EMIT). "SHOW OFF a <object>" → list "SHOW OFF" in
+    keywords and emit a marker {{"effect":"show_off","trigger":"on_play",
+    "target_filter":{{...}}}} describing the object (e.g. {{"subtype":"Mech"}},
+    {{"is_gear":true}}, {{"is_unit":true}}, {{"has_keyword":"HIDDEN"}},
+    {{"energy_at_least":7}}; empty filter for "a card"). Gate the "if you showed
+    off" effects with condition {{"type":"showed_off"}}; read the shown object's
+    numbers with amount_source "shown_might" / "shown_power_cost" /
+    "shown_energy_cost". Example: "SHOW OFF a unit. If you showed off a unit, deal
+    damage equal to that unit's Might to a unit." → effects: [
+        {{"effect":"show_off","trigger":"on_cast","target_filter":{{"is_unit":true}}}},
+        {{"effect":"deal_damage","trigger":"on_cast","target":"chosen_unit",
+          "amount_source":"shown_might","condition":{{"type":"showed_off"}}}}]
+
+25. "When I become exhausted" / "When this becomes exhausted" → trigger
+    "on_exhaust" (NOT "activated": it is a triggered ability with no cost).
+    "When another friendly unit becomes exhausted" is not supported → flag
+    (suggested_vocab "trigger:on_friendly_exhaust").
+
+24. "I enter ready if <condition>" → {{"effect":"ready_unit","trigger":"on_play",
+    "target":"self","condition":{{...}}}}. Conditions available for this pattern
+    include opponent_controls_a_battlefield, you_control_no_other_units,
+    card_with_my_name_in_trash, opponent_controls_stunned_unit,
+    you_control_this_battlefield ("if you control this battlefield", for DEPLOY
+    gear and battlefields) (and any other
+    condition type listed above). "I enter ready." with no condition → the same
+    effect without a condition.
 
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]
@@ -673,11 +734,12 @@ def main() -> int:
     shutil.copy(CARDS_PATH, bak)
     print(f"Snapshot saved to {bak}")
 
-    # review_needed.txt is rewritten with this run's flags at the end. On a full
-    # run it is reset; on a targeted --names run the entries for cards NOT in
-    # this run are preserved (a 5-card re-parse must not wipe the whole list).
+    # review_needed.txt is rewritten with this run's flags at the end. Entries for
+    # cards NOT in this run are preserved (a targeted --names / --set /
+    # --only-empty re-parse must not wipe the whole list); a full run targets
+    # every card, so it effectively resets the file.
     preserved_review: list[str] = []
-    if getattr(args, "names", None) and REVIEW_PATH.exists():
+    if REVIEW_PATH.exists():
         target_names = {c.get("name") for c in targets}
         preserved_review = [
             ln for ln in REVIEW_PATH.read_text(encoding="utf-8").splitlines()

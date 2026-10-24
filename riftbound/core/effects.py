@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Callable, Mapping
 
+from riftbound.registry.cards_registry import CARD_REGISTRY
+
+from .battlefield import Battlefield
+
 EffectHandler = Callable[["EffectContext", Mapping[str, Any]], None]
 
 REGISTRY: dict[str, EffectHandler] = {}
@@ -77,6 +81,30 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("reveal_top_draw_if_spell")
 def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
+
+
+@effect("gain_power_any_domain")
+def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ADD [rune] (§ "add"): gain `amount` Power of a domain of the player's
+    choice into the pool. Baseline policy: the domain the hand most lacks (power
+    cost still unpayable from the pool), else the most plentiful rune domain."""
+    from collections import Counter
+    from .enums import Domain
+    amount = int(spec.get("amount", 1))
+    if amount <= 0:
+        return
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    need: Counter = Counter()
+    for c in player.hand:
+        d, n = getattr(c, "cost_power_domain", None), int(getattr(c, "cost_power", 0) or 0)
+        if d is not None and n > player.power_pool.get(d, 0):
+            need[d] += n - player.power_pool.get(d, 0)
+    if need:
+        domain = need.most_common(1)[0][0]
+    else:
+        runes = {d: len(rs) for d, rs in player.rune_pool.items() if rs}
+        domain = max(runes, key=runes.get) if runes else next(iter(Domain))
+    player.power_pool[domain] = player.power_pool.get(domain, 0) + amount
 
 
 @effect("add_earmarked_energy")
@@ -157,7 +185,7 @@ def _double_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("exhaust_unit")
 def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
-        unit.ready = False
+        ctx.loop._exhaust(unit)
 
 
 @effect("ready_unit")
@@ -454,6 +482,13 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for u in _friendly_units(ctx) if tag in (u.card.tags or []))
     if src == "n_distinct_tags_among_friendlies":
         return len({t for u in _friendly_units(ctx) for t in (u.card.tags or [])})
+    if src == "cards_played_this_turn":
+        return int(ctx.loop.gs.cards_played_this_turn.get(ctx.actor_side, 0))
+    if src == "friendly_exhausted_units":
+        return sum(1 for u in _friendly_units(ctx) if not u.ready)
+    if src in ("shown_might", "shown_power_cost", "shown_energy_cost"):
+        shown = getattr(ctx.card, "_shown", None) or {}
+        return int(shown.get(src[len("shown_"):], 0))
     return int(spec.get("amount", 0))
 
 
@@ -474,8 +509,9 @@ def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 
 def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
-    """All gear in play as (owner_side, holder_or_None, gear_card). holder is the
-    UnitInPlay wearing it, or None for unattached base gear."""
+    """All gear in play as (owner_side, holder_or_None, gear). holder is the
+    UnitInPlay wearing it, None for unattached base gear, or the Battlefield a
+    DEPLOY gear sits on (gear is then its DeployedGear wrapper)."""
     gs = ctx.loop.gs
     # enemy_first means the opponent's side comes first in the pick order.
     order = (ctx.opponent_side, ctx.actor_side) if enemy_first else (ctx.actor_side, ctx.opponent_side)
@@ -490,10 +526,14 @@ def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, ob
                 entries.append((side, u, g))
         for g in player.base_gear:
             entries.append((side, None, g))
+        for bf in gs.battlefields:
+            for dg in bf.gear_for(side):
+                entries.append((side, bf, dg))
     return entries
 
 
 def _gear_matches(gear_card, tf: Mapping[str, Any]) -> bool:
+    gear_card = getattr(gear_card, "card", gear_card)  # unwrap a DeployedGear
     if "energy_at_most" in tf and int(getattr(gear_card, "cost_energy", 0) or 0) > int(tf["energy_at_most"]):
         return False
     if "energy_at_least" in tf and int(getattr(gear_card, "cost_energy", 0) or 0) < int(tf["energy_at_least"]):
@@ -519,7 +559,9 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
     for side, holder, gear in entries:
         player = gs.get_player(side)
-        if holder is not None:
+        if isinstance(holder, Battlefield):
+            ctx.loop._kill_deployed_gear(holder, side, [gear])
+        elif holder is not None:
             if gear in holder.gear:
                 holder.gear.remove(gear)
                 player.trash.append(gear)
@@ -735,8 +777,63 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         player = ctx._player_for_target(str(spec.get("target", "actor")))
     except ValueError:
         player = ctx.actor
+    token_spec = CARD_REGISTRY.get(token_name)
+    if token_spec is not None and "DEPLOY" in token_spec.keywords:
+        # Gear token with DEPLOY (§830): all `count` go to a single battlefield.
+        side = ctx._side_for_player(player)
+        bf = _deploy_destination(ctx, spec, side)
+        for _ in range(count):
+            ctx.loop._deploy_gear(side, bf, token_spec, is_token=True)
+        return
     for _ in range(count):
         _spawn_token_to_base(player, token_name, ready=ready)
+
+
+def _deploy_destination(ctx: "EffectContext", spec: Mapping[str, Any], side: str) -> Battlefield:
+    """Battlefield a DEPLOY gear goes to. `battlefield: "here"` keeps the effect's
+    own battlefield; otherwise (baseline policy) the one with the most enemy units,
+    where a Bomb will hit hardest when the opponent holds it."""
+    if str(spec.get("battlefield", "")).lower() == "here":
+        return ctx.battlefield
+    bfs = ctx.loop.gs.battlefields
+    enemy = "B" if side == "A" else "A"
+    return max(bfs, key=lambda b: (b.count(enemy), -bfs.index(b)))
+
+
+@effect("kill_other_deployed_here")
+def _kill_other_deployed_here(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Kill the actor's other deployed gear at this battlefield, optionally only
+    those named `name` (Bomb: "kill all other Bombs you control here"). They die
+    together, then each one's DEATHKNELL resolves. Used from a DEATHKNELL, when the
+    source has already left the battlefield, so every match is an "other" one."""
+    name = str(spec.get("name", "") or "").strip().lower()
+    side = ctx.actor_side
+    bf = ctx.battlefield
+    dead = [dg for dg in bf.gear_for(side)
+            if dg.card is not ctx.card or dg.is_token]
+    if name:
+        dead = [dg for dg in dead if dg.card.name.lower() == name]
+    ctx.loop._kill_deployed_gear(bf, side, dead)
+
+
+@effect("move_deployed_gear")
+def _move_deployed_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Move one of the actor's DEPLOY gear to another battlefield (§830.1.d).
+    Baseline policy: the gear from the battlefield with the fewest friendly units
+    to the one with the most."""
+    side = ctx.actor_side
+    bfs = ctx.loop.gs.battlefields
+    sources = [b for b in bfs if b.gear_for(side)]
+    if not sources:
+        return
+    src = min(sources, key=lambda b: b.count(side))
+    dests = [b for b in bfs if b is not src]
+    if not dests:
+        return
+    dst = max(dests, key=lambda b: b.count(side))
+    dg = src.gear_for(side).pop(0)
+    dst.gear_for(side).append(dg)
+    ctx.loop._recompute_passives()
 
 
 @effect("burn")
@@ -808,7 +905,10 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """PREDICT/SCRY X: look at the top X cards of your deck and reorder them.
     Deterministic policy: arrange so the highest-might card is drawn next (placed
     on top). No card leaves the deck. Top of deck = end of the cards list."""
-    amount = int(spec.get("amount", spec.get("count", 1)))
+    if spec.get("amount_source"):
+        amount = _amount(ctx, spec)  # e.g. The Empyrean: shown_power_cost
+    else:
+        amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
     if n == 0:

@@ -32,6 +32,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_reveal_from_top",                       # looked at/revealed from top of deck (Nocturne)
     "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
     "on_showdown_begin",                         # a showdown begins at this unit's battlefield (Diana Lunari)
+    "on_exhaust",                                # this unit/gear becomes exhausted (Reckless Innovator)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -60,6 +61,12 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "cards_burned_this_turn_at_least",
     "friendly_total_might_at_least",
     "you_control_n_or_more_gear",
+    "showed_off",                    # SHOW OFF (§832) happened as this card was played
+    "opponent_controls_a_battlefield",   # "If an opponent controls a battlefield, I enter ready"
+    "you_control_no_other_units",        # "I enter ready if you control no other units"
+    "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
+    "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
+    "you_control_this_battlefield",      # "... if you control this battlefield" (DEPLOY gear, battlefields)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -90,6 +97,10 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "controller_points", "opponent_points", "highest_might_friendly",
     "cards_in_hand", "enemies_here", "friendly_units_here",
     "n_friendly_with_tag", "n_distinct_tags_among_friendlies",
+    # SHOW OFF (§832): the shown object's info, snapshotted as the card was played.
+    "shown_might", "shown_power_cost", "shown_energy_cost",
+    # Per-count cost reductions ("I cost [1] less for each ...").
+    "cards_played_this_turn", "friendly_exhausted_units",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -118,7 +129,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
+# - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
-    "play_from_top", "ambush", "move_ally_here_to_base",
+    "play_from_top", "ambush", "move_ally_here_to_base", "show_off",
 })
