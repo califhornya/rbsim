@@ -232,6 +232,8 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target_card = target_item.card
     if target_card.cost_energy > max_energy:
         return
+    if (target_card.cost_power or 0) < int(spec.get("min_power", 0)):
+        return
     if (target_card.cost_power or 0) > max_power:
         return
     chain.pop()
@@ -411,6 +413,11 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     """
     target = str(spec.get("target", "actor")).lower()
     scope = str(spec.get("scope", "single")).lower()
+    if target in ("self", "this", "me"):
+        # "me" is the source unit itself wherever it is (base included), not the
+        # first friendly unit at the effect's battlefield.
+        src = _source_unit(ctx)
+        return [src] if src is not None else []
     if target in _BOTH_SIDES_TARGETS:
         units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
     elif target in _CHOOSER_TARGETS:
@@ -482,6 +489,10 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for u in _friendly_units(ctx) if tag in (u.card.tags or []))
     if src == "n_distinct_tags_among_friendlies":
         return len({t for u in _friendly_units(ctx) for t in (u.card.tags or [])})
+    if src == "battlefields_conquered_this_turn":
+        return int(ctx.loop.gs.conquered_this_turn.get(ctx.actor_side, 0))
+    if src == "hold_points_this_turn":
+        return int(ctx.loop.gs.hold_points_this_turn.get(ctx.actor_side, 0))
     if src == "cards_played_this_turn":
         return int(ctx.loop.gs.cards_played_this_turn.get(ctx.actor_side, 0))
     if src == "friendly_exhausted_units":

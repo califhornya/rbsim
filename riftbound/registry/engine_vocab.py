@@ -33,6 +33,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_first_unit_here",                        # first non-token unit played here this turn (Star Spring)
     "on_showdown_begin",                         # a showdown begins at this unit's battlefield (Diana Lunari)
     "on_exhaust",                                # this unit/gear becomes exhausted (Reckless Innovator)
+    "on_friendly_exhaust",                       # another friendly unit becomes exhausted (Riven Deserter)
+    "on_hide_here",                              # a card is hidden at this battlefield (Bandle Scouts' Academy)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -67,6 +69,14 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
     "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
     "you_control_this_battlefield",      # "... if you control this battlefield" (DEPLOY gear, battlefields)
+    "cards_in_hand_at_most",             # n: "if you have one or fewer cards in your hand"
+    "first_turn_of_player",              # the actor's first turn of the game
+    "rune_deck_empty",                   # "if your Rune Deck is empty"
+    "enemy_alone_here",                  # "if an enemy unit is alone here"
+    "one_on_one_here",                   # exactly one unit per side here ("one on one")
+    "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there"
+    "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
+    "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -101,6 +111,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "shown_might", "shown_power_cost", "shown_energy_cost",
     # Per-count cost reductions ("I cost [1] less for each ...").
     "cards_played_this_turn", "friendly_exhausted_units",
+    "battlefields_conquered_this_turn", "hold_points_this_turn",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -118,7 +129,7 @@ KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
 # on an effect with trigger on_play / on_cast.
 KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "discard_cards",
-    "kill_friendly_unit", "exhaust_friendly_unit",
+    "kill_friendly_unit", "exhaust_friendly_unit", "return_friendly_unit",
 })
 
 # Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere:
@@ -130,7 +141,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 # - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
+# - no_combat_damage       passive marker ("I don't deal combat damage") folded by Loop._apply_passive_grant
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
-    "play_from_top", "ambush", "move_ally_here_to_base", "show_off",
+    "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
 })

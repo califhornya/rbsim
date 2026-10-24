@@ -32,6 +32,7 @@ class UnitInPlay:
     hidden: bool = False  # reserved for future HIDDEN keyword
     empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
     is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
+    no_combat_damage: bool = False  # passive "I don't deal combat damage" (recomputed with passives)
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -89,7 +90,7 @@ class CombatStats:
 
 
 def _total_might(units: Iterable[UnitInPlay]) -> int:
-    return sum(unit.might for unit in units if not unit.stunned)
+    return sum(unit.might for unit in units if not unit.stunned and not unit.no_combat_damage)
 
 
 def _ordered_targets(units: List[UnitInPlay]) -> List[UnitInPlay]:

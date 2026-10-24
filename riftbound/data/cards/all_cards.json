@@ -8203,7 +8203,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_start_of_turn",
+        "count": 1,
+        "condition": {
+          "type": "cards_in_hand_at_most",
+          "params": {
+            "n": 1
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-252",
@@ -9402,7 +9414,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_start_of_turn",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "first_turn_of_player"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-291",
@@ -12002,7 +12024,14 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "amount_source": "hold_points_this_turn"
+      }
+    ],
     "keywords": [
       "SHIELD 5",
       "TANK"
@@ -13664,7 +13693,26 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "double_might",
+        "trigger": "on_attack",
+        "target": "self",
+        "duration": "this_turn",
+        "condition": {
+          "type": "one_on_one_here"
+        }
+      },
+      {
+        "effect": "double_might",
+        "trigger": "on_defend",
+        "target": "self",
+        "duration": "this_turn",
+        "condition": {
+          "type": "one_on_one_here"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-111",
@@ -22006,7 +22054,44 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_attack",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "enemy_alone_here"
+        }
+      },
+      {
+        "effect": "gain_xp",
+        "trigger": "on_attack",
+        "amount": 2,
+        "condition": {
+          "type": "enemy_alone_here"
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_defend",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "enemy_alone_here"
+        }
+      },
+      {
+        "effect": "gain_xp",
+        "trigger": "on_defend",
+        "amount": 2,
+        "condition": {
+          "type": "enemy_alone_here"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-144",
@@ -28676,7 +28761,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_control_bf_with_exactly_n_units",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-119",
@@ -30086,7 +30183,23 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_conquer",
+        "count": 1,
+        "optional": true,
+        "cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "you_have_n_or_fewer_runes",
+          "params": {
+            "n": 4
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-162",
@@ -31551,7 +31664,17 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "chosen_spell",
+        "min_power": 2,
+        "max_power": 99,
+        "max_energy": 99
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-041",
@@ -31872,7 +31995,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "chosen_unit",
+        "amount": 5,
+        "additional_cost": {
+          "return_friendly_unit": true
+        },
+        "condition": {
+          "type": "kicker_paid"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-051",
@@ -32729,7 +32865,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "amount_source": "battlefields_conquered_this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-080",
@@ -32888,7 +33031,27 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "amount_source": "self_might"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_defend",
+        "target": "all_enemy_units_here",
+        "scope": "all",
+        "amount_source": "self_might"
+      },
+      {
+        "effect": "no_combat_damage",
+        "trigger": "passive",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-085",
@@ -33062,7 +33225,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "exhausted": true,
+        "condition": {
+          "type": "friendly_deployed_gear_here"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-091",
@@ -33765,7 +33938,15 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_friendly_exhaust",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-114",
@@ -35167,7 +35348,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_hide_here",
+        "token_name": "Gold"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-157",
@@ -35252,7 +35439,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_hold",
+        "target": "actor",
+        "amount": 1,
+        "condition": {
+          "type": "rune_deck_empty"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-160",
