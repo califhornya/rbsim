@@ -88,6 +88,12 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
     SFD-110, UNL-143, VEN-119, VEN-162, RAD-041, RAD-051, RAD-080, RAD-085,
     RAD-091, RAD-114, RAD-157, RAD-160.
+  - **Full-corpus hand review (2026-10-25):** every card with effects in Origins,
+    Spiritforged, Unleashed, Vendetta and Proving Grounds was read against its
+    text; ~110 more specs that made cards stronger than printed were emptied
+    (fix scripts' card lists are in the commit messages of branch card-review).
+    Spiritforged had 74 June-era stubs without a trigger. Activated abilities
+    with no cost are never offered (misparsed triggers).
   - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
     keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
   - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In
