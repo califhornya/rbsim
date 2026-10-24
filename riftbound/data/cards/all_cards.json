@@ -33675,8 +33675,23 @@
     "effect": "DEPLOY (Play this only to a battlefield. When an opponent holds here, kill this.)\nDEATHKNELL Deal 2 to an enemy unit here and kill all other Bombs you control here.",
     "effect_equipped": null,
     "set": "Radiance",
-    "keywords": [],
-    "effects": [],
+    "keywords": [
+      "DEATHKNELL",
+      "DEPLOY"
+    ],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_death",
+        "target": "enemy_unit",
+        "amount": 2
+      },
+      {
+        "effect": "kill_other_deployed_here",
+        "trigger": "on_death",
+        "name": "Bomb"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-T02",

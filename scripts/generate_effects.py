@@ -461,6 +461,40 @@ STEP 4 — Vendetta mechanics:
     needs_review, and add suggested_vocab ["keyword:flow"]. Do NOT invent a
     play-from-trash verb.
 
+21. DEPLOY (supported — EMIT). A gear with DEPLOY is played to a battlefield and
+    the engine kills it when an opponent holds there; just list "DEPLOY" in
+    keywords. Its abilities that say "here" act at its battlefield: "Friendly
+    units here have ASSAULT" → {{"effect":"give_keyword","trigger":"passive",
+    "target":"all_friendly_units_here","keyword":"ASSAULT"}}; "When you
+    hold here" / "when you conquer here" → trigger on_hold / on_conquer; "When you
+    play this" → on_play; "DEATHKNELL ..." → on_death.
+    "Play a Bomb gear token to a battlefield" → {{"effect":"play_token","trigger":...,
+    "token_name":"Bomb"}} (add "count" for several; the engine places DEPLOY
+    tokens on a battlefield itself). "Move a friendly gear with DEPLOY to a
+    battlefield" → `move_deployed_gear`. "Kill all other Bombs you control here"
+    → {{"effect":"kill_other_deployed_here","trigger":"on_death","name":"Bomb"}}.
+    Only the card's OWN keywords go in `keywords`: a keyword named inside
+    reminder text "(It has DEPLOY ...)" or granted to others ("Your gear with
+    DEPLOY have ACTION") is not the card's keyword.
+
+22. DISARM (supported — keyword only). "DISARM" / "DISARM 2" is handled by the
+    engine on attack; list it in keywords ("DISARM", "DISARM 2") and emit no effect
+    for it. "Your Mechs have DISARM" → passive give_keyword with target_filter
+    {{"subtype":"Mech"}} and scope "board".
+
+23. SHOW OFF (supported — EMIT). "SHOW OFF a <object>" → list "SHOW OFF" in
+    keywords and emit a marker {{"effect":"show_off","trigger":"on_play",
+    "target_filter":{{...}}}} describing the object (e.g. {{"subtype":"Mech"}},
+    {{"is_gear":true}}, {{"is_unit":true}}, {{"has_keyword":"HIDDEN"}},
+    {{"energy_at_least":7}}; empty filter for "a card"). Gate the "if you showed
+    off" effects with condition {{"type":"showed_off"}}; read the shown object's
+    numbers with amount_source "shown_might" / "shown_power_cost" /
+    "shown_energy_cost". Example: "SHOW OFF a unit. If you showed off a unit, deal
+    damage equal to that unit's Might to a unit." → effects: [
+        {{"effect":"show_off","trigger":"on_cast","target_filter":{{"is_unit":true}}}},
+        {{"effect":"deal_damage","trigger":"on_cast","target":"chosen_unit",
+          "amount_source":"shown_might","condition":{{"type":"showed_off"}}}}]
+
 Output format: a JSON array, one object per input card, in the same order:
 [{{"name": "<card name>", "keywords": [...], "effects": [...], "needs_review": false}}, ...]
 Respond with ONLY the JSON array — no prose, no markdown fences."""

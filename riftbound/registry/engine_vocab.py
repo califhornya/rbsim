@@ -60,6 +60,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "cards_burned_this_turn_at_least",
     "friendly_total_might_at_least",
     "you_control_n_or_more_gear",
+    "showed_off",                    # SHOW OFF (§832) happened as this card was played
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -90,6 +91,8 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "controller_points", "opponent_points", "highest_might_friendly",
     "cards_in_hand", "enemies_here", "friendly_units_here",
     "n_friendly_with_tag", "n_distinct_tags_among_friendlies",
+    # SHOW OFF (§832): the shown object's info, snapshotted as the card was played.
+    "shown_might", "shown_power_cost", "shown_energy_cost",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -118,7 +121,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
+# - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
-    "play_from_top", "ambush", "move_ally_here_to_base",
+    "play_from_top", "ambush", "move_ally_here_to_base", "show_off",
 })

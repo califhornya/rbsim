@@ -65,17 +65,19 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
 - **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
   corpus cards; value-swap in `_amount`, a trigger after `player.burn`.
   Radiance adds stacking EMPOWER (§442.1.c.1 / §827.1.c.5) — currently binary.
-- **Radiance keywords (2026-10-24, CORE_RULES.md)** — all GAP, 168 Radiance cards
-  imported with empty effects[]:
-  - **DEPLOY** (§830) — gear playable/creatable to any battlefield, not recalled in
-    cleanup, killed when an opponent holds there, movable. Needed by the Bomb token
-    (RAD-T02, §187.12: Deathknell → deal 2 to an enemy unit here, kill other Bombs here).
-  - **DISARM X** (§831) — attack trigger, −X [M] to an enemy unit here this turn;
-    instances sum and trigger once.
-  - **SHOW OFF [Object]** (§832) — as you play the card, reveal from hand and/or pick
-    friendly board objects; linked abilities read snapshotted info.
-  - Data: RAD-142 Hexplosive Minefield has EMPTY rules text (missing in the RiftMana
-    HTML too) — needs the text from the user before parsing. RAD-167 Neeko Blending In
+- **Radiance keywords (2026-10-24, CORE_RULES.md)** — engine support added
+  2026-10-24 (see MECHANICS 830–832); Radiance effects[] still to be parsed:
+  - [DONE] **DISARM X** (§831), **SHOW OFF** (§832).
+  - [PARTIAL] **DEPLOY** (§830) + Bomb token (RAD-T02, §187.12). Still missing:
+    "Friendly DEATHKNELLs here trigger twice" (RAD-017 Detonation Amplifier), "when
+    you win a combat here" (RAD-024), "when one or more friendly units attack here"
+    (RAD-156), Deploy gear that become units (RAD-146 The Ball), "your gear with
+    DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
+    of turn, play that many Bombs". The RL observation encoding doesn't include
+    deployed gear yet (changing it changes the net's input shape).
+  - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
+    keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
+  - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In
     ("Neutral") stored as domainless with 1 power pip = [A]; the main card-play path
     doesn't charge [A] for a domainless card (power pip free) — small undercharge,
     Neeko is the only such card. Neeko's "choose up to 3 legends at deckbuilding" is a

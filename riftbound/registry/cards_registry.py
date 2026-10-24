@@ -348,15 +348,15 @@ def load_cards_json(base_path: Optional[Path] = None) -> dict[str, CardSpec]:
 
 _KNOWN_KEYWORDS: frozenset[str] = frozenset({
     "ACCELERATE", "ACTION", "AMBUSH", "ASSAULT", "BACKLINE",
-    "DEATHKNELL", "DEFLECT", "EMPOWER", "EMPOWERED", "EQUIP",
-    "FLOW", "GANKING", "HIDDEN", "HUNT", "LEGION", "LEVEL",
-    "PREDICT", "QUICK-DRAW", "REACTION", "REPEAT", "SHIELD",
+    "DEATHKNELL", "DEFLECT", "DEPLOY", "DISARM", "EMPOWER", "EMPOWERED",
+    "EQUIP", "FLOW", "GANKING", "HIDDEN", "HUNT", "LEGION", "LEVEL",
+    "PREDICT", "QUICK-DRAW", "REACTION", "REPEAT", "SHIELD", "SHOW OFF",
     "TANK", "TEMPORARY", "WEAPONMASTER",
 })
 
 
 _VALUED_KEYWORDS: frozenset[str] = frozenset({
-    "ASSAULT", "SHIELD", "DEFLECT", "HUNT", "LEVEL", "PREDICT", "REPEAT",
+    "ASSAULT", "SHIELD", "DEFLECT", "DISARM", "HUNT", "LEVEL", "PREDICT", "REPEAT",
 })
 
 # Legacy keyword tokens normalized on load / during generation.
@@ -368,7 +368,10 @@ _KEYWORD_MIGRATIONS: dict[str, Optional[str]] = {
 
 
 def _extract_keywords(rules_text: str) -> tuple[str, ...]:
-    upper = rules_text.upper()
+    # Parenthesized reminder text only explains keywords ("(It has DEPLOY ...)",
+    # "(... even before spells and abilities resolve.)"); it never prints the
+    # card's own, so drop it before matching.
+    upper = re.sub(r"\([^)]*\)", " ", rules_text.upper())
     found = []
     for kw in _KNOWN_KEYWORDS:
         # \b around the (escaped) keyword prevents false matches like ACTION
