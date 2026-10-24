@@ -30533,6 +30533,11 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
+      },
+      {
         "effect": "play_token",
         "trigger": "on_play",
         "token_name": "Mech",
@@ -30628,20 +30633,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_play",
-        "target": "self",
-        "from": "deck_top"
-      },
-      {
-        "effect": "banish_card",
-        "trigger": "leaves_board",
-        "target": "self",
-        "from": "deck_top"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-012",
@@ -30742,14 +30734,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_move",
-        "target": "self",
-        "from": "deck_top"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-015",
@@ -30887,16 +30872,7 @@
       "ACCELERATE",
       "ASSAULT 3"
     ],
-    "effects": [
-      {
-        "effect": "replace_death_with_recall",
-        "trigger": "death_replacement",
-        "target": "self",
-        "cost": {
-          "sacrifice": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-020",
@@ -31098,13 +31074,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-026",
@@ -31236,13 +31206,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_friendly_unit_played",
-        "target": "self"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-030",
@@ -31395,12 +31359,6 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "friendly_unit"
-      },
-      {
         "effect": "draw_cards",
         "trigger": "on_cast",
         "timing": "reaction",
@@ -31435,15 +31393,6 @@
         "target": "friendly_unit",
         "amount": 3,
         "duration": "this_turn"
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "activated",
-        "timing": "action",
-        "count": 1,
-        "cost": {
-          "tap": true
-        }
       }
     ],
     "variants": [
@@ -31469,13 +31418,7 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_death",
-        "count": 1
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-036",
@@ -31531,15 +31474,7 @@
     "keywords": [
       "DISARM"
     ],
-    "effects": [
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "passive",
-        "target": "self",
-        "amount": 1,
-        "duration": "this_turn"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-038",
@@ -31561,22 +31496,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "grant_might",
-        "trigger": "passive",
-        "target_filter": {
-          "is_unit": true
-        },
-        "amount": 2,
-        "scope": "board"
-      },
-      {
-        "effect": "kill_unit",
-        "trigger": "on_friendly_unit_played",
-        "target": "self"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-039",
@@ -31631,15 +31551,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "counter_spell",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "chosen_spell",
-        "min_power": 2
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-041",
@@ -32418,28 +32330,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
-        "condition": {
-          "type": "kicker_paid"
-        },
-        "additional_cost": {
-          "energy": 0
-        }
-      },
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_play",
-        "target": "self",
-        "amount_source": "shown_energy_cost",
-        "condition": {
-          "type": "kicker_paid"
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-066",
@@ -32496,16 +32387,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "is_gear": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-068",
@@ -32531,13 +32413,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_play_spell",
-        "count": 2
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-069",
@@ -32807,7 +32683,7 @@
         "effect": "deal_damage",
         "trigger": "on_move",
         "target": "chosen_unit",
-        "amount_source": "self_might"
+        "amount": 3
       }
     ],
     "variants": [
@@ -32831,14 +32707,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_cast",
-        "target": "all_units_here",
-        "amount": 3
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-079",
@@ -32860,13 +32729,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-080",
@@ -33025,22 +32888,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_attack",
-        "target": "all_enemy_units_here",
-        "scope": "all",
-        "amount_source": "self_might"
-      },
-      {
-        "effect": "deal_damage",
-        "trigger": "on_defend",
-        "target": "all_enemy_units_here",
-        "scope": "all",
-        "amount_source": "self_might"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-085",
@@ -33164,16 +33012,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "draw_cards",
-        "trigger": "on_friendly_unit_played",
-        "count": 1,
-        "cost": {
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-089",
@@ -33197,19 +33036,7 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": [
-      {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
-      },
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_play",
-        "target": "self",
-        "amount": 1
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-090",
@@ -33235,24 +33062,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "target_filter": {
-          "has_keyword": "DEPLOY",
-          "is_gear": true
-        },
-        "keyword": "ACTION",
-        "scope": "board"
-      },
-      {
-        "effect": "channel_rune",
-        "trigger": "on_conquer",
-        "amount": 1,
-        "exhausted": true
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-091",
@@ -33362,17 +33172,9 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [
-      "HIDDEN",
-      "TEMPORARY"
+      "HIDDEN"
     ],
-    "effects": [
-      {
-        "effect": "give_keyword",
-        "trigger": "on_play",
-        "target": "self",
-        "keyword": "TEMPORARY"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-095",
@@ -33458,14 +33260,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_cast",
-        "timing": "reaction",
-        "target": "enemy_unit"
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-098",
@@ -33639,6 +33434,14 @@
         "target_filter": {
           "has_keyword": "HIDDEN"
         }
+      },
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "on_play",
+        "amount": 1,
+        "condition": {
+          "type": "showed_off"
+        }
       }
     ],
     "variants": [
@@ -33748,11 +33551,6 @@
         "effect": "draw_cards",
         "trigger": "on_play",
         "count": 3
-      },
-      {
-        "effect": "recall_unit",
-        "trigger": "on_hold",
-        "target": "self"
       }
     ],
     "variants": [
@@ -33906,15 +33704,6 @@
           "tap": true
         },
         "token_name": "Bomb"
-      },
-      {
-        "effect": "grant_temporary_might",
-        "trigger": "on_defend",
-        "target": "self",
-        "amount": 2,
-        "cost": {
-          "sacrifice": true
-        }
       }
     ],
     "variants": [
@@ -34508,18 +34297,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "return_from_trash",
-        "trigger": "on_friendly_unit_death",
-        "target_filter": {
-          "is_gear": true
-        },
-        "cost": {
-          "energy": 1
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-130",
@@ -34775,10 +34553,9 @@
         "token_name": "Recruit"
       },
       {
-        "effect": "grant_might",
-        "trigger": "passive",
-        "target": "self",
-        "amount_source": "self_might"
+        "effect": "play_token",
+        "trigger": "on_exhaust",
+        "token_name": "Recruit"
       }
     ],
     "variants": [
@@ -34896,19 +34673,7 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [
-      {
-        "effect": "kill_unit",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "all_friendly_units_here",
-        "scope": "all",
-        "target_filter": {
-          "subtype": "Bomb",
-          "is_token": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-142",
@@ -35348,17 +35113,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "move_unit",
-        "trigger": "on_friendly_unit_played",
-        "target": "friendly_unit",
-        "cost": {
-          "tap": true,
-          "power": 1
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-155",
@@ -35497,13 +35252,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "score_point",
-        "trigger": "on_hold",
-        "amount": 1
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-160",
