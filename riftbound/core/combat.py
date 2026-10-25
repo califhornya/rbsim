@@ -132,6 +132,8 @@ class CombatStats:
     damage_to_B: int = 0
     dead_A: list = field(default_factory=list)  # List[UnitInPlay] that died
     dead_B: list = field(default_factory=list)  # List[UnitInPlay] that died
+    excess_by_A: int = 0   # damage A assigned beyond lethal to B's units
+    excess_by_B: int = 0
 
 
 def _total_might(units: Iterable[UnitInPlay]) -> int:
@@ -245,6 +247,8 @@ def resolve_might_combat(
     stats.deaths_B = kills_b
     stats.damage_to_A = assigned_a
     stats.damage_to_B = assigned_b
+    stats.excess_by_B = max(0, damage_to_a - assigned_a)
+    stats.excess_by_A = max(0, damage_to_b - assigned_b)
 
     # Capture dead units before filtering them out. A 0-might unit dies the
     # moment it receives any positive damage; a positive-might unit dies when

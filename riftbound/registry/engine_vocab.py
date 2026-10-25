@@ -141,13 +141,15 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "holder_didnt_conquer_this_turn",    # Equipment: "if I didn't conquer this turn"
     "conquered_uncontrolled",            # "when I conquer a battlefield that was uncontrolled"
     "your_legend_exhausted",             # your legend is exhausted (Hall of Legends)
+    "excess_damage_at_least",            # n: "if you assigned 3 or more excess damage" (this battlefield)
+    "facedown_card_here",                # "if you control a facedown card here"
+    "played_unit_gear_spell_this_turn",  # Swain Visionary
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
 # Kept distinct so the loop guard can assert the full handled set while the parser
 # never emits them.
 SAFE_FALSE_CONDITIONS: frozenset[str] = frozenset({
-    "excess_damage_at_least",
     "target_was_stunned",
 })
 
@@ -158,7 +160,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "subtype", "might_at_most", "might_at_least",
     # B2 additions
     "non_token", "is_buffed", "is_mighty", "might_less_than_self",
-    "card_type", "is_legend", "is_champion",
+    "card_type", "is_legend", "is_champion", "moved_this_turn",
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
@@ -188,7 +190,8 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
-    "disempower_self", "banish_from_trash", "discard",
+    "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
+    "kill_other_token",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs

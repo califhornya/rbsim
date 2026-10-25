@@ -69,9 +69,10 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "died_mighty", "units_here_exactly", "triggering_unit_stunned", "died_here",
     "triggering_unit_mightiest", "controller_has_facedown_card",
     "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
+    "excess_damage_at_least", "facedown_card_here", "played_unit_gear_spell_this_turn",
     "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
-    "excess_damage_at_least", "target_was_stunned",
+    "target_was_stunned",
 })
 assert _DISPATCHED_TRIGGERS <= KNOWN_TRIGGERS, (
     "loop.py dispatches triggers missing from engine_vocab.KNOWN_TRIGGERS: "
@@ -942,7 +943,7 @@ class GameLoop:
             for _ in range(parsed["recycle"]):
                 if actor.trash:
                     actor.deck.cards.append(actor.trash.pop(0))
-            self._pay_discard_and_banish(actor, parsed)
+            self._pay_discard_and_banish(actor, parsed, unit)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"] and unit is not None:
@@ -1573,6 +1574,22 @@ class GameLoop:
             other = self.gs.other(side)
             return any(u.stunned for bf in self.gs.battlefields
                        for u in (bf.units_A if other == "A" else bf.units_B))
+        if ctype == "excess_damage_at_least":
+            # "if you assigned 3 or more excess damage" in this battlefield's combat.
+            bf = extra.get("battlefield")
+            turn, amount = (bf.excess_damage.get(side, (-1, 0)) if bf is not None else (-1, 0))
+            return turn == self.gs.turn and amount >= _threshold(1)
+        if ctype == "facedown_card_here":
+            # "if you control a facedown card here" (Evelynn in Control).
+            bf = extra.get("battlefield")
+            return bf is not None and bf.facedown is not None and bf.facedown.owner == side
+        if ctype == "played_unit_gear_spell_this_turn":
+            # "if you've played a non-token unit, a non-token gear, and a spell
+            # this turn" (Swain Visionary).
+            played = self.gs.played_cards_this_turn.get(side, ())
+            return (any(isinstance(c, UnitCard) for c in played)
+                    and any(isinstance(c, GearCard) for c in played)
+                    and any(isinstance(c, SpellCard) for c in played))
         if ctype == "controller_has_facedown_card":
             # "if you control a facedown card at a battlefield" (Mushroom Pouch).
             return any(bf.facedown is not None and bf.facedown.owner == side
@@ -2432,6 +2449,9 @@ class GameLoop:
         # "Friendly units played from anywhere other than a player's hand have
         # ACCELERATE" (Rek'Sai Breacher).
         granted = from_zone != "hand" and self._side_has_passive(side, "accelerate_non_hand")
+        if self.gs.next_unit_accelerate.get(side) == self.gs.turn:
+            del self.gs.next_unit_accelerate[side]       # Firelights' Hideout: used up
+            granted = True
         if accelerate and self._pay_accelerate(card, ap, granted=granted):
             ready = True
         last_caress = self.gs.next_unit_any_bf.get(side) == self.gs.turn
@@ -2477,7 +2497,21 @@ class GameLoop:
         self._fire_enemy_unit_played(unit, side)
         self._fire_card_played(side, card, from_zone)
         self._unit_play_draw(side)
+        self._vision(card, side)
         return unit
+
+    def _vision(self, card: Card, side: str) -> None:
+        """VISION (migrated to PREDICT 1): "When you play me, look at the top card
+        of your Main Deck. You may recycle it." Unless the card's spec already
+        predicts when played."""
+        n = card.keyword_value("PREDICT") if card.has_keyword("PREDICT") else 0
+        spec = CARD_REGISTRY.get(card.name)
+        if not n or (spec and any(es.effect == "predict" and es.trigger == "on_play"
+                                  for es in spec.effects)):
+            return
+        ctx = EffectContext(self, card, self.gs.get_player(side),
+                            self.gs.get_player(self.gs.other(side)), self.gs.battlefields[0])
+        EFFECT_REGISTRY["predict"](ctx, {"amount": n})
 
     def _fire_enemy_unit_played(self, unit: UnitInPlay, side: str) -> None:
         """`side` played `unit` (a card or a token): the opponent's "when an
@@ -2528,6 +2562,7 @@ class GameLoop:
         self._count_card_played(card, side)
         self._resolve_card_effects(card, play_bf, ap, opponent)
         self._fire_card_played(side, card, from_zone)
+        self._vision(card, side)
 
     def _cast_spell_now(self, card: Card, side: str, lane: int = 0,
                         from_zone: str = "hand") -> None:
@@ -3237,6 +3272,10 @@ class GameLoop:
         eff = entry["eff"]
         if EFFECT_REGISTRY.get(eff.effect) is None:
             return False
+        if eff.params.get("once_per_turn"):
+            src = entry["gear"] if entry["type"] == "gear_ability" else entry["unit"].card
+            if self.gs.once_per_turn_used.get((id(src), "activated", eff.effect)) == self.gs.turn:
+                return False        # "Use only once each turn"
         parsed = self._parse_activated_cost(eff.cost)
         if entry["type"] == "gear_ability":
             gear = entry["gear"]
@@ -3254,7 +3293,9 @@ class GameLoop:
                 return False
             if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
                 return False
-            if parsed["discard"] and len(ap.hand) < parsed["discard"]:
+            if parsed["discard"] and len(self._discardable(ap, parsed)) < parsed["discard"]:
+                return False
+            if parsed["spend_buff"] and self._buff_to_spend(side, None, parsed["spend_buff"]) is None:
                 return False
             if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
                 return False
@@ -3309,7 +3350,8 @@ class GameLoop:
         import re
         parsed = {"energy": 0, "power": 0, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
-                  "banish_from_trash": None, "discard": 0}
+                  "banish_from_trash": None, "discard": 0, "discard_type": None,
+                  "spend_buff": None, "kill_other_token": False}
         if cost is None:
             return parsed
         if isinstance(cost, dict):
@@ -3326,6 +3368,9 @@ class GameLoop:
             # "Banish a unit from your trash": the card type(s), e.g. "unit".
             parsed["banish_from_trash"] = cost.get("banish_from_trash")
             parsed["discard"] = int(cost.get("discard", 0) or 0)     # "Discard 1, [tap]: ..."
+            parsed["discard_type"] = cost.get("discard_type")         # "Discard a gear"
+            parsed["spend_buff"] = cost.get("spend_buff")             # "self" / "other" / "any"
+            parsed["kill_other_token"] = bool(cost.get("kill_other_token"))
         elif isinstance(cost, str):
             for tok in cost.split(","):
                 t = tok.strip().lower()
@@ -3350,14 +3395,64 @@ class GameLoop:
         cands = [c for c in ap.trash if _zone_effect_card_ok(c, spec)]
         return min(cands, key=lambda c: c.cost_energy or 0) if cands else None
 
-    def _pay_discard_and_banish(self, ap: Player, parsed: dict) -> None:
-        """Pay a cost's "banish a <type> from your trash" and "Discard N" (the
-        cheapest cards)."""
+    def _pay_discard_and_banish(self, ap: Player, parsed: dict, unit=None) -> None:
+        """Pay a cost's "banish a <type> from your trash", "Discard N" (the
+        cheapest cards), "spend a buff" and "kill a friendly token"."""
+        side = "A" if ap is self.gs.A else "B"
         if parsed.get("banish_from_trash"):
             self._banish_from_trash(ap, self._trash_card_to_banish(ap, parsed))
         for _ in range(parsed.get("discard", 0)):
-            if ap.hand:
-                self._discard(ap, min(ap.hand, key=lambda c: c.cost_energy or 0))
+            cands = self._discardable(ap, parsed)
+            if cands:
+                self._discard(ap, min(cands, key=lambda c: c.cost_energy or 0))
+        if parsed.get("spend_buff"):
+            holder = self._buff_to_spend(side, unit, parsed["spend_buff"])
+            if holder is not None:
+                holder.might_counters -= 1
+        if parsed.get("kill_other_token"):
+            victim = self._token_to_kill(side, unit)
+            if isinstance(victim, UnitInPlay):
+                where = self._locate_unit(victim)
+                if where[1] is None:
+                    ap.base_units.remove(victim)
+                else:
+                    where[1].remove_unit(side, victim)
+                self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
+                                   in_base=where[1] is None)
+            elif victim is not None:
+                self._remove_gear(victim, ap)
+
+    @staticmethod
+    def _discardable(ap: Player, parsed: dict) -> list:
+        kind = parsed.get("discard_type")
+        if kind == "gear":
+            return [c for c in ap.hand if isinstance(c, GearCard)]
+        return list(ap.hand)
+
+    def _buff_to_spend(self, side: str, unit, who: str):
+        """The unit whose buff a "spend a buff" cost takes: "self" (Udyr: "Spend
+        my buff"), "other" (not the source), "any": a buffed friendly unit,
+        one in base first (it isn't fighting), the weakest."""
+        if who == "self":
+            return unit if unit is not None and unit.might_counters > 0 else None
+        cands = [u for u in self._friendly_units_of(side) if u.might_counters > 0
+                 and not (who == "other" and u is unit)]
+        if not cands:
+            return None
+        return min(cands, key=lambda u: (self._locate_unit(u)[1] is not None, u.might))
+
+    def _friendly_units_of(self, side: str) -> list:
+        return [u for bf in self.gs.battlefields for u in bf._units_for(side)] + \
+            list(self.gs.get_player(side).base_units)
+
+    def _token_to_kill(self, side: str, unit):
+        """ "Kill a friendly unit or gear" as a cost (Malzahar Fanatic): baseline,
+        only a token (unit or gear) is given up."""
+        tokens = [u for u in self._friendly_units_of(side) if u.is_token and u is not unit]
+        if tokens:
+            return min(tokens, key=lambda u: u.might)
+        gear = [g for g in self.gs.get_player(side).base_gear if getattr(g, "is_token", False)]
+        return gear[0] if gear else None
 
     def _banish_from_trash(self, ap: Player, card) -> None:
         if card is not None and card in ap.trash:
@@ -3377,7 +3472,11 @@ class GameLoop:
             return False
         if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
             return False
-        if parsed["discard"] and len(ap.hand) < parsed["discard"]:
+        if parsed["discard"] and len(self._discardable(ap, parsed)) < parsed["discard"]:
+            return False
+        if parsed["spend_buff"] and self._buff_to_spend(side, unit, parsed["spend_buff"]) is None:
+            return False
+        if parsed["kill_other_token"] and self._token_to_kill(side, unit) is None:
             return False
         if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
             return False
@@ -3448,6 +3547,8 @@ class GameLoop:
         # Unit/legend activated ability.
         unit = entry["unit"]
         eff = entry["eff"]
+        if eff.params.get("once_per_turn"):
+            self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
         parsed = self._parse_activated_cost(eff.cost)
         # Pay.
         if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
@@ -3459,7 +3560,7 @@ class GameLoop:
         for _ in range(parsed["recycle"]):
             if ap.trash:
                 ap.deck.cards.append(ap.trash.pop(0))
-        self._pay_discard_and_banish(ap, parsed)
+        self._pay_discard_and_banish(ap, parsed, unit)
         if parsed["spend_xp"]:
             self.gs.add_xp(side, -parsed["spend_xp"])
         if parsed["sacrifice"] and unit is not None:
@@ -4075,6 +4176,7 @@ class GameLoop:
                                                 self.gs.get_player(self.gs.other(side)),
                                                 context_extra={"battlefield": bf})
         stats = bf.resolve_combat_might(attacker_side=attacker, **self._combat_mods(bf, attacker))
+        bf.excess_damage = {"A": (self.gs.turn, stats.excess_by_A), "B": (self.gs.turn, stats.excess_by_B)}
 
         if self.verbose:
             dead_A_names = ",".join(u.card.name for u in stats.dead_A) or "-"

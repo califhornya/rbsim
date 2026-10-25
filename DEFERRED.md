@@ -379,8 +379,24 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   (ACCELERATE for units played from elsewhere). The simple_trade agent still
   plays units to base (Perched Grimwyrm where it can). Left: Dragon Roost,
   Stalking Wolf's additional cost, Poppy Defender's XP cost.
-- Next: buff spending, hand disruption (Ashe Focused, Bone Skewer,
-  Insightful Investigator), copies, rune manipulation, the rest.
+- [DONE] **Batch 10 (103 → 72).** Excess combat damage is tracked per
+  battlefield (`Battlefield.excess_damage`; the `excess_damage_at_least`
+  condition was safe-false): Vi Piltover Enforcer, Hextech Gauntlets, Yeti
+  Brawler, Trapping Grounds, Sivir Ambitious. **VISION never ran** on cards
+  without their own predict spec (Jeweled Colossus, Sai Scout, Karma
+  Channeler, Divining Shells, Swain): now every unit or gear printing it
+  predicts when played. Costs: "spend a buff" (Wildclaw Shaman, Monastery of
+  Hirana, Udyr Wildman), "discard a gear" (Sky Cruiser), "kill a friendly
+  unit or gear" (Malzahar Fanatic: baseline gives up tokens only); activated
+  abilities can be once per turn (Hungry Wolf). Albus Ferros, Scryer's
+  Bloom, Siren's Song (`moved_this_turn` filter), Stare Down, Tricksy
+  Tentacles, Temptation, Momentary Companion, Evelynn in Control,
+  Firelights' Hideout, Card Sharp and Party Favors (the opponent takes the
+  Gold / chooses Cards), Divine Judgment, Twisted Fate Gambler, Teemo
+  Strategist, Fox-Fire, Swain Visionary, Kai'Sa Evolutionary, Mechanical
+  Bandit, Friendship.
+- Next: hand disruption (Ashe Focused, Bone Skewer, Insightful
+  Investigator), copies, rune manipulation, replacement effects, the rest.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

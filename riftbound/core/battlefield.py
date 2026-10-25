@@ -52,6 +52,9 @@ class Battlefield:
     facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
     # side -> the turn it last conquered here ("a battlefield you conquered this turn").
     conquered_turn: dict = field(default_factory=dict)
+    # side -> (turn, excess combat damage it assigned here): "if you assigned 3
+    # or more excess damage" (Vi Piltover Enforcer, Yeti Brawler).
+    excess_damage: dict = field(default_factory=dict)
     # Gear deployed here (DEPLOY §830), per controlling side.
     gear_A: List[DeployedGear] = field(default_factory=list)
     gear_B: List[DeployedGear] = field(default_factory=list)

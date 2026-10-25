@@ -288,6 +288,220 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("next_unit_accelerate")
+def _next_unit_accelerate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next unit you play this turn has ACCELERATE" (Firelights' Hideout)."""
+    ctx.loop.gs.next_unit_accelerate[ctx.actor_side] = ctx.loop.gs.turn
+
+
+@effect("spend_buffs_for_runes")
+def _spend_buffs_for_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Spend any number of buffs. For each buff spent, channel 1 rune
+    exhausted" (Albus Ferros): the buffs of units in base (not fighting)."""
+    spent = 0
+    for unit in ctx.actor.base_units:
+        if unit.might_counters > 0 and unit.card is not ctx.card:
+            unit.might_counters -= 1
+            spent += 1
+    if spent:
+        ctx.actor.unlock_runes(spent, exhausted=True)
+
+
+def _send_home(ctx: "EffectContext", units: list) -> None:
+    for u in units:
+        ctx.loop._move_unit_by_effect(u, None)
+
+
+@effect("stare_down")
+def _stare_down(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a friendly unit and a battlefield. Move all enemy units at that
+    battlefield with less Might than the chosen unit to their base. Gain 1
+    XP." (Stare Down): the battlefield where the most Might goes home."""
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    if not mine:
+        return
+    ref = max(mine, key=lambda u: u.might)
+    best = max(ctx.loop.gs.battlefields,
+               key=lambda bf: sum(u.might for u in bf._units_for(ctx.opponent_side) if u.might < ref.might))
+    _send_home(ctx, [u for u in list(best._units_for(ctx.opponent_side)) if u.might < ref.might])
+    ctx.loop.gs.add_xp(ctx.actor_side, int(spec.get("xp", 1)))
+
+
+@effect("move_enemies_total_might")
+def _move_enemies_total_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Move any number of enemy units with the same controller and a total
+    Might of 8 or less to a single location" (Tricksy Tentacles): the
+    mightiest enemy battlefield units that fit, to their base."""
+    cap = int(spec.get("total", 8))
+    picked, total = [], 0
+    for u in sorted(_choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield")),
+                    key=lambda u: u.might, reverse=True):
+        if total + u.might <= cap:
+            picked.append(u)
+            total += u.might
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
+    _send_home(ctx, picked)
+
+
+@effect("move_enemy_to_its_units")
+def _move_enemy_to_its_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Move an enemy unit to a location where there's a unit with the same
+    controller" (Temptation): their mightiest battlefield unit to their base
+    if they have a unit there, else to another battlefield where they do."""
+    loop = ctx.loop
+    them = ctx.opponent_side
+    for u in sorted(_choosable(ctx, _units_at(ctx, them, "battlefield")), key=lambda u: -u.might):
+        cur = loop._locate_unit(u)[1]
+        if ctx.opponent.base_units:
+            dst = None
+        else:
+            others = [bf for bf in loop.gs.battlefields if bf is not cur and bf._units_for(them)]
+            if not others:
+                continue
+            dst = others[0]
+        loop._note_chosen(ctx.card, ctx.actor_side, [u])
+        if loop._move_unit_by_effect(u, dst):
+            return
+
+
+@effect("card_sharp")
+def _card_sharp(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You and each opponent may play a Gold gear token exhausted. For each
+    opponent who did, you play a Gold gear token exhausted." (Card Sharp):
+    the opponent takes theirs."""
+    loop = ctx.loop
+    loop._play_token("Gold", ctx.actor_side)
+    loop._play_token("Gold", ctx.opponent_side)
+    loop._play_token("Gold", ctx.actor_side)
+
+
+@effect("party_favors")
+def _party_favors(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Each other player chooses Cards or Runes ..." (Party Favors): the
+    opponent chooses Cards, so both players draw 1."""
+    ctx.draw_cards(1, target="actor")
+    ctx.draw_cards(1, target="opponent")
+
+
+@effect("divine_judgment")
+def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Each player chooses 2 units, 2 gear, 2 runes, and 2 cards in their
+    hands. Recycle the rest." (Divine Judgment): each keeps the mightiest
+    units, the costliest gear and cards."""
+    loop = ctx.loop
+    keep = int(spec.get("keep", 2))
+    for side in ("A", "B"):
+        p = loop.gs.get_player(side)
+        units = sorted(_units_at(ctx, side, "anywhere"), key=lambda u: u.might, reverse=True)
+        for u in units[keep:]:
+            where = loop._locate_unit(u)
+            if where[1] is None:
+                p.base_units.remove(u)
+            else:
+                where[1].remove_unit(side, u)
+            p.base_gear.extend(u.gear)
+            u.gear = []
+            loop._fire_leaves_board(u.card, side, where[1] or loop.gs.battlefields[0])
+            if not u.is_token:
+                p.deck.cards.insert(0, u.card)
+        gear = sorted(p.base_gear, key=_zone_value, reverse=True)
+        for g in gear[keep:]:
+            p.base_gear.remove(g)
+            if not getattr(g, "is_token", False):
+                p.deck.cards.insert(0, g)
+        runes = [r for d in list(p.rune_pool) for r in p.rune_pool[d]]
+        for r in runes[keep:]:
+            p.rune_pool[r.domain].remove(r)
+            r.ready = True
+            p.rune_deck.runes.append(r)
+        hand = sorted(p.hand, key=_zone_value, reverse=True)
+        for c in hand[keep:]:
+            p.hand.remove(c)
+            p.deck.cards.insert(0, c)
+
+
+@effect("twisted_fate_reveal")
+def _twisted_fate_reveal(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Reveal the top rune of your rune deck, then recycle it. [fury] - Deal 2
+    to an enemy unit here and 1 to all other enemy units here. [mind] - Draw
+    1. [order] - Stun an enemy unit." (Twisted Fate Gambler)"""
+    from .enums import Domain
+    runes = ctx.actor.rune_deck.runes
+    if not runes:
+        return
+    rune = runes.pop(0)
+    runes.append(rune)
+    enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
+    if rune.domain is Domain.FURY and enemies:
+        first = max(enemies, key=lambda u: (2 >= u.might - u.damage, u.might))
+        ctx.damage_units([first], 2)
+        ctx.damage_units([u for u in ctx.battlefield._units_for(ctx.opponent_side) if u is not first], 1)
+    elif rune.domain is Domain.MIND:
+        ctx.draw_cards(1, target="actor")
+    elif rune.domain is Domain.ORDER:
+        REGISTRY["stun_unit"](ctx, {"target": "enemy_unit"})
+
+
+@effect("teemo_reveal_damage")
+def _teemo_reveal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose an enemy unit here and reveal the top 5 cards of your Main Deck.
+    Deal 1 to that unit for each card with HIDDEN revealed this way, then
+    recycle the revealed cards." (Teemo Strategist)"""
+    enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
+    deck = ctx.actor.deck.cards
+    revealed = [deck.pop() for _ in range(min(5, len(deck)))]
+    n = sum(1 for c in revealed if c.has_keyword("HIDDEN"))
+    for c in revealed:
+        deck.insert(0, c)
+    if enemies and n:
+        unit = max(enemies, key=lambda u: (n >= u.might - u.damage, u.might))
+        ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+        ctx.damage_units([unit], n)
+
+
+@effect("kill_total_might_at_battlefield")
+def _kill_total_might_at_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Kill any number of units at a battlefield with total Might 4 or less"
+    (Fox-Fire): the enemy units, mightiest first, at the battlefield where
+    that kills the most Might."""
+    cap = int(spec.get("total", 4))
+    loop = ctx.loop
+
+    def plan(bf):
+        picked, total = [], 0
+        for u in sorted(_choosable(ctx, list(bf._units_for(ctx.opponent_side))), key=lambda u: -u.might):
+            if total + u.might <= cap:
+                picked.append(u)
+                total += u.might
+        return picked
+    best = max(loop.gs.battlefields, key=lambda bf: sum(u.might for u in plan(bf)))
+    victims = plan(best)
+    if not victims:
+        return
+    loop._note_chosen(ctx.card, ctx.actor_side, victims)
+    for u in victims:
+        best.remove_unit(ctx.opponent_side, u)
+    loop._route_deaths([(u, ctx.opponent_side) for u in victims], best)
+
+
+@effect("mechanical_bandit")
+def _mechanical_bandit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Each player reveals the top card of their Main Deck. If you revealed a
+    card with the lowest Energy cost, draw it. Recycle the rest." (Mechanical
+    Bandit)"""
+    mine, theirs = ctx.actor.deck.cards, ctx.opponent.deck.cards
+    if not mine:
+        return
+    my_top = mine.pop()
+    their_top = theirs.pop() if theirs else None
+    if their_top is None or (my_top.cost_energy or 0) <= (their_top.cost_energy or 0):
+        ctx.actor.hand.append(my_top)
+    else:
+        mine.insert(0, my_top)
+    if their_top is not None:
+        theirs.insert(0, their_top)
+
+
 @effect("next_unit_any_battlefield")
 def _next_unit_any_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "The next unit you play this turn, even from face down, can be played to
@@ -1329,6 +1543,8 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
         return False
     if tf.get("is_unit") and cat not in ("UNIT", "CHAMPION", "LEGEND"):
         return False
+    if tf.get("moved_this_turn") and not getattr(unit, "moves_this_turn", 0):
+        return False
     if tf.get("is_token") and not getattr(unit, "is_token", False):
         return False
     if tf.get("non_token") and getattr(unit, "is_token", False):
@@ -1517,7 +1733,13 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         tag = str(spec.get("tag", ""))
         return sum(1 for u in _friendly_units(ctx) if tag in u.tags)
     if src == "n_distinct_tags_among_friendlies":
-        return len({t for u in _friendly_units(ctx) for t in u.tags})
+        # `tags`: only these count ("Bird, Cat, Dog, and Poro": Friendship).
+        only = set(spec.get("tags") or [])
+        return len({t for u in _friendly_units(ctx) for t in u.tags if not only or t in only})
+    if src == "excess_damage":
+        bf = ctx.extra.get("battlefield") or ctx.battlefield
+        turn, n = bf.excess_damage.get(ctx.actor_side, (-1, 0))
+        return n if turn == ctx.loop.gs.turn else 0
     if src == "cards_with_my_name_in_trash":
         return sum(1 for c in ctx.actor.trash if c.name == ctx.card.name and c is not ctx.card)
     if src == "battlefields_conquered_this_turn":
@@ -2237,6 +2459,10 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
     lane = loop.gs.battlefields.index(ctx.battlefield) if ctx.battlefield in loop.gs.battlefields else 0
     picks = sorted((c for c in pool if _zone_effect_card_ok(c, spec)),
                    key=_zone_value, reverse=True)
+    if spec.get("energy_below_points"):
+        gs = loop.gs
+        pts = gs.points_A if side == "A" else gs.points_B
+        picks = [c for c in picks if int(c.cost_energy or 0) < pts]
     if spec.get("cost_at_most_cost_unit"):
         # "costs no more Energy and no more Power than the killed unit": the unit
         # the card's additional cost killed (GameLoop._pay_one_additional_cost).

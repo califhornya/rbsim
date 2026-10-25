@@ -102,6 +102,8 @@ class GameState:
     # Last Caress: side -> the turn "the next unit you play this turn can be
     # played to any battlefield" (and is buffed).
     next_unit_any_bf: dict = field(default_factory=dict)
+    # Firelights' Hideout: side -> turn "the next unit you play this turn has ACCELERATE".
+    next_unit_accelerate: dict = field(default_factory=dict)
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.
