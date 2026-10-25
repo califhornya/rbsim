@@ -191,8 +191,12 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   battlefield in a row are held (GameState.pending_move) and fight together.
   The RL observation doesn't yet show units by position, so the policy prior
   over "move the unit at position i" is blind (search still sees the result).
-- **`move_unit` effect** only moves a friendly unit at the effect's battlefield
-  to base (~40 cards: Charm, Ride the Wind, Moonfall, Fae Porter...).
+- [DONE] **`move_unit` effect**: units move per `from`/`destination` with a
+  baseline policy (enemy to its base or pulled "here", friendly where it
+  attacks best); effect moves fire move triggers, contests fight at end of
+  turn. Still approximate: Showstopper/Resonating Strike buff a unit other
+  than the one moved, Call to Battle's opponent half, Akshan's gear move,
+  Loyal Pup (on_defend from base), Possession (bounces instead of stealing).
 - **Targeting baseline.** Effects pick the first unit at the effect's
   battlefield (never base or other battlefields) instead of a real choice.
 - **Spell damage doesn't stay** on surviving units (`deal_direct_damage` heals

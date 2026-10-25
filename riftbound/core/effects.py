@@ -226,23 +226,6 @@ def _score_point(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         ctx.loop.gs.points_B += amount
 
 
-@effect("move_units_to_base")
-def _move_units_to_base(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    # Default: move ALL friendly units at this battlefield to base. Honors
-    # target_filter (e.g. is_exhausted) and scope=single so callers can move a
-    # single restricted unit instead of over-moving (KNOWN_ISSUES #14).
-    side = ctx.actor_side
-    bf = ctx.battlefield
-    resolved = _resolve_targets(
-        ctx, {**spec, "target": spec.get("target", "actor"),
-              "scope": spec.get("scope", "all")})
-    for unit in resolved:
-        if unit in ctx._units_for_side(side):
-            bf.remove_unit(side, unit)
-            unit.ready = True
-            ctx.actor.base_units.append(unit)
-
-
 @effect("counter_spell")
 def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     max_energy = int(spec.get("max_energy", 4))
@@ -646,19 +629,131 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 break
 
 
+def _units_at(ctx: "EffectContext", side: str, where: str) -> list:
+    """`side`'s units at a location kind: "here" (the effect's battlefield),
+    "battlefield" (any battlefield), "base", or "anywhere"."""
+    gs = ctx.loop.gs
+    if where == "here":
+        return list(ctx.battlefield._units_for(side)) if ctx.battlefield in gs.battlefields else []
+    units = []
+    if where in ("battlefield", "anywhere"):
+        units += [u for bf in gs.battlefields for u in bf._units_for(side)]
+    if where in ("base", "anywhere"):
+        units += list(gs.get_player(side).base_units)
+    return units
+
+
+def _attack_value(ctx: "EffectContext", side: str, unit, bf) -> int:
+    """How good moving `unit` (of `side`) into `bf` is for its controller:
+    winning a fight beats claiming an empty battlefield beats reinforcing."""
+    mine = sum(u.might for u in bf._units_for(side) if u is not unit)
+    theirs = sum(u.might for u in bf._units_for("B" if side == "A" else "A"))
+    if theirs and mine + unit.might >= theirs:
+        return 3
+    if not theirs and bf.controller() != side:
+        return 2
+    if bf.controller() == side:
+        return 1
+    return 0
+
+
 @effect("move_unit")
 def _move_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    # Minimal: move target friendly unit from current BF to its base (the only
-    # destination we can resolve without an explicit target lane from the agent).
-    side = ctx.actor_side
-    units = _bf_units(ctx, side)
-    player = ctx.loop.gs.get_player(side)
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
-        if unit in units:
-            units.remove(unit)
-            unit.ready = True
-            unit.reset_damage()
-            player.base_units.append(unit)
+    _move_units(ctx, spec, to_base_verb=False)
+
+
+@effect("move_units_to_base")
+def _move_units_to_base(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    _move_units(ctx, spec, to_base_verb=True)
+
+
+def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: bool) -> None:
+    """Move unit(s) as the effect says. `target`: friendly_unit / enemy_unit /
+    chosen_unit (either side; an enemy first) / self / all_*_here. `from`: here,
+    battlefield, base or anywhere (default: here for move_units_to_base and
+    *_here targets, else anywhere). `destination`: base (move_units_to_base's
+    default), here (this battlefield), battlefield (a battlefield), other_
+    battlefield, or to_or_from_base; move_unit's default is base for an enemy,
+    a battlefield for a friendly unit. `ready`: ready it after.
+
+    Baseline policy (the effect's controller's choice): an enemy goes to its
+    base / away from the fight, picking its mightiest unit at a battlefield, or
+    into "here" picking its weakest; a friendly unit goes where it attacks best
+    (_attack_value), picking its mightiest unit; a friendly unit sent to base
+    is the one losing its fight."""
+    loop = ctx.loop
+    gs = loop.gs
+    me, them = ctx.actor_side, ctx.opponent_side
+    target = str(spec.get("target", "friendly_unit")).lower()
+    scope_all = str(spec.get("scope", "")).lower() == "all" or target.startswith("all_")
+    count = len(gs.battlefields) * 99 if scope_all else int(spec.get("count", 1))
+    tf = spec.get("target_filter")
+
+    if target in ("self", "this", "me"):
+        src = _source_unit(ctx)
+        candidates = [(me, src)] if src is not None else []
+    else:
+        enemy = any(k in target for k in ("enemy", "opponent"))
+        friendly = any(k in target for k in ("friendly", "ally", "actor"))
+        default_from = "here" if (to_base_verb or target.endswith("_here")) else "anywhere"
+        frm = str(spec.get("from", default_from)).lower()
+        sides = [them] if enemy else [me] if friendly else [them, me]
+        candidates = [(s, u) for s in sides for u in _units_at(ctx, s, frm)]
+    if tf:
+        candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
+    if not candidates:
+        return
+
+    dest = spec.get("destination")
+    if dest is None:
+        dest = "base" if to_base_verb or candidates[0][0] == them else "battlefield"
+    dest = str(dest).lower()
+
+    def destination_for(side, unit):
+        where = loop._locate_unit(unit)
+        cur = where[1] if where else None
+        if dest == "base":
+            return None, True
+        if dest in ("here", "this_battlefield"):
+            ok = ctx.battlefield in gs.battlefields and cur is not ctx.battlefield
+            return ctx.battlefield, ok
+        if dest == "to_or_from_base" and cur is not None:
+            return None, True
+        others = [bf for bf in gs.battlefields if bf is not cur]
+        if not others:
+            return None, False
+        if side == me:
+            best = max(others, key=lambda bf: _attack_value(ctx, side, unit, bf))
+            return best, _attack_value(ctx, side, unit, best) > 0
+        # An enemy is moved where it fights worst for them.
+        return min(others, key=lambda bf: _attack_value(ctx, side, unit, bf)), True
+
+    def priority(item):
+        side, unit = item
+        where = loop._locate_unit(unit)
+        at_bf = where is not None and where[1] is not None
+        if side == them:
+            if dest in ("here", "this_battlefield"):
+                return (-unit.might,)                      # pull their weakest in
+            return (at_bf, unit.might)                     # push their mightiest out
+        if dest == "base":
+            bf = where[1] if where else None
+            losing = bf is not None and sum(u.might for u in bf._units_for(them)) > \
+                sum(u.might for u in bf._units_for(me))
+            return (losing, unit.might)
+        return (not at_bf, unit.might)                     # send a base unit in
+
+    moved = 0
+    for side, unit in sorted(candidates, key=priority, reverse=True):
+        if moved >= count:
+            break
+        dst_bf, ok = destination_for(side, unit)
+        if not ok:
+            continue
+        if loop._move_unit_by_effect(unit, dst_bf):
+            if spec.get("ready"):
+                unit.ready = True
+            moved += 1
 
 
 @effect("give_keyword")

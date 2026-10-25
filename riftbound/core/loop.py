@@ -2129,17 +2129,7 @@ class GameLoop:
             ap.base_units.append(unit)
         else:
             dst_bf.add_unit(side, unit)
-        here = dst_bf or self.gs.battlefields[0]
-        extra = {"battlefield": here, "moved_from": src_bf or "base",
-                 "moved_to": dst_bf or "base", "triggering_unit": unit}
-        # The unit's own "when I move", then its Equipment's (Eye of the Herald).
-        for card in [unit.card] + list(unit.gear):
-            self._resolve_triggered_effects(card, "on_move", here, ap, opponent,
-                                            context_extra=extra)
-        if src_bf is not None and src_bf.card is not None:
-            # "When a unit moves from here" (Back-Alley Bar), for its controller.
-            self._resolve_triggered_effects(src_bf.card, "on_unit_moves_from_here", src_bf,
-                                            ap, opponent, context_extra=extra)
+        self._fire_move_triggers(unit, side, src_bf, dst_bf)
         if dst_bf is None:
             return
         if src_bf is None:
@@ -2154,6 +2144,59 @@ class GameLoop:
             dst_bf.contested_this_turn = True
             if self.gs.pending_move is None:
                 self.gs.pending_move = (dst, side)
+
+    def _fire_move_triggers(self, unit: UnitInPlay, side: str,
+                            src_bf: Optional[Battlefield], dst_bf: Optional[Battlefield]) -> None:
+        """After a unit moved (Standard Move or an effect; None = base): its "when
+        I move" (on_move) abilities with where it came from and went, its
+        Equipment's (Eye of the Herald), and "when a unit moves from here"
+        (Back-Alley Bar) on the battlefield it left."""
+        ap = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        here = dst_bf or self.gs.battlefields[0]
+        extra = {"battlefield": here, "moved_from": src_bf or "base",
+                 "moved_to": dst_bf or "base", "triggering_unit": unit}
+        for card in [unit.card] + list(unit.gear):
+            self._resolve_triggered_effects(card, "on_move", here, ap, opponent,
+                                            context_extra=extra)
+        if src_bf is not None and src_bf.card is not None:
+            self._resolve_triggered_effects(src_bf.card, "on_unit_moves_from_here", src_bf,
+                                            ap, opponent, context_extra=extra)
+
+    def _locate_unit(self, unit: UnitInPlay):
+        """(side, battlefield or None for base) of a unit on the board, or None."""
+        for side in ("A", "B"):
+            for bf in self.gs.battlefields:
+                if any(u is unit for u in bf._units_for(side)):
+                    return side, bf
+            if any(u is unit for u in self.gs.get_player(side).base_units):
+                return side, None
+        return None
+
+    def _move_unit_by_effect(self, unit: UnitInPlay, dst_bf: Optional[Battlefield]) -> bool:
+        """Move a unit as an effect says ("Move an enemy unit to its base"): no
+        exhaust (that is the Standard Move's cost), its move triggers fire. A
+        battlefield it contests fights at the end of the turn. Returns whether
+        it moved (it may already be there or off the board)."""
+        where = self._locate_unit(unit)
+        if where is None:
+            return False
+        side, src_bf = where
+        if src_bf is dst_bf:
+            return False
+        if src_bf is None:
+            self.gs.get_player(side).base_units.remove(unit)
+        else:
+            src_bf.remove_unit(side, unit)
+        if dst_bf is None:
+            self.gs.get_player(side).base_units.append(unit)
+        else:
+            dst_bf.add_unit(side, unit)
+        if self.verbose:
+            to = "base" if dst_bf is None else f"BF{self.gs.battlefields.index(dst_bf)}"
+            print(f"  {unit.card.name} ({side}) is moved to {to}")
+        self._fire_move_triggers(unit, side, src_bf, dst_bf)
+        return True
 
     def _flush_pending_move(self) -> None:
         """Start the showdown a held Standard Move owes (see GameState.pending_move):

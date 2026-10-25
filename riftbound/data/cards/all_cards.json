@@ -2220,7 +2220,11 @@
         "effect": "move_unit",
         "trigger": "on_play",
         "target": "enemy_unit",
-        "destination": "here"
+        "destination": "here",
+        "condition": {
+          "type": "this_is_at_battlefield"
+        },
+        "optional": true
       },
       {
         "effect": "recall_unit",
@@ -5568,7 +5572,8 @@
         "effect": "move_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "ready": true
       },
       {
         "effect": "ready_unit",
@@ -5878,7 +5883,8 @@
         "cost": {
           "energy": 1,
           "tap": true
-        }
+        },
+        "from": "battlefield"
       }
     ]
   },
@@ -6078,7 +6084,8 @@
         "effect": "move_units_to_base",
         "trigger": "on_play",
         "target": "chosen_unit",
-        "scope": "single"
+        "scope": "single",
+        "from": "battlefield"
       }
     ]
   },
@@ -8415,9 +8422,7 @@
           "energy": 2,
           "tap": true
         },
-        "params": {
-          "to_or_from_base": true
-        }
+        "destination": "to_or_from_base"
       }
     ]
   },
@@ -8523,7 +8528,9 @@
       {
         "effect": "move_unit",
         "trigger": "on_cast",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "destination": "here",
+        "optional": true
       }
     ]
   },
@@ -8835,7 +8842,8 @@
       {
         "effect": "move_unit",
         "trigger": "on_cast",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "from": "base"
       }
     ]
   },
@@ -9876,8 +9884,8 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "friendly_unit",
-        "scope": "all",
-        "count": 2
+        "count": 2,
+        "from": "battlefield"
       }
     ]
   },
@@ -11549,7 +11557,9 @@
     "effects": [
       {
         "effect": "move_units_to_base",
-        "trigger": "on_cast"
+        "trigger": "on_cast",
+        "target": "friendly_unit",
+        "scope": "all"
       }
     ]
   },
@@ -11858,7 +11868,9 @@
         "trigger": "on_play",
         "timing": "reaction",
         "target": "enemy_unit",
-        "scope": "single"
+        "scope": "single",
+        "from": "here",
+        "optional": true
       }
     ]
   },
@@ -12719,7 +12731,8 @@
         },
         "additional_cost": {
           "exhaust_friendly_unit": true
-        }
+        },
+        "destination": "battlefield"
       }
     ]
   },
@@ -14061,7 +14074,9 @@
         },
         "condition": {
           "type": "moved_to_battlefield"
-        }
+        },
+        "destination": "here",
+        "from": "anywhere"
       }
     ]
   },
@@ -14142,7 +14157,8 @@
         "optional": true,
         "cost": {
           "sacrifice_self": true
-        }
+        },
+        "from": "here"
       }
     ]
   },
@@ -18749,11 +18765,8 @@
         "effect": "move_unit",
         "trigger": "on_hold",
         "target": "enemy_unit",
-        "params": {
-          "destination": "this_battlefield",
-          "delay": "start_of_next_main_phase",
-          "optional": true
-        }
+        "destination": "here",
+        "optional": true
       }
     ]
   },
@@ -20601,7 +20614,10 @@
         "target": "enemy_unit",
         "target_filter": {
           "might_less_than_self": true
-        }
+        },
+        "from": "here",
+        "destination": "other_battlefield",
+        "optional": true
       }
     ]
   },
@@ -20799,7 +20815,9 @@
         "target": "enemy_unit",
         "condition": {
           "type": "moved_to_battlefield"
-        }
+        },
+        "destination": "here",
+        "optional": true
       }
     ]
   },
@@ -21223,7 +21241,8 @@
         "effect": "move_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "from": "battlefield"
       }
     ]
   },
@@ -21664,7 +21683,8 @@
         },
         "condition": {
           "type": "kicker_paid"
-        }
+        },
+        "from": "here"
       }
     ]
   },
@@ -23694,7 +23714,9 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "enemy_unit",
-        "scope": "single"
+        "scope": "single",
+        "destination": "here",
+        "optional": true
       },
       {
         "effect": "grant_temporary_might",
@@ -23820,7 +23842,9 @@
         "cost": {
           "spend_xp": 2,
           "tap": true
-        }
+        },
+        "from": "battlefield",
+        "destination": "base"
       }
     ]
   },
@@ -24011,7 +24035,8 @@
         "effect": "move_units_to_base",
         "trigger": "on_hold",
         "target": "chosen_unit",
-        "scope": "single"
+        "scope": "single",
+        "from": "battlefield"
       }
     ]
   },
@@ -25618,7 +25643,8 @@
         "effect": "move_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "chosen_unit"
+        "target": "friendly_unit",
+        "destination": "here"
       },
       {
         "effect": "grant_temporary_might",
@@ -27498,7 +27524,10 @@
         "target_filter": {
           "might_at_most": 5
         },
-        "scope": "all"
+        "scope": "all",
+        "from": "here",
+        "destination": "base",
+        "optional": true
       }
     ],
     "variants": [
@@ -29404,7 +29433,8 @@
       {
         "effect": "move_unit",
         "trigger": "on_cast",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "destination": "here"
       }
     ],
     "variants": [
@@ -30932,7 +30962,13 @@
         "target": "friendly_unit",
         "target_filter": {
           "exclude_self": true
-        }
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        },
+        "from": "here",
+        "destination": "base",
+        "optional": true
       }
     ],
     "variants": [
@@ -31358,7 +31394,9 @@
       {
         "effect": "move_unit",
         "trigger": "on_play",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "destination": "here",
+        "optional": true
       },
       {
         "effect": "give_keyword",
@@ -33496,7 +33534,8 @@
         "target": "enemy_unit",
         "cost": {
           "tap": true
-        }
+        },
+        "destination": "here"
       }
     ],
     "variants": [
@@ -34140,7 +34179,9 @@
       {
         "effect": "move_unit",
         "trigger": "on_attack",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "destination": "here",
+        "optional": true
       }
     ],
     "variants": [
