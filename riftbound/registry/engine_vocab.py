@@ -36,6 +36,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_exhaust",                       # another friendly unit becomes exhausted (Riven Deserter)
     "on_hide_here",                              # a card is hidden at this battlefield (Bandle Scouts' Academy)
     "on_stun_enemy",                             # you stun one or more enemy units (Eclipse Herald, Leona legend)
+    "on_card_played",                            # you play a card, from any zone (Kennen legend, Darius Trifarian)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -82,6 +83,10 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
     "triggering_unit_has_subtype",       # subtype: the unit that caused the trigger has this tag ("another Dragon")
     "fewer_runes_than_opponent",         # "if you control fewer runes than an opponent"
+    "cards_played_this_turn_exactly",    # n: "when you play your second card in a turn"
+    "opponent_played_n_spells_this_turn",  # n: "if an opponent has played another spell this turn"
+    "triggering_card_matches",           # filter: "when you play a spell / a card with Energy cost [7]+"
+    "triggering_card_not_from_hand",     # "when you play a card from anywhere other than your hand"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -103,6 +108,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "card_type", "is_legend", "is_champion",
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
+    "power_at_most",                 # zone effects: "no more than [rune]"
 })
 
 # amount_source values understood by effects._amount.

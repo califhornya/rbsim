@@ -68,6 +68,9 @@ class GameState:
     # condition evaluator for LEGION / "you played N spells this turn" / etc.
     cards_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     spells_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # The cards each player played this turn, in order (GameLoop._note_card_played),
+    # so "if you've played ANOTHER card" can leave out the card asking.
+    played_cards_this_turn: dict = field(default_factory=lambda: {"A": [], "B": []})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})

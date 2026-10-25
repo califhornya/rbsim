@@ -749,27 +749,53 @@ def _swap_position(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     place(target, my_loc)
 
 
+_LEGACY_ZONE_FILTERS = {
+    "gear": ("GEAR",),
+    "unit": ("UNIT", "CHAMPION"),
+    "unit_or_gear": ("UNIT", "CHAMPION", "GEAR"),
+}
+
+
+def _zone_effect_card_ok(card, spec: Mapping[str, Any]) -> bool:
+    """Whether a card in a zone (trash / banishment) matches a zone effect's
+    filter: its target_filter (type, tag, keyword, Energy/Power bounds) plus the
+    older `filter` strings ("gear", "unit_or_gear") some specs still use."""
+    legacy = _LEGACY_ZONE_FILTERS.get(str(spec.get("filter") or "").lower())
+    if legacy and _card_category_name(card) not in legacy:
+        return False
+    tf = spec.get("target_filter") or {}
+    if not _zone_card_matches(card, tf):
+        return False
+    if "tag" in tf and tf["tag"] not in (getattr(card, "tags", None) or []):
+        return False
+    if "has_keyword" in tf and not card.has_keyword(str(tf["has_keyword"])):
+        return False
+    energy = int(getattr(card, "cost_energy", 0) or 0)
+    power = int(getattr(card, "cost_power", 0) or 0)
+    if "energy_at_most" in tf and energy > int(tf["energy_at_most"]):
+        return False
+    if "energy_at_least" in tf and energy < int(tf["energy_at_least"]):
+        return False
+    if "power_at_most" in tf and power > int(tf["power_at_most"]):
+        return False
+    return True
+
+
+def _zone_value(card) -> tuple[int, int]:
+    """Baseline pick among zone cards: the most expensive, then the mightiest."""
+    return (int(getattr(card, "cost_energy", 0) or 0), int(getattr(card, "might", 0) or 0))
+
+
 @effect("return_from_trash")
 def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
     player = ctx._player_for_target(target)
-    tf = spec.get("target_filter") or {}
     count = int(spec.get("count", spec.get("amount", 1)))
-    moved = 0
-    for card in list(player.trash):
-        if moved >= count:
-            break
-        if "tag" in tf and tf["tag"] not in getattr(card, "tags", []):
-            continue
-        if "card_type" in tf and _card_category_name(card) != str(tf["card_type"]).upper():
-            continue
-        if tf.get("is_spell") and _card_category_name(card) != "SPELL":
-            continue
-        if tf.get("is_unit") and _card_category_name(card) not in ("UNIT", "CHAMPION", "LEGEND"):
-            continue
+    picks = sorted((c for c in player.trash if _zone_effect_card_ok(c, spec)),
+                   key=_zone_value, reverse=True)[:count]
+    for card in picks:
         player.trash.remove(card)
         player.hand.append(card)
-        moved += 1
 
 
 @effect("discard_card")
@@ -998,27 +1024,64 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     deck.cards[:0] = top  # recycle remainder to the bottom
 
 
-@effect("play_from_trash")
-def _play_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Return matching card(s) from the trash into play. Units enter Base exhausted;
-    other card types go to hand (ignore-cost play resolves on the controller's turn)."""
-    from .cards import UnitCard
-    from .combat import UnitInPlay
+def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) -> None:
+    """Play matching card(s) from the trash or banishment, through the engine's
+    play procedure ("when you play me", play counters, ...). Costs are ignored,
+    except the Power cost when the card says "ignoring its Energy cost"
+    (`ignore_energy_cost` / `pay_power`); an unaffordable card is skipped. Units
+    go to base, gear to base, spells are cast at this battlefield (`then:
+    recycle` recycles the spell afterwards, e.g. Fizz Trickster)."""
+    from .cards import GearCard, SpellCard, UnitCard
+    loop = ctx.loop
     player = ctx._player_for_target(str(spec.get("target", "actor")))
-    tf = spec.get("target_filter") or {}
+    side = ctx._side_for_player(player)
+    pool = player.trash if zone == "trash" else player.banished
     count = int(spec.get("count", spec.get("amount", 1)))
-    moved = 0
-    for card in list(player.trash):
-        if moved >= count:
+    pay_power = bool(spec.get("ignore_energy_cost") or spec.get("pay_power"))
+    lane = loop.gs.battlefields.index(ctx.battlefield) if ctx.battlefield in loop.gs.battlefields else 0
+    picks = sorted((c for c in pool if _zone_effect_card_ok(c, spec)),
+                   key=_zone_value, reverse=True)
+    if spec.get("cost_at_most_cost_unit"):
+        # "costs no more Energy and no more Power than the killed unit": the unit
+        # the card's additional cost killed (GameLoop._pay_one_additional_cost).
+        victim = getattr(ctx.card, "_cost_unit", None)
+        if victim is None:
+            return
+        picks = [c for c in picks
+                 if int(c.cost_energy or 0) <= int(victim.cost_energy or 0)
+                 and int(c.cost_power or 0) <= int(victim.cost_power or 0)]
+    played = 0
+    for card in picks:
+        if played >= count:
             break
-        if "tag" in tf and tf["tag"] not in getattr(card, "tags", []):
+        if card not in pool:
             continue
-        player.trash.remove(card)
+        if pay_power:
+            power = int(card.cost_power or 0)
+            domain = card.cost_power_domain
+            if domain is None:
+                if not loop._pay_generic_power(player, power):
+                    continue
+            elif not player.pay_cost(0, power, domain):
+                continue
+        pool.remove(card)
         if isinstance(card, UnitCard):
-            player.base_units.append(UnitInPlay(card=card, ready=False))
+            loop._play_unit(card, side, from_zone=zone)
+        elif isinstance(card, GearCard):
+            loop._play_gear(card, side, lane, from_zone=zone)
+        elif isinstance(card, SpellCard):
+            loop._cast_spell_now(card, side, lane, from_zone=zone)
+            if spec.get("then") == "recycle" and card in player.trash:
+                player.trash.remove(card)
+                player.deck.cards.insert(0, card)
         else:
             player.hand.append(card)
-        moved += 1
+        played += 1
+
+
+@effect("play_from_trash")
+def _play_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    _play_from_zone(ctx, spec, "trash")
 
 
 @effect("banish_card")
@@ -1053,23 +1116,7 @@ def _banish_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _play_from_banish(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Play matching card(s) from the banished zone (ignore cost). Mirrors
     play_from_trash but pulls from `banished`."""
-    from .cards import UnitCard
-    from .combat import UnitInPlay
-    player = ctx._player_for_target(str(spec.get("target", "actor")))
-    tf = spec.get("target_filter") or {}
-    count = int(spec.get("count", spec.get("amount", 1)))
-    moved = 0
-    for card in list(player.banished):
-        if moved >= count:
-            break
-        if "tag" in tf and tf["tag"] not in getattr(card, "tags", []):
-            continue
-        player.banished.remove(card)
-        if isinstance(card, UnitCard):
-            player.base_units.append(UnitInPlay(card=card, ready=False))
-        else:
-            player.hand.append(card)
-        moved += 1
+    _play_from_zone(ctx, spec, "banished")
 
 
 @effect("prevent_death")

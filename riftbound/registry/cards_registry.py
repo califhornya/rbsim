@@ -258,9 +258,11 @@ class CardSpec:
 
     def instantiate(self) -> Card:
         effects = [effect.to_dict() for effect in self.effects]
-        if self.category is CardType.UNIT:
+        if self.category in (CardType.UNIT, CardType.CHAMPION):
+            # A champion is a unit (it fights, plays from the trash, ACTION in
+            # showdowns) that keeps CHAMPION as its category for filters.
             might = self.might if self.might is not None else 0
-            return UnitCard(
+            unit = UnitCard(
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
@@ -271,6 +273,8 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
+            unit.category = self.category
+            return unit
         if self.category is CardType.SPELL:
             damage = self.damage if self.damage is not None else 0
             return SpellCard(
@@ -305,7 +309,7 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
-        if self.category in (CardType.LEGEND, CardType.CHAMPION):
+        if self.category is CardType.LEGEND:
             return LegendCard(
                 name=self.name,
                 cost_energy=self.cost_energy,

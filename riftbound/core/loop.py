@@ -31,6 +31,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
+    "on_card_played",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -51,6 +52,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
     "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
     "fewer_runes_than_opponent",
+    "cards_played_this_turn_exactly", "opponent_played_n_spells_this_turn",
+    "triggering_card_matches", "triggering_card_not_from_hand",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1042,10 +1045,12 @@ class GameLoop:
                 return 1
         return default
 
-    def _deflect_surcharge(self, card: Card, target_lane: int) -> int:
-        """Extra energy a spell costs because the opponent has DEFLECT units at
-        the target battlefield (§809). Applies only when the spell targets the
-        opponent. Returns the max DEFLECT value among eligible enemy units."""
+    def _deflect_surcharge(self, card: Card, target_lane: int,
+                           caster: Optional[str] = None) -> int:
+        """Extra energy a spell costs because the caster's opponent has DEFLECT
+        units at the target battlefield (§809). Applies only when the spell targets
+        the opponent. Returns the max DEFLECT value among eligible enemy units.
+        `caster` defaults to the active player (a reaction's caster may not be)."""
         # Battlefield that waives DEFLECT while paying here (e.g. Heisho Shell of
         # the World) → no surcharge regardless of who the spell targets.
         if 0 <= target_lane < len(self.gs.battlefields):
@@ -1069,7 +1074,7 @@ class GameLoop:
         if not (0 <= target_lane < len(self.gs.battlefields)):
             return 0
         bf = self.gs.battlefields[target_lane]
-        opp_side = self.gs.other(self.gs.active)
+        opp_side = self.gs.other(caster or self.gs.active)
         enemy_units = bf.units_A if opp_side == "A" else bf.units_B
         return max((u.keyword_value("DEFLECT") for u in enemy_units), default=0)
 
@@ -1143,8 +1148,24 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "cards_played_this_turn_exactly":
+            # "When you play your second card in a turn": the triggering card is
+            # already counted when on_card_played fires.
+            return self.gs.cards_played_this_turn.get(side, 0) == _threshold(1)
+        if ctype == "opponent_played_n_spells_this_turn":
+            return self.gs.spells_played_this_turn.get(self.gs.other(side), 0) >= _threshold(1)
+        if ctype == "triggering_card_matches":
+            # "When you play a spell / a gear / a card with Energy cost [7] or more".
+            from .effects import _zone_effect_card_ok
+            trig = extra.get("triggering_card")
+            return trig is not None and _zone_effect_card_ok(trig, {"target_filter": params.get("filter") or {}})
+        if ctype == "triggering_card_not_from_hand":
+            # "When you play a card from anywhere other than your hand".
+            return extra.get("triggering_card") is not None and extra.get("from_zone", "hand") != "hand"
         if ctype == "you_already_played_another_card_this_turn":
-            return self.gs.cards_played_this_turn.get(side, 0) >= 1
+            # Another card than this one: a LEGION card's own play is already
+            # counted while its "when you play me" resolves.
+            return any(c is not card for c in self.gs.played_cards_this_turn.get(side, ()))
         if ctype == "controller_has_xp_at_least":
             return self.gs.get_xp(side) >= _threshold()
         if ctype == "card_in_trash_count_at_least":
@@ -1525,7 +1546,8 @@ class GameLoop:
                 actor.deck.cards.remove(card)
             if card in cards:
                 cards.remove(card)
-            actor.base_units.append(UnitInPlay(card=card, ready=False))
+            # Banished, then played from banishment.
+            self._play_unit(card, "A" if actor is self.gs.A else "B", from_zone="banished")
             taken.append(card)
             if self.verbose:
                 print(f"  {actor.name} reveals {card.name} from top → banish + play for [rune]")
@@ -1561,19 +1583,17 @@ class GameLoop:
             return False
         ap = self.gs.get_player(side)
         champ = self.gs.champion_A if side == "A" else self.gs.champion_B
-        if not ap.can_pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
-            return False
-        if not ap.pay_cost(champ.cost_energy, champ.cost_power, champ.cost_power_domain):
+        energy, power = self._effective_cost(champ, ap)
+        if not self._pay_card(ap, champ, energy, power):
             return False
         bf = self.gs.battlefields[lane]
-        bf.add_unit(side, UnitInPlay(card=champ, ready=False))
         if side == "A":
             self.gs.champion_A_deployed = True
         else:
             self.gs.champion_B_deployed = True
-        self.units_played += 1
         if self.verbose:
             print(f"  {side} AMBUSH-deploys CHAMPION {champ.name} @BF{lane}")
+        self._play_unit(champ, side, bf=bf, from_zone="champion")
         if self.recorder:
             self.recorder.record_play(side, self.gs.turn, champ, action="UNIT",
                                       battlefield_index=lane)
@@ -1689,14 +1709,12 @@ class GameLoop:
         card = fd.card
         bf.facedown = None
         ap = self.gs.get_player(side)
-        opponent = self.gs.get_player(self.gs.other(side))
         if isinstance(card, SpellCard):
+            self._spell_played(card, ap, from_zone="facedown")
             self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
             self._run_chain(side)
         else:  # unit / champion / gear-as-unit → enters at that battlefield
-            bf.add_unit(side, UnitInPlay(card=card, ready=False))
-            self.units_played += 1
-            self._resolve_card_effects(card, bf, ap, opponent)
+            self._play_unit(card, side, bf=bf, from_zone="facedown")
         if self.verbose:
             print(f"  {side} plays {card.name} from Hidden @BF{lane} for [0]")
         return True
@@ -1747,8 +1765,9 @@ class GameLoop:
         # --- affordability check (no mutation yet) ---
         if not self._can_pay_energy_and_generic(ap, energy, power):
             return False
-        # +1: never discard the very card being played.
-        if discard_n and len(ap.hand) < discard_n + 1:
+        # Never discard the very card being played (it may still be in hand).
+        in_hand = any(c is card for c in ap.hand)
+        if discard_n and len(ap.hand) < discard_n + (1 if in_hand else 0):
             return False
         target_unit = self._first_friendly_unit_for_cost(ap) if (kill or exhaust or bounce) else None
         if (kill or exhaust or bounce) and target_unit is None:
@@ -1769,6 +1788,9 @@ class GameLoop:
                 side = "A" if ap is self.gs.A else "B"
                 self._remove_unit_from_play(target_unit, side)
                 (ap.hand if bounce else ap.trash).append(target_unit.card)
+            # "... no more Energy and no more Power than the killed unit"
+            # (Heedless Resurrection) reads the unit this cost took.
+            card._cost_unit = target_unit.card
         return True
 
     def _find_unit_by_card(self, card: Card):
@@ -1812,6 +1834,224 @@ class GameLoop:
             gs.get_xp("A"), gs.get_xp("B"),
         )
 
+    # ------------------------------------------------------------------
+    # Playing a card: one procedure for every zone (hand, Champion Zone, face
+    # down, trash, banishment, top of deck) and every timing (main phase, chain,
+    # showdown). Callers pay the card's own cost (or ignore it) and take the card
+    # out of its zone; everything that happens AS a card is played lives here.
+
+    def _effective_cost(self, card: Card, actor: Player,
+                        lane: Optional[int] = None) -> tuple[int, Optional[int]]:
+        """(energy, power) `actor` pays to play `card`: the printed cost minus the
+        card's own reductions. A spell aimed at battlefield `lane` also pays the
+        DEFLECT surcharge there and gets that battlefield's discount."""
+        energy = int(card.cost_energy or 0) - self._cost_reduction(card, actor)
+        power = card.cost_power
+        if isinstance(card, SpellCard) and lane is not None:
+            side = "A" if actor is self.gs.A else "B"
+            energy += self._deflect_surcharge(card, lane, side)
+            e_red, p_red = self._bf_cost_reduction(card, lane)
+            energy -= e_red
+            if power is not None and p_red:
+                power = max(0, power - p_red)
+        return max(0, energy), power
+
+    def _can_pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
+        """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
+        earmarked gear power; during a showdown Diana's showdown energy counts."""
+        if isinstance(card, GearCard):
+            return self._can_pay_gear(actor, energy, power, card.cost_power_domain)
+        if self.gs.showdown_active:
+            return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
+        return actor.can_pay_cost(energy, power, card.cost_power_domain)
+
+    def _pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
+        if isinstance(card, GearCard):
+            return self._pay_gear(actor, energy, power, card.cost_power_domain)
+        if self.gs.showdown_active:
+            return self._pay_showdown(actor, energy, power, card.cost_power_domain)
+        return actor.pay_cost(energy, power, card.cost_power_domain)
+
+    def _count_card_played(self, card: Card, side: str) -> None:
+        """Count a played card for the "this turn" counters (LEGION, "your second
+        card", "for each card you've played"). Tokens are not cards and don't count."""
+        gs = self.gs
+        gs.played_cards_this_turn[side].append(card)
+        gs.cards_played_this_turn[side] = gs.cards_played_this_turn.get(side, 0) + 1
+        if isinstance(card, SpellCard):
+            gs.spells_played_this_turn[side] = gs.spells_played_this_turn.get(side, 0) + 1
+
+    def _note_card_played(self, card: Card, side: str, from_zone: str = "hand") -> None:
+        """Count a played card and fire its owner's "when you play a card" abilities."""
+        self._count_card_played(card, side)
+        self._fire_card_played(side, card, from_zone)
+
+    def _fire_card_played(self, side: str, card: Card, from_zone: str) -> None:
+        """on_card_played for `side`'s units, legend and gear (not the card itself).
+        Conditions see the played card as triggering_card and its origin zone."""
+        actor = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        anchor = self.gs.battlefields[0]
+        sources = []  # (card, battlefield it is at)
+        for bf in self.gs.battlefields:
+            for u in (bf.units_A if side == "A" else bf.units_B):
+                sources.append((u.card, bf))
+                sources.extend((g, bf) for g in u.gear)
+            sources.extend((dg.card, bf) for dg in bf.gear_for(side))
+        for u in actor.base_units:
+            sources.append((u.card, anchor))
+            sources.extend((g, anchor) for g in u.gear)
+        sources.extend((g, anchor) for g in actor.base_gear)
+        legend_unit = self._legend_unit(side)
+        if legend_unit is not None:
+            sources.append((legend_unit.card, anchor))
+        for src, bf in sources:
+            if src is card:
+                continue
+            self._resolve_triggered_effects(src, "on_card_played", bf, actor, opponent,
+                                            context_extra={"battlefield": bf,
+                                                           "triggering_card": card,
+                                                           "from_zone": from_zone})
+
+    def _pay_accelerate(self, card: Card, ap: Player) -> bool:
+        """ACCELERATE (§731): optional additional cost of [1] + 1 Power of the
+        unit's domain ([A] if no/multi domain) to enter ready. Routed through the
+        agent (default yes). Returns whether it was paid."""
+        if not card.has_keyword("ACCELERATE"):
+            return False
+        domain = card.domain
+        if domain is not None:
+            can = ap.can_pay_cost(1, 1, domain)
+        else:
+            can = ap.energy >= 1 and self._can_pay_generic_power(ap, 1)
+        if not (can and self._wants_optional_keyword(ap, card, "accelerate")):
+            return False
+        if domain is not None:
+            ap.pay_cost(1, 1, domain)
+        else:
+            ap.energy -= 1
+            self._pay_generic_power(ap, 1)
+        return True
+
+    def _play_unit(self, card: Card, side: str, *, bf: Optional[Battlefield] = None,
+                   ready: bool = False, from_zone: str = "hand",
+                   accelerate: bool = True) -> UnitInPlay:
+        """A unit card is played from any zone: ACCELERATE, it enters (its base,
+        or `bf`), additional costs, SHOW OFF, the play counters, "when you play
+        me", WEAPONMASTER, then its controller's "when you play a unit"
+        abilities. The caller paid (or ignored) its cost and took it out of its
+        zone. Contesting a battlefield is the caller's business."""
+        ap = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        if accelerate and self._pay_accelerate(card, ap):
+            ready = True
+        unit = UnitInPlay(card=card, ready=ready)
+        if bf is None:
+            ap.base_units.append(unit)
+        else:
+            bf.add_unit(side, unit)
+        self.units_played += 1
+        # B1: optional additional cost (kicker), paid before resolution.
+        self._try_pay_additional_costs(card, ap)
+        self._show_off(card, ap)
+        self._count_card_played(card, side)
+        self._resolve_card_effects(card, bf or self.gs.battlefields[0], ap, opponent)
+
+        # WEAPONMASTER (§747): choose an Equipment you control, pay its real
+        # Equip cost reduced by [A] (1 Power of any domain), and attach it to
+        # this unit. First affordable Equipment among base gear.
+        if card.has_keyword("WEAPONMASTER"):
+            for gear_card in list(ap.base_gear):
+                base_cost = self._equip_cost(gear_card)
+                if base_cost is None:
+                    continue
+                reduced = self._equip_cost_minus_A(base_cost)
+                if self._can_pay_equip(ap, reduced) and self._pay_equip(ap, reduced):
+                    ap.base_gear.remove(gear_card)
+                    unit.gear.append(gear_card)
+                    if self.verbose:
+                        print(f"  {ap.name} WEAPONMASTER attaches {gear_card.name} to {card.name}")
+                    break
+
+        self._fire_units_trigger("on_friendly_unit_played", side, exclude_card=card)
+        self._fire_card_played(side, card, from_zone)
+        return unit
+
+    def _play_gear(self, card: Card, side: str, lane: int = 0, from_zone: str = "hand") -> None:
+        """A gear card is played from any zone (cost already handled, card out of
+        its zone). §146.1.a.1: gear goes to the controller's BASE, unattached;
+        Equipment attaches later via its Equip ability, never for free on play.
+        Exceptions: QUICK-DRAW (§745.1.d) attaches to a unit you control as it is
+        played; DEPLOY (§830.1.a) gear go to a battlefield."""
+        ap = self.gs.get_player(side)
+        attached_to = None
+        deployed_bf = None
+        if card.has_keyword("DEPLOY"):
+            deployed_bf = self.gs.battlefields[lane]
+        elif card.has_keyword("QUICK-DRAW"):
+            target_bf = self.gs.battlefields[lane]
+            friendly_units = target_bf.units_A if side == "A" else target_bf.units_B
+            if friendly_units:
+                attached_to = friendly_units[0]
+                attached_to.gear.append(card)
+        if deployed_bf is not None:
+            self._deploy_gear(side, deployed_bf, card)
+        elif attached_to is None:
+            ap.base_gear.append(card)
+        # "This enters exhausted" gear cannot use its [tap] ability the turn
+        # it is played (§ enters exhausted) — it untaps on the next turn.
+        _gspec = CARD_REGISTRY.get(card.name)
+        if _gspec and "enters exhausted" in ((_gspec.raw or {}).get("effect") or "").lower():
+            card.tapped = True
+        if self.verbose:
+            if attached_to is not None:
+                print(f"  {side} plays GEAR (QUICK-DRAW): {card.name} -> {attached_to.card.name}")
+            elif deployed_bf is None:
+                print(f"  {side} plays GEAR: {card.name} (to base)")
+
+        # "When you play this" gear effects. A deployed gear's "here" is
+        # its battlefield.
+        play_bf = deployed_bf or self.gs.battlefields[lane]
+        opponent = self.gs.get_player(self.gs.other(side))
+        self._show_off(card, ap)
+        self._count_card_played(card, side)
+        self._resolve_card_effects(card, play_bf, ap, opponent)
+        self._fire_card_played(side, card, from_zone)
+
+    def _cast_spell_now(self, card: Card, side: str, lane: int = 0,
+                        from_zone: str = "hand") -> None:
+        """Play a spell from a zone other than hand as part of an effect ("play a
+        spell from your trash"): it is played, goes on a chain and resolves (the
+        opponent may react). Cost already handled, card out of its zone."""
+        ap = self.gs.get_player(side)
+        self._spell_played(card, ap, from_zone=from_zone)
+        self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+        self._run_chain(side)
+
+    def _spell_played(self, card: Card, ap: Player, from_zone: str = "hand") -> None:
+        """A spell is played from any zone, after its cost is paid and it left
+        that zone, before it goes on the chain: additional costs (kicker),
+        REPEAT, SHOW OFF, and the play counters."""
+        self._try_pay_additional_costs(card, ap)
+        # REPEAT [Cost]: optional additional cost. Pay it (once) if we can
+        # afford it, which flags the effect to execute a second time.
+        # Per the rules the REPEAT cost equals the spell's printed cost,
+        # so a bare "REPEAT" keyword (no explicit value) defaults to
+        # card.cost_energy. An explicit "REPEAT N" overrides for the rare
+        # exceptions. (Note: card.keyword_value returns 1 for bare
+        # keywords, so we detect bare-vs-parameterized by inspecting the
+        # raw keyword list rather than relying on the integer value.)
+        card._repeat_paid = False
+        if card.has_keyword("REPEAT"):
+            bare = any(k.strip().upper() == "REPEAT" for k in card.keywords)
+            repeat_cost = card.cost_energy if bare else card.keyword_value("REPEAT")
+            if repeat_cost and ap.can_pay_cost(repeat_cost, None, None):
+                if ap.pay_cost(repeat_cost, None, None):
+                    card._repeat_paid = True
+        self._show_off(card, ap)
+        side = "A" if ap is self.gs.A else "B"
+        self._note_card_played(card, side, from_zone)
+
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
@@ -1834,68 +2074,14 @@ class GameLoop:
             if isinstance(card, (UnitCard, LegendCard)):
                 # LEGION cost reductions are handled generically by _cost_reduction
                 # (the reduce_cost effect gated on you_already_played_another_card_
-                # this_turn). The old hardcoded get_legion_cost_reduction path was
-                # redundant and double-counted (Noxus Hopeful cost 0 instead of 2).
-                effective_energy = max(0, card.cost_energy - self._cost_reduction(card, ap))
-                if not ap.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
-                    return
-                if not ap.pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
+                # this_turn).
+                energy, power = self._effective_cost(card, ap)
+                if not self._pay_card(ap, card, energy, power):
                     return
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}")
-                # ACCELERATE (§731): OPTIONAL additional cost of [1] + 1 Power of the
-                # unit's domain ([A] if no/multi domain) to enter ready. Optional per
-                # §731.2 — routed through the agent (default yes preserves prior play).
-                enters_ready = False
-                if card.has_keyword("ACCELERATE"):
-                    accel_domain = card.domain
-                    if accel_domain is not None:               # single-domain: match it
-                        can_accel = ap.can_pay_cost(1, 1, accel_domain)
-                    else:                                       # no/multi domain: [A]
-                        can_accel = ap.energy >= 1 and self._can_pay_generic_power(ap, 1)
-                    if can_accel and self._wants_optional_keyword(ap, card, "accelerate"):
-                        if accel_domain is not None:
-                            ap.pay_cost(1, 1, accel_domain)
-                        else:
-                            ap.energy -= 1
-                            self._pay_generic_power(ap, 1)
-                        enters_ready = True
-                unit = UnitInPlay(card=card, ready=enters_ready)
-                ap.base_units.append(unit)
-
-                # B1: optional additional cost (kicker), paid before resolution.
-                self._try_pay_additional_costs(card, ap)
-                self._show_off(card, ap)
-
-                # Resolve on_play effects for EVERY unit. (Previously this was
-                # gated on `LEGION and cards_played>0`, so normal "When you play
-                # me" effects never fired — see KNOWN_ISSUES. LEGION's mechanical
-                # benefit is the cost reduction applied above, not effect gating.)
-                self._resolve_card_effects(card, self.gs.battlefields[0], ap, opponent)
-
-                # WEAPONMASTER (§747): choose an Equipment you control, pay its real
-                # Equip cost reduced by [A] (1 Power of any domain), and attach it to
-                # this unit. First affordable Equipment among base gear.
-                if card.has_keyword("WEAPONMASTER"):
-                    for gear_card in list(ap.base_gear):
-                        base_cost = self._equip_cost(gear_card)
-                        if base_cost is None:
-                            continue
-                        reduced = self._equip_cost_minus_A(base_cost)
-                        if self._can_pay_equip(ap, reduced) and self._pay_equip(ap, reduced):
-                            ap.base_gear.remove(gear_card)
-                            unit.gear.append(gear_card)
-                            if self.verbose:
-                                print(f"  {ap.name} WEAPONMASTER attaches {gear_card.name} to {card.name}")
-                            break
-
-                # Recompute by identity: a kicker `discard_cards` cost may have
-                # popped another hand card, shifting the original index.
-                cur_idx = next((i for i, c in enumerate(ap.hand) if c is card), idx)
-                ap.remove_from_hand(cur_idx)
-                self.units_played += 1
-                # on_friendly_unit_played: notify the player's OTHER units.
-                self._fire_units_trigger("on_friendly_unit_played", ap.name, exclude_card=card)
+                ap.remove_from_hand(idx)
+                self._play_unit(card, ap.name)
                 if self.recorder:
                     self.recorder.record_play(
                         ap.name,
@@ -1913,45 +2099,11 @@ class GameLoop:
                 # DEFLECT: if this spell targets enemy units and the opponent
                 # controls DEFLECT units at the target battlefield, the spell
                 # costs that much more energy (additional cost, §809).
-                deflect_surcharge = self._deflect_surcharge(card, target_lane)
-                bf_e_red, bf_p_red = self._bf_cost_reduction(card, target_lane)
-                base_energy = max(0, card.cost_energy + deflect_surcharge
-                                  - self._cost_reduction(card, ap) - bf_e_red)
-                power_cost = card.cost_power
-                if power_cost is not None and bf_p_red:
-                    power_cost = max(0, power_cost - bf_p_red)
-                if not ap.can_pay_cost(base_energy, power_cost, card.cost_power_domain):
+                energy, power = self._effective_cost(card, ap, target_lane)
+                if not self._pay_card(ap, card, energy, power):
                     return
-                if not ap.pay_cost(base_energy, power_cost, card.cost_power_domain):
-                    return
-                # B1: optional additional cost (kicker), paid before chain resolution.
-                self._try_pay_additional_costs(card, ap)
-                # REPEAT [Cost]: optional additional cost. Pay it (once) if we can
-                # afford it, which flags the effect to execute a second time.
-                # Per the rules the REPEAT cost equals the spell's printed cost,
-                # so a bare "REPEAT" keyword (no explicit value) defaults to
-                # card.cost_energy. An explicit "REPEAT N" overrides for the rare
-                # exceptions. (Note: card.keyword_value returns 1 for bare
-                # keywords, so we detect bare-vs-parameterized by inspecting the
-                # raw keyword list rather than relying on the integer value.)
-                card._repeat_paid = False
-                if card.has_keyword("REPEAT"):
-                    bare = any(k.strip().upper() == "REPEAT" for k in card.keywords)
-                    if bare:
-                        repeat_cost = card.cost_energy
-                        if self.verbose:
-                            print(f"  REPEAT defaults to spell cost ({repeat_cost}) for {card.name}")
-                    else:
-                        repeat_cost = card.keyword_value("REPEAT")
-                    if repeat_cost and ap.can_pay_cost(repeat_cost, None, None):
-                        if ap.pay_cost(repeat_cost, None, None):
-                            card._repeat_paid = True
-                # Recompute by identity: a kicker `discard_cards` cost may have
-                # popped another hand card, shifting the original index.
-                cur_idx = next((i for i, c in enumerate(ap.hand) if c is card), idx)
-                ap.remove_from_hand(cur_idx)
-                self._show_off(card, ap)
-                self.gs.spells_played_this_turn[ap.name] = self.gs.spells_played_this_turn.get(ap.name, 0) + 1
+                ap.remove_from_hand(idx)
+                self._spell_played(card, ap)
                 if self.verbose:
                     print(f"  {ap.name} plays SPELL: {card.name} at BF{target_lane}")
                 self.gs.chain.append(ChainItem(player=ap.name, card=card, bf_idx=target_lane))
@@ -1967,48 +2119,14 @@ class GameLoop:
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, GearCard):
-                gear_energy = max(0, card.cost_energy - self._cost_reduction(card, ap))
                 # Ornn's earmarked gear-power may cover the power portion.
-                if not self._pay_gear(ap, gear_energy, card.cost_power, card.cost_power_domain):
+                energy, power = self._effective_cost(card, ap)
+                if not self._pay_card(ap, card, energy, power):
                     return
-                # §146.1.a.1: gear is played to the controller's BASE (unattached).
-                # Equipment attaches later via its Equip ability — a separate action
-                # that pays the Equip cost. It must NOT auto-attach for free on play.
-                # EXCEPTION: QUICK-DRAW (§745.1.d) attaches to a unit you control as
-                # it is played.
-                attached_to = None
-                deployed_bf = None
-                if card.has_keyword("DEPLOY"):
-                    # §830.1.a: played only to a battlefield (any battlefield).
-                    deployed_bf = self.gs.battlefields[lane if lane is not None else 0]
-                elif card.has_keyword("QUICK-DRAW"):
-                    target_bf = self.gs.battlefields[lane if lane is not None else 0]
-                    friendly_units = target_bf.units_A if self.gs.active == "A" else target_bf.units_B
-                    if friendly_units:
-                        attached_to = friendly_units[0]
-                        attached_to.gear.append(card)
-                if deployed_bf is not None:
-                    self._deploy_gear(self.gs.active, deployed_bf, card)
-                elif attached_to is None:
-                    ap.base_gear.append(card)
-                # "This enters exhausted" gear cannot use its [tap] ability the turn
-                # it is played (§ enters exhausted) — it untaps on the next turn.
-                _gspec = CARD_REGISTRY.get(card.name)
-                if _gspec and "enters exhausted" in ((_gspec.raw or {}).get("effect") or "").lower():
-                    card.tapped = True
-                if self.verbose:
-                    if attached_to is not None:
-                        print(f"  {ap.name} plays GEAR (QUICK-DRAW): {card.name} -> {attached_to.card.name}")
-                    elif deployed_bf is None:
-                        print(f"  {ap.name} plays GEAR: {card.name} (to base)")
-
                 ap.remove_from_hand(idx)
-                # "When you play this" gear effects. A deployed gear's "here" is
-                # its battlefield.
-                play_bf = deployed_bf or self.gs.battlefields[lane if lane is not None else 0]
-                opponent = self.gs.get_player(self.gs.other(self.gs.active))
-                self._show_off(card, ap)
-                self._resolve_card_effects(card, play_bf, ap, opponent)
+                # The player playing it (QUICK-DRAW can be played on the opponent's
+                # turn), not necessarily the active player.
+                self._play_gear(card, ap.name, lane if lane is not None else 0)
                 if self.recorder:
                     self.recorder.record_play(
                         ap.name,
@@ -2024,19 +2142,18 @@ class GameLoop:
             already_deployed = self.gs.champion_A_deployed if is_A else self.gs.champion_B_deployed
             if champion is None or already_deployed:
                 return
-            if not ap.can_pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
+            # The Chosen Champion is played from the Champion Zone like any unit
+            # from hand: its own reductions, ACCELERATE, "when you play me", ...
+            energy, power = self._effective_cost(champion, ap)
+            if not self._pay_card(ap, champion, energy, power):
                 return
-            if not ap.pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
-                return
-            unit = UnitInPlay(card=champion, ready=False)
-            ap.base_units.append(unit)
             if is_A:
                 self.gs.champion_A_deployed = True
             else:
                 self.gs.champion_B_deployed = True
             if self.verbose:
                 print(f"  {ap.name} deploys CHAMPION: {champion.name}")
-            self.units_played += 1
+            self._play_unit(champion, ap.name, from_zone="champion")
             if self.recorder:
                 self.recorder.record_play(
                     ap.name,
@@ -2574,13 +2691,14 @@ class GameLoop:
                 if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
                     card = player.hand[idx]
                     if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
-                        if player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                            if player.pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                                if lane is None or not (0 <= lane < len(self.gs.battlefields)):
-                                    lane = 0
-                                player.remove_from_hand(idx)
-                                self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
-                                passes = 0
+                        if lane is None or not (0 <= lane < len(self.gs.battlefields)):
+                            lane = 0
+                        energy, power = self._effective_cost(card, player, lane)
+                        if self._pay_card(player, card, energy, power):
+                            player.remove_from_hand(idx)
+                            self._spell_played(card, player)
+                            self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
+                            passes = 0
                 elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
                     # QUICK-DRAW gear (§745): played at reaction speed.
                     card = player.hand[idx]
@@ -2670,16 +2788,15 @@ class GameLoop:
                     card = focus_player.hand[idx]
                     if isinstance(card, SpellCard):
                         has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
-                        if has_action_or_reaction and self._can_pay_showdown(
-                            focus_player, card.cost_energy, card.cost_power, card.cost_power_domain
-                        ):
-                            if self._pay_showdown(focus_player, card.cost_energy, card.cost_power, card.cost_power_domain):
-                                focus_player.remove_from_hand(idx)
-                                if self.verbose:
-                                    print(f"    {self.gs.focus_player} plays SPELL in showdown: {card.name}")
-                                self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
-                                self._run_chain(self.gs.focus_player)
-                                passes = 0
+                        energy, power = self._effective_cost(card, focus_player, bf_idx)
+                        if has_action_or_reaction and self._pay_card(focus_player, card, energy, power):
+                            focus_player.remove_from_hand(idx)
+                            self._spell_played(card, focus_player)
+                            if self.verbose:
+                                print(f"    {self.gs.focus_player} plays SPELL in showdown: {card.name}")
+                            self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
+                            self._run_chain(self.gs.focus_player)
+                            passes = 0
                 elif kind == "UNIT" and idx is not None and 0 <= idx < len(focus_player.hand):
                     # ACTION unit (§732.1.c.1): played during a showdown (to base).
                     card = focus_player.hand[idx]
@@ -2912,9 +3029,12 @@ class GameLoop:
         if self.verbose:
             print(f"\n=== TURN {gs.turn} ({gs.active}'s turn) ===")
 
-        # Reset per-turn counters for the condition evaluator.
-        gs.cards_played_this_turn[gs.active] = 0
-        gs.spells_played_this_turn[gs.active] = 0
+        # Reset per-turn counters for the condition evaluator. Both players: the
+        # non-active one can play reactions this turn too.
+        gs.cards_played_this_turn["A"] = gs.cards_played_this_turn["B"] = 0
+        gs.spells_played_this_turn["A"] = gs.spells_played_this_turn["B"] = 0
+        gs.played_cards_this_turn["A"] = []
+        gs.played_cards_this_turn["B"] = []
         gs.friendly_unit_died_this_turn["A"] = False
         gs.friendly_unit_died_this_turn["B"] = False
         gs.discarded_this_turn["A"] = False
@@ -2947,15 +3067,16 @@ class GameLoop:
     def _run_main_actions(self) -> Optional[Result]:
         """The active player's multi-action main phase (decide_action → apply until
         PASS / no-op / cap). Returns None — kept Optional so callers can chain it
-        with `or self._end_turn()`. Re-entrant: cards-played resumes from the live
-        counter, so a mid-turn clone continues LEGION counting correctly."""
+        with `or self._end_turn()`. The cards-played counters live in GameState and
+        are kept by the play procedure (_note_card_played), so a mid-turn clone
+        continues LEGION counting correctly."""
         gs = self.gs
         ap: Player = gs.get_player(gs.active)
         op: Player = gs.get_player(gs.other(gs.active))
 
-        cards_played_this_turn = gs.cards_played_this_turn.get(gs.active, 0)
         actions_this_turn = 0
         while True:
+            cards_played_this_turn = gs.cards_played_this_turn.get(gs.active, 0)
             if ap.agent is None:
                 act: Action = ("PASS", None, None)
             else:
@@ -2981,8 +3102,6 @@ class GameLoop:
                 if self.verbose:
                     print(f"  {ap.name} hit action cap — ending action phase")
                 break
-            cards_played_this_turn += 1
-            gs.cards_played_this_turn[gs.active] = cards_played_this_turn
         return None
 
     def _end_turn(self) -> Optional[Result]:
@@ -3003,10 +3122,10 @@ class GameLoop:
 
         self._fire_turn_trigger("on_end_of_turn", gs.active)
 
-        # Clear temporary might bonuses (REACTION spells like Discipline)
-        for bf in self.gs.battlefields:
-            for unit in bf.units_A + bf.units_B:
-                unit.clear_turn_end_bonuses()
+        # Clear temporary might bonuses (REACTION spells like Discipline), wherever
+        # the unit is (a base unit's "this turn" bonus ends too).
+        for unit in self._all_units_in_play():
+            unit.clear_turn_end_bonuses()
 
         # Cleanup: a facedown card whose owner no longer controls its battlefield is
         # removed to its owner's trash (§106.4.d / §322.8).

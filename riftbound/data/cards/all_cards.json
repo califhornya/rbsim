@@ -906,10 +906,12 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_friendly_unit_played",
+        "trigger": "on_card_played",
         "condition": {
-          "type": "you_already_played_another_card_this_turn",
-          "params": {}
+          "type": "cards_played_this_turn_exactly",
+          "params": {
+            "n": 2
+          }
         },
         "target": "self",
         "amount": 2,
@@ -917,10 +919,12 @@
       },
       {
         "effect": "ready_unit",
-        "trigger": "on_friendly_unit_played",
+        "trigger": "on_card_played",
         "condition": {
-          "type": "you_already_played_another_card_this_turn",
-          "params": {}
+          "type": "cards_played_this_turn_exactly",
+          "params": {
+            "n": 2
+          }
         },
         "target": "self"
       }
@@ -6217,12 +6221,11 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_play",
+        "optional": true,
         "target_filter": {
           "is_unit": true
         },
-        "params": {
-          "ignore_energy_cost": true
-        }
+        "ignore_energy_cost": true
       }
     ]
   },
@@ -7242,9 +7245,11 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_play",
+        "optional": true,
         "target_filter": {
+          "is_unit": true,
           "energy_at_most": 3,
-          "is_unit": true
+          "power_at_most": 1
         }
       }
     ]
@@ -14480,10 +14485,13 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_play",
+        "optional": true,
         "target_filter": {
           "is_spell": true,
           "energy_at_most": 3
-        }
+        },
+        "pay_power": true,
+        "then": "recycle"
       }
     ]
   },
@@ -15226,10 +15234,12 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_death",
+        "optional": true,
         "target_filter": {
-          "energy_at_most": 3
-        },
-        "ignore_cost": true
+          "is_unit": true,
+          "energy_at_most": 3,
+          "power_at_most": 1
+        }
       }
     ]
   },
@@ -21734,10 +21744,16 @@
         "effect": "play_from_trash",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "self",
         "additional_cost": {
           "kill_friendly_unit": true
-        }
+        },
+        "condition": {
+          "type": "kicker_paid"
+        },
+        "target_filter": {
+          "is_unit": true
+        },
+        "cost_at_most_cost_unit": true
       }
     ]
   },
@@ -21974,16 +21990,18 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "passive",
+        "trigger": "on_card_played",
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "is_spell": true
+            }
+          }
+        },
         "target": "self",
         "amount": 2,
-        "duration": "this_turn",
-        "condition": {
-          "type": "you_played_n_spells_this_turn",
-          "params": {
-            "n": 1
-          }
-        }
+        "duration": "this_turn"
       }
     ]
   },
@@ -22581,9 +22599,10 @@
         "effect": "play_from_trash",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit",
         "target_filter": {
-          "energy_at_most": 2
+          "is_unit": true,
+          "energy_at_most": 2,
+          "power_at_most": 1
         }
       }
     ]
@@ -25725,8 +25744,13 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "chosen_spell",
+        "max_energy": 99,
+        "max_power": 99,
         "condition": {
-          "type": "you_played_n_spells_this_turn"
+          "type": "opponent_played_n_spells_this_turn",
+          "params": {
+            "n": 2
+          }
         }
       }
     ],
@@ -34117,10 +34141,11 @@
       {
         "effect": "play_from_trash",
         "trigger": "on_cast",
-        "target": "self",
         "count": 3,
+        "filter": "unit_or_gear",
         "target_filter": {
-          "energy_at_most": 3
+          "energy_at_most": 3,
+          "power_at_most": 1
         }
       }
     ],
