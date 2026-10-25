@@ -60,6 +60,19 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_equipment_attached",                     # an Equipment is attached to me (Aphelios, Jax)
     "on_friendly_empowered",                     # you empower something else (Mel, Ambessa)
     "on_banish_own",                             # you banish a card you own (Zed)
+    "on_unit_played_here",                       # a player plays a unit here (Valley of Idols)
+    "on_self_played",                            # this card is played (from face down: Tornado Warrior)
+    "trash_on_card_played",                      # in the trash, you play a card (Meticulous Restorationist)
+    "on_enemy_gear_played",                      # an opponent plays a gear (Ravenbloom Prefect)
+    "on_enemy_might_reduced",                    # you reduce an enemy unit's Might (Ahri Confident)
+    "on_recycle",                                # you recycle cards to your Main Deck (Karma Channeler)
+    "on_three_exhausted",                        # 3 units exhausted at once (Seraphine Inspiring)
+    "on_friendly_gear_died_at_bf",               # a friendly gear at a battlefield dies (Battlefield Armorer)
+    "trash_on_spell_kill",                       # in the trash, you kill a unit with a spell (Immortal Phoenix)
+    "on_friendly_deploy",                        # you play a gear with DEPLOY (Jarvan IV Exemplar)
+    "granted_to_legend",                         # a battlefield gives your legend an ability (Forge of the Fluft)
+    "on_friendly_moves_from_here",               # a friendly unit moves from my location (Stealthy Pursuer)
+    "on_attached",                               # this Equipment is attached to a unit (Shady Spectacles)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -140,13 +153,19 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "holder_didnt_conquer_this_turn",    # Equipment: "if I didn't conquer this turn"
     "conquered_uncontrolled",            # "when I conquer a battlefield that was uncontrolled"
     "your_legend_exhausted",             # your legend is exhausted (Hall of Legends)
+    "excess_damage_at_least",            # n: "if you assigned 3 or more excess damage" (this battlefield)
+    "facedown_card_here",                # "if you control a facedown card here"
+    "played_unit_gear_spell_this_turn",  # Swain Visionary
+    "in_beginning_phase",                # during your Beginning Phase (Shard of Undoing)
+    "triggering_unit_here",              # the unit is (or died) at my battlefield
+    "has_all_pet_tags",                  # your units have Bird, Cat, Dog and Poro among them
+    "signpost_possible",                 # Forgotten Signpost has a unit to exhaust and one to move
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
 # Kept distinct so the loop guard can assert the full handled set while the parser
 # never emits them.
 SAFE_FALSE_CONDITIONS: frozenset[str] = frozenset({
-    "excess_damage_at_least",
     "target_was_stunned",
 })
 
@@ -157,7 +176,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "subtype", "might_at_most", "might_at_least",
     # B2 additions
     "non_token", "is_buffed", "is_mighty", "might_less_than_self",
-    "card_type", "is_legend", "is_champion",
+    "card_type", "is_legend", "is_champion", "moved_this_turn",
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
@@ -187,7 +206,8 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
-    "disempower_self", "banish_from_trash", "discard",
+    "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
+    "kill_other_token",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs
@@ -224,4 +244,16 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
+    # where units may be played (GameLoop._unit_play_destinations, _play_unit)
+    "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
+    "accelerate_non_hand",
+    "spells_repeat_in_showdown", "reaction_tax_in_showdown", "channel_plus_one",
+    "sacrifice_instead_of_dying", "mech_instead_of_tokens", "double_tokens_once",
+    # cost rules (GameLoop._cost_extras, _effective_cost, _adjust_ability_cost,
+    # _play_forbidden, _destination_surcharge, hiding)
+    "spend_buffs_for_power", "kill_tokens_for_power", "spend_xp_for_energy",
+    "reduce_cost_not_from_hand", "gear_discount_once", "vex_cheerless", "empower_discount_here",
+    "dragon_roost", "requires_friendly_gear", "requires_pet", "hide_for_energy",
+    "no_enemy_reveals_here",
+    "copy_tap_abilities", "group_move_toll", "jhin_pile", "zero_point_overflow", "rippers_bay",
 })

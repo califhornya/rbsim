@@ -404,6 +404,13 @@ class SimpleTradeAgent(Agent):
                 best = (score, idx)
         if best is None:
             return None
+        # Base, unless the card can only go to a battlefield (Perched Grimwyrm).
+        loop = getattr(self, "loop", None)
+        if loop is not None:
+            card = self.player.hand[best[1]]
+            dests = loop._unit_play_destinations(card, "A" if self.player.name == "A" else "B")
+            if None not in dests:
+                return ("UNIT", best[1], 0, dests[0]) if dests else None
         return ("UNIT", best[1], 0)
 
     def _find_empty_bf_move(self, my_side: str, bfs: list, base_idx: int) -> Optional[tuple]:

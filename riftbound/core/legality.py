@@ -69,7 +69,15 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     for idx, card in enumerate(ap.hand):
         if isinstance(card, (UnitCard, LegendCard)):
             if _affordable(loop, ap, card):
-                actions.append(GameAction.play("UNIT", idx, 0, f"Play {card.name}"))
+                for dst in loop._unit_play_destinations(card, side):
+                    surcharge = loop._destination_surcharge(card, dst, side)
+                    if surcharge and not loop._can_pay_generic_power(
+                            ap, surcharge + int(loop._effective_cost(card, ap)[1] or 0)):
+                        continue
+                    if dst is None:
+                        actions.append(GameAction.play("UNIT", idx, 0, f"Play {card.name}"))
+                    else:
+                        actions.append(GameAction("UNIT", idx, 0, dst, f"Play {card.name} to BF{dst}"))
         elif isinstance(card, SpellCard):
             for lane in range(n_bf):
                 if _affordable(loop, ap, card, lane):
@@ -104,13 +112,15 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     if dst == base_index and not loop._can_move_to_base(
                             u, None if src == base_index else gs.battlefields[src]):
                         continue      # "can't move to base" (Vilemaw's Lair, Sentry)
+                    if loop._group_move_toll(side, dst) > ap.energy:
+                        continue      # Mageseeker Investigator
                     actions.append(GameAction.move(
                         src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
 
     # --- HIDDEN keyword (Open State only) ---
     if not gs.showdown_active and not gs.chain:
         hide_lanes = loop._hide_lanes(side)
-        if hide_lanes and loop._can_pay_generic_power(ap, 1):
+        if hide_lanes and loop._can_hide_pay(ap, side):
             for idx, card in enumerate(ap.hand):
                 if card.has_keyword("HIDDEN"):
                     for lane in hide_lanes:
@@ -161,6 +171,11 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             if _affordable(loop, ap, card):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
+    # AMBUSH units in hand, to a battlefield where we have units.
+    for idx, card in enumerate(ap.hand):
+        if isinstance(card, UnitCard) and _affordable(loop, ap, card):
+            for lane in loop._ambush_unit_lanes(card, ap.name):
+                actions.append(GameAction("UNIT", idx, 0, lane, f"AMBUSH {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion to a legal lane at reaction speed.
     champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
     if champ is not None and _affordable(loop, ap, champ):
@@ -188,6 +203,10 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         elif isinstance(card, UnitCard) and card.has_keyword("ACTION"):
             if _affordable(loop, ap, card):
                 actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
+        # AMBUSH units into the showdown's battlefield.
+        if isinstance(card, UnitCard) and lane in loop._ambush_unit_lanes(card, ap.name) \
+                and _affordable(loop, ap, card):
+            actions.append(GameAction("UNIT", idx, lane, lane, f"AMBUSH {card.name} @BF{lane}"))
         # QUICK-DRAW gear (§745): has Reaction — playable during a showdown.
         elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
             if _affordable(loop, ap, card):

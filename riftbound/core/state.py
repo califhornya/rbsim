@@ -62,6 +62,7 @@ class GameState:
     pending_move: Optional[tuple] = None
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
+    showdown_attacker: Optional[str] = None   # who started the showdown (Rengar Pouncing)
     focus_player: Optional[str] = None
 
     # XP per player (HUNT gains it, LEVEL gates on it). Public, no cap.
@@ -98,6 +99,22 @@ class GameState:
     next_spell_bonus: dict = field(default_factory=dict)
     # "Choose one that hasn't been chosen this turn": (id of card, turn) -> modes.
     modes_chosen: dict = field(default_factory=dict)
+    # Last Caress: side -> the turn "the next unit you play this turn can be
+    # played to any battlefield" (and is buffed).
+    next_unit_any_bf: dict = field(default_factory=dict)
+    # Firelights' Hideout: side -> turn "the next unit you play this turn has ACCELERATE".
+    next_unit_accelerate: dict = field(default_factory=dict)
+    # Temporal Portal: side -> turn "the next spell you play this turn" has REPEAT.
+    next_spell_repeat: dict = field(default_factory=dict)
+    # Ashe Focused: (owner side, card) banished from a hand until that player holds.
+    held_hostage: list = field(default_factory=list)
+    # Consecutive Standard Moves to one place: (turn, side, dst, count) —
+    # "when you exhaust three or more friendly units at the same time".
+    move_group: Optional[tuple] = None
+    # Jhin Virtuoso: side -> spells "banished with me".
+    jhin_pile: dict = field(default_factory=dict)
+    # True while the active player's Beginning Phase runs (Shard of Undoing).
+    in_beginning_phase: bool = False
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.

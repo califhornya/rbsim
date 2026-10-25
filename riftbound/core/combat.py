@@ -54,6 +54,12 @@ class UnitInPlay:
     conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
     # Sanction: "Empower a unit. Disempower it at end of turn" (and the reverse).
     empower_flip_at_end: bool = False
+    # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
+    # end of that turn.
+    borrowed: Optional[tuple] = None
+    extra_tags: list = field(default_factory=list)   # Ivern Friend to All: "I gain that tag"
+    # Shady Spectacles: the unit's own card while it "becomes a copy" of another.
+    copied_from: Optional[object] = None
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -87,7 +93,8 @@ class UnitInPlay:
     def tags(self) -> list:
         """The unit's tags: its card's, plus those its Equipment gives ("I am a
         Mech": Experimental Hexplate, GearCard.grants_tags)."""
-        return list(self.card.tags or []) + [t for g in self.gear for t in getattr(g, "grants_tags", ())]
+        return list(self.card.tags or []) + list(self.extra_tags) + \
+            [t for g in self.gear for t in getattr(g, "grants_tags", ())]
 
     def has_keyword(self, keyword: str) -> bool:
         if self.card.has_keyword(keyword):
@@ -132,6 +139,8 @@ class CombatStats:
     damage_to_B: int = 0
     dead_A: list = field(default_factory=list)  # List[UnitInPlay] that died
     dead_B: list = field(default_factory=list)  # List[UnitInPlay] that died
+    excess_by_A: int = 0   # damage A assigned beyond lethal to B's units
+    excess_by_B: int = 0
 
 
 def _total_might(units: Iterable[UnitInPlay]) -> int:
@@ -245,6 +254,8 @@ def resolve_might_combat(
     stats.deaths_B = kills_b
     stats.damage_to_A = assigned_a
     stats.damage_to_B = assigned_b
+    stats.excess_by_B = max(0, damage_to_a - assigned_a)
+    stats.excess_by_A = max(0, damage_to_b - assigned_b)
 
     # Capture dead units before filtering them out. A 0-might unit dies the
     # moment it receives any positive damage; a positive-might unit dies when

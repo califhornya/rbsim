@@ -363,8 +363,92 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   of Suppression (was taxing its own cost; now opponents' spells, [rune] paid
   as Energy like DEFLECT). Left: Risen Altar, Tornado Warrior, Heartening
   Soul's granted ability, Mournful Witness ("a combat I was in").
-- Next: play-to-battlefield units, buff spending, hand disruption (Ashe
-  Focused, Bone Skewer, Insightful Investigator), copies, the rest.
+- [DONE] **Batch 9 (116 → 103, branch `inert-cards-2`): where units are
+  played.** Units were always played to base; the rules allow base or a
+  battlefield you control (§813.3.a). `GameLoop._unit_play_destinations`
+  adds the cards' permissions (`play_location`: open, occupied enemy, enemy
+  alone, conquered this turn only, attacking; `play_location_aura`: Miss
+  Fortune Buccaneer, Arachnoid Horror; Last Caress's next unit anywhere,
+  buffed) and restrictions (Rockfall Path, Mageseeker Warden). A UNIT action
+  carries its destination (`dst_lane`, None = base) and **the RL action
+  space grew**: UNIT slots are MAX_HAND x (N_BF+1), ACTION_DIM 201 (old
+  checkpoints don't load). A unit played to a battlefield contests it like a
+  move (the showdown follows). AMBUSH units (and REACTION units, to a
+  battlefield you control; Rengar Pouncing also where you're attacking) are
+  offered at reaction speed. Here to Help, Valley of Idols, Rek'Sai Breacher
+  (ACCELERATE for units played from elsewhere). The simple_trade agent still
+  plays units to base (Perched Grimwyrm where it can). Left: Dragon Roost,
+  Stalking Wolf's additional cost, Poppy Defender's XP cost.
+- [DONE] **Batch 10 (103 → 72).** Excess combat damage is tracked per
+  battlefield (`Battlefield.excess_damage`; the `excess_damage_at_least`
+  condition was safe-false): Vi Piltover Enforcer, Hextech Gauntlets, Yeti
+  Brawler, Trapping Grounds, Sivir Ambitious. **VISION never ran** on cards
+  without their own predict spec (Jeweled Colossus, Sai Scout, Karma
+  Channeler, Divining Shells, Swain): now every unit or gear printing it
+  predicts when played. Costs: "spend a buff" (Wildclaw Shaman, Monastery of
+  Hirana, Udyr Wildman), "discard a gear" (Sky Cruiser), "kill a friendly
+  unit or gear" (Malzahar Fanatic: baseline gives up tokens only); activated
+  abilities can be once per turn (Hungry Wolf). Albus Ferros, Scryer's
+  Bloom, Siren's Song (`moved_this_turn` filter), Stare Down, Tricksy
+  Tentacles, Temptation, Momentary Companion, Evelynn in Control,
+  Firelights' Hideout, Card Sharp and Party Favors (the opponent takes the
+  Gold / chooses Cards), Divine Judgment, Twisted Fate Gambler, Teemo
+  Strategist, Fox-Fire, Swain Visionary, Kai'Sa Evolutionary, Mechanical
+  Bandit, Friendship.
+- [DONE] **Batch 11 (72 → 47).** Hand disruption (Ashe Focused holds a card
+  until its owner holds, Insightful Investigator, Bone Skewer); taking
+  control (`take_control`: Hostile Takeover until end of turn, Conscription,
+  Possession). **Bug: two handlers were registered as `take_control`**, the
+  later one silently replacing the first (Possession moved a unit at the
+  effect's battlefield; Mystic Reversal, "gain control of a spell", stole a
+  unit: now empty). The `effect` decorator now refuses a duplicate name.
+  Granted REPEAT (Temporal Portal, Syndra Transcendent), Mystic Vortex,
+  token replacement and copies (Heimerdinger Academy Instructor, Zilean),
+  Seraphic Wyvern, Coalesced Energy, Mordekaiser Twice Slain, Ahri
+  Confident ("you reduce an enemy's Might"), Vex Mocking, "when you play me
+  from face down" (Tornado Warrior, Evelynn Entrancing, Evelynn Agony's
+  Embrace), Meticulous Restorationist (cards in the trash answer a play),
+  Jayce Hammer in Hand, Lillia Protector, Scrutinizing Scope, Ravenbloom
+  Prefect, Shard of Undoing, Dusk Rose Lab, Pyke Returned.
+- [DONE] **Batch 12a (47 → 33): cost rules.** `_cost_extras` (spent as you
+  play, baseline all of it: Kraken Hunter's buffs, Commander Ledros's tokens,
+  Poppy Defender's XP), `_effective_cost(from_zone=...)` (Void Drone),
+  Orianna Mechanical Marvel's gear discount once a turn, Vex Cheerless during
+  a showdown at its battlefield ([1][rune] as 2 Energy), Risen Altar
+  (`_adjust_ability_cost`), Dragon Roost (`_destination_surcharge`),
+  mandatory additional costs in `_play_forbidden` (Legion Quartermaster,
+  Stalking Wolf), Spirit of the Forge, Jayce Man of Progress (plays the gear
+  at once), Teemo Swift Scout (hide for [1], Teemo to hand), Noxus Saboteur.
+- [DONE] **Batch 12b (33 → 16): the last triggers.** Recycling from the trash
+  as a cost put cards on TOP of the Main Deck (now the bottom, through
+  `_recycle_from_trash`, which also tells Karma Channeler); `_play_token`
+  put DEPLOY gear tokens (Bombs) in base instead of on a battlefield.
+  Bedeviling Stranger, Ripper's Bay, Stealthy Pursuer (follows a friend into
+  a battlefield), Battlefield Armorer, Seraphine Inspiring (three Standard
+  Moves to one place in a row: `GameState.move_group`), Forgotten Signpost,
+  Mageseeker Investigator (the toll in moves and legal moves), Immortal
+  Phoenix (`_route_deaths(killer=...)`), Hexplosive Minefield, Ava Achiever,
+  Heimerdinger Inventor (borrows friendly [tap] abilities), Ivern Friend to
+  All, Jhin Virtuoso (the spell resolves, then is banished with him), Zero
+  Point Inflection, Jarvan IV Exemplar, Forge of the Fluft (abilities a
+  battlefield gives the legend).
+- [DONE] **Batch 13 (16 → 11): copies and last effects.** A unit can become
+  a copy of another (`UnitInPlay.copied_from`; Shady Spectacles while
+  attached, restored when it comes off), Leblanc Deceiver's TEMPORARY
+  Reflection, Ancient Henge (1 Energy → 1 Power per use), Chronobreak (one
+  generic Power per damaged unit or unit with a play effect), Mystic Reversal
+  (the opponent's latest spell on the chain resolves as ours).
+- **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
+  second facedown card at a battlefield: the Facedown Zone holds one);
+  Orianna Lady of Clockwork (a gear that becomes a unit); Ivern Green Father
+  (replacing a battlefield with a Brush token) and Baron Pit (a token
+  battlefield nothing creates yet); Svellsongur (an Equipment copying its
+  unit's text); Void Hatchling (a replacement on every reveal); Hextech
+  Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
+  baseline that converts would throw them away); Irelia Graceful (a spell's
+  cost depending on what it will choose); Endless Riches (playing from the
+  trash and banishing instead of trashing); Neeko Blending In (a deckbuilding
+  rule: extra legends).
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
