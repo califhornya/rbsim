@@ -4599,7 +4599,10 @@
         "target": "friendly_unit",
         "scope": "single",
         "count": 2,
-        "amount": 1
+        "amount": 1,
+        "target_filter": {
+          "exclude_self": true
+        }
       }
     ]
   },

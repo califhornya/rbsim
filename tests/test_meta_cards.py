@@ -216,3 +216,34 @@ def test_split_damage_divides_among_enemies():
         bf.add_unit("B", UnitInPlay(card=UnitCard(name=f"M{m}", might=m)))
     loop._resolve_card_effects(_card("Scorched Earth"), bf, loop.gs.A, loop.gs.B)
     assert [u.card.name for u in bf.units_B] == ["M4"]     # 2 + 2, then 1 on the 4
+
+
+def test_hard_bargain_counters_unless_they_pay_and_abandon_returns_it():
+    from riftbound.core.state import ChainItem
+    for energy, countered in ((2, False), (1, True)):
+        loop = _loop()
+        loop.gs.A.energy = energy
+        target = SpellCard(name="Theirs", cost_energy=1)
+        loop.gs.chain.append(ChainItem(player="A", card=target, bf_idx=0))
+        loop._resolve_card_effects(_card("Hard Bargain"), loop.gs.battlefields[0], loop.gs.B, loop.gs.A)
+        assert (not loop.gs.chain) is countered
+    loop = _loop()
+    target = SpellCard(name="Theirs", cost_energy=1)
+    loop.gs.chain.append(ChainItem(player="A", card=target, bf_idx=0))
+    loop._resolve_card_effects(_card("Abandon"), loop.gs.battlefields[0], loop.gs.B, loop.gs.A)
+    assert target in loop.gs.A.hand
+
+
+def test_debuff_floor_and_ready_up_to_n():
+    loop = _loop()
+    bf = loop.gs.battlefields[0]
+    enemy = UnitInPlay(card=UnitCard(name="E", might=2))
+    bf.add_unit("B", enemy)
+    ctx = EffectContext(loop, UnitCard(name="Src"), loop.gs.A, loop.gs.B, bf)
+    REGISTRY["grant_temporary_might"](ctx, {"target": "enemy_unit", "amount": -3, "minimum": 1})
+    assert enemy.might == 1
+    a = loop.gs.A
+    tired = [UnitInPlay(card=UnitCard(name=f"T{i}", might=i + 1)) for i in range(5)]
+    a.base_units.extend(tired)
+    loop._resolve_card_effects(_card("Acceleration Gate"), bf, a, loop.gs.B)
+    assert sum(u.ready for u in tired) == 4 and not tired[0].ready   # the 4 mightiest

@@ -404,6 +404,7 @@ class GameLoop:
         active_player.earmarked_energy_showdown = 0
         active_player.earmarked_power_gear = 0
         active_player.earmarked_power_spell = 0
+        active_player.earmarked_energy_spell = 0
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
@@ -2035,8 +2036,9 @@ class GameLoop:
         showdown Diana's showdown energy counts."""
         if isinstance(card, GearCard):
             return self._can_pay_gear(actor, energy, power, card.cost_power_domain)
-        if power and isinstance(card, SpellCard):
-            power = max(0, power - actor.earmarked_power_spell)
+        if isinstance(card, SpellCard):
+            power = max(0, (power or 0) - actor.earmarked_power_spell) if power else power
+            energy = max(0, energy - actor.earmarked_energy_spell)
         if self.gs.showdown_active:
             return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
@@ -2046,10 +2048,14 @@ class GameLoop:
             return self._pay_gear(actor, energy, power, card.cost_power_domain)
         if not self._can_pay_card(actor, card, energy, power):
             return False
-        if power and isinstance(card, SpellCard):
-            from_earmark = min(power, actor.earmarked_power_spell)
-            actor.earmarked_power_spell -= from_earmark
-            power -= from_earmark
+        if isinstance(card, SpellCard):
+            if power:
+                from_earmark = min(power, actor.earmarked_power_spell)
+                actor.earmarked_power_spell -= from_earmark
+                power -= from_earmark
+            from_earmark = min(energy, actor.earmarked_energy_spell)
+            actor.earmarked_energy_spell -= from_earmark
+            energy -= from_earmark
         if self.gs.showdown_active:
             return self._pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.pay_cost(energy, power, card.cost_power_domain)

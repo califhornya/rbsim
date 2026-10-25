@@ -96,6 +96,10 @@ def _draw_cards(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = int(spec.get("amount", 0))
     target = str(spec.get("target", "actor"))
+    if spec.get("restriction") == "spells_only":
+        # "Use only to play spells": earmarked, spent first on spells.
+        ctx._player_for_target(target).earmarked_energy_spell += amount
+        return
     ctx.gain_energy(amount, target=target)
 
 
@@ -276,6 +280,14 @@ def _add_earmarked_power(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("ready_units")
 def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
+    if spec.get("amount") is not None and target in _CHOOSER_TARGETS:
+        # "Ready up to 4 units": the controller's exhausted units, mightiest first.
+        exhausted = sorted((u for u in _friendly_units(ctx) if not u.ready),
+                           key=lambda u: u.might, reverse=True)
+        for unit in exhausted[:int(spec["amount"])]:
+            unit.ready = True
+            ctx.loop._fire_readied(unit, ctx.actor_side)
+        return
     scope = str(spec.get("scope", "all"))
     ctx.ready_units(target=target, scope=scope)
 
@@ -303,8 +315,13 @@ def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("grant_temporary_might")
 def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = _amount(ctx, spec)
+    floor = spec.get("minimum", spec.get("min_might"))
     for unit in _resolve_targets(ctx, spec):
-        unit.temporary_might += amount
+        if amount < 0 and floor is not None:
+            # "-2 [might] this turn, to a minimum of 1 [might]"
+            unit.temporary_might -= min(-amount, max(0, unit.might - int(floor)))
+        else:
+            unit.temporary_might += amount
 
 
 @effect("grant_temporary_might_if_alone")
@@ -323,7 +340,7 @@ def _grant_temporary_might_if_alone(ctx: "EffectContext", spec: Mapping[str, Any
 def _debuff_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Negative this-turn might with an optional floor (min resulting might)."""
     amount = abs(_amount(ctx, spec))
-    floor = int(spec.get("min_floor", 0))
+    floor = int(spec.get("min_floor", spec.get("minimum", 0)))
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         base = unit.might
         reduction = min(amount, max(0, base - floor))
@@ -378,9 +395,13 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     if (target_card.cost_power or 0) > max_power:
         return
-    chain.pop()
     owner = ctx.loop.gs.get_player(target_item.player)
-    owner.trash.append(target_card)
+    tax = int(spec.get("unless_pays", 0) or 0)
+    if tax and owner.energy >= tax:
+        owner.energy -= tax          # "unless its controller pays [2]": they do
+        return
+    chain.pop()
+    (owner.hand if spec.get("return_to_hand") else owner.trash).append(target_card)
 
 
 @effect("grant_temporary_might_per_enemy")
@@ -591,10 +612,11 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         return []
     if scope != "single" or target.startswith("all"):
         return list(units)
-    # One unit picked: that's a choice ("choose a unit"), for "when you choose
-    # me" and "you've chosen enemy units twice this turn".
-    ctx.loop._note_chosen(ctx.card, ctx.actor_side, units[:1])
-    return units[:1]
+    # Units picked one by one ("a unit", "up to two units" = count): that's a
+    # choice, for "when you choose me" and "you've chosen enemy units twice".
+    picked = units[:max(1, int(spec.get("count", 1) or 1))]
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
+    return picked
 
 
 def _fallback_units(ctx: "EffectContext", target: str, bias: str) -> list:

@@ -66,6 +66,7 @@ class Player:
     earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
     earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
     earmarked_power_spell: int = 0      # Kai'Sa: generic power spendable only for spells
+    earmarked_energy_spell: int = 0     # Lux Crownguard: energy spendable only for spells
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
