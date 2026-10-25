@@ -101,6 +101,9 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     # bf→bf needs GANKING (§144.4.c).
                     if src != base_index and dst != base_index and not u.has_keyword("GANKING"):
                         continue
+                    if dst == base_index and not loop._can_move_to_base(
+                            u, None if src == base_index else gs.battlefields[src]):
+                        continue      # "can't move to base" (Vilemaw's Lair, Sentry)
                     actions.append(GameAction.move(
                         src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
 
@@ -132,6 +135,10 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
             continue
         if entry["type"] == "equip":
             label = f"Equip {entry['gear'].name}"
+        elif entry["type"] == "flow":
+            label = f"Play {entry['card'].name} from trash (FLOW)"
+        elif entry["type"] == "banished_play":
+            label = f"Play {entry['card'].name} from banishment"
         elif entry["type"] == "gear_ability":
             label = f"Gear {entry['eff'].effect} ({entry['gear'].name})"
         else:

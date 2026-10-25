@@ -44,6 +44,22 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
     "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
     "on_hide",                                   # you hide a card (Katarina Reckless)
+    "on_buffed",                                 # I get a buff (Simian Ancestor)
+    "on_enemy_unit_moves",                       # an opponent's unit moves (Volibear Imposing)
+    "on_stunned_enemy_dies_here",                # a stunned enemy unit dies here (Storm Raptor)
+    "on_friendly_unit_readied",                  # you ready a friendly unit (Pirate's Haven)
+    "on_friendly_unit_buffed",                   # you buff a friendly unit (Mistfall)
+    "on_friendly_attack", "on_friendly_defend",  # a friendly unit attacks / defends (Mask of Foresight)
+    "on_second_draw",                            # you draw your second card this turn (Frigid Jewel)
+    "on_opponent_scores",                        # an opponent scores (Sumpworks Map)
+    "on_enemy_unit_died",                        # an enemy unit dies (Nasus Guardian, Solari Shrine)
+    "on_discarded",                              # you discard me (Flame Chompers)
+    "on_friendly_chosen",                        # you choose a friendly unit (Spirit Wheel)
+    "on_gear_ability_used",                      # you use a gear's ability (Prize of Progress)
+    "on_combat_start_here",                      # a combat starts at this battlefield (Threshold of the Gray)
+    "on_equipment_attached",                     # an Equipment is attached to me (Aphelios, Jax)
+    "on_friendly_empowered",                     # you empower something else (Mel, Ambessa)
+    "on_banish_own",                             # you banish a card you own (Zed)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -103,6 +119,27 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_card_from_zone",         # zone: "when you play a card from face down"
     "played_to_controlled_battlefield",  # enter_ready_aura: "units you play to battlefields you control"
     "units_in_base_at_least",            # n: "if you have two or more other units in your base"
+    "ready_enemy_here",                  # "if there is a ready enemy unit here"
+    "moves_this_turn_exactly",           # n: "the first / third time I move in a turn"
+    "moved_to_other_battlefield",        # "an opponent moves to a battlefield other than mine"
+    "gained_xp_this_turn",               # "if you've gained XP this turn"
+    "power_spent_this_turn_at_least",    # n: "if you've spent at least [rune] [rune] this turn"
+    "triggering_unit_alone",             # "when a friendly unit attacks or defends alone"
+    "triggering_unit_buffed",            # "when a buffed friendly unit dies"
+    "in_showdown",                       # "during a showdown"
+    "died_mighty",                       # DEATHKNELL "if I was MIGHTY"
+    "units_here_exactly",                # n: "exactly one other unit you control here" (n=2)
+    "triggering_unit_stunned",           # "when you kill a stunned enemy unit"
+    "died_here",                         # "when an enemy unit here dies"
+    "triggering_unit_mightiest",         # "a unit with Might greater than each other unit"
+    "controller_has_facedown_card",      # "if you control a facedown card at a battlefield"
+    "cards_in_hand_exactly",             # n: "if you have exactly 4 cards in hand"
+    "units_at_battlefields_exactly",     # n: "exactly 4 units at battlefields"
+    "not",                               # condition: {...} doesn't hold ("unless ...")
+    "friendly_gear_here",                # "there's a friendly gear here"
+    "holder_didnt_conquer_this_turn",    # Equipment: "if I didn't conquer this turn"
+    "conquered_uncontrolled",            # "when I conquer a battlefield that was uncontrolled"
+    "your_legend_exhausted",             # your legend is exhausted (Hall of Legends)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -110,7 +147,6 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
 # never emits them.
 SAFE_FALSE_CONDITIONS: frozenset[str] = frozenset({
     "excess_damage_at_least",
-    "controller_has_facedown_card",
     "target_was_stunned",
 })
 
@@ -151,7 +187,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
-    "disempower_self",
+    "disempower_self", "banish_from_trash", "discard",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs
@@ -175,5 +211,17 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
-    "enter_ready",
+    "enter_ready", "double_equipment_might", "double_deathknell",
+    # restrictions read where they apply (GameLoop._can_choose, _can_move_to_base,
+    # _can_ready, _play_forbidden, _points_allowed, the Channel Phase, TEMPORARY)
+    "cant_be_chosen", "cant_move_to_base", "cant_be_readied", "no_moves_to_base_from_here",
+    "warden_no_ready", "play_restriction", "opponents_cant_gain_points",
+    "no_score_before_turn", "early_score_draws", "channel_only_one", "no_temporary_here",
+    "victory_score_plus",       # Aspirant's Climb: read when the game is built
+    # damage and combat rules (GameLoop._take_damage, _combat_mods, combat cleanup)
+    "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
+    "lone_defender_minus", "attacking_with_another_bonus", "ignore_tank_here", "tie_recall_all",
+    # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
+    "grant_tag", "equip_conditional_might", "hold_conquer_swap",
+    "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
 })

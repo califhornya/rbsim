@@ -80,9 +80,10 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     (dropped condition/cost, wrong trigger, cost-less activated abilities). These
     cards are empty on purpose and a plain `--only-empty` re-parse tends to break
     them the same way — hand-author them once the engine has what they need:
-    OGN-025, OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
-    UNL-045, UNL-054, UNL-136, VEN-088, RAD-012, RAD-015, RAD-016, RAD-020,
-    RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
+    OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
+    UNL-045, UNL-054, UNL-136, VEN-088, RAD-016, RAD-020,
+    RAD-038, RAD-039, RAD-066, RAD-068, RAD-069, VEN-133 (Glowstone: only its
+    self-harm was encoded; its give-away ability needs the empower family),
     RAD-071, RAD-079, RAD-089, RAD-095, RAD-098, RAD-107, RAD-130,
     RAD-142, RAD-155.
     Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
@@ -95,7 +96,8 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     SFD-121, SFD-171, SFD-176, UNL-023, VEN-055, RAD-026, RAD-030, RAD-090,
     RAD-149 (enter-ready auras, "when you play a card ..." triggers, cost
     auras). RAD-143 Mordekaiser Iron Revenant emptied (its "banish a unit or
-    gear from your trash" cost isn't modeled).
+    gear from your trash" cost isn't modeled) — authored on `inert-cards`
+    with OGN-025, RAD-012, RAD-015, RAD-036 (see "Inert-card pass").
   - **Full-corpus hand review (2026-10-25):** every card with effects in Origins,
     Spiritforged, Unleashed, Vendetta and Proving Grounds was read against its
     text; ~110 more specs that made cards stronger than printed were emptied
@@ -213,14 +215,156 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   (attack/defend triggers, DISARM, "when you win a combat").
 - [DONE] **Equipment triggers**: an Equipment's "When I attack / defend /
   conquer / hold / move / die" fires with its unit (Recurve Bow, Trinity Force,
-  Sacred Shears...). Still not dispatched: unattached gear's "When you ..."
-  triggers (base gear: Glowstone, Forgotten Relic, Frigid Jewel, Blood Rose,
-  Fresh Beans, Chemtech Cask, Pirate's Haven, Mistfall, Vanguard of Helm, Mask
-  of Foresight, Bottled Constellation, Sprite Fountain, Sumpworks Map,
-  Treasure Trove) — several of those specs are misencoded ("when you ready" as
-  "when you play a unit"), review each before turning the dispatch on.
+  Sacred Shears...). [DONE on `inert-cards`, batch 3] unattached gear's
+  "When you ..." and turn triggers are dispatched, after fixing the
+  misencoded specs (see "Inert-card pass").
 - [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
   (latent: no non-passive spec uses it); now the unit's aura_might.
+
+## Equipment Might bonuses (data)
+[DONE 2026-10-25] The printed "[might] +N" of Equipment was dropped at import
+(the parser read Might with `isdigit()`; RiftMana puts it in `data-e-might`). A
+gear card's `might` is now its Equipment bonus, filled for all 43 Equipment from
+the user's saved RiftMana gear page (Downloads, 2026-10-25); the equipped unit
+counts it and Gearhead doubles it. `scripts/import_cards.py` now reads
+`data-e-might` as a gear's might (`parse_html_cards.py` is the older parser). Experimental
+Hexplate's "I am a Mech." (a tag given by Equipment) isn't modeled.
+
+## Inert-card pass (branch `inert-cards`, 2026-10-25)
+Hand-authoring the remaining INERT cards in batches grouped by mechanic
+(`scripts/coverage_audit.py` counts them; 229 at the start).
+- [DONE] **Batch 1 (229 → 211)**: `fight` ("they deal damage equal to their
+  Mights to each other": Challenge, Carnivorous Snapvine, Marching Orders,
+  Clash of Giants), `set_base_might` (Herald of the Emperor, Dragon Form, Lulu
+  Whimsical, Piltovan Guidebot), `match_might` (Convergent Mutation), banish
+  and replay to base (Portal Rescue) or in place (Temporal Breach), and
+  triggers: `on_chosen` by a spell (Jae Medarda), `ready_enemy_here` (Dune
+  Drake), `once_per_turn` on any triggered effect (Wraith of Echoes),
+  `on_buffed` (Simian Ancestor), `on_stunned_enemy_dies_here` (Storm Raptor),
+  `on_enemy_unit_moves` once per group move (Volibear Imposing),
+  `moves_this_turn_exactly` (Yasuo Windrider; Miss Fortune Captain and Blade
+  Twirler fired on every move). Also: REPEAT costs are read from the printed
+  text (Power and discard costs were free; Marching Orders paid 1 for [3]).
+  Left approximate: Temporal Breach only rescues a friendly unit; a stunned
+  unit dying in base counts as "here" for a Storm Raptor at the first
+  battlefield; Curtain Call's per-mode REPEAT costs; Temporal Portal, The
+  Academy, Syndra Transcendent (granting REPEAT) and Marai Spire (REPEAT cost
+  reduction) aren't modeled.
+- [DONE] **Batch 2 (211 → 204): FLOW and printed keywords.** FLOW spells in
+  the trash are offered as abilities at their own timing (agents and the RL
+  action space need nothing new), cost their printed FLOW cost and are
+  banished after resolving or being countered; Kennen gives FLOW for a turn
+  (`grant_flow`), Stargazer is a `flow_only` cost aura; costs may banish a
+  card from the trash (Shadow Clone). **Keyword bug:** the loader counted
+  every keyword a card's text mentions as printed: Sprite Mother, Sprite
+  Queen, Petal Pixie and Leblanc Deceiver had TEMPORARY (died each turn),
+  Jarvan IV ACTION (showdown plays), Gem Jammer, Captain Farron, Raging Soul,
+  Fiora... permanent GANKING/ASSAULT, Noxus Saboteur HIDDEN. Now only
+  keywords at the start of the text or of a sentence, or chained after
+  another printed one, count (163 removed; `_printed_keyword_heads`). The
+  passives that were hiding behind them: "Your Mechs have X" reached only the
+  card itself (Rumble x2, Clanging Sentry, Azir), and Wily Newtfish, Sivir
+  Mercenary, Ancient Warmonger, Repair Specialist, Lucian Purifier are now
+  modeled (counted keywords via `amount_source`). Still missing: Twilight
+  Shroud's "can't be chosen", Shadow Dash's +1, Lacerate's disempower,
+  Jayce Hammer in Hand, Lillia Protector, Udyr Wildman, Dune Surfer.
+- [DONE] **Batch 3 (204 → 196): reveal and play, banished cards playable
+  later, unattached gear triggers.** `reveal_play_top` (Blind Fury,
+  Promising Future, Dazzling Aurora, Baited Hook, Drakehound Packmaster,
+  Rek'Sai Void Burrower, Void Rush, Wild Claw, Clocktower Guardian's
+  DEATHKNELL); `banish_top_playable` offers the card as a "banished_play"
+  ability until the player's next Ending Phase (Runeblade Anvil, Akali Brash);
+  Mordekaiser Iron Revenant (Power only for units or gear). Engine fixes found
+  on the way: base gear never heard "when you ..." or turn triggers, and
+  their specs were misencoded (Pirate's Haven and Mistfall fired on "play a
+  unit", Sumpworks Map on conquer, Frigid Jewel at start of turn, Vanguard of
+  Helm checked itself for a buff), now on new triggers
+  (`on_friendly_unit_readied`, `on_friendly_unit_buffed`,
+  `on_friendly_attack`/`defend`, `on_second_draw`, `on_opponent_scores`);
+  a gear's "exhaust this" in a triggered cost was free and unlimited; killed
+  gear never ran DEATHKNELL / "leaves the board" (Sprite Fountain, Treasure
+  Trove); TEMPORARY units in base never died and those that died skipped
+  DEATHKNELL; legends never heard "when you conquer / hold" (Sett, Garen,
+  Irelia, Renata, Vex, Poppy). Vi Piltover Enforcer now waits for "3 or more
+  excess damage" (safe-false until excess damage is tracked); Bottled
+  Constellation only sacrifices tokens. Left: Wild Claw's empower, a
+  controlled opponent's card goes to its controller's trash, Sumpworks Map
+  (REACTION gear) is only played at normal speed.
+- [DONE] **Batch 4 (196 → 173): one-liners and missing triggers.**
+  Board-wide targets (`all_friendly_units_anywhere`, `all_units_in_bases`:
+  Grand Strategem, Avalanche); legends now hear every "when you ..." fan-out
+  (Draven, Volibear Relentless Storm, Rengar Pridestalker, Kha'Zix, Sivir
+  Battle Mistress; Nasus Curator got its missing "[7] or more", Jhin Virtuoso
+  emptied: it banished a random trash card); DEATHKNELL "if I was MIGHTY"
+  and Karthus's double DEATHKNELL; "when an enemy unit (here) dies" (Nasus
+  Guardian, Solari Shrine); "when you discard me" through one discard path
+  (Flame Chompers, Mask Mother); "when you choose a friendly unit" (Spirit
+  Wheel), "when you use a gear's ability" (Prize of Progress); Fanfare,
+  Mushroom Pouch (facedown-card condition, was safe-false), Titanic Shrine,
+  Royal Entourage, Altar of Memories, Shen, Reckoner's Arena, Ephemeral Ward
+  (unattached non-Equipment gear passives were never applied; Petricite
+  Monument's DEFLECT now board-wide), Downwell, Cataclysmic Duel, Keeper's
+  Verdict, Whirlwind. Left: Sivir Battle Mistress's "when you recycle a
+  rune".
+- [DONE] **Batch 5 (173 → 155): restrictions.** Every choice an effect makes
+  skips enemy units that "can't be chosen by enemy spells and abilities"
+  (`GameLoop._can_choose`: Ruin Runner, Alpha Wildclaw, Twilight Shroud);
+  "can't move to base" in moves, effect moves and the legal-action list
+  (Determined Sentry, Minotaur Reckoner, Vilemaw's Lair); "can't be readied"
+  and Mageseeker Warden's "can't ready enemy units" (`_can_ready`; its "only
+  play units to their base" holds as units are always played to base);
+  `_play_forbidden` (Brynhir, Ol' Poro, Fallen Feline: it names the costliest
+  spell in the opponent's trash); all scoring goes through `_gain_points`
+  (Tianna, Forgotten Monument, Otterpus; `turns_taken` counts each player's
+  turns); win conditions (The Grand Plaza, Gutter Palace), Aspirant's Climb
+  (applied when the game is built), Sandstone Chimera, Leblanc Everywhere at
+  Once, Maduli; "Discard 1" as an ability cost. Left: Mageseeker Warden's
+  gear half, Alpha Wildclaw in base.
+- [DONE] **Batch 6 (155 → 136): damage and combat rules.** One damage
+  hook, `GameLoop._take_damage`, for spell/ability damage (`damage_units`,
+  split damage) and combat assignment (`combat._apply_damage(take=...)`):
+  Bonus Damage (Annie Fiery, Ravenborn Tome's next spell), prevention
+  (Unyielding Spirit, Esteemed Hierophant at 7 runes, Kayn after two moves,
+  Ki Barrier's 7-point shield), doubling (Lotus Trap), Imperial Decree.
+  Combat-only rules (`_combat_mods`): Dune Surfer's side ignores TANK (and
+  orders its damage to kill the most), Forbidding Waste, Crimson Pigeons;
+  Galio / Orianna / Sacred Protector deal no combat damage (a `not`
+  condition, `friendly_gear_here`); Symbol of the Solari recalls everyone on
+  a tie; Threshold of the Gray; Alpha Strike, Shakedown, K'Sante Dauntless.
+  Not modeled: assigning extra combat damage through a Ki Barrier, and the
+  assigner choosing its order in general (list order outside Dune Surfer).
+- [DONE] **Batch 7 (136 → 122): Equipment texts and WEAPONMASTER units.**
+  `UnitInPlay.tags` includes tags an Equipment gives (Experimental Hexplate,
+  closing the Engine-audit note); Bonus Damage amounts, an Equipment's only
+  while attached (Rabadon's Deathcrown); an Equipment's conditional Might
+  (Hand Hammer); Skyfall of Areion's hold/conquer swap; attached Equipment
+  hears turn triggers (Blighted Battleaxe); "When you attach an Equipment to
+  me" from every attach path (Jax Unrelenting, Aphelios with `mode_choice`
+  `unique_per_turn`); Ornn Forge God, Lucian Merciless, Yone Blademaster
+  ("a battlefield that was uncontrolled": `Battlefield.prev_controller` set
+  by Standard Moves), Riven Shattered, Jax Grandmaster at Arms, Arise!, Azir
+  Sovereign. Left: Hextech Gauntlets (excess damage), Shady Spectacles and
+  Svellsongur (copies), Forge of the Fluft.
+- [DONE] **Batch 8 (122 → 116): EMPOWER everywhere, and target filters.**
+  **Bug: `target_filter` never reached the effect handlers** (it is a
+  top-level spec field and `EffectSpec.merged_params()` left it out), so all
+  119 filters were ignored when a real card resolved: "kill a unit with 3
+  [might] or less" killed any unit, "return a spell from your trash" any
+  card. Now passed through; the specs that only worked by accident got the
+  right verb (Hall of Legends / Heartening Soul `ready_legend`, Veiled Temple
+  `ready_gear`, Factory Recall `return_gear_to_hand`; Akshan Mischievous and
+  Kai'Sa Rebel now do nothing instead of the wrong thing). EMPOWER on gear
+  and legends (`_empower`, `_is_empowered`; gear abilities hide EMPOWER while
+  empowered and can cost "Disempower this"), "When you empower something
+  else" (Mel, Ambessa), "When you banish a card you own" (Zed), Questionable
+  Tome, Hextech Disc, Platewyrm Egg, Tools of Empire, Jayce Defender,
+  Glowstone (given away it burns its new controller), Lacerate, Sanction
+  (until end of turn), Profiteer, Wild Claw's empower, Hextech Formula, Helm
+  of Suppression (was taxing its own cost; now opponents' spells, [rune] paid
+  as Energy like DEFLECT). Left: Risen Altar, Tornado Warrior, Heartening
+  Soul's granted ability, Mournful Witness ("a combat I was in").
+- Next: play-to-battlefield units, buff spending, hand disruption (Ashe
+  Focused, Bone Skewer, Insightful Investigator), copies, the rest.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

@@ -84,6 +84,27 @@ class GameState:
     # "At the end of this turn, ..." effects waiting: (side, source card,
     # battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
+    # "Once each turn" / "The first time ... each turn" abilities used:
+    # (id of the source card, effect index) -> turn number.
+    once_per_turn_used: dict = field(default_factory=dict)
+    # The last turn each side gained XP (Wily Newtfish).
+    xp_gained_turn: dict = field(default_factory=dict)
+    # Damage rules for one turn: Unyielding Spirit ("Prevent all spell and
+    # ability damage this turn"), Imperial Decree ("When any unit takes damage
+    # this turn, kill it"), Ravenborn Tome (side -> turn of "the next spell
+    # you play this turn deals 1 Bonus Damage").
+    no_spell_damage_turn: int = -1
+    decree_turn: int = -1
+    next_spell_bonus: dict = field(default_factory=dict)
+    # "Choose one that hasn't been chosen this turn": (id of card, turn) -> modes.
+    modes_chosen: dict = field(default_factory=dict)
+    # Turns each player has started ("their third turn": Forgotten Monument).
+    turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # "Opponents can't play cards this turn" (Brynhir): side -> that turn.
+    cant_play_cards_turn: dict = field(default_factory=dict)
+    # "The next three times you play a unit this turn, draw 1" (Fanfare):
+    # side -> [turn, plays left].
+    unit_play_draws: dict = field(default_factory=dict)
     # "Units you play this turn enter ready" (Confront): the turn it applies to.
     units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
     # "The next unit you play this turn enters ready" (Sun Disc): how many.
@@ -108,6 +129,8 @@ class GameState:
             self.xp_A += amount
         else:
             self.xp_B += amount
+        if amount > 0:
+            self.xp_gained_turn[who] = self.turn     # "if you've gained XP this turn"
 
     def clone(self) -> "GameState":
         """A deep, independent copy of the game state — the primitive search

@@ -123,8 +123,8 @@ class Battlefield:
                 return unit
         return None
 
-    def resolve_combat_might(self, *, attacker_side: str = "A") -> CombatStats:
-        stats = resolve_might_combat(self.units_A, self.units_B, attacker_side=attacker_side)
+    def resolve_combat_might(self, *, attacker_side: str = "A", **mods) -> CombatStats:
+        stats = resolve_might_combat(self.units_A, self.units_B, attacker_side=attacker_side, **mods)
         self.kills_A += stats.kills_A
         self.kills_B += stats.kills_B
         self.deaths_A += stats.deaths_A
@@ -167,11 +167,11 @@ class Battlefield:
             return False
         return True
     
-    def apply_spell_damage(self, target: str, damage: int) -> tuple[int, list]:
+    def apply_spell_damage(self, target: str, damage: int, take=None) -> tuple[int, list]:
         """Deal direct damage to the target side; returns (kills, dead_units)."""
 
         units = self._units_for(target)
-        kills, dead = deal_direct_damage(units, damage)
+        kills, dead = deal_direct_damage(units, damage, take)
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:

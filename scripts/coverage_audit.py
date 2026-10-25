@@ -52,15 +52,26 @@ _LOWER_PROSE = re.compile(r"[a-z]{3,}")
 LIVE, PARTIAL, INERT, VANILLA = "LIVE", "PARTIAL", "INERT", "VANILLA"
 
 
+_EQUIP_CLAUSE = re.compile(r"(?i)\bequip\b.*?\(")   # its cost, parsed by the engine
+_ICONS = re.compile(r"\[[^\]]*\]")                  # [fury], [1], [tap]: costs and icons
+# Rules-reminder "tokens" that are markers, not game pieces with abilities.
+_MARKER_TOKENS = frozenset({"Buff", "Empowered", "XP Tracker"})
+
+
 def _printed_ability_text(spec: CardSpec) -> str:
-    """Rules text with parenthetical reminders and the card's own keyword tokens
+    """Rules text with parenthetical reminders, the EQUIP clause (its cost is read
+    from the text by the engine), icons and the card's own keyword tokens
     removed. If lowercase prose survives, the card has an ability the parser was
     supposed to express."""
     text = str(spec.raw.get("effect") or spec.raw.get("rules_text") or "")
+    text += " " + str(spec.raw.get("effect_equipped") or "")   # an Equipment's "I ..." text
+    text = _EQUIP_CLAUSE.sub(" (", text)
     text = _PARENS.sub(" ", text)
+    text = _ICONS.sub(" ", text)
     for kw in spec.keywords:
-        text = re.sub(rf"\b{re.escape(kw)}\b", " ", text, flags=re.IGNORECASE)
-    return text
+        for word in {kw, kw.split()[0]}:
+            text = re.sub(rf"\b{re.escape(word)}\b", " ", text, flags=re.IGNORECASE)
+    return re.sub(r"(?i)\bunique\b", " ", text)
 
 
 def _effect_problems(eff) -> list[str]:
@@ -84,6 +95,8 @@ def classify(spec: CardSpec) -> tuple[str, str]:
     """Return (verdict, reason)."""
     if not spec.effects:
         category = str(spec.raw.get("category") or "").strip().lower()
+        if category == "token" and spec.name in _MARKER_TOKENS:
+            return VANILLA, "rules marker, not a game piece"
         if category == "spell" and spec.damage:
             return LIVE, "printed damage, no effects[]"
         if _LOWER_PROSE.search(_printed_ability_text(spec)):

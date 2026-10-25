@@ -117,7 +117,10 @@ class GearCard(Card):
         tags: Optional[list[str]] = None,
         keywords: Optional[list[str]] = None,
         effects: Optional[list[dict[str, object]]] = None,
+        might: Optional[int] = None,
     ) -> None:
+        # An Equipment's `might` is the Might bonus it gives the unit it is
+        # attached to ("[might] +2" on the card); None for other gear.
         super().__init__(
             name=name,
             category=CardType.GEAR,
@@ -127,6 +130,7 @@ class GearCard(Card):
             domain=domain,
             tags=list(tags or []),
             keywords=list(keywords or []),
+            might=might,
             effects=list(effects or []),
         )
 

@@ -87,6 +87,11 @@ def _entry_from_attrs(attrs: dict[str, str]) -> dict[str, Any]:
 
     effect = attrs.get("effect", "").strip()
     equipped = attrs.get("e-effect", "").strip()
+    # An Equipment's Might bonus ("[might] +2") is its own field; it becomes the
+    # gear card's `might`, which the equipped unit adds.
+    e_might_raw = attrs.get("e-might", "").strip()
+    if not might_raw.isdigit() and e_might_raw.isdigit():
+        might_raw = e_might_raw
 
     return {
         "card_id": _base_card_id(attrs.get("card-id", "").strip()),
