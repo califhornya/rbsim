@@ -345,9 +345,9 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   by Standard Moves), Riven Shattered, Jax Grandmaster at Arms, Arise!, Azir
   Sovereign. Left: Hextech Gauntlets (excess damage), Shady Spectacles and
   Svellsongur (copies), Forge of the Fluft.
-- Next: Equipment
-  texts (Skyfall of Areion, Hexplate...), the empower family (Glowstone,
-  Lacerate, Wild Claw), play-to-battlefield units, Ashe Focused.
+- Next: the empower family (Glowstone, Lacerate, Wild Claw, Zed, Mel,
+  Ambessa, Questionable Tome, Hextech Disc), play-to-battlefield units,
+  buff spending, hand disruption (Ashe Focused), the rest.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
