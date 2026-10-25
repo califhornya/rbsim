@@ -40,7 +40,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_unit_played_here", "on_self_played", "trash_on_card_played", "on_enemy_gear_played",
     "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
-    "on_friendly_moves_from_here",
+    "on_friendly_moves_from_here", "on_attached",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -1144,6 +1144,8 @@ class GameLoop:
         grants into the passive_might / passive_keywords overlays. Called whenever
         board state changes so `UnitInPlay.might` stays correct (Round 4 Tier 2)."""
         for u in self._all_units_in_play():
+            if u.copied_from is not None and not any(self._has_effect(g, "copy_friendly_unit") for g in u.gear):
+                u.card, u.copied_from = u.copied_from, None     # Shady Spectacles came off
             u.passive_might = 0
             u.passive_keywords = set()
             u.no_combat_damage = False
@@ -4190,6 +4192,11 @@ class GameLoop:
                                         self.gs.get_player(side),
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": bf})
+        # "As this is attached to a unit, ..." (Shady Spectacles).
+        for g in list(unit.gear):
+            self._resolve_triggered_effects(g, "on_attached", bf, self.gs.get_player(side),
+                                            self.gs.get_player(self.gs.other(side)),
+                                            context_extra={"battlefield": bf, "triggering_unit": unit})
 
     def _signpost_pair(self, side: str):
         """Forgotten Signpost: (a ready friendly unit at a battlefield to exhaust,

@@ -72,6 +72,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_deploy",                        # you play a gear with DEPLOY (Jarvan IV Exemplar)
     "granted_to_legend",                         # a battlefield gives your legend an ability (Forge of the Fluft)
     "on_friendly_moves_from_here",               # a friendly unit moves from my location (Stealthy Pursuer)
+    "on_attached",                               # this Equipment is attached to a unit (Shady Spectacles)
 })
 
 # Condition types accepted by Loop._check_condition.

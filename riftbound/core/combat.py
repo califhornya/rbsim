@@ -58,6 +58,8 @@ class UnitInPlay:
     # end of that turn.
     borrowed: Optional[tuple] = None
     extra_tags: list = field(default_factory=list)   # Ivern Friend to All: "I gain that tag"
+    # Shady Spectacles: the unit's own card while it "becomes a copy" of another.
+    copied_from: Optional[object] = None
 
     def reset_damage(self) -> None:
         self.damage = 0

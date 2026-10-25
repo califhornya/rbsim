@@ -2779,7 +2779,12 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "steal_spell",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-081",
@@ -14619,7 +14624,18 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "gain_power_any_domain",
+        "trigger": "activated",
+        "timing": "reaction",
+        "amount": 1,
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-118",
@@ -25232,7 +25248,24 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reflection_copy",
+        "trigger": "on_conquer",
+        "optional": true,
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "reflection_copy",
+        "trigger": "on_hold",
+        "optional": true,
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-200",
@@ -31005,7 +31038,12 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "copy_friendly_unit",
+        "trigger": "on_attached"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-137",
@@ -36853,7 +36891,12 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "chronobreak",
+        "trigger": "on_cast"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-140",

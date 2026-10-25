@@ -432,11 +432,23 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   All, Jhin Virtuoso (the spell resolves, then is banished with him), Zero
   Point Inflection, Jarvan IV Exemplar, Forge of the Fluft (abilities a
   battlefield gives the legend).
-- Left (16): copies (Leblanc Deceiver, Shady Spectacles, Svellsongur),
-  mana conversion (Hextech Anomaly, Ancient Henge), Irelia Graceful, Ivern
-  Green Father, Chronobreak, Orianna Lady of Clockwork, Endless Riches,
-  Bandle Tree / Bushwhack Trap (two facedown cards), Void Hatchling, Mystic
-  Reversal, Baron Pit; Neeko is a deckbuilding rule.
+- [DONE] **Batch 13 (16 → 11): copies and last effects.** A unit can become
+  a copy of another (`UnitInPlay.copied_from`; Shady Spectacles while
+  attached, restored when it comes off), Leblanc Deceiver's TEMPORARY
+  Reflection, Ancient Henge (1 Energy → 1 Power per use), Chronobreak (one
+  generic Power per damaged unit or unit with a play effect), Mystic Reversal
+  (the opponent's latest spell on the chain resolves as ours).
+- **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
+  second facedown card at a battlefield: the Facedown Zone holds one);
+  Orianna Lady of Clockwork (a gear that becomes a unit); Ivern Green Father
+  (replacing a battlefield with a Brush token) and Baron Pit (a token
+  battlefield nothing creates yet); Svellsongur (an Equipment copying its
+  unit's text); Void Hatchling (a replacement on every reveal); Hextech
+  Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
+  baseline that converts would throw them away); Irelia Graceful (a spell's
+  cost depending on what it will choose); Endless Riches (playing from the
+  trash and banishing instead of trashing); Neeko Blending In (a deckbuilding
+  rule: extra legends).
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

@@ -407,6 +407,91 @@ def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         gs.champion_B_deployed = True
 
 
+def _copy_card(card):
+    """A fresh instance of `card` (by name) to become: "a copy of that unit"."""
+    spec = CARD_REGISTRY.get(card.name)
+    return spec.instantiate() if spec is not None else card
+
+
+@effect("copy_friendly_unit")
+def _copy_friendly_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "As this is attached to a unit, choose another friendly unit. The
+    equipped unit becomes a copy of that unit for as long as this is
+    attached to it." (Shady Spectacles): the mightiest other friendly unit."""
+    unit = ctx.extra.get("triggering_unit")
+    if unit is None or unit.copied_from is not None or ctx.card not in unit.gear:
+        return
+    others = [u for u in _units_at(ctx, ctx.actor_side, "anywhere") if u is not unit]
+    if not others:
+        return
+    model = max(others, key=lambda u: int(u.card.might or 0))
+    if int(model.card.might or 0) <= int(unit.card.might or 0):
+        return
+    unit.copied_from = unit.card
+    unit.card = _copy_card(model.card)
+
+
+@effect("reflection_copy")
+def _reflection_copy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may discard 1 and exhaust me to play a ready Reflection unit token
+    there. It becomes a copy of another unit there. Give it TEMPORARY."
+    (Leblanc Deceiver): a copy of the mightiest unit there."""
+    loop = ctx.loop
+    bf = ctx.battlefield
+    there = list(bf.units_A) + list(bf.units_B)
+    if not there or not ctx.actor.hand:
+        return
+    loop._discard(ctx.actor, min(ctx.actor.hand, key=_zone_value))
+    model = max(there, key=lambda u: u.might)
+    token = loop._play_token("Reflection", ctx.actor_side, bf=bf, ready=True)
+    if token is None:
+        return
+    copy = _copy_card(model.card)
+    copy.is_token = True
+    token.card = copy
+    token.granted_keywords.append("TEMPORARY")
+
+
+@effect("chronobreak")
+def _chronobreak(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "As an additional cost to play this, play any amount of Power. Banish
+    that many units you control, then for each, its owner plays that unit back
+    to the same location or to their base, ignoring its cost." (Chronobreak):
+    the damaged units and those with a play effect, one generic Power each."""
+    loop = ctx.loop
+    side, ap = ctx.actor_side, ctx.actor
+
+    def worth(u):
+        spec_ = CARD_REGISTRY.get(u.card.name)
+        return u.damage > 0 or bool(spec_ and any(es.trigger == "on_play" for es in spec_.effects))
+    picks = [u for u in _units_at(ctx, side, "anywhere") if not u.is_token and worth(u)]
+    for unit in picks:
+        if not loop._pay_generic_power(ap, 1):
+            break
+        where = loop._locate_unit(unit)
+        if where is None:
+            continue
+        src = where[1]
+        if src is None:
+            ap.base_units.remove(unit)
+        else:
+            src.remove_unit(side, unit)
+        ap.base_gear.extend(unit.gear)
+        loop._fire_leaves_board(unit.card, side, src or loop.gs.battlefields[0])
+        loop._note_banished(side)
+        loop._play_unit(unit.card, side, bf=src, from_zone="banished")
+
+
+@effect("steal_spell")
+def _steal_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Gain control of a spell. You may make new choices for it." (Mystic
+    Reversal): the opponent's latest spell on the chain resolves as ours."""
+    for item in reversed(ctx.loop.gs.chain):
+        if item.player == ctx.opponent_side and item.card is not ctx.card:
+            item.player = ctx.actor_side
+            return
+
+
 @effect("bounce_enemy_at_crowded_battlefield")
 def _bounce_enemy_at_crowded_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Choose a battlefield. If there are 4 or more units there, you may
