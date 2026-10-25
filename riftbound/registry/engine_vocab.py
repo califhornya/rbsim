@@ -65,6 +65,13 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "trash_on_card_played",                      # in the trash, you play a card (Meticulous Restorationist)
     "on_enemy_gear_played",                      # an opponent plays a gear (Ravenbloom Prefect)
     "on_enemy_might_reduced",                    # you reduce an enemy unit's Might (Ahri Confident)
+    "on_recycle",                                # you recycle cards to your Main Deck (Karma Channeler)
+    "on_three_exhausted",                        # 3 units exhausted at once (Seraphine Inspiring)
+    "on_friendly_gear_died_at_bf",               # a friendly gear at a battlefield dies (Battlefield Armorer)
+    "trash_on_spell_kill",                       # in the trash, you kill a unit with a spell (Immortal Phoenix)
+    "on_friendly_deploy",                        # you play a gear with DEPLOY (Jarvan IV Exemplar)
+    "granted_to_legend",                         # a battlefield gives your legend an ability (Forge of the Fluft)
+    "on_friendly_moves_from_here",               # a friendly unit moves from my location (Stealthy Pursuer)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -150,6 +157,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "played_unit_gear_spell_this_turn",  # Swain Visionary
     "in_beginning_phase",                # during your Beginning Phase (Shard of Undoing)
     "triggering_unit_here",              # the unit is (or died) at my battlefield
+    "has_all_pet_tags",                  # your units have Bird, Cat, Dog and Poro among them
+    "signpost_possible",                 # Forgotten Signpost has a unit to exhaust and one to move
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -245,4 +254,5 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost_not_from_hand", "gear_discount_once", "vex_cheerless", "empower_discount_here",
     "dragon_roost", "requires_friendly_gear", "requires_pet", "hide_for_energy",
     "no_enemy_reveals_here",
+    "copy_tap_abilities", "group_move_toll", "jhin_pile", "zero_point_overflow", "rippers_bay",
 })

@@ -57,6 +57,7 @@ class UnitInPlay:
     # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
     # end of that turn.
     borrowed: Optional[tuple] = None
+    extra_tags: list = field(default_factory=list)   # Ivern Friend to All: "I gain that tag"
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -90,7 +91,8 @@ class UnitInPlay:
     def tags(self) -> list:
         """The unit's tags: its card's, plus those its Equipment gives ("I am a
         Mech": Experimental Hexplate, GearCard.grants_tags)."""
-        return list(self.card.tags or []) + [t for g in self.gear for t in getattr(g, "grants_tags", ())]
+        return list(self.card.tags or []) + list(self.extra_tags) + \
+            [t for g in self.gear for t in getattr(g, "grants_tags", ())]
 
     def has_keyword(self, keyword: str) -> bool:
         if self.card.has_keyword(keyword):

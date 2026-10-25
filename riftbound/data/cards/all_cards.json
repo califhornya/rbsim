@@ -1269,7 +1269,17 @@
     "keywords": [
       "ASSAULT 2"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_self_from_trash",
+        "trigger": "trash_on_spell_kill",
+        "optional": true,
+        "cost": {
+          "energy": 1,
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-038",
@@ -3650,7 +3660,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_hidden_from_hand",
+        "trigger": "on_attack",
+        "optional": true,
+        "cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-108",
@@ -3780,7 +3799,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "copy_tap_abilities",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-112",
@@ -6011,7 +6035,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "follow_move",
+        "trigger": "on_friendly_moves_from_here",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "OGN-178",
@@ -7939,7 +7969,13 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_recycle",
+        "target": "friendly_unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-236",
@@ -17572,7 +17608,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "attach_equipment",
+        "trigger": "granted_to_legend",
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-209",
@@ -19620,7 +19664,19 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "signpost_move",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "signpost_possible"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-046",
@@ -23853,7 +23909,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "group_move_toll",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-164",
@@ -24332,7 +24393,28 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "choose_pet_tag",
+        "trigger": "on_play"
+      },
+      {
+        "effect": "score_point",
+        "trigger": "on_conquer",
+        "amount": 1,
+        "condition": {
+          "type": "has_all_pet_tags"
+        }
+      },
+      {
+        "effect": "score_point",
+        "trigger": "on_hold",
+        "amount": 1,
+        "condition": {
+          "type": "has_all_pet_tags"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-178",
@@ -24467,7 +24549,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "jhin_pile",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-182",
@@ -25637,7 +25724,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "rippers_bay",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-215",
@@ -34230,7 +34322,15 @@
     "keywords": [
       "DISARM 2"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_three_exhausted",
+        "count": 1,
+        "optional": true,
+        "once_per_turn": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-065",
@@ -34357,7 +34457,17 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_card_played",
+        "count": 2
+      },
+      {
+        "effect": "zero_point_overflow",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-069",
@@ -35624,7 +35734,13 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "bounce_enemy_at_crowded_battlefield",
+        "trigger": "on_play",
+        "optional": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-107",
@@ -36401,7 +36517,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "return_triggering_gear",
+        "trigger": "on_friendly_gear_died_at_bf",
+        "optional": true,
+        "cost": {
+          "energy": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-130",
@@ -36785,7 +36910,12 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "minefield",
+        "trigger": "on_cast"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-142",
@@ -37276,7 +37406,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_friendly_deploy",
+        "target": "friendly_unit",
+        "destination": "deployed_at",
+        "optional": true,
+        "cost": {
+          "tap": true,
+          "power": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-155",

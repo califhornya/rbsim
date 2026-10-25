@@ -419,12 +419,20 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   mandatory additional costs in `_play_forbidden` (Legion Quartermaster,
   Stalking Wolf), Spirit of the Forge, Jayce Man of Progress (plays the gear
   at once), Teemo Swift Scout (hide for [1], Teemo to hand), Noxus Saboteur.
-- Next (33 left): triggers and one-offs (Bedeviling Stranger, Ripper's Bay,
-  Stealthy Pursuer, Battlefield Armorer, Seraphine Inspiring, Forgotten
-  Signpost, Mageseeker Investigator, Immortal Phoenix, Karma Channeler,
-  Hexplosive Minefield, Ava Achiever, Heimerdinger Inventor, Ivern Friend to
-  All, Jhin Virtuoso, Zero Point Inflection, Jarvan IV Exemplar, Forge of the
-  Fluft); then copies (Leblanc Deceiver, Shady Spectacles, Svellsongur),
+- [DONE] **Batch 12b (33 → 16): the last triggers.** Recycling from the trash
+  as a cost put cards on TOP of the Main Deck (now the bottom, through
+  `_recycle_from_trash`, which also tells Karma Channeler); `_play_token`
+  put DEPLOY gear tokens (Bombs) in base instead of on a battlefield.
+  Bedeviling Stranger, Ripper's Bay, Stealthy Pursuer (follows a friend into
+  a battlefield), Battlefield Armorer, Seraphine Inspiring (three Standard
+  Moves to one place in a row: `GameState.move_group`), Forgotten Signpost,
+  Mageseeker Investigator (the toll in moves and legal moves), Immortal
+  Phoenix (`_route_deaths(killer=...)`), Hexplosive Minefield, Ava Achiever,
+  Heimerdinger Inventor (borrows friendly [tap] abilities), Ivern Friend to
+  All, Jhin Virtuoso (the spell resolves, then is banished with him), Zero
+  Point Inflection, Jarvan IV Exemplar, Forge of the Fluft (abilities a
+  battlefield gives the legend).
+- Left (16): copies (Leblanc Deceiver, Shady Spectacles, Svellsongur),
   mana conversion (Hextech Anomaly, Ancient Henge), Irelia Graceful, Ivern
   Green Father, Chronobreak, Orianna Lady of Clockwork, Endless Riches,
   Bandle Tree / Bushwhack Trap (two facedown cards), Void Hatchling, Mystic

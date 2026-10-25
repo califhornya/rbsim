@@ -112,6 +112,8 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     if dst == base_index and not loop._can_move_to_base(
                             u, None if src == base_index else gs.battlefields[src]):
                         continue      # "can't move to base" (Vilemaw's Lair, Sentry)
+                    if loop._group_move_toll(side, dst) > ap.energy:
+                        continue      # Mageseeker Investigator
                     actions.append(GameAction.move(
                         src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
 

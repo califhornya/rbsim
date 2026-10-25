@@ -38,7 +38,9 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
     "on_combat_start_here", "on_equipment_attached", "on_friendly_empowered", "on_banish_own",
     "on_unit_played_here", "on_self_played", "trash_on_card_played", "on_enemy_gear_played",
-    "on_enemy_might_reduced",
+    "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
+    "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
+    "on_friendly_moves_from_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -71,7 +73,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_mightiest", "controller_has_facedown_card",
     "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
     "excess_damage_at_least", "facedown_card_here", "played_unit_gear_spell_this_turn",
-    "in_beginning_phase", "triggering_unit_here",
+    "in_beginning_phase", "triggering_unit_here", "has_all_pet_tags", "signpost_possible",
     "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
     "target_was_stunned",
@@ -200,7 +202,8 @@ class EffectContext:
                     bf.remove_unit(side, unit)
                 dead_at.setdefault(id(bf), (bf, []))[1].append((unit, side))
         for bf, dead in dead_at.values():
-            self.loop._route_deaths(dead, bf or self.loop.gs.battlefields[0], in_base=bf is None)
+            self.loop._route_deaths(dead, bf or self.loop.gs.battlefields[0], in_base=bf is None,
+                                    killer=(self.actor_side, self.card))
 
     def grant_might(self, amount: int, *, target: str = "actor", scope: str = "all") -> None:
         if amount == 0:
@@ -789,6 +792,8 @@ class GameLoop:
         for dg in dead:
             self._resolve_triggered_effects(dg.card, "on_death", bf, owner, opponent,
                                             context_extra={"battlefield": bf})
+            if not dg.is_token:
+                self._fire_units_trigger("on_friendly_gear_died_at_bf", side, triggering_card=dg.card)
         self._recompute_passives()
 
     def _fire_deployed_gear_trigger(self, trigger: str, bf: Battlefield, side: str) -> None:
@@ -810,11 +815,25 @@ class GameLoop:
             self._burn_out(player)
             card = player.draw()
         if card is not None:
+            self._zero_point_overflow(player)
             player.draws_this_turn += 1
             if player.draws_this_turn == 2:
                 # "When you draw your second card each turn" (Frigid Jewel).
                 self._fire_units_trigger("on_second_draw", "A" if player is self.gs.A else "B")
         return card
+
+    def _zero_point_overflow(self, player: Player) -> None:
+        """ "When you draw 1 or more cards with 9 or more other cards in your hand,
+        discard your hand, kill this, and choose an opponent. They score 1
+        point." (Zero Point Inflection)"""
+        zpi = next((g for g in player.base_gear if self._has_effect(g, "zero_point_overflow")), None)
+        if zpi is None or len(player.hand) - 1 < 9:
+            return
+        for c in list(player.hand):
+            self._discard(player, c)
+        self._remove_gear(zpi, player)
+        side = "A" if player is self.gs.A else "B"
+        self._gain_points(self.gs.other(side), 1, "effect")
 
     def _burn_out(self, player: Player) -> None:
         # §418.2.b: recycle trash into the Main Deck, randomizing (reminder note).
@@ -1006,9 +1025,7 @@ class GameLoop:
                 self._exhaust(unit)
             if parsed["tap"] and gear is not None:
                 self._exhaust_gear(gear, actor)
-            for _ in range(parsed["recycle"]):
-                if actor.trash:
-                    actor.deck.cards.append(actor.trash.pop(0))
+            self._recycle_from_trash(actor, parsed["recycle"])
             self._pay_discard_and_banish(actor, parsed, unit)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
@@ -1640,6 +1657,13 @@ class GameLoop:
             other = self.gs.other(side)
             return any(u.stunned for bf in self.gs.battlefields
                        for u in (bf.units_A if other == "A" else bf.units_B))
+        if ctype == "has_all_pet_tags":
+            # "if your units have all of the following tags among them - Bird,
+            # Cat, Dog, and Poro" (Ivern Friend to All).
+            tags = {t for u in self._friendly_units_of(side) for t in u.tags}
+            return {"Bird", "Cat", "Dog", "Poro"} <= tags
+        if ctype == "signpost_possible":
+            return self._signpost_pair(side) is not None
         if ctype == "in_beginning_phase":
             return self.gs.in_beginning_phase and self.gs.active == side
         if ctype == "triggering_unit_here":
@@ -1796,9 +1820,7 @@ class GameLoop:
             if n - use:
                 ap.pay_cost(0, n - use, Domain[d.upper()])
         # Additional Equip costs.
-        for _ in range(cost.get("recycle", 0)):
-            if ap.trash:
-                ap.deck.cards.append(ap.trash.pop(0))
+        self._recycle_from_trash(ap, cost.get("recycle", 0))
         if cost.get("kill_friendly"):
             victim = self._first_friendly_unit_on_board(side)
             if victim is not None:
@@ -2782,6 +2804,10 @@ class GameLoop:
         self._fire_card_played(side, card, from_zone)
         self._vision(card, side)
         self._fire_units_trigger("on_enemy_gear_played", self.gs.other(side), triggering_card=card)
+        if deployed_bf is not None:
+            # "When you play a gear with DEPLOY, ..." (Jarvan IV Exemplar).
+            self._fire_units_trigger("on_friendly_deploy", side, triggering_card=card,
+                                     extra={"deployed_at": deployed_bf})
 
     def _cast_spell_now(self, card: Card, side: str, lane: int = 0,
                         from_zone: str = "hand") -> None:
@@ -2856,6 +2882,14 @@ class GameLoop:
                     break
         if isinstance(card, GearCard):
             card.tapped = not ready
+            if card.has_keyword("DEPLOY"):
+                # "Play this only to a battlefield" (a Bomb): `bf`, else where
+                # the opponent has the most units.
+                from .battlefield import DeployedGear
+                enemy = self.gs.other(side)
+                where = bf or max(self.gs.battlefields, key=lambda b: (b.count(enemy), -self.gs.battlefields.index(b)))
+                where.gear_for(side).append(DeployedGear(card=card, is_token=True))
+                return card
             ap.base_gear.append(card)
             return card
         unit = UnitInPlay(card=card, ready=ready or self._enters_ready(card, side, bf),
@@ -3032,6 +3066,12 @@ class GameLoop:
         src_bf = None if src == base_index else self.gs.battlefields[src]
         dst_bf = None if dst == base_index else self.gs.battlefields[dst]
         self._exhaust(unit)
+        g = self.gs.move_group
+        count = g[3] + 1 if g is not None and g[:3] == (self.gs.turn, side, dst) else 1
+        self.gs.move_group = (self.gs.turn, side, dst, count)
+        if count == 3:
+            # "when you exhaust three or more friendly units at the same time"
+            self._fire_units_trigger("on_three_exhausted", side)
         if self.verbose:
             print(f"  {side} moves UNIT: {unit.card.name} to {'base' if dst_bf is None else f'BF{dst}'}")
         prev_controller = dst_bf.controller() if dst_bf is not None else None
@@ -3078,6 +3118,13 @@ class GameLoop:
         for card in [unit.card] + list(unit.gear):
             self._resolve_triggered_effects(card, "on_move", here, ap, opponent,
                                             context_extra=extra)
+        # "When a friendly unit moves from my location, I may be moved with it"
+        # (Stealthy Pursuer): the friends it left behind.
+        left = src_bf._units_for(side) if src_bf is not None else ap.base_units
+        for friend in list(left):
+            if friend is not unit and self._has_effect(friend.card, "follow_move"):
+                self._resolve_triggered_effects(friend.card, "on_friendly_moves_from_here", here,
+                                                ap, opponent, context_extra=extra)
         if src_bf is not None and src_bf.card is not None:
             self._resolve_triggered_effects(src_bf.card, "on_unit_moves_from_here", src_bf,
                                             ap, opponent, context_extra=extra)
@@ -3150,6 +3197,8 @@ class GameLoop:
         pending = self.gs.pending_move
         if pending is not None and not (kind == "MOVE" and dst_lane == pending[0]):
             self._flush_pending_move()
+        if kind != "MOVE":
+            self.gs.move_group = None       # the units moved together are done
 
         opponent = self.gs.get_player(self.gs.other(self.gs.active))           
 
@@ -3294,6 +3343,11 @@ class GameLoop:
                 return    # bf -> bf needs GANKING (§144.4.c)
             if dst == base_index and not self._can_move_to_base(unit, src_bf):
                 return
+            toll = self._group_move_toll(side, dst)
+            if toll:
+                if ap.energy < toll:
+                    return
+                ap.energy -= toll
             if src_bf is None:
                 units.remove(unit)
             else:
@@ -3360,6 +3414,16 @@ class GameLoop:
                 if eff.effect == "empower_self" and getattr(unit, "empowered", False):
                     continue
                 out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
+            if self._has_effect(unit.card, "copy_tap_abilities"):
+                # "I have all [tap] abilities of all friendly legends, units, and
+                # gears" (Heimerdinger Inventor): used by me, tapping me.
+                for src, _bf in self._sources_in_play(side):
+                    if src is unit.card:
+                        continue
+                    for eff in _abilities(src):
+                        if self._parse_activated_cost(eff.cost)["tap"] and \
+                                EFFECT_REGISTRY.get(eff.effect) is not None:
+                            out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
 
         def _add_gear_abilities(gear):
             # Gear's own activated [tap] abilities (Seals, Gold, Iron Ballista, …).
@@ -3377,6 +3441,15 @@ class GameLoop:
         legend_unit = self._legend_unit(side)
         if legend_unit is not None:
             _add_unit_abilities(legend_unit, None)
+            # "While you control this battlefield, friendly legends have '[tap]:
+            # Attach an Equipment ...'" (Forge of the Fluft).
+            for bf in self.gs.battlefields:
+                if bf.card is not None and bf.controller() == side:
+                    bspec = CARD_REGISTRY.get(bf.card.name)
+                    for eff in (bspec.effects if bspec else ()):
+                        if eff.trigger == "granted_to_legend" and \
+                                ((eff.timing or "").lower() or None) in allowed:
+                            out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
         for gear in list(ap.base_gear):
             # Only Equipment (gear with an Equip ability) can be equipped.
             if window == "main" and self._equip_cost(gear) is not None:
@@ -3497,10 +3570,29 @@ class GameLoop:
     def _spell_to_trash(self, owner: Player, card: Card) -> None:
         """A spell that resolved or was countered goes to the trash, or is
         banished if it was played with FLOW."""
+        side = "A" if owner is self.gs.A else "B"
+        legend = self._legend_unit(side)
         if getattr(card, "_flow_banish", False):
             card._flow_banish = False
             owner.banished.append(card)
-            self._note_banished("A" if owner is self.gs.A else "B")
+            self._note_banished(side)
+        elif legend is not None and self._has_effect(legend.card, "jhin_pile") \
+                and int(card.cost_energy or 0) >= 4:
+            # "if you spent [4] or more, you may banish it. Then, if there are four
+            # spells banished with me, put each in its trash, channel 4 runes, and
+            # draw 1." (Jhin Virtuoso)
+            owner.banished.append(card)
+            self._note_banished(side)
+            pile = self.gs.jhin_pile.setdefault(side, [])
+            pile.append(card)
+            if len(pile) >= 4:
+                for c in pile:
+                    if c in owner.banished:
+                        owner.banished.remove(c)
+                        owner.trash.append(c)
+                self.gs.jhin_pile[side] = []
+                owner.unlock_runes(4)
+                self._draw_one(owner)
         else:
             owner.trash.append(card)
 
@@ -3779,9 +3871,7 @@ class GameLoop:
                 self._exhaust_gear(gear, ap)
             if parsed["disempower"]:
                 gear.empowered = False
-            for _ in range(parsed["recycle"]):
-                if ap.trash:
-                    ap.deck.cards.append(ap.trash.pop(0))
+            self._recycle_from_trash(ap, parsed["recycle"])
             self._pay_discard_and_banish(ap, parsed)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
@@ -3811,9 +3901,7 @@ class GameLoop:
             self._exhaust(unit)
         if parsed["disempower"] and unit is not None:
             unit.empowered = False
-        for _ in range(parsed["recycle"]):
-            if ap.trash:
-                ap.deck.cards.append(ap.trash.pop(0))
+        self._recycle_from_trash(ap, parsed["recycle"])
         self._pay_discard_and_banish(ap, parsed, unit)
         if parsed["spend_xp"]:
             self.gs.add_xp(side, -parsed["spend_xp"])
@@ -3932,13 +4020,22 @@ class GameLoop:
     def _route_combat_deaths(self, stats, bf) -> None:
         self._route_deaths([(u, "A") for u in stats.dead_A] + [(u, "B") for u in stats.dead_B], bf)
 
-    def _route_deaths(self, ordered, bf, in_base: bool = False) -> None:
+    def _route_deaths(self, ordered, bf, in_base: bool = False, killer=None) -> None:
         """Units that just died (already off the board), as (unit, owner side)
         pairs, from combat, spell damage or a kill effect: apply death
         replacements, then trash the truly-dead (tokens cease to exist), route
         their gear to base, set the friendly-died flag, and fire on_death /
         leaves_board / on_friendly_unit_death."""
         truly_dead = []
+        if killer is not None and isinstance(killer[1], SpellCard) and ordered:
+            # "When you kill a unit with a spell, you may pay ... to play me from
+            # your trash" (Immortal Phoenix).
+            ksi, kcard = killer
+            kp = self.gs.get_player(ksi)
+            for src in list(kp.trash):
+                self._resolve_triggered_effects(src, "trash_on_spell_kill", bf, kp,
+                                                self.gs.get_player(self.gs.other(ksi)),
+                                                context_extra={"battlefield": bf})
         for dead_unit, owner_side in ordered:
             if self._try_replace_death(dead_unit, owner_side):
                 continue
@@ -4063,6 +4160,21 @@ class GameLoop:
         ap = self.gs.get_player(side)
         return card in ap.base_gear or card in self._controlled_attached_gear(side)
 
+    def _recycle_from_trash(self, player: Player, n: int) -> None:
+        """Recycle n cards from the trash: to the bottom of the Main Deck."""
+        moved = 0
+        for _ in range(n):
+            if player.trash:
+                player.deck.cards.insert(0, player.trash.pop(0))
+                moved += 1
+        if moved:
+            self._note_recycled("A" if player is self.gs.A else "B")
+
+    def _note_recycled(self, side: str) -> None:
+        """`side` recycled one or more cards to its Main Deck: "When you recycle
+        one or more cards to your Main Deck" (Karma Channeler)."""
+        self._fire_units_trigger("on_recycle", side)
+
     def _note_banished(self, side: str, count: int = 1) -> None:
         """`side` banished card(s) it owns: "When you banish a card you own,
         empower me" (Zed Master of Shadows)."""
@@ -4078,6 +4190,27 @@ class GameLoop:
                                         self.gs.get_player(side),
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": bf})
+
+    def _signpost_pair(self, side: str):
+        """Forgotten Signpost: (a ready friendly unit at a battlefield to exhaust,
+        a different friendly unit in base to move there), the mightiest."""
+        ready = [u for bf in self.gs.battlefields for u in bf._units_for(side) if u.ready]
+        movers = list(self.gs.get_player(side).base_units)
+        if not ready or not movers:
+            return None
+        return max(ready, key=lambda u: u.might), max(movers, key=lambda u: u.might)
+
+    def _group_move_toll(self, side: str, dst: int) -> int:
+        """ "Opponents must pay 1 for each unit beyond the first to move multiple
+        units to my battlefield at the same time" (Mageseeker Investigator)."""
+        if dst >= len(self.gs.battlefields):
+            return 0
+        g = self.gs.move_group
+        if g is None or g[:3] != (self.gs.turn, side, dst):
+            return 0
+        bf = self.gs.battlefields[dst]
+        return sum(1 for u in bf._units_for(self.gs.other(side))
+                   if self._has_effect(u.card, "group_move_toll"))
 
     def _can_choose(self, unit: UnitInPlay, chooser: str) -> bool:
         """Whether a spell or ability of `chooser` can choose `unit`: not an

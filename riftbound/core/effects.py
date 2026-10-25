@@ -407,6 +407,101 @@ def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         gs.champion_B_deployed = True
 
 
+@effect("bounce_enemy_at_crowded_battlefield")
+def _bounce_enemy_at_crowded_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a battlefield. If there are 4 or more units there, you may
+    return an enemy unit there to its owner's hand" (Bedeviling Stranger)."""
+    crowded = [bf for bf in ctx.loop.gs.battlefields if len(bf.units_A) + len(bf.units_B) >= 4
+               and _choosable(ctx, list(bf._units_for(ctx.opponent_side)))]
+    if not crowded:
+        return
+    bf = max(crowded, key=lambda b: max(u.might for u in b._units_for(ctx.opponent_side)))
+    unit = max(_choosable(ctx, list(bf._units_for(ctx.opponent_side))), key=lambda u: u.might)
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    _unit_leaves_to(ctx, unit, ctx.opponent_side, "hand")
+
+
+@effect("follow_move")
+def _follow_move(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When a friendly unit moves from my location, I may be moved with it"
+    (Stealthy Pursuer): when it goes to a battlefield."""
+    me = _source_unit(ctx)
+    dst = ctx.extra.get("moved_to")
+    if me is None or dst in (None, "base") or ctx.extra.get("triggering_unit") is me:
+        return
+    ctx.loop._move_unit_by_effect(me, dst)
+
+
+@effect("return_triggering_gear")
+def _return_triggering_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When a friendly gear at a battlefield dies, you may pay [1] to return
+    it to its owner's hand" (Battlefield Armorer)."""
+    gear = ctx.extra.get("triggering_card")
+    if gear is not None and gear in ctx.actor.trash:
+        ctx.actor.trash.remove(gear)
+        ctx.actor.hand.append(gear)
+
+
+@effect("signpost_move")
+def _signpost_move(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Exhaust a unit you control, [tap]: Move a different unit you control to
+    the location of the unit you exhausted" (Forgotten Signpost)."""
+    pair = ctx.loop._signpost_pair(ctx.actor_side)
+    if pair is None:
+        return
+    anchor, mover = pair
+    ctx.loop._exhaust(anchor)
+    ctx.loop._move_unit_by_effect(mover, ctx.loop._locate_unit(anchor)[1])
+
+
+@effect("minefield")
+def _minefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Kill any number of friendly Bomb tokens. At end of turn, play that many
+    Bomb tokens to a single battlefield." (Hexplosive Minefield): all of them."""
+    loop = ctx.loop
+    side = ctx.actor_side
+    n = 0
+    for bf in loop.gs.battlefields:
+        bombs = [dg for dg in bf.gear_for(side) if dg.card.name == "Bomb"]
+        if bombs:
+            n += len(bombs)
+            loop._kill_deployed_gear(bf, side, bombs)
+    if n:
+        loop.gs.delayed_effects.append((side, ctx.card, 0, {"effect": "play_token", "token_name": "Bomb", "count": n}))
+
+
+@effect("play_hidden_from_hand")
+def _play_hidden_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may pay [mind] to play a card with HIDDEN from your hand, ignoring
+    its cost. If it's a unit, play it here." (Ava Achiever): the costliest."""
+    from .cards import GearCard, UnitCard
+    loop = ctx.loop
+    cards = [c for c in ctx.actor.hand if c.has_keyword("HIDDEN")]
+    if not cards:
+        return
+    card = max(cards, key=_zone_value)
+    ctx.actor.hand.remove(card)
+    side = ctx.actor_side
+    if isinstance(card, UnitCard):
+        loop._play_unit(card, side, bf=ctx.battlefield if ctx.battlefield in loop.gs.battlefields else None)
+    elif isinstance(card, GearCard):
+        loop._play_gear(card, side, 0)
+    else:
+        loop._play_from_zone_now(ctx.actor, card, side, "hand")
+
+
+@effect("choose_pet_tag")
+def _choose_pet_tag(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "As you play me, choose Bird, Cat, Dog, or Poro. I gain that tag."
+    (Ivern Friend to All): the one your units lack."""
+    me = _source_unit(ctx)
+    if me is None:
+        return
+    have = {t for u in _units_at(ctx, ctx.actor_side, "anywhere") for t in u.tags}
+    pick = next((t for t in ("Bird", "Cat", "Dog", "Poro") if t not in have), "Bird")
+    me.extra_tags.append(pick)
+
+
 @effect("hostage_from_hand")
 def _hostage_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They reveal their hand. Choose a card revealed this way and banish it.
@@ -1194,6 +1289,7 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card = max(hand, key=_zone_value)
         hand.remove(card)
         ctx.actor.deck.cards.insert(0, card)
+        ctx.loop._note_recycled(ctx.actor_side)
 
 
 def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
@@ -1215,6 +1311,12 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
         owner.base_gear.extend(unit.gear)
     unit.gear = []
     loop._fire_leaves_board(unit.card, side, where[1] or loop.gs.battlefields[0])
+    if to == "hand" and where[1] is not None and where[1].card is not None and \
+            loop._has_effect(where[1].card, "rippers_bay") and owner.energy >= 1             and owner.rune_deck.runes:
+        # "When a unit here is returned to a player's hand, that player may pay
+        # [1] to channel 1 rune exhausted" (Ripper's Bay).
+        owner.energy -= 1
+        owner.unlock_runes(1, exhausted=True)
     if unit.is_token:
         return
     if to == "hand":
@@ -1447,6 +1549,8 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
         if spec.get("empower") and loop._locate_unit_or_gear(pick, chooser_side):
             loop._empower(pick, chooser_side)          # Wild Claw: "Empower it."
     rest = str(spec.get("rest", "recycle")).lower()
+    if rest == "recycle" and revealed:
+        loop._note_recycled(owner_side)
     for card in revealed:
         if rest == "draw" and owner is chooser:
             chooser.hand.append(card)
@@ -2089,7 +2193,7 @@ def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 dead.append((unit, side))
                 break
     # They die together: replacements, DEATHKNELL, "when a friendly unit dies".
-    ctx.loop._route_deaths(dead, ctx.battlefield)
+    ctx.loop._route_deaths(dead, ctx.battlefield, killer=(ctx.actor_side, ctx.card))
 
 
 def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
@@ -2281,9 +2385,9 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         if dest in ("here", "this_battlefield"):
             ok = ctx.battlefield in gs.battlefields and cur is not ctx.battlefield
             return ctx.battlefield, ok
-        if dest == "stunned_at":
-            # "you may move me to that battlefield" (Vex Mocking)
-            at = ctx.extra.get("stunned_at")
+        if dest in ("stunned_at", "deployed_at"):
+            # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar)
+            at = ctx.extra.get(dest)
             return at, at is not None and cur is not at
         if dest == "to_or_from_base" and cur is not None:
             return None, True
@@ -2716,6 +2820,7 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 and agent.decide_predict_recycle(top):
             deck.cards.pop()
             deck.cards.insert(0, top)   # recycle to bottom (front of the list)
+            ctx.loop._note_recycled(ctx.actor_side)
         return
     rest = deck.cards[:-n]
     top_sorted = sorted(look, key=lambda c: int(getattr(c, "might", 0) or 0))
@@ -2815,6 +2920,7 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
             if spec.get("then") == "recycle" and card in player.trash:
                 player.trash.remove(card)
                 player.deck.cards.insert(0, card)
+                loop._note_recycled(side)
         else:
             player.hand.append(card)
         played += 1

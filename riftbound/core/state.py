@@ -108,6 +108,11 @@ class GameState:
     next_spell_repeat: dict = field(default_factory=dict)
     # Ashe Focused: (owner side, card) banished from a hand until that player holds.
     held_hostage: list = field(default_factory=list)
+    # Consecutive Standard Moves to one place: (turn, side, dst, count) —
+    # "when you exhaust three or more friendly units at the same time".
+    move_group: Optional[tuple] = None
+    # Jhin Virtuoso: side -> spells "banished with me".
+    jhin_pile: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
     # Turns each player has started ("their third turn": Forgotten Monument).
