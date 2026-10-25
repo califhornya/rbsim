@@ -2411,6 +2411,10 @@
       {
         "effect": "warden_no_ready",
         "trigger": "passive"
+      },
+      {
+        "effect": "warden_only_base",
+        "trigger": "passive"
       }
     ]
   },
@@ -5381,7 +5385,13 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "occupied_enemy"
+      }
+    ]
   },
   {
     "card_id": "OGN-162",
@@ -5838,7 +5848,13 @@
     "keywords": [
       "PREDICT 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "open"
+      }
+    ]
   },
   {
     "card_id": "OGN-175",
@@ -5882,7 +5898,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "open"
+      }
+    ]
   },
   {
     "card_id": "OGN-177",
@@ -6400,7 +6422,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "open"
+      },
+      {
+        "effect": "play_location_aura",
+        "trigger": "passive",
+        "where": "open"
+      }
+    ]
   },
   {
     "card_id": "OGN-194",
@@ -11102,7 +11135,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "conquered_this_turn_only"
+      }
+    ]
   },
   {
     "card_id": "SFD-016",
@@ -11375,7 +11414,13 @@
         "rarity": "Rare"
       }
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "attacking"
+      }
+    ],
     "keywords": [
       "REACTION",
       "ASSAULT 2"
@@ -11514,7 +11559,12 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "accelerate_non_hand",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-030",
@@ -13609,7 +13659,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "occupied_enemy"
+      }
+    ]
   },
   {
     "card_id": "SFD-094",
@@ -14165,7 +14221,13 @@
       "HIDDEN",
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_unit_to_controlled_battlefield",
+        "trigger": "on_cast",
+        "reduce": 3
+      }
+    ]
   },
   {
     "card_id": "SFD-112",
@@ -17556,7 +17618,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_unit_plays_here",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-217",
@@ -21869,7 +21936,18 @@
     "keywords": [
       "HUNT 2"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "enemy_alone"
+      },
+      {
+        "effect": "play_location_aura",
+        "trigger": "passive",
+        "where": "enemy_alone"
+      }
+    ]
   },
   {
     "card_id": "UNL-118",
@@ -25256,7 +25334,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "buff_unit",
+        "trigger": "on_unit_played_here",
+        "target": "triggering_unit",
+        "optional": true,
+        "cost": {
+          "energy": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-219",
@@ -36492,7 +36580,12 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "next_unit_any_battlefield",
+        "trigger": "on_cast"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-154",

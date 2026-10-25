@@ -37,6 +37,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
     "on_combat_start_here", "on_equipment_attached", "on_friendly_empowered", "on_banish_own",
+    "on_unit_played_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -521,6 +522,7 @@ class GameLoop:
         opponent = self.gs.get_player(self.gs.other(side))
         if trigger == "on_conquer":
             self.gs.conquered_this_turn[side] = self.gs.conquered_this_turn.get(side, 0) + 1
+            bf.conquered_turn[side] = self.gs.turn
         elif trigger == "on_hold":
             self.gs.hold_points_this_turn[side] = self.gs.hold_points_this_turn.get(side, 0) + 1
         units = list(bf.units_A if side == "A" else bf.units_B)
@@ -2396,11 +2398,12 @@ class GameLoop:
                                                            "triggering_card": card,
                                                            "from_zone": from_zone})
 
-    def _pay_accelerate(self, card: Card, ap: Player) -> bool:
+    def _pay_accelerate(self, card: Card, ap: Player, granted: bool = False) -> bool:
         """ACCELERATE (§731): optional additional cost of [1] + 1 Power of the
         unit's domain ([A] if no/multi domain) to enter ready. Routed through the
-        agent (default yes). Returns whether it was paid."""
-        if not card.has_keyword("ACCELERATE"):
+        agent (default yes). Returns whether it was paid. `granted`: an effect
+        gives it ACCELERATE."""
+        if not (card.has_keyword("ACCELERATE") or granted):
             return False
         domain = card.domain
         if domain is not None:
@@ -2426,14 +2429,22 @@ class GameLoop:
         zone. Contesting a battlefield is the caller's business."""
         ap = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
-        if accelerate and self._pay_accelerate(card, ap):
+        # "Friendly units played from anywhere other than a player's hand have
+        # ACCELERATE" (Rek'Sai Breacher).
+        granted = from_zone != "hand" and self._side_has_passive(side, "accelerate_non_hand")
+        if accelerate and self._pay_accelerate(card, ap, granted=granted):
             ready = True
+        last_caress = self.gs.next_unit_any_bf.get(side) == self.gs.turn
+        if last_caress:
+            del self.gs.next_unit_any_bf[side]       # "the next unit you play": used up
         if self._enters_ready(card, side, bf):
             ready = True
         if self.gs.next_units_enter_ready.get(side, 0) > 0:
             self.gs.next_units_enter_ready[side] -= 1    # "the next unit": used up
             ready = True
         unit = UnitInPlay(card=card, ready=ready)
+        if last_caress:
+            unit.might_counters = max(unit.might_counters, 1)   # "When you play it, BUFF it"
         if bf is None:
             ap.base_units.append(unit)
         else:
@@ -2581,6 +2592,14 @@ class GameLoop:
         self._unit_play_draw(side)
         return unit
 
+    def _unit_played_here(self, bf: Battlefield, side: str, unit: UnitInPlay) -> None:
+        """ "When a player plays a unit here" (Valley of Idols)."""
+        if bf.card is not None:
+            self._resolve_triggered_effects(bf.card, "on_unit_played_here", bf,
+                                            self.gs.get_player(side),
+                                            self.gs.get_player(self.gs.other(side)),
+                                            context_extra={"battlefield": bf, "triggering_unit": unit})
+
     def _unit_play_draw(self, side: str) -> None:
         """ "The next three times you play a unit this turn, draw 1" (Fanfare)."""
         entry = self.gs.unit_play_draws.get(side)
@@ -2588,6 +2607,102 @@ class GameLoop:
             entry[1] -= 1
             player = self.gs.get_player(side)
             self._draw_one(player)
+
+    def _play_permissions(self, card: Card, side: str) -> set:
+        """Where else than base or a battlefield it controls `side` may play
+        unit `card`: "open" (Sai Scout, and Miss Fortune Buccaneer's friendly
+        units), "occupied_enemy" (Dauntless Vanguard), "enemy_alone" (Arachnoid
+        Horror), "any" (Last Caress's next unit), or "conquered_this_turn_only"
+        (Perched Grimwyrm)."""
+        perms = set()
+        spec = CARD_REGISTRY.get(card.name)
+        for es in (spec.effects if spec else ()):
+            if es.effect == "play_location":
+                perms.add(str(es.params.get("where")))
+        for src, _bf in self._sources_in_play(side):
+            sspec = CARD_REGISTRY.get(src.name)
+            for es in (sspec.effects if sspec else ()):
+                if es.effect == "play_location_aura":
+                    perms.add(str(es.params.get("where")))
+        if self.gs.next_unit_any_bf.get(side) == self.gs.turn:
+            perms.add("any")
+        return perms
+
+    def _unit_play_destinations(self, card: Card, side: str) -> list:
+        """Where `side` may play unit `card` now (§ a unit is played to its
+        controller's base or a battlefield they control): None for base, and
+        battlefield indices. Rockfall Path ("Units can't be played here") and
+        an opponent's Mageseeker Warden at a battlefield ("opponents can only
+        play units to their base") restrict it."""
+        gs = self.gs
+        opp = gs.other(side)
+        perms = self._play_permissions(card, side)
+        only_conquered = "conquered_this_turn_only" in perms
+        out = [] if only_conquered else [None]
+        if self._units_at_battlefields_with(opp, "warden_only_base"):
+            return out
+        for i, bf in enumerate(gs.battlefields):
+            if bf.card is not None and self._has_effect(bf.card, "no_unit_plays_here"):
+                continue
+            mine, theirs = bf._units_for(side), bf._units_for(opp)
+            if only_conquered:
+                ok = bf.conquered_turn.get(side) == gs.turn
+            else:
+                ok = (bf.controller() == side or "any" in perms
+                      or ("open" in perms and not mine and not theirs and bf.controller() is None)
+                      or ("occupied_enemy" in perms and bool(theirs))
+                      or ("enemy_alone" in perms and len(theirs) == 1))
+            if ok:
+                out.append(i)
+        return out
+
+    def _arrive_at(self, bf: Battlefield, side: str, prev_controller) -> None:
+        """A unit was played to `bf`: it contests the battlefield if `side`
+        didn't control it (§190.3.a.1); the showdown follows like a move's."""
+        dst = self.gs.battlefields.index(bf)
+        bf.prev_controller = prev_controller
+        gained = prev_controller != side and bf.controller() == side
+        if gained or (bf.units_A and bf.units_B):
+            bf.contested_this_turn = True
+            if self.gs.pending_move is None and not self.gs.showdown_active and not self.gs.chain:
+                self.gs.pending_move = (dst, side)
+
+    def _ambush_unit_lanes(self, card: Card, side: str) -> list:
+        """The battlefields a unit card in hand may be played to at reaction
+        speed: AMBUSH ("as a REACTION to a battlefield where you have units"), a
+        REACTION unit to a battlefield you control, Rengar Pouncing also to a
+        battlefield you're attacking."""
+        gs = self.gs
+        lanes = set()
+        if card.has_keyword("AMBUSH"):
+            lanes |= {i for i, bf in enumerate(gs.battlefields) if bf._units_for(side)}
+        if card.has_keyword("REACTION"):
+            lanes |= {i for i, bf in enumerate(gs.battlefields) if bf.controller() == side}
+            if "attacking" in self._play_permissions(card, side) and gs.showdown_active                     and gs.showdown_attacker == side and gs.showdown_bf_idx is not None:
+                lanes.add(gs.showdown_bf_idx)
+        if self._units_at_battlefields_with(gs.other(side), "warden_only_base"):
+            return []
+        return sorted(i for i in lanes if not (gs.battlefields[i].card is not None and
+                                               self._has_effect(gs.battlefields[i].card, "no_unit_plays_here")))
+
+    def _play_ambush_unit(self, ap: Player, idx: int, lane) -> bool:
+        """Play an AMBUSH unit from hand to `lane` at reaction speed."""
+        side = "A" if ap is self.gs.A else "B"
+        if not (0 <= idx < len(ap.hand)) or lane not in self._ambush_unit_lanes(ap.hand[idx], side):
+            return False
+        card = ap.hand[idx]
+        energy, power = self._effective_cost(card, ap)
+        if not self._pay_card(ap, card, energy, power):
+            return False
+        ap.remove_from_hand(idx)
+        bf = self.gs.battlefields[lane]
+        if self.verbose:
+            print(f"  {side} AMBUSH-plays {card.name} @BF{lane}")
+        self._play_unit(card, side, bf=bf)
+        if bf.units_A and bf.units_B:
+            bf.contested_this_turn = True
+            self._run_showdown(lane, attacker=side)
+        return True
 
     def _enters_ready(self, card: Card, side: str, bf: Optional[Battlefield]) -> bool:
         """Whether a unit `side` plays (a card or token, to `bf` or base) enters
@@ -2760,6 +2875,12 @@ class GameLoop:
         if kind == "UNIT" and idx is not None and 0 <= idx < len(ap.hand):
             card = ap.hand[idx]
             if isinstance(card, (UnitCard, LegendCard)):
+                # Where it goes: base (dst None) or a battlefield it may be played to.
+                dst = None if dst_lane is None or dst_lane == base_index else dst_lane
+                if dst not in self._unit_play_destinations(card, ap.name):
+                    return
+                bf = None if dst is None else self.gs.battlefields[dst]
+                prev_controller = bf.controller() if bf is not None else None
                 # LEGION cost reductions are handled generically by _cost_reduction
                 # (the reduce_cost effect gated on you_already_played_another_card_
                 # this_turn).
@@ -2767,9 +2888,12 @@ class GameLoop:
                 if not self._pay_card(ap, card, energy, power):
                     return
                 if self.verbose:
-                    print(f"  {ap.name} plays UNIT: {card.name}")
+                    print(f"  {ap.name} plays UNIT: {card.name}" + (f" to BF{dst}" if bf else ""))
                 ap.remove_from_hand(idx)
-                self._play_unit(card, ap.name)
+                unit = self._play_unit(card, ap.name, bf=bf)
+                if bf is not None:
+                    self._arrive_at(bf, ap.name, prev_controller)
+                    self._unit_played_here(bf, ap.name, unit)
                 if self.recorder:
                     self.recorder.record_play(
                         ap.name,
@@ -3739,6 +3863,10 @@ class GameLoop:
                     # spell → resolves immediately (no chain), then priority reopens.
                     if self._deploy_ambush_champion(active, lane if lane is not None else 0):
                         passes = 0
+                elif kind == "UNIT" and len(action) > 3:
+                    # An AMBUSH unit from hand, at reaction speed.
+                    if self._play_ambush_unit(player, idx, action[3]):
+                        passes = 0
                 elif kind == "HIDDEN_PLAY":
                     # Play a facedown card for [0] at reaction speed (§737.1.b).
                     if self._play_from_hidden(active, lane if lane is not None else 0):
@@ -3791,6 +3919,7 @@ class GameLoop:
             print(f"  [SHOWDOWN triggered at BF{bf_idx}] {attacker} has focus")
 
         self.gs.showdown_active = True
+        self.gs.showdown_attacker = attacker
         self.gs.showdown_bf_idx = bf_idx
         self.gs.focus_player = attacker
 
@@ -3836,6 +3965,10 @@ class GameLoop:
                             self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
                             self._run_chain(self.gs.focus_player)
                             passes = 0
+                elif kind == "UNIT" and len(action) > 3 and action[3] is not None:
+                    # An AMBUSH unit into the showdown's battlefield.
+                    if self._play_ambush_unit(focus_player, idx, action[3]):
+                        passes = 0
                 elif kind == "UNIT" and idx is not None and 0 <= idx < len(focus_player.hand):
                     # ACTION unit (§732.1.c.1): played during a showdown (to base).
                     card = focus_player.hand[idx]
@@ -3871,6 +4004,7 @@ class GameLoop:
 
         self.gs.showdown_active = False
         self.gs.showdown_bf_idx = None
+        self.gs.showdown_attacker = None
         self.gs.focus_player = None
 
         # Resolve showdown outcome

@@ -288,6 +288,44 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("next_unit_any_battlefield")
+def _next_unit_any_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next unit you play this turn, even from face down, can be played to
+    any battlefield. When you play it, BUFF it." (Last Caress)"""
+    ctx.loop.gs.next_unit_any_bf[ctx.actor_side] = ctx.loop.gs.turn
+
+
+@effect("play_unit_to_controlled_battlefield")
+def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may play a unit from your hand to a battlefield you control,
+    reducing its cost by [3]" (Here to Help): the costliest unit that can go,
+    to the battlefield where the fight is hardest."""
+    from .cards import UnitCard
+    loop = ctx.loop
+    side, ap = ctx.actor_side, ctx.actor
+    reduce = int(spec.get("reduce", 3))
+    best = None
+    for card in ap.hand:
+        if not isinstance(card, UnitCard):
+            continue
+        dests = [d for d in loop._unit_play_destinations(card, side)
+                 if d is not None and loop.gs.battlefields[d].controller() == side]
+        energy, power = loop._effective_cost(card, ap)
+        energy = max(0, energy - reduce)
+        if dests and loop._can_pay_card(ap, card, energy, power) and \
+                (best is None or _zone_value(card) > _zone_value(best[0])):
+            best = (card, dests, energy, power)
+    if best is None:
+        return
+    card, dests, energy, power = best
+    loop._pay_card(ap, card, energy, power)
+    ap.hand.remove(card)
+    bf = max((loop.gs.battlefields[d] for d in dests),
+             key=lambda b: sum(u.might for u in b._units_for(ctx.opponent_side)))
+    unit = loop._play_unit(card, side, bf=bf)
+    loop._unit_played_here(bf, side, unit)
+
+
 @effect("ready_legend")
 def _ready_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Ready your legend" (Hall of Legends, Heartening Soul)."""

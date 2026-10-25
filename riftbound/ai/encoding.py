@@ -151,8 +151,8 @@ def encode_observation(obs: Observation) -> np.ndarray:
 # --- action space -------------------------------------------------------------
 # Contiguous slot layout. Offsets computed once; ACTION_DIM is the total width.
 _OFF_PASS = 0
-_OFF_UNIT = _OFF_PASS + 1                          # MAX_HAND
-_OFF_SPELL = _OFF_UNIT + MAX_HAND                  # MAX_HAND * N_BF
+_OFF_UNIT = _OFF_PASS + 1                          # MAX_HAND * (N_BF+1): base, then each BF
+_OFF_SPELL = _OFF_UNIT + MAX_HAND * (N_BF + 1)     # MAX_HAND * N_BF
 _OFF_GEAR = _OFF_SPELL + MAX_HAND * N_BF           # MAX_HAND * N_BF
 _OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF
 _OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2 * MAX_MOVERS
@@ -182,7 +182,9 @@ def action_to_index(action) -> Optional[int]:
     if kind == "PASS":
         return _OFF_PASS
     if kind == "UNIT":
-        return None if idx is None or not (0 <= idx < MAX_HAND) else _OFF_UNIT + idx
+        # Where it is played: base (dst None) or battlefield dst.
+        loc = 0 if dst is None or dst == N_BF else dst + 1
+        return hb(_OFF_UNIT, idx, N_BF + 1, loc) if isinstance(loc, int) else None
     if kind == "SPELL":
         return hb(_OFF_SPELL, idx, N_BF, lane if isinstance(lane, int) else 0)
     if kind == "GEAR":

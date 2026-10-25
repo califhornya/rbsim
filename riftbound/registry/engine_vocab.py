@@ -60,6 +60,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_equipment_attached",                     # an Equipment is attached to me (Aphelios, Jax)
     "on_friendly_empowered",                     # you empower something else (Mel, Ambessa)
     "on_banish_own",                             # you banish a card you own (Zed)
+    "on_unit_played_here",                       # a player plays a unit here (Valley of Idols)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -224,4 +225,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
+    # where units may be played (GameLoop._unit_play_destinations, _play_unit)
+    "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
+    "accelerate_non_hand",
 })

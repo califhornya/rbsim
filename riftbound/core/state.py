@@ -62,6 +62,7 @@ class GameState:
     pending_move: Optional[tuple] = None
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
+    showdown_attacker: Optional[str] = None   # who started the showdown (Rengar Pouncing)
     focus_player: Optional[str] = None
 
     # XP per player (HUNT gains it, LEVEL gates on it). Public, no cap.
@@ -98,6 +99,9 @@ class GameState:
     next_spell_bonus: dict = field(default_factory=dict)
     # "Choose one that hasn't been chosen this turn": (id of card, turn) -> modes.
     modes_chosen: dict = field(default_factory=dict)
+    # Last Caress: side -> the turn "the next unit you play this turn can be
+    # played to any battlefield" (and is buffed).
+    next_unit_any_bf: dict = field(default_factory=dict)
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.

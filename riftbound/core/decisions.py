@@ -42,7 +42,8 @@ class GameAction:
 
     ``kind`` is one of PASS / UNIT / SPELL / GEAR / CHAMPION / MOVE / ABILITY.
     Field meaning depends on kind (matches the historical tuple grammar):
-      * UNIT/SPELL/GEAR : index=hand_idx, lane=target battlefield
+      * UNIT/SPELL/GEAR : index=hand_idx, lane=target battlefield; a UNIT's
+                          dst_lane is the battlefield it is played to (None: base)
       * CHAMPION        : lane=target battlefield (index unused)
       * MOVE            : index=the unit's position in its location's list (None:
                           the first ready unit there), lane=src, dst_lane=dst
@@ -57,7 +58,7 @@ class GameAction:
 
     def to_engine(self) -> tuple:
         """The raw action tuple ``GameLoop._apply_action`` expects."""
-        if self.kind == "MOVE":
+        if self.kind == "MOVE" or (self.kind == "UNIT" and self.dst_lane is not None):
             return (self.kind, self.index, self.lane, self.dst_lane)
         return (self.kind, self.index, self.lane)
 

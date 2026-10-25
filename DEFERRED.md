@@ -363,8 +363,24 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   of Suppression (was taxing its own cost; now opponents' spells, [rune] paid
   as Energy like DEFLECT). Left: Risen Altar, Tornado Warrior, Heartening
   Soul's granted ability, Mournful Witness ("a combat I was in").
-- Next: play-to-battlefield units, buff spending, hand disruption (Ashe
-  Focused, Bone Skewer, Insightful Investigator), copies, the rest.
+- [DONE] **Batch 9 (116 → 103, branch `inert-cards-2`): where units are
+  played.** Units were always played to base; the rules allow base or a
+  battlefield you control (§813.3.a). `GameLoop._unit_play_destinations`
+  adds the cards' permissions (`play_location`: open, occupied enemy, enemy
+  alone, conquered this turn only, attacking; `play_location_aura`: Miss
+  Fortune Buccaneer, Arachnoid Horror; Last Caress's next unit anywhere,
+  buffed) and restrictions (Rockfall Path, Mageseeker Warden). A UNIT action
+  carries its destination (`dst_lane`, None = base) and **the RL action
+  space grew**: UNIT slots are MAX_HAND x (N_BF+1), ACTION_DIM 201 (old
+  checkpoints don't load). A unit played to a battlefield contests it like a
+  move (the showdown follows). AMBUSH units (and REACTION units, to a
+  battlefield you control; Rengar Pouncing also where you're attacking) are
+  offered at reaction speed. Here to Help, Valley of Idols, Rek'Sai Breacher
+  (ACCELERATE for units played from elsewhere). The simple_trade agent still
+  plays units to base (Perched Grimwyrm where it can). Left: Dragon Roost,
+  Stalking Wolf's additional cost, Poppy Defender's XP cost.
+- Next: buff spending, hand disruption (Ashe Focused, Bone Skewer,
+  Insightful Investigator), copies, rune manipulation, the rest.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
