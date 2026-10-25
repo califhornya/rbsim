@@ -2146,11 +2146,25 @@ class GameLoop:
             # Battlefield "first non-token unit played here this turn" trigger
             # (Star Spring). Fires once per side per turn at this battlefield.
             self._fire_first_unit_here(side, dst_bf, unit)
-        # Contested if: gaining control from empty/opponent, OR both sides now have units
+        # Contested if: gaining control from empty/opponent, OR both sides now have
+        # units. The showdown waits while the player moves more units here
+        # (_flush_pending_move): they moved together (§144.3).
         gained_control = prev_controller != side and dst_bf.controller() == side
         if gained_control or (dst_bf.units_A and dst_bf.units_B):
             dst_bf.contested_this_turn = True
-            self._run_showdown(dst, attacker=side)
+            if self.gs.pending_move is None:
+                self.gs.pending_move = (dst, side)
+
+    def _flush_pending_move(self) -> None:
+        """Start the showdown a held Standard Move owes (see GameState.pending_move):
+        called before any action other than another move to the same battlefield,
+        and when the player's actions end."""
+        pending = self.gs.pending_move
+        if pending is None:
+            return
+        self.gs.pending_move = None
+        dst, side = pending
+        self._run_showdown(dst, attacker=side)
 
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
@@ -2166,6 +2180,12 @@ class GameLoop:
             dst_lane = None
 
         base_index = len(self.gs.battlefields)
+
+        # Units moved to a battlefield arrive together; anything else this player
+        # does first lets the showdown they started happen.
+        pending = self.gs.pending_move
+        if pending is not None and not (kind == "MOVE" and dst_lane == pending[0]):
+            self._flush_pending_move()
 
         opponent = self.gs.get_player(self.gs.other(self.gs.active))           
 
@@ -2282,16 +2302,20 @@ class GameLoop:
             if src is None or dst is None or src == dst or src not in range(n_loc)                     or dst not in range(n_loc):
                 return
             side = self.gs.active
-            if src == base_index:
-                unit = ap.pop_base_unit()
+            src_bf = None if src == base_index else self.gs.battlefields[src]
+            units = ap.base_units if src_bf is None else src_bf._units_for(side)
+            if idx is None:   # legacy: the first ready unit there
+                unit = next((u for u in units if u.ready), None)
             else:
-                unit = self.gs.battlefields[src].pop_unit_for_movement(side)
-            if unit is None:
+                unit = units[idx] if isinstance(idx, int) and 0 <= idx < len(units) else None
+            if unit is None or not unit.ready:
                 return
-            if src != base_index and dst != base_index and not unit.has_keyword("GANKING"):
-                # bf -> bf needs GANKING (§144.4.c); put it back untouched.
-                self.gs.battlefields[src].add_unit(side, unit)
-                return
+            if src_bf is not None and dst != base_index and not unit.has_keyword("GANKING"):
+                return    # bf -> bf needs GANKING (§144.4.c)
+            if src_bf is None:
+                units.remove(unit)
+            else:
+                src_bf.remove_unit(side, unit)
             self._standard_move(unit, side, src, dst)
 
         elif kind == "ABILITY":
@@ -3118,12 +3142,14 @@ class GameLoop:
                 if self.verbose:
                     print(f"  {ap.name} hit action cap — ending action phase")
                 break
+        self._flush_pending_move()
         return None
 
     def _end_turn(self) -> Optional[Result]:
         """Showdown + combat/conquer (+victory) + end-of-turn triggers + cleanup +
         advance to the next player/turn. Returns a Result on a combat victory."""
         gs = self.gs
+        self._flush_pending_move()   # search agents end turns without a PASS
         self._phase_showdown(gs.active, gs.other(gs.active))
 
         self._phase_combat_and_conquer(gs.active)

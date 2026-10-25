@@ -56,6 +56,10 @@ class GameState:
 
     # Chain and Showdown state
     chain: list[ChainItem] = field(default_factory=list)
+    # A Standard Move that will start a showdown, held while the player keeps
+    # moving units to the same battlefield: those units moved together (Core
+    # Rules §144.3) and fight together. (battlefield index, moving side).
+    pending_move: Optional[tuple] = None
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
     focus_player: Optional[str] = None

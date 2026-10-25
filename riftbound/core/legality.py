@@ -85,23 +85,24 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     if champ is not None and not deployed and _affordable(loop, ap, champ):
         actions.append(GameAction.champion(0, f"Deploy champion {champ.name}"))
 
-    # --- movement (illegal during showdown or an open chain) ---
+    # --- movement (illegal during showdown or an open chain), one action per
+    # ready unit; consecutive moves to one battlefield go together (§144.3) ---
     if not gs.showdown_active and not gs.chain:
-        if ap.has_movable_base_unit():
-            for dst in range(n_bf):
-                actions.append(GameAction.move(base_index, dst, f"Move base→BF{dst}"))
-        for src in range(n_bf):
-            units = gs.battlefields[src].units_A if side == "A" else gs.battlefields[src].units_B
-            first_ready = next((u for u in units if u.ready), None)
-            if first_ready is None:
-                continue
-            actions.append(GameAction.move(src, base_index, f"Move BF{src}→base"))
-            # bf→bf only applies if the moving unit (first ready) has GANKING —
-            # otherwise the engine refuses it (see _apply_action MOVE branch).
-            if first_ready.has_keyword("GANKING"):
-                for dst in range(n_bf):
-                    if dst != src:
-                        actions.append(GameAction.move(src, dst, f"Move BF{src}→BF{dst}"))
+        def where(loc):
+            return "base" if loc == base_index else f"BF{loc}"
+        for src in range(n_bf + 1):
+            units = ap.base_units if src == base_index else gs.battlefields[src]._units_for(side)
+            for ui, u in enumerate(units):
+                if not u.ready:
+                    continue
+                for dst in range(n_bf + 1):
+                    if dst == src:
+                        continue
+                    # bf→bf needs GANKING (§144.4.c).
+                    if src != base_index and dst != base_index and not u.has_keyword("GANKING"):
+                        continue
+                    actions.append(GameAction.move(
+                        src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
 
     # --- HIDDEN keyword (Open State only) ---
     if not gs.showdown_active and not gs.chain:

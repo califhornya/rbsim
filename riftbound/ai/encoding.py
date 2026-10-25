@@ -30,6 +30,7 @@ from riftbound.registry.cards_registry import CARD_REGISTRY
 N_BF = 2
 MAX_HAND = 12
 MAX_ABIL = 16
+MAX_MOVERS = 8          # unit positions per location a MOVE can name
 DOMAINS = ("FURY", "CALM", "MIND", "BODY", "CHAOS", "ORDER")
 N_DOM = len(DOMAINS)
 _DOM_INDEX = {d: i for i, d in enumerate(DOMAINS)}
@@ -154,8 +155,8 @@ _OFF_UNIT = _OFF_PASS + 1                          # MAX_HAND
 _OFF_SPELL = _OFF_UNIT + MAX_HAND                  # MAX_HAND * N_BF
 _OFF_GEAR = _OFF_SPELL + MAX_HAND * N_BF           # MAX_HAND * N_BF
 _OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF
-_OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2
-_OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2            # MAX_HAND * N_BF
+_OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2 * MAX_MOVERS
+_OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2 * MAX_MOVERS  # MAX_HAND * N_BF
 _OFF_HIDDEN = _OFF_HIDE + MAX_HAND * N_BF          # N_BF
 _OFF_ABIL = _OFF_HIDDEN + N_BF                     # ACTIVATED(MAX_ABIL)
 ACTION_DIM = _OFF_ABIL + MAX_ABIL
@@ -194,7 +195,10 @@ def action_to_index(action) -> Optional[int]:
             return None
         if not (0 <= src <= N_BF and 0 <= dst <= N_BF):
             return None
-        return _OFF_MOVE + src * (N_BF + 1) + dst
+        unit = 0 if idx is None else idx   # None = the first ready unit there
+        if not (isinstance(unit, int) and 0 <= unit < MAX_MOVERS):
+            return None
+        return _OFF_MOVE + (src * (N_BF + 1) + dst) * MAX_MOVERS + unit
     if kind == "HIDE":
         return hb(_OFF_HIDE, idx, N_BF, lane if isinstance(lane, int) else 0)
     if kind == "HIDDEN_PLAY":

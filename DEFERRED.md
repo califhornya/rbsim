@@ -187,9 +187,10 @@ rune); the hardcoded movement handlers ran on top of the card specs (Stellacorn
 Herder drew 2); kill effects and spell damage skip DEATHKNELL; REACTION abilities
 were never offered and activated abilities never checked their condition; the
 Seals added energy or crashed; floating Power. Still open, in this order:
-- **Group moves (§144.3).** A MOVE moves one unit (always the first ready one,
-  whatever the agent picked), and its showdown/combat starts at once, so every
-  attack is a single unit. Needs a move action that names the units.
+- [DONE] **Group moves (§144.3).** A MOVE names its unit; moves to one
+  battlefield in a row are held (GameState.pending_move) and fight together.
+  The RL observation doesn't yet show units by position, so the policy prior
+  over "move the unit at position i" is blind (search still sees the result).
 - **`move_unit` effect** only moves a friendly unit at the effect's battlefield
   to base (~40 cards: Charm, Ride the Wind, Moonfall, Fae Porter...).
 - **Targeting baseline.** Effects pick the first unit at the effect's

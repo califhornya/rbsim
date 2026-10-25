@@ -186,41 +186,44 @@ class SimpleTradeAgent(Agent):
         return ("CHAMPION", None, 0)
 
     def _find_trade_move(self, my_side: str, bfs: list, base_idx: int) -> Optional[tuple]:
-        """Pick the smallest sufficient base unit that turns a contested/enemy BF into
-        a favorable trade (our total Might >= their total Might after move-in)."""
-        ready_base = [
-            u for u in self.player.base_units
-            if u.ready and not u.is_token and (u.card.might or 0) > 0
-        ]
+        """Attack a contested/enemy BF when our units can win the trade (our total
+        Might >= theirs). Units moved to one battlefield in a row arrive together
+        (the engine holds the showdown), so this sends the smallest sufficient
+        unit, or, when one isn't enough, the strongest one and keeps adding units
+        on the next calls until the attack is sufficient."""
+        base = self.player.base_units
+        ready_base = [u for u in base if u.ready and (u.might or 0) > 0]
         if not ready_base:
             return None
-        # Smallest sufficient unit first — we don't overcommit.
-        ready_base.sort(key=lambda u: (u.card.might or 0))
+        ready_base.sort(key=lambda u: u.might)
+        pending = getattr(getattr(self, "gs", None), "pending_move", None)
 
-        best: Optional[tuple[int, int]] = None  # (score, bf_idx)
-        chosen_action: Optional[tuple] = None
-
+        best: Optional[tuple[int, tuple]] = None  # (score, action)
         opp_side = self._opp_side(my_side)
         for bf_idx, bf in enumerate(bfs):
             my_now, opp_now, my_units, opp_units = self._trade_math(bf, my_side)
             if not opp_units:
                 continue  # no one to trade with
-            for candidate in ready_base:
-                projected = my_now + candidate.might
-                if projected < opp_now:
-                    continue  # losing trade
-                # Score: prefer attacks that deny a current opponent Hold.
-                score = 10
-                if bf.controller() == opp_side:
-                    score += 5  # denying their Hold is best
-                if projected > opp_now:
-                    score += 3  # we likely have survivors -> Conquer
-                if best is None or score > best[0]:
-                    best = (score, bf_idx)
-                    chosen_action = ("MOVE", None, base_idx, bf_idx)
-                break  # smallest sufficient unit wins; move on to next BF
-
-        return chosen_action
+            joining = pending is not None and pending[0] == bf_idx
+            if joining and my_now >= opp_now:
+                return None  # the attack moving in is enough: let it fight
+            if my_now + sum(u.might for u in ready_base) < opp_now:
+                continue  # losing trade even with everything
+            single = next((u for u in ready_base if my_now + u.might >= opp_now), None)
+            unit = single if single is not None else ready_base[-1]
+            # Score: prefer attacks that deny a current opponent Hold; finish an
+            # attack already moving in before starting another.
+            score = 10
+            if bf.controller() == opp_side:
+                score += 5  # denying their Hold is best
+            if single is not None and my_now + unit.might > opp_now:
+                score += 3  # we likely have survivors -> Conquer
+            if joining:
+                score += 100
+            action = ("MOVE", base.index(unit), base_idx, bf_idx)
+            if best is None or score > best[0]:
+                best = (score, action)
+        return best[1] if best is not None else None
 
     def _find_gear_play(self, my_side: str, bfs: list) -> Optional[tuple]:
         """Play a gear targeting a lane that has friendly units (auto-attach).
@@ -379,13 +382,11 @@ class SimpleTradeAgent(Agent):
 
     def _find_empty_bf_move(self, my_side: str, bfs: list, base_idx: int) -> Optional[tuple]:
         """Walk a ready base unit onto an uncontrolled BF to Conquer it."""
-        ready = next(
-            (u for u in self.player.base_units if u.ready and not u.is_token),
-            None,
-        )
+        base = self.player.base_units
+        ready = next((u for u in base if u.ready), None)
         if ready is None:
             return None
         for bf_idx, bf in enumerate(bfs):
             if not bf.units_A and not bf.units_B and bf.controller() != my_side:
-                return ("MOVE", None, base_idx, bf_idx)
+                return ("MOVE", base.index(ready), base_idx, bf_idx)
         return None
