@@ -14817,14 +14817,18 @@
         "trigger": "on_conquer",
         "target_filter": {
           "is_unit": true
-        }
+        },
+        "pay_cost": true,
+        "optional": true
       },
       {
         "effect": "play_from_trash",
         "trigger": "on_hold",
         "target_filter": {
           "is_unit": true
-        }
+        },
+        "pay_cost": true,
+        "optional": true
       }
     ]
   },
@@ -23361,7 +23365,13 @@
       {
         "effect": "draw_cards",
         "trigger": "on_conquer",
-        "count": 1
+        "count": 1,
+        "condition": {
+          "type": "excess_damage_at_least",
+          "params": {
+            "n": 3
+          }
+        }
       }
     ]
   },

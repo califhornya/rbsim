@@ -1172,6 +1172,7 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
     pool = player.trash if zone == "trash" else player.banished
     count = int(spec.get("count", spec.get("amount", 1)))
     pay_power = bool(spec.get("ignore_energy_cost") or spec.get("pay_power"))
+    pay_cost = bool(spec.get("pay_cost"))   # "You still pay its costs" (Last Rites)
     lane = loop.gs.battlefields.index(ctx.battlefield) if ctx.battlefield in loop.gs.battlefields else 0
     picks = sorted((c for c in pool if _zone_effect_card_ok(c, spec)),
                    key=_zone_value, reverse=True)
@@ -1190,7 +1191,11 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
             break
         if card not in pool:
             continue
-        if pay_power:
+        if pay_cost:
+            energy, power = loop._effective_cost(card, player)
+            if not loop._pay_card(player, card, energy, power):
+                continue
+        elif pay_power:
             power = int(card.cost_power or 0)
             domain = card.cost_power_domain
             if domain is None:

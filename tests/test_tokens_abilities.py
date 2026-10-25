@@ -172,3 +172,33 @@ def test_kaisa_power_only_pays_for_spells():
     assert loop._can_pay_card(a, spell, 0, 1)
     assert not loop._can_pay_card(a, unit, 0, 1)
     assert loop._pay_card(a, spell, 0, 1) and a.earmarked_power_spell == 0
+
+
+def test_equipment_triggers_fire_with_the_equipped_unit():
+    loop = _loop()
+    a = loop.gs.A
+    bf = loop.gs.battlefields[0]
+    archer = UnitInPlay(card=UnitCard(name="Archer", might=1))
+    archer.gear.append(CARD_REGISTRY["Recurve Bow"].instantiate())
+    archer.gear.append(CARD_REGISTRY["Sacred Shears"].instantiate())
+    bf.add_unit("A", archer)
+    target = UnitInPlay(card=UnitCard(name="Target", might=2))
+    brute = UnitInPlay(card=UnitCard(name="Brute", might=5))
+    bf.add_unit("B", target)
+    bf.add_unit("B", brute)
+    loop._phase_combat_and_conquer_single(0, "A")
+    # "When I attack, deal 2 to an enemy unit here", then the fight kills Archer.
+    assert target not in bf.units_B
+    assert archer not in bf.units_A
+    assert len(a.hand) == 1                       # Sacred Shears: DEATHKNELL draw 1
+    assert sorted(g.name for g in a.base_gear) == ["Recurve Bow", "Sacred Shears"]
+
+
+def test_trinity_force_scores_when_its_unit_holds():
+    loop = _loop()
+    bf = loop.gs.battlefields[0]
+    holder = UnitInPlay(card=UnitCard(name="Holder", might=2))
+    holder.gear.append(CARD_REGISTRY["Trinity Force"].instantiate())
+    bf.add_unit("A", holder)
+    loop._fire_scoring_trigger("on_hold", bf, "A")
+    assert loop.gs.points_A == 1

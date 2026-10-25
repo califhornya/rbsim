@@ -203,8 +203,14 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   (§468.1.a.1 / §317.2.b). Also: attackers are recalled when defenders survive
   (§468.1.a.2), and end-of-turn combats run the same procedure as showdown ones
   (attack/defend triggers, DISARM, "when you win a combat").
-- **Equipment triggers** ("When I attack/conquer" on gear) aren't dispatched;
-  only "when I move" is (2026-10-25).
+- [DONE] **Equipment triggers**: an Equipment's "When I attack / defend /
+  conquer / hold / move / die" fires with its unit (Recurve Bow, Trinity Force,
+  Sacred Shears...). Still not dispatched: unattached gear's "When you ..."
+  triggers (base gear: Glowstone, Forgotten Relic, Frigid Jewel, Blood Rose,
+  Fresh Beans, Chemtech Cask, Pirate's Haven, Mistfall, Vanguard of Helm, Mask
+  of Foresight, Bottled Constellation, Sprite Fountain, Sumpworks Map,
+  Treasure Trove) — several of those specs are misencoded ("when you ready" as
+  "when you play a unit"), review each before turning the dispatch on.
 - [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
   (latent: no non-passive spec uses it); now the unit's aura_might.
 

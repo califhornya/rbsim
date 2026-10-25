@@ -453,10 +453,11 @@ class GameLoop:
                 self.gs.add_xp(side, amount)
                 if self.verbose:
                     print(f"  [HUNT] {side} gains {amount} XP (now {self.gs.get_xp(side)})")
-            self._resolve_triggered_effects(
-                unit.card, trigger, bf, actor, opponent,
-                context_extra={"battlefield": bf},
-            )
+            for card in [unit.card] + list(unit.gear):
+                self._resolve_triggered_effects(
+                    card, trigger, bf, actor, opponent,
+                    context_extra={"battlefield": bf},
+                )
         # The scoring player's deployed gear here ("when you hold here ...").
         self._fire_deployed_gear_trigger(trigger, bf, side)
         # The battlefield's OWN triggered ability (e.g. "when you conquer here,
@@ -2721,10 +2722,14 @@ class GameLoop:
         for dead_unit, owner_side in truly_dead:
             actor = self.gs.get_player(owner_side)
             opponent = self.gs.get_player(self.gs.other(owner_side))
-            self._resolve_triggered_effects(
-                dead_unit.card, "on_death", bf, actor, opponent,
-                context_extra={"battlefield": bf},
-            )
+            # The unit's DEATHKNELL, then its Equipment's ("When I die" on gear;
+            # the gear itself is back in base by now).
+            for card in [dead_unit.card] + list(dead_unit.gear):
+                self._resolve_triggered_effects(
+                    card, "on_death", bf, actor, opponent,
+                    context_extra={"battlefield": bf},
+                )
+            dead_unit.gear = []
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
@@ -2955,12 +2960,14 @@ class GameLoop:
         defender = self.gs.other(attacker)
         atk_actor, atk_opp = self.gs.get_player(attacker), self.gs.get_player(defender)
         for unit in list(bf.units_A if attacker == "A" else bf.units_B):
-            self._resolve_triggered_effects(unit.card, "on_attack", bf, atk_actor, atk_opp,
-                                            context_extra={"battlefield": bf})
+            for card in [unit.card] + list(unit.gear):
+                self._resolve_triggered_effects(card, "on_attack", bf, atk_actor, atk_opp,
+                                                context_extra={"battlefield": bf})
             self._apply_disarm(unit, bf, defender)
         for unit in list(bf.units_A if defender == "A" else bf.units_B):
-            self._resolve_triggered_effects(unit.card, "on_defend", bf, atk_opp, atk_actor,
-                                            context_extra={"battlefield": bf})
+            for card in [unit.card] + list(unit.gear):
+                self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
+                                                context_extra={"battlefield": bf})
 
         stats = bf.resolve_combat_might(attacker_side=attacker)
 
