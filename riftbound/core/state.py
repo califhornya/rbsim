@@ -75,6 +75,15 @@ class GameState:
     # The cards each player played this turn, in order (GameLoop._note_card_played),
     # so "if you've played ANOTHER card" can leave out the card asking.
     played_cards_this_turn: dict = field(default_factory=lambda: {"A": [], "B": []})
+    # Times each player chose enemy units/gear with a spell or unit ability this
+    # turn (Ezreal Prodigal Explorer).
+    enemy_choices_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # "The next card / spell you play this turn costs ... less" (Astral Heron,
+    # Raging Firebrand): per player, a list of {filter, energy, power}.
+    next_card_discounts: dict = field(default_factory=lambda: {"A": [], "B": []})
+    # "At the end of this turn, ..." effects waiting: (side, source card,
+    # battlefield index, effect dict).
+    delayed_effects: list = field(default_factory=list)
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})

@@ -1331,7 +1331,14 @@
     "keywords": [
       "DEFLECT 2"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "amount": 5,
+        "split": true
+      }
+    ]
   },
   {
     "card_id": "OGN-042",
@@ -2797,7 +2804,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_aura",
+        "amount": 1,
+        "min_cost": 1,
+        "filter": {
+          "is_spell": true
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-085",
@@ -4018,9 +4038,8 @@
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
-        "target": "all_units_here",
-        "scope": "all",
-        "amount": 12
+        "amount": 12,
+        "filter": "all_units_at_battlefields"
       }
     ]
   },
@@ -9289,7 +9308,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "at_end_of_turn",
+        "trigger": "on_conquer",
+        "then": {
+          "effect": "ready_runes",
+          "amount": 2
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-290",
@@ -11361,7 +11389,16 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_death",
+        "count": 1,
+        "condition": {
+          "type": "died_alone"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-037",
@@ -12006,7 +12043,22 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_chosen",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_readied",
+        "target": "self",
+        "amount": 1,
+        "duration": "this_turn"
+      }
+    ]
   },
   {
     "card_id": "SFD-058",
@@ -16320,7 +16372,23 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "reaction",
+        "cost": {
+          "tap": true
+        },
+        "count": 1,
+        "condition": {
+          "type": "enemy_choices_this_turn_at_least",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-200",
@@ -19454,7 +19522,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_gear_temporary",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "UNL-071",
@@ -22110,7 +22183,25 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "sequence",
+        "trigger": "on_enemy_unit_played",
+        "condition": {
+          "type": "this_is_at_battlefield"
+        },
+        "steps": [
+          {
+            "effect": "stun_unit",
+            "target": "triggering_unit"
+          },
+          {
+            "effect": "cant_move_this_turn",
+            "target": "triggering_unit"
+          }
+        ]
+      }
+    ]
   },
   {
     "card_id": "UNL-151",
@@ -23220,7 +23311,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "blink_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "destination": "any_battlefield"
+      }
+    ]
   },
   {
     "card_id": "UNL-185",
@@ -25999,7 +26097,30 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "discount_next_card",
+        "trigger": "on_card_played",
+        "energy": 2,
+        "power": 2,
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "cards_played_this_turn_exactly",
+                "params": {
+                  "n": 1
+                }
+              },
+              {
+                "type": "this_is_at_battlefield"
+              }
+            ]
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-044",
@@ -29634,7 +29755,26 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_card_played",
+        "condition": {
+          "type": "triggering_card_not_from_hand"
+        }
+      },
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "tap": true,
+          "disempower_self": true
+        },
+        "target": "friendly_unit",
+        "amount": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-155",
@@ -30183,7 +30323,15 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 5,
+        "split": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-006",

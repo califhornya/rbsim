@@ -93,7 +93,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
         for src in range(n_bf + 1):
             units = ap.base_units if src == base_index else gs.battlefields[src]._units_for(side)
             for ui, u in enumerate(units):
-                if not u.ready:
+                if not u.ready or u.cant_move_turn == gs.turn:
                     continue
                 for dst in range(n_bf + 1):
                     if dst == src:

@@ -38,6 +38,10 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_stun_enemy",                             # you stun one or more enemy units (Eclipse Herald, Leona legend)
     "on_card_played",                            # you play a card, from any zone (Kennen legend, Darius Trifarian)
     "on_unit_moves_from_here",                   # battlefield: a unit moves from here (Back-Alley Bar)
+    "on_enemy_unit_played",                      # an opponent plays a unit / unit token (Vex Apathetic)
+    "on_chosen",                                 # your spell or ability chooses me (Irelia Fervent)
+    "on_readied",                                # I go from exhausted to ready (Irelia Fervent)
+    "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -90,6 +94,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_card_not_from_hand",     # "when you play a card from anywhere other than your hand"
     "moved_to_battlefield",              # on_move: "when I move to a battlefield"
     "moved_from_battlefield",            # on_move: "when I move from a battlefield"
+    "all_of",                            # conditions: [...] all hold
+    "died_alone",                        # DEATHKNELL "if I died alone"
+    "enemy_choices_this_turn_at_least",  # n: "if you've chosen enemy units twice this turn"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -138,6 +145,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
+    "disempower_self",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs

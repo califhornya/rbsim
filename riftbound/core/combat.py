@@ -33,6 +33,12 @@ class UnitInPlay:
     empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
     is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
     no_combat_damage: bool = False  # passive "I don't deal combat damage" (recomputed with passives)
+    # Keywords effects gave this unit: until the end of the turn ("give it
+    # ASSAULT 2 this turn") or while it stays on the board. The card's own
+    # keyword list is never changed (it would follow the card to every zone).
+    turn_keywords: list = field(default_factory=list)
+    granted_keywords: list = field(default_factory=list)
+    cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -41,6 +47,7 @@ class UnitInPlay:
 
     def clear_turn_end_bonuses(self) -> None:
         self.temporary_might = 0
+        self.turn_keywords = []
 
     @property
     def might(self) -> int:
@@ -57,22 +64,30 @@ class UnitInPlay:
             return True
         kw = keyword.upper()
         return any(k.upper() == kw or k.upper().startswith(kw + " ")
-                   for k in self.passive_keywords)
+                   for k in (*self.passive_keywords, *self.turn_keywords, *self.granted_keywords))
+
+    @staticmethod
+    def _kw_amount(k: str, kw: str) -> int:
+        """The value of keyword instance `k` if it is `kw` ("ASSAULT 2" -> 2,
+        bare "ASSAULT" -> 1), else 0."""
+        ku = k.upper()
+        if ku == kw:
+            return 1
+        if ku.startswith(kw + " "):
+            try:
+                return int(ku[len(kw):].strip())
+            except ValueError:
+                return 1
+        return 0
 
     def keyword_value(self, keyword: str) -> int:
+        """Printed or passive value, plus every instance effects gave it (two
+        "give it ASSAULT 2" add up, §807)."""
         base = self.card.keyword_value(keyword)
         kw = keyword.upper()
-        passive = 0
-        for k in self.passive_keywords:
-            ku = k.upper()
-            if ku == kw:
-                passive = max(passive, 1)
-            elif ku.startswith(kw + " "):
-                try:
-                    passive = max(passive, int(ku[len(kw):].strip()))
-                except ValueError:
-                    passive = max(passive, 1)
-        return max(base, passive)
+        passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
+        given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords))
+        return max(base, passive) + given
 
 
 @dataclass

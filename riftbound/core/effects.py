@@ -5,6 +5,7 @@ from typing import Any, Callable, Mapping
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 from .battlefield import Battlefield
+from .cards import SpellCard
 
 EffectHandler = Callable[["EffectContext", Mapping[str, Any]], None]
 
@@ -27,9 +28,50 @@ def effect(name: str) -> Callable[[EffectHandler], EffectHandler]:
 
 @effect("deal_damage")
 def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Deal damage. A single target ("deal 3 to an enemy unit") takes it all,
+    excess is lost; `count` targets ("each of up to two units") each take it;
+    a group ("all enemy units here", `filter: all_units_at_battlefields`) each
+    take it; `split: true` divides the amount among the enemies here, killing
+    in order ("5 damage split among enemy units here"). Baseline pick for a
+    single target: an enemy over a friend, one the damage kills, the mightiest."""
     amount = _amount(ctx, spec)
-    target = str(spec.get("target", "opponent"))
-    ctx.deal_damage(amount, target=target)
+    if amount <= 0:
+        return
+    target = str(spec.get("target", "enemy_unit")).lower()
+    if target in ("opponent", "enemy"):
+        target = "enemy_unit"
+    if spec.get("split"):
+        ctx.deal_damage(amount, target="opponent")
+        return
+    tf = spec.get("target_filter")
+    gs = ctx.loop.gs
+    if spec.get("filter") == "all_units_at_battlefields":
+        units = [u for bf in gs.battlefields for u in bf.units_A + bf.units_B]
+        if tf:
+            units = [u for u in units if _passes_filter(u, tf, ctx)]
+    elif target.startswith("all") or target in _BOTH_SIDES_TARGETS \
+            or str(spec.get("scope", "")).lower() == "all":
+        units = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
+    else:
+        cands = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
+        if not cands and not isinstance(ctx.card, SpellCard):
+            cands = _fallback_units(ctx, target, "enemy")
+            if tf:
+                cands = [u for u in cands if _passes_filter(u, tf, ctx)]
+        enemies = ctx._units_for_side(ctx.opponent_side)
+        enemy_ids = {id(u) for u in enemies}
+        for bf in gs.battlefields:
+            enemy_ids |= {id(u) for u in bf._units_for(ctx.opponent_side)}
+        enemy_ids |= {id(u) for u in ctx.opponent.base_units}
+
+        def value(u):
+            kills = amount >= max(0, u.might - u.damage)
+            return (id(u) in enemy_ids, kills, u.might)
+
+        units = sorted(cands, key=value, reverse=True)[:int(spec.get("count", 1))]
+        if units:
+            ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
+    ctx.damage_units(units, amount)
 
 
 @effect("grant_might")
@@ -90,6 +132,96 @@ def _sequence(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         handler = REGISTRY.get(sub.get("effect"))
         if handler:
             handler(ctx, sub)
+
+
+@effect("at_end_of_turn")
+def _at_end_of_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "At the end of this turn, <then>" (Targon's Peak): schedule `then` (an
+    effect dict) for this turn's end, with this effect's controller, source and
+    battlefield."""
+    sub = spec.get("then")
+    if not isinstance(sub, Mapping):
+        return
+    gs = ctx.loop.gs
+    bf_idx = next((i for i, b in enumerate(gs.battlefields) if b is ctx.battlefield), 0)
+    gs.delayed_effects.append((ctx.actor_side, ctx.card, bf_idx, dict(sub)))
+
+
+@effect("discount_next_card")
+def _discount_next_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next card (spell, ...) you play this turn costs [energy] [power]
+    less" (Astral Heron, Raging Firebrand): used by that card (filter)."""
+    ctx.loop.gs.next_card_discounts[ctx.actor_side].append({
+        "filter": dict(spec.get("filter") or {}),
+        "energy": int(spec.get("energy", 0)),
+        "power": int(spec.get("power", 0)),
+    })
+
+
+@effect("cant_move_this_turn")
+def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "They can't move it this turn" (Vex Apathetic): no Standard Move."""
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "triggering_unit")}):
+        unit.cant_move_turn = ctx.loop.gs.turn
+
+
+@effect("give_gear_temporary")
+def _give_gear_temporary(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Give a gear TEMPORARY" (Turn to Dust): it dies at the start of its
+    controller's next Beginning Phase. Baseline pick: the opponent's most
+    expensive gear (attached, in base or deployed), else none."""
+    entries = [(side, holder, g) for side, holder, g in _gear_entries(ctx, enemy_first=True)
+               if side == ctx.opponent_side]
+    if not entries:
+        return
+    side, holder, gear = max(entries, key=lambda e: int(getattr(getattr(e[2], "card", e[2]),
+                                                                 "cost_energy", 0) or 0))
+    if isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(gear)        # a deployed gear: give it base status
+        ctx.loop.gs.get_player(side).base_gear.append(gear.card)
+        gear = gear.card
+    gear._temporary = True
+
+
+@effect("blink_unit")
+def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Banish a friendly unit, then its owner plays it to any battlefield,
+    ignoring its cost" (Thrill of the Hunt): it leaves the board (its gear goes
+    to base) and is played again through the play procedure ("when you play
+    me" fires again) at `destination` "any_battlefield" (where it attacks
+    best) or "same_location". Baseline pick: the friendly unit with the best
+    destination, then the mightiest."""
+    loop = ctx.loop
+    gs = loop.gs
+    me = ctx.actor_side
+    units = [u for u in _units_at(ctx, me, "anywhere") if not u.is_token]
+    tf = spec.get("target_filter")
+    if tf:
+        units = [u for u in units if _passes_filter(u, tf, ctx)]
+    if not units:
+        return
+    dest = str(spec.get("destination", "any_battlefield")).lower()
+
+    def place(unit):
+        where = loop._locate_unit(unit)
+        if dest == "same_location":
+            return where[1] if where else None
+        return max(gs.battlefields, key=lambda bf: _attack_value(ctx, me, unit, bf))
+
+    unit = max(units, key=lambda u: (_attack_value(ctx, me, u, place(u)) if place(u) else 0, u.might))
+    bf = place(unit)
+    where = loop._locate_unit(unit)
+    if where is None:
+        return
+    side, src_bf = where
+    owner = gs.get_player(side)
+    if src_bf is None:
+        owner.base_units.remove(unit)
+    else:
+        src_bf.remove_unit(side, unit)
+    owner.base_gear.extend(unit.gear)
+    loop._fire_leaves_board(unit.card, side, src_bf or gs.battlefields[0])
+    loop._play_unit(unit.card, side, bf=bf, from_zone="banished")
 
 
 @effect("reveal_top_draw_if_spell")
@@ -213,7 +345,12 @@ def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("ready_unit")
 def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+        was_ready = unit.ready
         unit.ready = True
+        if not was_ready:
+            where = ctx.loop._locate_unit(unit)
+            if where is not None:
+                ctx.loop._fire_readied(unit, where[0])
 
 
 @effect("score_point")
@@ -443,9 +580,41 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     tf = spec.get("target_filter")
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
+    if not units and scope == "single" and not target.startswith("all")             and not isinstance(ctx.card, SpellCard) and target not in _BOTH_SIDES_TARGETS:
+        # An ability or trigger isn't aimed at one battlefield the way a spell is
+        # (a legend's "give a unit ASSAULT 2"): with no candidate here, look at
+        # the other battlefields, then base.
+        units = _fallback_units(ctx, target, bias)
+        if tf:
+            units = [u for u in units if _passes_filter(u, tf, ctx)]
     if not units:
         return []
-    return list(units) if scope != "single" else units[:1]
+    if scope != "single" or target.startswith("all"):
+        return list(units)
+    # One unit picked: that's a choice ("choose a unit"), for "when you choose
+    # me" and "you've chosen enemy units twice this turn".
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, units[:1])
+    return units[:1]
+
+
+def _fallback_units(ctx: "EffectContext", target: str, bias: str) -> list:
+    """Candidates for a single-unit target anywhere: the other battlefields, then
+    base, for the side(s) the target names."""
+    gs = ctx.loop.gs
+    me, them = ctx.actor_side, ctx.opponent_side
+    if target in _CHOOSER_TARGETS:
+        sides = [them, me] if bias == "enemy" else [me, them]
+    else:
+        try:
+            player = ctx._player_for_target(target)
+        except ValueError:
+            return []
+        sides = [ctx._side_for_player(player)]
+    units = []
+    for side in sides:
+        units += [u for bf in gs.battlefields if bf is not ctx.battlefield for u in bf._units_for(side)]
+        units += list(gs.get_player(side).base_units)
+    return units
 
 
 def _source_unit(ctx: "EffectContext"):
@@ -761,16 +930,16 @@ def _give_keyword(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     keyword = str(spec.get("keyword", "")).strip()
     if not keyword:
         return
+    this_turn = str(spec.get("duration", "")).lower() == "this_turn"
     for unit in _resolve_targets(ctx, spec):
-        if keyword not in unit.card.keywords:
-            unit.card.keywords.append(keyword)
+        (unit.turn_keywords if this_turn else unit.granted_keywords).append(keyword)
 
 
 def _give_temp_keyword(ctx: "EffectContext", spec: Mapping[str, Any], kw: str) -> None:
     amount = int(spec.get("amount", 1))
     token = f"{kw} {amount}"
     for unit in _resolve_targets(ctx, spec):
-        unit.card.keywords.append(token)
+        unit.turn_keywords.append(token)    # "this turn"
 
 
 @effect("give_temporary_assault")
@@ -1068,7 +1237,9 @@ def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("ready_runes")
 def _ready_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Ready exhausted runes: "ready up to N runes" honors `amount`; without one
-    ("ready your runes") every rune is readied."""
+    ("ready your runes") every rune is readied. The engine exhausts every rune
+    for its Energy as the turn begins, so a readied rune is that Energy back:
+    the rune is used again at once (it stays exhausted) for +1 Energy."""
     player = ctx._player_for_target(str(spec.get("target", "actor")))
     left = spec.get("amount")
     left = None if left is None else int(left)
@@ -1077,7 +1248,7 @@ def _ready_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             if left is not None and left <= 0:
                 return
             if not rune.ready:
-                rune.refresh()
+                player.energy += 1
                 if left is not None:
                     left -= 1
 

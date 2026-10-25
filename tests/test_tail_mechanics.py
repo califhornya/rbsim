@@ -210,9 +210,11 @@ def test_annie_legend_readies_up_to_two_runes_at_end_of_turn():
     for r in a.rune_pool[Domain.FURY]:
         r.ready = False
     loop._fire_turn_trigger("on_start_of_turn", "A")   # Annie's is an END-of-turn ability
-    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 0
+    assert a.energy == 0
     loop._fire_turn_trigger("on_end_of_turn", "A")
-    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 2   # up to 2, not all
+    # Up to 2, not all: each readied rune is its Energy back (the engine has
+    # already exhausted every rune for Energy this turn).
+    assert a.energy == 2
 
 
 def test_costless_activated_ability_is_never_offered(monkeypatch):
