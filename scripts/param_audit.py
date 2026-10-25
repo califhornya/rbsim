@@ -47,7 +47,7 @@ handler_name = {verb: fn.__name__ for verb, fn in REGISTRY.items()}
 # EffectContext methods the handlers call read their kwargs as parameters; treat
 # target/scope as read when the handler passes them through.
 ALWAYS = {"effect", "trigger", "timing", "condition", "cost", "additional_cost", "optional",
-          "suggested_vocab"}
+          "suggested_vocab", "once_per_turn"}   # once_per_turn: read by the loop
 
 used = defaultdict(lambda: defaultdict(list))   # verb -> key -> [cards]
 seen_cards = set()

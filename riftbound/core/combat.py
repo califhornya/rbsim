@@ -40,6 +40,8 @@ class UnitInPlay:
     granted_keywords: list = field(default_factory=list)
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
+    base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
+    moves_this_turn: int = 0   # "The third time I move in a turn" (Yasuo Windrider)
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -49,6 +51,8 @@ class UnitInPlay:
     def clear_turn_end_bonuses(self) -> None:
         self.temporary_might = 0
         self.turn_keywords = []
+        self.base_might_override = None
+        self.moves_this_turn = 0
 
     @property
     def might(self) -> int:
@@ -60,7 +64,8 @@ class UnitInPlay:
         )
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
-        return max(0, int(self.card.might or 0) + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+        base = self.base_might_override if self.base_might_override is not None else int(self.card.might or 0)
+        return max(0, base + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
 
     def has_keyword(self, keyword: str) -> bool:
         if self.card.has_keyword(keyword):

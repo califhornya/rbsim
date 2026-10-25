@@ -231,6 +231,31 @@ counts it and Gearhead doubles it. `scripts/import_cards.py` now reads
 `data-e-might` as a gear's might (`parse_html_cards.py` is the older parser). Experimental
 Hexplate's "I am a Mech." (a tag given by Equipment) isn't modeled.
 
+## Inert-card pass (branch `inert-cards`, 2026-10-25)
+Hand-authoring the remaining INERT cards in batches grouped by mechanic
+(`scripts/coverage_audit.py` counts them; 229 at the start).
+- [DONE] **Batch 1 (229 → 211)**: `fight` ("they deal damage equal to their
+  Mights to each other": Challenge, Carnivorous Snapvine, Marching Orders,
+  Clash of Giants), `set_base_might` (Herald of the Emperor, Dragon Form, Lulu
+  Whimsical, Piltovan Guidebot), `match_might` (Convergent Mutation), banish
+  and replay to base (Portal Rescue) or in place (Temporal Breach), and
+  triggers: `on_chosen` by a spell (Jae Medarda), `ready_enemy_here` (Dune
+  Drake), `once_per_turn` on any triggered effect (Wraith of Echoes),
+  `on_buffed` (Simian Ancestor), `on_stunned_enemy_dies_here` (Storm Raptor),
+  `on_enemy_unit_moves` once per group move (Volibear Imposing),
+  `moves_this_turn_exactly` (Yasuo Windrider; Miss Fortune Captain and Blade
+  Twirler fired on every move). Also: REPEAT costs are read from the printed
+  text (Power and discard costs were free; Marching Orders paid 1 for [3]).
+  Left approximate: Temporal Breach only rescues a friendly unit; a stunned
+  unit dying in base counts as "here" for a Storm Raptor at the first
+  battlefield; Curtain Call's per-mode REPEAT costs; Temporal Portal, The
+  Academy, Syndra Transcendent (granting REPEAT) and Marai Spire (REPEAT cost
+  reduction) aren't modeled.
+- Next: FLOW (play from trash, then banish: 16 cards, Dragon Form's FLOW
+  waits for it), "banish the top card / reveal and play it" (Akali Brash,
+  Runeblade Anvil, Blind Fury, Drakehound Packmaster, Void Rush, Rek'Sai...),
+  restrictions, damage modifiers, the empower family.
+
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
 the real engine (reset/step/legal_actions/observation/reward vs a fixed opponent).

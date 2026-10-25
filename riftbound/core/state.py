@@ -84,6 +84,9 @@ class GameState:
     # "At the end of this turn, ..." effects waiting: (side, source card,
     # battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
+    # "Once each turn" / "The first time ... each turn" abilities used:
+    # (id of the source card, effect index) -> turn number.
+    once_per_turn_used: dict = field(default_factory=dict)
     # "Units you play this turn enter ready" (Confront): the turn it applies to.
     units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
     # "The next unit you play this turn enters ready" (Sun Disc): how many.

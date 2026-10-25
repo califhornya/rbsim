@@ -3413,7 +3413,13 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "blink_unit",
+        "trigger": "on_cast",
+        "destination": "base"
+      }
+    ]
   },
   {
     "card_id": "OGN-103",
@@ -3594,7 +3600,12 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "match_might",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-109",
@@ -3889,7 +3900,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_friendly_unit_death",
+        "count": 1,
+        "once_per_turn": true
+      }
+    ]
   },
   {
     "card_id": "OGN-119",
@@ -4261,7 +4279,12 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "fight",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-129",
@@ -4348,7 +4371,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_attack",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "ready_enemy_here"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-132",
@@ -4876,7 +4909,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "fight",
+        "trigger": "on_play",
+        "first": "self"
+      }
+    ]
   },
   {
     "card_id": "OGN-150",
@@ -5165,7 +5204,16 @@
       "SHIELD 3",
       "TANK"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_enemy_unit_moves",
+        "count": 1,
+        "condition": {
+          "type": "moved_to_other_battlefield"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-159",
@@ -5280,6 +5328,13 @@
         "target_filter": {
           "exclude_self": true,
           "is_exhausted": true
+        },
+        "optional": true,
+        "condition": {
+          "type": "moves_this_turn_exactly",
+          "params": {
+            "n": 1
+          }
         }
       }
     ]
@@ -6659,7 +6714,19 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "score_point",
+        "trigger": "on_move",
+        "amount": 1,
+        "condition": {
+          "type": "moves_this_turn_exactly",
+          "params": {
+            "n": 3
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-206",
@@ -11779,7 +11846,13 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_buffed",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-048",
@@ -13933,7 +14006,12 @@
       "ACTION",
       "REPEAT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "fight",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "SFD-115",
@@ -14765,7 +14843,21 @@
         "rarity": "Rare"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_chosen",
+        "count": 1,
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "is_spell": true
+            }
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-143",
@@ -21001,7 +21093,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "fight",
+        "trigger": "on_cast",
+        "first": "any"
+      }
+    ]
   },
   {
     "card_id": "UNL-111",
@@ -24836,7 +24934,13 @@
         "effect": "burn",
         "trigger": "on_move",
         "target": "opponent",
-        "amount": 1
+        "amount": 1,
+        "condition": {
+          "type": "moves_this_turn_exactly",
+          "params": {
+            "n": 1
+          }
+        }
       }
     ],
     "variants": [
@@ -27002,7 +27106,13 @@
     "keywords": [
       "HIDDEN"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "blink_unit",
+        "trigger": "on_cast",
+        "destination": "same_location"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-066",
@@ -28688,7 +28798,14 @@
     "keywords": [
       "FLOW"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "set_base_might",
+        "trigger": "on_cast",
+        "target": "unit",
+        "amount": 5
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-116",
@@ -31517,7 +31634,13 @@
     "keywords": [
       "DEFLECT"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_stunned_enemy_dies_here",
+        "count": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-036",
@@ -32169,7 +32292,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "set_base_might",
+        "trigger": "on_card_played",
+        "target": "self",
+        "amount_source": "triggering_energy",
+        "only_if_higher": true,
+        "optional": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-057",
@@ -33834,7 +33966,16 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "set_base_might",
+        "trigger": "on_move",
+        "target": "unit",
+        "amount": 4,
+        "other": true,
+        "optional": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-110",
@@ -34097,7 +34238,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "set_base_might",
+        "trigger": "on_play",
+        "target": "friendly_unit",
+        "amount": 5
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-118",

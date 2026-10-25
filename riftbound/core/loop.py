@@ -32,6 +32,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
     "on_card_played", "on_unit_moves_from_here", "on_enemy_unit_played",
     "on_chosen", "on_readied", "cost_aura", "enter_ready_aura", "on_hide",
+    "on_buffed", "on_enemy_unit_moves", "on_stunned_enemy_dies_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -57,7 +58,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "moved_to_battlefield", "moved_from_battlefield",
     "all_of", "died_alone", "enemy_choices_this_turn_at_least",
     "not_your_turn", "triggering_card_from_zone", "played_to_controlled_battlefield",
-    "units_in_base_at_least",
+    "units_in_base_at_least", "ready_enemy_here", "moves_this_turn_exactly",
+    "moved_to_other_battlefield",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -816,9 +818,12 @@ class GameLoop:
         if not effect_specs:
             return
         context = EffectContext(self, card, actor, opponent, battlefield, dict(context_extra or {}))
-        for es in effect_specs:
+        for es_index, es in enumerate(effect_specs):
             if es.trigger != trigger:
                 continue
+            once_key = (id(card), es_index)
+            if es.params.get("once_per_turn") and self.gs.once_per_turn_used.get(once_key) == self.gs.turn:
+                continue    # "Once each turn" / "The first time ... each turn": used
             # Optional ("you may ...") effects: let the actor decline BEFORE paying
             # any cost. Default (no agent / heuristic agents) is yes.
             if not self._wants_optional(actor, card, es):
@@ -841,6 +846,8 @@ class GameLoop:
             handler = EFFECT_REGISTRY.get(es.effect)
             if not handler:
                 continue
+            if es.params.get("once_per_turn"):
+                self.gs.once_per_turn_used[once_key] = self.gs.turn
             # Resilience: mirror the guard in _resolve_card_effects — a single
             # malformed triggered spec must not abort the whole match. Skip + log.
             try:
@@ -1241,6 +1248,18 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "ready_enemy_here":
+            bf = extra.get("battlefield")
+            return bf is not None and any(u.ready for u in bf._units_for(self.gs.other(side)))
+        if ctype == "moves_this_turn_exactly":
+            # "The first / third time I move in a turn" (on_move).
+            unit = extra.get("triggering_unit") or self._find_unit_by_card(card)
+            return unit is not None and unit.moves_this_turn == _threshold(1)
+        if ctype == "moved_to_other_battlefield":
+            # "When an opponent moves to a battlefield other than mine".
+            to = extra.get("moved_to")
+            me = self._locate_unit(self._find_unit_by_card(card)) if self._find_unit_by_card(card) else None
+            return to is not None and to != "base" and (me is None or me[1] is not to)
         if ctype == "not_your_turn":
             return side != self.gs.active
         if ctype == "triggering_card_from_zone":
@@ -1623,6 +1642,37 @@ class GameLoop:
             return False
         actor.energy -= energy or 0
         return self._pay_generic_power(actor, power or 0)
+
+    def _pay_repeat(self, card: Card, ap: Player) -> bool:
+        """Pay a spell's REPEAT cost if affordable: its printed cost
+        (SpellCard.repeat_cost: Energy, Power of a domain or of any, or a
+        discard), else an explicit "REPEAT N" keyword, else the spell's Energy
+        cost (a bare REPEAT)."""
+        cost = getattr(card, "repeat_cost", None)
+        if not cost:
+            bare = any(k.strip().upper() == "REPEAT" for k in card.keywords)
+            cost = {"energy": (card.cost_energy or 0) if bare else card.keyword_value("REPEAT")}
+        energy = int(cost.get("energy", 0) or 0)
+        power = int(cost.get("power", 0) or 0)
+        domain = Domain[cost["domain"]] if cost.get("domain") else None
+        discard = int(cost.get("discard_cards", 0) or 0)
+        others = [c for c in ap.hand if c is not card]
+        if not (energy or power or discard) or ap.energy < energy or len(others) < discard:
+            return False
+        if power and not (ap.can_pay_cost(0, power, domain) if domain
+                          else self._can_pay_generic_power(ap, power)):
+            return False
+        ap.energy -= energy
+        if power:
+            if domain:
+                ap.pay_cost(0, power, domain)
+            else:
+                self._pay_generic_power(ap, power)
+        for victim in others[:discard]:
+            ap.hand.remove(victim)
+            ap.trash.append(victim)
+            self.gs.discarded_this_turn["A" if ap is self.gs.A else "B"] = True
+        return True
 
     def _pay_generic_power(self, actor: Player, n: int) -> bool:
         """Pay n generic ([rune]) power from the first domain that can cover it."""
@@ -2287,11 +2337,7 @@ class GameLoop:
         # raw keyword list rather than relying on the integer value.)
         card._repeat_paid = False
         if card.has_keyword("REPEAT"):
-            bare = any(k.strip().upper() == "REPEAT" for k in card.keywords)
-            repeat_cost = card.cost_energy if bare else card.keyword_value("REPEAT")
-            if repeat_cost and ap.can_pay_cost(repeat_cost, None, None):
-                if ap.pay_cost(repeat_cost, None, None):
-                    card._repeat_paid = True
+            card._repeat_paid = self._pay_repeat(card, ap)
         self._show_off(card, ap)
         side = "A" if ap is self.gs.A else "B"
         self._note_card_played(card, side, from_zone)
@@ -2401,9 +2447,16 @@ class GameLoop:
         (Back-Alley Bar) on the battlefield it left."""
         ap = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
+        unit.moves_this_turn += 1
         here = dst_bf or self.gs.battlefields[0]
         extra = {"battlefield": here, "moved_from": src_bf or "base",
                  "moved_to": dst_bf or "base", "triggering_unit": unit}
+        # "When an opponent moves to a battlefield ..." (Volibear Imposing): once
+        # per move, not per unit of a group move (§144.3) already held here.
+        dst_index = self.gs.battlefields.index(dst_bf) if dst_bf is not None else None
+        if self.gs.pending_move != (dst_index, side):
+            self._fire_units_trigger("on_enemy_unit_moves", self.gs.other(side),
+                                     triggering_card=unit.card, extra=extra)
         for card in [unit.card] + list(unit.gear):
             self._resolve_triggered_effects(card, "on_move", here, ap, opponent,
                                             context_extra=extra)
@@ -2987,6 +3040,13 @@ class GameLoop:
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
                                      exclude_card=dead_unit.card)
+            if dead_unit.stunned:
+                # "When a stunned enemy unit dies here" (Storm Raptor).
+                enemy = self.gs.other(owner_side)
+                for u in list(bf._units_for(enemy)):
+                    self._resolve_triggered_effects(u.card, "on_stunned_enemy_dies_here", bf,
+                                                    self.gs.get_player(enemy), actor,
+                                                    context_extra={"battlefield": bf})
 
     def _fire_leaves_board(self, card: Card, owner_side: str, bf: Battlefield) -> None:
         """Fire a card's `leaves_board` triggered effects. 'Leaving the board'

@@ -44,6 +44,9 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
     "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
     "on_hide",                                   # you hide a card (Katarina Reckless)
+    "on_buffed",                                 # I get a buff (Simian Ancestor)
+    "on_enemy_unit_moves",                       # an opponent's unit moves (Volibear Imposing)
+    "on_stunned_enemy_dies_here",                # a stunned enemy unit dies here (Storm Raptor)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -103,6 +106,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_card_from_zone",         # zone: "when you play a card from face down"
     "played_to_controlled_battlefield",  # enter_ready_aura: "units you play to battlefields you control"
     "units_in_base_at_least",            # n: "if you have two or more other units in your base"
+    "ready_enemy_here",                  # "if there is a ready enemy unit here"
+    "moves_this_turn_exactly",           # n: "the first / third time I move in a turn"
+    "moved_to_other_battlefield",        # "an opponent moves to a battlefield other than mine"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).

@@ -290,7 +290,7 @@ class CardSpec:
             return unit
         if self.category is CardType.SPELL:
             damage = self.damage if self.damage is not None else 0
-            return SpellCard(
+            spell = SpellCard(
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
@@ -301,6 +301,8 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
+            spell.repeat_cost = _repeat_cost(str(self.raw.get("effect") or ""))
+            return spell
         if self.category is CardType.GEAR:
             return GearCard(
                 name=self.name,
@@ -384,6 +386,27 @@ _KEYWORD_MIGRATIONS: dict[str, Optional[str]] = {
     "QUICK": "QUICK-DRAW",
     "MIGHTY": None,  # not a keyword — drop it
 }
+
+
+_REPEAT_PIPS = re.compile(r"REPEAT\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)")
+_REPEAT_DISCARD = re.compile(r"REPEAT\W+Discard (\d+)", re.IGNORECASE)
+
+
+def _repeat_cost(rules_text: str) -> Optional[Dict[str, Any]]:
+    """A spell's printed REPEAT cost: "REPEAT [2] [fury]" -> 2 Energy and one
+    Fury Power, "[rune]" is Power of any domain, "REPEAT - Discard 1" a
+    discard. None when the text has no such cost (the loop then charges the
+    spell's Energy cost)."""
+    m = _REPEAT_DISCARD.search(rules_text)
+    if m:
+        return {"discard_cards": int(m.group(1))}
+    m = _REPEAT_PIPS.search(rules_text)
+    if not m:
+        return None
+    pips = re.findall(r"\[([A-Za-z]+)\]", m.group(2))
+    domains = [p.upper() for p in pips if p.upper() in Domain.__members__]
+    return {"energy": int(m.group(1)), "power": len(pips),
+            "domain": domains[0] if domains and len(domains) == len(pips) else None}
 
 
 def _extract_keywords(rules_text: str) -> tuple[str, ...]:

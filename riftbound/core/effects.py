@@ -174,6 +174,92 @@ def _next_unit_enters_ready(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     ctx.loop.gs.next_units_enter_ready[ctx.actor_side] += int(spec.get("amount", 1))
 
 
+@effect("fight")
+def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a friendly unit and an enemy unit. They deal damage equal to
+    their Mights to each other" (Challenge). `first`: "friendly" (default),
+    "self" ("We deal ...", Carnivorous Snapvine) or "any" (Clash of Giants:
+    "two units", two enemies when there are two). The enemy is at a
+    battlefield. Baseline pick: the enemy our unit kills without dying, else
+    one it kills, else one it survives, mightiest first; our mightiest unit."""
+    loop = ctx.loop
+    gs = loop.gs
+    me, them = ctx.actor_side, ctx.opponent_side
+    enemies = [u for bf in gs.battlefields for u in bf._units_for(them)]
+    first = str(spec.get("first", "friendly")).lower()
+    if first == "any" and len(enemies) >= 2:
+        a, b = sorted(enemies, key=lambda u: u.might, reverse=True)[:2]
+    else:
+        if first == "self":
+            a = _source_unit(ctx)
+        else:
+            mine = _units_at(ctx, me, "anywhere")
+            a = max(mine, key=lambda u: u.might) if mine else None
+        if a is None or not enemies:
+            return
+
+        def value(e):
+            kills = a.might >= e.might - e.damage
+            survives = e.might < a.might - a.damage
+            return (kills and survives, kills, survives, e.might)
+        b = max(enemies, key=value)
+    loop._note_chosen(ctx.card, me, [a, b])
+    a_might, b_might = a.might, b.might
+    ctx.damage_units([b], a_might)
+    ctx.damage_units([a], b_might)
+
+
+@effect("set_base_might")
+def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Its base Might becomes N this turn" (Herald of the Emperor, Dragon
+    Form, Lulu). `amount`, or `amount_source: triggering_energy` (the played
+    card's Energy cost, Piltovan Guidebot). Target per the spec; a chooser target
+    picks the unit it helps most (a friendly unit raised, an enemy lowered)."""
+    if spec.get("amount_source") == "triggering_energy":
+        trig = ctx.extra.get("triggering_card")
+        amount = int(getattr(trig, "cost_energy", 0) or 0)
+    else:
+        amount = int(spec.get("amount", 0))
+    target = str(spec.get("target", "friendly_unit")).lower()
+    if target in ("self", "this", "me"):
+        units = _resolve_targets(ctx, spec)
+    else:
+        units = _resolve_targets(ctx, {**spec, "scope": "all"})
+        if not units and not isinstance(ctx.card, SpellCard):
+            units = _fallback_units(ctx, target, "none")
+        if spec.get("other"):
+            units = [u for u in units if u.card is not ctx.card]
+        friends = {id(u) for u in _friendly_units(ctx)}
+
+        def gain(u):
+            base = u.base_might_override if u.base_might_override is not None else int(u.card.might or 0)
+            return amount - base if id(u) in friends else base - amount
+        units = sorted(units, key=gain, reverse=True)[:1]
+        if units and gain(units[0]) <= 0:
+            return       # "you may": it helps no one
+        ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
+    for unit in units:
+        current = unit.base_might_override if unit.base_might_override is not None else int(unit.card.might or 0)
+        if spec.get("only_if_higher") and amount <= current:
+            continue     # "you may": only when it raises me
+        unit.base_might_override = amount
+
+
+@effect("match_might")
+def _match_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a friendly unit. This turn, increase its Might to the Might of
+    another friendly unit" (Convergent Mutation): the weakest friendly unit at a
+    battlefield rises to the mightiest friendly unit."""
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    if len(mine) < 2:
+        return
+    top = max(mine, key=lambda u: u.might)
+    at_bf = [u for u in mine if u is not top and ctx.loop._locate_unit(u)[1] is not None]
+    low = min(at_bf or [u for u in mine if u is not top], key=lambda u: u.might)
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [low])
+    low.temporary_might += max(0, top.might - low.might)
+
+
 @effect("cant_move_this_turn")
 def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They can't move it this turn" (Vex Apathetic): no Standard Move."""
@@ -222,9 +308,20 @@ def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         where = loop._locate_unit(unit)
         if dest == "same_location":
             return where[1] if where else None
+        if dest == "base":
+            return None
         return max(gs.battlefields, key=lambda bf: _attack_value(ctx, me, unit, bf))
 
-    unit = max(units, key=lambda u: (_attack_value(ctx, me, u, place(u)) if place(u) else 0, u.might))
+    if dest == "base":
+        # "plays it to their base": save the unit losing its fight, else the mightiest.
+        def losing(u):
+            where = loop._locate_unit(u)
+            bf = where[1] if where else None
+            return bf is not None and sum(x.might for x in bf._units_for(ctx.opponent_side)) > \
+                sum(x.might for x in bf._units_for(me))
+        unit = max(units, key=lambda u: (losing(u), u.might))
+    else:
+        unit = max(units, key=lambda u: (_attack_value(ctx, me, u, place(u)) if place(u) else 0, u.might))
     bf = place(unit)
     where = loop._locate_unit(unit)
     if where is None:
@@ -449,6 +546,13 @@ def _buff_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, spec):
         if unit.might_counters < 1:  # BUFF is non-stacking (max 1 per unit)
             unit.might_counters += 1
+            where = ctx.loop._locate_unit(unit)
+            if where is not None:   # "When you buff me" (Simian Ancestor)
+                bf = where[1] or ctx.loop.gs.battlefields[0]
+                ctx.loop._resolve_triggered_effects(unit.card, "on_buffed", bf,
+                                                    ctx.loop.gs.get_player(where[0]),
+                                                    ctx.loop.gs.get_player(ctx.loop.gs.other(where[0])),
+                                                    context_extra={"battlefield": bf})
 
 
 @effect("spend_buff")
