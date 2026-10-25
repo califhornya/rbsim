@@ -96,6 +96,8 @@ class GameState:
     no_spell_damage_turn: int = -1
     decree_turn: int = -1
     next_spell_bonus: dict = field(default_factory=dict)
+    # "Choose one that hasn't been chosen this turn": (id of card, turn) -> modes.
+    modes_chosen: dict = field(default_factory=dict)
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.

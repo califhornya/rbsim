@@ -11538,7 +11538,12 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "hold_conquer_swap",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-031",
@@ -12099,7 +12104,28 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "mode_choice",
+        "trigger": "on_equipment_attached",
+        "unique_per_turn": true,
+        "modes": [
+          {
+            "effect": "ready_runes",
+            "amount": 2
+          },
+          {
+            "effect": "channel_rune",
+            "amount": 1,
+            "exhausted": true
+          },
+          {
+            "effect": "buff_unit",
+            "target": "friendly_unit"
+          }
+        ]
+      }
+    ]
   },
   {
     "card_id": "SFD-050",
@@ -12923,7 +12949,13 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_tag",
+        "trigger": "passive",
+        "tag": "Mech"
+      }
+    ]
   },
   {
     "card_id": "SFD-074",
@@ -13320,7 +13352,14 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount_source": "gear_you_control"
+      }
+    ]
   },
   {
     "card_id": "SFD-086",
@@ -14189,7 +14228,14 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_conquer",
+        "target": "self",
+        "once_per_turn": true
+      }
+    ]
   },
   {
     "card_id": "SFD-114",
@@ -14283,7 +14329,17 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_conquer",
+        "target": "enemy_unit_in_base",
+        "amount_source": "self_might",
+        "condition": {
+          "type": "conquered_uncontrolled"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-117",
@@ -14367,7 +14423,17 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_equipment_attached",
+        "count": 1,
+        "optional": true,
+        "cost": {
+          "energy": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-120",
@@ -16213,7 +16279,19 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_unit",
+        "trigger": "on_attack",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_token": true
+        },
+        "destination": "here",
+        "count": 99,
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "SFD-178",
@@ -16680,7 +16758,13 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "spell_bonus_damage",
+        "trigger": "passive",
+        "amount": 3
+      }
+    ]
   },
   {
     "card_id": "SFD-192",
@@ -16742,7 +16826,24 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "attach_equipment",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      },
+      {
+        "effect": "attach_equipment",
+        "trigger": "activated",
+        "from": "attached",
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-194",
@@ -16903,7 +17004,12 @@
         "rarity": "Epic"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "arise",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "SFD-199",
@@ -18313,7 +18419,16 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "unattach_and_damage_holder",
+        "trigger": "on_end_of_turn",
+        "amount": 4,
+        "condition": {
+          "type": "holder_didnt_conquer_this_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-020",
@@ -26237,7 +26352,19 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "equip_conditional_might",
+        "trigger": "passive",
+        "amount": 2,
+        "condition": {
+          "type": "units_here_exactly",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-027",
@@ -26752,7 +26879,15 @@
     "keywords": [
       "WEAPONMASTER"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_attack",
+        "target": "enemy_unit",
+        "amount_source": "own_equipment",
+        "per": 2
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-041",

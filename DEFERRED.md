@@ -333,6 +333,18 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   a tie; Threshold of the Gray; Alpha Strike, Shakedown, K'Sante Dauntless.
   Not modeled: assigning extra combat damage through a Ki Barrier, and the
   assigner choosing its order in general (list order outside Dune Surfer).
+- [DONE] **Batch 7 (136 → 122): Equipment texts and WEAPONMASTER units.**
+  `UnitInPlay.tags` includes tags an Equipment gives (Experimental Hexplate,
+  closing the Engine-audit note); Bonus Damage amounts, an Equipment's only
+  while attached (Rabadon's Deathcrown); an Equipment's conditional Might
+  (Hand Hammer); Skyfall of Areion's hold/conquer swap; attached Equipment
+  hears turn triggers (Blighted Battleaxe); "When you attach an Equipment to
+  me" from every attach path (Jax Unrelenting, Aphelios with `mode_choice`
+  `unique_per_turn`); Ornn Forge God, Lucian Merciless, Yone Blademaster
+  ("a battlefield that was uncontrolled": `Battlefield.prev_controller` set
+  by Standard Moves), Riven Shattered, Jax Grandmaster at Arms, Arise!, Azir
+  Sovereign. Left: Hextech Gauntlets (excess damage), Shady Spectacles and
+  Svellsongur (copies), Forge of the Fluft.
 - Next: Equipment
   texts (Skyfall of Areion, Hexplate...), the empower family (Glowstone,
   Lacerate, Wild Claw), play-to-battlefield units, Ashe Focused.

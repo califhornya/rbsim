@@ -119,6 +119,14 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         except Exception:  # noqa: BLE001
             i = 0
     i = max(0, min(i, len(modes) - 1))
+    if spec.get("unique_per_turn"):
+        # "Choose one that hasn't been chosen this turn" (Aphelios).
+        used = ctx.loop.gs.modes_chosen.setdefault((id(ctx.card), ctx.loop.gs.turn), set())
+        free = [j for j in range(len(modes)) if j not in used]
+        if not free:
+            return
+        i = i if i in free else free[0]
+        used.add(i)
     chosen = modes[i]
     subs = chosen if isinstance(chosen, list) else [chosen]
     for sub in subs:
@@ -278,6 +286,59 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card._flow_granted_turn = None
     pick = max(payable or spells, key=lambda c: (c.cost_energy or 0) + (c.cost_power or 0))
     pick._flow_granted_turn = loop.gs.turn
+
+
+@effect("unattach_and_damage_holder")
+def _unattach_and_damage_holder(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Unattach this and deal 4 to me" (Blighted Battleaxe): the Equipment goes
+    to base, its unit takes the damage."""
+    holder = ctx.extra.get("triggering_unit")
+    if holder is None or ctx.card not in holder.gear:
+        return
+    holder.gear.remove(ctx.card)
+    where = ctx.loop._locate_unit(holder)
+    if where is not None:
+        ctx.loop.gs.get_player(where[0]).base_gear.append(ctx.card)
+    ctx.damage_units([holder], int(spec.get("amount", 4)))
+
+
+@effect("attach_equipment")
+def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Attach a detached Equipment you control to a unit you control" (Jax
+    Grandmaster at Arms; `from: attached` moves one from a unit in base): to
+    the mightiest unit at a battlefield, else any."""
+    loop = ctx.loop
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    at_bf = [u for u in mine if loop._locate_unit(u)[1] is not None]
+    if not mine:
+        return
+    if str(spec.get("from", "detached")) == "attached":
+        holders = [u for u in mine if u.gear and loop._locate_unit(u)[1] is None]
+        gear = next((g for u in holders for g in u.gear if loop._equip_cost(g) is not None), None)
+        if gear is None or not at_bf:
+            return
+        next(u for u in holders if gear in u.gear).gear.remove(gear)
+        target = max(at_bf, key=lambda u: u.might)
+    else:
+        gear = next((g for g in ctx.actor.base_gear if loop._equip_cost(g) is not None), None)
+        if gear is None:
+            return
+        ctx.actor.base_gear.remove(gear)
+        target = max(at_bf or mine, key=lambda u: u.might)
+    target.gear.append(gear)
+    loop._fire_attached(target, ctx.actor_side)
+
+
+@effect("arise")
+def _arise(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Play a 2 [might] Sand Soldier unit token for each Equipment you
+    control. Then do this: Ready up to two of them." (Arise!)"""
+    n = _amount(ctx, {"amount_source": "equipment_you_control"})
+    played = [ctx.loop._play_token(str(spec.get("token_name", "Sand Soldier")), ctx.actor_side,
+                                   might=int(spec.get("might", 2)))
+              for _ in range(n)]
+    for unit in [u for u in played if u is not None][:int(spec.get("ready", 2))]:
+        unit.ready = True
 
 
 @effect("next_spell_bonus_damage")
@@ -1121,7 +1182,7 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
         return False
     if "card_type" in tf and cat != str(tf["card_type"]).upper():
         return False
-    if "subtype" in tf and str(tf["subtype"]) not in (card.tags or []):
+    if "subtype" in tf and str(tf["subtype"]) not in (getattr(unit, "tags", None) or card.tags or []):
         return False
     if tf.get("is_buffed") and getattr(unit, "might_counters", 0) <= 0:
         return False
@@ -1152,6 +1213,7 @@ _EVERYWHERE_TARGETS = {
     "all_enemy_units_anywhere": ("enemy", "anywhere"),
     "all_units_anywhere": ("both", "anywhere"),
     "all_units_in_bases": ("both", "base"),
+    "enemy_unit_in_base": ("enemy", "base"),     # "an enemy unit in a base" (Yone)
 }
 
 # "Player picks a unit" — unrestricted, may be on EITHER side (KNOWN_ISSUES #16).
@@ -1296,9 +1358,9 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return len(ctx._units_for_side(ctx.actor_side))
     if src == "n_friendly_with_tag":
         tag = str(spec.get("tag", ""))
-        return sum(1 for u in _friendly_units(ctx) if tag in (u.card.tags or []))
+        return sum(1 for u in _friendly_units(ctx) if tag in u.tags)
     if src == "n_distinct_tags_among_friendlies":
-        return len({t for u in _friendly_units(ctx) for t in (u.card.tags or [])})
+        return len({t for u in _friendly_units(ctx) for t in u.tags})
     if src == "cards_with_my_name_in_trash":
         return sum(1 for c in ctx.actor.trash if c.name == ctx.card.name and c is not ctx.card)
     if src == "battlefields_conquered_this_turn":
@@ -1307,6 +1369,15 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return int(ctx.loop.gs.hold_points_this_turn.get(ctx.actor_side, 0))
     if src == "cards_played_this_turn":
         return int(ctx.loop.gs.cards_played_this_turn.get(ctx.actor_side, 0))
+    if src == "own_equipment":
+        # "for each Equipment attached to me" (Riven Shattered), times `per`.
+        u = _source_unit(ctx)
+        n = sum(1 for g in (u.gear if u else []) if ctx.loop._equip_cost(g) is not None)
+        return n * int(spec.get("per", 1))
+    if src == "equipment_you_control":
+        loop = ctx.loop
+        gear = list(ctx.actor.base_gear) + loop._controlled_attached_gear(ctx.actor_side)
+        return sum(1 for g in gear if loop._equip_cost(g) is not None)
     if src == "friendly_exhausted_units":
         return sum(1 for u in _friendly_units(ctx) if not u.ready)
     if src in ("shown_might", "shown_power_cost", "shown_energy_cost"):

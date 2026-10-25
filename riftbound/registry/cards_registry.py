@@ -314,7 +314,7 @@ class CardSpec:
             spell.flow_cost = _keyword_pip_cost("FLOW", text)
             return spell
         if self.category is CardType.GEAR:
-            return GearCard(
+            gear = GearCard(
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
@@ -325,6 +325,10 @@ class CardSpec:
                 effects=effects,
                 might=self.might,
             )
+            # "I am a Mech." on an Equipment: the tag its unit gets.
+            gear.grants_tags = tuple(str(e.params.get("tag")) for e in self.effects
+                                     if e.effect == "grant_tag" and e.params.get("tag"))
+            return gear
         if self.category is CardType.RUNE:
             if self.domain is None:
                 raise ValueError(f"Rune card '{self.name}' requires a domain")

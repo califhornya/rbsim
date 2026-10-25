@@ -36,7 +36,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_readied", "on_friendly_unit_buffed", "on_friendly_attack",
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
-    "on_combat_start_here",
+    "on_combat_start_here", "on_equipment_attached",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -68,6 +68,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "died_mighty", "units_here_exactly", "triggering_unit_stunned", "died_here",
     "triggering_unit_mightiest", "controller_has_facedown_card",
     "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
+    "holder_didnt_conquer_this_turn", "conquered_uncontrolled",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "target_was_stunned",
 })
@@ -482,6 +483,11 @@ class GameLoop:
             for unit in units:
                 self._resolve_triggered_effects(unit.card, trigger, bf, actor, opponent,
                                                 context_extra={"battlefield": bf})
+                # Its Equipment ("At the end of your turn, ... deal 4 to me").
+                for g in list(unit.gear):
+                    self._resolve_triggered_effects(g, trigger, bf, actor, opponent,
+                                                    context_extra={"battlefield": bf,
+                                                                   "triggering_unit": unit})
         # Base units (use battlefield[0] as a neutral context anchor).
         anchor = self.gs.battlefields[0]
         for unit in list(actor.base_units):
@@ -525,11 +531,19 @@ class GameLoop:
                 self.gs.add_xp(side, amount)
                 if self.verbose:
                     print(f"  [HUNT] {side} gains {amount} XP (now {self.gs.get_xp(side)})")
-            for card in [unit.card] + list(unit.gear):
-                self._resolve_triggered_effects(
-                    card, trigger, bf, actor, opponent,
-                    context_extra={"battlefield": bf},
-                )
+            if trigger == "on_conquer":
+                unit.conquered_turn = self.gs.turn
+            triggers = [trigger]
+            if any(self._has_effect(g, "hold_conquer_swap") for g in unit.gear):
+                # "My hold effects are also conquer effects, and vice versa"
+                # (Skyfall of Areion).
+                triggers.append("on_hold" if trigger == "on_conquer" else "on_conquer")
+            for trig in triggers:
+                for card in [unit.card] + list(unit.gear):
+                    self._resolve_triggered_effects(
+                        card, trig, bf, actor, opponent,
+                        context_extra={"battlefield": bf},
+                    )
         # The scoring player's Legend ("When you conquer, ready me": Sett).
         legend_unit = self._legend_unit(side)
         if legend_unit is not None:
@@ -1077,6 +1091,7 @@ class GameLoop:
     def _apply_unit_passives(self, unit, side, bf, actor, opponent) -> None:
         spec = CARD_REGISTRY.get(unit.card.name)
         if not (spec and spec.effects):
+            self._apply_equipment_conditions(unit, actor, opponent, bf)
             return
         context = EffectContext(self, unit.card, actor, opponent, bf)
         for es in spec.effects:
@@ -1086,6 +1101,18 @@ class GameLoop:
                                          {"battlefield": bf}):
                 continue
             self._apply_passive_grant(unit, context, es)
+        self._apply_equipment_conditions(unit, actor, opponent, bf)
+
+    def _apply_equipment_conditions(self, unit, actor, opponent, bf) -> None:
+        """An Equipment's conditional Might for its unit ("I have +2 [might]
+        while I'm at a battlefield with exactly one other unit you control":
+        Hand Hammer), checked as the unit."""
+        for g in unit.gear:
+            gspec = CARD_REGISTRY.get(g.name)
+            for es in (gspec.effects if gspec else ()):
+                if es.effect == "equip_conditional_might" and self._check_condition(
+                        es.condition, unit.card, actor, opponent, {"battlefield": bf}):
+                    unit.passive_might += int(es.params.get("amount", 0))
 
     def _apply_gear_passives(self, card, side, bf, actor, opponent) -> None:
         spec = CARD_REGISTRY.get(card.name)
@@ -1331,6 +1358,13 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "holder_didnt_conquer_this_turn":
+            unit = extra.get("triggering_unit")
+            return unit is not None and unit.conquered_turn != self.gs.turn
+        if ctype == "conquered_uncontrolled":
+            # "When I conquer a battlefield that was uncontrolled" (Yone).
+            bf = extra.get("battlefield")
+            return bf is not None and getattr(bf, "prev_controller", "?") is None
         if ctype == "not":
             return not self._check_condition(params.get("condition"), card, actor, opponent, extra)
         if ctype == "friendly_gear_here":
@@ -1461,7 +1495,7 @@ class GameLoop:
                 return False
             # other: true = "another Dragon" (not this card).
             other = bool(params.get("other"))
-            return any(tag in (u.card.tags or []) and not (other and u.card is card)
+            return any(tag in u.tags and not (other and u.card is card)
                        for u in _friendly_units())
         if ctype == "score_within_n_of_victory":
             pts = self.gs.points_A if side == "A" else self.gs.points_B
@@ -2407,6 +2441,7 @@ class GameLoop:
                     unit.gear.append(gear_card)
                     if self.verbose:
                         print(f"  {ap.name} WEAPONMASTER attaches {gear_card.name} to {card.name}")
+                    self._fire_attached(unit, side)
                     break
 
         self._fire_units_trigger("on_friendly_unit_played", side, exclude_card=card)
@@ -2440,6 +2475,7 @@ class GameLoop:
             if friendly_units:
                 attached_to = friendly_units[0]
                 attached_to.gear.append(card)
+                self._fire_attached(attached_to, side)
         if deployed_bf is not None:
             self._deploy_gear(side, deployed_bf, card)
         elif attached_to is None:
@@ -2583,6 +2619,8 @@ class GameLoop:
         if self.verbose:
             print(f"  {side} moves UNIT: {unit.card.name} to {'base' if dst_bf is None else f'BF{dst}'}")
         prev_controller = dst_bf.controller() if dst_bf is not None else None
+        if dst_bf is not None and self.gs.pending_move != (dst, side):
+            dst_bf.prev_controller = prev_controller     # "a battlefield that was uncontrolled"
         if dst_bf is None:
             ap.base_units.append(unit)
         else:
@@ -3218,6 +3256,7 @@ class GameLoop:
             target_unit.gear.append(gear)
             if self.verbose:
                 print(f"  {ap.name} EQUIP: {gear.name} -> {target_unit.card.name}")
+            self._fire_attached(target_unit, side)
             return
 
         if entry["type"] == "flow":
@@ -3425,8 +3464,7 @@ class GameLoop:
             if gs.no_spell_damage_turn == gs.turn:
                 return 0
             if source_side is not None:
-                if self._side_has_passive(source_side, "spell_bonus_damage"):
-                    amount += 1
+                amount += self._spell_bonus(source_side)
                 if getattr(source, "_bonus_damage_turn", None) == gs.turn:
                     amount += 1
                 if unit.spell_immune and owner is not None and source_side != owner:
@@ -3443,6 +3481,29 @@ class GameLoop:
             # Imperial Decree: dealt damage kills it.
             return max(amount, unit.might - unit.damage, 1)
         return amount
+
+    def _spell_bonus(self, side: str) -> int:
+        """ "Your spells and abilities deal N Bonus Damage" (Annie Fiery; Rabadon's
+        Deathcrown only while attached)."""
+        ap = self.gs.get_player(side)
+        total = 0
+        for src, _bf in self._sources_in_play(side):
+            if src in ap.base_gear and self._equip_cost(src) is not None:
+                continue
+            spec = CARD_REGISTRY.get(src.name)
+            total += sum(int(es.params.get("amount", 1)) for es in (spec.effects if spec else ())
+                         if es.trigger == "passive" and es.effect == "spell_bonus_damage")
+        return total
+
+    def _fire_attached(self, unit: UnitInPlay, side: str) -> None:
+        """An Equipment was attached to `unit`: its "When you attach an
+        Equipment to me" (Aphelios Exalted, Jax Unrelenting)."""
+        where = self._locate_unit(unit)
+        bf = where[1] if where and where[1] is not None else self.gs.battlefields[0]
+        self._resolve_triggered_effects(unit.card, "on_equipment_attached", bf,
+                                        self.gs.get_player(side),
+                                        self.gs.get_player(self.gs.other(side)),
+                                        context_extra={"battlefield": bf})
 
     def _can_choose(self, unit: UnitInPlay, chooser: str) -> bool:
         """Whether a spell or ability of `chooser` can choose `unit`: not an

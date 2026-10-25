@@ -51,6 +51,7 @@ class UnitInPlay:
     spell_immune: bool = False       # Esteemed Hierophant: enemy spell/ability damage prevented
     double_damage_turn: int = -1     # Lotus Trap: "Double all damage dealt to it this turn"
     damage_shield: int = 0           # Ki Barrier: "Prevent the next 7 damage ... this turn"
+    conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -76,6 +77,12 @@ class UnitInPlay:
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
         base = self.base_might_override if self.base_might_override is not None else int(self.card.might or 0)
         return max(0, base + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+
+    @property
+    def tags(self) -> list:
+        """The unit's tags: its card's, plus those its Equipment gives ("I am a
+        Mech": Experimental Hexplate, GearCard.grants_tags)."""
+        return list(self.card.tags or []) + [t for g in self.gear for t in getattr(g, "grants_tags", ())]
 
     def has_keyword(self, keyword: str) -> bool:
         if self.card.has_keyword(keyword):

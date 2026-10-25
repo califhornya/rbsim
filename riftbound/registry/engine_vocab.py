@@ -57,6 +57,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_chosen",                        # you choose a friendly unit (Spirit Wheel)
     "on_gear_ability_used",                      # you use a gear's ability (Prize of Progress)
     "on_combat_start_here",                      # a combat starts at this battlefield (Threshold of the Gray)
+    "on_equipment_attached",                     # an Equipment is attached to me (Aphelios, Jax)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -134,6 +135,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "units_at_battlefields_exactly",     # n: "exactly 4 units at battlefields"
     "not",                               # condition: {...} doesn't hold ("unless ...")
     "friendly_gear_here",                # "there's a friendly gear here"
+    "holder_didnt_conquer_this_turn",    # Equipment: "if I didn't conquer this turn"
+    "conquered_uncontrolled",            # "when I conquer a battlefield that was uncontrolled"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -215,4 +218,6 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # damage and combat rules (GameLoop._take_damage, _combat_mods, combat cleanup)
     "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
     "lone_defender_minus", "attacking_with_another_bonus", "ignore_tank_here", "tie_recall_all",
+    # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
+    "grant_tag", "equip_conditional_might", "hold_conquer_swap",
 })
