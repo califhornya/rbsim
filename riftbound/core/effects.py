@@ -68,7 +68,7 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             kills = amount >= max(0, u.might - u.damage)
             return (id(u) in enemy_ids, kills, u.might)
 
-        units = sorted(cands, key=value, reverse=True)[:int(spec.get("count", 1))]
+        units = sorted(_choosable(ctx, cands), key=value, reverse=True)[:int(spec.get("count", 1))]
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
     ctx.damage_units(units, amount)
@@ -185,7 +185,7 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     loop = ctx.loop
     gs = loop.gs
     me, them = ctx.actor_side, ctx.opponent_side
-    enemies = [u for bf in gs.battlefields for u in bf._units_for(them)]
+    enemies = _choosable(ctx, [u for bf in gs.battlefields for u in bf._units_for(them)])
     first = str(spec.get("first", "friendly")).lower()
     if first == "any" and len(enemies) >= 2:
         a, b = sorted(enemies, key=lambda u: u.might, reverse=True)[:2]
@@ -227,6 +227,7 @@ def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         units = _resolve_targets(ctx, {**spec, "scope": "all"})
         if not units and not isinstance(ctx.card, SpellCard):
             units = _fallback_units(ctx, target, "none")
+        units = _choosable(ctx, units)
         if spec.get("other"):
             units = [u for u in units if u.card is not ctx.card]
         friends = {id(u) for u in _friendly_units(ctx)}
@@ -277,6 +278,54 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card._flow_granted_turn = None
     pick = max(payable or spells, key=lambda c: (c.cost_energy or 0) + (c.cost_power or 0))
     pick._flow_granted_turn = loop.gs.turn
+
+
+@effect("cant_be_chosen_this_turn")
+def _cant_be_chosen_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "It can't be chosen by enemy spells and abilities this turn" (Twilight
+    Shroud)."""
+    for unit in _resolve_targets(ctx, spec):
+        unit.cant_be_chosen_turn = ctx.loop.gs.turn
+
+
+@effect("opponents_cant_play_cards")
+def _opponents_cant_play_cards(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Opponents can't play cards this turn" (Brynhir Thundersong)."""
+    ctx.loop.gs.cant_play_cards_turn[ctx.opponent_side] = ctx.loop.gs.turn
+
+
+@effect("name_spell")
+def _name_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Name a spell" (Fallen Feline): baseline, the costliest spell in the
+    opponent's trash (they play it again), else none."""
+    spells = [c for c in ctx.opponent.trash if isinstance(c, SpellCard)]
+    if spells:
+        ctx.card._named_spell = max(spells, key=_zone_value).name
+
+
+@effect("win_game")
+def _win_game(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You win the game" (The Grand Plaza, Gutter Palace)."""
+    gs = ctx.loop.gs
+    if ctx.actor_side == "A":
+        gs.points_A = max(gs.points_A, gs.victory_score)
+    else:
+        gs.points_B = max(gs.points_B, gs.victory_score)
+
+
+@effect("move_self_to_weaker_enemy_battlefield")
+def _move_self_to_weaker_enemy_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Move me to an occupied enemy battlefield if my Might is greater than
+    the total Might of enemy units there" (Maduli the Gatekeeper)."""
+    me = _source_unit(ctx)
+    if me is None:
+        return
+    gs = ctx.loop.gs
+    opts = [bf for bf in gs.battlefields if bf._units_for(ctx.opponent_side)
+            and me.might > sum(u.might for u in bf._units_for(ctx.opponent_side))
+            and ctx.loop._locate_unit(me)[1] is not bf]
+    if opts:
+        ctx.loop._move_unit_by_effect(me, max(opts, key=lambda bf: len(bf._units_for(ctx.opponent_side))))
 
 
 @effect("ready_or_exhaust_legend")
@@ -385,7 +434,7 @@ def _tuck_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Choose an enemy unit at a battlefield. Its owner places it on the top or
     bottom of their Main Deck" (Keeper's Verdict): the mightiest; its owner
     puts it on top."""
-    enemies = _units_at(ctx, ctx.opponent_side, "battlefield")
+    enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
     if enemies:
         unit = max(enemies, key=lambda u: u.might)
         ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
@@ -397,7 +446,7 @@ def _each_player_bounces(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Starting with the next player, each player may return a unit to its
     owner's hand" (Whirlwind): each returns the other's mightiest unit."""
     for chooser, victim in ((ctx.opponent_side, ctx.actor_side), (ctx.actor_side, ctx.opponent_side)):
-        units = _units_at(ctx, victim, "anywhere")
+        units = [u for u in _units_at(ctx, victim, "anywhere") if ctx.loop._can_choose(u, chooser)]
         if units:
             _unit_leaves_to(ctx, max(units, key=lambda u: u.might), victim, "hand")
 
@@ -698,7 +747,7 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
     if spec.get("amount") is not None and target in _CHOOSER_TARGETS:
         # "Ready up to 4 units": the controller's exhausted units, mightiest first.
-        exhausted = sorted((u for u in _friendly_units(ctx) if not u.ready),
+        exhausted = sorted((u for u in _friendly_units(ctx) if not u.ready and ctx.loop._can_ready(u)),
                            key=lambda u: u.might, reverse=True)
         for unit in exhausted[:int(spec["amount"])]:
             unit.ready = True
@@ -778,6 +827,8 @@ def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("ready_unit")
 def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+        if not ctx.loop._can_ready(unit):
+            continue
         was_ready = unit.ready
         unit.ready = True
         if not was_ready:
@@ -790,11 +841,8 @@ def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _score_point(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = int(spec.get("amount", 1))
     side = _target_side(ctx, str(spec.get("target", "actor")))
-    if side == "A":
-        ctx.loop.gs.points_A += amount
-    else:
-        ctx.loop.gs.points_B += amount
-    ctx.loop._fire_units_trigger("on_opponent_scores", ctx.loop.gs.other(side))
+    if ctx.loop._gain_points(side, amount, "effect"):
+        ctx.loop._fire_units_trigger("on_opponent_scores", ctx.loop.gs.other(side))
 
 
 @effect("counter_spell")
@@ -1057,9 +1105,15 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         return list(units)
     # Units picked one by one ("a unit", "up to two units" = count): that's a
     # choice, for "when you choose me" and "you've chosen enemy units twice".
+    units = _choosable(ctx, units)
     picked = units[:max(1, int(spec.get("count", 1) or 1))]
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     return picked
+
+
+def _choosable(ctx: "EffectContext", units: list) -> list:
+    """The units this effect's controller may choose (GameLoop._can_choose)."""
+    return [u for u in units if ctx.loop._can_choose(u, ctx.actor_side)]
 
 
 def _fallback_units(ctx: "EffectContext", target: str, bias: str) -> list:
@@ -1346,6 +1400,8 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         candidates = [(s, u) for s in sides for u in _units_at(ctx, s, frm)]
     if tf:
         candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
+    if not target.startswith("all"):
+        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me)]
     if not candidates:
         return
 
@@ -1396,7 +1452,7 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         if not ok:
             continue
         if loop._move_unit_by_effect(unit, dst_bf):
-            if spec.get("ready"):
+            if spec.get("ready") and loop._can_ready(unit):
                 unit.ready = True
             moved += 1
 

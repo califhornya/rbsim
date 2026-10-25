@@ -192,6 +192,11 @@ def build_game(
     bf_slot_A = _select_battlefield(bfs_a, bf_a, bf_rng)
     bf_slot_B = _select_battlefield(bfs_b, bf_b, bf_rng)
     battlefields = [Battlefield(card=bf_slot_A), Battlefield(card=bf_slot_B)]
+    # "Increase the points needed to win the game by 1" (Aspirant's Climb).
+    for bf in battlefields:
+        spec = CARD_REGISTRY.get(bf.card.name) if bf.card is not None else None
+        victory_score += sum(int(es.params.get("amount", 1)) for es in (spec.effects if spec else ())
+                             if es.effect == "victory_score_plus")
 
     return GameState(
         rng=rng,

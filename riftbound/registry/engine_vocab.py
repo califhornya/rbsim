@@ -129,6 +129,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "died_here",                         # "when an enemy unit here dies"
     "triggering_unit_mightiest",         # "a unit with Might greater than each other unit"
     "controller_has_facedown_card",      # "if you control a facedown card at a battlefield"
+    "cards_in_hand_exactly",             # n: "if you have exactly 4 cards in hand"
+    "units_at_battlefields_exactly",     # n: "exactly 4 units at battlefields"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -176,7 +178,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
-    "disempower_self", "banish_from_trash",
+    "disempower_self", "banish_from_trash", "discard",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs
@@ -201,4 +203,10 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
     "enter_ready", "double_equipment_might", "double_deathknell",
+    # restrictions read where they apply (GameLoop._can_choose, _can_move_to_base,
+    # _can_ready, _play_forbidden, _points_allowed, the Channel Phase, TEMPORARY)
+    "cant_be_chosen", "cant_move_to_base", "cant_be_readied", "no_moves_to_base_from_here",
+    "warden_no_ready", "play_restriction", "opponents_cant_gain_points",
+    "no_score_before_turn", "early_score_draws", "channel_only_one", "no_temporary_here",
+    "victory_score_plus",       # Aspirant's Climb: read when the game is built
 })

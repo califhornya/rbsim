@@ -66,6 +66,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_alone", "triggering_unit_buffed", "in_showdown",
     "died_mighty", "units_here_exactly", "triggering_unit_stunned", "died_here",
     "triggering_unit_mightiest", "controller_has_facedown_card",
+    "cards_in_hand_exactly", "units_at_battlefields_exactly",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "target_was_stunned",
 })
@@ -281,7 +282,8 @@ class EffectContext:
             iterable = units
 
         for unit in iterable:
-            unit.ready = True
+            if self.loop._can_ready(unit):
+                unit.ready = True
 
     def add_rune(self, domain: object, *, target: str = "actor", ready: bool = True) -> None:
         domain_obj = self._coerce_domain(domain)
@@ -349,6 +351,9 @@ class GameLoop:
         for bf in self.gs.battlefields:
             bf.ready_side(active)
         for unit in exhausted:
+            if unit.cant_ready:
+                unit.ready = False       # "I can't be readied" (Maduli)
+                continue
             self._fire_readied(unit, active)
         legend_unit = self._legend_unit(active)
         if legend_unit is not None:
@@ -373,6 +378,8 @@ class GameLoop:
         player = self.gs.get_player(active)
         for bf in self.gs.battlefields:
             units = bf.units_A if active == "A" else bf.units_B
+            if any(self._has_effect(u.card, "no_temporary_here") for u in units):
+                continue     # "Your TEMPORARY effects at my battlefield don't trigger"
             dead = [u for u in units if u.has_keyword("TEMPORARY")]
             for u in dead:
                 units.remove(u)
@@ -431,6 +438,8 @@ class GameLoop:
         channel_count = 2
         if self.gs.turn == 2:
             channel_count = 3
+        if any(self._units_at_battlefields_with(s, "channel_only_one") for s in ("A", "B")):
+            channel_count = 1     # Sandstone Chimera
         active_player.unlock_runes(channel_count)
         active_player.channel()
         # Only the Turn Player channels — opponent channels on their own turn
@@ -447,7 +456,7 @@ class GameLoop:
         vps = 0
         for bf in self.gs.battlefields:
             if bf.can_score_hold(active):
-                vps += 1
+                vps += self._points_allowed(active, 1, "hold", bf)
                 bf.mark_scored(active)
                 if self.verbose:
                     bf_idx = self.gs.battlefields.index(bf)
@@ -728,10 +737,7 @@ class GameLoop:
             self.gs.rng.shuffle(player.deck.cards)
         # §418.2.c: an opponent gains 1 point (2-player: the other player).
         side = "A" if player is self.gs.A else "B"
-        if self.gs.other(side) == "A":
-            self.gs.points_A += 1
-        else:
-            self.gs.points_B += 1
+        self._gain_points(self.gs.other(side), 1, "burn_out")
         if self.verbose:
             print(f"  {player.name} BURNS OUT (§418): opponent +1 point, trash recycled")
 
@@ -915,8 +921,7 @@ class GameLoop:
             for _ in range(parsed["recycle"]):
                 if actor.trash:
                     actor.deck.cards.append(actor.trash.pop(0))
-            if parsed["banish_from_trash"]:
-                self._banish_from_trash(actor, self._trash_card_to_banish(actor, parsed))
+            self._pay_discard_and_banish(actor, parsed)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"] and unit is not None:
@@ -1038,6 +1043,7 @@ class GameLoop:
             u.passive_keywords = set()
             u.no_combat_damage = False
             u.equip_bonus_mult = 1
+            u.unchoosable = u.no_move_to_base = u.cant_ready = False
 
         for bf in self.gs.battlefields:
             for side in ("A", "B"):
@@ -1150,6 +1156,13 @@ class GameLoop:
         if es.effect == "double_equipment_might":
             for u in targets:
                 u.equip_bonus_mult = 2
+            return
+
+        if es.effect in ("cant_be_chosen", "cant_move_to_base", "cant_be_readied"):
+            flag = {"cant_be_chosen": "unchoosable", "cant_move_to_base": "no_move_to_base",
+                    "cant_be_readied": "cant_ready"}[es.effect]
+            for u in targets:
+                setattr(u, flag, True)
             return
 
         if es.effect == "give_keyword":
@@ -1311,6 +1324,11 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "cards_in_hand_exactly":
+            return len(actor.hand) == _threshold()
+        if ctype == "units_at_battlefields_exactly":
+            # Gutter Palace: "exactly 4 units at battlefields".
+            return sum(len(bf._units_for(side)) for bf in self.gs.battlefields) == _threshold()
         if ctype == "died_mighty":
             # DEATHKNELL "If I was MIGHTY" (Unsung Hero).
             return int(extra.get("died_might", 0) or 0) >= 5
@@ -2232,6 +2250,8 @@ class GameLoop:
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
         showdown Diana's showdown energy counts. Units and gear may use
         Mordekaiser's earmarked power."""
+        if self._play_forbidden(actor, card):
+            return False
         if isinstance(card, (UnitCard, GearCard)) and power:
             power = max(0, power - actor.earmarked_power_permanent)
         if isinstance(card, GearCard):
@@ -2610,6 +2630,8 @@ class GameLoop:
         side, src_bf = where
         if src_bf is dst_bf:
             return False
+        if dst_bf is None and not self._can_move_to_base(unit, src_bf):
+            return False
         if src_bf is None:
             self.gs.get_player(side).base_units.remove(unit)
         else:
@@ -2781,6 +2803,8 @@ class GameLoop:
                 return
             if src_bf is not None and dst != base_index and not unit.has_keyword("GANKING"):
                 return    # bf -> bf needs GANKING (§144.4.c)
+            if dst == base_index and not self._can_move_to_base(unit, src_bf):
+                return
             if src_bf is None:
                 units.remove(unit)
             else:
@@ -2950,7 +2974,7 @@ class GameLoop:
 
     def _can_pay_flow(self, ap: Player, card: Card, side: str) -> bool:
         cost = self._flow_cost(card, side)
-        if cost is None or card not in ap.trash:
+        if cost is None or card not in ap.trash or self._play_forbidden(ap, card):
             return False
         energy, power, domain = cost
         if ap.energy < energy:
@@ -3022,6 +3046,10 @@ class GameLoop:
                 return False
             if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
                 return False
+            if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
+                return False
+            if parsed["discard"] and len(ap.hand) < parsed["discard"]:
+                return False
             if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
                 return False
         else:
@@ -3075,7 +3103,7 @@ class GameLoop:
         import re
         parsed = {"energy": 0, "power": 0, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
-                  "banish_from_trash": None}
+                  "banish_from_trash": None, "discard": 0}
         if cost is None:
             return parsed
         if isinstance(cost, dict):
@@ -3091,6 +3119,7 @@ class GameLoop:
             parsed["disempower"] = bool(cost.get("disempower_self"))
             # "Banish a unit from your trash": the card type(s), e.g. "unit".
             parsed["banish_from_trash"] = cost.get("banish_from_trash")
+            parsed["discard"] = int(cost.get("discard", 0) or 0)     # "Discard 1, [tap]: ..."
         elif isinstance(cost, str):
             for tok in cost.split(","):
                 t = tok.strip().lower()
@@ -3115,6 +3144,15 @@ class GameLoop:
         cands = [c for c in ap.trash if _zone_effect_card_ok(c, spec)]
         return min(cands, key=lambda c: c.cost_energy or 0) if cands else None
 
+    def _pay_discard_and_banish(self, ap: Player, parsed: dict) -> None:
+        """Pay a cost's "banish a <type> from your trash" and "Discard N" (the
+        cheapest cards)."""
+        if parsed.get("banish_from_trash"):
+            self._banish_from_trash(ap, self._trash_card_to_banish(ap, parsed))
+        for _ in range(parsed.get("discard", 0)):
+            if ap.hand:
+                self._discard(ap, min(ap.hand, key=lambda c: c.cost_energy or 0))
+
     def _banish_from_trash(self, ap: Player, card) -> None:
         if card is not None and card in ap.trash:
             ap.trash.remove(card)
@@ -3131,6 +3169,8 @@ class GameLoop:
         if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
             return False
         if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
+            return False
+        if parsed["discard"] and len(ap.hand) < parsed["discard"]:
             return False
         if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
             return False
@@ -3179,6 +3219,7 @@ class GameLoop:
             for _ in range(parsed["recycle"]):
                 if ap.trash:
                     ap.deck.cards.append(ap.trash.pop(0))
+            self._pay_discard_and_banish(ap, parsed)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"]:
@@ -3208,8 +3249,7 @@ class GameLoop:
         for _ in range(parsed["recycle"]):
             if ap.trash:
                 ap.deck.cards.append(ap.trash.pop(0))
-        if parsed["banish_from_trash"]:
-            self._banish_from_trash(ap, self._trash_card_to_banish(ap, parsed))
+        self._pay_discard_and_banish(ap, parsed)
         if parsed["spend_xp"]:
             self.gs.add_xp(side, -parsed["spend_xp"])
         if parsed["sacrifice"] and unit is not None:
@@ -3349,6 +3389,96 @@ class GameLoop:
                     self._resolve_triggered_effects(u.card, "on_stunned_enemy_dies_here", bf,
                                                     self.gs.get_player(enemy), actor,
                                                     context_extra={"battlefield": bf})
+
+    def _can_choose(self, unit: UnitInPlay, chooser: str) -> bool:
+        """Whether a spell or ability of `chooser` can choose `unit`: not an
+        enemy unit that "can't be chosen by enemy spells and abilities" (Ruin
+        Runner, Alpha Wildclaw; Twilight Shroud this turn)."""
+        where = self._locate_unit(unit)
+        if where is None or where[0] == chooser:
+            return True
+        return not (unit.unchoosable or unit.cant_be_chosen_turn == self.gs.turn)
+
+    def _can_move_to_base(self, unit: UnitInPlay, src_bf: Optional[Battlefield]) -> bool:
+        """ "I can't move to base" / "Units can't move to base" (Determined
+        Sentry, Minotaur Reckoner), "Units can't move from here to base"
+        (Vilemaw's Lair)."""
+        if unit.no_move_to_base:
+            return False
+        if src_bf is not None and src_bf.card is not None:
+            spec = CARD_REGISTRY.get(src_bf.card.name)
+            if spec and any(es.effect == "no_moves_to_base_from_here" for es in spec.effects):
+                return False
+        return True
+
+    def _can_ready(self, unit: UnitInPlay) -> bool:
+        """Whether a spell or ability can ready `unit`: not "I can't be readied"
+        (Maduli), not while its opponent has a Mageseeker Warden at a
+        battlefield ("spells and abilities can't ready enemy units")."""
+        if unit.cant_ready:
+            return False
+        where = self._locate_unit(unit)
+        if where is None:
+            return True
+        other = self.gs.other(where[0])
+        return not any(self._has_effect(u.card, "warden_no_ready")
+                       for bf in self.gs.battlefields for u in bf._units_for(other))
+
+    @staticmethod
+    def _has_effect(card: Card, verb: str) -> bool:
+        spec = CARD_REGISTRY.get(card.name)
+        return bool(spec) and any(es.effect == verb for es in spec.effects)
+
+    def _units_at_battlefields_with(self, side: str, verb: str) -> list:
+        return [u for bf in self.gs.battlefields for u in bf._units_for(side)
+                if self._has_effect(u.card, verb)]
+
+    def _play_forbidden(self, actor: Player, card: Card) -> bool:
+        """Restrictions on playing `card` now: "opponents can't play cards this
+        turn" (Brynhir), "I can't be played on your first, second, or third
+        turns" (Ol' Poro), a spell an opponent's Fallen Feline named."""
+        side = "A" if actor is self.gs.A else "B"
+        if self.gs.cant_play_cards_turn.get(side) == self.gs.turn:
+            return True
+        spec = CARD_REGISTRY.get(card.name)
+        for es in (spec.effects if spec else ()):
+            if es.effect == "play_restriction" and \
+                    self.gs.turns_taken.get(side, 0) < int(es.params.get("min_turn", 0)):
+                return True
+        if isinstance(card, SpellCard):
+            for u in self._units_at_battlefields_with(self.gs.other(side), "name_spell"):
+                if getattr(u.card, "_named_spell", None) == card.name:
+                    return True
+        return False
+
+    def _points_allowed(self, side: str, n: int, how: str, bf: Optional[Battlefield] = None) -> int:
+        """Points `side` actually gains from `n` it would score by `how`
+        ("conquer", "hold", "effect", "burn_out"): none while an opponent's
+        Tianna Crownguard is at a battlefield; none at Forgotten Monument
+        before the player's third turn; a draw instead during their first two
+        turns while Otterpus is in play (conquer / hold, 1 point)."""
+        gs = self.gs
+        if self._units_at_battlefields_with(gs.other(side), "opponents_cant_gain_points"):
+            return 0
+        if how in ("conquer", "hold") and bf is not None and bf.card is not None:
+            spec = CARD_REGISTRY.get(bf.card.name)
+            for es in (spec.effects if spec else ()):
+                if es.effect == "no_score_before_turn" and \
+                        gs.turns_taken.get(side, 0) < int(es.params.get("turn", 3)):
+                    return 0
+        if how in ("conquer", "hold") and n == 1 and gs.turns_taken.get(side, 0) <= 2 and \
+                any(self._has_effect(u.card, "early_score_draws") for u in self._all_units_in_play()):
+            self._draw_one(gs.get_player(side))
+            return 0
+        return n
+
+    def _gain_points(self, side: str, n: int, how: str, bf: Optional[Battlefield] = None) -> int:
+        n = self._points_allowed(side, n, how, bf)
+        if side == "A":
+            self.gs.points_A += n
+        else:
+            self.gs.points_B += n
+        return n
 
     def _side_has_passive(self, side: str, verb: str) -> bool:
         """Whether something `side` has in play has a passive `verb` effect
@@ -3568,7 +3698,7 @@ class GameLoop:
         elif bf.units_A and not bf.units_B:
             # A controls
             if bf.can_score_conquer("A"):
-                self.gs.points_A += 1
+                self._gain_points("A", 1, "conquer", bf)
                 bf.mark_scored("A")
                 if self.verbose:
                     print(f"  [CONQUER] A conquers BF{bf_idx} (uncontested showdown) -> +1 VP")
@@ -3576,7 +3706,7 @@ class GameLoop:
         elif bf.units_B and not bf.units_A:
             # B controls
             if bf.can_score_conquer("B"):
-                self.gs.points_B += 1
+                self._gain_points("B", 1, "conquer", bf)
                 bf.mark_scored("B")
                 if self.verbose:
                     print(f"  [CONQUER] B conquers BF{bf_idx} (uncontested showdown) -> +1 VP")
@@ -3652,10 +3782,7 @@ class GameLoop:
             self._fire_units_trigger("on_win_combat", "B")
 
         if bf.can_score_conquer(attacker):
-            if attacker == "A":
-                self.gs.points_A += 1
-            else:
-                self.gs.points_B += 1
+            self._gain_points(attacker, 1, "conquer", bf)
             bf.mark_scored(attacker)
             if self.verbose:
                 print(f"  [CONQUER] {attacker} conquers BF{bf_idx} -> +1 VP")
@@ -3676,10 +3803,7 @@ class GameLoop:
                 self._phase_combat_and_conquer_single(bf_idx, active)
                 continue
             if bf.can_score_conquer(active):
-                if active == "A":
-                    self.gs.points_A += 1
-                else:
-                    self.gs.points_B += 1
+                self._gain_points(active, 1, "conquer", bf)
                 bf.mark_scored(active)
                 if self.verbose:
                     print(f"  [CONQUER] {active} conquers BF{bf_idx} -> +1 VP")
@@ -3762,6 +3886,7 @@ class GameLoop:
         gs.played_cards_this_turn["A"] = []
         gs.played_cards_this_turn["B"] = []
         gs.A.power_spent_this_turn = gs.B.power_spent_this_turn = 0
+        gs.turns_taken[gs.active] = gs.turns_taken.get(gs.active, 0) + 1
         gs.A.draws_this_turn = gs.B.draws_this_turn = 0
         gs.enemy_choices_this_turn["A"] = gs.enemy_choices_this_turn["B"] = 0
         gs.next_card_discounts["A"] = []

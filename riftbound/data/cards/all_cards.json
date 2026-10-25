@@ -912,7 +912,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "opponents_cant_play_cards",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "OGN-027",
@@ -2387,7 +2392,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "warden_no_ready",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-071",
@@ -9243,7 +9253,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "victory_score_plus",
+        "trigger": "passive",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-277",
@@ -9642,7 +9658,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "win_game",
+        "trigger": "on_hold",
+        "condition": {
+          "type": "you_have_n_or_more_units_here",
+          "params": {
+            "n": 7
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-294",
@@ -9697,7 +9724,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_moves_to_base_from_here",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-296",
@@ -11001,7 +11033,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cant_move_to_base",
+        "trigger": "passive",
+        "target": "all_units_here",
+        "scope": "board"
+      }
+    ]
   },
   {
     "card_id": "SFD-015",
@@ -12409,7 +12448,12 @@
     "keywords": [
       "DEFLECT 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "opponents_cant_gain_points",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-061",
@@ -13838,7 +13882,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cant_be_chosen",
+        "trigger": "passive",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-106",
@@ -17153,7 +17203,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_score_before_turn",
+        "trigger": "passive",
+        "turn": 3
+      }
+    ]
   },
   {
     "card_id": "SFD-210",
@@ -19584,7 +19640,16 @@
     "keywords": [
       "TANK"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cant_be_chosen",
+        "trigger": "passive",
+        "target": "all_friendly_units_here",
+        "target_filter": {
+          "might_less_than_self": true
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-058",
@@ -20616,7 +20681,40 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "win_game",
+        "trigger": "on_start_of_turn",
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "cards_in_hand_exactly",
+                "params": {
+                  "n": 4
+                }
+              },
+              {
+                "type": "units_at_battlefields_exactly",
+                "params": {
+                  "n": 4
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "cost": {
+          "discard": 1,
+          "tap": true
+        },
+        "token_name": "Bird"
+      }
+    ]
   },
   {
     "card_id": "UNL-089",
@@ -20678,7 +20776,12 @@
     "keywords": [
       "BACKLINE"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_temporary_here",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-091",
@@ -21381,7 +21484,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cant_move_to_base",
+        "trigger": "passive",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "UNL-112",
@@ -22512,7 +22621,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cant_be_readied",
+        "trigger": "passive",
+        "target": "self"
+      },
+      {
+        "effect": "move_self_to_weaker_enemy_battlefield",
+        "trigger": "activated",
+        "cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-145",
@@ -26092,7 +26214,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "play_restriction",
+        "trigger": "passive",
+        "min_turn": 4
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-029",
@@ -26171,6 +26299,11 @@
         "trigger": "on_cast",
         "target": "friendly_unit",
         "amount": 1
+      },
+      {
+        "effect": "cant_be_chosen_this_turn",
+        "trigger": "on_cast",
+        "target": "friendly_unit"
       }
     ],
     "variants": [
@@ -26361,7 +26494,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "channel_only_one",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-036",
@@ -26976,7 +27114,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "early_score_draws",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-053",
@@ -29629,7 +29772,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "name_spell",
+        "trigger": "on_play"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-132",

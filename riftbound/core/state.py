@@ -89,6 +89,10 @@ class GameState:
     once_per_turn_used: dict = field(default_factory=dict)
     # The last turn each side gained XP (Wily Newtfish).
     xp_gained_turn: dict = field(default_factory=dict)
+    # Turns each player has started ("their third turn": Forgotten Monument).
+    turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # "Opponents can't play cards this turn" (Brynhir): side -> that turn.
+    cant_play_cards_turn: dict = field(default_factory=dict)
     # "The next three times you play a unit this turn, draw 1" (Fanfare):
     # side -> [turn, plays left].
     unit_play_draws: dict = field(default_factory=dict)

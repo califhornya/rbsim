@@ -306,7 +306,21 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   Monument's DEFLECT now board-wide), Downwell, Cataclysmic Duel, Keeper's
   Verdict, Whirlwind. Left: Sivir Battle Mistress's "when you recycle a
   rune".
-- Next: restrictions ("can't be chosen", "can't move"), damage modifiers,
+- [DONE] **Batch 5 (173 → 155): restrictions.** Every choice an effect makes
+  skips enemy units that "can't be chosen by enemy spells and abilities"
+  (`GameLoop._can_choose`: Ruin Runner, Alpha Wildclaw, Twilight Shroud);
+  "can't move to base" in moves, effect moves and the legal-action list
+  (Determined Sentry, Minotaur Reckoner, Vilemaw's Lair); "can't be readied"
+  and Mageseeker Warden's "can't ready enemy units" (`_can_ready`; its "only
+  play units to their base" holds as units are always played to base);
+  `_play_forbidden` (Brynhir, Ol' Poro, Fallen Feline: it names the costliest
+  spell in the opponent's trash); all scoring goes through `_gain_points`
+  (Tianna, Forgotten Monument, Otterpus; `turns_taken` counts each player's
+  turns); win conditions (The Grand Plaza, Gutter Palace), Aspirant's Climb
+  (applied when the game is built), Sandstone Chimera, Leblanc Everywhere at
+  Once, Maduli; "Discard 1" as an ability cost. Left: Mageseeker Warden's
+  gear half, Alpha Wildclaw in base.
+- Next: damage modifiers,
   combat-damage conditions (Orianna, Galio, Sacred Protector), Equipment
   texts (Skyfall of Areion, Hexplate...), the empower family (Glowstone,
   Lacerate, Wild Claw), play-to-battlefield units, Ashe Focused.

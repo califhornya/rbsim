@@ -42,6 +42,12 @@ class UnitInPlay:
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
     moves_this_turn: int = 0   # "The third time I move in a turn" (Yasuo Windrider)
+    # Restrictions (recomputed passives, or this turn's): "I can't be chosen by
+    # enemy spells and abilities", "can't move to base", "I can't be readied".
+    unchoosable: bool = False
+    cant_be_chosen_turn: int = -1
+    no_move_to_base: bool = False
+    cant_ready: bool = False
 
     def reset_damage(self) -> None:
         self.damage = 0
