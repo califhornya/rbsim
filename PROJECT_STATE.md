@@ -164,7 +164,7 @@ document.
     corpus cards.
   - **Burn Out** (§431) — not implemented; gated on reading §431 from the rulebook.
   - `enters_exhausted` (#21).
-- **Search is still not learning; battlefield selection still random; no Bo3/sideboards.**
+- **Search is still not learning.** (Bo3 matches with battlefield choice and sideboarding: done, `core/match.py`.)
 
 Net: meta-deck card fidelity is now high, but the win-rate numbers are **still not
 trustworthy as meta reads** — the piloting is memoryless (search, not learning) and
@@ -193,13 +193,16 @@ Star Spring. Then the corpus long tail via the parser.
 4. **Validation discipline:** read full game traces; keep the golden fixture green
    (regenerate only for legitimate gameplay changes).
 
-### Stage 0.5 — Match structure (can run in parallel with Stage 0)
-- **Bo3 match harness** (default Bo3), with the §458 battlefield rules
-  (Match = players choose, no reuse).
-- **Searched battlefield selection** — make the opening battlefield a real,
-  searchable/learnable decision instead of a coin flip.
-- **Sideboarding** — apply fixed in/out swaps per matchup for games 2 and 3
-  (user will supply sideboards like decklists).
+### Stage 0.5 — Match structure ✅ (2026-10-25)
+- **Match harness** (`riftbound/core/match.py`): Bo3 default, Bo5 option, Core
+  Rules §488 battlefield rules and the Tournament Rules for turn order,
+  sideboarding and the time limit, modeled as a match clock in turns
+  (`TOURNAMENT_RULES.md`).
+- **Battlefield selection** is a pluggable decision; `ai/pregame.py` has a
+  net-guided chooser.
+- **Sideboarding**: deck JSON `sideboard` (≤10) plus fixed per-matchup
+  `sideboard_plans`; `scripts/deck_from_txt.py` reads the decklist's Sideboard
+  section. Learned sideboarding is future work (DEFERRED.md).
 
 ### Stage 1 — RL environment API
 Wrap the resumable engine in a clean, gym-style step interface:

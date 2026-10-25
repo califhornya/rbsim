@@ -16,17 +16,15 @@ Input format (as exported / pasted from RiftMana), sections in any order:
     Rune Pool:
     3 Order Rune
     9 Chaos Rune
-    Sideboard:      # ignored
+    Sideboard:      # optional, up to 10 cards
     ...
 
 Card names in the .txt use a comma ("Kennen, Storm of Shuriken"); the corpus
 uses no comma ("Kennen Storm of Shuriken"). Names are canonicalized against
 CARD_REGISTRY so the output matches the corpus exactly, and the whole deck is
-validated by load_deck_json before writing.
-
-NOTE: the current engine does not yet consume deck-provided `legend` or
-`battlefields` (load_deck_json reads only champion/cards/runes). They are written
-into the JSON for record and forward-compat; they do not affect the sim yet.
+validated by load_deck_json before writing. The sideboard is used between the
+games of a match (riftbound/core/match.py); per-matchup swap plans
+(`sideboard_plans`) are added to the JSON by hand.
 
 Usage:
   uv run python scripts/deck_from_txt.py path/to/Kennen.txt --out riftbound/data/decks/vendetta_kennen.json
@@ -66,7 +64,7 @@ def _resolve(name: str, canon: dict[str, str]) -> str:
 
 def parse_txt(text: str):
     section = None
-    d = {"legend": None, "champion": None, "main": [], "battlefields": [], "runes": []}
+    d = {"legend": None, "champion": None, "main": [], "battlefields": [], "runes": [], "sideboard": []}
     for line in text.splitlines():
         s = line.strip()
         if not s:
@@ -89,7 +87,8 @@ def parse_txt(text: str):
             d["battlefields"].append((name, count))
         elif section == "rune pool":
             d["runes"].append((name, count))
-        # sideboard intentionally ignored
+        elif section == "sideboard":
+            d["sideboard"].append((name, count))
     return d
 
 
@@ -113,6 +112,8 @@ def build_deck(text: str, name: str | None = None) -> dict:
         deck["runes"].append({"domain": domain, "count": count})
     for card_name, count in p["main"]:
         deck["cards"].append({"name": _resolve(card_name, canon), "count": count})
+    if p["sideboard"]:
+        deck["sideboard"] = [{"name": _resolve(n, canon), "count": c} for n, c in p["sideboard"]]
     return deck
 
 
@@ -128,9 +129,10 @@ def main(
     if out:
         out.write_text(blob, encoding="utf-8")
         # Validate the written file through the real loader.
-        specs, runes, champ = load_deck_json(out)
+        specs, runes, champ, _legend, _bfs = load_deck_json(out)
+        sideboard = sum(c["count"] for c in deck.get("sideboard", []))
         typer.secho(
-            f"Wrote {out} — {len(specs)} main cards, "
+            f"Wrote {out} — {len(specs)} main cards, {sideboard} sideboard, "
             f"{sum(c for _, c in runes)} runes, champion={champ.name if champ else None}.",
             fg=typer.colors.GREEN,
         )

@@ -154,13 +154,30 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   (showdown-begin predict/draw on the golden champion → golden regen).
 
 ## Stage 0.5 (match layer)
-- **Strategic / searched battlefield selection.** `play_match` has a pluggable
-  `bf_chooser`; today it just takes the first available. Making the pre-game choice
-  a learned/searched decision is future work (and ties into the RL env's action space).
-- **Sideboarding** between games (fixed in/out per matchup — user will supply lists
-  like decklists). Decks are static in `play_match` today.
-- **Full §458 pre-game protocol** (reveal/pick order). We model the competitive
-  essentials: one battlefield per player per game, no reuse, loser-chooses-first.
+Done (2026-10-25): `riftbound/core/match.py` follows Core Rules §488 and the
+Tournament Rules (excerpt in `TOURNAMENT_RULES.md`): a played battlefield is out
+for the match, best-of-5 reuse, "play first or last" as a decision, sideboarding
+(deck JSON `sideboard` ≤10 + per-matchup `sideboard_plans`, champion change, never
+before game 1), and the time limit as a match clock: 60 minutes per best of 3,
+converted to 45 turns at an estimated 1⅓ minutes per turn. When it runs out, +3
+turns, then a 2-point lead wins the game or it's a draw, and the match ends.
+Riftbound has no turn limit; the per-game `max_turns` is a stall guard that counts
+as the time running out. Left:
+- **Recalibrate the clock** (`MINUTES_PER_TURN` in `core/match.py`) when real turn
+  counts or game durations are known. With it, `simple_trade` mirrors over all repo
+  decks (280 matches): 11 of 44 game-3s go to time; 71 matches end by time, most
+  of them from AI stalls hitting the 40-turn guard.
+- **AI stalls.** With `simple_trade` vs `simple_trade`, 53 of 420 games (12.6%,
+  all repo deck pairs × 15 seeds) reach the 40-turn guard without either side
+  reaching 8 points.
+- **Learned sideboarding.** Today's policies are "keep the registered list" and
+  "follow the deck's fixed plans"; a net-guided policy (like the battlefield
+  chooser in `ai/pregame.py`) is future work.
+- **Richer battlefield chooser input.** The chooser sees its own available
+  battlefields only, not the opponent's remaining ones or the match history.
+- **Best-of-1 setup variant** (TR 406.1.h): not modeled.
+- **Single games** (CLI, self-play, RL env) still score the 40-turn guard as "any
+  lead wins"; only matches apply the time-limit rule.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

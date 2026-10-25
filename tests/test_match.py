@@ -16,9 +16,10 @@ def test_match_produces_a_winner_and_clinches_early():
     res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=3)
     assert isinstance(res, MatchResult)
     assert res.winner in ("A", "B", "DRAW")
-    # Bo3 clinches at 2 wins: never more than 3 games, and the leader has >= 2.
+    # Bo3 clinches at 2 wins: never more than 3 games, and the leader has >= 2
+    # unless the match clock ran out first.
     assert len(res.games) <= 3
-    if res.winner in ("A", "B"):
+    if res.winner in ("A", "B") and not res.games[-1].timed_out:
         assert max(res.wins_A, res.wins_B) >= 2
     # Games actually assigned battlefields from each deck.
     for g in res.games:
