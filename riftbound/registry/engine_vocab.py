@@ -109,6 +109,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "ready_enemy_here",                  # "if there is a ready enemy unit here"
     "moves_this_turn_exactly",           # n: "the first / third time I move in a turn"
     "moved_to_other_battlefield",        # "an opponent moves to a battlefield other than mine"
+    "gained_xp_this_turn",               # "if you've gained XP this turn"
+    "power_spent_this_turn_at_least",    # n: "if you've spent at least [rune] [rune] this turn"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -157,7 +159,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
-    "disempower_self",
+    "disempower_self", "banish_from_trash",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs

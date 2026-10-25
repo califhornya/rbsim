@@ -260,6 +260,25 @@ def _match_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     low.temporary_might += max(0, top.might - low.might)
 
 
+@effect("grant_flow")
+def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Give a spell in your trash FLOW equal to its cost this turn" (Kennen
+    Storm of Shuriken): baseline pick, the costliest spell the player can pay
+    for now, else the costliest."""
+    loop = ctx.loop
+    side = ctx.actor_side
+    spells = [c for c in ctx.actor.trash if isinstance(c, SpellCard)]
+    if not spells:
+        return
+    for card in spells:
+        card._flow_granted_turn = loop.gs.turn
+    payable = [c for c in spells if loop._can_pay_flow(ctx.actor, c, side)]
+    for card in spells:
+        card._flow_granted_turn = None
+    pick = max(payable or spells, key=lambda c: (c.cost_energy or 0) + (c.cost_power or 0))
+    pick._flow_granted_turn = loop.gs.turn
+
+
 @effect("cant_move_this_turn")
 def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They can't move it this turn" (Vex Apathetic): no Standard Move."""
@@ -510,7 +529,10 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         owner.energy -= tax          # "unless its controller pays [2]": they do
         return
     chain.pop()
-    (owner.hand if spec.get("return_to_hand") else owner.trash).append(target_card)
+    if spec.get("return_to_hand"):
+        owner.hand.append(target_card)
+    else:
+        ctx.loop._spell_to_trash(owner, target_card)
 
 
 @effect("grant_temporary_might_per_enemy")
@@ -803,6 +825,10 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return max((u.might for u in units), default=0)
     if src == "cards_in_hand":
         return len(ctx.actor.hand)
+    if src == "gear_you_control":
+        loop = ctx.loop
+        return len(ctx.actor.base_gear) + len(loop._controlled_attached_gear(ctx.actor_side)) + \
+            sum(len(bf.gear_for(ctx.actor_side)) for bf in loop.gs.battlefields)
     if src == "enemies_here":
         return len(ctx._units_for_side(ctx.opponent_side))
     if src == "friendly_units_here":

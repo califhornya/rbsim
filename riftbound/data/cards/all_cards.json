@@ -11228,10 +11228,11 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
         "target_filter": {
           "subtype": "Mech"
         },
-        "scope": "all",
         "keyword": "ASSAULT"
       }
     ]
@@ -14492,7 +14493,15 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "ASSAULT",
+        "amount_source": "enemies_here"
+      }
+    ]
   },
   {
     "card_id": "SFD-132",
@@ -14882,7 +14891,32 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "power_spent_this_turn_at_least",
+          "params": {
+            "n": 2
+          }
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "power_spent_this_turn_at_least",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-144",
@@ -16062,10 +16096,12 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
-        "keyword": "SHIELD",
+        "target": "friendly_unit",
+        "scope": "board",
         "target_filter": {
           "subtype": "Mech"
-        }
+        },
+        "keyword": "SHIELD"
       }
     ]
   },
@@ -16129,7 +16165,16 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "keyword": "ASSAULT",
+        "amount_source": "own_equipment"
+      }
+    ]
   },
   {
     "card_id": "SFD-184",
@@ -16544,7 +16589,8 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
-        "target": "all_friendly_units_here",
+        "target": "friendly_unit",
+        "scope": "board",
         "target_filter": {
           "subtype": "Sand Soldier"
         },
@@ -21027,7 +21073,26 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "gained_xp_this_turn"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "gained_xp_this_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-109",
@@ -27457,7 +27522,15 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "ASSAULT",
+        "amount_source": "gear_you_control"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-076",
@@ -28184,7 +28257,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_aura",
+        "amount": 2,
+        "min_cost": 1,
+        "flow_only": true,
+        "filter": {
+          "is_spell": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-098",
@@ -28696,6 +28780,10 @@
         "effect": "burn",
         "trigger": "on_play",
         "amount": 2
+      },
+      {
+        "effect": "grant_flow",
+        "trigger": "on_conquer"
       }
     ],
     "variants": [
@@ -29724,9 +29812,16 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "burn",
+        "trigger": "on_cast",
+        "target": "actor",
+        "amount": 3
+      },
+      {
         "effect": "play_token",
         "trigger": "on_cast",
-        "token_name": "Shadow Clone"
+        "token_name": "Shadow Clone",
+        "might": 0
       }
     ],
     "variants": [
@@ -30422,7 +30517,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_temporary_assault",
+        "trigger": "on_attack",
+        "target": "self",
+        "amount": 4,
+        "optional": true,
+        "cost": {
+          "banish_from_trash": "unit"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-T05",
@@ -32232,10 +32338,11 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
         "target_filter": {
           "subtype": "Mech"
         },
-        "scope": "board",
         "keyword": "DISARM"
       }
     ],

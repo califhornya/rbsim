@@ -251,8 +251,25 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   battlefield; Curtain Call's per-mode REPEAT costs; Temporal Portal, The
   Academy, Syndra Transcendent (granting REPEAT) and Marai Spire (REPEAT cost
   reduction) aren't modeled.
-- Next: FLOW (play from trash, then banish: 16 cards, Dragon Form's FLOW
-  waits for it), "banish the top card / reveal and play it" (Akali Brash,
+- [DONE] **Batch 2 (211 → 204): FLOW and printed keywords.** FLOW spells in
+  the trash are offered as abilities at their own timing (agents and the RL
+  action space need nothing new), cost their printed FLOW cost and are
+  banished after resolving or being countered; Kennen gives FLOW for a turn
+  (`grant_flow`), Stargazer is a `flow_only` cost aura; costs may banish a
+  card from the trash (Shadow Clone). **Keyword bug:** the loader counted
+  every keyword a card's text mentions as printed: Sprite Mother, Sprite
+  Queen, Petal Pixie and Leblanc Deceiver had TEMPORARY (died each turn),
+  Jarvan IV ACTION (showdown plays), Gem Jammer, Captain Farron, Raging Soul,
+  Fiora... permanent GANKING/ASSAULT, Noxus Saboteur HIDDEN. Now only
+  keywords at the start of the text or of a sentence, or chained after
+  another printed one, count (163 removed; `_printed_keyword_heads`). The
+  passives that were hiding behind them: "Your Mechs have X" reached only the
+  card itself (Rumble x2, Clanging Sentry, Azir), and Wily Newtfish, Sivir
+  Mercenary, Ancient Warmonger, Repair Specialist, Lucian Purifier are now
+  modeled (counted keywords via `amount_source`). Still missing: Twilight
+  Shroud's "can't be chosen", Shadow Dash's +1, Lacerate's disempower,
+  Jayce Hammer in Hand, Lillia Protector, Udyr Wildman, Dune Surfer.
+- Next: "banish the top card / reveal and play it" (Akali Brash,
   Runeblade Anvil, Blind Fury, Drakehound Packmaster, Void Rush, Rek'Sai...),
   restrictions, damage modifiers, the empower family.
 

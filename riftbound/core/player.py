@@ -75,6 +75,8 @@ class Player:
     # than backed by a rune: spent first, without recycling a rune; cleared with
     # the pool each turn.
     floating_power: Dict[Domain, int] = field(default_factory=dict)
+    # Power paid this turn ("If you've spent at least [rune] [rune] this turn").
+    power_spent_this_turn: int = 0
     base_units: List[UnitInPlay] = field(default_factory=list)
 
     @classmethod
@@ -204,6 +206,7 @@ class Player:
             return False
         self.energy -= cost_energy
         if cost_power and cost_power_domain:
+            self.power_spent_this_turn += cost_power
             current = self.power_pool.get(cost_power_domain, 0) - cost_power
             if current <= 0:
                 self.power_pool.pop(cost_power_domain, None)

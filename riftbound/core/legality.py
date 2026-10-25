@@ -132,6 +132,8 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
             continue
         if entry["type"] == "equip":
             label = f"Equip {entry['gear'].name}"
+        elif entry["type"] == "flow":
+            label = f"Play {entry['card'].name} from trash (FLOW)"
         elif entry["type"] == "gear_ability":
             label = f"Gear {entry['eff'].effect} ({entry['gear'].name})"
         else:

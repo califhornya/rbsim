@@ -87,6 +87,8 @@ class GameState:
     # "Once each turn" / "The first time ... each turn" abilities used:
     # (id of the source card, effect index) -> turn number.
     once_per_turn_used: dict = field(default_factory=dict)
+    # The last turn each side gained XP (Wily Newtfish).
+    xp_gained_turn: dict = field(default_factory=dict)
     # "Units you play this turn enter ready" (Confront): the turn it applies to.
     units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
     # "The next unit you play this turn enters ready" (Sun Disc): how many.
@@ -111,6 +113,8 @@ class GameState:
             self.xp_A += amount
         else:
             self.xp_B += amount
+        if amount > 0:
+            self.xp_gained_turn[who] = self.turn     # "if you've gained XP this turn"
 
     def clone(self) -> "GameState":
         """A deep, independent copy of the game state — the primitive search

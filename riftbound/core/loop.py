@@ -59,7 +59,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "all_of", "died_alone", "enemy_choices_this_turn_at_least",
     "not_your_turn", "triggering_card_from_zone", "played_to_controlled_battlefield",
     "units_in_base_at_least", "ready_enemy_here", "moves_this_turn_exactly",
-    "moved_to_other_battlefield",
+    "moved_to_other_battlefield", "gained_xp_this_turn", "power_spent_this_turn_at_least",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -887,6 +887,8 @@ class GameLoop:
             for _ in range(parsed["recycle"]):
                 if actor.trash:
                     actor.deck.cards.append(actor.trash.pop(0))
+            if parsed["banish_from_trash"]:
+                self._banish_from_trash(actor, self._trash_card_to_banish(actor, parsed))
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"] and unit is not None:
@@ -1103,9 +1105,21 @@ class GameLoop:
 
         if es.effect == "give_keyword":
             keyword = str(params.get("keyword", "")).strip()
-            if keyword:
-                for u in targets:
+            if not keyword:
+                return
+            src = params.get("amount_source")
+            for u in targets:
+                if src == "own_equipment":
+                    # "Your Equipment each give ASSAULT" (Lucian Purifier).
+                    n = sum(1 for g in u.gear if self._equip_cost(g) is not None)
+                elif src:
+                    # "I have ASSAULT equal to the number of ..." (Ancient Warmonger).
+                    n = _effect_amount(context, params)
+                else:
                     u.passive_keywords.add(keyword)
+                    continue
+                if n > 0:
+                    u.passive_keywords.add(f"{keyword.split()[0]} {n}")
             return
 
         # Might-granting passives (anthems, "while" buffs). buff_unit tagged as a
@@ -1248,6 +1262,11 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "gained_xp_this_turn":
+            return self.gs.xp_gained_turn.get(side) == self.gs.turn
+        if ctype == "power_spent_this_turn_at_least":
+            # "If you've spent at least [rune] [rune] this turn".
+            return actor.power_spent_this_turn >= _threshold(1)
         if ctype == "ready_enemy_here":
             bf = extra.get("battlefield")
             return bf is not None and any(u.ready for u in bf._units_for(self.gs.other(side)))
@@ -2047,12 +2066,14 @@ class GameLoop:
                 power = max(0, power - int(discount.get("power", 0)))
         return max(0, energy), power
 
-    def _aura_reduction(self, card: Card, actor: Player) -> tuple[int, int]:
+    def _aura_reduction(self, card: Card, actor: Player, flow: bool = False) -> tuple[int, int]:
         """Energy that `actor`'s in-play sources take off `card`'s cost ("While
         I'm at a battlefield, spells you play cost [1] less, to a minimum of
         [1]"): `cost_aura` effects (verb reduce_cost) whose condition holds for
         their source and whose `filter` matches the card. Returns (total, the
-        highest `min_cost` floor among them)."""
+        highest `min_cost` floor among them). `flow`: the card is played from
+        the trash for its FLOW cost, which `flow_only` auras also reduce
+        (Stargazer)."""
         from .effects import _zone_effect_card_ok
         side = "A" if actor is self.gs.A else "B"
         opponent = self.gs.get_player(self.gs.other(side))
@@ -2063,6 +2084,8 @@ class GameLoop:
             spec = CARD_REGISTRY.get(src.name)
             for es in (spec.effects if spec else ()):
                 if es.trigger != "cost_aura" or es.effect != "reduce_cost":
+                    continue
+                if es.params.get("flow_only") and not flow:
                     continue
                 if not _zone_effect_card_ok(card, {"target_filter": es.params.get("filter") or {}}):
                     continue
@@ -2745,7 +2768,80 @@ class GameLoop:
         # Attached gear (on controlled units) can also use its [tap] abilities.
         for gear in self._controlled_attached_gear(side):
             _add_gear_abilities(gear)
+        # FLOW (§ "You may play this from your trash for its Flow cost. Then
+        # banish it."): a spell in the trash, at its own timing.
+        for card in ap.trash:
+            if isinstance(card, SpellCard) and self._flow_cost(card, side) is not None:
+                timing = "reaction" if card.has_keyword("REACTION") else \
+                    "action" if card.has_keyword("ACTION") else None
+                if timing in allowed:
+                    out.append({"type": "flow", "card": card})
         return out
+
+    def _flow_cost(self, card: Card, side: str):
+        """(Energy, Power, domain or None) to play `card` from the trash with
+        FLOW: its printed FLOW cost, or its own cost when an effect gave it FLOW
+        this turn (Kennen), less cost auras (Stargazer: FLOW spells cost [2]
+        less, to a minimum of [1]). None if it has no FLOW now."""
+        cost = getattr(card, "flow_cost", None)
+        if getattr(card, "_flow_granted_turn", None) == self.gs.turn:
+            dom = getattr(card, "cost_power_domain", None)
+            cost = {"energy": card.cost_energy or 0, "power": card.cost_power or 0,
+                    "domain": dom.name if isinstance(dom, Domain) else None}
+        if not cost:
+            return None
+        aura, floor = self._aura_reduction(card, self.gs.get_player(side), flow=True)
+        energy = int(cost.get("energy", 0) or 0)
+        if aura:
+            energy = max(min(energy, floor), energy - aura)
+        domain = Domain[cost["domain"]] if cost.get("domain") else None
+        return energy, int(cost.get("power", 0) or 0), domain
+
+    def _can_pay_flow(self, ap: Player, card: Card, side: str) -> bool:
+        cost = self._flow_cost(card, side)
+        if cost is None or card not in ap.trash:
+            return False
+        energy, power, domain = cost
+        if ap.energy < energy:
+            return False
+        if not power:
+            return True
+        return ap.can_pay_cost(0, power, domain) if domain else self._can_pay_generic_power(ap, power)
+
+    def _play_with_flow(self, ap: Player, card: Card, side: str) -> None:
+        """Pay a spell's FLOW cost, take it from the trash and play it: on the
+        open chain if there is one, else as a new chain. It is banished when it
+        resolves or is countered. The battlefield it is aimed at is the
+        showdown's, else the first."""
+        if not self._can_pay_flow(ap, card, side):
+            return
+        energy, power, domain = self._flow_cost(card, side)
+        ap.energy -= energy
+        if power:
+            if domain:
+                ap.pay_cost(0, power, domain)
+            else:
+                self._pay_generic_power(ap, power)
+        ap.trash.remove(card)
+        card._flow_banish = True
+        lane = self.gs.showdown_bf_idx if self.gs.showdown_active and \
+            self.gs.showdown_bf_idx is not None else 0
+        if self.verbose:
+            print(f"  {ap.name} plays {card.name} from the trash (FLOW)")
+        if self.gs.chain:
+            self._spell_played(card, ap, from_zone="trash")
+            self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+        else:
+            self._cast_spell_now(card, side, lane, from_zone="trash")
+
+    def _spell_to_trash(self, owner: Player, card: Card) -> None:
+        """A spell that resolved or was countered goes to the trash, or is
+        banished if it was played with FLOW."""
+        if getattr(card, "_flow_banish", False):
+            card._flow_banish = False
+            owner.banished.append(card)
+        else:
+            owner.trash.append(card)
 
     def _ability_usable(self, ap: Player, entry: dict) -> bool:
         """Whether `ap` can use this activatable_abilities entry now: it can pay
@@ -2757,6 +2853,8 @@ class GameLoop:
             cost = self._equip_cost(gear)
             return (gear in ap.base_gear and cost is not None and self._can_pay_equip(ap, cost)
                     and self._first_friendly_unit_on_board(side) is not None)
+        if entry["type"] == "flow":
+            return self._can_pay_flow(ap, entry["card"], side)
         eff = entry["eff"]
         if EFFECT_REGISTRY.get(eff.effect) is None:
             return False
@@ -2814,7 +2912,8 @@ class GameLoop:
         """Normalize the mixed string/dict/None cost forms the generator emits."""
         import re
         parsed = {"energy": 0, "power": 0, "tap": False, "recycle": 0,
-                  "sacrifice": False, "spend_xp": 0, "disempower": False}
+                  "sacrifice": False, "spend_xp": 0, "disempower": False,
+                  "banish_from_trash": None}
         if cost is None:
             return parsed
         if isinstance(cost, dict):
@@ -2828,6 +2927,8 @@ class GameLoop:
                                        or cost.get("kill_friendly"))
             parsed["spend_xp"] = int(cost.get("spend_xp", 0) or 0)
             parsed["disempower"] = bool(cost.get("disempower_self"))
+            # "Banish a unit from your trash": the card type(s), e.g. "unit".
+            parsed["banish_from_trash"] = cost.get("banish_from_trash")
         elif isinstance(cost, str):
             for tok in cost.split(","):
                 t = tok.strip().lower()
@@ -2840,6 +2941,23 @@ class GameLoop:
                     parsed["energy"] = int(t)
         return parsed
 
+    @staticmethod
+    def _trash_card_to_banish(ap: Player, parsed: dict):
+        """The card a "banish a <type> from your trash" cost takes: the cheapest
+        matching one (the least likely to be played back)."""
+        from .effects import _zone_effect_card_ok
+        kind = parsed.get("banish_from_trash")
+        if not kind:
+            return None
+        spec = {"filter": kind} if isinstance(kind, str) else {"target_filter": kind}
+        cands = [c for c in ap.trash if _zone_effect_card_ok(c, spec)]
+        return min(cands, key=lambda c: c.cost_energy or 0) if cands else None
+
+    def _banish_from_trash(self, ap: Player, card) -> None:
+        if card is not None and card in ap.trash:
+            ap.trash.remove(card)
+            ap.banished.append(card)
+
     def _activated_affordable(self, ap: Player, unit, parsed: dict) -> bool:
         side = "A" if ap is self.gs.A else "B"
         if parsed["tap"] and unit is not None and not unit.ready:
@@ -2849,6 +2967,8 @@ class GameLoop:
         if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
             return False
         if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
+            return False
+        if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
             return False
         if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
             return False
@@ -2877,6 +2997,10 @@ class GameLoop:
             target_unit.gear.append(gear)
             if self.verbose:
                 print(f"  {ap.name} EQUIP: {gear.name} -> {target_unit.card.name}")
+            return
+
+        if entry["type"] == "flow":
+            self._play_with_flow(ap, entry["card"], side)
             return
 
         if entry["type"] == "gear_ability":
@@ -3108,10 +3232,15 @@ class GameLoop:
                 elif kind == "ABILITY":
                     # A REACTION ability resolves at once (resource abilities
                     # can't be reacted to) and its player keeps priority; one
-                    # that does nothing counts as a pass.
+                    # that does nothing counts as a pass. One that put a spell
+                    # on the chain (FLOW) passes priority like a played spell.
+                    depth = len(self.gs.chain)
                     if self._use_ability_now(player, idx, lane):
-                        continue
-                    passes += 1
+                        if len(self.gs.chain) == depth:
+                            continue
+                        passes = 0
+                    else:
+                        passes += 1
 
             active = self.gs.other(active)
 
@@ -3137,7 +3266,7 @@ class GameLoop:
                 # (FLOW / recycle / return-from-trash) of any targets. Countered
                 # spells are popped + trashed by counter_spell before this loop, so
                 # they never reach here — no double-trash.
-                actor.trash.append(item.card)
+                self._spell_to_trash(actor, item.card)
 
     def _run_showdown(self, bf_idx: int, attacker: str) -> None:
         """Execute a showdown at the given battlefield (§337–345)."""
@@ -3424,6 +3553,7 @@ class GameLoop:
         gs.spells_played_this_turn["A"] = gs.spells_played_this_turn["B"] = 0
         gs.played_cards_this_turn["A"] = []
         gs.played_cards_this_turn["B"] = []
+        gs.A.power_spent_this_turn = gs.B.power_spent_this_turn = 0
         gs.enemy_choices_this_turn["A"] = gs.enemy_choices_this_turn["B"] = 0
         gs.next_card_discounts["A"] = []
         gs.next_card_discounts["B"] = []

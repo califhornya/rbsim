@@ -77,6 +77,11 @@ class SimpleTradeAgent(Agent):
         if empty_bf_move is not None:
             return empty_bf_move
 
+        # 6b. Spend leftover energy replaying a spell from the trash (FLOW).
+        flow_play = self._find_flow_play(my_side, bfs)
+        if flow_play is not None:
+            return flow_play
+
         # 7. Tempo: rather than waste leftover energy, bank an affordable gear at
         #    base now so it can be EQUIPped onto a unit on a later turn.
         stage_gear = self._find_gear_to_stage()
@@ -324,6 +329,8 @@ class SimpleTradeAgent(Agent):
             return None
         abilities = loop.activatable_abilities(my_side)
         for idx, entry in enumerate(abilities):
+            if entry["type"] == "flow":
+                continue        # replaying a spell from the trash: _find_flow_play
             if entry["type"] == "equip":
                 gear = entry["gear"]
                 if not self.player.can_pay_cost(
@@ -344,6 +351,20 @@ class SimpleTradeAgent(Agent):
                 continue
             return ("ABILITY", "ACTIVATED", idx)
         return None
+
+    def _find_flow_play(self, my_side: str, bfs: list) -> Optional[tuple]:
+        """The best-scoring spell in the trash we can play with FLOW now."""
+        loop = getattr(self, "loop", None)
+        if loop is None:
+            return None
+        best = None
+        for idx, entry in enumerate(loop.activatable_abilities(my_side)):
+            if entry["type"] != "flow" or not loop._ability_usable(self.player, entry):
+                continue
+            score = self._score_combat_spell(entry["card"], my_side, bfs, 0)
+            if score > 0 and (best is None or score > best[0]):
+                best = (score, idx)
+        return ("ABILITY", "ACTIVATED", best[1]) if best else None
 
     def _find_gear_to_stage(self) -> Optional[tuple]:
         """Last-resort tempo play: deploy an affordable gear when no better action

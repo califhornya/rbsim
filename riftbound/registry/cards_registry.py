@@ -246,6 +246,14 @@ class CardSpec:
             # timing keywords (REACTION/ACTION) and combat keywords are tagged
             # even before the card corpus is populated.
             keywords = _extract_keywords(rules_text)
+        # Only keywords the card prints count: not one its abilities mention
+        # ("give me ASSAULT 4", "Your Mechs have SHIELD", "EMPOWERED[>] I have
+        # GANKING"). An Equipment's own text ("TANK" for its unit) counts too.
+        printed_text = rules_text + "\n" + str(data.get("effect_equipped") or "")
+        if printed_text.strip():
+            heads = _printed_keyword_heads(printed_text)
+            keywords = tuple(k for k in keywords
+                             if any(k.upper() == h or k.upper().startswith(h + " ") for h in heads))
         # Tags: explicit `tags` plus `sub_type` (comma-joined, e.g. "Mech, Piltover").
         tag_list = [str(t) for t in data.get("tags", [])]
         sub_type = data.get("sub_type")
@@ -301,7 +309,9 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
-            spell.repeat_cost = _repeat_cost(str(self.raw.get("effect") or ""))
+            text = str(self.raw.get("effect") or "")
+            spell.repeat_cost = _repeat_cost(text)
+            spell.flow_cost = _keyword_pip_cost("FLOW", text)
             return spell
         if self.category is CardType.GEAR:
             return GearCard(
@@ -388,8 +398,20 @@ _KEYWORD_MIGRATIONS: dict[str, Optional[str]] = {
 }
 
 
-_REPEAT_PIPS = re.compile(r"REPEAT\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)")
 _REPEAT_DISCARD = re.compile(r"REPEAT\W+Discard (\d+)", re.IGNORECASE)
+
+
+def _keyword_pip_cost(keyword: str, rules_text: str) -> Optional[Dict[str, Any]]:
+    """A keyword's printed cost: "FLOW [4] [order] [order]" -> 4 Energy and two
+    Order Power; "[rune]" is Power of any domain (domain None). None when the
+    keyword carries no number."""
+    m = re.search(keyword + r"\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)", rules_text)
+    if not m:
+        return None
+    pips = re.findall(r"\[([A-Za-z]+)\]", m.group(2))
+    domains = [p.upper() for p in pips if p.upper() in Domain.__members__]
+    return {"energy": int(m.group(1)), "power": len(pips),
+            "domain": domains[0] if domains and len(domains) == len(pips) else None}
 
 
 def _repeat_cost(rules_text: str) -> Optional[Dict[str, Any]]:
@@ -400,20 +422,50 @@ def _repeat_cost(rules_text: str) -> Optional[Dict[str, Any]]:
     m = _REPEAT_DISCARD.search(rules_text)
     if m:
         return {"discard_cards": int(m.group(1))}
-    m = _REPEAT_PIPS.search(rules_text)
-    if not m:
-        return None
-    pips = re.findall(r"\[([A-Za-z]+)\]", m.group(2))
-    domains = [p.upper() for p in pips if p.upper() in Domain.__members__]
-    return {"energy": int(m.group(1)), "power": len(pips),
-            "domain": domains[0] if domains and len(domains) == len(pips) else None}
+    return _keyword_pip_cost("REPEAT", rules_text)
+
+
+# Words a printed keyword line can chain through besides keywords: legacy
+# names (_KEYWORD_MIGRATIONS) and UNIQUE.
+_KEYWORD_LINE_WORDS = ("VISION", "QUICK", "MIGHTY", "UNIQUE")
+_REMINDER = re.compile(r"\([^)]*\)")
+
+
+def _printed_keyword_heads(rules_text: str) -> set[str]:
+    """The keywords a card prints (after migrations, without values): those at
+    the start of its text, at the start of a sentence ("Kill a gear. FLOW
+    [4]"), or chained after another printed keyword ("ASSAULT 2, SHIELD 2",
+    "EQUIP [rune] ... TEMPORARY"). Not a keyword mentioned inside a sentence
+    ("I have ASSAULT and GANKING"), nor a conditional header ("LEVEL 6[>]",
+    "EMPOWERED I have +1 [might]"), nor an ability's timing ("[tap]: REACTION")."""
+    # A reminder becomes a marker: a boundary for chaining, never a value.
+    t = _REMINDER.sub(" \u00b6 ", rules_text).upper()
+    names = sorted(set(_KNOWN_KEYWORDS) | set(_KEYWORD_LINE_WORDS), key=len, reverse=True)
+    pat = re.compile(r"\[?\b(" + "|".join(re.escape(k) for k in names) + r")\b\]?"
+                     r"(?:[ \t]*\[?[ \t]*\d+[ \t]*\]?)?(?:[ \t]*\[[A-Za-z]+\])*")
+    found: list[str] = []
+    last_end = None
+    for m in pat.finditer(t):
+        prefix = t[:m.start()].rstrip(" \t\u00b6")
+        chained = last_end is not None and \
+            prefix.rstrip(",").rstrip(" \t\u00b6") == t[:last_end].rstrip(" \t\u00b6")
+        start = prefix == "" or prefix.endswith((".", "\n", "!"))
+        header = t[m.end():].lstrip(" \t").startswith(("[>]", ">"))
+        kw = m.group(1)
+        if not (start or chained) or header or kw == "EMPOWERED":
+            continue
+        last_end = m.end()
+        found.append(kw)
+    return {k.split(" ")[0] if k.split(" ")[0] in ("PREDICT",) else k
+            for k in _normalize_keywords(found)} - set(_KEYWORD_LINE_WORDS)
 
 
 def _extract_keywords(rules_text: str) -> tuple[str, ...]:
     # Parenthesized reminder text only explains keywords ("(It has DEPLOY ...)",
     # "(... even before spells and abilities resolve.)"); it never prints the
-    # card's own, so drop it before matching.
-    upper = re.sub(r"\([^)]*\)", " ", rules_text.upper())
+    # card's own, so drop it before matching. The marker keeps a value from
+    # being read across it ("DEFLECT (...) [2] [fury]: ...").
+    upper = _REMINDER.sub(" \u00b6 ", rules_text.upper())
     found = []
     for kw in _KNOWN_KEYWORDS:
         # \b around the (escaped) keyword prevents false matches like ACTION
