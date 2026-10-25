@@ -31,7 +31,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
     "on_card_played", "on_unit_moves_from_here", "on_enemy_unit_played",
-    "on_chosen", "on_readied", "cost_aura",
+    "on_chosen", "on_readied", "cost_aura", "enter_ready_aura", "on_hide",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -56,6 +56,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "triggering_card_matches", "triggering_card_not_from_hand",
     "moved_to_battlefield", "moved_from_battlefield",
     "all_of", "died_alone", "enemy_choices_this_turn_at_least",
+    "not_your_turn", "triggering_card_from_zone", "played_to_controlled_battlefield",
+    "units_in_base_at_least",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -1233,6 +1235,18 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "not_your_turn":
+            return side != self.gs.active
+        if ctype == "triggering_card_from_zone":
+            # "When you play a card from face down" (zone "facedown").
+            return extra.get("triggering_card") is not None and \
+                extra.get("from_zone", "hand") == params.get("zone")
+        if ctype == "played_to_controlled_battlefield":
+            bf = extra.get("played_to")
+            return bf is not None and bf.controller() == side
+        if ctype == "units_in_base_at_least":
+            # "if you have two or more other units in your base"
+            return sum(1 for u in actor.base_units if u.card is not card) >= _threshold(1)
         if ctype == "all_of":
             # Several conditions that must all hold ("your first card each turn,
             # if I'm at a battlefield").
@@ -1284,11 +1298,10 @@ class GameLoop:
             tag = str(params.get("tag") or params.get("subtype") or "")
             if not tag:
                 return False
-            for bf in self.gs.battlefields:
-                for u in (bf.units_A if side == "A" else bf.units_B):
-                    if tag in (u.card.tags or []):
-                        return True
-            return any(tag in (u.card.tags or []) for u in actor.base_units)
+            # other: true = "another Dragon" (not this card).
+            other = bool(params.get("other"))
+            return any(tag in (u.card.tags or []) and not (other and u.card is card)
+                       for u in _friendly_units())
         if ctype == "score_within_n_of_victory":
             pts = self.gs.points_A if side == "A" else self.gs.points_B
             return pts >= self.gs.victory_score - _threshold()
@@ -1772,6 +1785,8 @@ class GameLoop:
             self._resolve_triggered_effects(bf.card, "on_hide_here", bf, ap,
                                             self.gs.get_player(self.gs.other(side)),
                                             context_extra={"battlefield": bf})
+        # "When you hide a card" on the hider's units (Katarina Reckless).
+        self._fire_units_trigger("on_hide", side)
         return True
 
     def _cleanup_hidden_cards(self) -> None:
@@ -1967,6 +1982,8 @@ class GameLoop:
             # "reduced by [1], to a minimum of [1]": never below the floor, and
             # never raises a card that already costs less than it.
             energy = max(min(energy, floor), energy - aura)
+        if power:
+            power = max(0, power - self._aura_power_reduction(card, actor))
         discount = self._next_card_discount(card, side)
         if discount is not None:
             energy -= int(discount.get("energy", 0))
@@ -1999,6 +2016,22 @@ class GameLoop:
                 total += int(es.params.get("amount", 1))
                 floor = max(floor, int(es.params.get("min_cost", 0)))
         return total, floor
+
+    def _aura_power_reduction(self, card: Card, actor: Player) -> int:
+        """Power that `cost_aura` effects take off `card` ("cost [1] [rune] less")."""
+        from .effects import _zone_effect_card_ok
+        side = "A" if actor is self.gs.A else "B"
+        opponent = self.gs.get_player(self.gs.other(side))
+        total = 0
+        for src, bf in self._sources_in_play(side):
+            spec = CARD_REGISTRY.get(src.name) if src is not card else None
+            for es in (spec.effects if spec else ()):
+                if es.trigger == "cost_aura" and es.effect == "reduce_cost" and es.params.get("power") \
+                        and _zone_effect_card_ok(card, {"target_filter": es.params.get("filter") or {}}) \
+                        and self._check_condition(es.condition, src, actor, opponent,
+                                                  {"battlefield": bf, "triggering_card": card}):
+                    total += int(es.params["power"])
+        return total
 
     def _sources_in_play(self, side: str) -> list:
         """(card, battlefield) for everything `side` has in play that can carry an
@@ -2136,6 +2169,11 @@ class GameLoop:
         opponent = self.gs.get_player(self.gs.other(side))
         if accelerate and self._pay_accelerate(card, ap):
             ready = True
+        if self._enters_ready(card, side, bf):
+            ready = True
+        if self.gs.next_units_enter_ready.get(side, 0) > 0:
+            self.gs.next_units_enter_ready[side] -= 1    # "the next unit": used up
+            ready = True
         unit = UnitInPlay(card=card, ready=ready)
         if bf is None:
             ap.base_units.append(unit)
@@ -2271,7 +2309,8 @@ class GameLoop:
             card.tapped = not ready
             ap.base_gear.append(card)
             return card
-        unit = UnitInPlay(card=card, ready=ready, is_token=True)
+        unit = UnitInPlay(card=card, ready=ready or self._enters_ready(card, side, bf),
+                          is_token=True)
         if bf is None:
             ap.base_units.append(unit)
         else:
@@ -2279,6 +2318,32 @@ class GameLoop:
         self._fire_units_trigger("on_friendly_unit_played", side, exclude_card=card)
         self._fire_enemy_unit_played(unit, side)
         return unit
+
+    def _enters_ready(self, card: Card, side: str, bf: Optional[Battlefield]) -> bool:
+        """Whether a unit `side` plays (a card or token, to `bf` or base) enters
+        ready by an effect: "Units you play this turn enter ready" (Confront), or
+        an `enter_ready_aura` of something `side` has in play whose filter
+        matches it and whose condition holds ("Other friendly units enter ready",
+        "Your tokens enter ready", "Units you play to battlefields you control")."""
+        from .effects import _zone_effect_card_ok
+        if self.gs.units_enter_ready_turn.get(side) == self.gs.turn:
+            return True
+        actor = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        for src, src_bf in self._sources_in_play(side):
+            if src is card:
+                continue
+            spec = CARD_REGISTRY.get(src.name)
+            for es in (spec.effects if spec else ()):
+                if es.trigger != "enter_ready_aura":
+                    continue
+                if not _zone_effect_card_ok(card, {"target_filter": es.params.get("filter") or {}}):
+                    continue
+                if self._check_condition(es.condition, src, actor, opponent,
+                                         {"battlefield": src_bf, "triggering_card": card,
+                                          "played_to": bf}):
+                    return True
+        return False
 
     @staticmethod
     def _to_trash(owner: Player, card: Card) -> None:
@@ -3296,6 +3361,7 @@ class GameLoop:
         gs.enemy_choices_this_turn["A"] = gs.enemy_choices_this_turn["B"] = 0
         gs.next_card_discounts["A"] = []
         gs.next_card_discounts["B"] = []
+        gs.next_units_enter_ready["A"] = gs.next_units_enter_ready["B"] = 0
         gs.friendly_unit_died_this_turn["A"] = False
         gs.friendly_unit_died_this_turn["B"] = False
         gs.discarded_this_turn["A"] = False

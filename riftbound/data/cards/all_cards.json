@@ -384,7 +384,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "enter_ready",
+        "trigger": "enter_ready_aura",
+        "filter": {
+          "is_unit": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-012",
@@ -725,7 +733,18 @@
     "keywords": [
       "LEGION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "next_unit_enters_ready",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "you_already_played_another_card_this_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-022",
@@ -1051,7 +1070,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "discount_next_card",
+        "filter": {
+          "is_spell": true
+        },
+        "energy": 5
+      }
+    ]
   },
   {
     "card_id": "OGN-032",
@@ -3830,7 +3857,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_card_played",
+        "token_name": "Recruit",
+        "might": 1,
+        "condition": {
+          "type": "not_your_turn"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-118",
@@ -4250,6 +4287,11 @@
     ],
     "effects": [
       {
+        "effect": "units_enter_ready_this_turn",
+        "trigger": "on_cast",
+        "timing": "action"
+      },
+      {
         "effect": "draw_cards",
         "trigger": "on_cast",
         "timing": "action",
@@ -4570,7 +4612,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_aura",
+        "amount": 2,
+        "min_cost": 1,
+        "filter": {
+          "subtype": "Dragon"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-141",
@@ -5431,7 +5483,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_card_played",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "triggering_card_from_zone",
+          "params": {
+            "zone": "facedown"
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-169",
@@ -10466,7 +10532,17 @@
         "rarity": "Common"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "units_enter_ready_this_turn",
+        "trigger": "on_cast"
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Gold"
+      }
+    ]
   },
   {
     "card_id": "SFD-005",
@@ -13235,7 +13311,19 @@
         "rarity": "Common"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "target": "self",
+        "condition": {
+          "type": "you_control_subtype",
+          "params": {
+            "subtype": "Dragon",
+            "other": true
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-095",
@@ -13397,7 +13485,21 @@
         "rarity": "Common"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_card_played",
+        "count": 1,
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "power_at_least": 2
+            }
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-101",
@@ -14023,7 +14125,19 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_card_played",
+        "token_name": "Gold",
+        "condition": {
+          "type": "triggering_card_from_zone",
+          "params": {
+            "zone": "facedown"
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-123",
@@ -15515,7 +15629,15 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "enter_ready",
+        "trigger": "enter_ready_aura",
+        "filter": {
+          "is_token": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-172",
@@ -15673,7 +15795,18 @@
         "rarity": "Rare"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "target": "self",
+        "condition": {
+          "type": "units_in_base_at_least",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-177",
@@ -17859,7 +17992,25 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_hide",
+        "target": "self"
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_card_played",
+        "target": "enemy_unit",
+        "amount": 2,
+        "condition": {
+          "type": "triggering_card_from_zone",
+          "params": {
+            "zone": "facedown"
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "UNL-024",
@@ -26489,7 +26640,28 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
+      },
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_aura",
+        "amount": 1,
+        "power": 1,
+        "min_cost": 1,
+        "filter": {
+          "is_spell": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-055",
@@ -30960,7 +31132,22 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "sequence",
+        "optional": true,
+        "steps": [
+          {
+            "effect": "ready_unit",
+            "target": "self"
+          },
+          {
+            "effect": "cant_move_this_turn",
+            "target": "self"
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-026",
@@ -31092,7 +31279,21 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_card_played",
+        "target": "self",
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "energy_at_least": 7
+            }
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-030",
@@ -32980,7 +33181,30 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "sequence",
+        "trigger": "on_card_played",
+        "condition": {
+          "type": "triggering_card_from_zone",
+          "params": {
+            "zone": "facedown"
+          }
+        },
+        "steps": [
+          {
+            "effect": "ready_unit",
+            "target": "self"
+          },
+          {
+            "effect": "grant_temporary_might",
+            "target": "self",
+            "amount": 1,
+            "duration": "this_turn"
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-090",
@@ -34870,7 +35094,15 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "enter_ready",
+        "trigger": "enter_ready_aura",
+        "condition": {
+          "type": "played_to_controlled_battlefield"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-149",

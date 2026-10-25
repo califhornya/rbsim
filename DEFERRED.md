@@ -82,12 +82,20 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     them the same way — hand-author them once the engine has what they need:
     OGN-025, OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
     UNL-045, UNL-054, UNL-136, VEN-088, RAD-012, RAD-015, RAD-016, RAD-020,
-    RAD-026, RAD-030, RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
-    RAD-071, RAD-079, RAD-089, RAD-090, RAD-095, RAD-098, RAD-107, RAD-130,
-    RAD-142, RAD-149, RAD-155.
+    RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
+    RAD-071, RAD-079, RAD-089, RAD-095, RAD-098, RAD-107, RAD-130,
+    RAD-142, RAD-155.
     Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
     SFD-110, UNL-143, VEN-119, VEN-162, RAD-041, RAD-051, RAD-080, RAD-085,
     RAD-091, RAD-114, RAD-157, RAD-160.
+    Hand-authored later on 2026-10-25 (engine-audit session): the 10 meta
+    cards (OGN-084, OGN-289, SFD-036, SFD-057, SFD-199, UNL-070, UNL-150,
+    UNL-184, VEN-044, VEN-155), RAD-006, OGN-041, and OGN-011, OGN-021,
+    OGN-031, OGN-117, OGN-129, OGN-140, OGN-167, SFD-004, SFD-094, SFD-100,
+    SFD-121, SFD-171, SFD-176, UNL-023, VEN-055, RAD-026, RAD-030, RAD-090,
+    RAD-149 (enter-ready auras, "when you play a card ..." triggers, cost
+    auras). RAD-143 Mordekaiser Iron Revenant emptied (its "banish a unit or
+    gear from your trash" cost isn't modeled).
   - **Full-corpus hand review (2026-10-25):** every card with effects in Origins,
     Spiritforged, Unleashed, Vendetta and Proving Grounds was read against its
     text; ~110 more specs that made cards stronger than printed were emptied

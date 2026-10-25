@@ -84,6 +84,10 @@ class GameState:
     # "At the end of this turn, ..." effects waiting: (side, source card,
     # battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
+    # "Units you play this turn enter ready" (Confront): the turn it applies to.
+    units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
+    # "The next unit you play this turn enters ready" (Sun Disc): how many.
+    next_units_enter_ready: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})

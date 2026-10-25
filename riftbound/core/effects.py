@@ -162,6 +162,18 @@ def _discount_next_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     })
 
 
+@effect("units_enter_ready_this_turn")
+def _units_enter_ready_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Units you play this turn enter ready" (Confront, Bushwhack)."""
+    ctx.loop.gs.units_enter_ready_turn[ctx.actor_side] = ctx.loop.gs.turn
+
+
+@effect("next_unit_enters_ready")
+def _next_unit_enters_ready(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next unit you play this turn enters ready" (Sun Disc)."""
+    ctx.loop.gs.next_units_enter_ready[ctx.actor_side] += int(spec.get("amount", 1))
+
+
 @effect("cant_move_this_turn")
 def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They can't move it this turn" (Vex Apathetic): no Standard Move."""
@@ -1083,6 +1095,10 @@ def _zone_effect_card_ok(card, spec: Mapping[str, Any]) -> bool:
         return False
     energy = int(getattr(card, "cost_energy", 0) or 0)
     power = int(getattr(card, "cost_power", 0) or 0)
+    if "is_token" in tf and bool(getattr(card, "is_token", False)) != bool(tf["is_token"]):
+        return False
+    if "power_at_least" in tf and power < int(tf["power_at_least"]):
+        return False
     if "energy_at_most" in tf and energy > int(tf["energy_at_most"]):
         return False
     if "energy_at_least" in tf and energy < int(tf["energy_at_least"]):

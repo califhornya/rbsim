@@ -42,6 +42,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_chosen",                                 # your spell or ability chooses me (Irelia Fervent)
     "on_readied",                                # I go from exhausted to ready (Irelia Fervent)
     "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
+    "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
+    "on_hide",                                   # you hide a card (Katarina Reckless)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -97,6 +99,10 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "all_of",                            # conditions: [...] all hold
     "died_alone",                        # DEATHKNELL "if I died alone"
     "enemy_choices_this_turn_at_least",  # n: "if you've chosen enemy units twice this turn"
+    "not_your_turn",                     # "when you play a card on an opponent's turn"
+    "triggering_card_from_zone",         # zone: "when you play a card from face down"
+    "played_to_controlled_battlefield",  # enter_ready_aura: "units you play to battlefields you control"
+    "units_in_base_at_least",            # n: "if you have two or more other units in your base"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -118,7 +124,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "card_type", "is_legend", "is_champion",
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
-    "power_at_most",                 # zone effects: "no more than [rune]"
+    "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
 })
 
 # amount_source values understood by effects._amount.
@@ -165,7 +171,9 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 # - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 # - no_combat_damage       passive marker ("I don't deal combat damage") folded by Loop._apply_passive_grant
+# - enter_ready            enter_ready_aura marker read by Loop._enters_ready
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
+    "enter_ready",
 })

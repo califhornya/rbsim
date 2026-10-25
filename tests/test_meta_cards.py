@@ -247,3 +247,60 @@ def test_debuff_floor_and_ready_up_to_n():
     a.base_units.extend(tired)
     loop._resolve_card_effects(_card("Acceleration Gate"), bf, a, loop.gs.B)
     assert sum(u.ready for u in tired) == 4 and not tired[0].ready   # the 4 mightiest
+
+
+def test_enter_ready_auras_and_turn_effects():
+    loop = _loop()
+    a = loop.gs.A
+    a.base_units.append(_unit("Magma Wurm"))
+    a.hand.append(UnitCard(name="Runner", cost_energy=0))
+    loop._apply_action(a, ("UNIT", 0, 0, None))
+    assert a.base_units[-1].ready                      # "Other friendly units enter ready"
+    loop = _loop()
+    a = loop.gs.A
+    a.base_units.append(_unit("Renata Glasc Industrialist"))
+    assert loop._play_token("Recruit", "A").ready      # "Your tokens enter ready"
+    a.hand.append(UnitCard(name="Card", cost_energy=0))
+    loop._apply_action(a, ("UNIT", 0, 0, None))
+    assert not a.base_units[-1].ready                  # ...but not cards
+
+
+def test_direwing_needs_another_dragon_and_herald_discounts_dragons():
+    loop = _loop()
+    a = loop.gs.A
+    a.hand.append(_card("Direwing"))
+    a.energy = 20
+    for _ in range(3):
+        a.add_power(Domain.CALM)
+        a.add_power(Domain.FURY)
+    loop._apply_action(a, ("UNIT", 0, 0, None))
+    assert not a.base_units[-1].ready                  # it is the only Dragon
+    a.base_units.append(_unit("Herald of Scales"))
+    dragon = _card("Direwing")
+    assert loop._effective_cost(dragon, a)[0] == max(1, dragon.cost_energy - 2)
+    a.hand.append(dragon)
+    loop._apply_action(a, ("UNIT", len(a.hand) - 1, 0, None))
+    assert a.base_units[-1].ready                      # another Dragon now
+
+
+def test_viktor_makes_recruits_only_on_the_opponents_turn():
+    loop = _loop()
+    b = loop.gs.B
+    b.base_units.append(_unit("Viktor Innovator"))
+    loop._count_card_played(SpellCard(name="Mine"), "A")
+    loop._note_card_played(SpellCard(name="Reaction"), "B")    # B plays on A's turn
+    assert [u.card.name for u in b.base_units].count("Recruit") == 1
+    loop.gs.active = "B"
+    loop._note_card_played(SpellCard(name="OnMyTurn"), "B")
+    assert [u.card.name for u in b.base_units].count("Recruit") == 1
+
+
+def test_applied_researchers_discount_needs_empowered():
+    loop = _loop()
+    a = loop.gs.A
+    researchers = _unit("Applied Researchers")
+    a.base_units.append(researchers)
+    spell = SpellCard(name="S", cost_energy=3, cost_power=1, cost_power_domain=Domain.MIND)
+    assert loop._effective_cost(spell, a, 0) == (3, 1)
+    researchers.empowered = True
+    assert loop._effective_cost(spell, a, 0) == (2, 0)
