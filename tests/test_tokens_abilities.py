@@ -202,3 +202,16 @@ def test_trinity_force_scores_when_its_unit_holds():
     bf.add_unit("A", holder)
     loop._fire_scoring_trigger("on_hold", bf, "A")
     assert loop.gs.points_A == 1
+
+
+def test_equipment_might_bonus_and_gearhead_doubles_it():
+    loop = _loop()
+    holder = UnitInPlay(card=UnitCard(name="Holder", might=2))
+    holder.gear.append(CARD_REGISTRY["Jagged Cutlass"].instantiate())     # [might] +2
+    loop.gs.A.base_units.append(holder)
+    assert holder.might == 4
+    gearhead = UnitInPlay(card=CARD_REGISTRY["Gearhead"].instantiate())
+    gearhead.gear.append(CARD_REGISTRY["Jagged Cutlass"].instantiate())
+    loop.gs.A.base_units.append(gearhead)
+    loop._recompute_passives()
+    assert gearhead.might == int(gearhead.card.might) + 4

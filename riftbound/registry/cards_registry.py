@@ -311,6 +311,7 @@ class CardSpec:
                 tags=list(self.tags),
                 keywords=list(self.keywords),
                 effects=effects,
+                might=self.might,
             )
         if self.category is CardType.RUNE:
             if self.domain is None:

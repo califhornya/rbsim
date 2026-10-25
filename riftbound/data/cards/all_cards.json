@@ -11359,7 +11359,7 @@
     "domain": "Calm",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 1,
     "cost_energy": 1,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -11885,7 +11885,7 @@
     "domain": "Calm",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 1,
     "cost_energy": 2,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -12485,7 +12485,13 @@
         "rarity": "Common"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "double_equipment_might",
+        "trigger": "passive",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-069",
@@ -25128,7 +25134,7 @@
     "domain": "Fury",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 1,
     "cost_energy": 3,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -25651,7 +25657,7 @@
     "domain": "Calm",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 1,
     "cost_energy": 2,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -27225,7 +27231,7 @@
     "domain": "Body",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 2,
     "cost_energy": 3,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -29367,7 +29373,7 @@
     "domain": "Order",
     "category": "Gear",
     "sub_type": "Equipment",
-    "might": null,
+    "might": 0,
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,

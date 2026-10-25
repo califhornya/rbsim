@@ -281,62 +281,59 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Vex Apathetic"
+          "A": [],
+          "B": [
+            "Scuttle Crab"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": "B"
         },
         {
-          "A": [
-            "Hwei Brooding Painter"
+          "A": [],
+          "B": [
+            "Yasuo Remorseful"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": null
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [],
         "deck": 18,
-        "energy": 12,
+        "energy": 9,
         "hand": 0,
         "power_pool": {
           "CHAOS": 7,
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 20
+        "trash": 22
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Adaptatron",
-          "Stellacorn Herder"
-        ],
+        "base_gear": 3,
+        "base_units": [],
         "deck": 21,
-        "energy": 0,
-        "hand": 3,
+        "energy": 3,
+        "hand": 5,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 1,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 12
+        "runes_in_play": 7,
+        "trash": 7
       },
-      "points_A": 8,
-      "points_B": 7,
+      "points_A": 3,
+      "points_B": 8,
       "spells_cast": 18,
-      "turns": 19,
-      "units_played": 19,
-      "winner": "A",
+      "turns": 18,
+      "units_played": 16,
+      "winner": "B",
       "xp_A": 0,
-      "xp_B": 2
+      "xp_B": 1
     },
     "spec": {
       "ai_a": "diana",
@@ -1025,35 +1022,36 @@
         "base_units": [],
         "deck": 26,
         "energy": 10,
-        "hand": 2,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 6,
           "FURY": 4
         },
         "runes_in_play": 10,
-        "trash": 10
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
         "base_gear": 3,
         "base_units": [
+          "Scuttle Crab",
           "Lonely Poro"
         ],
-        "deck": 25,
+        "deck": 21,
         "energy": 12,
-        "hand": 0,
+        "hand": 1,
         "power_pool": {
           "CALM": 6,
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 9
+        "trash": 11
       },
-      "points_A": 6,
+      "points_A": 7,
       "points_B": 8,
-      "spells_cast": 10,
+      "spells_cast": 12,
       "turns": 19,
-      "units_played": 11,
+      "units_played": 12,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0

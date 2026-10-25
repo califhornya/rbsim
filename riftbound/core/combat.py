@@ -39,6 +39,7 @@ class UnitInPlay:
     turn_keywords: list = field(default_factory=list)
     granted_keywords: list = field(default_factory=list)
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
+    equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -57,6 +58,8 @@ class UnitInPlay:
             for e in getattr(g, "effects", []) or []
             if isinstance(e, dict) and e.get("effect") == "grant_might"
         )
+        # Each Equipment's printed Might bonus ("[might] +2").
+        gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
         return max(0, int(self.card.might or 0) + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
 
     def has_keyword(self, keyword: str) -> bool:

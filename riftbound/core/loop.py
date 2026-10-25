@@ -984,6 +984,7 @@ class GameLoop:
             u.passive_might = 0
             u.passive_keywords = set()
             u.no_combat_damage = False
+            u.equip_bonus_mult = 1
 
         for bf in self.gs.battlefields:
             for side in ("A", "B"):
@@ -1086,6 +1087,11 @@ class GameLoop:
         if es.effect == "no_combat_damage":
             for u in targets:
                 u.no_combat_damage = True
+            return
+
+        if es.effect == "double_equipment_might":
+            for u in targets:
+                u.equip_bonus_mult = 2
             return
 
         if es.effect == "give_keyword":

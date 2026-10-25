@@ -222,6 +222,15 @@ Seals added energy or crashed; floating Power. Still open, in this order:
 - [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
   (latent: no non-passive spec uses it); now the unit's aura_might.
 
+## Equipment Might bonuses (data)
+The printed "[might] +N" of Equipment was dropped at import (the parser reads
+Might with `isdigit()`; RiftMana now puts it in `data-e-might`). A gear card's
+`might` is its Equipment bonus and the equipped unit counts it (2026-10-25), but
+only 6 of 43 values are known from local sources (rm-extract JSON, Downloads/
+vendetta.html): Doran's Shield, Guardian Angel, Pendulum Blade, Hand Hammer,
+Jagged Cutlass, Shady Spectacles. The other 37 (Spiritforged, Unleashed,
+Radiance Equipment) need a saved RiftMana card-list page with those cards.
+
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
 the real engine (reset/step/legal_actions/observation/reward vs a fixed opponent).

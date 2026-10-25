@@ -175,5 +175,5 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
-    "enter_ready",
+    "enter_ready", "double_equipment_might",
 })
