@@ -66,8 +66,7 @@ def test_action_to_index_stable_across_kinds():
         GameAction.play("UNIT", 0, 0, ""),
         GameAction.move(2, 0, ""),                 # base(=2) -> BF0
         GameAction.hidden_play(1, ""),
-        GameAction.ability("PYKE_LEGEND", 0, ""),
-        GameAction.ability("GOLD_SACRIFICE", "FURY", ""),
+        GameAction.ability("ACTIVATED", 0, ""),
         GameAction.ability("ACTIVATED", 2, ""),
     ]
     idxs = [action_to_index(a) for a in samples]

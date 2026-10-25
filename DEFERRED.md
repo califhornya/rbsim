@@ -167,9 +167,9 @@ as the time running out. Left:
   counts or game durations are known. With it, `simple_trade` mirrors over all repo
   decks (280 matches): 11 of 44 game-3s go to time; 71 matches end by time, most
   of them from AI stalls hitting the 40-turn guard.
-- **AI stalls.** With `simple_trade` vs `simple_trade`, 53 of 420 games (12.6%,
-  all repo deck pairs × 15 seeds) reach the 40-turn guard without either side
-  reaching 8 points.
+- [DONE 2026-10-25] **AI stalls.** Were 53 of 420 `simple_trade` mirror games
+  (12.6%) at the 40-turn guard; 0 of 420 after token units could move and fight
+  and the duplicate movement handlers were removed.
 - **Learned sideboarding.** Today's policies are "keep the registered list" and
   "follow the deck's fixed plans"; a net-guided policy (like the battlefield
   chooser in `ai/pregame.py`) is future work.
@@ -178,6 +178,28 @@ as the time running out. Left:
 - **Best-of-1 setup variant** (TR 406.1.h): not modeled.
 - **Single games** (CLI, self-play, RL env) still score the 40-turn guard as "any
   lead wins"; only matches apply the time-limit rule.
+
+## Engine audit (2026-10-25) — found while starting the inert-card pass
+Fixed: one play procedure for every zone/timing (champions' play effects,
+ACCELERATE, reactions' costs and counters); token units are real units that move
+and fight, Gold is a gear token (its old special ability added a permanent
+rune); the hardcoded movement handlers ran on top of the card specs (Stellacorn
+Herder drew 2); kill effects and spell damage skip DEATHKNELL; REACTION abilities
+were never offered and activated abilities never checked their condition; the
+Seals added energy or crashed; floating Power. Still open, in this order:
+- **Group moves (§144.3).** A MOVE moves one unit (always the first ready one,
+  whatever the agent picked), and its showdown/combat starts at once, so every
+  attack is a single unit. Needs a move action that names the units.
+- **`move_unit` effect** only moves a friendly unit at the effect's battlefield
+  to base (~40 cards: Charm, Ride the Wind, Moonfall, Fae Porter...).
+- **Targeting baseline.** Effects pick the first unit at the effect's
+  battlefield (never base or other battlefields) instead of a real choice.
+- **Spell damage doesn't stay** on surviving units (`deal_direct_damage` heals
+  them at once), so spell + combat damage never add up.
+- **Equipment triggers** ("When I attack/conquer" on gear) aren't dispatched;
+  only "when I move" is (2026-10-25).
+- **`grant_might` (EffectContext)** writes the card's printed Might, which then
+  persists in every zone.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

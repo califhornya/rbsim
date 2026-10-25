@@ -22,8 +22,6 @@ from typing import Optional, TYPE_CHECKING
 
 from .cards import GearCard, LegendCard, SpellCard, UnitCard
 from .decisions import DecisionPoint, GameAction
-from .effects import REGISTRY as EFFECT_REGISTRY
-from .enums import Domain
 
 if TYPE_CHECKING:
     from .loop import GameLoop
@@ -124,51 +122,20 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
 
 
 def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
-    gs = loop.gs
     out: list[GameAction] = []
 
-    # Pyke legend: [1],[tap] a ready Pyke on a battlefield.
-    pyke_ready = any(
-        u.card.name == "Pyke Bloodharbor Ripper" and u.ready
-        for bf in gs.battlefields
-        for u in (bf.units_A if side == "A" else bf.units_B)
-    )
-    if pyke_ready and ap.can_pay_cost(1, None, None):
-        out.append(GameAction.ability("PYKE_LEGEND", 0, "Pyke: bounce a unit, spawn Gold"))
-
-    # Gold sacrifice: kill a Gold token → add a rune of a chosen domain.
-    if any(u.card.name == "Gold" and u.is_token for u in ap.base_units):
-        domains = [d for d in Domain if d in ap.rune_pool] or list(Domain)
-        for d in domains:
-            out.append(GameAction.ability("GOLD_SACRIFICE", d.name, f"Sacrifice Gold → {d.name} rune"))
-
-    # Generic activated abilities + base-gear equips (stable index order).
+    # Generic activated abilities + base-gear equips (stable index order), those
+    # the current window allows (GameLoop._ability_window) and that are usable.
     for i, entry in enumerate(loop.activatable_abilities(side)):
+        if not loop._ability_usable(ap, entry):
+            continue
         if entry["type"] == "equip":
-            gear = entry["gear"]
-            cost = loop._equip_cost(gear)
-            if (
-                gear in ap.base_gear
-                and cost is not None
-                and loop._can_pay_equip(ap, cost)
-                and loop._first_friendly_unit_on_board(side) is not None
-            ):
-                out.append(GameAction.ability("ACTIVATED", i, f"Equip {gear.name}"))
+            label = f"Equip {entry['gear'].name}"
         elif entry["type"] == "gear_ability":
-            gear, eff = entry["gear"], entry["eff"]
-            parsed = loop._parse_activated_cost(eff.cost)
-            tap_ok = not (parsed["tap"] and getattr(gear, "tapped", False))
-            pay_ok = loop._can_pay_gear(ap, parsed["energy"], parsed["power"], None)
-            rec_ok = not parsed["recycle"] or len(ap.trash) >= parsed["recycle"]
-            xp_ok = not parsed["spend_xp"] or loop.gs.get_xp(side) >= parsed["spend_xp"]
-            if (gear in ap.base_gear and tap_ok and pay_ok and rec_ok and xp_ok
-                    and EFFECT_REGISTRY.get(eff.effect) is not None):
-                out.append(GameAction.ability("ACTIVATED", i, f"Gear {eff.effect} ({gear.name})"))
+            label = f"Gear {entry['eff'].effect} ({entry['gear'].name})"
         else:
-            unit, eff = entry["unit"], entry["eff"]
-            parsed = loop._parse_activated_cost(eff.cost)
-            if loop._activated_affordable(ap, unit, parsed) and EFFECT_REGISTRY.get(eff.effect) is not None:
-                out.append(GameAction.ability("ACTIVATED", i, f"Activate {eff.effect} ({unit.card.name})"))
+            label = f"Activate {entry['eff'].effect} ({entry['unit'].card.name})"
+        out.append(GameAction.ability("ACTIVATED", i, label))
     return out
 
 
@@ -195,6 +162,8 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
     for lane in loop._hidden_playable_lanes(ap.name):
         fd = loop.gs.battlefields[lane].facedown
         actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+    # REACTION abilities (mana abilities like Seals and Gold among them).
+    actions.extend(_ability_actions(loop, ap, ap.name))
     return actions
 
 
@@ -224,4 +193,6 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     if lane in loop._hidden_playable_lanes(ap.name):
         fd = gs.battlefields[lane].facedown
         actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+    # ACTION and REACTION abilities.
+    actions.extend(_ability_actions(loop, ap, ap.name))
     return actions

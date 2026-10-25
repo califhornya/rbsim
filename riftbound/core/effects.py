@@ -81,6 +81,17 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             handler(ctx, sub)
 
 
+@effect("sequence")
+def _sequence(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Several effects resolved in order as ONE ability or trigger, paid once
+    ("[1], [tap]: Return a friendly unit ... Play a Gold gear token"): `steps`
+    is a list of effect dicts, resolved like mode_choice's sub-effects."""
+    for sub in spec.get("steps") or []:
+        handler = REGISTRY.get(sub.get("effect"))
+        if handler:
+            handler(ctx, sub)
+
+
 @effect("reveal_top_draw_if_spell")
 def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
@@ -107,7 +118,14 @@ def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
     else:
         runes = {d: len(rs) for d, rs in player.rune_pool.items() if rs}
         domain = max(runes, key=runes.get) if runes else next(iter(Domain))
-    player.power_pool[domain] = player.power_pool.get(domain, 0) + amount
+    player.add_power(domain, amount)
+
+
+@effect("add_power")
+def _add_power(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ADD [fury] (§ "add"): gain `amount` Power of a named domain (the Seals)."""
+    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    player.add_power(ctx._coerce_domain(spec.get("domain")), int(spec.get("amount", 1)))
 
 
 @effect("add_earmarked_energy")
@@ -119,7 +137,8 @@ def _add_earmarked_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
 @effect("add_earmarked_power")
 def _add_earmarked_power(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.add_earmarked_power(int(spec.get("amount", 1)),
-                            target=str(spec.get("target", "actor")))
+                            target=str(spec.get("target", "actor")),
+                            use=str(spec.get("use", "gear")))
 
 
 @effect("ready_units")
@@ -426,6 +445,10 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         # first friendly unit at the effect's battlefield.
         src = _source_unit(ctx)
         return [src] if src is not None else []
+    if target == "triggering_unit":
+        # The unit that caused this trigger ("give it +1 [might]").
+        unit = ctx.extra.get("triggering_unit")
+        return [unit] if unit is not None else []
     if target in _BOTH_SIDES_TARGETS:
         units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
     elif target in _CHOOSER_TARGETS:
@@ -443,13 +466,15 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
 
 
 def _source_unit(ctx: "EffectContext"):
-    """The UnitInPlay whose card is this effect's source (for self_might etc.)."""
-    for bf in ctx.loop.gs.battlefields:
-        for u in bf.units_A + bf.units_B:
-            if u.card is ctx.card:
-                return u
-    for u in ctx.actor.base_units:
+    """The UnitInPlay whose card is this effect's source (for self_might etc.).
+    For an attached Equipment it is the equipped unit ("When I move" on gear)."""
+    units = [u for bf in ctx.loop.gs.battlefields for u in bf.units_A + bf.units_B]
+    units += ctx.actor.base_units
+    for u in units:
         if u.card is ctx.card:
+            return u
+    for u in units:
+        if any(g is ctx.card for g in u.gear):
             return u
     return None
 
@@ -515,7 +540,7 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
 
 @effect("kill_unit")
 def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    gs = ctx.loop.gs
+    dead = []
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         # The owner is found per unit so both-sides targets route each card to
         # the right trash.
@@ -523,10 +548,10 @@ def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             units = _bf_units(ctx, side)
             if unit in units:
                 units.remove(unit)
-                owner = gs.get_player(side)
-                owner.trash.append(unit.card)
-                owner.base_gear.extend(unit.gear)
+                dead.append((unit, side))
                 break
+    # They die together: replacements, DEATHKNELL, "when a friendly unit dies".
+    ctx.loop._route_deaths(dead, ctx.battlefield)
 
 
 def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
@@ -585,10 +610,10 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         elif holder is not None:
             if gear in holder.gear:
                 holder.gear.remove(gear)
-                player.trash.append(gear)
+                ctx.loop._to_trash(player, gear)
         elif gear in player.base_gear:
             player.base_gear.remove(gear)
-            player.trash.append(gear)
+            ctx.loop._to_trash(player, gear)
 
 
 _ENEMY_GEAR_HINTS = {"enemy_gear", "chosen_gear", "gear"}
@@ -813,7 +838,10 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("play_token")
 def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    from .movement_effects import _spawn_token_to_base
+    """Play `count` tokens (GameLoop._play_token). `location`: "base" (default),
+    "here" (this battlefield; base if the source is in base) or "moved_from"
+    (where the moving unit left, Lillia: "play a Sprite there"). `might`
+    overrides the token's Might ("a 2 [might] Sand Soldier")."""
     token_name = str(spec.get("token_name", "Recruit"))
     count = int(spec.get("count", spec.get("amount", 1)))
     ready = _coerce_bool(spec.get("ready", False))
@@ -832,8 +860,19 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         for _ in range(count):
             ctx.loop._deploy_gear(side, bf, token_spec, is_token=True)
         return
+    side = ctx._side_for_player(player)
+    location = str(spec.get("location", "base")).lower()
+    bf = None
+    if location == "here":
+        here = ctx.battlefield
+        src = ctx.loop._find_unit_by_card(ctx.card)
+        in_base = src is not None and src in player.base_units
+        bf = None if in_base or here not in ctx.loop.gs.battlefields else here
+    elif location == "moved_from":
+        origin = ctx.extra.get("moved_from")
+        bf = origin if origin in ctx.loop.gs.battlefields else None
     for _ in range(count):
-        _spawn_token_to_base(player, token_name, ready=ready)
+        ctx.loop._play_token(token_name, side, bf=bf, ready=ready, might=spec.get("might"))
 
 
 def _deploy_destination(ctx: "EffectContext", spec: Mapping[str, Any], side: str) -> Battlefield:

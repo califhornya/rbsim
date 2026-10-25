@@ -1294,12 +1294,14 @@
     ],
     "effects": [
       {
-        "effect": "gain_energy",
+        "effect": "add_power",
         "trigger": "activated",
         "timing": "reaction",
-        "target": "actor",
-        "amount": 1,
-        "domain": "Fury"
+        "cost": {
+          "tap": true
+        },
+        "domain": "fury",
+        "amount": 1
       }
     ]
   },
@@ -2694,12 +2696,14 @@
     ],
     "effects": [
       {
-        "effect": "gain_energy",
+        "effect": "add_power",
         "trigger": "activated",
         "timing": "reaction",
-        "amount": 1,
-        "domain": "Calm",
-        "cost": "exhaust"
+        "cost": {
+          "tap": true
+        },
+        "domain": "calm",
+        "amount": 1
       }
     ]
   },
@@ -3905,10 +3909,13 @@
     ],
     "effects": [
       {
-        "effect": "gain_energy",
+        "effect": "add_power",
         "trigger": "activated",
         "timing": "reaction",
-        "resource": "mind",
+        "cost": {
+          "tap": true
+        },
+        "domain": "mind",
         "amount": 1
       }
     ]
@@ -5227,13 +5234,13 @@
     ],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "add_power",
         "trigger": "activated",
         "timing": "reaction",
         "cost": {
           "tap": true
         },
-        "rune_domain": "Body",
+        "domain": "body",
         "amount": 1
       }
     ]
@@ -6512,13 +6519,13 @@
     ],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "add_power",
         "trigger": "activated",
         "timing": "reaction",
         "cost": {
           "tap": true
         },
-        "rune_type": "chaos",
+        "domain": "chaos",
         "amount": 1
       }
     ]
@@ -7111,7 +7118,11 @@
         "trigger": "on_move",
         "token_name": "Recruit",
         "amount": 1,
-        "might": 1
+        "might": 1,
+        "location": "here",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ]
   },
@@ -7826,12 +7837,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "gain_power_any_domain",
+        "effect": "add_power",
         "trigger": "activated",
-        "amount": 1,
+        "timing": "reaction",
         "cost": {
           "tap": true
-        }
+        },
+        "domain": "order",
+        "amount": 1
       }
     ]
   },
@@ -7917,13 +7930,14 @@
     ],
     "effects": [
       {
-        "effect": "gain_power_any_domain",
+        "effect": "add_earmarked_power",
         "trigger": "activated",
         "timing": "reaction",
-        "amount": 1,
         "cost": {
           "tap": true
-        }
+        },
+        "use": "spell",
+        "amount": 1
       }
     ]
   },
@@ -8850,7 +8864,7 @@
     "name": "Recruit",
     "domain": null,
     "category": "Token",
-    "sub_type": null,
+    "sub_type": "Recruit",
     "might": 1,
     "cost_energy": null,
     "cost_power": 0,
@@ -8870,7 +8884,7 @@
     "name": "Recruit",
     "domain": null,
     "category": "Token",
-    "sub_type": null,
+    "sub_type": "Recruit",
     "might": 1,
     "cost_energy": null,
     "cost_power": 0,
@@ -8994,8 +9008,8 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_move",
-        "target": "actor",
+        "trigger": "on_unit_moves_from_here",
+        "target": "triggering_unit",
         "amount": 1,
         "duration": "this_turn"
       }
@@ -11397,7 +11411,10 @@
           "exclude_self": true
         },
         "amount": 1,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ]
   },
@@ -13685,7 +13702,10 @@
           "exclude_self": true
         },
         "amount_source": "self_might",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ]
   },
@@ -13855,9 +13875,9 @@
     ],
     "effects": [
       {
-        "effect": "add_rune",
+        "effect": "channel_rune",
         "trigger": "on_conquer",
-        "amount": 1,
+        "count": 1,
         "exhausted": true
       }
     ]
@@ -13960,7 +13980,10 @@
       {
         "effect": "discard_card",
         "trigger": "on_move",
-        "count": 1
+        "count": 1,
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       },
       {
         "effect": "draw_cards",
@@ -14037,7 +14060,7 @@
           "power": 1
         },
         "condition": {
-          "type": "kicker_paid"
+          "type": "moved_to_battlefield"
         }
       }
     ]
@@ -14291,7 +14314,7 @@
       {
         "effect": "play_token",
         "trigger": "on_conquer",
-        "token_name": "Gold gear",
+        "token_name": "Gold",
         "exhausted": true
       }
     ]
@@ -14386,7 +14409,18 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_move",
+        "target": "self",
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "moved_from_battlefield"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-138",
@@ -14867,7 +14901,8 @@
         "trigger": "on_move",
         "token_name": "Recruit",
         "might": 1,
-        "count": 1
+        "count": 1,
+        "location": "here"
       }
     ]
   },
@@ -15641,7 +15676,19 @@
         "rarity": "Epic"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_move",
+        "token_name": "Recruit",
+        "count": 3,
+        "might": 1,
+        "location": "here",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-180",
@@ -16931,7 +16978,7 @@
     "domain": null,
     "category": "Token",
     "sub_type": "Shurima",
-    "might": null,
+    "might": 2,
     "cost_energy": null,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -16980,7 +17027,8 @@
         "timing": "reaction",
         "amount": 1,
         "cost": {
-          "tap": true
+          "tap": true,
+          "sacrifice_self": true
         }
       }
     ]
@@ -19806,7 +19854,8 @@
       {
         "effect": "play_token",
         "trigger": "on_move",
-        "token_name": "Sprite"
+        "token_name": "Sprite",
+        "location": "moved_from"
       }
     ]
   },
@@ -20747,7 +20796,10 @@
       {
         "effect": "move_unit",
         "trigger": "on_move",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ]
   },
@@ -21283,7 +21335,10 @@
         "effect": "gain_xp",
         "trigger": "on_move",
         "target": "actor",
-        "amount": 2
+        "amount": 2,
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ]
   },
@@ -22952,6 +23007,9 @@
         "amount": 3,
         "target_filter": {
           "is_unit": true
+        },
+        "condition": {
+          "type": "moved_to_battlefield"
         }
       }
     ]
@@ -23170,24 +23228,22 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "recall_unit",
+        "effect": "sequence",
         "trigger": "activated",
-        "timing": "action",
-        "target": "friendly_unit",
         "cost": {
           "energy": 1,
           "tap": true
-        }
-      },
-      {
-        "effect": "play_token",
-        "trigger": "activated",
-        "timing": "action",
-        "token_name": "Gold",
-        "cost": {
-          "energy": 1,
-          "tap": true
-        }
+        },
+        "steps": [
+          {
+            "effect": "recall_unit",
+            "target": "friendly_unit"
+          },
+          {
+            "effect": "play_token",
+            "token_name": "Gold"
+          }
+        ]
       }
     ]
   },
@@ -24801,7 +24857,10 @@
         "trigger": "on_move",
         "target": "self",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ],
     "variants": [
@@ -25708,7 +25767,11 @@
         "effect": "grant_temporary_might",
         "trigger": "on_move",
         "target": "self",
-        "amount": 2
+        "amount": 2,
+        "duration": "this_turn",
+        "condition": {
+          "type": "moved_to_battlefield"
+        }
       }
     ],
     "variants": [
@@ -28089,6 +28152,9 @@
       {
         "effect": "mode_choice",
         "trigger": "on_move",
+        "condition": {
+          "type": "moved_to_battlefield"
+        },
         "modes": [
           [
             {
@@ -34395,16 +34461,7 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [
-      {
-        "effect": "gain_power_any_domain",
-        "trigger": "activated",
-        "amount": 1,
-        "cost": {
-          "tap": true
-        }
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "RAD-143",

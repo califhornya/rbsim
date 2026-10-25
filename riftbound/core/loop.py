@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState, ChainItem
@@ -13,7 +13,6 @@ from .effects import REGISTRY as EFFECT_REGISTRY
 from .effects import _amount as _effect_amount
 from .effects import _passes_filter as _effect_passes_filter
 from .enums import Domain
-from .movement_effects import MOVEMENT_REGISTRY
 from riftbound.registry.engine_vocab import (
     KNOWN_TRIGGERS,
     KNOWN_CONDITIONS,
@@ -31,7 +30,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
-    "on_card_played",
+    "on_card_played", "on_unit_moves_from_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -54,6 +53,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "fewer_runes_than_opponent",
     "cards_played_this_turn_exactly", "opponent_played_n_spells_this_turn",
     "triggering_card_matches", "triggering_card_not_from_hand",
+    "moved_to_battlefield", "moved_from_battlefield",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -86,6 +86,8 @@ class EffectContext:
     actor: Player
     opponent: Player
     battlefield: Battlefield
+    # The trigger's context (triggering_card, moved_from, ...), for handlers.
+    extra: dict = field(default_factory=dict)
 
     def _side_for_player(self, player: Player) -> str:
         return "A" if player is self.loop.gs.A else "B"
@@ -148,13 +150,8 @@ class EffectContext:
 
         _, dead = self.battlefield.apply_spell_damage(target_side, amount)
 
-        # Route spell-killed units (death replacements applied first) to trash + gear.
-        owner = self.loop.gs.A if target_side == "A" else self.loop.gs.B
-        for dead_unit in dead:
-            if self.loop._try_replace_death(dead_unit, target_side):
-                continue
-            owner.trash.append(dead_unit.card)
-            owner.base_gear.extend(dead_unit.gear)
+        # Spell-killed units die like any other (replacements, DEATHKNELL, ...).
+        self.loop._route_deaths([(u, target_side) for u in dead], self.battlefield)
 
         if self.loop.recorder:
             self.loop._record_spell_deaths(self.battlefield, before_a, before_b)
@@ -223,11 +220,16 @@ class EffectContext:
             return
         self._player_for_target(target).earmarked_energy_showdown += amount
 
-    def add_earmarked_power(self, amount: int, *, target: str = "actor") -> None:
-        """Add generic power usable only to play/use gear (Ornn, §earmark)."""
+    def add_earmarked_power(self, amount: int, *, target: str = "actor", use: str = "gear") -> None:
+        """Add generic power usable only to play/use gear (Ornn, §earmark), or
+        with use="spell" only to play spells (Kai'Sa)."""
         if amount == 0:
             return
-        self._player_for_target(target).earmarked_power_gear += amount
+        player = self._player_for_target(target)
+        if use == "spell":
+            player.earmarked_power_spell += amount
+        else:
+            player.earmarked_power_gear += amount
 
     def ready_units(self, *, target: str = "actor", scope: str = "all") -> None:
         units = self._units_for_target(target)
@@ -331,7 +333,7 @@ class GameLoop:
             dead = [u for u in units if u.card.has_keyword("TEMPORARY")]
             for u in dead:
                 units.remove(u)
-                player.trash.append(u.card)
+                self._to_trash(player, u.card)
                 player.base_gear.extend(u.gear)
 
         # Remove unattached TEMPORARY gear at base (§742.1.b; e.g. Spinning Axe:
@@ -341,7 +343,7 @@ class GameLoop:
         temp_gear = [g for g in actor.base_gear if g.has_keyword("TEMPORARY")]
         for g in temp_gear:
             actor.base_gear.remove(g)
-            actor.trash.append(g)
+            self._to_trash(actor, g)
 
         # Clear STUN status at the start of the active player's turn
         for bf in self.gs.battlefields:
@@ -362,8 +364,10 @@ class GameLoop:
         # Clear leftover resources from last turn before channeling
         active_player.energy = 0
         active_player.power_pool.clear()
+        active_player.floating_power.clear()
         active_player.earmarked_energy_showdown = 0
         active_player.earmarked_power_gear = 0
+        active_player.earmarked_power_spell = 0
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
@@ -771,7 +775,7 @@ class GameLoop:
         effect_specs: list[EffectSpec] = list(spec.effects) if spec and spec.effects else []
         if not effect_specs:
             return
-        context = EffectContext(self, card, actor, opponent, battlefield)
+        context = EffectContext(self, card, actor, opponent, battlefield, dict(context_extra or {}))
         for es in effect_specs:
             if es.trigger != trigger:
                 continue
@@ -840,7 +844,7 @@ class GameLoop:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"] and unit is not None:
                 self._remove_unit_from_play(unit, side)
-                actor.trash.append(unit.card)
+                self._to_trash(actor, unit.card)
             card._kicker_paid = True
 
         return True
@@ -1148,6 +1152,10 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype in ("moved_to_battlefield", "moved_from_battlefield"):
+            # "When I move to a battlefield" / "from a battlefield" (on_move).
+            where = extra.get("moved_to" if ctype == "moved_to_battlefield" else "moved_from")
+            return where is not None and where != "base"
         if ctype == "cards_played_this_turn_exactly":
             # "When you play your second card in a turn": the triggering card is
             # already counted when on_card_played fires.
@@ -1397,7 +1405,7 @@ class GameLoop:
             victim = self._first_friendly_unit_on_board(side)
             if victim is not None:
                 self._remove_unit_from_play(victim, side)
-                ap.trash.append(victim.card)
+                self._to_trash(ap, victim.card)
         if cost.get("spend_xp", 0):
             self.gs.add_xp(side, -cost["spend_xp"])
         return True
@@ -1815,17 +1823,24 @@ class GameLoop:
         gs = self.gs
 
         def player_sig(p: Player):
+            side = "A" if p is gs.A else "B"
+            legend = self._legend_unit(side)
             return (
                 len(p.hand), len(p.deck.cards), len(p.trash), len(p.banished),
                 len(p.base_units), len(p.base_gear), p.energy,
                 tuple(sorted((d.name, n) for d, n in p.power_pool.items())),
                 p.total_runes_in_play(),
                 tuple(sorted(u.card.name for u in p.base_units if u.ready)),
+                sum(u.might for u in p.base_units),
+                sum(1 for g in p.base_gear if getattr(g, "tapped", False)),
+                legend is not None and legend.ready,
+                p.earmarked_energy_showdown, p.earmarked_power_gear,
             )
 
         board = tuple(
             (len(bf.units_A), len(bf.units_B),
-             sum(u.might for u in bf.units_A), sum(u.might for u in bf.units_B))
+             sum(u.might for u in bf.units_A), sum(u.might for u in bf.units_B),
+             sum(u.ready for u in bf.units_A + bf.units_B))
             for bf in gs.battlefields
         )
         return (
@@ -1858,9 +1873,12 @@ class GameLoop:
 
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
-        earmarked gear power; during a showdown Diana's showdown energy counts."""
+        earmarked gear power, spells Kai'Sa's earmarked spell power; during a
+        showdown Diana's showdown energy counts."""
         if isinstance(card, GearCard):
             return self._can_pay_gear(actor, energy, power, card.cost_power_domain)
+        if power and isinstance(card, SpellCard):
+            power = max(0, power - actor.earmarked_power_spell)
         if self.gs.showdown_active:
             return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
@@ -1868,6 +1886,12 @@ class GameLoop:
     def _pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
         if isinstance(card, GearCard):
             return self._pay_gear(actor, energy, power, card.cost_power_domain)
+        if not self._can_pay_card(actor, card, energy, power):
+            return False
+        if power and isinstance(card, SpellCard):
+            from_earmark = min(power, actor.earmarked_power_spell)
+            actor.earmarked_power_spell -= from_earmark
+            power -= from_earmark
         if self.gs.showdown_active:
             return self._pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.pay_cost(energy, power, card.cost_power_domain)
@@ -2052,6 +2076,82 @@ class GameLoop:
         side = "A" if ap is self.gs.A else "B"
         self._note_card_played(card, side, from_zone)
 
+    def _play_token(self, name: str, side: str, *, bf: Optional[Battlefield] = None,
+                    ready: bool = False, might: Optional[int] = None):
+        """Play a token (§179). Tokens are not cards (§185): they don't count as a
+        card played and cease to exist off the board (§186.1, see _to_trash). A
+        unit token enters its controller's base or `bf` (exhausted unless
+        `ready`) and is a unit played ("when you play a unit"); a gear token goes
+        to base. Returns the UnitInPlay or the gear card (None if unknown)."""
+        spec = CARD_REGISTRY.get(name)
+        if spec is None:
+            return None
+        card = spec.instantiate()
+        card.is_token = True
+        if might is not None:
+            card.might = int(might)
+        ap = self.gs.get_player(side)
+        if isinstance(card, GearCard):
+            card.tapped = not ready
+            ap.base_gear.append(card)
+            return card
+        unit = UnitInPlay(card=card, ready=ready, is_token=True)
+        if bf is None:
+            ap.base_units.append(unit)
+        else:
+            bf.add_unit(side, unit)
+        self._fire_units_trigger("on_friendly_unit_played", side, exclude_card=card)
+        return unit
+
+    @staticmethod
+    def _to_trash(owner: Player, card: Card) -> None:
+        """Put a card that left the board into its owner's trash; a token ceases
+        to exist instead (§186.1)."""
+        if not getattr(card, "is_token", False):
+            owner.trash.append(card)
+
+    def _standard_move(self, unit: UnitInPlay, side: str, src: int, dst: int) -> None:
+        """A unit's Standard Move (§144) from location `src` to `dst` (battlefield
+        index, or len(battlefields) for base): exhaust it (the cost, §144.2), move
+        it, fire its "when I move" (on_move) abilities with where it came from and
+        went, then start a showdown if it contests or claims the battlefield (the
+        move's triggers resolve first: Corina's Recruits join the fight)."""
+        ap = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        base_index = len(self.gs.battlefields)
+        src_bf = None if src == base_index else self.gs.battlefields[src]
+        dst_bf = None if dst == base_index else self.gs.battlefields[dst]
+        self._exhaust(unit)
+        if self.verbose:
+            print(f"  {side} moves UNIT: {unit.card.name} to {'base' if dst_bf is None else f'BF{dst}'}")
+        prev_controller = dst_bf.controller() if dst_bf is not None else None
+        if dst_bf is None:
+            ap.base_units.append(unit)
+        else:
+            dst_bf.add_unit(side, unit)
+        here = dst_bf or self.gs.battlefields[0]
+        extra = {"battlefield": here, "moved_from": src_bf or "base",
+                 "moved_to": dst_bf or "base", "triggering_unit": unit}
+        # The unit's own "when I move", then its Equipment's (Eye of the Herald).
+        for card in [unit.card] + list(unit.gear):
+            self._resolve_triggered_effects(card, "on_move", here, ap, opponent,
+                                            context_extra=extra)
+        if src_bf is not None and src_bf.card is not None:
+            # "When a unit moves from here" (Back-Alley Bar), for its controller.
+            self._resolve_triggered_effects(src_bf.card, "on_unit_moves_from_here", src_bf,
+                                            ap, opponent, context_extra=extra)
+        if dst_bf is None:
+            return
+        if src_bf is None:
+            # Battlefield "first non-token unit played here this turn" trigger
+            # (Star Spring). Fires once per side per turn at this battlefield.
+            self._fire_first_unit_here(side, dst_bf, unit)
+        # Contested if: gaining control from empty/opponent, OR both sides now have units
+        gained_control = prev_controller != side and dst_bf.controller() == side
+        if gained_control or (dst_bf.units_A and dst_bf.units_B):
+            dst_bf.contested_this_turn = True
+            self._run_showdown(dst, attacker=side)
+
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
@@ -2174,257 +2274,160 @@ class GameLoop:
             self._play_from_hidden(side, lane)
 
         elif kind == "MOVE":
-            # Illegal during Showdown or Closed State (active chain)
+            # Illegal during Showdown or Closed State (active chain), §144.1.
             if self.gs.showdown_active or self.gs.chain:
                 return
-
-            src = lane
-            dst = dst_lane
-            if src is None or dst is None or src == dst:
+            src, dst = lane, dst_lane
+            n_loc = len(self.gs.battlefields) + 1
+            if src is None or dst is None or src == dst or src not in range(n_loc)                     or dst not in range(n_loc):
                 return
-            if src not in range(len(self.gs.battlefields) + 1):
-                return
-            if dst not in range(len(self.gs.battlefields) + 1):
-                return
-
             side = self.gs.active
-            base = ap.base_units
-
             if src == base_index:
-                if dst == base_index:
-                    return
                 unit = ap.pop_base_unit()
-                if unit is None:
-                    return
-                if unit.is_token:
-                    ap.base_units.insert(0, unit)
-                    return
-                if self.verbose:
-                    print(f"  {ap.name} moves UNIT: {unit.card.name} to BF{dst}")
-                self._exhaust(unit)
-                target_bf = self.gs.battlefields[dst]
-
-                # Check if this move establishes contested status (moving to a BF the player doesn't control)
-                prev_controller = target_bf.controller()
-                target_bf.add_unit(side, unit)
-                new_controller = target_bf.controller()
-
-                # Contested if: gaining control from empty/opponent, OR both sides now have units
-                gained_control = prev_controller != side and new_controller == side
-                both_sides = target_bf.units_A and target_bf.units_B
-
-                if gained_control or both_sides:
-                    target_bf.contested_this_turn = True
-                    self._run_showdown(dst, attacker=side)
-
-                # Dispatch movement effects
-                handler = MOVEMENT_REGISTRY.get(unit.card.name)
-                if handler:
-                    handler(ap, opponent, self.gs, unit, "base", "bf", target_bf)
-                self._resolve_triggered_effects(unit.card, "on_move", target_bf, ap, opponent,
-                                                context_extra={"battlefield": target_bf})
-                # Battlefield "first non-token unit played here this turn" trigger
-                # (Star Spring). Fires once per side per turn at this battlefield.
-                self._fire_first_unit_here(side, target_bf, unit)
-
-            elif dst == base_index:
-                src_bf = self.gs.battlefields[src]
-                unit = src_bf.pop_unit_for_movement(side)
-                if unit is None:
-                    return
-                unit.ready = True
-                base.append(unit)
-
-                # Dispatch movement effects
-                handler = MOVEMENT_REGISTRY.get(unit.card.name)
-                if handler:
-                    handler(ap, opponent, self.gs, unit, "bf", "base", None)
-                self._resolve_triggered_effects(unit.card, "on_move", self.gs.battlefields[0],
-                                                ap, opponent,
-                                                context_extra={"battlefield": self.gs.battlefields[0]})
             else:
-                src_bf = self.gs.battlefields[src]
-                dst_bf = self.gs.battlefields[dst]
-                unit = src_bf.pop_unit_for_movement(side)
-                if unit is None:
-                    return
-                if not unit.has_keyword("GANKING"):
-                    src_bf.add_unit(side, unit)
-                    unit.ready = True
-                    return
-                self._exhaust(unit)
-
-                # Check if this move establishes contested status (moving to a BF the player doesn't control)
-                prev_controller = dst_bf.controller()
-                dst_bf.add_unit(side, unit)
-                new_controller = dst_bf.controller()
-
-                # Contested if: gaining control from empty/opponent, OR both sides now have units
-                gained_control = prev_controller != side and new_controller == side
-                both_sides = dst_bf.units_A and dst_bf.units_B
-
-                if gained_control or both_sides:
-                    dst_bf.contested_this_turn = True
-                    self._run_showdown(dst, attacker=side)
-
-                # Dispatch movement effects
-                handler = MOVEMENT_REGISTRY.get(unit.card.name)
-                if handler:
-                    handler(ap, opponent, self.gs, unit, "bf", "bf", dst_bf)
-                self._resolve_triggered_effects(unit.card, "on_move", dst_bf, ap, opponent,
-                                                context_extra={"battlefield": dst_bf})
+                unit = self.gs.battlefields[src].pop_unit_for_movement(side)
+            if unit is None:
+                return
+            if src != base_index and dst != base_index and not unit.has_keyword("GANKING"):
+                # bf -> bf needs GANKING (§144.4.c); put it back untouched.
+                self.gs.battlefields[src].add_unit(side, unit)
+                return
+            self._standard_move(unit, side, src, dst)
 
         elif kind == "ABILITY":
             ability_id = idx  # idx actually contains the ability_id
             arg = lane  # lane actually contains the argument
-            if ability_id == "PYKE_LEGEND":
-                self._apply_pyke_ability(ap, opponent)
-            elif ability_id == "GOLD_SACRIFICE":
-                self._apply_gold_sacrifice(ap, str(arg) if arg is not None else "FURY")
-            elif ability_id == "ACTIVATED":
+            if ability_id == "ACTIVATED":
                 self._apply_activated_ability(ap, opponent, arg)
-
-    def _apply_pyke_ability(self, ap: Player, op: Player) -> None:
-        """[1],[tap]: Return a friendly unit at a battlefield to hand. Play Gold token."""
-        side = "A" if ap is self.gs.A else "B"
-
-        # Find Pyke legend on any friendly battlefield, must be ready
-        pyke_unit = None
-        for bf in self.gs.battlefields:
-            units = bf.units_A if side == "A" else bf.units_B
-            for u in units:
-                if u.card.name == "Pyke Bloodharbor Ripper" and u.ready:
-                    pyke_unit = u
-                    break
-            if pyke_unit:
-                break
-
-        if pyke_unit is None:
-            return
-        if not ap.can_pay_cost(1, None, None):
-            return
-        ap.pay_cost(1, None, None)
-        self._exhaust(pyke_unit)
-
-        # Return a friendly unit from a battlefield to hand (prefer non-Pyke units)
-        for bf in self.gs.battlefields:
-            units = bf.units_A if side == "A" else bf.units_B
-            candidates = [u for u in units if u is not pyke_unit and not u.is_token]
-            if candidates:
-                target_unit = candidates[0]
-                units.remove(target_unit)
-                ap.hand.append(target_unit.card)
-                if self.verbose:
-                    print(f"  {ap.name} PYKE ABILITY: returned {target_unit.card.name} to hand")
-                break
-
-        # Spawn Gold token to base
-        from .movement_effects import _spawn_token_to_base
-        _spawn_token_to_base(ap, "Gold", ready=False)
-        if self.verbose:
-            print(f"  {ap.name} spawned Gold token")
-
-    def _apply_gold_sacrifice(self, ap: Player, domain_str: str) -> None:
-        """Kill a Gold token, add a rune of chosen domain."""
-        gold = next((u for u in ap.base_units if u.card.name == "Gold" and u.is_token), None)
-        if gold is None:
-            return
-        ap.base_units.remove(gold)
-        ap.trash.append(gold.card)
-        try:
-            domain = Domain[domain_str.upper()]
-            ap.add_rune(domain, ready=True)
-            if self.verbose:
-                print(f"  {ap.name} GOLD SACRIFICE: gained {domain_str} rune")
-        except (KeyError, AttributeError):
-            pass
 
     # ------------------------------------------------------------------
     # Generic activated abilities (Round 4 Tier 2 / D3)
 
+    # Which ability timings each window allows: in your own Open State any
+    # ability; in a showdown ACTION and REACTION ones; with a chain open only
+    # REACTION ones (Core Rules: ACTION = your turn or showdowns, REACTION =
+    # any time).
+    _WINDOW_TIMINGS = {
+        "main": (None, "action", "reaction"),
+        "showdown": ("action", "reaction"),
+        "reaction": ("reaction",),
+    }
+
+    def _ability_window(self, side: str) -> str:
+        """The timing window `side` is acting in right now."""
+        if self.gs.chain:
+            return "reaction"
+        if self.gs.showdown_active:
+            return "showdown"
+        return "main" if side == self.gs.active else "reaction"
+
     def activatable_abilities(self, side: str) -> list:
-        """Deterministic list of activated abilities a side can use in its Open
-        State (main phase, non-reaction): unit/legend abilities tagged
-        `trigger: activated`, plus EQUIP entries for gear waiting at base. The
-        list order is stable for a given board, so an agent can pick by index and
-        the engine re-resolves the same entry. Affordability is NOT filtered here
-        (so indices stay stable) — payment fails gracefully if unaffordable.
+        """Deterministic list of activated abilities `side` may use in the current
+        window (_ability_window): unit/legend/gear abilities tagged `trigger:
+        activated` whose timing the window allows, plus EQUIP entries for gear
+        waiting at base (Open State only). The list order is stable for a given
+        board and window, so an agent can pick by index and the engine
+        re-resolves the same entry. Affordability and conditions are NOT filtered
+        here (so indices stay stable): see _ability_usable.
 
         A spec tagged `activated` with no cost is never offered: every printed
         activated ability has a cost, so a cost-less one is a misparsed trigger
         ("When you stun an enemy unit, ready me" read as a button) that would
         otherwise be usable for free, without limit."""
         ap = self.gs.get_player(side)
+        window = self._ability_window(side)
+        allowed = self._WINDOW_TIMINGS[window]
         out: list = []
-        for bf_idx, bf in enumerate(self.gs.battlefields):
-            for unit in (bf.units_A if side == "A" else bf.units_B):
-                spec = CARD_REGISTRY.get(unit.card.name)
-                if not (spec and spec.effects):
-                    continue
-                for eff in spec.effects:
-                    if eff.trigger != "activated":
-                        continue
-                    if not eff.cost:
-                        continue  # cost-less "activated" = misparsed trigger (see docstring)
-                    if (eff.timing or "").lower() == "reaction":
-                        continue
-                    # EMPOWER can only be activated while NOT already empowered.
-                    if eff.effect == "empower_self" and getattr(unit, "empowered", False):
-                        continue
-                    out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
-        for unit in ap.base_units:
-            spec = CARD_REGISTRY.get(unit.card.name)
-            if not (spec and spec.effects):
-                continue
-            for eff in spec.effects:
-                if eff.trigger != "activated":
-                    continue
-                if not eff.cost:
+
+        def _abilities(card):
+            spec = CARD_REGISTRY.get(card.name)
+            for eff in (spec.effects if spec else ()):
+                if eff.trigger != "activated" or not eff.cost:
                     continue  # cost-less "activated" = misparsed trigger (see docstring)
-                if (eff.timing or "").lower() == "reaction":
+                if ((eff.timing or "").lower() or None) not in allowed:
                     continue
+                yield eff
+
+        def _add_unit_abilities(unit, bf_idx):
+            for eff in _abilities(unit.card):
+                # EMPOWER can only be activated while NOT already empowered.
                 if eff.effect == "empower_self" and getattr(unit, "empowered", False):
                     continue
-                out.append({"type": "ability", "unit": unit, "bf_idx": None, "eff": eff})
+                out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
+
+        def _add_gear_abilities(gear):
+            # Gear's own activated [tap] abilities (Seals, Gold, Iron Ballista, …).
+            for eff in _abilities(gear):
+                if EFFECT_REGISTRY.get(eff.effect) is not None:
+                    out.append({"type": "gear_ability", "gear": gear, "eff": eff})
+
+        for bf_idx, bf in enumerate(self.gs.battlefields):
+            for unit in (bf.units_A if side == "A" else bf.units_B):
+                _add_unit_abilities(unit, bf_idx)
+        for unit in ap.base_units:
+            _add_unit_abilities(unit, None)
         legend_unit = self._legend_unit(side)
         if legend_unit is not None:
-            spec = CARD_REGISTRY.get(legend_unit.card.name)
-            if spec and spec.effects:
-                for eff in spec.effects:
-                    if eff.trigger != "activated":
-                        continue
-                    if not eff.cost:
-                        continue  # cost-less "activated" = misparsed trigger (see docstring)
-                    if (eff.timing or "").lower() == "reaction":
-                        continue
-                    if eff.effect == "empower_self" and getattr(legend_unit, "empowered", False):
-                        continue
-                    out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
-        def _add_gear_abilities(gear):
-            # Gear's own activated [tap] abilities (Seals, Iron Ballista, …).
-            spec = CARD_REGISTRY.get(gear.name)
-            if not (spec and spec.effects):
-                return
-            for eff in spec.effects:
-                if eff.trigger != "activated":
-                    continue
-                if not eff.cost:
-                    continue  # cost-less "activated" = misparsed trigger (see docstring)
-                if (eff.timing or "").lower() == "reaction":
-                    continue
-                if EFFECT_REGISTRY.get(eff.effect) is None:
-                    continue
-                out.append({"type": "gear_ability", "gear": gear, "eff": eff})
-
+            _add_unit_abilities(legend_unit, None)
         for gear in list(ap.base_gear):
             # Only Equipment (gear with an Equip ability) can be equipped.
-            if self._equip_cost(gear) is not None:
+            if window == "main" and self._equip_cost(gear) is not None:
                 out.append({"type": "equip", "gear": gear})
             _add_gear_abilities(gear)
         # Attached gear (on controlled units) can also use its [tap] abilities.
         for gear in self._controlled_attached_gear(side):
             _add_gear_abilities(gear)
         return out
+
+    def _ability_usable(self, ap: Player, entry: dict) -> bool:
+        """Whether `ap` can use this activatable_abilities entry now: it can pay
+        the cost and the ability's condition ("LEGION", "while I'm at a
+        battlefield") holds."""
+        side = "A" if ap is self.gs.A else "B"
+        if entry["type"] == "equip":
+            gear = entry["gear"]
+            cost = self._equip_cost(gear)
+            return (gear in ap.base_gear and cost is not None and self._can_pay_equip(ap, cost)
+                    and self._first_friendly_unit_on_board(side) is not None)
+        eff = entry["eff"]
+        if EFFECT_REGISTRY.get(eff.effect) is None:
+            return False
+        parsed = self._parse_activated_cost(eff.cost)
+        if entry["type"] == "gear_ability":
+            gear = entry["gear"]
+            source = gear
+            if not self._controls_gear(ap, gear):
+                return False
+            if parsed["tap"] and getattr(gear, "tapped", False):
+                return False
+            # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
+            if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], None):
+                return False
+            if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
+                return False
+            if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
+                return False
+        else:
+            source = entry["unit"].card
+            if not self._activated_affordable(ap, entry["unit"], parsed):
+                return False
+        bf = self.gs.battlefields[entry["bf_idx"]] if entry.get("bf_idx") is not None             else self.gs.battlefields[0]
+        return self._check_condition(eff.condition, source, ap,
+                                     self.gs.get_player(self.gs.other(side)),
+                                     {"battlefield": bf})
+
+    def _remove_gear(self, gear, ap: Player) -> None:
+        """A gear `ap` controls (in base or attached) is killed: it goes to the
+        trash, or ceases to exist if it is a token."""
+        if gear in ap.base_gear:
+            ap.base_gear.remove(gear)
+        else:
+            side = "A" if ap is self.gs.A else "B"
+            for u in [u for b in self.gs.battlefields for u in (b.units_A if side == "A" else b.units_B)] + ap.base_units:
+                if gear in u.gear:
+                    u.gear.remove(gear)
+                    break
+        self._to_trash(ap, gear)
 
     def _controlled_attached_gear(self, side: str) -> list:
         ap = self.gs.get_player(side)
@@ -2490,17 +2493,13 @@ class GameLoop:
         if not (0 <= index < len(abilities)):
             return
         entry = abilities[index]
+        if not self._ability_usable(ap, entry):
+            return
 
         if entry["type"] == "equip":
             gear = entry["gear"]
-            if gear not in ap.base_gear:
-                return
             cost = self._equip_cost(gear)              # the EQUIP-ability cost (§744)
-            if cost is None:
-                return                                  # not Equipment — cannot equip
             target_unit = self._first_friendly_unit_on_board(side)
-            if target_unit is None:
-                return
             if not self._pay_equip(ap, cost):
                 return
             ap.base_gear.remove(gear)
@@ -2512,18 +2511,7 @@ class GameLoop:
         if entry["type"] == "gear_ability":
             gear = entry["gear"]
             eff = entry["eff"]
-            if not self._controls_gear(ap, gear):
-                return
             parsed = self._parse_activated_cost(eff.cost)
-            if parsed["tap"] and getattr(gear, "tapped", False):
-                return                              # already tapped this turn
-            # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
-            if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], None):
-                return
-            if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
-                return
-            if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
-                return
             if not self._pay_gear(ap, parsed["energy"], parsed["power"], None):
                 return
             if parsed["tap"]:
@@ -2533,6 +2521,9 @@ class GameLoop:
                     ap.deck.cards.append(ap.trash.pop(0))
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
+            if parsed["sacrifice"]:
+                # "Kill this" (a Gold token): off the board before the effect.
+                self._remove_gear(gear, ap)
             handler = EFFECT_REGISTRY.get(eff.effect)
             if handler is None:
                 return
@@ -2546,8 +2537,6 @@ class GameLoop:
         unit = entry["unit"]
         eff = entry["eff"]
         parsed = self._parse_activated_cost(eff.cost)
-        if not self._activated_affordable(ap, unit, parsed):
-            return
         # Pay.
         if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
             return
@@ -2560,7 +2549,7 @@ class GameLoop:
             self.gs.add_xp(side, -parsed["spend_xp"])
         if parsed["sacrifice"] and unit is not None:
             self._remove_unit_from_play(unit, side)
-            ap.trash.append(unit.card)
+            self._to_trash(ap, unit.card)
 
         bf = self.gs.battlefields[entry["bf_idx"]] if entry["bf_idx"] is not None \
             else self.gs.battlefields[0]
@@ -2572,6 +2561,15 @@ class GameLoop:
         handler(context, eff.merged_params())
         if self.verbose:
             print(f"  {ap.name} ACTIVATED: {eff.effect}")
+
+    def _use_ability_now(self, player: Player, ability_id, arg) -> bool:
+        """Use an activated ability inside a chain or showdown window. Returns
+        whether it changed the game (an unusable pick does nothing)."""
+        opponent = self.gs.get_player(self.gs.other(player.name))
+        before = self._action_fingerprint(player, opponent)
+        self._apply_action(player, ("ABILITY", ability_id, arg, None))
+        self._recompute_passives()
+        return self._action_fingerprint(player, opponent) != before
 
     def _first_friendly_unit_on_board(self, side: str):
         for bf in self.gs.battlefields:
@@ -2628,22 +2626,27 @@ class GameLoop:
         if kind == "gear" and gear is not None:
             if gear in dead_unit.gear:
                 dead_unit.gear.remove(gear)
-            owner.trash.append(gear)    # the gear is destroyed instead of the unit
+            self._to_trash(owner, gear)    # the gear is destroyed instead of the unit
         owner.base_units.append(dead_unit)  # recall (not a move)
         if self.verbose:
             print(f"  {owner.name} DEATH REPLACEMENT: {dead_unit.card.name} recalled instead of dying")
         return True
 
     def _route_combat_deaths(self, stats, bf) -> None:
-        """Apply death replacements, then trash the truly-dead, route their gear to
-        base, set the friendly-died flag, and fire on_death / on_friendly_unit_death."""
-        ordered = [(u, "A") for u in stats.dead_A] + [(u, "B") for u in stats.dead_B]
+        self._route_deaths([(u, "A") for u in stats.dead_A] + [(u, "B") for u in stats.dead_B], bf)
+
+    def _route_deaths(self, ordered, bf) -> None:
+        """Units that just died (already off the board), as (unit, owner side)
+        pairs, from combat, spell damage or a kill effect: apply death
+        replacements, then trash the truly-dead (tokens cease to exist), route
+        their gear to base, set the friendly-died flag, and fire on_death /
+        leaves_board / on_friendly_unit_death."""
         truly_dead = []
         for dead_unit, owner_side in ordered:
             if self._try_replace_death(dead_unit, owner_side):
                 continue
             owner = self.gs.get_player(owner_side)
-            owner.trash.append(dead_unit.card)
+            self._to_trash(owner, dead_unit.card)
             owner.base_gear.extend(dead_unit.gear)
             self.gs.friendly_unit_died_this_turn[owner_side] = True
             truly_dead.append((dead_unit, owner_side))
@@ -2716,6 +2719,13 @@ class GameLoop:
                     # Play a facedown card for [0] at reaction speed (§737.1.b).
                     if self._play_from_hidden(active, lane if lane is not None else 0):
                         passes = 0
+                elif kind == "ABILITY":
+                    # A REACTION ability resolves at once (resource abilities
+                    # can't be reacted to) and its player keeps priority; one
+                    # that does nothing counts as a pass.
+                    if self._use_ability_now(player, idx, lane):
+                        continue
+                    passes += 1
 
             active = self.gs.other(active)
 
@@ -2821,6 +2831,12 @@ class GameLoop:
                     # Play a facedown card for [0] into the showdown lane (§737.1.b).
                     if self._play_from_hidden(self.gs.focus_player, bf_idx):
                         passes = 0
+                elif kind == "ABILITY":
+                    # ACTION / REACTION ability: resolves at once, focus stays.
+                    if self._use_ability_now(focus_player, idx, lane):
+                        passes = 0
+                        continue
+                    passes += 1
 
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 

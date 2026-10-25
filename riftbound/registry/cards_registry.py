@@ -58,6 +58,11 @@ def _parse_domain(value: Optional[str]) -> Optional[Domain]:
     raise ValueError(f"Unknown domain '{value}'")
 
 
+# Token "cards" are all filed as category "Token"; these are gear tokens
+# (Core Rules §187.5 Gold, §187.12 Bomb), the rest are unit tokens.
+_GEAR_TOKENS = frozenset({"Gold", "Bomb"})
+
+
 def _parse_card_type(value: str) -> CardType:
     key = value.strip().lower()
     # First try the mapping (handles "signature spell", "token", etc.)
@@ -130,6 +135,12 @@ class EffectSpec:
         effect = str(data["effect"]).strip()
         if not effect:
             raise ValueError("Effect name cannot be blank")
+        # Some specs nest their parameters under a "params" key (e.g. Treasure
+        # Hunter's token_name); handlers read them flat, so lift them up (the
+        # effect's own top-level keys win).
+        nested = data.get("params")
+        if isinstance(nested, Mapping):
+            data = {**nested, **{k: v for k, v in data.items() if k != "params"}}
         top = {k: data[k] for k in _EFFECT_TOP_LEVEL_FIELDS if k in data}
         if "condition" in top:
             top["condition"] = _normalize_condition(top["condition"])
@@ -185,6 +196,8 @@ class CardSpec:
             raise ValueError("Card specification requires a name")
         category_str = str(data.get("category", "")).strip()
         category = _parse_card_type(category_str)
+        if category_str.lower() == "token" and name in _GEAR_TOKENS:
+            category = CardType.GEAR
         domain_raw = data.get("domain")
         # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
         if domain_raw:

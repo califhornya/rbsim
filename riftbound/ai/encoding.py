@@ -29,7 +29,7 @@ from riftbound.registry.cards_registry import CARD_REGISTRY
 # --- fixed dimensions ---------------------------------------------------------
 N_BF = 2
 MAX_HAND = 12
-MAX_ABIL = 8
+MAX_ABIL = 16
 DOMAINS = ("FURY", "CALM", "MIND", "BODY", "CHAOS", "ORDER")
 N_DOM = len(DOMAINS)
 _DOM_INDEX = {d: i for i, d in enumerate(DOMAINS)}
@@ -157,8 +157,8 @@ _OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF
 _OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2
 _OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2            # MAX_HAND * N_BF
 _OFF_HIDDEN = _OFF_HIDE + MAX_HAND * N_BF          # N_BF
-_OFF_ABIL = _OFF_HIDDEN + N_BF                     # PYKE(1) + GOLD(N_DOM) + ACTIVATED(MAX_ABIL)
-ACTION_DIM = _OFF_ABIL + 1 + N_DOM + MAX_ABIL
+_OFF_ABIL = _OFF_HIDDEN + N_BF                     # ACTIVATED(MAX_ABIL)
+ACTION_DIM = _OFF_ABIL + MAX_ABIL
 
 
 def action_to_index(action) -> Optional[int]:
@@ -201,13 +201,8 @@ def action_to_index(action) -> Optional[int]:
         return _OFF_HIDDEN + lane if isinstance(lane, int) and 0 <= lane < N_BF else None
     if kind == "ABILITY":
         ability_id, arg = idx, lane
-        if ability_id == "PYKE_LEGEND":
-            return _OFF_ABIL
-        if ability_id == "GOLD_SACRIFICE":
-            di = _DOM_INDEX.get(arg)
-            return None if di is None else _OFF_ABIL + 1 + di
         if ability_id == "ACTIVATED":
-            return _OFF_ABIL + 1 + N_DOM + arg if isinstance(arg, int) and 0 <= arg < MAX_ABIL else None
+            return _OFF_ABIL + arg if isinstance(arg, int) and 0 <= arg < MAX_ABIL else None
     return None
 
 

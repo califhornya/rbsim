@@ -29,10 +29,12 @@ class DeployedGear:
     is_token: bool = False
 
 
-@dataclass
+@dataclass(eq=False)
 class Battlefield:
 
-    """Battlefield model with Might-based combat and contest tracking."""
+    """Battlefield model with Might-based combat and contest tracking. Compared
+    by identity: two battlefields with the same card and no units (a mirror
+    match) are still different lanes for `battlefields.index(bf)`."""
 
     units_A: List[UnitInPlay] = field(default_factory=list)
     units_B: List[UnitInPlay] = field(default_factory=list)

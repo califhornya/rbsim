@@ -65,10 +65,15 @@ class Player:
     # Earmarked resources (§ restricted-use). Cleared each turn with energy/power.
     earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
     earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
+    earmarked_power_spell: int = 0      # Kai'Sa: generic power spendable only for spells
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
     power_pool: Dict[Domain, int] = field(default_factory=dict)
+    # The part of power_pool added by effects ("ADD [fury]": Seals, Gold) rather
+    # than backed by a rune: spent first, without recycling a rune; cleared with
+    # the pool each turn.
+    floating_power: Dict[Domain, int] = field(default_factory=dict)
     base_units: List[UnitInPlay] = field(default_factory=list)
 
     @classmethod
@@ -173,16 +178,15 @@ class Player:
             unit.ready = True
 
     def pop_base_unit(self) -> Optional[UnitInPlay]:
-        # Only non-token units may move from base to a battlefield; tokens are
-        # skipped so a ready token can't block a movable unit behind it.
+        # Token units take the Standard Move like any unit (§185.2.d).
         for idx, unit in enumerate(self.base_units):
-            if unit.ready and not unit.is_token:
+            if unit.ready:
                 return self.base_units.pop(idx)
         return None
 
     def has_movable_base_unit(self) -> bool:
-        """True if a ready non-token unit is available to move to a battlefield."""
-        return any(u.ready and not u.is_token for u in self.base_units)
+        """True if a ready unit is available to move to a battlefield."""
+        return any(u.ready for u in self.base_units)
 
     def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if self.energy < cost_energy:
@@ -192,7 +196,7 @@ class Player:
         if self.power_pool.get(cost_power_domain, 0) < cost_power:
             return False
         runes = self.rune_pool.get(cost_power_domain, [])
-        return len(runes) >= cost_power
+        return len(runes) + self.floating_power.get(cost_power_domain, 0) >= cost_power
 
     def pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if not self.can_pay_cost(cost_energy, cost_power, cost_power_domain):
@@ -204,10 +208,18 @@ class Player:
                 self.power_pool.pop(cost_power_domain, None)
             else:
                 self.power_pool[cost_power_domain] = current
-            for _ in range(cost_power):
+            floating = min(cost_power, self.floating_power.get(cost_power_domain, 0))
+            if floating:
+                self.floating_power[cost_power_domain] -= floating
+            for _ in range(cost_power - floating):
                 if not self.recycle_rune(cost_power_domain):
                     return False
         return True
+
+    def add_power(self, domain: Domain, amount: int = 1) -> None:
+        """ADD Power of a domain from an effect (not a rune): spendable this turn."""
+        self.power_pool[domain] = self.power_pool.get(domain, 0) + amount
+        self.floating_power[domain] = self.floating_power.get(domain, 0) + amount
 
     def draw(self) -> Optional[Card]:
         card = self.deck.draw()
