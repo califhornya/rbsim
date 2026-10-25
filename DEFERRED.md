@@ -395,8 +395,26 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   Gold / chooses Cards), Divine Judgment, Twisted Fate Gambler, Teemo
   Strategist, Fox-Fire, Swain Visionary, Kai'Sa Evolutionary, Mechanical
   Bandit, Friendship.
-- Next: hand disruption (Ashe Focused, Bone Skewer, Insightful
-  Investigator), copies, rune manipulation, replacement effects, the rest.
+- [DONE] **Batch 11 (72 → 47).** Hand disruption (Ashe Focused holds a card
+  until its owner holds, Insightful Investigator, Bone Skewer); taking
+  control (`take_control`: Hostile Takeover until end of turn, Conscription,
+  Possession). **Bug: two handlers were registered as `take_control`**, the
+  later one silently replacing the first (Possession moved a unit at the
+  effect's battlefield; Mystic Reversal, "gain control of a spell", stole a
+  unit: now empty). The `effect` decorator now refuses a duplicate name.
+  Granted REPEAT (Temporal Portal, Syndra Transcendent), Mystic Vortex,
+  token replacement and copies (Heimerdinger Academy Instructor, Zilean),
+  Seraphic Wyvern, Coalesced Energy, Mordekaiser Twice Slain, Ahri
+  Confident ("you reduce an enemy's Might"), Vex Mocking, "when you play me
+  from face down" (Tornado Warrior, Evelynn Entrancing, Evelynn Agony's
+  Embrace), Meticulous Restorationist (cards in the trash answer a play),
+  Jayce Hammer in Hand, Lillia Protector, Scrutinizing Scope, Ravenbloom
+  Prefect, Shard of Undoing, Dusk Rose Lab, Pyke Returned.
+- Next (47 left): copies (Leblanc Deceiver, Shady Spectacles, Svellsongur,
+  Heimerdinger Inventor), cost tricks (Kraken Hunter, Commander Ledros, Void
+  Drone, Irelia Graceful, Vex Cheerless, Orianna Mechanical Marvel, Risen
+  Altar, Hextech Anomaly, Ancient Henge), Ivern x2, Chronobreak, and
+  one-offs; Neeko is a deckbuilding rule.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

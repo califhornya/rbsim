@@ -476,7 +476,8 @@ def test_take_control_moves_enemy_unit():
     bf.units_B.append(enemy)
     ctx = EffectContext(loop, SpellCard(name="Possess"), loop.gs.A, loop.gs.B, bf)
     REGISTRY["take_control"](ctx, {})
-    assert enemy in bf.units_A
+    # Possession: "Take control of it and recall it" — to our base, exhausted.
+    assert enemy in loop.gs.A.base_units and not enemy.ready
     assert enemy not in bf.units_B
 
 

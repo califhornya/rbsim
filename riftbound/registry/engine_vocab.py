@@ -61,6 +61,10 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_empowered",                     # you empower something else (Mel, Ambessa)
     "on_banish_own",                             # you banish a card you own (Zed)
     "on_unit_played_here",                       # a player plays a unit here (Valley of Idols)
+    "on_self_played",                            # this card is played (from face down: Tornado Warrior)
+    "trash_on_card_played",                      # in the trash, you play a card (Meticulous Restorationist)
+    "on_enemy_gear_played",                      # an opponent plays a gear (Ravenbloom Prefect)
+    "on_enemy_might_reduced",                    # you reduce an enemy unit's Might (Ahri Confident)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -144,6 +148,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "excess_damage_at_least",            # n: "if you assigned 3 or more excess damage" (this battlefield)
     "facedown_card_here",                # "if you control a facedown card here"
     "played_unit_gear_spell_this_turn",  # Swain Visionary
+    "in_beginning_phase",                # during your Beginning Phase (Shard of Undoing)
+    "triggering_unit_here",              # the unit is (or died) at my battlefield
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -231,4 +237,6 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)
     "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
     "accelerate_non_hand",
+    "spells_repeat_in_showdown", "reaction_tax_in_showdown", "channel_plus_one",
+    "sacrifice_instead_of_dying", "mech_instead_of_tokens", "double_tokens_once",
 })

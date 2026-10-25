@@ -54,6 +54,9 @@ class UnitInPlay:
     conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
     # Sanction: "Empower a unit. Disempower it at end of turn" (and the reverse).
     empower_flip_at_end: bool = False
+    # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
+    # end of that turn.
+    borrowed: Optional[tuple] = None
 
     def reset_damage(self) -> None:
         self.damage = 0

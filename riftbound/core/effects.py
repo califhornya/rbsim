@@ -20,6 +20,9 @@ def effect(name: str) -> Callable[[EffectHandler], EffectHandler]:
         raise ValueError("Effect name cannot be empty")
 
     def decorator(func: EffectHandler) -> EffectHandler:
+        # A second handler under one name silently replaced the first.
+        if key in REGISTRY:
+            raise ValueError(f"Effect {key!r} is registered twice")
         REGISTRY[key] = func
         return func
 
@@ -286,6 +289,195 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card._flow_granted_turn = None
     pick = max(payable or spells, key=lambda c: (c.cost_energy or 0) + (c.cost_power or 0))
     pick._flow_granted_turn = loop.gs.turn
+
+
+@effect("hostage_from_hand")
+def _hostage_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "They reveal their hand. Choose a card revealed this way and banish it.
+    When they hold, return it to their hand" (Ashe Focused): the costliest."""
+    hand = ctx.opponent.hand
+    if hand:
+        card = max(hand, key=_zone_value)
+        hand.remove(card)
+        ctx.opponent.banished.append(card)
+        ctx.loop.gs.held_hostage.append((ctx.opponent_side, card))
+
+
+@effect("force_discard_redraw")
+def _force_discard_redraw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "They reveal their hand. You may pay 2 XP to choose a card from their
+    hand. If you do, they discard that card and draw 1." (Insightful
+    Investigator)"""
+    gs = ctx.loop.gs
+    xp = int(spec.get("xp", 2))
+    hand = ctx.opponent.hand
+    if hand and gs.get_xp(ctx.actor_side) >= xp:
+        gs.add_xp(ctx.actor_side, -xp)
+        ctx.loop._discard(ctx.opponent, max(hand, key=_zone_value))
+        ctx.draw_cards(1, target="opponent")
+
+
+@effect("pull_unit_from_hand")
+def _pull_unit_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a battlefield. An opponent reveals their hand. You may choose a
+    unit from it. Then play that unit to the battlefield, ignoring any and all
+    costs. When they do, STUN it." (Bone Skewer): their unit comes, stunned, to
+    the battlefield where we are strongest, the biggest one we beat there."""
+    from .cards import UnitCard
+    loop = ctx.loop
+    units = [c for c in ctx.opponent.hand if isinstance(c, UnitCard)]
+    if not units:
+        return
+    bf = max(loop.gs.battlefields, key=lambda b: sum(u.might for u in b._units_for(ctx.actor_side)))
+    mine = sum(u.might for u in bf._units_for(ctx.actor_side))
+    beaten = [c for c in units if int(c.might or 0) <= mine]
+    card = max(beaten or units, key=lambda c: int(c.might or 0))
+    ctx.opponent.hand.remove(card)
+    prev = bf.controller()
+    unit = loop._play_unit(card, ctx.opponent_side, bf=bf, from_zone="hand")
+    unit.stunned = True
+    loop._arrive_at(bf, ctx.opponent_side, prev)
+
+
+@effect("take_control")
+def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Take control of an enemy unit at a battlefield. `until_end_of_turn`:
+    ready it, and it goes back to its owner's base at end of turn (Hostile
+    Takeover); else exhaust it and recall it to our base for good
+    (Conscription: one with 3 Might or less, any if 5 XP was spent)."""
+    loop = ctx.loop
+    me = ctx.actor_side
+    cands = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
+    cap = spec.get("might_at_most")
+    xp = int(spec.get("xp_for_any", 0))
+    if cap is not None and not (xp and loop.gs.get_xp(me) >= xp and
+                                any(u.might > int(cap) for u in cands)):
+        cands = [u for u in cands if u.might <= int(cap)]
+    elif cap is not None and xp:
+        loop.gs.add_xp(me, -xp)
+    if not cands:
+        return
+    unit = max(cands, key=lambda u: u.might)
+    loop._note_chosen(ctx.card, me, [unit])
+    prev = loop._locate_unit(unit)[1].controller()
+    bf = loop._take_control(unit, me)
+    if spec.get("until_end_of_turn"):
+        unit.borrowed = (ctx.opponent_side, loop.gs.turn)
+        if loop._can_ready(unit):
+            unit.ready = True
+        loop._arrive_at(bf, me, prev)
+    else:
+        loop._exhaust(unit) if unit.ready else None
+        bf.remove_unit(me, unit)
+        ctx.actor.base_units.append(unit)
+
+
+@effect("gain_permanent_might")
+def _gain_permanent_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "I gain +1 Might" for good (Lillia Protector of Dreams)."""
+    unit = _source_unit(ctx)
+    if unit is not None:
+        unit.aura_might += int(spec.get("amount", 1))
+
+
+@effect("recycle_runes_channel")
+def _recycle_runes_channel(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Recycle all your runes, then channel 4 runes exhausted" (Coalesced
+    Energy)."""
+    p = ctx.actor
+    for dom in list(p.rune_pool):
+        for rune in p.rune_pool.pop(dom):
+            rune.ready = True
+            p.rune_deck.runes.append(rune)
+    p.unlock_runes(int(spec.get("amount", 4)), exhausted=True)
+
+
+@effect("guess_type_draw")
+def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose an opponent. They guess a card type. Reveal the top card of your
+    Main Deck. If it has that type, recycle it. Otherwise, draw it."
+    (Scrutinizing Scope): they guess unit."""
+    from .cards import UnitCard
+    deck = ctx.actor.deck.cards
+    if not deck:
+        return
+    top = deck.pop()
+    if isinstance(top, UnitCard):
+        deck.insert(0, top)
+    else:
+        ctx.actor.hand.append(top)
+
+
+@effect("banish_self_and_gear")
+def _banish_self_and_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When an opponent plays a gear, you may banish me to banish it"
+    (Ravenbloom Prefect)."""
+    loop = ctx.loop
+    gear = ctx.extra.get("triggering_card")
+    me = _source_unit(ctx)
+    if gear is None or me is None:
+        return
+    entry = next(((s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True)
+                  if getattr(g, "card", g) is gear), None)
+    if entry is None:
+        return
+    side, holder, g = entry
+    owner = loop.gs.get_player(side)
+    if isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(g)
+    elif holder is not None:
+        holder.gear.remove(g)
+    else:
+        owner.base_gear.remove(g)
+    if not getattr(gear, "is_token", False):
+        owner.banished.append(gear)
+    where = loop._locate_unit(me)
+    if where[1] is None:
+        ctx.actor.base_units.remove(me)
+    else:
+        where[1].remove_unit(ctx.actor_side, me)
+    ctx.actor.base_gear.extend(me.gear)
+    loop._fire_leaves_board(me.card, ctx.actor_side, where[1] or loop.gs.battlefields[0])
+    ctx.actor.banished.append(me.card)
+    loop._note_banished(ctx.actor_side)
+
+
+@effect("opponent_kills_own_unit")
+def _opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Each opponent must kill one of their units" (Shard of Undoing): their
+    choice, their weakest."""
+    loop = ctx.loop
+    units = _units_at(ctx, ctx.opponent_side, "anywhere")
+    if not units:
+        return
+    victim = min(units, key=lambda u: (not u.is_token, u.might))
+    where = loop._locate_unit(victim)
+    if where[1] is None:
+        ctx.opponent.base_units.remove(victim)
+    else:
+        where[1].remove_unit(ctx.opponent_side, victim)
+    loop._route_deaths([(victim, ctx.opponent_side)], where[1] or loop.gs.battlefields[0],
+                       in_base=where[1] is None)
+
+
+@effect("sacrifice_token_here_draw")
+def _sacrifice_token_here_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may kill a unit you control here to draw 1" (Dusk Rose Lab):
+    baseline, only a token."""
+    tokens = [u for u in ctx.battlefield._units_for(ctx.actor_side) if u.is_token]
+    if not tokens:
+        return
+    victim = min(tokens, key=lambda u: u.might)
+    ctx.battlefield.remove_unit(ctx.actor_side, victim)
+    ctx.loop._route_deaths([(victim, ctx.actor_side)], ctx.battlefield)
+    ctx.draw_cards(1, target="actor")
+
+
+@effect("next_spell_repeat")
+def _next_spell_repeat(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Give the next spell you play this turn REPEAT equal to its cost"
+    (Temporal Portal)."""
+    ctx.loop.gs.next_spell_repeat[ctx.actor_side] = ctx.loop.gs.turn
 
 
 @effect("next_unit_accelerate")
@@ -1316,6 +1508,8 @@ def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
     amount = _amount(ctx, spec)
     floor = spec.get("minimum", spec.get("min_might"))
     for unit in _resolve_targets(ctx, spec):
+        if amount < 0:
+            ctx.loop._fire_might_reduced(unit, ctx.actor_side)
         if amount < 0 and floor is not None:
             # "-2 [might] this turn, to a minimum of 1 [might]"
             unit.temporary_might -= min(-amount, max(0, unit.might - int(floor)))
@@ -1463,13 +1657,14 @@ def _spend_buff(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("stun_unit")
 def _stun_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    enemies = ctx._units_for_side(ctx.opponent_side)
-    stunned_enemy = False
+    stunned_at = []
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "opponent")}, bias="enemy"):
         unit.stunned = True
-        stunned_enemy = stunned_enemy or any(unit is e for e in enemies)
-    if stunned_enemy:
-        ctx.loop._fire_stun_enemy(ctx.actor_side)
+        where = ctx.loop._locate_unit(unit)
+        if where is not None and where[0] == ctx.opponent_side:
+            stunned_at.append(where[1])
+    if stunned_at:
+        ctx.loop._fire_stun_enemy(ctx.actor_side, stunned_at[0])
 
 
 @effect("recycle_card")
@@ -1970,6 +2165,10 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         if dest in ("here", "this_battlefield"):
             ok = ctx.battlefield in gs.battlefields and cur is not ctx.battlefield
             return ctx.battlefield, ok
+        if dest == "stunned_at":
+            # "you may move me to that battlefield" (Vex Mocking)
+            at = ctx.extra.get("stunned_at")
+            return at, at is not None and cur is not at
         if dest == "to_or_from_base" and cur is not None:
             return None, True
         others = [bf for bf in gs.battlefields if bf is not cur]
@@ -2554,23 +2753,6 @@ def _replace_death_with_recall(ctx: "EffectContext", spec: Mapping[str, Any]) ->
     # not via normal on_play dispatch. This registry entry documents the verb and
     # is a no-op if ever dispatched directly.
     return
-
-
-@effect("take_control")
-def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Take control of an enemy unit at the effect's battlefield: move it from the
-    opponent's side to the actor's side at the same battlefield."""
-    bf = ctx.battlefield
-    actor_side = ctx.actor_side
-    enemy = bf.units_B if actor_side == "A" else bf.units_A
-    friendly = bf.units_A if actor_side == "A" else bf.units_B
-    tf = spec.get("target_filter")
-    candidates = [u for u in enemy if _passes_filter(u, tf, ctx)] if tf else list(enemy)
-    if not candidates:
-        return
-    unit = candidates[0]
-    enemy.remove(unit)
-    friendly.append(unit)
 
 
 @effect("add_battlefield")
