@@ -279,6 +279,149 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("ready_or_exhaust_legend")
+def _ready_or_exhaust_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Ready or exhaust a legend" (Royal Entourage): ready yours if it is
+    exhausted, else exhaust the opponent's."""
+    loop = ctx.loop
+    mine, theirs = loop._legend_unit(ctx.actor_side), loop._legend_unit(ctx.opponent_side)
+    if mine is not None and not mine.ready:
+        mine.ready = True
+        loop._fire_readied(mine, ctx.actor_side)
+    elif theirs is not None and theirs.ready:
+        loop._exhaust(theirs)
+
+
+@effect("draw_on_next_unit_plays")
+def _draw_on_next_unit_plays(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next three times you play a unit this turn, draw 1" (Fanfare)."""
+    gs = ctx.loop.gs
+    gs.unit_play_draws[ctx.actor_side] = [gs.turn, int(spec.get("count", 3))]
+
+
+@effect("hand_to_deck_bottom")
+def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Put a card from your hand on the top or bottom of your Main Deck"
+    (Altar of Memories): the costliest card goes to the bottom."""
+    hand = ctx.actor.hand
+    if hand:
+        card = max(hand, key=_zone_value)
+        hand.remove(card)
+        ctx.actor.deck.cards.insert(0, card)
+
+
+def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
+    """Take a unit off the board to its owner's hand or the top of their Main
+    Deck (`to`: "hand" / "deck_top"); its gear goes to its owner's hand when
+    the unit goes to hand, else to base. A token ceases to exist."""
+    loop = ctx.loop
+    where = loop._locate_unit(unit)
+    if where is None:
+        return
+    owner = loop.gs.get_player(side)
+    if where[1] is None:
+        owner.base_units.remove(unit)
+    else:
+        where[1].remove_unit(side, unit)
+    if to == "hand":
+        owner.hand.extend(g for g in unit.gear if not getattr(g, "is_token", False))
+    else:
+        owner.base_gear.extend(unit.gear)
+    unit.gear = []
+    loop._fire_leaves_board(unit.card, side, where[1] or loop.gs.battlefields[0])
+    if unit.is_token:
+        return
+    if to == "hand":
+        owner.hand.append(unit.card)
+    else:
+        owner.deck.cards.append(unit.card)
+
+
+@effect("return_all_to_hand")
+def _return_all_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Return all units and gear to their owners' hands" (Downwell)."""
+    loop = ctx.loop
+    for side in ("A", "B"):
+        player = loop.gs.get_player(side)
+        for unit in _units_at(ctx, side, "anywhere"):
+            _unit_leaves_to(ctx, unit, side, "hand")
+        for gear in list(player.base_gear):
+            player.base_gear.remove(gear)
+            if not getattr(gear, "is_token", False):
+                player.hand.append(gear)
+        for bf in loop.gs.battlefields:
+            for dg in list(bf.gear_for(side)):
+                bf.gear_for(side).remove(dg)
+                if not getattr(dg.card, "is_token", False):
+                    player.hand.append(dg.card)
+
+
+@effect("keep_one_kill_rest")
+def _keep_one_kill_rest(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Each player chooses a unit they control. Kill the rest." (Cataclysmic
+    Duel): each keeps their mightiest."""
+    loop = ctx.loop
+    for side in ("A", "B"):
+        units = _units_at(ctx, side, "anywhere")
+        if len(units) < 2:
+            continue
+        keep = max(units, key=lambda u: u.might)
+        by_bf = {}
+        for unit in units:
+            if unit is keep:
+                continue
+            where = loop._locate_unit(unit)
+            if where[1] is None:
+                loop.gs.get_player(side).base_units.remove(unit)
+            else:
+                where[1].remove_unit(side, unit)
+            by_bf.setdefault(id(where[1]), (where[1], []))[1].append((unit, side))
+        for bf, dead in by_bf.values():
+            loop._route_deaths(dead, bf or loop.gs.battlefields[0], in_base=bf is None)
+
+
+@effect("tuck_unit")
+def _tuck_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose an enemy unit at a battlefield. Its owner places it on the top or
+    bottom of their Main Deck" (Keeper's Verdict): the mightiest; its owner
+    puts it on top."""
+    enemies = _units_at(ctx, ctx.opponent_side, "battlefield")
+    if enemies:
+        unit = max(enemies, key=lambda u: u.might)
+        ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+        _unit_leaves_to(ctx, unit, ctx.opponent_side, "deck_top")
+
+
+@effect("each_player_bounces")
+def _each_player_bounces(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Starting with the next player, each player may return a unit to its
+    owner's hand" (Whirlwind): each returns the other's mightiest unit."""
+    for chooser, victim in ((ctx.opponent_side, ctx.actor_side), (ctx.actor_side, ctx.opponent_side)):
+        units = _units_at(ctx, victim, "anywhere")
+        if units:
+            _unit_leaves_to(ctx, max(units, key=lambda u: u.might), victim, "hand")
+
+
+@effect("activate_conquer_effects")
+def _activate_conquer_effects(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When you hold here, activate the conquer effects of units here"
+    (Reckoner's Arena)."""
+    loop = ctx.loop
+    for unit in list(ctx.battlefield._units_for(ctx.actor_side)):
+        for card in [unit.card] + list(unit.gear):
+            loop._resolve_triggered_effects(card, "on_conquer", ctx.battlefield, ctx.actor,
+                                            ctx.opponent, context_extra={"battlefield": ctx.battlefield})
+
+
+@effect("play_self_from_trash")
+def _play_self_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "... you may pay [fury] to play me" from the trash (Flame Chompers):
+    the cost is the effect's `cost`, paid before this runs."""
+    if ctx.card in ctx.actor.trash:
+        ctx.actor.trash.remove(ctx.card)
+        ctx.loop._play_from_zone_now(ctx.actor, ctx.card, ctx.actor_side, "trash")
+
+
 @effect("sacrifice_for_points")
 def _sacrifice_for_points(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "You may kill 3 other friendly units and/or gear to score 1 point"
@@ -854,6 +997,12 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
 # Targets that mean "units on both sides of this battlefield" (board-wide
 # spells like 'Kill all units' / 'return all units with 2 [might] or less').
 _BOTH_SIDES_TARGETS = {"battlefield", "both", "both_players", "everyone", "all_units"}
+_EVERYWHERE_TARGETS = {
+    "all_friendly_units_anywhere": ("friendly", "anywhere"),
+    "all_enemy_units_anywhere": ("enemy", "anywhere"),
+    "all_units_anywhere": ("both", "anywhere"),
+    "all_units_in_bases": ("both", "base"),
+}
 
 # "Player picks a unit" — unrestricted, may be on EITHER side (KNOWN_ISSUES #16).
 # These resolve to a both-sides candidate pool; `bias` orders the deterministic
@@ -878,7 +1027,13 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         # The unit that caused this trigger ("give it +1 [might]").
         unit = ctx.extra.get("triggering_unit")
         return [unit] if unit is not None else []
-    if target in _BOTH_SIDES_TARGETS:
+    if target in _EVERYWHERE_TARGETS:
+        # "Give friendly units +5" / "Deal 3 to all units in bases": not only here.
+        who, where = _EVERYWHERE_TARGETS[target]
+        sides = {"friendly": [ctx.actor_side], "enemy": [ctx.opponent_side],
+                 "both": [ctx.actor_side, ctx.opponent_side]}[who]
+        units = [u for s in sides for u in _units_at(ctx, s, where)]
+    elif target in _BOTH_SIDES_TARGETS:
         units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
     elif target in _CHOOSER_TARGETS:
         friendly = list(ctx._units_for_side(ctx.actor_side))
@@ -1421,8 +1576,7 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for _ in range(count):
         if not player.hand:
             break
-        player.trash.append(player.hand.pop(0))
-        ctx.loop.gs.discarded_this_turn[side] = True
+        ctx.loop._discard(player, player.hand[0])
 
 
 @effect("play_token")

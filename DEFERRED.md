@@ -290,8 +290,26 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   Constellation only sacrifices tokens. Left: Wild Claw's empower, a
   controlled opponent's card goes to its controller's trash, Sumpworks Map
   (REACTION gear) is only played at normal speed.
+- [DONE] **Batch 4 (196 → 173): one-liners and missing triggers.**
+  Board-wide targets (`all_friendly_units_anywhere`, `all_units_in_bases`:
+  Grand Strategem, Avalanche); legends now hear every "when you ..." fan-out
+  (Draven, Volibear Relentless Storm, Rengar Pridestalker, Kha'Zix, Sivir
+  Battle Mistress; Nasus Curator got its missing "[7] or more", Jhin Virtuoso
+  emptied: it banished a random trash card); DEATHKNELL "if I was MIGHTY"
+  and Karthus's double DEATHKNELL; "when an enemy unit (here) dies" (Nasus
+  Guardian, Solari Shrine); "when you discard me" through one discard path
+  (Flame Chompers, Mask Mother); "when you choose a friendly unit" (Spirit
+  Wheel), "when you use a gear's ability" (Prize of Progress); Fanfare,
+  Mushroom Pouch (facedown-card condition, was safe-false), Titanic Shrine,
+  Royal Entourage, Altar of Memories, Shen, Reckoner's Arena, Ephemeral Ward
+  (unattached non-Equipment gear passives were never applied; Petricite
+  Monument's DEFLECT now board-wide), Downwell, Cataclysmic Duel, Keeper's
+  Verdict, Whirlwind. Left: Sivir Battle Mistress's "when you recycle a
+  rune".
 - Next: restrictions ("can't be chosen", "can't move"), damage modifiers,
-  the empower family (Glowstone, Lacerate, Wild Claw), Ashe Focused.
+  combat-damage conditions (Orianna, Galio, Sacred Protector), Equipment
+  texts (Skyfall of Areion, Hexplate...), the empower family (Glowstone,
+  Lacerate, Wild Claw), play-to-battlefield units, Ashe Focused.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

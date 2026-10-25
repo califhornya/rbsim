@@ -52,6 +52,10 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_attack", "on_friendly_defend",  # a friendly unit attacks / defends (Mask of Foresight)
     "on_second_draw",                            # you draw your second card this turn (Frigid Jewel)
     "on_opponent_scores",                        # an opponent scores (Sumpworks Map)
+    "on_enemy_unit_died",                        # an enemy unit dies (Nasus Guardian, Solari Shrine)
+    "on_discarded",                              # you discard me (Flame Chompers)
+    "on_friendly_chosen",                        # you choose a friendly unit (Spirit Wheel)
+    "on_gear_ability_used",                      # you use a gear's ability (Prize of Progress)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -119,6 +123,12 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_alone",             # "when a friendly unit attacks or defends alone"
     "triggering_unit_buffed",            # "when a buffed friendly unit dies"
     "in_showdown",                       # "during a showdown"
+    "died_mighty",                       # DEATHKNELL "if I was MIGHTY"
+    "units_here_exactly",                # n: "exactly one other unit you control here" (n=2)
+    "triggering_unit_stunned",           # "when you kill a stunned enemy unit"
+    "died_here",                         # "when an enemy unit here dies"
+    "triggering_unit_mightiest",         # "a unit with Might greater than each other unit"
+    "controller_has_facedown_card",      # "if you control a facedown card at a battlefield"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -126,7 +136,6 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
 # never emits them.
 SAFE_FALSE_CONDITIONS: frozenset[str] = frozenset({
     "excess_damage_at_least",
-    "controller_has_facedown_card",
     "target_was_stunned",
 })
 
@@ -191,5 +200,5 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
-    "enter_ready", "double_equipment_might",
+    "enter_ready", "double_equipment_might", "double_deathknell",
 })

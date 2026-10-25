@@ -215,7 +215,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_self_from_trash",
+        "trigger": "on_discarded",
+        "optional": true,
+        "cost": {
+          "power": 1
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-007",
@@ -2422,7 +2431,20 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_enemy_unit_died",
+        "count": 1,
+        "optional": true,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "triggering_unit_stunned"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-073",
@@ -3404,7 +3426,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_start_of_turn",
+        "count": 1,
+        "condition": {
+          "type": "controller_has_facedown_card"
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-102",
@@ -6158,7 +6189,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "each_player_bounces",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-188",
@@ -7670,7 +7706,14 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "all_friendly_units_anywhere",
+        "amount": 5
+      }
+    ]
   },
   {
     "card_id": "OGN-234",
@@ -7752,7 +7795,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "double_deathknell",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-237",
@@ -9408,7 +9456,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "activate_conquer_effects",
+        "trigger": "on_hold"
+      }
+    ]
   },
   {
     "card_id": "OGN-287",
@@ -11678,7 +11731,12 @@
         "rarity": "Common"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_or_exhaust_legend",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "SFD-040",
@@ -12840,7 +12898,14 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_gear_ability_used",
+        "target": "self",
+        "amount": 1
+      }
+    ]
   },
   {
     "card_id": "SFD-076",
@@ -13747,7 +13812,8 @@
       {
         "effect": "give_keyword",
         "trigger": "passive",
-        "target": "all_friendly_units_here",
+        "target": "friendly_unit",
+        "scope": "board",
         "keyword": "DEFLECT"
       }
     ]
@@ -14988,7 +15054,18 @@
         "rarity": "Rare"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_friendly_chosen",
+        "count": 1,
+        "optional": true,
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-145",
@@ -15062,7 +15139,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "return_all_to_hand",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "SFD-148",
@@ -15701,7 +15783,16 @@
         "rarity": "Uncommon"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_death",
+        "count": 2,
+        "condition": {
+          "type": "died_mighty"
+        }
+      }
+    ]
   },
   {
     "card_id": "SFD-168",
@@ -15755,7 +15846,25 @@
         "rarity": "Rare"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "sequence",
+        "trigger": "on_friendly_unit_death",
+        "optional": true,
+        "cost": {
+          "tap": true
+        },
+        "steps": [
+          {
+            "effect": "draw_cards",
+            "count": 1
+          },
+          {
+            "effect": "hand_to_deck_bottom"
+          }
+        ]
+      }
+    ]
   },
   {
     "card_id": "SFD-170",
@@ -16281,7 +16390,13 @@
         "rarity": "Showcase"
       }
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_win_combat",
+        "count": 1
+      }
+    ]
   },
   {
     "card_id": "SFD-186",
@@ -16852,7 +16967,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_enemy_unit_died",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "SFD-204",
@@ -23583,19 +23704,7 @@
       }
     ],
     "keywords": [],
-    "effects": [
-      {
-        "effect": "banish_card",
-        "trigger": "on_play_spell",
-        "condition": {
-          "type": "spell_cost_at_least",
-          "params": {
-            "amount": 4
-          }
-        },
-        "target": "chosen_spell"
-      }
-    ]
+    "effects": []
   },
   {
     "card_id": "UNL-182",
@@ -24463,7 +24572,12 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "tuck_unit",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "UNL-205",
@@ -26438,7 +26552,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_hold",
+        "count": 1,
+        "condition": {
+          "type": "units_here_exactly",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-042",
@@ -27169,7 +27295,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "channel_rune",
+        "trigger": "on_enemy_unit_died",
+        "amount": 1,
+        "exhausted": true,
+        "once_per_turn": true,
+        "condition": {
+          "type": "died_here"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-063",
@@ -28069,7 +28206,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "keep_one_kill_rest",
+        "trigger": "on_cast"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-090",
@@ -28214,7 +28356,18 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_discarded",
+        "target": "friendly_unit",
+        "amount": 2,
+        "optional": true,
+        "cost": {
+          "energy": 1
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-094",
@@ -29925,8 +30078,17 @@
         "effect": "ready_runes",
         "trigger": "on_friendly_unit_played",
         "amount": 2,
+        "optional": true,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "energy_at_least": 7
+            }
+          }
         }
       }
     ],
@@ -31956,7 +32118,20 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 2
+      },
+      {
+        "effect": "kill_gear",
+        "trigger": "on_friendly_unit_played",
+        "target": "self"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-039",
@@ -32231,7 +32406,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_on_next_unit_plays",
+        "trigger": "on_cast",
+        "count": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-047",
@@ -33209,7 +33390,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "target": "all_units_in_bases",
+        "amount": 3
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-079",
@@ -33541,7 +33729,19 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_friendly_unit_played",
+        "count": 1,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "triggering_unit_mightiest"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-089",

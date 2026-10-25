@@ -89,6 +89,9 @@ class GameState:
     once_per_turn_used: dict = field(default_factory=dict)
     # The last turn each side gained XP (Wily Newtfish).
     xp_gained_turn: dict = field(default_factory=dict)
+    # "The next three times you play a unit this turn, draw 1" (Fanfare):
+    # side -> [turn, plays left].
+    unit_play_draws: dict = field(default_factory=dict)
     # "Units you play this turn enter ready" (Confront): the turn it applies to.
     units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
     # "The next unit you play this turn enters ready" (Sun Disc): how many.
