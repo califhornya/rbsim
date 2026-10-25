@@ -36,6 +36,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_readied", "on_friendly_unit_buffed", "on_friendly_attack",
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
+    "on_combat_start_here",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -66,7 +67,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_alone", "triggering_unit_buffed", "in_showdown",
     "died_mighty", "units_here_exactly", "triggering_unit_stunned", "died_here",
     "triggering_unit_mightiest", "controller_has_facedown_card",
-    "cards_in_hand_exactly", "units_at_battlefields_exactly",
+    "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "target_was_stunned",
 })
@@ -161,7 +162,9 @@ class EffectContext:
         # route through here).
         amount += self.loop._bf_passive_amount(self.battlefield, "bonus_damage_here")
 
-        _, dead = self.battlefield.apply_spell_damage(target_side, amount)
+        _, dead = self.battlefield.apply_spell_damage(
+            target_side, amount,
+            take=lambda u, a: self.loop._take_damage(u, a, "spell", self.actor_side, self.card))
 
         # Spell-killed units die like any other (replacements, DEATHKNELL, ...).
         self.loop._route_deaths([(u, target_side) for u in dead], self.battlefield)
@@ -182,7 +185,9 @@ class EffectContext:
             if where is None:
                 continue
             side, bf = where
-            unit.damage += amount + self.loop._bf_passive_amount(bf, "bonus_damage_here")
+            unit.damage += self.loop._take_damage(
+                unit, amount + self.loop._bf_passive_amount(bf, "bonus_damage_here"),
+                "spell", self.actor_side, self.card)
             if _is_dead(unit):
                 if bf is None:
                     self.loop.gs.get_player(side).base_units.remove(unit)
@@ -1043,7 +1048,7 @@ class GameLoop:
             u.passive_keywords = set()
             u.no_combat_damage = False
             u.equip_bonus_mult = 1
-            u.unchoosable = u.no_move_to_base = u.cant_ready = False
+            u.unchoosable = u.no_move_to_base = u.cant_ready = u.spell_immune = False
 
         for bf in self.gs.battlefields:
             for side in ("A", "B"):
@@ -1158,9 +1163,11 @@ class GameLoop:
                 u.equip_bonus_mult = 2
             return
 
-        if es.effect in ("cant_be_chosen", "cant_move_to_base", "cant_be_readied"):
+        if es.effect in ("cant_be_chosen", "cant_move_to_base", "cant_be_readied",
+                         "prevent_enemy_spell_damage"):
             flag = {"cant_be_chosen": "unchoosable", "cant_move_to_base": "no_move_to_base",
-                    "cant_be_readied": "cant_ready"}[es.effect]
+                    "cant_be_readied": "cant_ready",
+                    "prevent_enemy_spell_damage": "spell_immune"}[es.effect]
             for u in targets:
                 setattr(u, flag, True)
             return
@@ -1324,6 +1331,15 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "not":
+            return not self._check_condition(params.get("condition"), card, actor, opponent, extra)
+        if ctype == "friendly_gear_here":
+            # "unless there's a friendly gear here" (Orianna Exquisite).
+            unit = self._find_unit_by_card(card)
+            where = self._locate_unit(unit) if unit is not None else None
+            here = where[1] if where else None
+            return here is not None and (bool(here.gear_for(side)) or
+                                         any(u.gear for u in here._units_for(side)))
         if ctype == "cards_in_hand_exactly":
             return len(actor.hand) == _threshold()
         if ctype == "units_at_battlefields_exactly":
@@ -2476,6 +2492,9 @@ class GameLoop:
             card._repeat_paid = self._pay_repeat(card, ap)
         self._show_off(card, ap)
         side = "A" if ap is self.gs.A else "B"
+        if self.gs.next_spell_bonus.get(side) == self.gs.turn:
+            card._bonus_damage_turn = self.gs.turn      # Ravenborn Tome
+            del self.gs.next_spell_bonus[side]
         self._note_card_played(card, side, from_zone)
 
     def _play_token(self, name: str, side: str, *, bf: Optional[Battlefield] = None,
@@ -3390,6 +3409,41 @@ class GameLoop:
                                                     self.gs.get_player(enemy), actor,
                                                     context_extra={"battlefield": bf})
 
+    def _take_damage(self, unit: UnitInPlay, amount: int, kind: str = "spell",
+                     source_side: Optional[str] = None, source: Optional[Card] = None) -> int:
+        """The damage `unit` actually takes from `amount` dealt to it (kind
+        "spell" = a spell or ability, or "combat"): Bonus Damage (Annie Fiery,
+        Ravenborn Tome's next spell), prevention (Unyielding Spirit, Esteemed
+        Hierophant, Kayn after two moves, Ki Barrier's shield), doubling (Lotus
+        Trap); with Imperial Decree a unit that takes damage dies."""
+        gs = self.gs
+        if amount <= 0:
+            return 0
+        where = self._locate_unit(unit)
+        owner = where[0] if where else None
+        if kind == "spell":
+            if gs.no_spell_damage_turn == gs.turn:
+                return 0
+            if source_side is not None:
+                if self._side_has_passive(source_side, "spell_bonus_damage"):
+                    amount += 1
+                if getattr(source, "_bonus_damage_turn", None) == gs.turn:
+                    amount += 1
+                if unit.spell_immune and owner is not None and source_side != owner:
+                    return 0
+        if self._has_effect(unit.card, "no_damage_if_moved_twice") and unit.moves_this_turn >= 2:
+            return 0
+        if unit.double_damage_turn == gs.turn:
+            amount *= 2
+        if unit.damage_shield:
+            absorbed = min(unit.damage_shield, amount)
+            unit.damage_shield -= absorbed
+            amount -= absorbed
+        if amount > 0 and gs.decree_turn == gs.turn:
+            # Imperial Decree: dealt damage kills it.
+            return max(amount, unit.might - unit.damage, 1)
+        return amount
+
     def _can_choose(self, unit: UnitInPlay, chooser: str) -> bool:
         """Whether a spell or ability of `chooser` can choose `unit`: not an
         enemy unit that "can't be chosen by enemy spells and abilities" (Ruin
@@ -3749,7 +3803,15 @@ class GameLoop:
                 self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
                                                 context_extra={"battlefield": bf})
 
-        stats = bf.resolve_combat_might(attacker_side=attacker)
+        # "When combat starts here, the attacker and defender each ADD [1]"
+        # (Threshold of the Gray).
+        if bf.card is not None:
+            for side in (attacker, defender):
+                self._resolve_triggered_effects(bf.card, "on_combat_start_here", bf,
+                                                self.gs.get_player(side),
+                                                self.gs.get_player(self.gs.other(side)),
+                                                context_extra={"battlefield": bf})
+        stats = bf.resolve_combat_might(attacker_side=attacker, **self._combat_mods(bf, attacker))
 
         if self.verbose:
             dead_A_names = ",".join(u.card.name for u in stats.dead_A) or "-"
@@ -3769,9 +3831,14 @@ class GameLoop:
         # Combat cleanup (§468.1.a.2): attackers still here with defenders are
         # recalled to their base (not a move).
         if bf.units_A and bf.units_B:
-            for unit in list(bf._units_for(attacker)):
-                bf.remove_unit(attacker, unit)
-                atk_actor.base_units.append(unit)
+            # "If a combat where you are the attacker ends in a tie, recall ALL
+            # units instead" (Symbol of the Solari).
+            tie_all = any(self._has_effect(src, "tie_recall_all")
+                          for src, _ in self._sources_in_play(attacker))
+            for side in ((attacker, defender) if tie_all else (attacker,)):
+                for unit in list(bf._units_for(side)):
+                    bf.remove_unit(side, unit)
+                    self.gs.get_player(side).base_units.append(unit)
             if self.verbose:
                 print(f"  [RECALL] {attacker}'s attackers at BF{bf_idx} return to base")
 
@@ -3787,6 +3854,28 @@ class GameLoop:
             if self.verbose:
                 print(f"  [CONQUER] {attacker} conquers BF{bf_idx} -> +1 VP")
             self._fire_scoring_trigger("on_conquer", bf, attacker)
+
+    def _combat_mods(self, bf: Battlefield, attacker: str) -> dict:
+        """Combat-only rules at `bf`: the damage hook (_take_damage), a side
+        that ignores TANK while assigning damage here (Dune Surfer), and Might
+        changes while fighting (Forbidding Waste: a lone defender -2; Crimson
+        Pigeons: +2 attacking with another unit)."""
+        defender = self.gs.other(attacker)
+        mods: dict = {}
+        if bf.card is not None and self._has_effect(bf.card, "lone_defender_minus") \
+                and len(bf._units_for(defender)) == 1:
+            mods[id(bf._units_for(defender)[0])] = -2
+        attackers = bf._units_for(attacker)
+        if len(attackers) >= 2:
+            for u in attackers:
+                if self._has_effect(u.card, "attacking_with_another_bonus"):
+                    mods[id(u)] = mods.get(id(u), 0) + 2
+
+        def surfer(side):
+            return any(self._has_effect(u.card, "ignore_tank_here") for u in bf._units_for(side))
+        return {"take": lambda u, a: self._take_damage(u, a, "combat"),
+                "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
+                "might_mods": mods}
 
     def _phase_showdown(self, active: str, opponent: str) -> None:
         pass  # Showdowns now trigger immediately when battlefield contested

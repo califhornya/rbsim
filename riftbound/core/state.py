@@ -89,6 +89,13 @@ class GameState:
     once_per_turn_used: dict = field(default_factory=dict)
     # The last turn each side gained XP (Wily Newtfish).
     xp_gained_turn: dict = field(default_factory=dict)
+    # Damage rules for one turn: Unyielding Spirit ("Prevent all spell and
+    # ability damage this turn"), Imperial Decree ("When any unit takes damage
+    # this turn, kill it"), Ravenborn Tome (side -> turn of "the next spell
+    # you play this turn deals 1 Bonus Damage").
+    no_spell_damage_turn: int = -1
+    decree_turn: int = -1
+    next_spell_bonus: dict = field(default_factory=dict)
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.

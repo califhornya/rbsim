@@ -280,6 +280,108 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("next_spell_bonus_damage")
+def _next_spell_bonus_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "The next spell you play this turn deals 1 Bonus Damage" (Ravenborn Tome)."""
+    ctx.loop.gs.next_spell_bonus[ctx.actor_side] = ctx.loop.gs.turn
+
+
+@effect("prevent_spell_damage_this_turn")
+def _prevent_spell_damage_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Prevent all spell and ability damage this turn" (Unyielding Spirit)."""
+    ctx.loop.gs.no_spell_damage_turn = ctx.loop.gs.turn
+
+
+@effect("kill_damaged_this_turn")
+def _kill_damaged_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When any unit takes damage this turn, kill it" (Imperial Decree)."""
+    ctx.loop.gs.decree_turn = ctx.loop.gs.turn
+
+
+@effect("damage_shield")
+def _damage_shield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Prevent the next 7 damage that would be dealt to it this turn" (Ki
+    Barrier): the friendly unit losing its fight, else the mightiest."""
+    mine = _choosable(ctx, _units_at(ctx, ctx.actor_side, "anywhere"))
+    if not mine:
+        return
+
+    def threatened(u):
+        where = ctx.loop._locate_unit(u)
+        bf = where[1] if where else None
+        enemy = sum(x.might for x in bf._units_for(ctx.opponent_side)) if bf else 0
+        return (enemy >= u.might - u.damage, u.might)
+    unit = max(mine, key=threatened)
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    unit.damage_shield += int(spec.get("amount", 7))
+
+
+@effect("double_damage_this_turn")
+def _double_damage_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a unit. Double all damage that would be dealt to it this turn"
+    (Lotus Trap): an enemy unit, the mightiest at a battlefield."""
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
+        unit.double_damage_turn = ctx.loop.gs.turn
+
+
+@effect("double_shield")
+def _double_shield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Double the SHIELD of a unit you control here this turn" (K'Sante
+    Dauntless): the unit here with the most SHIELD."""
+    units = [u for u in ctx.battlefield._units_for(ctx.actor_side) if u.keyword_value("SHIELD")]
+    if units:
+        unit = max(units, key=lambda u: u.keyword_value("SHIELD"))
+        unit.turn_keywords.append(f"SHIELD {unit.keyword_value('SHIELD')}")
+
+
+@effect("unit_split_damage")
+def _unit_split_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a friendly unit. It deals damage equal to its Might split among
+    enemy units at battlefields. Then for each unit this kills: Gain 1 XP"
+    (Alpha Strike): the mightiest friendly unit, killing the toughest enemies
+    it can, the rest on the next."""
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
+    if not mine or not enemies:
+        return
+    source = max(mine, key=lambda u: u.might)
+    pool = source.might
+    plan = []
+    for e in sorted(enemies, key=lambda u: u.might - u.damage):
+        need = max(1, e.might - e.damage)
+        if need <= pool:
+            plan.append((e, need))
+            pool -= need
+    if pool and len(plan) < len(enemies):
+        rest = [e for e in enemies if all(e is not p for p, _ in plan)]
+        plan.append((max(rest, key=lambda u: u.might), pool))
+    elif pool and plan:
+        plan[-1] = (plan[-1][0], plan[-1][1] + pool)
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [source] + [e for e, _ in plan])
+    for e, n in plan:
+        ctx.damage_units([e], n)
+    alive = {id(u) for u in _units_at(ctx, ctx.opponent_side, "anywhere")}
+    killed = sum(1 for e, _ in plan if id(e) not in alive)
+    if killed:
+        ctx.loop.gs.add_xp(ctx.actor_side, killed)
+
+
+@effect("damage_unless_draw")
+def _damage_unless_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose an enemy unit. Deal 6 to it unless its controller has you draw
+    2" (Shakedown): they let you draw when the damage would kill it."""
+    amount = int(spec.get("amount", 6))
+    enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "anywhere"))
+    if not enemies:
+        return
+    unit = max(enemies, key=lambda u: (amount >= u.might - u.damage, u.might))
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    if amount >= unit.might - unit.damage:
+        ctx.draw_cards(int(spec.get("draw", 2)), target="actor")
+    else:
+        ctx.damage_units([unit], amount)
+
+
 @effect("cant_be_chosen_this_turn")
 def _cant_be_chosen_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "It can't be chosen by enemy spells and abilities this turn" (Twilight

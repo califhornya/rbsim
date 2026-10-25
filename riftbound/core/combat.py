@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 from .cards import UnitCard
 
@@ -48,6 +48,9 @@ class UnitInPlay:
     cant_be_chosen_turn: int = -1
     no_move_to_base: bool = False
     cant_ready: bool = False
+    spell_immune: bool = False       # Esteemed Hierophant: enemy spell/ability damage prevented
+    double_damage_turn: int = -1     # Lotus Trap: "Double all damage dealt to it this turn"
+    damage_shield: int = 0           # Ki Barrier: "Prevent the next 7 damage ... this turn"
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -59,6 +62,7 @@ class UnitInPlay:
         self.turn_keywords = []
         self.base_might_override = None
         self.moves_this_turn = 0
+        self.damage_shield = 0
 
     @property
     def might(self) -> int:
@@ -122,20 +126,24 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
     return sum(unit.might for unit in units if not unit.stunned and not unit.no_combat_damage)
 
 
-def _ordered_targets(units: List[UnitInPlay]) -> List[UnitInPlay]:
+def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False) -> List[UnitInPlay]:
     """Damage-assignment order (§460.2.c): TANK units must take lethal first,
     BACKLINE units last, everyone else in between. On a Tank+Backline conflict
-    the controller chooses — we resolve deterministically as Tank (take first)."""
+    the controller chooses — we resolve deterministically as Tank (take first).
+    `ignore_tank`: the assigner ignores TANK here (Dune Surfer)."""
     tanks: List[UnitInPlay] = []
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
     for u in units:
-        if u.has_keyword("TANK"):
+        if u.has_keyword("TANK") and not ignore_tank:
             tanks.append(u)
         elif u.has_keyword("BACKLINE"):
             backline.append(u)
         else:
             normal.append(u)
+    if ignore_tank:
+        # Free to choose the order: the most kills first.
+        normal.sort(key=lambda u: u.might - u.damage)
     return tanks + normal + backline
 
 
@@ -148,32 +156,36 @@ def _is_dead(unit: UnitInPlay) -> bool:
     return unit.damage >= unit.might
 
 
-def _apply_damage(units: List[UnitInPlay], damage: int) -> tuple[int, int]:
+def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
+                  ignore_tank: bool = False) -> tuple[int, int]:
     """Apply damage to the provided units; return (kills, damage_assigned).
 
     Lethal-first per §460.2.c: assign each unit its lethal amount before moving
     to the next. For positive-might units, lethal = remaining might. For 0-might
     units, lethal is 0 — but to register a kill (and to honor "you can dump
     excess on the last unit if no other targets") we assign 1 point of damage.
+    `take(unit, amount)` is the damage the unit actually takes (prevention,
+    doubling: GameLoop._take_damage); the assignment itself is unchanged.
     """
 
+    take = take or (lambda unit, amount: amount)
     assigned = 0
     kills = 0
-    for unit in _ordered_targets(units):
+    for unit in _ordered_targets(units, ignore_tank):
         if damage <= 0:
             break
         if _is_dead(unit):
             continue  # already dead this combat — skip
         if unit.might == 0:
             # 0-might unit: any damage kills. Assign 1 to register the kill.
-            unit.damage += 1
+            unit.damage += take(unit, 1)
             damage -= 1
             assigned += 1
             kills += 1
             continue
         remaining = unit.might - unit.damage
         to_assign = min(remaining, damage)
-        unit.damage += to_assign
+        unit.damage += take(unit, to_assign)
         damage -= to_assign
         assigned += to_assign
         if _is_dead(unit):
@@ -186,6 +198,10 @@ def resolve_might_combat(
     units_b: List[UnitInPlay],
     *,
     attacker_side: str = "A",
+    take=None,
+    ignore_tank_a: bool = False,
+    ignore_tank_b: bool = False,
+    might_mods: Optional[dict] = None,
 ) -> CombatStats:
     """Resolve simultaneous combat between two unit groups.
 
@@ -201,12 +217,15 @@ def resolve_might_combat(
         u.bonus_might = u.keyword_value("ASSAULT") if a_attacks else u.keyword_value("SHIELD")
     for u in units_b:
         u.bonus_might = u.keyword_value("ASSAULT") if not a_attacks else u.keyword_value("SHIELD")
+    # Combat-only Might changes (Forbidding Waste, Crimson Pigeons): id -> amount.
+    for u in list(units_a) + list(units_b):
+        u.bonus_might += (might_mods or {}).get(id(u), 0)
 
     damage_to_a = _total_might(units_b)
     damage_to_b = _total_might(units_a)
 
-    kills_a, assigned_a = _apply_damage(units_a, damage_to_a)
-    kills_b, assigned_b = _apply_damage(units_b, damage_to_b)
+    kills_a, assigned_a = _apply_damage(units_a, damage_to_a, take, ignore_tank_a)
+    kills_b, assigned_b = _apply_damage(units_b, damage_to_b, take, ignore_tank_b)
 
     stats.kills_A = kills_a
     stats.kills_B = kills_b
@@ -234,10 +253,10 @@ def resolve_might_combat(
     return stats
 
 
-def deal_direct_damage(units: List[UnitInPlay], damage: int) -> tuple[int, list[UnitInPlay]]:
+def deal_direct_damage(units: List[UnitInPlay], damage: int, take=None) -> tuple[int, list[UnitInPlay]]:
     """Apply spell or ability damage to a unit group; returns (kills, dead_units)."""
 
-    kills, _ = _apply_damage(units, damage)
+    kills, _ = _apply_damage(units, damage, take)
     dead = [u for u in units if _is_dead(u)]
     units[:] = [u for u in units if not _is_dead(u)]
     # Survivors keep the damage until a combat ends or the turn ends (Core

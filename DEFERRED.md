@@ -320,8 +320,20 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   (applied when the game is built), Sandstone Chimera, Leblanc Everywhere at
   Once, Maduli; "Discard 1" as an ability cost. Left: Mageseeker Warden's
   gear half, Alpha Wildclaw in base.
-- Next: damage modifiers,
-  combat-damage conditions (Orianna, Galio, Sacred Protector), Equipment
+- [DONE] **Batch 6 (155 → 136): damage and combat rules.** One damage
+  hook, `GameLoop._take_damage`, for spell/ability damage (`damage_units`,
+  split damage) and combat assignment (`combat._apply_damage(take=...)`):
+  Bonus Damage (Annie Fiery, Ravenborn Tome's next spell), prevention
+  (Unyielding Spirit, Esteemed Hierophant at 7 runes, Kayn after two moves,
+  Ki Barrier's 7-point shield), doubling (Lotus Trap), Imperial Decree.
+  Combat-only rules (`_combat_mods`): Dune Surfer's side ignores TANK (and
+  orders its damage to kill the most), Forbidding Waste, Crimson Pigeons;
+  Galio / Orianna / Sacred Protector deal no combat damage (a `not`
+  condition, `friendly_gear_here`); Symbol of the Solari recalls everyone on
+  a tie; Threshold of the Gray; Alpha Strike, Shakedown, K'Sante Dauntless.
+  Not modeled: assigning extra combat damage through a Ki Barrier, and the
+  assigner choosing its order in general (list order outside Dune Surfer).
+- Next: Equipment
   texts (Skyfall of Areion, Hexplate...), the empower family (Glowstone,
   Lacerate, Wild Claw), play-to-battlefield units, Ashe Focused.
 

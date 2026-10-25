@@ -56,6 +56,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_discarded",                              # you discard me (Flame Chompers)
     "on_friendly_chosen",                        # you choose a friendly unit (Spirit Wheel)
     "on_gear_ability_used",                      # you use a gear's ability (Prize of Progress)
+    "on_combat_start_here",                      # a combat starts at this battlefield (Threshold of the Gray)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -131,6 +132,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "controller_has_facedown_card",      # "if you control a facedown card at a battlefield"
     "cards_in_hand_exactly",             # n: "if you have exactly 4 cards in hand"
     "units_at_battlefields_exactly",     # n: "exactly 4 units at battlefields"
+    "not",                               # condition: {...} doesn't hold ("unless ...")
+    "friendly_gear_here",                # "there's a friendly gear here"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -209,4 +212,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "warden_no_ready", "play_restriction", "opponents_cant_gain_points",
     "no_score_before_turn", "early_score_draws", "channel_only_one", "no_temporary_here",
     "victory_score_plus",       # Aspirant's Climb: read when the game is built
+    # damage and combat rules (GameLoop._take_damage, _combat_mods, combat cleanup)
+    "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
+    "lone_defender_minus", "attacking_with_another_bonus", "ignore_tank_here", "tie_recall_all",
 })

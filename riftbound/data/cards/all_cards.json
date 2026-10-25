@@ -1121,7 +1121,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "next_spell_bonus_damage",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-033",
@@ -1145,7 +1153,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "damage_unless_draw",
+        "trigger": "on_cast",
+        "amount": 6,
+        "draw": 2
+      }
+    ]
   },
   {
     "card_id": "OGN-035",
@@ -4867,7 +4882,12 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "prevent_spell_damage_this_turn",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-146",
@@ -6250,7 +6270,12 @@
     "keywords": [
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_damage_if_moved_twice",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-190",
@@ -7336,7 +7361,12 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "kill_damaged_this_turn",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-222",
@@ -7531,7 +7561,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "tie_recall_all",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-228",
@@ -9851,7 +9886,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "spell_bonus_damage",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGS-002",
@@ -18077,7 +18117,13 @@
       "HIDDEN",
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "double_damage_this_turn",
+        "trigger": "on_cast",
+        "target": "enemy_unit"
+      }
+    ]
   },
   {
     "card_id": "UNL-014",
@@ -22964,7 +23010,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "attacking_with_another_bonus",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-155",
@@ -23496,7 +23547,13 @@
       "DEFLECT",
       "TANK"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_combat_damage",
+        "trigger": "passive",
+        "target": "self"
+      }
+    ]
   },
   {
     "card_id": "UNL-172",
@@ -24249,7 +24306,12 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "unit_split_damage",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "UNL-193",
@@ -24862,7 +24924,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "lone_defender_minus",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-211",
@@ -25377,7 +25444,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "ignore_tank_here",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-004",
@@ -26100,7 +26172,19 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "prevent_enemy_spell_damage",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "you_have_n_or_more_runes",
+          "params": {
+            "n": 7
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-025",
@@ -29587,7 +29671,13 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "damage_shield",
+        "trigger": "on_cast",
+        "amount": 7
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-126",
@@ -29686,7 +29776,24 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "no_combat_damage",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "units_here_exactly",
+              "params": {
+                "n": 2
+              }
+            }
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-129",
@@ -30858,7 +30965,13 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "gain_energy",
+        "trigger": "on_combat_start_here",
+        "amount": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-166",
@@ -32368,7 +32481,21 @@
     "keywords": [
       "SHIELD"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "no_combat_damage",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "friendly_gear_here"
+            }
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-042",
@@ -32480,7 +32607,16 @@
     "keywords": [
       "SHIELD"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "double_shield",
+        "trigger": "on_attack"
+      },
+      {
+        "effect": "double_shield",
+        "trigger": "on_defend"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-045",
