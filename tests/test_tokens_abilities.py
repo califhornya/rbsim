@@ -215,3 +215,11 @@ def test_equipment_might_bonus_and_gearhead_doubles_it():
     loop.gs.A.base_units.append(gearhead)
     loop._recompute_passives()
     assert gearhead.might == int(gearhead.card.might) + 4
+
+
+def test_equipment_bonuses_come_from_the_card_data():
+    for name, bonus in (("B.F. Sword", 3), ("Doran's Blade", 2), ("Blade of the Ruined King", 4),
+                        ("Serrated Dirk", 0)):
+        unit = UnitInPlay(card=UnitCard(name="Holder", might=1))
+        unit.gear.append(CARD_REGISTRY[name].instantiate())
+        assert unit.might == 1 + bonus, name

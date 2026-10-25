@@ -223,13 +223,13 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   (latent: no non-passive spec uses it); now the unit's aura_might.
 
 ## Equipment Might bonuses (data)
-The printed "[might] +N" of Equipment was dropped at import (the parser reads
-Might with `isdigit()`; RiftMana now puts it in `data-e-might`). A gear card's
-`might` is its Equipment bonus and the equipped unit counts it (2026-10-25), but
-only 6 of 43 values are known from local sources (rm-extract JSON, Downloads/
-vendetta.html): Doran's Shield, Guardian Angel, Pendulum Blade, Hand Hammer,
-Jagged Cutlass, Shady Spectacles. The other 37 (Spiritforged, Unleashed,
-Radiance Equipment) need a saved RiftMana card-list page with those cards.
+[DONE 2026-10-25] The printed "[might] +N" of Equipment was dropped at import
+(the parser read Might with `isdigit()`; RiftMana puts it in `data-e-might`). A
+gear card's `might` is now its Equipment bonus, filled for all 43 Equipment from
+the user's saved RiftMana gear page (Downloads, 2026-10-25); the equipped unit
+counts it and Gearhead doubles it. `scripts/import_cards.py` now reads
+`data-e-might` as a gear's might (`parse_html_cards.py` is the older parser). Experimental
+Hexplate's "I am a Mech." (a tag given by Equipment) isn't modeled.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
