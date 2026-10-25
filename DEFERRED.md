@@ -82,12 +82,26 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     them the same way — hand-author them once the engine has what they need:
     OGN-025, OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
     UNL-045, UNL-054, UNL-136, VEN-088, RAD-012, RAD-015, RAD-016, RAD-020,
-    RAD-026, RAD-030, RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
-    RAD-071, RAD-079, RAD-089, RAD-090, RAD-095, RAD-098, RAD-107, RAD-130,
-    RAD-142, RAD-149, RAD-155.
+    RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
+    RAD-071, RAD-079, RAD-089, RAD-095, RAD-098, RAD-107, RAD-130,
+    RAD-142, RAD-155.
     Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
     SFD-110, UNL-143, VEN-119, VEN-162, RAD-041, RAD-051, RAD-080, RAD-085,
     RAD-091, RAD-114, RAD-157, RAD-160.
+    Hand-authored later on 2026-10-25 (engine-audit session): the 10 meta
+    cards (OGN-084, OGN-289, SFD-036, SFD-057, SFD-199, UNL-070, UNL-150,
+    UNL-184, VEN-044, VEN-155), RAD-006, OGN-041, and OGN-011, OGN-021,
+    OGN-031, OGN-117, OGN-129, OGN-140, OGN-167, SFD-004, SFD-094, SFD-100,
+    SFD-121, SFD-171, SFD-176, UNL-023, VEN-055, RAD-026, RAD-030, RAD-090,
+    RAD-149 (enter-ready auras, "when you play a card ..." triggers, cost
+    auras). RAD-143 Mordekaiser Iron Revenant emptied (its "banish a unit or
+    gear from your trash" cost isn't modeled).
+  - **Full-corpus hand review (2026-10-25):** every card with effects in Origins,
+    Spiritforged, Unleashed, Vendetta and Proving Grounds was read against its
+    text; ~110 more specs that made cards stronger than printed were emptied
+    (fix scripts' card lists are in the commit messages of branch card-review).
+    Spiritforged had 74 June-era stubs without a trigger. Activated abilities
+    with no cost are never offered (misparsed triggers).
   - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
     keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
   - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In
@@ -148,13 +162,65 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   (showdown-begin predict/draw on the golden champion → golden regen).
 
 ## Stage 0.5 (match layer)
-- **Strategic / searched battlefield selection.** `play_match` has a pluggable
-  `bf_chooser`; today it just takes the first available. Making the pre-game choice
-  a learned/searched decision is future work (and ties into the RL env's action space).
-- **Sideboarding** between games (fixed in/out per matchup — user will supply lists
-  like decklists). Decks are static in `play_match` today.
-- **Full §458 pre-game protocol** (reveal/pick order). We model the competitive
-  essentials: one battlefield per player per game, no reuse, loser-chooses-first.
+Done (2026-10-25): `riftbound/core/match.py` follows Core Rules §488 and the
+Tournament Rules (excerpt in `TOURNAMENT_RULES.md`): a played battlefield is out
+for the match, best-of-5 reuse, "play first or last" as a decision, sideboarding
+(deck JSON `sideboard` ≤10 + per-matchup `sideboard_plans`, champion change, never
+before game 1), and the time limit as a match clock: 60 minutes per best of 3,
+converted to 45 turns at an estimated 1⅓ minutes per turn. When it runs out, +3
+turns, then a 2-point lead wins the game or it's a draw, and the match ends.
+Riftbound has no turn limit; the per-game `max_turns` is a stall guard that counts
+as the time running out. Left:
+- **Recalibrate the clock** (`MINUTES_PER_TURN` in `core/match.py`) when real turn
+  counts or game durations are known. With it, `simple_trade` mirrors over all repo
+  decks (280 matches): 11 of 44 game-3s go to time; 71 matches end by time, most
+  of them from AI stalls hitting the 40-turn guard.
+- [DONE 2026-10-25] **AI stalls.** Were 53 of 420 `simple_trade` mirror games
+  (12.6%) at the 40-turn guard; 0 of 420 after token units could move and fight
+  and the duplicate movement handlers were removed.
+- **Learned sideboarding.** Today's policies are "keep the registered list" and
+  "follow the deck's fixed plans"; a net-guided policy (like the battlefield
+  chooser in `ai/pregame.py`) is future work.
+- **Richer battlefield chooser input.** The chooser sees its own available
+  battlefields only, not the opponent's remaining ones or the match history.
+- **Best-of-1 setup variant** (TR 406.1.h): not modeled.
+- **Single games** (CLI, self-play, RL env) still score the 40-turn guard as "any
+  lead wins"; only matches apply the time-limit rule.
+
+## Engine audit (2026-10-25) — found while starting the inert-card pass
+Fixed: one play procedure for every zone/timing (champions' play effects,
+ACCELERATE, reactions' costs and counters); token units are real units that move
+and fight, Gold is a gear token (its old special ability added a permanent
+rune); the hardcoded movement handlers ran on top of the card specs (Stellacorn
+Herder drew 2); kill effects and spell damage skip DEATHKNELL; REACTION abilities
+were never offered and activated abilities never checked their condition; the
+Seals added energy or crashed; floating Power. Still open, in this order:
+- [DONE] **Group moves (§144.3).** A MOVE names its unit; moves to one
+  battlefield in a row are held (GameState.pending_move) and fight together.
+  The RL observation doesn't yet show units by position, so the policy prior
+  over "move the unit at position i" is blind (search still sees the result).
+- [DONE] **`move_unit` effect**: units move per `from`/`destination` with a
+  baseline policy (enemy to its base or pulled "here", friendly where it
+  attacks best); effect moves fire move triggers, contests fight at end of
+  turn. Still approximate: Showstopper/Resonating Strike buff a unit other
+  than the one moved, Call to Battle's opponent half, Akshan's gear move,
+  Loyal Pup (on_defend from base), Possession (bounces instead of stealing).
+- **Targeting baseline.** Effects pick the first unit at the effect's
+  battlefield (never base or other battlefields) instead of a real choice.
+- [DONE] **Spell damage stays** until a combat ends or the turn ends
+  (§468.1.a.1 / §317.2.b). Also: attackers are recalled when defenders survive
+  (§468.1.a.2), and end-of-turn combats run the same procedure as showdown ones
+  (attack/defend triggers, DISARM, "when you win a combat").
+- [DONE] **Equipment triggers**: an Equipment's "When I attack / defend /
+  conquer / hold / move / die" fires with its unit (Recurve Bow, Trinity Force,
+  Sacred Shears...). Still not dispatched: unattached gear's "When you ..."
+  triggers (base gear: Glowstone, Forgotten Relic, Frigid Jewel, Blood Rose,
+  Fresh Beans, Chemtech Cask, Pirate's Haven, Mistfall, Vanguard of Helm, Mask
+  of Foresight, Bottled Constellation, Sprite Fountain, Sumpworks Map,
+  Treasure Trove) — several of those specs are misencoded ("when you ready" as
+  "when you play a unit"), review each before turning the dispatch on.
+- [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
+  (latent: no non-passive spec uses it); now the unit's aura_might.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

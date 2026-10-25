@@ -62,16 +62,12 @@ def test_noop_action_ends_action_phase():
 
         def decide_action(self, opponent, cards_played=0):
             self.calls += 1
-            # A MOVE from a nonexistent base slot: the engine refuses it, so the
+            # A MOVE from an empty battlefield: the engine refuses it, so the
             # state never changes. Without the guard this loops forever.
-            return ("MOVE", None, 2, 1)
+            return ("MOVE", None, 0, 1)
 
     player_a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
     player_b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
-    # Give A a ready token in base so pop_base_unit finds nothing movable.
-    player_a.base_units.append(
-        UnitInPlay(UnitCard(name="Recruit", might=1), ready=True, is_token=True)
-    )
     gs = GameState(rng=random.Random(1), A=player_a, B=player_b,
                    turn=1, max_turns=3, active="A", victory_score=8)
     player_a.agent = StuckAgent(player_a)

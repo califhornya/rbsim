@@ -56,6 +56,10 @@ class GameState:
 
     # Chain and Showdown state
     chain: list[ChainItem] = field(default_factory=list)
+    # A Standard Move that will start a showdown, held while the player keeps
+    # moving units to the same battlefield: those units moved together (Core
+    # Rules §144.3) and fight together. (battlefield index, moving side).
+    pending_move: Optional[tuple] = None
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
     focus_player: Optional[str] = None
@@ -68,6 +72,22 @@ class GameState:
     # condition evaluator for LEGION / "you played N spells this turn" / etc.
     cards_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     spells_played_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # The cards each player played this turn, in order (GameLoop._note_card_played),
+    # so "if you've played ANOTHER card" can leave out the card asking.
+    played_cards_this_turn: dict = field(default_factory=lambda: {"A": [], "B": []})
+    # Times each player chose enemy units/gear with a spell or unit ability this
+    # turn (Ezreal Prodigal Explorer).
+    enemy_choices_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
+    # "The next card / spell you play this turn costs ... less" (Astral Heron,
+    # Raging Firebrand): per player, a list of {filter, energy, power}.
+    next_card_discounts: dict = field(default_factory=lambda: {"A": [], "B": []})
+    # "At the end of this turn, ..." effects waiting: (side, source card,
+    # battlefield index, effect dict).
+    delayed_effects: list = field(default_factory=list)
+    # "Units you play this turn enter ready" (Confront): the turn it applies to.
+    units_enter_ready_turn: dict = field(default_factory=lambda: {"A": -1, "B": -1})
+    # "The next unit you play this turn enters ready" (Sun Disc): how many.
+    next_units_enter_ready: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})

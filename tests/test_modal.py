@@ -58,6 +58,6 @@ def test_multi_effect_mode_runs_all():
     minah = UnitInPlay(card=CARD_REGISTRY["Minah Swiftfoot"].instantiate(), ready=True)
     bf = loop.gs.battlefields[0]
     loop._resolve_triggered_effects(minah.card, "on_move", bf, loop.gs.A, loop.gs.B,
-                                    context_extra={"battlefield": bf})
+                                    context_extra={"battlefield": bf, "moved_to": bf})
     assert loop.gs.A.hand == [] and loop.gs.B.hand == []      # both discarded
     assert len(loop.gs.A.trash) == 1 and len(loop.gs.B.trash) == 1

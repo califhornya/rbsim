@@ -210,6 +210,118 @@ def test_annie_legend_readies_up_to_two_runes_at_end_of_turn():
     for r in a.rune_pool[Domain.FURY]:
         r.ready = False
     loop._fire_turn_trigger("on_start_of_turn", "A")   # Annie's is an END-of-turn ability
-    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 0
+    assert a.energy == 0
     loop._fire_turn_trigger("on_end_of_turn", "A")
-    assert sum(r.ready for r in a.rune_pool[Domain.FURY]) == 2   # up to 2, not all
+    # Up to 2, not all: each readied rune is its Energy back (the engine has
+    # already exhausted every rune for Energy this turn).
+    assert a.energy == 2
+
+
+def test_costless_activated_ability_is_never_offered(monkeypatch):
+    # A trigger misread as a cost-less "button" must not be usable for free.
+    _register(monkeypatch, "Test Misread", [
+        {"effect": "ready_unit", "trigger": "activated", "target": "self"},
+        {"effect": "draw_cards", "trigger": "activated", "count": 1, "cost": {"tap": True}}])
+    loop = _loop()
+    loop.gs.A.base_units.append(UnitInPlay(UnitCard(name="Test Misread"), ready=True))
+    effects = [entry["eff"].effect for entry in loop.activatable_abilities("A")
+               if entry.get("type") == "ability"]
+    assert effects == ["draw_cards"]
+
+
+def test_on_stun_enemy_readies_eclipse_herald(monkeypatch):
+    _register(monkeypatch, "Test Herald", [
+        {"effect": "ready_unit", "trigger": "on_stun_enemy", "target": "self"}])
+    loop = _loop()
+    gs = loop.gs
+    herald = UnitInPlay(UnitCard(name="Test Herald", might=7), ready=False)
+    gs.A.base_units.append(herald)
+    bf = gs.battlefields[0]
+    ally = UnitInPlay(UnitCard(name="Ally"))
+    bf.add_unit("A", ally)
+    bf.add_unit("B", UnitInPlay(UnitCard(name="Victim")))
+    ctx = EffectContext(loop, SpellCard(name="Rune Prison"), gs.A, gs.B, bf)
+    REGISTRY["stun_unit"](ctx, {"target": "friendly_unit"})   # stunning my own unit: no
+    assert not herald.ready
+    REGISTRY["stun_unit"](ctx, {"target": "enemy_unit"})
+    assert herald.ready
+
+
+def test_at_battlefield_and_not_named_conditions():
+    loop = _loop()
+    a = loop.gs.A
+    me = UnitInPlay(UnitCard(name="Sona"))
+    a.base_units.append(me)
+    check = lambda t, extra=None, **kw: loop._check_condition(  # noqa: E731
+        {"type": t, "params": kw}, me.card, a, loop.gs.B, extra)
+    assert not check("this_is_at_battlefield")
+    a.base_units.remove(me)
+    loop.gs.battlefields[1].add_unit("A", me)
+    assert check("this_is_at_battlefield")
+    assert not check("triggering_unit_not_named", {"triggering_card": UnitCard(name="Recruit")},
+                     name="Recruit")
+    assert check("triggering_unit_not_named", {"triggering_card": UnitCard(name="Viktor")},
+                 name="Recruit")
+
+
+def test_generic_power_in_costs_is_charged():
+    # Regression: Player.can_pay_cost with no domain ignored power, so every
+    # "power" cost on abilities / additional costs was free.
+    loop = _loop()
+    a = loop.gs.A
+    assert not loop._pay_one_additional_cost(SpellCard(name="Kicker"), a, {"power": 1})
+    a.add_rune(Domain.CALM)
+    a.power_pool[Domain.CALM] = 1
+    assert loop._pay_one_additional_cost(SpellCard(name="Kicker"), a, {"power": 1})
+    assert not a.power_pool.get(Domain.CALM)
+
+
+def test_reveal_and_choose_honors_filter():
+    from riftbound.core.cards import GearCard
+    loop = _loop(deck_cards=0)
+    a = loop.gs.A
+    a.deck.cards.extend([GearCard(name="Hammer"), UnitCard(name="Big", might=9)])
+    ctx = EffectContext(loop, UnitCard(name="Ornn"), a, loop.gs.B, loop.gs.battlefields[0])
+    REGISTRY["reveal_and_choose"](ctx, {"count": 2, "target_filter": {"is_gear": True}})
+    assert [c.name for c in a.hand] == ["Hammer"]
+
+
+def test_draw_cards_amount_source():
+    loop = _loop()
+    a = loop.gs.A
+    for m in (5, 6, 2):
+        loop.gs.battlefields[0].add_unit("A", UnitInPlay(UnitCard(name=f"U{m}", might=m)))
+    ctx = EffectContext(loop, SpellCard(name="Show of Strength"), a, loop.gs.B, loop.gs.battlefields[0])
+    REGISTRY["draw_cards"](ctx, {"amount_source": "friendly_mighty_units"})
+    assert len(a.hand) == 2
+
+
+def test_subtype_conditions_read_the_subtype_key():
+    loop = _loop()
+    a = loop.gs.A
+    check = lambda t, extra=None, **kw: loop._check_condition(  # noqa: E731
+        {"type": t, "params": kw}, UnitCard(name="Src"), a, loop.gs.B, extra)
+    assert not check("you_control_subtype", subtype="Poro")
+    a.base_units.append(UnitInPlay(UnitCard(name="Snax", tags=["Poro"])))
+    assert check("you_control_subtype", subtype="Poro")
+    assert not check("you_control_subtype")                 # no tag → never true
+    dragon = UnitCard(name="Wyrm", tags=["Dragon"])
+    assert check("triggering_unit_has_subtype", {"triggering_card": dragon}, subtype="Dragon")
+    assert not check("triggering_unit_has_subtype", {"triggering_card": UnitCard(name="X")},
+                     subtype="Dragon")
+
+
+def test_fewer_runes_and_same_name_trash_count():
+    loop = _loop()
+    a, b = loop.gs.A, loop.gs.B
+    check = lambda: loop._check_condition({"type": "fewer_runes_than_opponent"},  # noqa: E731
+                                          UnitCard(name="Baccai"), a, b, None)
+    assert not check()
+    b.add_rune(Domain.FURY)
+    assert check()
+    me = UnitCard(name="Shadowblade Lurker")
+    a.trash.extend([UnitCard(name="Shadowblade Lurker"), UnitCard(name="Shadowblade Lurker"),
+                    UnitCard(name="Other")])
+    from riftbound.core.effects import _amount
+    ctx = EffectContext(loop, me, a, b, loop.gs.battlefields[0])
+    assert _amount(ctx, {"amount_source": "cards_with_my_name_in_trash"}) == 2

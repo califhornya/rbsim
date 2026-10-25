@@ -44,9 +44,9 @@ class GameAction:
     Field meaning depends on kind (matches the historical tuple grammar):
       * UNIT/SPELL/GEAR : index=hand_idx, lane=target battlefield
       * CHAMPION        : lane=target battlefield (index unused)
-      * MOVE            : lane=src, dst_lane=dst (index is None)
-      * ABILITY         : index=ability_id ("PYKE_LEGEND"/"GOLD_SACRIFICE"/
-                          "ACTIVATED"), lane=arg (domain / ability index)
+      * MOVE            : index=the unit's position in its location's list (None:
+                          the first ready unit there), lane=src, dst_lane=dst
+      * ABILITY         : index=ability_id ("ACTIVATED"), lane=ability index
     """
 
     kind: str
@@ -98,8 +98,8 @@ class GameAction:
         return cls("HIDDEN_PLAY", None, lane, None, label)
 
     @classmethod
-    def move(cls, src: int, dst: int, label: str) -> "GameAction":
-        return cls("MOVE", None, src, dst, label)
+    def move(cls, src: int, dst: int, label: str, unit: Optional[int] = None) -> "GameAction":
+        return cls("MOVE", unit, src, dst, label)
 
     @classmethod
     def ability(cls, ability_id: str, arg: Any, label: str) -> "GameAction":

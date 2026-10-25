@@ -25,7 +25,7 @@ def test_legion_cost_reduction_applies_once():
     loop = _loop(); ap = loop.gs.A; loop.gs.active = "A"
     ap.hand.append(CARD_REGISTRY["Noxus Hopeful"].instantiate())   # cost 4, LEGION -2
     ap.energy = 4
-    loop.gs.cards_played_this_turn["A"] = 1                        # a card already played
+    loop._count_card_played(CARD_REGISTRY["Noxus Hopeful"].instantiate(), "A")  # a card already played
     loop._apply_action(ap, ("UNIT", 0, 0, None), cards_played_this_turn=1)
     assert ap.energy == 2          # 4 - 2 once (not 4 - 2 - 2 = 0)
 

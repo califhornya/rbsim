@@ -58,6 +58,11 @@ def _parse_domain(value: Optional[str]) -> Optional[Domain]:
     raise ValueError(f"Unknown domain '{value}'")
 
 
+# Token "cards" are all filed as category "Token"; these are gear tokens
+# (Core Rules §187.5 Gold, §187.12 Bomb), the rest are unit tokens.
+_GEAR_TOKENS = frozenset({"Gold", "Bomb"})
+
+
 def _parse_card_type(value: str) -> CardType:
     key = value.strip().lower()
     # First try the mapping (handles "signature spell", "token", etc.)
@@ -130,6 +135,12 @@ class EffectSpec:
         effect = str(data["effect"]).strip()
         if not effect:
             raise ValueError("Effect name cannot be blank")
+        # Some specs nest their parameters under a "params" key (e.g. Treasure
+        # Hunter's token_name); handlers read them flat, so lift them up (the
+        # effect's own top-level keys win).
+        nested = data.get("params")
+        if isinstance(nested, Mapping):
+            data = {**nested, **{k: v for k, v in data.items() if k != "params"}}
         top = {k: data[k] for k in _EFFECT_TOP_LEVEL_FIELDS if k in data}
         if "condition" in top:
             top["condition"] = _normalize_condition(top["condition"])
@@ -185,6 +196,8 @@ class CardSpec:
             raise ValueError("Card specification requires a name")
         category_str = str(data.get("category", "")).strip()
         category = _parse_card_type(category_str)
+        if category_str.lower() == "token" and name in _GEAR_TOKENS:
+            category = CardType.GEAR
         domain_raw = data.get("domain")
         # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
         if domain_raw:
@@ -258,9 +271,11 @@ class CardSpec:
 
     def instantiate(self) -> Card:
         effects = [effect.to_dict() for effect in self.effects]
-        if self.category is CardType.UNIT:
+        if self.category in (CardType.UNIT, CardType.CHAMPION):
+            # A champion is a unit (it fights, plays from the trash, ACTION in
+            # showdowns) that keeps CHAMPION as its category for filters.
             might = self.might if self.might is not None else 0
-            return UnitCard(
+            unit = UnitCard(
                 name=self.name,
                 cost_energy=self.cost_energy,
                 cost_power=self.cost_power,
@@ -271,6 +286,8 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
+            unit.category = self.category
+            return unit
         if self.category is CardType.SPELL:
             damage = self.damage if self.damage is not None else 0
             return SpellCard(
@@ -305,7 +322,7 @@ class CardSpec:
                 keywords=list(self.keywords),
                 effects=effects,
             )
-        if self.category in (CardType.LEGEND, CardType.CHAMPION):
+        if self.category is CardType.LEGEND:
             return LegendCard(
                 name=self.name,
                 cost_energy=self.cost_energy,
@@ -479,6 +496,65 @@ def load_banned_cards() -> frozenset[str]:
 
 BANNED_CARDS: frozenset[str] = load_banned_cards()
 
+SIDEBOARD_MAX = 10   # Tournament Rules 601.1.c.1 (constructed)
+
+
+def _name_counts(entries, what: str, path: Path) -> dict[str, int]:
+    """[{"name", "count"}] (or {name: count}) -> {name: count}, every name known."""
+    items = entries.items() if isinstance(entries, Mapping) else (
+        (str(e.get("name", "")).strip(), int(e.get("count", 1))) for e in entries)
+    out: dict[str, int] = {}
+    for name, count in items:
+        name = str(name).strip()
+        if not name:
+            continue
+        if CARD_REGISTRY.get(name) is None:
+            raise ValueError(f"Deck '{path.name}' {what} references unknown card '{name}'")
+        out[name] = out.get(name, 0) + int(count)
+    return out
+
+
+def _parse_sideboard(data: Mapping, path: Path) -> tuple[dict[str, int], dict[str, dict]]:
+    """Validate and return a deck's sideboard {name: count} and its per-matchup plans.
+
+    A plan is relative to the registered main deck: {"in": {name: n}, "out":
+    {name: n}, "champion": optional new Chosen Champion}. Swaps are 1 for 1
+    (Tournament Rules 403.4), so "in" and "out" must have the same size.
+    """
+    sideboard = _name_counts(data.get("sideboard", []), "sideboard", path)
+    total = sum(sideboard.values())
+    if total > SIDEBOARD_MAX:
+        raise ValueError(f"Deck '{path.name}' sideboard has {total} cards — maximum is {SIDEBOARD_MAX}.")
+    for name in sideboard:
+        if name in BANNED_CARDS:
+            warnings.warn(f"Deck '{path.name}' sideboard contains banned card '{name}'", stacklevel=3)
+    main = _name_counts(data.get("cards", []), "cards", path)
+
+    plans: dict[str, dict] = {}
+    for key, raw in (data.get("sideboard_plans") or {}).items():
+        ins = _name_counts(raw.get("in", {}), f"plan '{key}'", path)
+        outs = _name_counts(raw.get("out", {}), f"plan '{key}'", path)
+        for name, n in ins.items():
+            if n > sideboard.get(name, 0):
+                raise ValueError(f"Deck '{path.name}' plan '{key}' brings in {n} '{name}' "
+                                 f"but the sideboard has {sideboard.get(name, 0)}")
+        for name, n in outs.items():
+            if n > main.get(name, 0):
+                raise ValueError(f"Deck '{path.name}' plan '{key}' takes out {n} '{name}' "
+                                 f"but the main deck has {main.get(name, 0)}")
+        if sum(ins.values()) != sum(outs.values()):
+            raise ValueError(f"Deck '{path.name}' plan '{key}' is not 1 for 1 "
+                             f"({sum(ins.values())} in, {sum(outs.values())} out)")
+        plans[str(key)] = {"in": ins, "out": outs, "champion": raw.get("champion")}
+    return sideboard, plans
+
+
+def load_sideboard_json(path: Path) -> tuple[dict[str, int], dict[str, dict]]:
+    """A deck's sideboard ({name: count}) and its sideboard plans (keyed by the
+    opponent's legend name, "*" for any opponent). Both empty if the deck has none."""
+    with path.open("r", encoding="utf-8") as fh:
+        return _parse_sideboard(json.load(fh), path)
+
 
 def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:
     """Load a deck JSON file.
@@ -493,9 +569,13 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         "legend": "Vi",          # optional legend name (identity card)
         "champion": "Vi Destructive",  # chosen champion (goes to Champion Zone, NOT in cards list)
         "runes": [{"domain": "FURY", "count": 6}, ...],
-        "cards": [{"name": "...", "count": N}, ...]   # exactly 39 cards
+        "cards": [{"name": "...", "count": N}, ...],   # exactly 39 cards
+        "sideboard": [{"name": "...", "count": N}, ...],  # optional, ≤10 cards
+        "sideboard_plans": {"<opponent legend>": {"in": {...}, "out": {...}}}  # optional
       }
-    Rules enforced: ≥39 main deck cards, ≤3 copies per named card, champion not in cards list.
+    Rules enforced: ≥39 main deck cards, ≤3 copies per named card (main deck and
+    sideboard combined, Tournament Rules 403.3), champion not in cards list,
+    sideboard ≤10 cards (601.1.c.1). The sideboard is read by `load_sideboard_json`.
     Banned cards (BANNED_CARDS) only raise a warning, so older decks still load.
     """
     with path.open("r", encoding="utf-8") as fh:
@@ -557,6 +637,16 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
             f"Main deck has {len(cards)} cards — must have at least 39 "
             "(plus 1 champion in the Champion Zone for a legal 40-card deck)."
         )
+
+    # --- Sideboard (validated here so a bad one fails with the deck) ---
+    sideboard, _plans = _parse_sideboard(data, path)
+    for name, count in sideboard.items():
+        copy_counts[name] = copy_counts.get(name, 0) + count
+        if copy_counts[name] > 3:
+            raise ValueError(
+                f"Deck has {copy_counts[name]} copies of '{name}' across main deck "
+                "and sideboard — maximum is 3."
+            )
 
     # --- Runes ---
     runes: list[tuple[Domain, int]] = []

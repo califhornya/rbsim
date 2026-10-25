@@ -11,6 +11,7 @@ game RNG must keep this order so a given seed reproduces an identical game.
 from __future__ import annotations
 
 import random
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
@@ -18,7 +19,7 @@ from riftbound.core.cards import Card
 from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.battlefield import Battlefield
-from riftbound.registry.cards_registry import load_deck_json
+from riftbound.registry.cards_registry import CARD_REGISTRY, load_deck_json, load_sideboard_json
 
 # Agents. Imported here (not in the CLI) so every entry point builds games the
 # same way. Agents only depend on Player, so there is no import cycle with core.
@@ -40,9 +41,39 @@ AI_REGISTRY = {
 }
 
 
-def make_deck_from_file(path: Path) -> tuple[Deck, RuneDeck, Optional[Card], Optional[Card], List[Card]]:
-    """Load a deck, rune deck, champion, legend, and battlefield cards from JSON."""
+@dataclass(frozen=True)
+class DeckConfig:
+    """The main deck, Chosen Champion and sideboard a seat plays one game with: the
+    registered list, or the list after sideboarding between games (core/match.py).
+    ``main`` keeps the registered card order with each swapped-in card in the place
+    of the card it replaced, so an unchanged config builds exactly the game the
+    deck file would."""
+    main: tuple[str, ...]
+    champion: Optional[str]
+    sideboard: tuple[str, ...] = ()
+
+
+def registered_deck_config(path: Path) -> DeckConfig:
+    """The deck exactly as registered in its JSON file (Tournament Rules 403.8:
+    every match starts from it)."""
+    specs, _runes, champion_spec, _legend, _bfs = load_deck_json(path)
+    sideboard, _plans = load_sideboard_json(path)
+    return DeckConfig(
+        main=tuple(s.name for s in specs),
+        champion=champion_spec.name if champion_spec is not None else None,
+        sideboard=tuple(n for n, count in sideboard.items() for _ in range(count)),
+    )
+
+
+def make_deck_from_file(path: Path, config: Optional[DeckConfig] = None
+                        ) -> tuple[Deck, RuneDeck, Optional[Card], Optional[Card], List[Card]]:
+    """Load a deck, rune deck, champion, legend, and battlefield cards from JSON.
+    ``config`` replaces the main deck and champion (a sideboarded list); runes,
+    legend and battlefields always come from the file (Tournament Rules 403.4.b)."""
     specs, rune_entries, champion_spec, legend_spec, bf_specs = load_deck_json(path)
+    if config is not None:
+        specs = [CARD_REGISTRY[name] for name in config.main]
+        champion_spec = CARD_REGISTRY[config.champion] if config.champion else None
     cards: List[Card] = [spec.instantiate() for spec in specs]
     runes: List[Rune] = []
     for domain, count in rune_entries:
@@ -113,6 +144,8 @@ def build_game(
     max_turns: int = 40,
     bf_a: "Optional[object]" = None,
     bf_b: "Optional[object]" = None,
+    deck_a: Optional[DeckConfig] = None,
+    deck_b: Optional[DeckConfig] = None,
 ) -> GameState:
     """Build a fully-seeded :class:`GameState` from decks + agent names.
 
@@ -124,23 +157,26 @@ def build_game(
     card name, or an index into the deck's up-to-3). Left as ``None`` the choice is
     random (historical behaviour, unchanged). Explicit selection is what the Bo3
     match harness uses to implement §458 "players choose, no reuse".
+
+    ``deck_a``/``deck_b`` optionally replace a seat's main deck and champion with a
+    sideboarded list (see :class:`DeckConfig`); ``None`` plays the file as written.
     """
     rng = random.Random(game_seed)
 
     rune_rng_a = random.Random(rng.randrange(1 << 30))
     rune_rng_b = random.Random(rng.randrange(1 << 30))
 
-    deck_a, rune_deck_a, champion_a, legend_a, bfs_a = make_deck_from_file(deck_a_path)
+    main_a, rune_deck_a, champion_a, legend_a, bfs_a = make_deck_from_file(deck_a_path, deck_a)
     rune_rng_a.shuffle(rune_deck_a.runes)
 
-    deck_b, rune_deck_b, champion_b, legend_b, bfs_b = make_deck_from_file(deck_b_path)
+    main_b, rune_deck_b, champion_b, legend_b, bfs_b = make_deck_from_file(deck_b_path, deck_b)
     rune_rng_b.shuffle(rune_deck_b.runes)
 
-    deck_a.shuffle(rng)
-    deck_b.shuffle(rng)
+    main_a.shuffle(rng)
+    main_b.shuffle(rng)
 
-    A = Player(name="A", hp=10, deck=deck_a, energy=starting_energy, rune_deck=rune_deck_a)
-    B = Player(name="B", hp=10, deck=deck_b, energy=starting_energy, rune_deck=rune_deck_b)
+    A = Player(name="A", hp=10, deck=main_a, energy=starting_energy, rune_deck=rune_deck_a)
+    B = Player(name="B", hp=10, deck=main_b, energy=starting_energy, rune_deck=rune_deck_b)
 
     if ai_a is not None:
         A.agent = make_agent(ai_a, A)

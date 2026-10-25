@@ -35,6 +35,15 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_exhaust",                                # this unit/gear becomes exhausted (Reckless Innovator)
     "on_friendly_exhaust",                       # another friendly unit becomes exhausted (Riven Deserter)
     "on_hide_here",                              # a card is hidden at this battlefield (Bandle Scouts' Academy)
+    "on_stun_enemy",                             # you stun one or more enemy units (Eclipse Herald, Leona legend)
+    "on_card_played",                            # you play a card, from any zone (Kennen legend, Darius Trifarian)
+    "on_unit_moves_from_here",                   # battlefield: a unit moves from here (Back-Alley Bar)
+    "on_enemy_unit_played",                      # an opponent plays a unit / unit token (Vex Apathetic)
+    "on_chosen",                                 # your spell or ability chooses me (Irelia Fervent)
+    "on_readied",                                # I go from exhausted to ready (Irelia Fervent)
+    "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
+    "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
+    "on_hide",                                   # you hide a card (Katarina Reckless)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -77,6 +86,23 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there"
     "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
     "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
+    "this_is_at_battlefield",            # the source unit is at a battlefield (not in base)
+    "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
+    "triggering_unit_has_subtype",       # subtype: the unit that caused the trigger has this tag ("another Dragon")
+    "fewer_runes_than_opponent",         # "if you control fewer runes than an opponent"
+    "cards_played_this_turn_exactly",    # n: "when you play your second card in a turn"
+    "opponent_played_n_spells_this_turn",  # n: "if an opponent has played another spell this turn"
+    "triggering_card_matches",           # filter: "when you play a spell / a card with Energy cost [7]+"
+    "triggering_card_not_from_hand",     # "when you play a card from anywhere other than your hand"
+    "moved_to_battlefield",              # on_move: "when I move to a battlefield"
+    "moved_from_battlefield",            # on_move: "when I move from a battlefield"
+    "all_of",                            # conditions: [...] all hold
+    "died_alone",                        # DEATHKNELL "if I died alone"
+    "enemy_choices_this_turn_at_least",  # n: "if you've chosen enemy units twice this turn"
+    "not_your_turn",                     # "when you play a card on an opponent's turn"
+    "triggering_card_from_zone",         # zone: "when you play a card from face down"
+    "played_to_controlled_battlefield",  # enter_ready_aura: "units you play to battlefields you control"
+    "units_in_base_at_least",            # n: "if you have two or more other units in your base"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -98,6 +124,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "card_type", "is_legend", "is_champion",
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
+    "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
 })
 
 # amount_source values understood by effects._amount.
@@ -112,6 +139,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     # Per-count cost reductions ("I cost [1] less for each ...").
     "cards_played_this_turn", "friendly_exhausted_units",
     "battlefields_conquered_this_turn", "hold_points_this_turn",
+    "cards_with_my_name_in_trash",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -123,6 +151,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
+    "disempower_self",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs
@@ -142,7 +171,9 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 # - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 # - no_combat_damage       passive marker ("I don't deal combat damage") folded by Loop._apply_passive_grant
+# - enter_ready            enter_ready_aura marker read by Loop._enters_ready
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
+    "enter_ready",
 })

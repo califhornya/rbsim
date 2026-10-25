@@ -57,8 +57,8 @@ def _collect(gs) -> list[tuple[int, str, str, str]]:
     items: list[tuple[int, str, str, str]] = []
 
     def add(card, zone: str) -> None:
-        if not isinstance(card, Card):
-            return
+        if not isinstance(card, Card) or getattr(card, "is_token", False):
+            return  # tokens are not cards (§185): they come and go
         items.append((id(card), type(card).__name__, getattr(card, "name", "?"), zone))
 
     for p in (gs.A, gs.B):
