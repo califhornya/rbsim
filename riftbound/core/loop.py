@@ -36,7 +36,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_readied", "on_friendly_unit_buffed", "on_friendly_attack",
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
-    "on_combat_start_here", "on_equipment_attached",
+    "on_combat_start_here", "on_equipment_attached", "on_friendly_empowered", "on_banish_own",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -68,7 +68,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "died_mighty", "units_here_exactly", "triggering_unit_stunned", "died_here",
     "triggering_unit_mightiest", "controller_has_facedown_card",
     "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
-    "holder_didnt_conquer_this_turn", "conquered_uncontrolled",
+    "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "target_was_stunned",
 })
@@ -1358,6 +1358,9 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "your_legend_exhausted":
+            legend = self._legend_unit(side)
+            return legend is not None and not legend.ready
         if ctype == "holder_didnt_conquer_this_turn":
             unit = extra.get("triggering_unit")
             return unit is not None and unit.conquered_turn != self.gs.turn
@@ -1485,9 +1488,8 @@ class GameLoop:
             return bool(unit and unit.might_counters > 0)
         if ctype == "this_is_empowered":
             # Vendetta EMPOWERED dependent ability: fires only while the source
-            # unit carries the empowered status (see UnitInPlay.empowered).
-            unit = self._find_unit_by_card(card)
-            return bool(unit and getattr(unit, "empowered", False))
+            # (unit, legend or gear) carries the empowered status.
+            return self._is_empowered(card)
         if ctype == "you_control_subtype":
             # The corpus writes the tag as "subtype" (older specs as "tag").
             tag = str(params.get("tag") or params.get("subtype") or "")
@@ -2210,6 +2212,8 @@ class GameLoop:
             # "reduced by [1], to a minimum of [1]": never below the floor, and
             # never raises a card that already costs less than it.
             energy = max(min(energy, floor), energy - aura)
+        if isinstance(card, SpellCard):
+            energy += self._enemy_spell_tax(side)
         if power:
             power = max(0, power - self._aura_power_reduction(card, actor))
         discount = self._next_card_discount(card, side)
@@ -2218,6 +2222,20 @@ class GameLoop:
             if power:
                 power = max(0, power - int(discount.get("power", 0)))
         return max(0, energy), power
+
+    def _enemy_spell_tax(self, side: str) -> int:
+        """ "Opponents' spells cost [1] more. If this is EMPOWERED, they cost
+        [1] [rune] more instead" (Helm of Suppression): what `side`'s spells
+        cost extra ([rune] paid as Energy, as DEFLECT's surcharge is)."""
+        total = 0
+        for src, _bf in self._sources_in_play(self.gs.other(side)):
+            spec = CARD_REGISTRY.get(src.name)
+            for es in (spec.effects if spec else ()):
+                if es.effect == "enemy_spell_tax":
+                    total += int(es.params.get("amount", 1))
+                    if self._is_empowered(src):
+                        total += int(es.params.get("empowered_extra", 0))
+        return total
 
     def _aura_reduction(self, card: Card, actor: Player, flow: bool = False) -> tuple[int, int]:
         """Energy that `actor`'s in-play sources take off `card`'s cost ("While
@@ -2601,6 +2619,8 @@ class GameLoop:
     def _to_trash(owner: Player, card: Card) -> None:
         """Put a card that left the board into its owner's trash; a token ceases
         to exist instead (§186.1)."""
+        if getattr(card, "empowered", False):
+            card.empowered = False
         if not getattr(card, "is_token", False):
             owner.trash.append(card)
 
@@ -2932,6 +2952,8 @@ class GameLoop:
         def _add_gear_abilities(gear):
             # Gear's own activated [tap] abilities (Seals, Gold, Iron Ballista, …).
             for eff in _abilities(gear):
+                if eff.effect == "empower_self" and getattr(gear, "empowered", False):
+                    continue      # EMPOWER: "Use only if not Empowered"
                 if EFFECT_REGISTRY.get(eff.effect) is not None:
                     out.append({"type": "gear_ability", "gear": gear, "eff": eff})
 
@@ -3066,6 +3088,7 @@ class GameLoop:
         if getattr(card, "_flow_banish", False):
             card._flow_banish = False
             owner.banished.append(card)
+            self._note_banished("A" if owner is self.gs.A else "B")
         else:
             owner.trash.append(card)
 
@@ -3098,6 +3121,8 @@ class GameLoop:
                 return False
             if parsed["tap"] and getattr(gear, "tapped", False):
                 return False
+            if parsed["disempower"] and not getattr(gear, "empowered", False):
+                return False      # "Disempower this, ...": needs it empowered
             # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
             if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], None):
                 return False
@@ -3214,6 +3239,7 @@ class GameLoop:
         if card is not None and card in ap.trash:
             ap.trash.remove(card)
             ap.banished.append(card)
+            self._note_banished("A" if ap is self.gs.A else "B")
 
     def _activated_affordable(self, ap: Player, unit, parsed: dict) -> bool:
         side = "A" if ap is self.gs.A else "B"
@@ -3274,6 +3300,8 @@ class GameLoop:
                 return
             if parsed["tap"]:
                 self._exhaust_gear(gear, ap)
+            if parsed["disempower"]:
+                gear.empowered = False
             for _ in range(parsed["recycle"]):
                 if ap.trash:
                     ap.deck.cards.append(ap.trash.pop(0))
@@ -3494,6 +3522,46 @@ class GameLoop:
             total += sum(int(es.params.get("amount", 1)) for es in (spec.effects if spec else ())
                          if es.trigger == "passive" and es.effect == "spell_bonus_damage")
         return total
+
+    def _is_empowered(self, card: Card) -> bool:
+        """EMPOWERED status of a unit / legend (on its UnitInPlay) or a gear (on
+        the card)."""
+        unit = self._find_unit_by_card(card)
+        return bool(unit.empowered) if unit is not None else bool(getattr(card, "empowered", False))
+
+    def _empower(self, card: Card, side: str) -> None:
+        """Empower a unit, legend or gear `side` controls; if it wasn't already,
+        "When you empower something else, empower me" (Mel, Ambessa)."""
+        unit = self._find_unit_by_card(card)
+        if self._is_empowered(card):
+            return
+        if unit is not None:
+            unit.empowered = True
+        else:
+            card.empowered = True
+        self._fire_units_trigger("on_friendly_empowered", side, exclude_card=card,
+                                 triggering_card=card)
+
+    def _disempower(self, card: Card) -> None:
+        unit = self._find_unit_by_card(card)
+        if unit is not None:
+            unit.empowered = False
+        else:
+            card.empowered = False
+
+    def _locate_unit_or_gear(self, card: Card, side: str) -> bool:
+        """Whether `card` is in play for `side` (a unit, or a gear in base or
+        attached)."""
+        if self._find_unit_by_card(card) is not None:
+            return True
+        ap = self.gs.get_player(side)
+        return card in ap.base_gear or card in self._controlled_attached_gear(side)
+
+    def _note_banished(self, side: str, count: int = 1) -> None:
+        """`side` banished card(s) it owns: "When you banish a card you own,
+        empower me" (Zed Master of Shadows)."""
+        for _ in range(count):
+            self._fire_units_trigger("on_banish_own", side)
 
     def _fire_attached(self, unit: UnitInPlay, side: str) -> None:
         """An Equipment was attached to `unit`: its "When you attach an

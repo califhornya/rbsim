@@ -167,6 +167,10 @@ class EffectSpec:
         merged = dict(self.params)
         if self.target is not None:
             merged["target"] = self.target
+        if self.target_filter:
+            # "a unit with 3 [might] or less": handlers read it from the spec
+            # (it never reached them, so every filter was ignored).
+            merged["target_filter"] = self.target_filter
         if self.scope is not None:
             merged["scope"] = self.scope
         if self.duration is not None:

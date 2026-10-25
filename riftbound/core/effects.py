@@ -288,6 +288,120 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("ready_legend")
+def _ready_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Ready your legend" (Hall of Legends, Heartening Soul)."""
+    legend = ctx.loop._legend_unit(ctx.actor_side)
+    if legend is not None and not legend.ready:
+        legend.ready = True
+        ctx.loop._fire_readied(legend, ctx.actor_side)
+
+
+@effect("return_gear_to_hand")
+def _return_gear_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Return a gear to its owner's hand" (Factory Recall): the opponent's
+    costliest gear (a token ceases to exist)."""
+    entries = [(s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True) if s == ctx.opponent_side]
+    if not entries:
+        return
+    side, holder, gear = max(entries, key=lambda e: _zone_value(getattr(e[2], "card", e[2])))
+    owner = ctx.loop.gs.get_player(side)
+    card = getattr(gear, "card", gear)
+    if isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(gear)
+    elif holder is not None:
+        holder.gear.remove(gear)
+    else:
+        owner.base_gear.remove(gear)
+    ctx.loop._fire_leaves_board(card, side, ctx.loop.gs.battlefields[0])
+    if not getattr(card, "is_token", False):
+        card.empowered = False
+        owner.hand.append(card)
+
+
+@effect("give_this_to_opponent")
+def _give_this_to_opponent(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a player. They gain control of this and recall it" (Glowstone):
+    it goes to the opponent's base."""
+    loop = ctx.loop
+    me = ctx.actor
+    if ctx.card in me.base_gear:
+        me.base_gear.remove(ctx.card)
+    else:
+        holder = next((u for u in _units_at(ctx, ctx.actor_side, "anywhere") if ctx.card in u.gear), None)
+        if holder is None:
+            return
+        holder.gear.remove(ctx.card)
+    ctx.opponent.base_gear.append(ctx.card)
+
+
+@effect("ready_gear")
+def _ready_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Ready a gear" / "Ready 2 gear" (Jayce Defender of Tomorrow): your
+    exhausted gear, costliest first."""
+    loop = ctx.loop
+    gear = [g for g in list(ctx.actor.base_gear) + loop._controlled_attached_gear(ctx.actor_side)
+            if getattr(g, "tapped", False)]
+    for g in sorted(gear, key=_zone_value, reverse=True)[:int(spec.get("count", 1))]:
+        g.tapped = False
+
+
+@effect("disempower_then_kill")
+def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a unit. If it's EMPOWERED, disempower it. Then kill it if it has
+    3 [might] or less" (Lacerate): the mightiest enemy that ends at 3 or less."""
+    loop = ctx.loop
+    cap = int(spec.get("might_at_most", 3))
+    enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "anywhere"))
+    if not enemies:
+        return
+
+    def after(u):
+        was = u.empowered
+        u.empowered = False
+        loop._recompute_passives()
+        m = u.might
+        u.empowered = was
+        loop._recompute_passives()
+        return m
+    killable = [u for u in enemies if after(u) <= cap]
+    unit = max(killable or enemies, key=lambda u: (u.empowered, u.might))
+    loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    unit.empowered = False
+    loop._recompute_passives()
+    if unit.might <= cap:
+        where = loop._locate_unit(unit)
+        if where[1] is None:
+            ctx.opponent.base_units.remove(unit)
+        else:
+            where[1].remove_unit(ctx.opponent_side, unit)
+        loop._route_deaths([(unit, ctx.opponent_side)], where[1] or loop.gs.battlefields[0],
+                           in_base=where[1] is None)
+
+
+@effect("move_empowerment")
+def _move_empowerment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may disempower something you control to empower a legend, unit, or
+    gear" (Profiteer): only when an EMPOWERED ability would gain from it."""
+    loop = ctx.loop
+    side = ctx.actor_side
+    mine = _units_at(ctx, side, "anywhere")
+    legend = loop._legend_unit(side)
+    holders = [u.card for u in mine + ([legend] if legend else [])] + \
+        list(ctx.actor.base_gear) + loop._controlled_attached_gear(side)
+    src = next((c for c in holders if loop._is_empowered(c) and not _uses_empowered(c)), None)
+    dst = next((c for c in holders if not loop._is_empowered(c) and _uses_empowered(c)), None)
+    if src is not None and dst is not None:
+        loop._disempower(src)
+        loop._empower(dst, side)
+
+
+def _uses_empowered(card) -> bool:
+    spec = CARD_REGISTRY.get(card.name)
+    return bool(spec) and any((es.condition or {}).get("type") == "this_is_empowered"
+                              for es in spec.effects)
+
+
 @effect("unattach_and_damage_holder")
 def _unattach_and_damage_holder(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Unattach this and deal 4 to me" (Blighted Battleaxe): the Equipment goes
@@ -669,6 +783,7 @@ def _banish_top_playable(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     card = player.deck.cards.pop()
     player.banished.append(card)
+    ctx.loop._note_banished(side)
     gs = ctx.loop.gs
     card._banish_play_side = side
     card._banish_play_until = gs.turn if gs.active == side else gs.turn + 1
@@ -766,7 +881,11 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
             loop._pay_card(chooser, pick, energy, power)
         if loop.verbose:
             print(f"  {chooser.name} banishes and plays {pick.name}")
+        if owner is chooser:
+            loop._note_banished(chooser_side)
         loop._play_from_zone_now(chooser, pick, chooser_side, "banished")
+        if spec.get("empower") and loop._locate_unit_or_gear(pick, chooser_side):
+            loop._empower(pick, chooser_side)          # Wild Claw: "Empower it."
     rest = str(spec.get("rest", "recycle")).lower()
     for card in revealed:
         if rest == "draw" and owner is chooser:
@@ -1921,9 +2040,23 @@ def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Vendetta EMPOWER: give the source unit the empowered status. Usually an
     activated ability (`trigger: activated`) whose cost the player pays first, but
     also usable from a trigger ("when ..., empower me"). Idempotent."""
-    unit = ctx.loop._find_unit_by_card(ctx.card)
-    if unit is not None:
-        unit.empowered = True
+    loop = ctx.loop
+    target = str(spec.get("target", "self")).lower()
+    tf = spec.get("target_filter") or {}
+    if target in ("self", "this", "me"):
+        loop._empower(ctx.card, ctx.actor_side)
+    elif tf.get("is_gear"):
+        # "Empower another gear" (Hextech Formula): one not yet empowered.
+        gear = [g for g in list(ctx.actor.base_gear) + loop._controlled_attached_gear(ctx.actor_side)
+                if g is not ctx.card and not getattr(g, "empowered", False)]
+        if gear:
+            loop._empower(max(gear, key=_zone_value), ctx.actor_side)
+    else:
+        for unit in _resolve_targets(ctx, {**spec, "target": target}):
+            where = loop._locate_unit(unit)
+            loop._empower(unit.card, where[0] if where else ctx.actor_side)
+            if spec.get("until_end_of_turn") and not unit.empower_flip_at_end:
+                unit.empower_flip_at_end = True     # Sanction: "Disempower it at end of turn"
 
 
 @effect("disempower")
@@ -1932,13 +2065,14 @@ def _disempower(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     instruction or a cost ("disempower a unit that's EMPOWERED")."""
     target = str(spec.get("target", "enemy_unit"))
     if target in ("self", "this"):
-        unit = ctx.loop._find_unit_by_card(ctx.card)
-        units = [unit] if unit is not None else []
-    else:
-        units = _resolve_targets(ctx, {**spec, "target": target, "scope": spec.get("scope", "single")})
-    for u in units:
-        if getattr(u, "empowered", False):
-            u.empowered = False
+        ctx.loop._disempower(ctx.card)
+        return
+    cands = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
+    cands = [u for u in _choosable(ctx, cands) if u.empowered] if spec.get("only_empowered", True) else cands
+    for u in cands[:1] if str(spec.get("scope", "single")) == "single" else cands:
+        u.empowered = False
+        if spec.get("until_end_of_turn"):
+            u.empower_flip_at_end = True             # "Empower it at end of turn"
 
 
 @effect("attach_gear")
@@ -2138,6 +2272,7 @@ def _banish_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         pool.remove(card)
         player.banished.append(card)
         banished += 1
+        ctx.loop._note_banished(ctx._side_for_player(player))
 
 
 @effect("play_from_banish")

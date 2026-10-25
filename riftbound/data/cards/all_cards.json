@@ -14894,13 +14894,8 @@
     ],
     "effects": [
       {
-        "effect": "recall_unit",
-        "trigger": "on_cast",
-        "timing": "action",
-        "target": "chosen_unit",
-        "target_filter": {
-          "is_gear": true
-        }
+        "effect": "return_gear_to_hand",
+        "trigger": "on_cast"
       }
     ]
   },
@@ -17379,14 +17374,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
+        "effect": "ready_legend",
         "trigger": "on_conquer",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_legend": true
-        },
-        "additional_cost": {
+        "optional": true,
+        "cost": {
           "energy": 1
+        },
+        "condition": {
+          "type": "your_legend_exhausted"
         }
       }
     ]
@@ -17703,12 +17698,10 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
+        "effect": "ready_gear",
         "trigger": "on_conquer",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_gear": true
-        }
+        "count": 1,
+        "optional": true
       }
     ]
   },
@@ -26657,30 +26650,17 @@
       {
         "effect": "mode_choice",
         "trigger": "on_cast",
-        "timing": "reaction",
         "modes": [
-          [
-            {
-              "effect": "empower_self",
-              "target": "chosen_unit"
-            },
-            {
-              "effect": "disempower",
-              "target": "chosen_unit",
-              "trigger": "on_end_of_turn"
-            }
-          ],
-          [
-            {
-              "effect": "disempower",
-              "target": "chosen_unit"
-            },
-            {
-              "effect": "empower_self",
-              "target": "chosen_unit",
-              "trigger": "on_end_of_turn"
-            }
-          ]
+          {
+            "effect": "empower_self",
+            "target": "friendly_unit",
+            "until_end_of_turn": true
+          },
+          {
+            "effect": "disempower",
+            "target": "enemy_unit",
+            "until_end_of_turn": true
+          }
         ]
       }
     ],
@@ -27037,12 +27017,18 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": -1,
-        "target_filter": {
-          "is_spell": true
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 4,
+          "power": 1
         }
+      },
+      {
+        "effect": "enemy_spell_tax",
+        "trigger": "passive",
+        "amount": 1,
+        "empowered_extra": 1
       }
     ],
     "variants": [
@@ -27362,7 +27348,25 @@
     "keywords": [
       "EMPOWER"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "count": 1,
+        "cost": {
+          "disempower_self": true,
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-054",
@@ -28075,6 +28079,35 @@
           "energy": 1,
           "tap": true
         }
+      },
+      {
+        "effect": "gain_energy",
+        "trigger": "activated",
+        "timing": "reaction",
+        "amount": 1,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_is_empowered"
+            }
+          }
+        }
+      },
+      {
+        "effect": "gain_energy",
+        "trigger": "activated",
+        "timing": "reaction",
+        "amount": 2,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -28130,6 +28163,13 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2
+        }
+      },
+      {
         "effect": "grant_temporary_might",
         "trigger": "activated",
         "timing": "action",
@@ -28137,6 +28177,27 @@
         "target": "chosen_unit",
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_is_empowered"
+            }
+          }
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit",
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
         }
       }
     ],
@@ -28311,14 +28372,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "disempower",
+        "effect": "move_empowerment",
         "trigger": "on_play",
-        "target": "friendly_unit"
-      },
-      {
-        "effect": "empower_self",
-        "trigger": "on_play",
-        "target": "chosen_unit"
+        "optional": true
       }
     ],
     "variants": [
@@ -28489,7 +28545,25 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "token_name": "Mech",
+        "cost": {
+          "disempower_self": true,
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-087",
@@ -28544,7 +28618,8 @@
         "look": 5,
         "filter": "unit_or_gear",
         "pay": "reduce",
-        "reduce": 5
+        "reduce": 5,
+        "empower": true
       }
     ],
     "variants": [
@@ -29836,13 +29911,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "disempower_then_kill",
         "trigger": "on_cast",
-        "timing": "action",
-        "target": "chosen_unit",
-        "target_filter": {
-          "might_at_most": 3
-        }
+        "might_at_most": 3
       }
     ],
     "variants": [
@@ -30041,7 +30112,38 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 2
+        }
+      },
+      {
+        "effect": "give_this_to_opponent",
+        "trigger": "activated",
+        "cost": {
+          "disempower_self": true,
+          "tap": true
+        }
+      },
+      {
+        "effect": "sequence",
+        "trigger": "on_end_of_turn",
+        "steps": [
+          {
+            "effect": "deal_damage",
+            "target": "all_friendly_units_anywhere",
+            "amount": 5
+          },
+          {
+            "effect": "kill_gear",
+            "target": "self"
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-133",
@@ -30406,7 +30508,31 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_banish_own"
+      },
+      {
+        "effect": "sequence",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "disempower_self": true,
+          "tap": true
+        },
+        "steps": [
+          {
+            "effect": "discard_card",
+            "count": 1
+          },
+          {
+            "effect": "draw_cards",
+            "count": 1
+          }
+        ]
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-143",
@@ -30611,16 +30737,42 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 2
+        }
+      },
+      {
+        "effect": "ready_gear",
         "trigger": "activated",
         "timing": "action",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_gear": true
-        },
+        "count": 1,
         "cost": {
           "energy": 1,
           "tap": true
+        },
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_is_empowered"
+            }
+          }
+        }
+      },
+      {
+        "effect": "ready_gear",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 2,
+        "cost": {
+          "energy": 1,
+          "tap": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
         }
       }
     ],
@@ -30674,7 +30826,22 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_friendly_empowered"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "activated",
+        "target": "enemy_unit",
+        "amount": -2,
+        "cost": {
+          "disempower_self": true,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-151",
@@ -30720,7 +30887,25 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_self",
+        "trigger": "on_friendly_empowered"
+      },
+      {
+        "effect": "ready_unit",
+        "trigger": "activated",
+        "target": "friendly_unit",
+        "target_filter": {
+          "is_exhausted": true
+        },
+        "cost": {
+          "disempower_self": true,
+          "power": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-153",
@@ -32551,12 +32736,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_legend": true
-        }
+        "effect": "ready_legend",
+        "trigger": "on_play"
       }
     ],
     "variants": [

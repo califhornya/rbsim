@@ -345,9 +345,26 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   by Standard Moves), Riven Shattered, Jax Grandmaster at Arms, Arise!, Azir
   Sovereign. Left: Hextech Gauntlets (excess damage), Shady Spectacles and
   Svellsongur (copies), Forge of the Fluft.
-- Next: the empower family (Glowstone, Lacerate, Wild Claw, Zed, Mel,
-  Ambessa, Questionable Tome, Hextech Disc), play-to-battlefield units,
-  buff spending, hand disruption (Ashe Focused), the rest.
+- [DONE] **Batch 8 (122 → 116): EMPOWER everywhere, and target filters.**
+  **Bug: `target_filter` never reached the effect handlers** (it is a
+  top-level spec field and `EffectSpec.merged_params()` left it out), so all
+  119 filters were ignored when a real card resolved: "kill a unit with 3
+  [might] or less" killed any unit, "return a spell from your trash" any
+  card. Now passed through; the specs that only worked by accident got the
+  right verb (Hall of Legends / Heartening Soul `ready_legend`, Veiled Temple
+  `ready_gear`, Factory Recall `return_gear_to_hand`; Akshan Mischievous and
+  Kai'Sa Rebel now do nothing instead of the wrong thing). EMPOWER on gear
+  and legends (`_empower`, `_is_empowered`; gear abilities hide EMPOWER while
+  empowered and can cost "Disempower this"), "When you empower something
+  else" (Mel, Ambessa), "When you banish a card you own" (Zed), Questionable
+  Tome, Hextech Disc, Platewyrm Egg, Tools of Empire, Jayce Defender,
+  Glowstone (given away it burns its new controller), Lacerate, Sanction
+  (until end of turn), Profiteer, Wild Claw's empower, Hextech Formula, Helm
+  of Suppression (was taxing its own cost; now opponents' spells, [rune] paid
+  as Energy like DEFLECT). Left: Risen Altar, Tornado Warrior, Heartening
+  Soul's granted ability, Mournful Witness ("a combat I was in").
+- Next: play-to-battlefield units, buff spending, hand disruption (Ashe
+  Focused, Bone Skewer, Insightful Investigator), copies, the rest.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
