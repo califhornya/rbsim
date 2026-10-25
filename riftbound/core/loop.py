@@ -176,9 +176,10 @@ class EffectContext:
         else:
             iterable = units
 
+        # On the unit in play, not its card (the card's printed Might would
+        # otherwise follow it to every zone).
         for unit in iterable:
-            current = int(unit.card.might or 0)
-            unit.card.might = current + amount
+            unit.aura_might += amount
 
     def draw_cards(self, count: int, *, target: str = "actor", source: str = "effect") -> None:
         if count <= 0:
@@ -2978,6 +2979,15 @@ class GameLoop:
         if self.recorder:
             self._record_combat_deaths(bf, before_A, before_B)
 
+        # Combat cleanup (§468.1.a.2): attackers still here with defenders are
+        # recalled to their base (not a move).
+        if bf.units_A and bf.units_B:
+            for unit in list(bf._units_for(attacker)):
+                bf.remove_unit(attacker, unit)
+                atk_actor.base_units.append(unit)
+            if self.verbose:
+                print(f"  [RECALL] {attacker}'s attackers at BF{bf_idx} return to base")
+
         # on_win_combat: a side won if it still has units and the other doesn't.
         if bf.units_A and not bf.units_B:
             self._fire_units_trigger("on_win_combat", "A")
@@ -3000,47 +3010,23 @@ class GameLoop:
     def _phase_combat_and_conquer(self, active: str) -> None:
         self._recompute_passives()
 
-        for bf in self.gs.battlefields:
-            before_A = list(bf.units_A)
-            before_B = list(bf.units_B)
-            if bf.contested_this_turn:
-                bf_idx = self.gs.battlefields.index(bf)
-                # Only log "real" combats — when both sides have units that can fight.
-                real_combat = bool(before_A) and bool(before_B)
-                if self.verbose and real_combat:
-                    mightA = sum(u.might for u in before_A if not u.stunned)
-                    mightB = sum(u.might for u in before_B if not u.stunned)
-                    namesA = ",".join(f"{u.card.name}({u.might})" for u in before_A) or "-"
-                    namesB = ",".join(f"{u.card.name}({u.might})" for u in before_B) or "-"
-                    print(
-                        f"  [COMBAT BF{bf_idx} end-of-turn] attacker={active} "
-                        f"A_might={mightA} [{namesA}] vs B_might={mightB} [{namesB}]"
-                    )
-                stats = bf.resolve_combat_might(attacker_side=active)
-                if self.verbose and real_combat:
-                    dead_A_names = ",".join(u.card.name for u in stats.dead_A) or "-"
-                    dead_B_names = ",".join(u.card.name for u in stats.dead_B) or "-"
-                    print(
-                        f"  [COMBAT RESULT BF{bf_idx}] "
-                        f"deaths A=[{dead_A_names}] B=[{dead_B_names}] "
-                        f"survivors A={len(bf.units_A)} B={len(bf.units_B)}"
-                    )
-
-                # Route dead units (death replacements applied first), fire on_death.
-                self._route_combat_deaths(stats, bf)
-
-                if self.recorder:
-                    self._record_combat_deaths(bf, before_A, before_B)
-                if bf.can_score_conquer(active):
-                    if active == "A":
-                        self.gs.points_A += 1
-                    else:
-                        self.gs.points_B += 1
-                    bf.mark_scored(active)
-                    if self.verbose:
-                        print(f"  [CONQUER] {active} conquers BF{bf_idx} -> +1 VP")
-                    self._fire_scoring_trigger("on_conquer", bf, active)
-
+        for bf_idx, bf in enumerate(self.gs.battlefields):
+            if not bf.contested_this_turn:
+                continue
+            if bf.units_A and bf.units_B:
+                # Contested by an effect (a unit moved or played there) without
+                # a showdown yet: it fights now, the turn player attacking.
+                self._phase_combat_and_conquer_single(bf_idx, active)
+                continue
+            if bf.can_score_conquer(active):
+                if active == "A":
+                    self.gs.points_A += 1
+                else:
+                    self.gs.points_B += 1
+                bf.mark_scored(active)
+                if self.verbose:
+                    print(f"  [CONQUER] {active} conquers BF{bf_idx} -> +1 VP")
+                self._fire_scoring_trigger("on_conquer", bf, active)
 
     # ====== MAIN LOOP ======
 
@@ -3207,9 +3193,10 @@ class GameLoop:
 
         self._fire_turn_trigger("on_end_of_turn", gs.active)
 
-        # Clear temporary might bonuses (REACTION spells like Discipline), wherever
-        # the unit is (a base unit's "this turn" bonus ends too).
+        # Expiration step (§317.2): heal all units, and "this turn" Might bonuses
+        # (REACTION spells like Discipline) end, wherever the unit is.
         for unit in self._all_units_in_play():
+            unit.damage = 0
             unit.clear_turn_end_bonuses()
 
         # Cleanup: a facedown card whose owner no longer controls its battlefield is

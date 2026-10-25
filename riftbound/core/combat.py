@@ -211,6 +211,6 @@ def deal_direct_damage(units: List[UnitInPlay], damage: int) -> tuple[int, list[
     kills, _ = _apply_damage(units, damage)
     dead = [u for u in units if _is_dead(u)]
     units[:] = [u for u in units if not _is_dead(u)]
-    for unit in units:
-        unit.reset_damage()
+    # Survivors keep the damage until a combat ends or the turn ends (Core
+    # Rules §468.1.a.1 / §317.2.b), so spell and combat damage add up.
     return kills, dead

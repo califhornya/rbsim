@@ -30,10 +30,10 @@ def test_guard_priority_absorbs_spell_damage_first():
     _, _ = bf.apply_spell_damage("B", 2)
 
     assert bf.count("B") == 2
-    assert guard.damage == 0
+    assert guard.damage == 2          # damage stays until the turn ends (§317.2.b)
     assert ally.damage == 0
 
-    bf.apply_spell_damage("B", 3)
+    bf.apply_spell_damage("B", 3)     # 1 finishes the guard, 1 kills the archer
 
-    assert bf.count("B") == 1
+    assert bf.count("B") == 0
     assert guard not in bf.units_B

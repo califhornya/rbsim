@@ -199,12 +199,14 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   Loyal Pup (on_defend from base), Possession (bounces instead of stealing).
 - **Targeting baseline.** Effects pick the first unit at the effect's
   battlefield (never base or other battlefields) instead of a real choice.
-- **Spell damage doesn't stay** on surviving units (`deal_direct_damage` heals
-  them at once), so spell + combat damage never add up.
+- [DONE] **Spell damage stays** until a combat ends or the turn ends
+  (§468.1.a.1 / §317.2.b). Also: attackers are recalled when defenders survive
+  (§468.1.a.2), and end-of-turn combats run the same procedure as showdown ones
+  (attack/defend triggers, DISARM, "when you win a combat").
 - **Equipment triggers** ("When I attack/conquer" on gear) aren't dispatched;
   only "when I move" is (2026-10-25).
-- **`grant_might` (EffectContext)** writes the card's printed Might, which then
-  persists in every zone.
+- [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
+  (latent: no non-passive spec uses it); now the unit's aura_might.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

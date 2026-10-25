@@ -90,3 +90,30 @@ def test_effect_move_fires_move_triggers():
     REGISTRY["move_unit"](ctx, {"target": "friendly_unit", "destination": "here"})
     assert herder in loop.gs.battlefields[0].units_A
     assert len(loop.gs.A.hand) == 1                  # "When I move, draw 1"
+
+
+def test_spell_damage_adds_up_with_combat_and_heals_at_end_of_turn():
+    loop = _loop()
+    bf = loop.gs.battlefields[0]
+    big = _u("Big", 4)
+    bf.add_unit("B", big)
+    ctx = EffectContext(loop, UnitCard(name="Bolt"), loop.gs.A, loop.gs.B, bf)
+    ctx.deal_damage(2, target="opponent")
+    assert big.damage == 2
+    bf.add_unit("A", _u("Two", 2))
+    loop._phase_combat_and_conquer_single(0, "A")   # 2 + 2 >= 4: Big dies
+    assert big not in bf.units_B
+
+
+def test_attackers_are_recalled_when_defenders_survive():
+    loop = _loop()
+    bf = loop.gs.battlefields[0]
+    wall = _u("Wall", 5)
+    wall.stunned = True                    # deals no combat damage
+    poke = _u("Poke", 3)
+    bf.add_unit("B", wall)
+    bf.add_unit("A", poke)
+    loop._phase_combat_and_conquer_single(0, "A")
+    assert bf.units_B == [wall]            # 3 damage doesn't kill a 5
+    assert poke in loop.gs.A.base_units    # §468.1.a.2: attacker recalled
+    assert bf.units_A == []
