@@ -33,6 +33,8 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_card_played", "on_unit_moves_from_here", "on_enemy_unit_played",
     "on_chosen", "on_readied", "cost_aura", "enter_ready_aura", "on_hide",
     "on_buffed", "on_enemy_unit_moves", "on_stunned_enemy_dies_here",
+    "on_friendly_unit_readied", "on_friendly_unit_buffed", "on_friendly_attack",
+    "on_friendly_defend", "on_second_draw", "on_opponent_scores",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -60,6 +62,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "not_your_turn", "triggering_card_from_zone", "played_to_controlled_battlefield",
     "units_in_base_at_least", "ready_enemy_here", "moves_this_turn_exactly",
     "moved_to_other_battlefield", "gained_xp_this_turn", "power_spent_this_turn_at_least",
+    "triggering_unit_alone", "triggering_unit_buffed", "in_showdown",
     # safe-False branch (loop.py:612-614)
     "excess_damage_at_least", "controller_has_facedown_card", "target_was_stunned",
 })
@@ -258,6 +261,8 @@ class EffectContext:
         player = self._player_for_target(target)
         if use == "spell":
             player.earmarked_power_spell += amount
+        elif use == "unit_or_gear":
+            player.earmarked_power_permanent += amount     # Mordekaiser Iron Revenant
         else:
             player.earmarked_power_gear += amount
 
@@ -360,15 +365,21 @@ class GameLoop:
         for bf in self.gs.battlefields:
             bf.begin_turn_reset()
 
-        # Remove TEMPORARY units at the start of the active player's turn
+        # TEMPORARY units die at the start of their controller's Beginning Phase
+        # (at battlefields and in base): DEATHKNELL, "when a friendly unit dies".
+        player = self.gs.get_player(active)
         for bf in self.gs.battlefields:
-            player = self.gs.get_player(active)
             units = bf.units_A if active == "A" else bf.units_B
-            dead = [u for u in units if u.card.has_keyword("TEMPORARY")]
+            dead = [u for u in units if u.has_keyword("TEMPORARY")]
             for u in dead:
                 units.remove(u)
-                self._to_trash(player, u.card)
-                player.base_gear.extend(u.gear)
+            if dead:
+                self._route_deaths([(u, active) for u in dead], bf)
+        dead = [u for u in player.base_units if u.has_keyword("TEMPORARY")]
+        for u in dead:
+            player.base_units.remove(u)
+        if dead:
+            self._route_deaths([(u, active) for u in dead], self.gs.battlefields[0])
 
         # Remove unattached TEMPORARY gear at base (§742.1.b; e.g. Spinning Axe:
         # "if unattached, kill it at the start of its controller's Beginning
@@ -376,8 +387,7 @@ class GameLoop:
         actor = self.gs.get_player(active)
         temp_gear = [g for g in actor.base_gear if g.has_keyword("TEMPORARY")]
         for g in temp_gear:
-            actor.base_gear.remove(g)
-            self._to_trash(actor, g)
+            self._remove_gear(g, actor)       # killed: its DEATHKNELL (Sprite Fountain)
         # Gear an effect gave TEMPORARY (Turn to Dust: "Kill it at the start of
         # its controller's Beginning Phase"), attached or not.
         for g in [g for g in actor.base_gear + self._controlled_attached_gear(active)
@@ -408,6 +418,7 @@ class GameLoop:
         active_player.earmarked_energy_showdown = 0
         active_player.earmarked_power_gear = 0
         active_player.earmarked_power_spell = 0
+        active_player.earmarked_power_permanent = 0
         active_player.earmarked_energy_spell = 0
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
@@ -464,6 +475,10 @@ class GameLoop:
         if legend_unit is not None:
             self._resolve_triggered_effects(legend_unit.card, trigger, anchor, actor, opponent,
                                             context_extra={"battlefield": anchor})
+        # Unattached gear ("At the end of your turn, ...": Dazzling Aurora).
+        for g in list(actor.base_gear):
+            self._resolve_triggered_effects(g, trigger, anchor, actor, opponent,
+                                            context_extra={"battlefield": anchor})
         # Deployed gear's turn triggers ("at the end of your turn, if you control
         # this battlefield ..."), with their battlefield as "here".
         for bf in self.gs.battlefields:
@@ -498,6 +513,13 @@ class GameLoop:
                     card, trigger, bf, actor, opponent,
                     context_extra={"battlefield": bf},
                 )
+        # The scoring player's Legend ("When you conquer, ready me": Sett).
+        legend_unit = self._legend_unit(side)
+        if legend_unit is not None:
+            self._resolve_triggered_effects(legend_unit.card, trigger, bf, actor, opponent,
+                                            context_extra={"battlefield": bf})
+        # "When an opponent scores, ..." (Sumpworks Map).
+        self._fire_units_trigger("on_opponent_scores", self.gs.other(side))
         # The scoring player's deployed gear here ("when you hold here ...").
         self._fire_deployed_gear_trigger(trigger, bf, side)
         # The battlefield's OWN triggered ability (e.g. "when you conquer here,
@@ -692,10 +714,15 @@ class GameLoop:
         only when both deck AND trash are empty (a fully decked-out player still
         hands the opponent a point — the deck-out loss vector)."""
         card = player.draw()
+        if card is None:
+            self._burn_out(player)
+            card = player.draw()
         if card is not None:
-            return card
-        self._burn_out(player)
-        return player.draw()
+            player.draws_this_turn += 1
+            if player.draws_this_turn == 2:
+                # "When you draw your second card each turn" (Frigid Jewel).
+                self._fire_units_trigger("on_second_draw", "A" if player is self.gs.A else "B")
+        return card
 
     def _burn_out(self, player: Player) -> None:
         # §418.2.b: recycle trash into the Main Deck, randomizing (reminder note).
@@ -880,10 +907,15 @@ class GameLoop:
             parsed = self._parse_activated_cost(cost)
             if not self._activated_affordable(actor, unit, parsed):
                 return False
+            gear = card if unit is None and isinstance(card, GearCard) else None
+            if parsed["tap"] and gear is not None and getattr(gear, "tapped", False):
+                return False      # "exhaust this" on an exhausted gear
             if not self._pay_energy_and_generic(actor, parsed["energy"], parsed["power"]):
                 return False
             if parsed["tap"] and unit is not None:
                 self._exhaust(unit)
+            if parsed["tap"] and gear is not None:
+                self._exhaust_gear(gear, actor)
             for _ in range(parsed["recycle"]):
                 if actor.trash:
                     actor.deck.cards.append(actor.trash.pop(0))
@@ -926,6 +958,14 @@ class GameLoop:
                                             context_extra={"battlefield": anchor,
                                                            "triggering_card": trig,
                                                            **(extra or {})})
+        # Unattached gear ("When you play a unit, ...": Blood Rose, Fresh Beans).
+        for g in list(actor.base_gear):
+            if g is exclude_card:
+                continue
+            self._resolve_triggered_effects(g, trigger, anchor, actor, opponent,
+                                            context_extra={"battlefield": anchor,
+                                                           "triggering_card": trig,
+                                                           **(extra or {})})
 
     def _fire_readied(self, unit: UnitInPlay, side: str) -> None:
         """`unit` went from exhausted to ready: its "when you ready me" abilities
@@ -935,6 +975,9 @@ class GameLoop:
         self._resolve_triggered_effects(unit.card, "on_readied", bf, self.gs.get_player(side),
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": bf})
+        # "When you ready a friendly unit, ..." (Pirate's Haven).
+        self._fire_units_trigger("on_friendly_unit_readied", side, triggering_card=unit.card,
+                                 extra={"triggering_unit": unit})
 
     def _note_chosen(self, source: Card, chooser: str, units: list) -> None:
         """A spell or ability of `chooser` chose these units (a choice, not "all
@@ -1262,6 +1305,15 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
+        if ctype == "triggering_unit_alone":
+            # "When a friendly unit attacks or defends alone".
+            return bool(extra.get("alone"))
+        if ctype == "triggering_unit_buffed":
+            # "When a buffed friendly unit dies".
+            unit = extra.get("triggering_unit")
+            return unit is not None and unit.might_counters > 0
+        if ctype == "in_showdown":
+            return self.gs.showdown_active
         if ctype == "gained_xp_this_turn":
             return self.gs.xp_gained_turn.get(side) == self.gs.turn
         if ctype == "power_spent_this_turn_at_least":
@@ -2145,7 +2197,10 @@ class GameLoop:
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
-        showdown Diana's showdown energy counts."""
+        showdown Diana's showdown energy counts. Units and gear may use
+        Mordekaiser's earmarked power."""
+        if isinstance(card, (UnitCard, GearCard)) and power:
+            power = max(0, power - actor.earmarked_power_permanent)
         if isinstance(card, GearCard):
             return self._can_pay_gear(actor, energy, power, card.cost_power_domain)
         if isinstance(card, SpellCard):
@@ -2156,10 +2211,14 @@ class GameLoop:
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
 
     def _pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
-        if isinstance(card, GearCard):
-            return self._pay_gear(actor, energy, power, card.cost_power_domain)
         if not self._can_pay_card(actor, card, energy, power):
             return False
+        if isinstance(card, (UnitCard, GearCard)) and power:
+            from_earmark = min(power, actor.earmarked_power_permanent)
+            actor.earmarked_power_permanent -= from_earmark
+            power -= from_earmark
+        if isinstance(card, GearCard):
+            return self._pay_gear(actor, energy, power, card.cost_power_domain)
         if isinstance(card, SpellCard):
             if power:
                 from_earmark = min(power, actor.earmarked_power_spell)
@@ -2776,7 +2835,56 @@ class GameLoop:
                     "action" if card.has_keyword("ACTION") else None
                 if timing in allowed:
                     out.append({"type": "flow", "card": card})
+        # "Banish the top card of your Main Deck. Until your next Ending Phase,
+        # you may play that card." (Runeblade Anvil, Akali Brash)
+        for card in ap.banished:
+            if self._banished_playable(card, side) and self._card_timing(card) in allowed:
+                out.append({"type": "banished_play", "card": card})
         return out
+
+    @staticmethod
+    def _card_timing(card: Card):
+        """The timing a card can be played at: "reaction" (REACTION spells,
+        QUICK-DRAW gear), "action" (ACTION spells and units), else None (your
+        own Open State)."""
+        if card.has_keyword("REACTION") or (isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW")):
+            return "reaction"
+        return "action" if card.has_keyword("ACTION") else None
+
+    def _banished_playable(self, card: Card, side: str) -> bool:
+        return (getattr(card, "_banish_play_side", None) == side
+                and self.gs.turn <= getattr(card, "_banish_play_until", -1))
+
+    def _play_banished(self, ap: Player, card: Card, side: str) -> None:
+        """Play a card a "you may play that card" effect left in banishment,
+        paying its costs."""
+        if card not in ap.banished or not self._banished_playable(card, side):
+            return
+        energy, power = self._effective_cost(card, ap)
+        if not self._pay_card(ap, card, energy, power):
+            return
+        ap.banished.remove(card)
+        card._banish_play_side = None
+        if self.verbose:
+            print(f"  {ap.name} plays {card.name} from banishment")
+        self._play_from_zone_now(ap, card, side, "banished")
+
+    def _play_from_zone_now(self, ap: Player, card: Card, side: str, zone: str) -> None:
+        """Put a card taken from `zone` (cost handled) into play: a unit to base,
+        a gear to base, a spell onto the open chain or as a new chain (aimed at
+        the showdown's battlefield, else the first)."""
+        if isinstance(card, UnitCard):
+            self._play_unit(card, side, from_zone=zone)
+        elif isinstance(card, GearCard):
+            self._play_gear(card, side, 0, from_zone=zone)
+        elif isinstance(card, SpellCard):
+            lane = self.gs.showdown_bf_idx if self.gs.showdown_active and \
+                self.gs.showdown_bf_idx is not None else 0
+            if self.gs.chain:
+                self._spell_played(card, ap, from_zone=zone)
+                self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+            else:
+                self._cast_spell_now(card, side, lane, from_zone=zone)
 
     def _flow_cost(self, card: Card, side: str):
         """(Energy, Power, domain or None) to play `card` from the trash with
@@ -2824,15 +2932,9 @@ class GameLoop:
                 self._pay_generic_power(ap, power)
         ap.trash.remove(card)
         card._flow_banish = True
-        lane = self.gs.showdown_bf_idx if self.gs.showdown_active and \
-            self.gs.showdown_bf_idx is not None else 0
         if self.verbose:
             print(f"  {ap.name} plays {card.name} from the trash (FLOW)")
-        if self.gs.chain:
-            self._spell_played(card, ap, from_zone="trash")
-            self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
-        else:
-            self._cast_spell_now(card, side, lane, from_zone="trash")
+        self._play_from_zone_now(ap, card, side, "trash")
 
     def _spell_to_trash(self, owner: Player, card: Card) -> None:
         """A spell that resolved or was countered goes to the trash, or is
@@ -2855,6 +2957,12 @@ class GameLoop:
                     and self._first_friendly_unit_on_board(side) is not None)
         if entry["type"] == "flow":
             return self._can_pay_flow(ap, entry["card"], side)
+        if entry["type"] == "banished_play":
+            card = entry["card"]
+            if card not in ap.banished or not self._banished_playable(card, side):
+                return False
+            energy, power = self._effective_cost(card, ap)
+            return self._can_pay_card(ap, card, energy, power)
         eff = entry["eff"]
         if EFFECT_REGISTRY.get(eff.effect) is None:
             return False
@@ -2882,6 +2990,16 @@ class GameLoop:
                                      self.gs.get_player(self.gs.other(side)),
                                      {"battlefield": bf})
 
+    def _gear_left_board(self, gear, side: str) -> None:
+        """A gear was killed (or sacrificed): its DEATHKNELL (Sprite Fountain)
+        and "When this leaves the board" (Runeblade Anvil, Treasure Trove)."""
+        card = getattr(gear, "card", gear)
+        bf = self.gs.battlefields[0]
+        self._resolve_triggered_effects(card, "on_death", bf, self.gs.get_player(side),
+                                        self.gs.get_player(self.gs.other(side)),
+                                        context_extra={"battlefield": bf})
+        self._fire_leaves_board(card, side, bf)
+
     def _remove_gear(self, gear, ap: Player) -> None:
         """A gear `ap` controls (in base or attached) is killed: it goes to the
         trash, or ceases to exist if it is a token."""
@@ -2894,6 +3012,7 @@ class GameLoop:
                     u.gear.remove(gear)
                     break
         self._to_trash(ap, gear)
+        self._gear_left_board(gear, "A" if ap is self.gs.A else "B")
 
     def _controlled_attached_gear(self, side: str) -> list:
         ap = self.gs.get_player(side)
@@ -3002,6 +3121,9 @@ class GameLoop:
         if entry["type"] == "flow":
             self._play_with_flow(ap, entry["card"], side)
             return
+        if entry["type"] == "banished_play":
+            self._play_banished(ap, entry["card"], side)
+            return
 
         if entry["type"] == "gear_ability":
             gear = entry["gear"]
@@ -3042,6 +3164,8 @@ class GameLoop:
         for _ in range(parsed["recycle"]):
             if ap.trash:
                 ap.deck.cards.append(ap.trash.pop(0))
+        if parsed["banish_from_trash"]:
+            self._banish_from_trash(ap, self._trash_card_to_banish(ap, parsed))
         if parsed["spend_xp"]:
             self.gs.add_xp(side, -parsed["spend_xp"])
         if parsed["sacrifice"] and unit is not None:
@@ -3163,7 +3287,8 @@ class GameLoop:
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
-                                     exclude_card=dead_unit.card)
+                                     exclude_card=dead_unit.card,
+                                     extra={"triggering_unit": dead_unit})
             if dead_unit.stunned:
                 # "When a stunned enemy unit dies here" (Storm Raptor).
                 enemy = self.gs.other(owner_side)
@@ -3406,6 +3531,13 @@ class GameLoop:
                 self._resolve_triggered_effects(card, "on_attack", bf, atk_actor, atk_opp,
                                                 context_extra={"battlefield": bf})
             self._apply_disarm(unit, bf, defender)
+        # "When a friendly unit attacks / defends (alone), ..." (Mask of Foresight).
+        for side, trig in ((attacker, "on_friendly_attack"), (defender, "on_friendly_defend")):
+            fighters = list(bf._units_for(side))
+            for unit in fighters:
+                self._fire_units_trigger(trig, side, triggering_card=unit.card,
+                                         extra={"battlefield": bf, "triggering_unit": unit,
+                                                "alone": len(fighters) == 1})
         for unit in list(bf.units_A if defender == "A" else bf.units_B):
             for card in [unit.card] + list(unit.gear):
                 self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
@@ -3554,6 +3686,7 @@ class GameLoop:
         gs.played_cards_this_turn["A"] = []
         gs.played_cards_this_turn["B"] = []
         gs.A.power_spent_this_turn = gs.B.power_spent_this_turn = 0
+        gs.A.draws_this_turn = gs.B.draws_this_turn = 0
         gs.enemy_choices_this_turn["A"] = gs.enemy_choices_this_turn["B"] = 0
         gs.next_card_discounts["A"] = []
         gs.next_card_discounts["B"] = []

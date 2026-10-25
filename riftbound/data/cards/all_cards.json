@@ -874,7 +874,14 @@
     "keywords": [
       "ACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_cast",
+        "source": "opponent",
+        "look": 1
+      }
+    ]
   },
   {
     "card_id": "OGN-026",
@@ -2010,12 +2017,20 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_attack",
-        "target": "friendly_unit",
+        "trigger": "on_friendly_attack",
+        "target": "triggering_unit",
         "amount": 1,
-        "duration": "this_turn",
         "condition": {
-          "type": "this_is_alone"
+          "type": "triggering_unit_alone"
+        }
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_friendly_defend",
+        "target": "triggering_unit",
+        "amount": 1,
+        "condition": {
+          "type": "triggering_unit_alone"
         }
       }
     ]
@@ -3808,7 +3823,15 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_cast",
+        "each_player": true,
+        "look": 5,
+        "pay": "ignore_energy"
+      }
+    ]
   },
   {
     "card_id": "OGN-116",
@@ -4736,10 +4759,9 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_friendly_unit_played",
-        "amount": 1,
-        "target": "friendly_unit",
-        "duration": "this_turn"
+        "trigger": "on_friendly_unit_readied",
+        "target": "triggering_unit",
+        "amount": 1
       }
     ]
   },
@@ -5008,8 +5030,9 @@
     "effects": [
       {
         "effect": "ready_unit",
-        "trigger": "on_friendly_unit_played",
-        "target": "friendly_unit",
+        "trigger": "on_friendly_unit_buffed",
+        "target": "triggering_unit",
+        "optional": true,
         "cost": {
           "power": 1,
           "tap": true
@@ -5267,7 +5290,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_end_of_turn",
+        "until": "unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-161",
@@ -6097,6 +6126,15 @@
         "trigger": "leaves_board",
         "amount": 1,
         "exhausted": true
+      },
+      {
+        "effect": "kill_gear",
+        "trigger": "activated",
+        "target": "self",
+        "cost": {
+          "power": 1,
+          "tap": true
+        }
       }
     ]
   },
@@ -7474,11 +7512,8 @@
         "effect": "buff_unit",
         "trigger": "on_friendly_unit_death",
         "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        },
         "condition": {
-          "type": "this_is_buffed"
+          "type": "triggering_unit_buffed"
         }
       }
     ]
@@ -7895,7 +7930,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "activated",
+        "cost": {
+          "energy": 1,
+          "power": 1,
+          "tap": true
+        },
+        "kill_friendly": true,
+        "might_margin": 1,
+        "look": 5,
+        "filter": "unit"
+      }
+    ]
   },
   {
     "card_id": "OGN-243",
@@ -12388,11 +12437,13 @@
       {
         "effect": "play_token",
         "trigger": "on_play_spell",
-        "timing": "reaction",
         "token_name": "Gold",
-        "exhausted": true,
+        "optional": true,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "not_your_turn"
         }
       }
     ]
@@ -16283,7 +16334,18 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_conquer",
+        "optional": true,
+        "cost": {
+          "tap": true
+        },
+        "look": 2,
+        "pay": "cost"
+      }
+    ]
   },
   {
     "card_id": "SFD-188",
@@ -16305,7 +16367,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_cast",
+        "look": 2,
+        "pay": "reduce",
+        "reduce": 2,
+        "rest": "draw"
+      }
+    ]
   },
   {
     "card_id": "SFD-189",
@@ -17764,8 +17835,12 @@
         "effect": "draw_cards",
         "trigger": "on_friendly_unit_played",
         "count": 1,
+        "optional": true,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "in_showdown"
         }
       }
     ]
@@ -19950,10 +20025,9 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "on_start_of_turn",
+        "trigger": "on_second_draw",
         "target": "friendly_unit",
-        "amount": 2,
-        "duration": "this_turn"
+        "amount": 2
       }
     ]
   },
@@ -20340,7 +20414,7 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "trigger": "on_conquer",
+        "trigger": "on_opponent_scores",
         "count": 1
       }
     ]
@@ -23754,8 +23828,15 @@
         "effect": "ready_unit",
         "trigger": "on_conquer",
         "target": "chosen_unit",
+        "optional": true,
         "cost": {
           "tap": true
+        },
+        "condition": {
+          "type": "excess_damage_at_least",
+          "params": {
+            "n": 3
+          }
         }
       }
     ]
@@ -27201,15 +27282,11 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "score_point",
+        "effect": "sacrifice_for_points",
         "trigger": "on_start_of_turn",
+        "count": 3,
         "amount": 1,
-        "additional_cost": {
-          "kill_friendly_unit": true
-        },
-        "condition": {
-          "type": "kicker_paid"
-        }
+        "optional": true
       }
     ],
     "variants": [
@@ -27963,9 +28040,12 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "dig",
+        "effect": "reveal_play_top",
         "trigger": "on_cast",
-        "amount": 5
+        "look": 5,
+        "filter": "unit_or_gear",
+        "pay": "reduce",
+        "reduce": 5
       }
     ],
     "variants": [
@@ -28581,12 +28661,14 @@
       {
         "effect": "burn",
         "trigger": "on_play",
-        "amount": 1
+        "amount": 1,
+        "buff_by_burned_unit": true
       },
       {
         "effect": "burn",
         "trigger": "on_start_of_turn",
-        "amount": 1
+        "amount": 1,
+        "buff_by_burned_unit": true
       }
     ],
     "variants": [
@@ -29416,14 +29498,7 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [
-      {
-        "effect": "deal_damage",
-        "trigger": "on_end_of_turn",
-        "target": "all_friendly_units_here",
-        "amount": 5
-      }
-    ],
+    "effects": [],
     "variants": [
       {
         "variant_id": "VEN-133",
@@ -30920,7 +30995,26 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_top_playable",
+        "trigger": "on_play"
+      },
+      {
+        "effect": "banish_top_playable",
+        "trigger": "leaves_board"
+      },
+      {
+        "effect": "kill_gear",
+        "trigger": "activated",
+        "target": "self",
+        "cost": {
+          "energy": 2,
+          "power": 1,
+          "tap": true
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-012",
@@ -31021,7 +31115,38 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "sequence",
+        "trigger": "on_move",
+        "condition": {
+          "type": "moves_this_turn_exactly",
+          "params": {
+            "n": 1
+          }
+        },
+        "steps": [
+          {
+            "effect": "gain_energy",
+            "amount": 1
+          },
+          {
+            "effect": "gain_power_any_domain",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "effect": "banish_top_playable",
+        "trigger": "on_move",
+        "condition": {
+          "type": "moves_this_turn_exactly",
+          "params": {
+            "n": 2
+          }
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-015",
@@ -31101,7 +31226,14 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_play",
+        "source": "opponent",
+        "look": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-018",
@@ -32727,6 +32859,13 @@
         "effect": "predict",
         "trigger": "on_hold",
         "amount": 3
+      },
+      {
+        "effect": "reveal_play_top",
+        "trigger": "on_death",
+        "look": 1,
+        "pay": "ignore_energy",
+        "rest": "banish"
       }
     ],
     "variants": [
@@ -35148,7 +35287,19 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "add_earmarked_power",
+        "trigger": "activated",
+        "timing": "reaction",
+        "use": "unit_or_gear",
+        "amount": 1,
+        "cost": {
+          "tap": true,
+          "banish_from_trash": "unit_or_gear"
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-143",

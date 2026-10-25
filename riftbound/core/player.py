@@ -66,6 +66,7 @@ class Player:
     earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
     earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
     earmarked_power_spell: int = 0      # Kai'Sa: generic power spendable only for spells
+    earmarked_power_permanent: int = 0  # Mordekaiser: generic power only for units or gear
     earmarked_energy_spell: int = 0     # Lux Crownguard: energy spendable only for spells
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
@@ -77,6 +78,8 @@ class Player:
     floating_power: Dict[Domain, int] = field(default_factory=dict)
     # Power paid this turn ("If you've spent at least [rune] [rune] this turn").
     power_spent_this_turn: int = 0
+    # Cards drawn this turn ("When you draw your second card each turn").
+    draws_this_turn: int = 0
     base_units: List[UnitInPlay] = field(default_factory=list)
 
     @classmethod

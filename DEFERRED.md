@@ -80,9 +80,10 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     (dropped condition/cost, wrong trigger, cost-less activated abilities). These
     cards are empty on purpose and a plain `--only-empty` re-parse tends to break
     them the same way — hand-author them once the engine has what they need:
-    OGN-025, OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
-    UNL-045, UNL-054, UNL-136, VEN-088, RAD-012, RAD-015, RAD-016, RAD-020,
-    RAD-036, RAD-038, RAD-039, RAD-066, RAD-068, RAD-069,
+    OGN-113, OGN-200, OGN-256, SFD-083, SFD-117, SFD-141, UNL-018,
+    UNL-045, UNL-054, UNL-136, VEN-088, RAD-016, RAD-020,
+    RAD-038, RAD-039, RAD-066, RAD-068, RAD-069, VEN-133 (Glowstone: only its
+    self-harm was encoded; its give-away ability needs the empower family),
     RAD-071, RAD-079, RAD-089, RAD-095, RAD-098, RAD-107, RAD-130,
     RAD-142, RAD-155.
     Hand-authored on 2026-10-25 with new primitives: OGN-251, OGN-290, SFD-055,
@@ -95,7 +96,8 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
     SFD-121, SFD-171, SFD-176, UNL-023, VEN-055, RAD-026, RAD-030, RAD-090,
     RAD-149 (enter-ready auras, "when you play a card ..." triggers, cost
     auras). RAD-143 Mordekaiser Iron Revenant emptied (its "banish a unit or
-    gear from your trash" cost isn't modeled).
+    gear from your trash" cost isn't modeled) — authored on `inert-cards`
+    with OGN-025, RAD-012, RAD-015, RAD-036 (see "Inert-card pass").
   - **Full-corpus hand review (2026-10-25):** every card with effects in Origins,
     Spiritforged, Unleashed, Vendetta and Proving Grounds was read against its
     text; ~110 more specs that made cards stronger than printed were emptied
@@ -213,12 +215,9 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   (attack/defend triggers, DISARM, "when you win a combat").
 - [DONE] **Equipment triggers**: an Equipment's "When I attack / defend /
   conquer / hold / move / die" fires with its unit (Recurve Bow, Trinity Force,
-  Sacred Shears...). Still not dispatched: unattached gear's "When you ..."
-  triggers (base gear: Glowstone, Forgotten Relic, Frigid Jewel, Blood Rose,
-  Fresh Beans, Chemtech Cask, Pirate's Haven, Mistfall, Vanguard of Helm, Mask
-  of Foresight, Bottled Constellation, Sprite Fountain, Sumpworks Map,
-  Treasure Trove) — several of those specs are misencoded ("when you ready" as
-  "when you play a unit"), review each before turning the dispatch on.
+  Sacred Shears...). [DONE on `inert-cards`, batch 3] unattached gear's
+  "When you ..." and turn triggers are dispatched, after fixing the
+  misencoded specs (see "Inert-card pass").
 - [DONE] **`grant_might` (EffectContext)** wrote the card's printed Might
   (latent: no non-passive spec uses it); now the unit's aura_might.
 
@@ -269,9 +268,30 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   modeled (counted keywords via `amount_source`). Still missing: Twilight
   Shroud's "can't be chosen", Shadow Dash's +1, Lacerate's disempower,
   Jayce Hammer in Hand, Lillia Protector, Udyr Wildman, Dune Surfer.
-- Next: "banish the top card / reveal and play it" (Akali Brash,
-  Runeblade Anvil, Blind Fury, Drakehound Packmaster, Void Rush, Rek'Sai...),
-  restrictions, damage modifiers, the empower family.
+- [DONE] **Batch 3 (204 → 196): reveal and play, banished cards playable
+  later, unattached gear triggers.** `reveal_play_top` (Blind Fury,
+  Promising Future, Dazzling Aurora, Baited Hook, Drakehound Packmaster,
+  Rek'Sai Void Burrower, Void Rush, Wild Claw, Clocktower Guardian's
+  DEATHKNELL); `banish_top_playable` offers the card as a "banished_play"
+  ability until the player's next Ending Phase (Runeblade Anvil, Akali Brash);
+  Mordekaiser Iron Revenant (Power only for units or gear). Engine fixes found
+  on the way: base gear never heard "when you ..." or turn triggers, and
+  their specs were misencoded (Pirate's Haven and Mistfall fired on "play a
+  unit", Sumpworks Map on conquer, Frigid Jewel at start of turn, Vanguard of
+  Helm checked itself for a buff), now on new triggers
+  (`on_friendly_unit_readied`, `on_friendly_unit_buffed`,
+  `on_friendly_attack`/`defend`, `on_second_draw`, `on_opponent_scores`);
+  a gear's "exhaust this" in a triggered cost was free and unlimited; killed
+  gear never ran DEATHKNELL / "leaves the board" (Sprite Fountain, Treasure
+  Trove); TEMPORARY units in base never died and those that died skipped
+  DEATHKNELL; legends never heard "when you conquer / hold" (Sett, Garen,
+  Irelia, Renata, Vex, Poppy). Vi Piltover Enforcer now waits for "3 or more
+  excess damage" (safe-false until excess damage is tracked); Bottled
+  Constellation only sacrifices tokens. Left: Wild Claw's empower, a
+  controlled opponent's card goes to its controller's trash, Sumpworks Map
+  (REACTION gear) is only played at normal speed.
+- Next: restrictions ("can't be chosen", "can't move"), damage modifiers,
+  the empower family (Glowstone, Lacerate, Wild Claw), Ashe Focused.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

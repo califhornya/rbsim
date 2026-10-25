@@ -279,6 +279,151 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+@effect("sacrifice_for_points")
+def _sacrifice_for_points(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may kill 3 other friendly units and/or gear to score 1 point"
+    (Bottled Constellation). Baseline: only when `count` tokens (units or gear)
+    can pay it, so no real card is thrown away."""
+    loop = ctx.loop
+    me, side = ctx.actor, ctx.actor_side
+    count = int(spec.get("count", 3))
+    units = [u for u in _units_at(ctx, side, "anywhere") if u.is_token]
+    gear = [g for g in me.base_gear if getattr(g, "is_token", False) and g is not ctx.card]
+    if len(units) + len(gear) < count:
+        return
+    for g in gear[:count]:
+        loop._remove_gear(g, me)
+    for u in units[:max(0, count - len(gear))]:
+        where = loop._locate_unit(u)
+        if where[1] is None:
+            me.base_units.remove(u)
+        else:
+            where[1].remove_unit(side, u)
+        loop._route_deaths([(u, side)], where[1] or loop.gs.battlefields[0])
+    _score_point(ctx, {"amount": int(spec.get("amount", 1))})
+
+
+@effect("banish_top_playable")
+def _banish_top_playable(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Banish the top card of your Main Deck. Until your next Ending Phase,
+    you may play that card. (You still pay its costs.)" (Runeblade Anvil,
+    Akali Brash): GameLoop offers it as a "banished_play" ability until the
+    end of the player's next turn (this turn, if it is theirs)."""
+    player, side = ctx.actor, ctx.actor_side
+    if not player.deck.cards:
+        return
+    card = player.deck.cards.pop()
+    player.banished.append(card)
+    gs = ctx.loop.gs
+    card._banish_play_side = side
+    card._banish_play_until = gs.turn if gs.active == side else gs.turn + 1
+
+
+@effect("reveal_play_top")
+def _reveal_play_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Reveal (or look at) cards from the top of a Main Deck, banish one and
+    play it (Blind Fury, Drakehound Packmaster, Void Rush, Rek'Sai, Dazzling
+    Aurora, Baited Hook, Clocktower Guardian, Wild Claw, Promising Future).
+    - `source`: "own" (default) or "opponent" (their deck; you play it).
+      `each_player`: every player does it with their own deck, the opponent
+      first ("Starting with the next player").
+    - `look` (default 1) cards, or `until` a card of that type ("unit").
+    - which can be played: `filter` / `target_filter`; `kill_friendly`: first
+      kill your weakest unit, then only cards with Might up to `might_margin`
+      more than it (Baited Hook).
+    - `pay`: "ignore" (default), "ignore_energy" (still pay its Power),
+      "cost" (pay it), or "reduce" by `reduce` Energy.
+    - `rest`: "recycle" (default), "draw" (yours), "banish" or "trash".
+    Baseline pick: the most expensive playable card."""
+    loop = ctx.loop
+    if spec.get("each_player"):
+        for side in (ctx.opponent_side, ctx.actor_side):
+            _reveal_play_for(ctx, spec, side, side)
+    elif str(spec.get("source", "own")).lower() == "opponent":
+        _reveal_play_for(ctx, spec, ctx.actor_side, ctx.opponent_side)
+    else:
+        _reveal_play_for(ctx, spec, ctx.actor_side, ctx.actor_side)
+    loop._recompute_passives()
+
+
+def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side: str,
+                     owner_side: str) -> None:
+    loop = ctx.loop
+    gs = loop.gs
+    chooser, owner = gs.get_player(chooser_side), gs.get_player(owner_side)
+    might_cap = None
+    if spec.get("kill_friendly"):
+        mine = [u for u in _units_at(ctx, chooser_side, "anywhere") if not u.is_token]
+        if not mine:
+            return
+        victim = min(mine, key=lambda u: u.might)
+        might_cap = victim.might + int(spec.get("might_margin", 1))
+        where = loop._locate_unit(victim)
+        if where[1] is None:
+            chooser.base_units.remove(victim)
+        else:
+            where[1].remove_unit(chooser_side, victim)
+        loop._route_deaths([(victim, chooser_side)], where[1] or gs.battlefields[0])
+    deck = owner.deck.cards
+    revealed = []
+    until = spec.get("until")
+    if until:
+        while deck:
+            revealed.append(deck.pop())
+            if _zone_effect_card_ok(revealed[-1], {"filter": until}):
+                break
+    else:
+        for _ in range(min(int(spec.get("look", 1)), len(deck))):
+            revealed.append(deck.pop())
+    match = {"filter": spec.get("filter") or until, "target_filter": spec.get("target_filter") or {}}
+    cands = [c for c in revealed if _zone_effect_card_ok(c, match)]
+    if might_cap is not None:
+        cands = [c for c in cands if int(getattr(c, "might", 0) or 0) <= might_cap]
+    mode = str(spec.get("pay", "ignore")).lower()
+
+    def price(card):
+        """(Energy, Power) to pay for `card` under this effect, or None if the
+        chooser can't."""
+        if mode == "ignore":
+            return 0, 0
+        if mode == "ignore_energy":
+            power = int(card.cost_power or 0)
+            ok = (chooser.can_pay_cost(0, power, card.cost_power_domain) if card.cost_power_domain
+                  else loop._can_pay_generic_power(chooser, power))
+            return (0, power) if ok else None
+        energy, power = loop._effective_cost(card, chooser)
+        if mode == "reduce":
+            energy = max(0, energy - int(spec.get("reduce", 0)))
+        return (energy, power) if loop._can_pay_card(chooser, card, energy, power) else None
+
+    playable = [c for c in cands if price(c) is not None]
+    pick = max(playable, key=_zone_value) if playable else None
+    if pick is not None:
+        revealed.remove(pick)
+        energy, power = price(pick)
+        if mode == "ignore_energy":
+            if power:
+                if pick.cost_power_domain:
+                    chooser.pay_cost(0, power, pick.cost_power_domain)
+                else:
+                    loop._pay_generic_power(chooser, power)
+        elif mode != "ignore":
+            loop._pay_card(chooser, pick, energy, power)
+        if loop.verbose:
+            print(f"  {chooser.name} banishes and plays {pick.name}")
+        loop._play_from_zone_now(chooser, pick, chooser_side, "banished")
+    rest = str(spec.get("rest", "recycle")).lower()
+    for card in revealed:
+        if rest == "draw" and owner is chooser:
+            chooser.hand.append(card)
+        elif rest == "banish":
+            owner.banished.append(card)
+        elif rest == "trash":
+            owner.trash.append(card)
+        else:
+            deck.insert(0, card)      # recycle: to the bottom
+
+
 @effect("cant_move_this_turn")
 def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They can't move it this turn" (Vex Apathetic): no Standard Move."""
@@ -506,6 +651,7 @@ def _score_point(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         ctx.loop.gs.points_A += amount
     else:
         ctx.loop.gs.points_B += amount
+    ctx.loop._fire_units_trigger("on_opponent_scores", ctx.loop.gs.other(side))
 
 
 @effect("counter_spell")
@@ -575,6 +721,10 @@ def _buff_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                                                     ctx.loop.gs.get_player(where[0]),
                                                     ctx.loop.gs.get_player(ctx.loop.gs.other(where[0])),
                                                     context_extra={"battlefield": bf})
+                if where[0] == ctx.actor_side:   # "When you buff a friendly unit" (Mistfall)
+                    ctx.loop._fire_units_trigger("on_friendly_unit_buffed", where[0],
+                                                 triggering_card=unit.card,
+                                                 extra={"triggering_unit": unit})
 
 
 @effect("spend_buff")
@@ -916,20 +1066,27 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
     entries = _gear_entries(ctx, enemy_first=True)
     entries = [(s, h, g) for (s, h, g) in entries if _gear_matches(g, tf)]
-    if single:
+    if target in ("self", "this"):
+        # "Kill this" (Runeblade Anvil's ability).
+        entries = [(s, h, g) for (s, h, g) in entries if getattr(g, "card", g) is ctx.card]
+    elif single:
         entries = entries[:1]
 
     for side, holder, gear in entries:
         player = gs.get_player(side)
         if isinstance(holder, Battlefield):
             ctx.loop._kill_deployed_gear(holder, side, [gear])
-        elif holder is not None:
-            if gear in holder.gear:
-                holder.gear.remove(gear)
-                ctx.loop._to_trash(player, gear)
+            continue
+        if holder is not None:
+            if gear not in holder.gear:
+                continue
+            holder.gear.remove(gear)
         elif gear in player.base_gear:
             player.base_gear.remove(gear)
-            ctx.loop._to_trash(player, gear)
+        else:
+            continue
+        ctx.loop._to_trash(player, gear)
+        ctx.loop._gear_left_board(gear, side)
 
 
 _ENEMY_GEAR_HINTS = {"enemy_gear", "chosen_gear", "gear"}
@@ -1364,6 +1521,16 @@ def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     side = ctx._side_for_player(player)
     gs = ctx.loop.gs
     gs.cards_burned_this_turn[side] = gs.cards_burned_this_turn.get(side, 0) + len(burned)
+    if spec.get("buff_by_burned_unit"):
+        # "When you burn a unit this way, give a friendly unit +[might] equal to
+        # the burned card's Might this turn" (Forgotten Relic): the mightiest
+        # friendly unit at a battlefield, else any.
+        from .cards import UnitCard
+        mine = _units_at(ctx, ctx.actor_side, "anywhere")
+        at_bf = [u for u in mine if ctx.loop._locate_unit(u)[1] is not None]
+        for card in burned:
+            if isinstance(card, UnitCard) and (at_bf or mine):
+                max(at_bf or mine, key=lambda u: u.might).temporary_might += int(card.might or 0)
 
 
 @effect("empower_self")

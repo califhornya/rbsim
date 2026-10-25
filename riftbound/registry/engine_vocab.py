@@ -47,6 +47,11 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_buffed",                                 # I get a buff (Simian Ancestor)
     "on_enemy_unit_moves",                       # an opponent's unit moves (Volibear Imposing)
     "on_stunned_enemy_dies_here",                # a stunned enemy unit dies here (Storm Raptor)
+    "on_friendly_unit_readied",                  # you ready a friendly unit (Pirate's Haven)
+    "on_friendly_unit_buffed",                   # you buff a friendly unit (Mistfall)
+    "on_friendly_attack", "on_friendly_defend",  # a friendly unit attacks / defends (Mask of Foresight)
+    "on_second_draw",                            # you draw your second card this turn (Frigid Jewel)
+    "on_opponent_scores",                        # an opponent scores (Sumpworks Map)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -111,6 +116,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "moved_to_other_battlefield",        # "an opponent moves to a battlefield other than mine"
     "gained_xp_this_turn",               # "if you've gained XP this turn"
     "power_spent_this_turn_at_least",    # n: "if you've spent at least [rune] [rune] this turn"
+    "triggering_unit_alone",             # "when a friendly unit attacks or defends alone"
+    "triggering_unit_buffed",            # "when a buffed friendly unit dies"
+    "in_showdown",                       # "during a showdown"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
