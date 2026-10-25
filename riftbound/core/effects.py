@@ -291,6 +291,122 @@ def _grant_flow(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     pick._flow_granted_turn = loop.gs.turn
 
 
+def _return_gear(ctx: "EffectContext", pick) -> Optional[object]:
+    """Return a friendly gear to its owner's hand (base first, then attached);
+    `pick` chooses among them. Returns the card (a token ceases to exist)."""
+    loop = ctx.loop
+    side, ap = ctx.actor_side, ctx.actor
+    pool = [(None, g) for g in ap.base_gear] + \
+        [(u, g) for u in _units_at(ctx, side, "anywhere") for g in u.gear]
+    if not pool:
+        return None
+    holder, gear = pick(pool)
+    if holder is None:
+        ap.base_gear.remove(gear)
+    else:
+        holder.gear.remove(gear)
+    loop._fire_leaves_board(gear, side, loop.gs.battlefields[0])
+    if not getattr(gear, "is_token", False):
+        gear.empowered = False
+        ap.hand.append(gear)
+    return gear
+
+
+@effect("return_gear_cost")
+def _return_gear_cost(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "As an additional cost to play me, return a friendly gear to its
+    owner's hand" (Legion Quartermaster): a token or the cheapest in base."""
+    _return_gear(ctx, lambda pool: min(pool, key=lambda e: (e[0] is not None,
+                                                           not getattr(e[1], "is_token", False),
+                                                           e[1].cost_energy or 0)))
+
+
+@effect("return_gear_ready_pump")
+def _return_gear_ready_pump(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may return a friendly gear to its owner's hand as an additional
+    cost to play me. If you paid, ready me and give me +[might] this turn
+    equal to the Energy cost of the gear you returned." (Spirit of the Forge):
+    the costliest gear in base."""
+    base = [g for g in ctx.actor.base_gear if not getattr(g, "is_token", False)]
+    me = _source_unit(ctx)
+    if not base or me is None:
+        return
+    gear = _return_gear(ctx, lambda pool: max((e for e in pool if e[0] is None),
+                                              key=lambda e: e[1].cost_energy or 0))
+    if gear is not None:
+        if ctx.loop._can_ready(me):
+            me.ready = True
+        me.temporary_might += int(gear.cost_energy or 0)
+
+
+@effect("swap_gear_free")
+def _swap_gear_free(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may kill a friendly gear. If you do, you may play a gear with
+    Energy cost no more than [7] from hand this turn, ignoring its Energy
+    cost." (Jayce Man of Progress): a token or the cheapest gear goes, the
+    costliest gear in hand comes in now."""
+    from .cards import GearCard
+    loop = ctx.loop
+    ap, side = ctx.actor, ctx.actor_side
+    hand = [c for c in ap.hand if isinstance(c, GearCard) and int(c.cost_energy or 0) <= 7
+            and (not c.cost_power or (ap.can_pay_cost(0, c.cost_power, c.cost_power_domain)
+                                      if c.cost_power_domain else loop._can_pay_generic_power(ap, c.cost_power)))]
+    mine = list(ap.base_gear)
+    if not hand or not mine:
+        return
+    victim = min(mine, key=lambda g: (not getattr(g, "is_token", False), g.cost_energy or 0))
+    best = max(hand, key=_zone_value)
+    if int(best.cost_energy or 0) <= int(victim.cost_energy or 0):
+        return
+    loop._remove_gear(victim, ap)
+    if best.cost_power:
+        if best.cost_power_domain:
+            ap.pay_cost(0, best.cost_power, best.cost_power_domain)
+        else:
+            loop._pay_generic_power(ap, best.cost_power)
+    ap.hand.remove(best)
+    loop._play_gear(best, side, 0, from_zone="hand")
+
+
+@effect("kill_pet_cost")
+def _kill_pet_cost(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "As an additional cost to play me, kill a Bird, Cat, Dog, or Poro you
+    control" (Stalking Wolf): the one at my battlefield, else the weakest."""
+    loop = ctx.loop
+    side = ctx.actor_side
+    me = _source_unit(ctx)
+    here = loop._locate_unit(me)[1] if me is not None else None
+    pets = [u for u in _units_at(ctx, side, "anywhere") if u is not me
+            and any(t in u.tags for t in ("Bird", "Cat", "Dog", "Poro"))]
+    if not pets:
+        return
+    victim = min(pets, key=lambda u: (loop._locate_unit(u)[1] is not here, u.might))
+    where = loop._locate_unit(victim)
+    if where[1] is None:
+        ctx.actor.base_units.remove(victim)
+    else:
+        where[1].remove_unit(side, victim)
+    loop._route_deaths([(victim, side)], where[1] or loop.gs.battlefields[0], in_base=where[1] is None)
+
+
+@effect("champion_to_hand")
+def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Put a Teemo unit you own into your hand from your Champion Zone"
+    (Teemo Swift Scout)."""
+    gs = ctx.loop.gs
+    side = ctx.actor_side
+    champ = gs.champion_A if side == "A" else gs.champion_B
+    deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
+    name = str(spec.get("name_prefix", ""))
+    if champ is None or deployed or not champ.name.startswith(name):
+        return
+    ctx.actor.hand.append(champ)
+    if side == "A":
+        gs.champion_A_deployed = True
+    else:
+        gs.champion_B_deployed = True
+
+
 @effect("hostage_from_hand")
 def _hostage_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They reveal their hand. Choose a card revealed this way and banish it.

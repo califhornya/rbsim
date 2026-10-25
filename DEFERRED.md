@@ -410,11 +410,25 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   Embrace), Meticulous Restorationist (cards in the trash answer a play),
   Jayce Hammer in Hand, Lillia Protector, Scrutinizing Scope, Ravenbloom
   Prefect, Shard of Undoing, Dusk Rose Lab, Pyke Returned.
-- Next (47 left): copies (Leblanc Deceiver, Shady Spectacles, Svellsongur,
-  Heimerdinger Inventor), cost tricks (Kraken Hunter, Commander Ledros, Void
-  Drone, Irelia Graceful, Vex Cheerless, Orianna Mechanical Marvel, Risen
-  Altar, Hextech Anomaly, Ancient Henge), Ivern x2, Chronobreak, and
-  one-offs; Neeko is a deckbuilding rule.
+- [DONE] **Batch 12a (47 → 33): cost rules.** `_cost_extras` (spent as you
+  play, baseline all of it: Kraken Hunter's buffs, Commander Ledros's tokens,
+  Poppy Defender's XP), `_effective_cost(from_zone=...)` (Void Drone),
+  Orianna Mechanical Marvel's gear discount once a turn, Vex Cheerless during
+  a showdown at its battlefield ([1][rune] as 2 Energy), Risen Altar
+  (`_adjust_ability_cost`), Dragon Roost (`_destination_surcharge`),
+  mandatory additional costs in `_play_forbidden` (Legion Quartermaster,
+  Stalking Wolf), Spirit of the Forge, Jayce Man of Progress (plays the gear
+  at once), Teemo Swift Scout (hide for [1], Teemo to hand), Noxus Saboteur.
+- Next (33 left): triggers and one-offs (Bedeviling Stranger, Ripper's Bay,
+  Stealthy Pursuer, Battlefield Armorer, Seraphine Inspiring, Forgotten
+  Signpost, Mageseeker Investigator, Immortal Phoenix, Karma Channeler,
+  Hexplosive Minefield, Ava Achiever, Heimerdinger Inventor, Ivern Friend to
+  All, Jhin Virtuoso, Zero Point Inflection, Jarvan IV Exemplar, Forge of the
+  Fluft); then copies (Leblanc Deceiver, Shady Spectacles, Svellsongur),
+  mana conversion (Hextech Anomaly, Ancient Henge), Irelia Graceful, Ivern
+  Green Father, Chronobreak, Orianna Lady of Clockwork, Endless Riches,
+  Bandle Tree / Bushwhack Trap (two facedown cards), Void Hatchling, Mystic
+  Reversal, Baron Pit; Neeko is a deckbuilding rule.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

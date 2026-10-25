@@ -70,6 +70,10 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
         if isinstance(card, (UnitCard, LegendCard)):
             if _affordable(loop, ap, card):
                 for dst in loop._unit_play_destinations(card, side):
+                    surcharge = loop._destination_surcharge(card, dst, side)
+                    if surcharge and not loop._can_pay_generic_power(
+                            ap, surcharge + int(loop._effective_cost(card, ap)[1] or 0)):
+                        continue
                     if dst is None:
                         actions.append(GameAction.play("UNIT", idx, 0, f"Play {card.name}"))
                     else:
@@ -114,7 +118,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     # --- HIDDEN keyword (Open State only) ---
     if not gs.showdown_active and not gs.chain:
         hide_lanes = loop._hide_lanes(side)
-        if hide_lanes and loop._can_pay_generic_power(ap, 1):
+        if hide_lanes and loop._can_hide_pay(ap, side):
             for idx, card in enumerate(ap.hand):
                 if card.has_keyword("HIDDEN"):
                     for lane in hide_lanes:

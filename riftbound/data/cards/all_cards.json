@@ -632,7 +632,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "no_enemy_reveals_here",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-019",
@@ -5068,7 +5073,12 @@
       "ACCELERATE",
       "ASSAULT"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "spend_buffs_for_power",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-151",
@@ -7782,7 +7792,12 @@
       "DEFLECT",
       "GANKING"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "kill_tokens_for_power",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-232",
@@ -8985,7 +9000,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "hide_for_energy",
+        "trigger": "passive"
+      },
+      {
+        "effect": "champion_to_hand",
+        "trigger": "activated",
+        "name_prefix": "Teemo",
+        "cost": {
+          "energy": 1,
+          "tap": true
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-264",
@@ -11084,7 +11113,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "reduce_cost_not_from_hand",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-011",
@@ -12103,7 +12137,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "requires_friendly_gear",
+        "trigger": "passive"
+      },
+      {
+        "effect": "return_gear_cost",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "SFD-045",
@@ -13486,7 +13529,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "swap_gear_free",
+        "trigger": "on_play",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "SFD-085",
@@ -15458,7 +15507,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "vex_cheerless",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-147",
@@ -23893,7 +23947,21 @@
     "keywords": [
       "AMBUSH"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "requires_pet",
+        "trigger": "passive"
+      },
+      {
+        "effect": "play_location",
+        "trigger": "passive",
+        "where": "pet_battlefield"
+      },
+      {
+        "effect": "kill_pet_cost",
+        "trigger": "on_play"
+      }
+    ]
   },
   {
     "card_id": "UNL-167",
@@ -24293,7 +24361,14 @@
       "AMBUSH",
       "TANK"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "spend_xp_for_energy",
+        "trigger": "passive",
+        "xp": 3,
+        "amount": 3
+      }
+    ]
   },
   {
     "card_id": "UNL-179",
@@ -31560,7 +31635,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "dragon_roost",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-157",
@@ -31740,7 +31820,12 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "empower_discount_here",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-163",
@@ -34171,7 +34256,13 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "return_gear_ready_pump",
+        "trigger": "on_play",
+        "optional": true
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-066",
@@ -34235,7 +34326,12 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "gear_discount_once",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-068",

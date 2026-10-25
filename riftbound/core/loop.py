@@ -2100,9 +2100,12 @@ class GameLoop:
             return False
         if lane not in self._hide_lanes(side):
             return False
-        if not self._can_pay_generic_power(ap, 1):
+        if not self._can_hide_pay(ap, side):
             return False
-        self._pay_generic_power(ap, 1)
+        if self._can_pay_generic_power(ap, 1):
+            self._pay_generic_power(ap, 1)
+        else:
+            ap.energy -= 1           # Teemo Swift Scout: "pay [1] ... instead of [rune]"
         ap.remove_from_hand(idx)
         bf = self.gs.battlefields[lane]
         bf.facedown = FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn)
@@ -2115,6 +2118,11 @@ class GameLoop:
         # "When you hide a card" on the hider's units (Katarina Reckless).
         self._fire_units_trigger("on_hide", side)
         return True
+
+    def _can_hide_pay(self, ap: Player, side: str) -> bool:
+        legend = self._legend_unit(side)
+        teemo = legend is not None and self._has_effect(legend.card, "hide_for_energy")
+        return self._can_pay_generic_power(ap, 1) or (teemo and ap.energy >= 1)
 
     def _cleanup_hidden_cards(self) -> None:
         """§106.4.d / §322.8: a face-down card whose owner no longer controls its
@@ -2137,6 +2145,10 @@ class GameLoop:
         for i, bf in enumerate(self.gs.battlefields):
             fd = bf.facedown
             if fd is not None and fd.owner == side and self.gs.turn > fd.turn_hidden:
+                # "Your opponents' HIDDEN cards can't be revealed here" (Noxus Saboteur).
+                if any(self._has_effect(u.card, "no_enemy_reveals_here")
+                       for u in bf._units_for(self.gs.other(side))):
+                    continue
                 lanes.append(i)
         return lanes
 
@@ -2290,7 +2302,7 @@ class GameLoop:
     # out of its zone; everything that happens AS a card is played lives here.
 
     def _effective_cost(self, card: Card, actor: Player,
-                        lane: Optional[int] = None) -> tuple[int, Optional[int]]:
+                        lane: Optional[int] = None, from_zone: str = "hand") -> tuple[int, Optional[int]]:
         """(energy, power) `actor` pays to play `card`: the printed cost minus the
         card's own reductions. A spell aimed at battlefield `lane` also pays the
         DEFLECT surcharge there and gets that battlefield's discount."""
@@ -2298,6 +2310,18 @@ class GameLoop:
         energy = printed - self._cost_reduction(card, actor)
         power = card.cost_power
         side = "A" if actor is self.gs.A else "B"
+        if from_zone != "hand" and self._has_effect(card, "reduce_cost_not_from_hand"):
+            energy -= 2                                    # Void Drone
+        extras = self._cost_extras(card, side) if from_zone == "hand" else {}
+        energy -= extras.get("energy", 0)
+        if power:
+            power = max(0, power - extras.get("power", 0))
+        if isinstance(card, GearCard) and self._orianna_discount_ready(side):
+            energy -= 1                                    # Orianna Mechanical Marvel
+            if power:
+                power = max(0, power - 1)
+        if isinstance(card, SpellCard):
+            energy += self._vex_cheerless_delta(side, energy)
         if isinstance(card, SpellCard) and lane is not None:
             energy += self._deflect_surcharge(card, lane, side)
             e_red, p_red = self._bf_cost_reduction(card, lane)
@@ -2323,6 +2347,99 @@ class GameLoop:
             if power:
                 power = max(0, power - int(discount.get("power", 0)))
         return max(0, energy), power
+
+    def _cost_extras(self, card: Card, side: str) -> dict:
+        """What a card lets you spend as you play it to cost less (baseline:
+        all of it): Kraken Hunter's buffs ([body] each), Commander Ledros's
+        friendly units ([order] each; tokens only), Poppy Defender's 3 XP ([3])."""
+        spec = CARD_REGISTRY.get(card.name)
+        out: dict = {}
+        for es in (spec.effects if spec else ()):
+            kind = es.effect
+            if kind == "spend_buffs_for_power":
+                n = min(int(card.cost_power or 0),
+                        sum(1 for u in self._friendly_units_of(side) if u.might_counters > 0))
+                if n:
+                    out.update(power=n, buffs=n)
+            elif kind == "kill_tokens_for_power":
+                n = min(int(card.cost_power or 0),
+                        sum(1 for u in self._friendly_units_of(side) if u.is_token))
+                if n:
+                    out.update(power=n, tokens=n)
+            elif kind == "spend_xp_for_energy":
+                xp = int(es.params.get("xp", 3))
+                if self.gs.get_xp(side) >= xp:
+                    out.update(energy=int(es.params.get("amount", 3)), xp=xp)
+        return out
+
+    def _spend_cost_extras(self, extras: dict, side: str) -> None:
+        """Pay what _cost_extras said the play spends."""
+        for _ in range(extras.get("buffs", 0)):
+            holder = self._buff_to_spend(side, None, "any")
+            if holder is not None:
+                holder.might_counters -= 1
+        for _ in range(extras.get("tokens", 0)):
+            tokens = [u for u in self._friendly_units_of(side) if u.is_token]
+            if tokens:
+                victim = min(tokens, key=lambda u: u.might)
+                where = self._locate_unit(victim)
+                if where[1] is None:
+                    self.gs.get_player(side).base_units.remove(victim)
+                else:
+                    where[1].remove_unit(side, victim)
+                self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
+                                   in_base=where[1] is None)
+        if extras.get("xp"):
+            self.gs.add_xp(side, -extras["xp"])
+
+    def _adjust_ability_cost(self, unit, eff, parsed: dict, side: str) -> dict:
+        """ "EMPOWER costs of your units here cost [1] or [Rune] less" (Risen
+        Altar): Energy first, else Power."""
+        if eff.effect != "empower_self" or unit is None:
+            return parsed
+        where = self._locate_unit(unit)
+        bf = where[1] if where else None
+        if bf is None or bf.card is None or bf.controller() != side or \
+                not self._has_effect(bf.card, "empower_discount_here"):
+            return parsed
+        parsed = dict(parsed)
+        if parsed["energy"]:
+            parsed["energy"] -= 1
+        elif parsed["power"]:
+            parsed["power"] -= 1
+        return parsed
+
+    def _orianna_discount_ready(self, side: str) -> bool:
+        """ "Once each turn, while I'm at a battlefield, you may pay [1] [rune]
+        less to play a gear" (Orianna Mechanical Marvel), not used yet this turn."""
+        return any(self.gs.once_per_turn_used.get((id(u.card), "orianna")) != self.gs.turn
+                   for u in self._units_at_battlefields_with(side, "gear_discount_once"))
+
+    def _vex_cheerless_delta(self, side: str, energy: int) -> int:
+        """ "While I'm in combat, friendly spells cost [1][rune] less to a minimum
+        of [1], and enemy spells cost [1][rune] more" (Vex Cheerless): during a
+        showdown at Vex's battlefield; [1][rune] counted as 2 Energy."""
+        gs = self.gs
+        if not gs.showdown_active or gs.showdown_bf_idx is None:
+            return 0
+        bf = gs.battlefields[gs.showdown_bf_idx]
+        delta = 0
+        for s in ("A", "B"):
+            if any(self._has_effect(u.card, "vex_cheerless") for u in bf._units_for(s)):
+                delta += -min(2, max(0, energy - 1)) if s == side else 2
+        return delta
+
+    def _destination_surcharge(self, card: Card, dst, side: str) -> int:
+        """Extra generic Power `side` pays to play `card` to battlefield `dst`:
+        Dragon Roost ("Any player may pay [rune] [rune] as an additional cost to
+        play a Dragon. If they do, they play it to this battlefield") — unless
+        they control it, where the unit could go anyway."""
+        if dst is None:
+            return 0
+        bf = self.gs.battlefields[dst]
+        if bf.card is not None and self._has_effect(bf.card, "dragon_roost") and                 "Dragon" in (card.tags or []) and bf.controller() != side:
+            return 2
+        return 0
 
     def _enemy_spell_tax(self, side: str) -> int:
         """ "Opponents' spells cost [1] more. If this is EMPOWERED, they cost
@@ -2623,6 +2740,12 @@ class GameLoop:
         Exceptions: QUICK-DRAW (§745.1.d) attaches to a unit you control as it is
         played; DEPLOY (§830.1.a) gear go to a battlefield."""
         ap = self.gs.get_player(side)
+        if from_zone == "hand":
+            for u in self._units_at_battlefields_with(side, "gear_discount_once"):
+                key = (id(u.card), "orianna")
+                if self.gs.once_per_turn_used.get(key) != self.gs.turn:
+                    self.gs.once_per_turn_used[key] = self.gs.turn     # used up
+                    break
         attached_to = None
         deployed_bf = None
         if card.has_keyword("DEPLOY"):
@@ -2802,7 +2925,11 @@ class GameLoop:
             if only_conquered:
                 ok = bf.conquered_turn.get(side) == gs.turn
             else:
+                pets = ("Bird", "Cat", "Dog", "Poro")
                 ok = (bf.controller() == side or "any" in perms
+                      or (bf.card is not None and self._has_effect(bf.card, "dragon_roost")
+                          and "Dragon" in (card.tags or []))
+                      or ("pet_battlefield" in perms and any(t in u.tags for u in mine for t in pets))
                       or ("open" in perms and not mine and not theirs and bf.controller() is None)
                       or ("occupied_enemy" in perms and bool(theirs))
                       or ("enemy_alone" in perms and len(theirs) == 1))
@@ -3038,9 +3165,16 @@ class GameLoop:
                 # LEGION cost reductions are handled generically by _cost_reduction
                 # (the reduce_cost effect gated on you_already_played_another_card_
                 # this_turn).
+                extras = self._cost_extras(card, ap.name)
+                surcharge = self._destination_surcharge(card, dst, ap.name)
                 energy, power = self._effective_cost(card, ap)
+                if surcharge and not self._can_pay_generic_power(ap, surcharge + int(power or 0)):
+                    return
                 if not self._pay_card(ap, card, energy, power):
                     return
+                if surcharge:
+                    self._pay_generic_power(ap, surcharge)
+                self._spend_cost_extras(extras, ap.name)
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}" + (f" to BF{dst}" if bf else ""))
                 ap.remove_from_hand(idx)
@@ -3284,7 +3418,7 @@ class GameLoop:
         paying its costs."""
         if card not in ap.banished or not self._banished_playable(card, side):
             return
-        energy, power = self._effective_cost(card, ap)
+        energy, power = self._effective_cost(card, ap, from_zone="banished")
         if not self._pay_card(ap, card, energy, power):
             return
         ap.banished.remove(card)
@@ -3386,7 +3520,7 @@ class GameLoop:
             card = entry["card"]
             if card not in ap.banished or not self._banished_playable(card, side):
                 return False
-            energy, power = self._effective_cost(card, ap)
+            energy, power = self._effective_cost(card, ap, from_zone="banished")
             return self._can_pay_card(ap, card, energy, power)
         eff = entry["eff"]
         if EFFECT_REGISTRY.get(eff.effect) is None:
@@ -3420,6 +3554,7 @@ class GameLoop:
                 return False
         else:
             source = entry["unit"].card
+            parsed = self._adjust_ability_cost(entry["unit"], eff, parsed, side)
             if not self._activated_affordable(ap, entry["unit"], parsed):
                 return False
         bf = self.gs.battlefields[entry["bf_idx"]] if entry.get("bf_idx") is not None             else self.gs.battlefields[0]
@@ -3668,7 +3803,7 @@ class GameLoop:
         eff = entry["eff"]
         if eff.params.get("once_per_turn"):
             self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
-        parsed = self._parse_activated_cost(eff.cost)
+        parsed = self._adjust_ability_cost(unit, eff, self._parse_activated_cost(eff.cost), side)
         # Pay.
         if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
             return
@@ -3994,6 +4129,12 @@ class GameLoop:
         side = "A" if actor is self.gs.A else "B"
         if self.gs.cant_play_cards_turn.get(side) == self.gs.turn:
             return True
+        if self._has_effect(card, "requires_friendly_gear") and not (
+                actor.base_gear or self._controlled_attached_gear(side)):
+            return True      # "As an additional cost to play me, return a friendly gear"
+        if self._has_effect(card, "requires_pet") and not any(
+                t in u.tags for u in self._friendly_units_of(side) for t in ("Bird", "Cat", "Dog", "Poro")):
+            return True      # "kill a Bird, Cat, Dog, or Poro you control"
         spec = CARD_REGISTRY.get(card.name)
         for es in (spec.effects if spec else ()):
             if es.effect == "play_restriction" and \

@@ -239,4 +239,10 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "accelerate_non_hand",
     "spells_repeat_in_showdown", "reaction_tax_in_showdown", "channel_plus_one",
     "sacrifice_instead_of_dying", "mech_instead_of_tokens", "double_tokens_once",
+    # cost rules (GameLoop._cost_extras, _effective_cost, _adjust_ability_cost,
+    # _play_forbidden, _destination_surcharge, hiding)
+    "spend_buffs_for_power", "kill_tokens_for_power", "spend_xp_for_energy",
+    "reduce_cost_not_from_hand", "gear_discount_once", "vex_cheerless", "empower_discount_here",
+    "dragon_roost", "requires_friendly_gear", "requires_pet", "hide_for_energy",
+    "no_enemy_reveals_here",
 })
