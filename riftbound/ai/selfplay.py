@@ -158,6 +158,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
           eval_every: int = 5, eval_games: int = 20,
           eval_vs: Sequence[str] = ("simple_trade", "random"), max_turns: int = 40,
           pause: float = 10.0, rest: float = 0.0, device: Optional[torch.device] = None,
+          coach_dir: Optional[Path] = None, coach_fraction: float = 0.1,
           log=print) -> RiftboundNet:
     """Self-play → train, `iterations` times, over a pool of decks (each game
     two decks drawn from `decks`, mirrors included). `workers`: processes for
@@ -170,7 +171,9 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     and a copy of the net is kept (net_0050.pt...; net_best.pt: the best
     against the first agent). `pause` seconds between iterations and `rest`
     after each game let the machine breathe. Saves `checkpoint` and appends a
-    JSON line per iteration to `log_path`."""
+    JSON line per iteration to `log_path`. `coach_dir`: decisions a person
+    coached (riftbound.ai.coach), re-read every iteration; `coach_fraction` of
+    each batch comes from them."""
     from multiprocessing import Pool
 
     from riftbound.ai.net import save_checkpoint
@@ -217,14 +220,20 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
                 buffer.extend(examples)
                 new += len(examples)
             stats = {"loss": float("nan"), "policy_loss": float("nan"), "value_loss": float("nan")}
+            coached: list = []
+            if coach_dir is not None and Path(coach_dir).exists():
+                from riftbound.ai.coach import load_coach_examples
+                coached = load_coach_examples(Path(coach_dir))
+            n_coach = round(coach_fraction * batch_size) if coached else 0
             if len(buffer) >= batch_size:
                 # 0 = auto: each new example is seen about twice.
                 n_steps = train_steps or max(1, 2 * new // batch_size)
-                steps = [train_step(net, opt, random.sample(buffer, batch_size), device=device)
+                steps = [train_step(net, opt, random.sample(buffer, batch_size - n_coach) +
+                                    random.choices(coached, k=n_coach), device=device)
                          for _ in range(n_steps)]
                 stats = {k: mean(s[k] for s in steps) for k in stats}
             record = {"iteration": it + 1, "games": games_per_iter, "examples": new,
-                      "buffer": len(buffer), "lr": rate, **stats}
+                      "buffer": len(buffer), "lr": rate, "coached": len(coached), **stats}
             if eval_every and (it + 1) % eval_every == 0 and eval_games:
                 save_checkpoint(net.to("cpu"), weights)
                 net.to(device)

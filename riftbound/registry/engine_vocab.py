@@ -59,6 +59,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_combat_start_here",                      # a combat starts at this battlefield (Threshold of the Gray)
     "on_equipment_attached",                     # an Equipment is attached to me (Aphelios, Jax)
     "on_friendly_empowered",                     # you empower something else (Mel, Ambessa)
+    "on_become_empowered",                       # I become EMPOWERED (Apprentice Mage, Kharox)
+    "on_you_discard",                            # you discard a card (Jinx Rebel)
     "on_banish_own",                             # you banish a card you own (Zed)
     "on_unit_played_here",                       # a player plays a unit here (Valley of Idols)
     "on_self_played",                            # this card is played (from face down: Tornado Warrior)
@@ -180,6 +182,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     # Step 3 additions (KNOWN_ISSUES #14/#17): ready-state + gear energy cost.
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
+    "at_battlefield",                    # "a unit at a battlefield" (not in a base)
 })
 
 # amount_source values understood by effects._amount.
@@ -207,7 +210,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
     "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
-    "kill_other_token",
+    "kill_other_token", "kill_other_friendly",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs

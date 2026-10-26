@@ -1,6 +1,9 @@
 """Standard Moves name their unit, and units moved to the same battlefield in a
-row move together (Core Rules §144.3): the showdown waits until the player does
-anything else, so they fight together."""
+row move together (Core Rules §144.3): the showdown waits until the player is
+done moving (PASS), so they fight together; then the turn goes on (§323.11).
+While a move is being declared nothing else can be done: an action that isn't
+a move to the same battlefield ends the move instead (its showdown happens and
+the action isn't taken)."""
 
 from __future__ import annotations
 
@@ -54,7 +57,7 @@ def test_units_moved_together_fight_together():
     assert [u.card.name for u in bf.units_A] == ["Two"]
 
 
-def test_any_other_action_starts_the_held_showdown():
+def test_any_other_action_ends_the_move_and_is_not_taken():
     loop = _loop()
     a = loop.gs.A
     loop.gs.battlefields[0].add_unit("B", _unit("Wall", 1))
@@ -64,6 +67,54 @@ def test_any_other_action_starts_the_held_showdown():
     loop._apply_action(a, ("SPELL", 0, 1, None))
     assert loop.gs.pending_move is None
     assert loop.gs.battlefields[0].units_B == []
+    # It was chosen before the showdown, on another board: the player decides again.
+    assert [c.name for c in a.hand] == ["Free"]
+
+
+def test_while_moving_only_joining_the_move_or_passing_is_legal():
+    loop = _loop()
+    a = loop.gs.A
+    loop.gs.battlefields[0].add_unit("B", _unit("Wall", 4))
+    a.base_units.extend([_unit("Two", 2), _unit("Three", 3)])
+    loop.gs.battlefields[1].add_unit("A", _unit("Ganker", 1, keywords=["GANKING"]))
+    a.hand.append(UnitCard(name="Free", might=1, cost_energy=0))
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    legal = legal_actions(loop, DecisionPoint.TURN_ACTION, "A")
+    assert {(ga.kind, ga.lane, ga.dst_lane) for ga in legal} == {
+        ("PASS", None, None),
+        ("MOVE", 2, 0),          # Three, from base
+        ("MOVE", 1, 0)}          # the Ganker, from the other battlefield (§144.3.b)
+
+
+class _Script:
+    """An agent that plays a list of turn actions, then passes, noting the
+    board each time it's asked."""
+
+    def __init__(self, player, actions):
+        self.player, self.actions, self.asked = player, list(actions), []
+
+    def decide_action(self, opponent, cards_played=0):
+        bf = self.gs.battlefields[0]
+        self.asked.append((len(bf.units_A), len(bf.units_B), self.gs.pending_move))
+        return self.actions.pop(0) if self.actions else ("PASS", None, None)
+
+    def decide_showdown_action(self, opponent, bf_idx):
+        return ("PASS", None, None)
+
+    def decide_reaction(self, opponent, chain):
+        return ("PASS", None, None)
+
+
+def test_passing_during_a_move_runs_its_showdown_and_the_turn_goes_on():
+    loop = _loop()
+    a = loop.gs.A
+    loop.gs.battlefields[0].add_unit("B", _unit("Wall", 1))
+    a.base_units.append(_unit("Hero", 3))
+    a.agent = _Script(a, [("MOVE", 0, 2, 0), ("PASS", None, None)])
+    a.agent.gs, a.agent.loop = loop.gs, loop
+    loop._run_main_actions()
+    # Asked: before moving, while the move is held, and once more after the fight.
+    assert a.agent.asked == [(0, 1, None), (1, 1, (0, "A")), (1, 0, None)]
 
 
 def test_legality_offers_one_move_per_ready_unit():

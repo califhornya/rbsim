@@ -48,6 +48,10 @@ def main() -> None:
     ap.add_argument("--pause", type=float, default=10.0, help="Seconds of rest between iterations")
     ap.add_argument("--rest", type=float, default=0.0, help="Seconds of rest after each game")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--coach-dir", type=Path, default=None,
+                    help="Decisions coached in scripts/coach.py (e.g. runs/coach)")
+    ap.add_argument("--coach-fraction", type=float, default=0.1,
+                    help="Share of each batch taken from the coached decisions")
     ap.add_argument("--run-dir", type=Path, required=True)
     ap.add_argument("--resume", action="store_true", help="Continue the run in --run-dir")
     args = ap.parse_args()
@@ -80,7 +84,8 @@ def main() -> None:
         checkpoint=ckpt, log_path=log_path, start_iteration=start, seed=args.seed + start,
         workers=args.workers, eval_every=args.eval_every, eval_games=args.eval_games,
         eval_vs=args.eval_vs,
-        pause=args.pause, rest=args.rest, log=log,
+        pause=args.pause, rest=args.rest, coach_dir=args.coach_dir,
+        coach_fraction=args.coach_fraction, log=log,
     )
     log("done.")
 

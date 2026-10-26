@@ -765,6 +765,28 @@ def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         ctx.actor.hand.append(top)
 
 
+@effect("banish_unit")
+def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Banish an enemy unit at a battlefield with 3 Might or less" (Mel Defiant
+    Soul): off the board into its owner's banishment — it doesn't die (no
+    DEATHKNELL, not to the trash); a token just ceases to exist, its gear goes
+    to the trash."""
+    loop = ctx.loop
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")},
+                                 bias="enemy"):
+        where = loop._locate_unit(unit)
+        if where is None:
+            continue
+        side = where[0]
+        owner = loop.gs.get_player(side)
+        loop._remove_unit_from_play(unit, side)
+        for g in list(unit.gear):
+            loop._to_trash(owner, g)
+        unit.gear.clear()
+        if not unit.is_token:
+            owner.banished.append(unit.card)
+
+
 @effect("banish_self_and_gear")
 def _banish_self_and_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "When an opponent plays a gear, you may banish me to banish it"
@@ -2136,6 +2158,10 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
         return False
     if "might_at_most" in tf and unit.might > int(tf["might_at_most"]):
         return False
+    if tf.get("at_battlefield"):
+        where = ctx.loop._locate_unit(unit)
+        if where is None or where[1] is None:
+            return False
     if "might_at_least" in tf and unit.might < int(tf["might_at_least"]):
         return False
     if tf.get("might_less_than_self"):

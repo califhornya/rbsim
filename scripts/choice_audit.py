@@ -141,31 +141,10 @@ class Audit:
                                  default, loop.gs.turn, _flags(loop, side, options, default)))
         if self.force is not None and k == self.force[0]:
             self.resample = True
-            self.options = [_describe(loop, side, o) for o in options]
+            from riftbound.core.decisions import describe_option
+            self.options = [describe_option(loop, side, o) for o in options]
             return self.force[1]
         return None
-
-
-def _describe(loop, side, option) -> str:
-    """A short label for an option: a unit (whose, Might, where), a card (cost,
-    type), a battlefield, a mode / yes-no."""
-    from riftbound.core.battlefield import Battlefield
-    from riftbound.core.combat import UnitInPlay
-    if isinstance(option, tuple) and option and isinstance(option[-1], UnitInPlay):
-        option = option[-1]                    # (side, unit) in effect moves
-    if isinstance(option, UnitInPlay):
-        where = loop._locate_unit(option)
-        whose = "mine" if where and where[0] == side else "theirs"
-        at = "base" if where and where[1] is None else "bf"
-        return f"{whose} {option.card.name} ({option.might}, {at}{', token' if option.is_token else ''})"
-    if isinstance(option, Battlefield):
-        return f"battlefield {loop.gs.battlefields.index(option)}"
-    if hasattr(option, "cost_energy"):
-        cat = getattr(getattr(option, "category", None), "name", "?")
-        return f"{option.name} ({cat.lower()}, {option.cost_energy or 0} energy)"
-    if isinstance(option, tuple):
-        return str(getattr(option[0], "name", option[0]))
-    return str(getattr(option, "name", option))
 
 
 def _flags(loop, side, options, default) -> tuple:

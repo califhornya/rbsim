@@ -5632,17 +5632,13 @@
         "target": "self"
       },
       {
-        "effect": "spend_buff",
-        "trigger": "activated",
-        "timing": "action",
-        "target": "self"
-      },
-      {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "target": "self",
-        "amount": 4
+        "amount": 4,
+        "cost": {
+          "spend_buff": "self"
+        }
       }
     ]
   },
@@ -6849,21 +6845,15 @@
     "effects": [
       {
         "effect": "ready_unit",
-        "trigger": "activated",
-        "target": "self",
-        "condition": {
-          "type": "you_discarded_card_this_turn"
-        }
+        "trigger": "on_you_discard",
+        "target": "self"
       },
       {
         "effect": "grant_temporary_might",
-        "trigger": "activated",
+        "trigger": "on_you_discard",
         "target": "self",
         "amount": 1,
-        "duration": "this_turn",
-        "condition": {
-          "type": "you_discarded_card_this_turn"
-        }
+        "duration": "this_turn"
       }
     ]
   },
@@ -10524,7 +10514,10 @@
         "trigger": "activated",
         "timing": "reaction",
         "amount": 2,
-        "restriction": "spells_only"
+        "restriction": "spells_only",
+        "cost": {
+          "tap": true
+        }
       }
     ]
   },
@@ -26295,8 +26288,8 @@
       {
         "effect": "empower_self",
         "trigger": "activated",
-        "additional_cost": {
-          "discard_cards": 1
+        "cost": {
+          "discard": 1
         }
       },
       {
@@ -26800,6 +26793,23 @@
         "trigger": "on_move",
         "amount": 1,
         "target": "chosen_unit"
+      },
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 2,
+          "power": 1
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -27558,7 +27568,7 @@
     "cost_energy": 1,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "DEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)\nEMPOWER [1] ([1]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I HAVE +7 [might].",
+    "effect": "DEFLECT (Opponent's must pay [rune] to choose me with a spell or ability.)\nEMPOWER [7] ([7]: Empower me. Use only if not Empowered.)\nEMPOWERED[>] I HAVE +7 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
@@ -27571,7 +27581,7 @@
         "effect": "empower_self",
         "trigger": "activated",
         "cost": {
-          "energy": 1
+          "energy": 7
         }
       },
       {
@@ -27747,11 +27757,8 @@
       },
       {
         "effect": "predict",
-        "trigger": "activated",
-        "amount": 2,
-        "condition": {
-          "type": "this_is_empowered"
-        }
+        "trigger": "on_become_empowered",
+        "amount": 2
       }
     ],
     "variants": [
@@ -28511,6 +28518,13 @@
         "effect": "draw_cards",
         "trigger": "on_play",
         "count": 1
+      },
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "energy": 3
+        }
       }
     ],
     "variants": [
@@ -28593,9 +28607,9 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "activated",
-        "amount": 2,
-        "target": "self"
+        "trigger": "on_readied",
+        "target": "self",
+        "amount": 2
       }
     ],
     "variants": [
@@ -29838,6 +29852,16 @@
           "energy": 2,
           "power": 1
         }
+      },
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_become_empowered",
+        "target": "actor",
+        "filter": "unit",
+        "target_filter": {
+          "energy_at_most": 3,
+          "power_at_most": 1
+        }
       }
     ],
     "variants": [
@@ -30029,14 +30053,20 @@
     ],
     "effects": [
       {
-        "effect": "banish_card",
-        "trigger": "on_play",
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "discard": 1,
+          "discard_type": "spell"
+        }
+      },
+      {
+        "effect": "banish_unit",
+        "trigger": "on_become_empowered",
         "target": "enemy_unit",
         "target_filter": {
-          "might_at_most": 3
-        },
-        "condition": {
-          "type": "this_is_empowered"
+          "might_at_most": 3,
+          "at_battlefield": true
         }
       }
     ],
@@ -30206,12 +30236,9 @@
       },
       {
         "effect": "burn",
-        "trigger": "passive",
+        "trigger": "on_become_empowered",
         "target": "opponent",
-        "amount": 3,
-        "condition": {
-          "type": "this_is_empowered"
-        }
+        "amount": 3
       }
     ],
     "variants": [
@@ -30537,6 +30564,13 @@
     ],
     "effects": [
       {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "kill_other_friendly": true
+        }
+      },
+      {
         "effect": "grant_might",
         "trigger": "passive",
         "target": "self",
@@ -30765,7 +30799,8 @@
         "effect": "empower_self",
         "trigger": "activated",
         "cost": {
-          "power": 3
+          "energy": 3,
+          "power": 1
         }
       }
     ],

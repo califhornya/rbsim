@@ -132,6 +132,13 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
 
     # --- abilities ---
     actions.extend(_ability_actions(loop, ap, side))
+
+    # A move being declared (§144.3): more units may join it, to the same
+    # battlefield; PASS ends it, and its showdown starts (§323.11).
+    pending = gs.pending_move
+    if pending is not None and pending[1] == side:
+        actions = [a for a in actions
+                   if a.kind == "PASS" or (a.kind == "MOVE" and a.dst_lane == pending[0])]
     return actions
 
 
