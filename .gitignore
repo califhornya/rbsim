@@ -39,3 +39,6 @@ riftbound/data/cards/all_cards.json.preimport.bak
 
 # game trace outputs (scripts/trace_game.py)
 *trace*.log
+
+# Training runs (checkpoints, logs)
+runs/
