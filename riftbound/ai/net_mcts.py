@@ -131,8 +131,12 @@ class NetGuidedMCTSAgent(Agent):
                  c_puct: float = 1.5, rng: Optional[random.Random] = None,
                  mulligan_samples: int = 3, reaction_iterations: Optional[int] = None,
                  explore: bool = False, dirichlet_alpha: float = 0.3,
-                 noise_frac: float = 0.25, temperature_moves: int = 10):
+                 noise_frac: float = 0.25, temperature_moves: int = 10,
+                 pass_margin: float = 0.02):
         super().__init__(player)
+        # A move whose searched value isn't at least this much above passing's
+        # (values in [-1, 1]: 0.02 = 1 point of win chance) isn't played.
+        self.pass_margin = pass_margin
         self.net = net
         self.iterations = iterations
         # Showdown / reaction decisions search one ply: a quarter of the budget.
@@ -258,11 +262,23 @@ class NetGuidedMCTSAgent(Agent):
         if self.explore and self._decisions <= self.temperature_moves:
             key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
         else:
-            key = max(items, key=lambda kv: kv[1].N)[0]
+            key = self.prefer_pass(root, max(items, key=lambda kv: kv[1].N)[0])
         action, force = _split_key(key)
         if force is not None:
             self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
         return action
+
+    def prefer_pass(self, root: _Node, key):
+        """PASS instead of `key` when `key` isn't clearly better: a free-looking
+        move can spend what the opponent's turn needs (Shen's legend tapped for a
+        TANK nobody fights with, energy a reaction would want). Not while a move
+        is held: PASS then starts its showdown (it isn't "do nothing")."""
+        p = root.children.get(_PASS)
+        best = root.children.get(key)
+        if key == _PASS or p is None or best is None or not p.N or not best.N \
+                or getattr(self.gs, "pending_move", None) is not None:
+            return key
+        return _PASS if best.W / best.N - p.W / p.N < self.pass_margin else key
 
     def _add_noise(self, node: _Node) -> None:
         """Dirichlet noise on a root's priors, so self-play also tries what the

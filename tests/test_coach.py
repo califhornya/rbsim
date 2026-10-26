@@ -178,3 +178,39 @@ def test_the_log_tells_a_battlefield_discard_and_draw():
     lines = [t for _, t in _board_events(before, Observation.from_state(gs, "A").to_dict())]
     assert any(t.startswith("Scarti ") for t in lines) and any(t.startswith("Peschi ") for t in lines)
     assert "Ora controlli Zaun Warrens" in lines
+
+
+def test_the_net_passes_when_its_move_isnt_clearly_better():
+    from types import SimpleNamespace
+    from riftbound.ai.net_mcts import _PASS, NetGuidedMCTSAgent, _Node
+    agent = NetGuidedMCTSAgent(SimpleNamespace(name="A"), RiftboundNet(), iterations=1)
+    agent.gs = SimpleNamespace(pending_move=None)
+
+    def node(n, q):
+        x = _Node()
+        x.N, x.W = n, n * q
+        return x
+    tank = ("ABILITY", "ACTIVATED", 0)
+    root = _Node()
+    root.children = {tank: node(70, 0.10), _PASS: node(10, 0.095)}   # a free TANK nobody uses
+    assert agent.prefer_pass(root, tank) == _PASS
+    root.children[tank] = node(70, 0.20)                             # clearly better: play it
+    assert agent.prefer_pass(root, tank) == tank
+    root.children[tank] = node(70, 0.10)
+    agent.gs.pending_move = (0, "A")                                 # PASS would start a showdown
+    assert agent.prefer_pass(root, tank) == tank
+
+
+def test_the_log_says_where_burned_cards_come_from():
+    from riftbound.ai.coach import _board_events
+    from riftbound.core.decisions import Observation
+    from riftbound.core.game_factory import build_game
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
+    a = gs.A
+    a.draw()
+    before = Observation.from_state(gs, "A").to_dict()
+    a.burn(2)
+    a.draw()
+    lines = [t for _, t in _board_events(before, Observation.from_state(gs, "A").to_dict())]
+    assert sum(t.startswith("Dal mazzo al cimitero: ") for t in lines) == 2
+    assert sum(t.startswith("Peschi ") for t in lines) == 1

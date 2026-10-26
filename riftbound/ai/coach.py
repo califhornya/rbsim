@@ -372,23 +372,39 @@ def _board_events(prev: Optional[dict], cur: dict) -> list:
                 out.append((who, f"{whose} {name} è morta"))
             for _ in range(n - dead):
                 out.append((who, f"{whose} {name} ha lasciato il tavolo"))
-        # Cards drawn and cards gone to the trash otherwise (discards, spells).
+        # Cards drawn, and cards gone to the trash otherwise: discards, spells,
+        # the top of the deck (BURN, e.g. Shadow Temple's "When you hold here").
         deck = "my_deck_count" if who == "me" else "opp_deck_count"
-        drawn = prev[deck] - cur[deck]
+        left_deck = max(0, prev[deck] - cur[deck])
         if who == "me":
             left_hand = Counter(prev["my_hand"]) - Counter(cur["my_hand"])
-            for name in sorted((+to_trash).elements()):
-                # A spell leaving the hand was cast (its move is logged) or discarded.
-                out.append(("me", f"Scarti {name}" if left_hand[name] and not _is_spell(name)
-                            else f"{name} va nel tuo cimitero"))
             new = sorted((Counter(cur["my_hand"]) - Counter(prev["my_hand"])).elements())
-            if drawn > 0:
-                out.append(("me", f"Peschi {', '.join(new[:drawn])}" if new else
-                            f"Peschi {drawn} cart{'a' if drawn == 1 else 'e'}"))
-        else:
+            drawn = min(left_deck, len(new))
+            burned = left_deck - drawn
             for name in sorted((+to_trash).elements()):
-                out.append(("opp", f"{name} va nel cimitero avversario"))
-            if drawn > 0:
+                if left_hand[name]:
+                    # A spell leaving the hand was cast (its move is logged) or discarded.
+                    left_hand[name] -= 1
+                    out.append(("me", f"{name} va nel tuo cimitero" if _is_spell(name)
+                                else f"Scarti {name}"))
+                elif burned > 0:
+                    burned -= 1
+                    out.append(("me", f"Dal mazzo al cimitero: {name}"))
+                else:
+                    out.append(("me", f"{name} va nel tuo cimitero"))
+            if drawn:
+                out.append(("me", f"Peschi {', '.join(new[:drawn])}"))
+        else:
+            gained = max(0, cur["opp_hand_count"] - prev["opp_hand_count"])
+            drawn = min(left_deck, gained) if gained else 0
+            burned = left_deck - drawn
+            for name in sorted((+to_trash).elements()):
+                if burned > 0:
+                    burned -= 1
+                    out.append(("opp", f"Dal mazzo avversario al cimitero: {name}"))
+                else:
+                    out.append(("opp", f"{name} va nel cimitero avversario"))
+            if drawn:
                 out.append(("opp", f"L'avversario pesca {drawn} cart{'a' if drawn == 1 else 'e'}"))
     return out
 
@@ -517,6 +533,9 @@ class CoachAgent(NetGuidedMCTSAgent):
         infos = [action_info(self.loop, side, side, point, t) for t in tuples]
         total = sum(c.N for c in root.children.values()) or 1
         ranked = sorted(root.children.items(), key=lambda kv: -kv[1].N)[:3]
+        if ranked and self.prefer_pass(root, ranked[0][0]) == _PASS and ranked[0][0] != _PASS:
+            # The net would pass: its top move isn't clearly better (prefer_pass).
+            ranked = [(_PASS, root.children[_PASS])] + [kv for kv in ranked if kv[0] != _PASS][:2]
         suggestions = []
         for key, child in ranked:
             action, force = _split_key(key)
