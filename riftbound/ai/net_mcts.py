@@ -13,6 +13,15 @@ training loop (next chunk) will feed the visit distributions back as policy targ
 Requires the optional `rl` extra (torch), via `net.py`. Search focuses on the main
 turn action (like ISMCTS); mulligan/showdown/reaction stay simple in v1 (documented
 deferrals — folding them into the learned policy is later work).
+
+**Choices inside an action** (a spell's target, a mode, the unit an Equipment
+goes on, which enemy combat damage kills first, a "you may"...; GameLoop.choose)
+are searched too: the first time a child action is tried, the player's first
+choice of a SEARCH_CHOICES kind it meets splits that child into one child per
+option (the action's prior shared out), each later tried with that option
+forced. The value of the position each leads to decides, as for actions; the
+chosen variant's option is then forced in the real game (_ForcedChoice). The
+policy target counts all variants of an action as that action.
 """
 
 from __future__ import annotations
@@ -37,6 +46,64 @@ from riftbound.core.legality import legal_actions
 
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
+
+# The GameLoop.choose kinds the search branches on (by prefix): ones the player
+# sees, so a determinized copy offers the same options in the same order.
+# Hidden ones (dig and predict look at the deck) and the Power domain (six
+# options, rarely mattering) keep their baseline.
+SEARCH_CHOICES = ("target:", "mode", "equip", "combat_damage_order", "cost_unit:",
+                  "destination", "optional:", "deploy", "discard")
+_MAX_VARIANTS = 6
+
+
+def _searchable(kind: str, side: str, me: str, n: int) -> bool:
+    return side == me and n > 1 and kind.startswith(SEARCH_CHOICES)
+
+
+def _split_key(key) -> tuple:
+    """A child key is an engine action tuple, or (action, (kind, n, option)) for
+    one variant of an action's choice. -> (action, force or None)."""
+    if key and isinstance(key[0], tuple):
+        return key[0], key[1]
+    return key, None
+
+
+class _ChoiceProbe:
+    """Chooser for one action applied in the search: records the first choice
+    `me` makes of a searched kind, as (kind, n options, baseline index), and
+    with `force` = (kind, n, j) takes option j there if it is that choice."""
+
+    def __init__(self, me: str, force=None):
+        self.me, self.force, self.first = me, force, None
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if self.first is not None or not _searchable(kind, side, self.me, len(options)):
+            return None
+        self.first = (kind, len(options), default)
+        if self.force is not None and tuple(self.force[:2]) == (kind, len(options)):
+            return self.force[2]
+        return None
+
+
+class _ForcedChoice(_ChoiceProbe):
+    """The searched option, forced in the real game for the action just
+    returned: fires at the player's first searched choice, then puts the loop's
+    previous chooser back; any other choice goes to that chooser."""
+
+    def __init__(self, me: str, force, loop, previous):
+        super().__init__(me, force)
+        self.loop, self.previous = loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if self.first is None and _searchable(kind, side, self.me, len(options)):
+            pick = super().__call__(loop, kind, side, options, default, source)
+            self.release()
+            return pick
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        if self.loop.chooser is self:
+            self.loop.chooser = self.previous
 
 
 class _Node:
@@ -125,8 +192,15 @@ class NetGuidedMCTSAgent(Agent):
 
     # -- search --------------------------------------------------------------
 
+    def _release_forced(self) -> None:
+        """A forced choice the last action never reached doesn't outlive it."""
+        chooser = getattr(getattr(self, "loop", None), "chooser", None)
+        if isinstance(chooser, _ForcedChoice) and chooser.me == self.player.name:
+            chooser.release()
+
     def decide_action(self, opponent, cards_played: int = 0) -> Action:
         self._ensure_rng()
+        self._release_forced()
         side = self.player.name
         root_legal = legal_actions(self.loop, DecisionPoint.TURN_ACTION, side)
         if len(root_legal) <= 1:
@@ -142,15 +216,18 @@ class NetGuidedMCTSAgent(Agent):
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None:
             self._record_example(side, root_legal)
-        # Most-visited action (AlphaZero's move choice).
-        best = max(root.children.items(), key=lambda kv: kv[1].N)[0]
-        return best
+        # Most-visited action (AlphaZero's move choice), with its searched option.
+        action, force = _split_key(max(root.children.items(), key=lambda kv: kv[1].N)[0])
+        if force is not None:
+            self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
+        return action
 
     def _record_example(self, side: str, root_legal: list) -> None:
         """Append (state, MCTS visit policy, legal mask, player) for training."""
         obs = Observation.from_state(self.gs, side)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
-        for a_tuple, share in self.last_visits.items():
+        for key, share in self.last_visits.items():
+            a_tuple, _force = _split_key(key)
             idx = action_to_index(a_tuple)
             if idx is not None:
                 policy[idx] += share
@@ -203,20 +280,26 @@ class NetGuidedMCTSAgent(Agent):
                 value = v
                 break
 
-            action = self._puct_select(node, [a.to_engine() for a in legal_ga])
-            if action is None:
+            key = self._puct_select(node, [a.to_engine() for a in legal_ga])
+            if key is None:
                 value = self._net_value(clone, side)
                 break
-            path.append(node.children[action])
-            if action == _PASS:
+            if key == _PASS:
                 # Stop-here: evaluate the position where we choose to end acting.
+                path.append(node.children[key])
                 value = self._net_value(clone, side)
                 break
-            ap = clone.get_player(side)
-            loop._apply_action(ap, action, cards_played_this_turn=cpt)
+            action, force = _split_key(key)
+            probe = _ChoiceProbe(side, force)
+            loop.chooser = probe
+            loop._apply_action(clone.get_player(side), action, cards_played_this_turn=cpt)
+            loop.chooser = None
             loop._recompute_passives()
             cpt += 1
-            node = node.children[action]
+            if force is None and probe.first is not None:
+                key = self._split_child(node, action, probe.first)
+            node = node.children[key]
+            path.append(node)
         else:
             value = self._net_value(clone, side)
 
@@ -224,11 +307,25 @@ class NetGuidedMCTSAgent(Agent):
             n.N += 1
             n.W += value
 
+    @staticmethod
+    def _split_child(node: _Node, action, first) -> tuple:
+        """The action met a choice: one child per option (at most _MAX_VARIANTS:
+        the baseline's and the first others), sharing the action's prior; the
+        baseline's keeps the existing child. Returns that child's key."""
+        kind, n, default = first
+        options = [default] + [j for j in range(n) if j != default][:_MAX_VARIANTS - 1]
+        child, prior = node.children.pop(action), node.P.pop(action, 0.0)
+        for j in options:
+            key = (action, (kind, n, j))
+            node.children[key] = child if j == default else _Node()
+            node.P[key] = prior / len(options)
+        return (action, (kind, n, default))
+
     def _puct_select(self, node: _Node, legal: list):
-        """PUCT over children that are currently legal:
-        argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
+        """PUCT over children that are currently legal (a choice variant when its
+        action is):  argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
         legal_set = set(legal)
-        candidates = [(a, c) for a, c in node.children.items() if a in legal_set]
+        candidates = [(a, c) for a, c in node.children.items() if _split_key(a)[0] in legal_set]
         if not candidates:
             return None
         sqrt_total = math.sqrt(max(1, node.N))
@@ -250,6 +347,7 @@ class NetGuidedMCTSAgent(Agent):
         learns that a dead card in hand loses, it learns to mulligan it (e.g.
         Nocturne). Averaged over a few determinized draws to cut variance."""
         self._ensure_rng()
+        self._release_forced()
         side = self.player.name
         n = len(self.player.hand)
         if n == 0:
