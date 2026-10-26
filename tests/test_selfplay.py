@@ -57,3 +57,14 @@ def test_run_training_smoke(tmp_path):
                  train_steps=2, batch_size=4, checkpoint=ckpt, seed=0,
                  device=torch.device("cpu"), log=lambda *a, **k: None)
     assert ckpt.exists()
+
+
+def test_a_stop_file_ends_the_run(tmp_path):
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    (tmp_path / "STOP").write_text("")
+    logs = []
+    run_training(net, KENNEN, ORNN, iterations=3, games_per_iter=1, mcts_iters=2,
+                 train_steps=1, batch_size=4, checkpoint=tmp_path / "net.pt", seed=0,
+                 device=torch.device("cpu"), log=logs.append)
+    assert sum(1 for line in logs if line.startswith("[iter")) == 1

@@ -13,7 +13,8 @@ thread each; riftbound/compute.py), with --pause seconds between iterations, so
 the machine keeps plenty of headroom. Every --eval-every iterations the net plays
 --eval-games games against each --eval-vs agent (simple_trade, and random as a
 sanity check). The run directory holds the checkpoint (net.pt) and one JSON line
-per iteration (log.jsonl); --resume continues it.
+per iteration (log.jsonl); --resume continues it. A file named STOP in the run
+directory ends the run after the current iteration, everything saved.
 """
 from __future__ import annotations
 
