@@ -797,6 +797,21 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             owner.banished.append(unit.card)
 
 
+@effect("banish_or_return")
+def _banish_or_return(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """Wind and Ghosts: "Choose a unit at a battlefield. If it has 3 [might] or
+    less, banish it. Otherwise, return it to its owner's hand." One choice
+    (baseline: an enemy), then the outcome by its Might."""
+    limit = int(spec.get("might_at_most", 3))
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "chosen_unit")},
+                                 bias="enemy"):
+        ctx.extra["it"] = [unit]
+        if unit.might <= limit:
+            _banish_unit(ctx, {"target": "it"})
+        else:
+            _recall_unit(ctx, {"target": "it"})
+
+
 @effect("banish_self_and_gear")
 def _banish_self_and_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "When an opponent plays a gear, you may banish me to banish it"
@@ -2420,18 +2435,30 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
 
 @effect("kill_unit")
 def _kill_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    dead = []
+    dead_at: dict = {}   # id(bf or None for a base) -> (bf, [(unit, side)])
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
-        # The owner is found per unit so both-sides targets route each card to
-        # the right trash.
-        for side in ("A", "B"):
-            units = _bf_units(ctx, side)
-            if unit in units:
-                units.remove(unit)
-                dead.append((unit, side))
-                break
+        # Wherever it is ("Kill a unit": a base too); the owner per unit so
+        # both-sides targets route each card to the right trash.
+        where = _take_off_board(ctx, unit)
+        if where is not None:
+            side, bf = where
+            dead_at.setdefault(id(bf), (bf, []))[1].append((unit, side))
     # They die together: replacements, DEATHKNELL, "when a friendly unit dies".
-    ctx.loop._route_deaths(dead, ctx.battlefield, killer=(ctx.actor_side, ctx.card))
+    for bf, dead in dead_at.values():
+        ctx.loop._route_deaths(dead, bf or ctx.battlefield, in_base=bf is None,
+                               killer=(ctx.actor_side, ctx.card))
+
+
+def _take_off_board(ctx: "EffectContext", unit):
+    """Remove `unit` from wherever it is, its battlefield or its base: its
+    (side, battlefield or None for a base), or None if it isn't on the board."""
+    where = ctx.loop._locate_unit(unit)
+    if where is None:
+        return None
+    side, bf = where
+    zone = ctx.loop.gs.get_player(side).base_units if bf is None else bf._units_for(side)
+    zone.remove(unit)
+    return where
 
 
 def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
@@ -2521,18 +2548,17 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     unit" (Rebuke, Gust): an enemy first."""
     gs = ctx.loop.gs
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}, bias="enemy"):
-        for side in ("A", "B"):
-            units = _bf_units(ctx, side)
-            if unit in units:
-                units.remove(unit)
-                owner = gs.get_player(side)
-                owner.base_gear.extend(unit.gear)
-                unit.gear = []
-                if not getattr(unit, "is_token", False):
-                    owner.hand.append(unit.card)
-                # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
-                ctx.loop._fire_leaves_board(unit.card, side, ctx.battlefield)
-                break
+        where = _take_off_board(ctx, unit)          # a base or any battlefield
+        if where is None:
+            continue
+        side, bf = where
+        owner = gs.get_player(side)
+        owner.base_gear.extend(unit.gear)
+        unit.gear = []
+        if not getattr(unit, "is_token", False):
+            owner.hand.append(unit.card)
+        # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
+        ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
 
 
 def _units_at(ctx: "EffectContext", side: str, where: str) -> list:

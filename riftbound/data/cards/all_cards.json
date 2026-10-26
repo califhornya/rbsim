@@ -30101,13 +30101,12 @@
     ],
     "effects": [
       {
-        "effect": "banish_card",
+        "effect": "banish_or_return",
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "target_filter": {
-          "might_at_most": 3
-        }
+        "where": "battlefield",
+        "might_at_most": 3
       }
     ],
     "variants": [
@@ -36632,9 +36631,10 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "banish_card",
+        "effect": "banish_unit",
         "trigger": "on_cast",
         "target": "chosen_unit",
+        "where": "anywhere",
         "target_filter": {
           "might_at_most": 3
         }
@@ -37044,10 +37044,9 @@
     ],
     "effects": [
       {
-        "effect": "banish_card",
+        "effect": "banish_unit",
         "trigger": "on_play",
-        "target": "enemy_unit",
-        "from": "board"
+        "target": "chosen_unit"
       }
     ],
     "variants": [

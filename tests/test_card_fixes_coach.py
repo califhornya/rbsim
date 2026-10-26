@@ -363,3 +363,32 @@ def test_an_ability_timing_is_not_a_card_keyword():
     assert _use(loop, "Zed Without a Sound")
     assert zed in loop.gs.battlefields[1].units_A and clone in a.base_units
     assert a.energy == 8 and a.power_pool.get(Domain.CHAOS, 0) == 1
+
+
+def test_wind_and_ghosts_banishes_a_small_unit_and_returns_a_big_one():
+    """It banished a card from the caster's own trash (banish_card is the zone
+    effect) instead of a unit at a battlefield."""
+    for might, banished in ((3, True), (5, False)):
+        loop, a, _ = _setup()
+        a.trash = [UnitCard(name="Mine")]
+        target = UnitInPlay(card=UnitCard(name="Target", might=might))
+        loop.gs.battlefields[1].add_unit("B", target)
+        card = CARD_REGISTRY["Wind and Ghosts"].instantiate()
+        loop._resolve_card_effects(card, loop.gs.battlefields[0], a, loop.gs.B)
+        assert not loop.gs.battlefields[1].units_B and [c.name for c in a.trash] == ["Mine"]
+        assert ([c.name for c in loop.gs.B.banished] == ["Target"]) == banished
+        assert ([c.name for c in loop.gs.B.hand] == ["Target"]) == (not banished)
+
+
+def test_return_and_kill_reach_a_unit_in_base():
+    """recall_unit / kill_unit only looked at the effect's battlefield: a unit
+    "anywhere" (Retreat: "Return a friendly unit to its owner's hand") stayed."""
+    loop, a, _ = _setup()
+    mine = UnitInPlay(card=UnitCard(name="Mine", might=2))
+    a.base_units.append(mine)
+    loop._resolve_card_effects(CARD_REGISTRY["Retreat"].instantiate(), loop.gs.battlefields[0], a, loop.gs.B)
+    assert mine not in a.base_units and [c.name for c in a.hand] == ["Mine"]
+    theirs = UnitInPlay(card=UnitCard(name="Theirs", might=2))
+    loop.gs.B.base_units.append(theirs)
+    loop._resolve_card_effects(CARD_REGISTRY["Vengeance"].instantiate(), loop.gs.battlefields[0], a, loop.gs.B)
+    assert theirs not in loop.gs.B.base_units and [c.name for c in loop.gs.B.trash] == ["Theirs"]
