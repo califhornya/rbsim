@@ -279,3 +279,36 @@ def test_a_suggested_move_names_the_unit_it_moves():
     seen = _choice_preview(gs, "A", ("SPELL", 0, 1), ("destination:move_unit", 2, 1), 0)
     assert seen["text"].startswith("bersaglio: Shadow Order Disciple (tua")
     assert seen["text"].endswith("verso: campo 2") and seen["ref"] == "bf:1"
+
+
+def test_the_advice_names_the_card_of_a_you_may_and_banishes_are_logged():
+    """ "Fatto: parte lo showdown" carried Shadow Clone's "you may banish a unit
+    from your trash" (searched in the combat it starts) as a bare "Usare questo
+    effetto? Sì"; the banished card wasn't in the log either."""
+    import random
+    from riftbound.ai.coach import _board_events, _choice_preview
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.decisions import Observation
+    from riftbound.core.loop import GameLoop
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    gs.active = "A"
+    loop = GameLoop(gs)
+    a.trash = [CARD_REGISTRY["Punching Poro"].instantiate()]
+    gs.battlefields[0].add_unit("B", UnitInPlay(card=UnitCard(name="Wall", might=3)))
+    clone = UnitInPlay(card=CARD_REGISTRY["Shadow Clone"].instantiate(), ready=True)
+    clone.is_token = True
+    a.base_units.append(clone)
+    loop._apply_action(a, ("MOVE", 0, 2, 0))                 # held: the showdown waits
+    seen = _choice_preview(gs, "A", ("PASS", None, None), ("optional:give_temporary_assault", 2, 0), 0)
+    assert seen["text"] == "Shadow Clone: Usare questo effetto? Sì"
+    before = Observation.from_state(gs, "A").to_dict()
+    loop._apply_action(a, ("PASS", None, None))
+    lines = [t for _, t in _board_events(before, Observation.from_state(gs, "A").to_dict())]
+    assert "Bandita una tua carta: Punching Poro" in lines

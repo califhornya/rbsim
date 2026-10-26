@@ -307,8 +307,11 @@ def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
         if not seen and s == side and (kind, len(options)) == tuple(force[:2]):
             opt = options[force[2]]
             head = kind.partition(":")[0]
-            text = f"{question(kind)} {option_text(clone, side, opt)}" if head == "optional" \
-                else f"{_SHORT.get(head, 'scelta')}: {option_text(clone, side, opt)}"
+            # "you may" of a card that isn't the move's (Shadow Clone attacking
+            # when the showdown starts): name the card.
+            name = getattr(source, "name", None)
+            text = f"{name + ': ' if name else ''}{question(kind)} {option_text(clone, side, opt)}" \
+                if head == "optional" else f"{_SHORT.get(head, 'scelta')}: {option_text(clone, side, opt)}"
             seen.update(text=", ".join(targets + [text]), ref=option_ref(clone, side, opt))
             return force[2]
         if not seen and s == side and kind.startswith("target"):
@@ -406,6 +409,10 @@ def _board_events(prev: Optional[dict], cur: dict) -> list:
                 out.append((who, f"{whose} {name} è morta"))
             for _ in range(n - dead):
                 out.append((who, f"{whose} {name} ha lasciato il tavolo"))
+        # Banished (Shadow Clone's cost: a unit from your trash; a FLOW spell).
+        banished = "my_banished" if who == "me" else "opp_banished"
+        for name in sorted((Counter(cur[banished]) - Counter(prev[banished])).elements()):
+            out.append((who, f"Bandita {'una tua carta' if who == 'me' else 'una carta avversaria'}: {name}"))
         # Cards drawn, and cards gone to the trash otherwise: discards, spells,
         # the top of the deck (BURN, e.g. Shadow Temple's "When you hold here").
         deck = "my_deck_count" if who == "me" else "opp_deck_count"
@@ -603,6 +610,7 @@ class CoachAgent(NetGuidedMCTSAgent):
                                 "text": infos[i]["text"] + (f" → {choice['text']}" if choice else ""),
                                 "choice": choice.get("text"), "choice_ref": choice.get("ref")})
         answer = self.session.ask_decision(point, side, infos, suggestions, self._context(point, bf_idx))
+        force = None
         if "suggestion" in answer:
             action, force = _split_key(suggestions[int(answer["suggestion"])]["key"])
             # The net's searched choice is forced; the other choices inside the
@@ -617,11 +625,15 @@ class CoachAgent(NetGuidedMCTSAgent):
             best = _split_key(suggestions[0]["key"])[0] if suggestions else None
             corrected = action != best
         auto = bool(answer.get("auto"))      # the net finishing the game on its own
-        if action != _PASS:
+        if action != _PASS or force is not None:
+            # A suggestion taken says the choice it makes too ("Fatto: parte lo
+            # showdown → Shadow Clone: Usare questo effetto? Sì").
             i = tuples.index(action)
+            text = suggestions[int(answer["suggestion"])]["text"] if force is not None \
+                else infos[i]["text"]
             note = " (la rete, da sola)" if auto else "" if not suggestions else \
                 " (diversa dalla rete)" if corrected else " (come la rete)"
-            self.session.event("me", infos[i]["text"] + note, move=True)
+            self.session.event("me", text + note, move=True)
         if not auto:
             self.session.record(self.gs, side, legal, action, corrected)
         return action
@@ -832,7 +844,8 @@ class CoachSession:
             return default
         pick = int(answer.get("option", default))
         if 0 <= pick < len(options):
-            self.event("me", f"{question(kind)} → {options[pick]['text']}", move=True)
+            self.event("me", f"{source + ': ' if source else ''}{question(kind)} → {options[pick]['text']}",
+                       move=True)
         return pick
 
     # -- the page's side ---------------------------------------------------------
