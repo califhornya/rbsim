@@ -11,8 +11,9 @@ Each game draws two decks from --decks (mirrors included). Games run in
 --workers processes (default: a quarter of the cores, below-normal priority, one
 thread each; riftbound/compute.py), with --pause seconds between iterations, so
 the machine keeps plenty of headroom. Every --eval-every iterations the net plays
---eval-games games against simple_trade. The run directory holds the checkpoint
-(net.pt) and one JSON line per iteration (log.jsonl); --resume continues it.
+--eval-games games against each --eval-vs agent (simple_trade, and random as a
+sanity check). The run directory holds the checkpoint (net.pt) and one JSON line
+per iteration (log.jsonl); --resume continues it.
 """
 from __future__ import annotations
 
@@ -37,7 +38,8 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=None,
                     help="Game processes (default: a quarter of the cores; 0: this process)")
     ap.add_argument("--eval-every", type=int, default=5)
-    ap.add_argument("--eval-games", type=int, default=20)
+    ap.add_argument("--eval-games", type=int, default=20, help="Games against each --eval-vs agent")
+    ap.add_argument("--eval-vs", nargs="+", default=["simple_trade", "random"])
     ap.add_argument("--pause", type=float, default=10.0, help="Seconds of rest between iterations")
     ap.add_argument("--rest", type=float, default=0.0, help="Seconds of rest after each game")
     ap.add_argument("--seed", type=int, default=0)
@@ -71,6 +73,7 @@ def main() -> None:
         batch_size=args.batch_size, lr=args.lr, buffer_size=args.buffer_size,
         checkpoint=ckpt, log_path=log_path, start_iteration=start, seed=args.seed + start,
         workers=args.workers, eval_every=args.eval_every, eval_games=args.eval_games,
+        eval_vs=args.eval_vs,
         pause=args.pause, rest=args.rest, log=log,
     )
     log("done.")
