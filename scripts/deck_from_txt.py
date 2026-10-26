@@ -70,6 +70,7 @@ def parse_txt(text: str):
         if not s:
             continue
         low = s.lower().rstrip(":")
+        low = "rune pool" if low == "runes" else low     # "Runes:" in some exports
         if low in _SECTIONS:
             section = low
             continue

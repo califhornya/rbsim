@@ -10,9 +10,20 @@ clone (hidden opponent info resampled per iteration, as in ISMCTS), then plays t
 **most-visited** root action. This is the search half of AlphaZero; the self-play
 training loop (next chunk) will feed the visit distributions back as policy targets.
 
-Requires the optional `rl` extra (torch), via `net.py`. Search focuses on the main
-turn action (like ISMCTS); mulligan/showdown/reaction stay simple in v1 (documented
-deferrals — folding them into the learned policy is later work).
+Requires the optional `rl` extra (torch), via `net.py`. The main turn is searched
+over the player's actions until the turn passes; a decision in a showdown or on an
+open chain gets a one-ply search (`_search_now`: each option played until the chain
+and the showdown settle, both players then passing); the mulligan compares the
+net's value of each keep.
+
+**Choices inside an action** (a spell's target, a mode, the unit an Equipment
+goes on, which enemy combat damage kills first, a "you may"...; GameLoop.choose)
+are searched too: the first time a child action is tried, the player's first
+choice of a SEARCH_CHOICES kind it meets splits that child into one child per
+option (the action's prior shared out), each later tried with that option
+forced. The value of the position each leads to decides, as for actions; the
+chosen variant's option is then forced in the real game (_ForcedChoice). The
+policy target counts all variants of an action as that action.
 """
 
 from __future__ import annotations
@@ -38,6 +49,65 @@ from riftbound.core.legality import legal_actions
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
 
+# The GameLoop.choose kinds the search branches on (by prefix): ones the player
+# sees, so a determinized copy offers the same options in the same order.
+# Hidden ones (dig and predict look at the deck) and the Power domain (six
+# options, rarely mattering) keep their baseline.
+SEARCH_CHOICES = ("target:", "mode", "equip", "combat_damage_order", "cost_unit:",
+                  "destination", "optional:", "deploy", "discard")
+_MAX_VARIANTS = 6
+
+
+def _searchable(kind: str, side: str, me: str, n: int) -> bool:
+    return side == me and n > 1 and kind.startswith(SEARCH_CHOICES)
+
+
+def _split_key(key) -> tuple:
+    """A child key is an engine action tuple, or (action, (kind, n, option)) for
+    one variant of an action's choice. -> (action, force or None)."""
+    if key and isinstance(key[0], tuple):
+        return key[0], key[1]
+    return key, None
+
+
+class _ChoiceProbe:
+    """Chooser for one action applied in the search: records the first choice
+    `me` makes of a searched kind, as (kind, n options, baseline index), and
+    with `force` = (kind, n, j) takes option j there if it is that choice."""
+
+    def __init__(self, me: str, force=None):
+        self.me, self.force, self.first = me, force, None
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if self.first is not None or not _searchable(kind, side, self.me, len(options)):
+            return None
+        self.first = (kind, len(options), default)
+        if self.force is not None and tuple(self.force[:2]) == (kind, len(options)):
+            return self.force[2]
+        return None
+
+
+class _ForcedChoice(_ChoiceProbe):
+    """The searched option, forced in the real game for the action just
+    returned: fires at the player's first choice of that kind and number of
+    options, then puts the loop's previous chooser back; any other choice goes
+    to that chooser."""
+
+    def __init__(self, me: str, force, loop, previous):
+        super().__init__(me, force)
+        self.loop, self.previous = loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if _searchable(kind, side, self.me, len(options)) and \
+                tuple(self.force[:2]) == (kind, len(options)):
+            self.release()
+            return self.force[2]
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        if self.loop.chooser is self:
+            self.loop.chooser = self.previous
+
 
 class _Node:
     __slots__ = ("N", "W", "P", "children", "expanded", "value")
@@ -56,13 +126,25 @@ class NetGuidedMCTSAgent(Agent):
 
     def __init__(self, player, net: RiftboundNet, iterations: int = 100,
                  c_puct: float = 1.5, rng: Optional[random.Random] = None,
-                 mulligan_samples: int = 3):
+                 mulligan_samples: int = 3, reaction_iterations: Optional[int] = None,
+                 explore: bool = False, dirichlet_alpha: float = 0.3,
+                 noise_frac: float = 0.25, temperature_moves: int = 10):
         super().__init__(player)
         self.net = net
         self.iterations = iterations
+        # Showdown / reaction decisions search one ply: a quarter of the budget.
+        self.reaction_iterations = reaction_iterations or max(8, iterations // 4)
         self.c_puct = c_puct
         self.mulligan_samples = mulligan_samples
         self._rng = rng
+        # Self-play exploration (AlphaZero): Dirichlet noise on the root priors,
+        # and for the first `temperature_moves` searched decisions an action
+        # drawn in proportion to its visits instead of the most visited.
+        self.explore = explore
+        self.dirichlet_alpha = dirichlet_alpha
+        self.noise_frac = noise_frac
+        self.temperature_moves = temperature_moves
+        self._decisions = 0
         # Last root visit distribution (action_tuple -> visit share), for the
         # self-play trainer's policy target and for debugging.
         self.last_visits: dict = {}
@@ -125,8 +207,15 @@ class NetGuidedMCTSAgent(Agent):
 
     # -- search --------------------------------------------------------------
 
+    def _release_forced(self) -> None:
+        """A forced choice the last action never reached doesn't outlive it."""
+        chooser = getattr(getattr(self, "loop", None), "chooser", None)
+        if isinstance(chooser, _ForcedChoice) and chooser.me == self.player.name:
+            chooser.release()
+
     def decide_action(self, opponent, cards_played: int = 0) -> Action:
         self._ensure_rng()
+        self._release_forced()
         side = self.player.name
         root_legal = legal_actions(self.loop, DecisionPoint.TURN_ACTION, side)
         if len(root_legal) <= 1:
@@ -142,15 +231,40 @@ class NetGuidedMCTSAgent(Agent):
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None:
             self._record_example(side, root_legal)
-        # Most-visited action (AlphaZero's move choice).
-        best = max(root.children.items(), key=lambda kv: kv[1].N)[0]
-        return best
+        return self._play(root, side)
+
+    def _play(self, root: _Node, side: str) -> Action:
+        """The root child to play: the most visited (AlphaZero's move choice), or
+        early in an exploring game one drawn in proportion to its visits; its
+        searched option is forced in the real game."""
+        self._decisions += 1
+        items = [(k, c) for k, c in root.children.items() if c.N > 0] or list(root.children.items())
+        if self.explore and self._decisions <= self.temperature_moves:
+            key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
+        else:
+            key = max(items, key=lambda kv: kv[1].N)[0]
+        action, force = _split_key(key)
+        if force is not None:
+            self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
+        return action
+
+    def _add_noise(self, node: _Node) -> None:
+        """Dirichlet noise on a root's priors, so self-play also tries what the
+        net doesn't (yet) favour."""
+        if not self.explore or len(node.P) < 2:
+            return
+        noise = [self._rng.gammavariate(self.dirichlet_alpha, 1.0) for _ in node.P]
+        total = sum(noise) or 1.0
+        f = self.noise_frac
+        for key, n in zip(list(node.P), noise):
+            node.P[key] = (1 - f) * node.P[key] + f * n / total
 
     def _record_example(self, side: str, root_legal: list) -> None:
         """Append (state, MCTS visit policy, legal mask, player) for training."""
         obs = Observation.from_state(self.gs, side)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
-        for a_tuple, share in self.last_visits.items():
+        for key, share in self.last_visits.items():
+            a_tuple, _force = _split_key(key)
             idx = action_to_index(a_tuple)
             if idx is not None:
                 policy[idx] += share
@@ -200,23 +314,31 @@ class NetGuidedMCTSAgent(Agent):
                 node.children = {t: _Node() for t in priors}
                 node.expanded = True
                 node.value = v
+                if node is root:
+                    self._add_noise(node)
                 value = v
                 break
 
-            action = self._puct_select(node, [a.to_engine() for a in legal_ga])
-            if action is None:
+            key = self._puct_select(node, [a.to_engine() for a in legal_ga])
+            if key is None:
                 value = self._net_value(clone, side)
                 break
-            path.append(node.children[action])
-            if action == _PASS:
+            if key == _PASS:
                 # Stop-here: evaluate the position where we choose to end acting.
+                path.append(node.children[key])
                 value = self._net_value(clone, side)
                 break
-            ap = clone.get_player(side)
-            loop._apply_action(ap, action, cards_played_this_turn=cpt)
+            action, force = _split_key(key)
+            probe = _ChoiceProbe(side, force)
+            loop.chooser = probe
+            loop._apply_action(clone.get_player(side), action, cards_played_this_turn=cpt)
+            loop.chooser = None
             loop._recompute_passives()
             cpt += 1
-            node = node.children[action]
+            if force is None and probe.first is not None:
+                key = self._split_child(node, action, probe.first)
+            node = node.children[key]
+            path.append(node)
         else:
             value = self._net_value(clone, side)
 
@@ -224,11 +346,25 @@ class NetGuidedMCTSAgent(Agent):
             n.N += 1
             n.W += value
 
+    @staticmethod
+    def _split_child(node: _Node, action, first) -> tuple:
+        """The action met a choice: one child per option (at most _MAX_VARIANTS:
+        the baseline's and the first others), sharing the action's prior; the
+        baseline's keeps the existing child. Returns that child's key."""
+        kind, n, default = first
+        options = [default] + [j for j in range(n) if j != default][:_MAX_VARIANTS - 1]
+        child, prior = node.children.pop(action), node.P.pop(action, 0.0)
+        for j in options:
+            key = (action, (kind, n, j))
+            node.children[key] = child if j == default else _Node()
+            node.P[key] = prior / len(options)
+        return (action, (kind, n, default))
+
     def _puct_select(self, node: _Node, legal: list):
-        """PUCT over children that are currently legal:
-        argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
+        """PUCT over children that are currently legal (a choice variant when its
+        action is):  argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
         legal_set = set(legal)
-        candidates = [(a, c) for a, c in node.children.items() if a in legal_set]
+        candidates = [(a, c) for a, c in node.children.items() if _split_key(a)[0] in legal_set]
         if not candidates:
             return None
         sqrt_total = math.sqrt(max(1, node.N))
@@ -250,6 +386,7 @@ class NetGuidedMCTSAgent(Agent):
         learns that a dead card in hand loses, it learns to mulligan it (e.g.
         Nocturne). Averaged over a few determinized draws to cut variance."""
         self._ensure_rng()
+        self._release_forced()
         side = self.player.name
         n = len(self.player.hand)
         if n == 0:
@@ -270,8 +407,92 @@ class NetGuidedMCTSAgent(Agent):
                 best_v, best_combo = v, combo
         return best_combo
 
+    # -- showdown / reaction decisions -----------------------------------------
+
     def decide_showdown_action(self, opponent, bf_idx: int) -> Action:
-        return _PASS
+        return self._search_now(DecisionPoint.SHOWDOWN_ACTION, bf_idx)
 
     def decide_reaction(self, opponent, chain) -> Action:
-        return _PASS
+        return self._search_now(DecisionPoint.REACTION, None)
+
+    def _search_now(self, point: DecisionPoint, bf_idx: Optional[int]) -> Action:
+        """A decision in a showdown (with focus) or on an open chain: one-ply
+        PUCT over the legal actions and their choice variants. Each is played on
+        a determinized copy until things settle (the chain resolved, then the
+        showdown over with its combat, both players passing) and the net's
+        value of that position counts. Free when passing is the only option."""
+        self._ensure_rng()
+        side = self.player.name
+        legal = legal_actions(self.loop, point, side)
+        if len(legal) <= 1:
+            return legal[0].to_engine() if legal else _PASS
+        root = _Node()
+        for _ in range(self.reaction_iterations):
+            self._iterate_now(root, side, point, legal, bf_idx)
+        if not root.children or not any(c.N for c in root.children.values()):
+            return _PASS
+        total = sum(c.N for c in root.children.values()) or 1
+        self.last_visits = {a: c.N / total for a, c in root.children.items()}
+        if self.record is not None:
+            self._record_example(side, legal)
+        return self._play(root, side)
+
+    def _iterate_now(self, root: _Node, side: str, point: DecisionPoint, legal: list,
+                     bf_idx: Optional[int]) -> None:
+        from riftbound.core.loop import GameLoop
+        from riftbound.core.state import determinize
+        clone = self.gs.clone()
+        clone.rng = random.Random(self._rng.randrange(1 << 30))
+        determinize(clone, observer=side, rng=clone.rng)
+        loop = GameLoop(clone)
+        if not root.expanded:
+            priors, value = self._evaluate(clone, side, legal)
+            root.P = priors
+            root.children = {t: _Node() for t in priors}
+            root.expanded = True
+            self._add_noise(root)
+            root.N += 1
+            root.W += value
+            return
+        key = self._puct_select(root, [a.to_engine() for a in legal])
+        if key is None:
+            return
+        action, force = _split_key(key)
+        probe = _ChoiceProbe(side, force)
+        loop.chooser = probe
+        if action != _PASS:
+            player = clone.get_player(side)
+            if point == DecisionPoint.SHOWDOWN_ACTION:
+                loop._showdown_step(player, side, action, bf_idx)
+            else:
+                loop._reaction_step(player, side, action)
+        loop.chooser = None
+        self._settle(loop)
+        value = self._terminal_value(clone, side)
+        if value is None:
+            value = self._net_value(clone, side)
+        if force is None and probe.first is not None:
+            key = self._split_child(root, action, probe.first)
+        child = root.children[key]
+        for n in (root, child):
+            n.N += 1
+            n.W += value
+
+    @staticmethod
+    def _settle(loop) -> None:
+        """Resolve the chain, then end the showdown (combat included), as if
+        both players passed from here."""
+        gs = loop.gs
+        if gs.chain:
+            loop._resolve_chain()
+        if gs.showdown_active and gs.showdown_bf_idx is not None:
+            loop._finish_showdown(gs.showdown_bf_idx, gs.showdown_attacker)
+
+    @staticmethod
+    def _terminal_value(clone, side: str) -> Optional[float]:
+        vs = clone.victory_score
+        if clone.points_A >= vs or clone.points_B >= vs:
+            pa, pb = clone.points_A, clone.points_B
+            win = (pa > pb) if side == "A" else (pb > pa)
+            return 1.0 if win else (-1.0 if pa != pb else 0.0)
+        return None

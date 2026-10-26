@@ -486,9 +486,11 @@ and replays sampled choices with each alternative forced to measure the baseline
   hand / cheapest), the "you may" additional cost is always paid. The audit's
   gains are measured with simple_trade on both seats; near the end of a game a
   small change flips the heuristic opponent's plan, so rare choices are noisy.
-- **Next:** let search / the network make the frequent choices through
-  `choose` (MCTS can branch on them like on actions), starting with equip,
-  damage and Might targets, combat order.
+- [DONE] **The net-guided search makes them** (`net_mcts.SEARCH_CHOICES`): an
+  action's first searched choice splits its child into one per option, the
+  net's value decides, the option is forced in the real game. Only choices
+  made during the player's own actions (not while defending, not hidden ones:
+  dig, predict) and only the first one per action.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
@@ -512,11 +514,28 @@ Progress:
    headless). Verified end-to-end (loss decreases across iterations).
 
 Still to build / tune:
-5. **Scale + tune the training** on a rented GPU box (more games/iters/MCTS sims,
-   LR schedule, larger net, eval vs. baselines). This is the "run it big" phase.
-6. **True self-play refinements** — Dirichlet exploration noise at the root,
-   temperature schedule for move selection, and (optionally) a two-controller
-   driver. The current loop already self-plays (both seats = the net's MCTS).
+5. **Scale + tune the training.** [DONE 2026-10-26, branch `net-choices`] the
+   loop runs on the user's PC, gently (`riftbound/compute.py`: a quarter of the
+   cores, below-normal priority, one thread each, a pause between iterations;
+   the user's cooling isn't great): `selfplay.train` plays each iteration's
+   games in worker processes over a deck pool, trains on a replay buffer
+   (each new example seen ~twice), and every few iterations plays the net
+   against simple_trade; `scripts/train_selfplay.py --decks ... --run-dir runs/x`
+   (`runs/` is git-ignored: net.pt + log.jsonl, `--resume`). Training decks: the
+   two Vendetta precons the user sent (`precon_zed.json`, `precon_shen.json`;
+   Shen's chosen champion assumed Shen Leader of the Kinkou Order). The net
+   agent now also searches showdown and reaction decisions (it used to pass)
+   and the observation encodes the turn player, the showdown and the chain
+   (OBS_DIM 6779). Still to tune: MCTS budget, LR schedule, net size.
+   `GameState.clone` pickles (1.7x faster self-play than deepcopy).
+   **First run** (`runs/precons-1`, 2026-10-26): 30 iterations x 16 games, 100
+   simulations, 4 workers, ~35 min at ~5% CPU. Against simple_trade over 100
+   games (seats and decks alternating): the untrained net 0.00, the trained one
+   0.35 ± 0.05 (Shen 0.44, Zed 0.26). The in-training evaluation (20 games) is
+   too noisy to follow a trend: use more games or fewer, larger checks.
+6. **True self-play refinements** — [DONE] Dirichlet exploration noise at the
+   root and visit-proportional moves for the first decisions
+   (`NetGuidedMCTSAgent(explore=True)`). Optional: a two-controller driver.
 7. [DONE] **Learned mulligan + battlefield** — both are now net-value-guided (they
    use the trained net, so they improve as it learns):
    - `NetGuidedMCTSAgent.decide_mulligan` scores every keep/return combo by the net's

@@ -4515,63 +4515,65 @@ class GameLoop:
                 continue
 
             action = player.agent.decide_reaction(self.gs.get_player(self.gs.other(active)), self.gs.chain)
-
-            if action[0] == "PASS":
-                passes += 1
-            else:
-                # An action that does nothing (a spell it can't pay for once
-                # taxes are added) counts as a pass: two players proposing one
-                # each never stopped.
-                before = passes
-                passes += 1
-                kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
-                if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
-                    card = player.hand[idx]
-                    if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
-                        if lane is None or not (0 <= lane < len(self.gs.battlefields)):
-                            lane = 0
-                        energy, power = self._effective_cost(card, player, lane)
-                        if self._pay_card(player, card, energy, power):
-                            player.remove_from_hand(idx)
-                            self._spell_played(card, player)
-                            self.gs.chain.append(ChainItem(player=active, card=card, bf_idx=lane))
-                            passes = 0
-                elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
-                    # QUICK-DRAW gear (§745): played at reaction speed.
-                    card = player.hand[idx]
-                    if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
-                        before = len(player.hand)
-                        self._apply_action(player, ("GEAR", idx, lane if lane is not None else 0, None))
-                        if len(player.hand) < before:
-                            passes = 0
-                elif kind == "CHAMPION":
-                    # AMBUSH: deploy the champion to a lane at reaction speed. Not a
-                    # spell → resolves immediately (no chain), then priority reopens.
-                    if self._deploy_ambush_champion(active, lane if lane is not None else 0):
-                        passes = 0
-                elif kind == "UNIT" and len(action) > 3:
-                    # An AMBUSH unit from hand, at reaction speed.
-                    if self._play_ambush_unit(player, idx, action[3]):
-                        passes = 0
-                elif kind == "HIDDEN_PLAY":
-                    # Play a facedown card for [0] at reaction speed (§737.1.b).
-                    if self._play_from_hidden(active, lane if lane is not None else 0):
-                        passes = 0
-                elif kind == "ABILITY":
-                    # A REACTION ability resolves at once (resource abilities
-                    # can't be reacted to) and its player keeps priority; one
-                    # that does nothing counts as a pass. One that put a spell
-                    # on the chain (FLOW) passes priority like a played spell.
-                    depth = len(self.gs.chain)
-                    if self._use_ability_now(player, idx, lane):
-                        if len(self.gs.chain) == depth:
-                            passes = before
-                            continue
-                        passes = 0
-
+            step = "pass" if action[0] == "PASS" else self._reaction_step(player, active, action)
+            if step == "kept":
+                continue          # a resolved ability: its player keeps priority
+            # An action that does nothing (a spell it can't pay for once taxes
+            # are added) counts as a pass: two players proposing one each never
+            # stopped.
+            passes = 0 if step == "acted" else passes + 1
             active = self.gs.other(active)
 
-        # Resolve chain LIFO
+        self._resolve_chain()
+
+    def _reaction_step(self, player: Player, side: str, action) -> str:
+        """`side` takes `action` with priority on an open chain: "acted" (it put
+        something on the chain or into play; priority passes), "kept" (a
+        REACTION ability resolved; its player keeps priority) or "noop"."""
+        kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
+        if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
+            card = player.hand[idx]
+            if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
+                if lane is None or not (0 <= lane < len(self.gs.battlefields)):
+                    lane = 0
+                energy, power = self._effective_cost(card, player, lane)
+                if self._pay_card(player, card, energy, power):
+                    player.remove_from_hand(idx)
+                    self._spell_played(card, player)
+                    self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+                    return "acted"
+        elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
+            # QUICK-DRAW gear (§745): played at reaction speed.
+            card = player.hand[idx]
+            if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+                before = len(player.hand)
+                self._apply_action(player, ("GEAR", idx, lane if lane is not None else 0, None))
+                if len(player.hand) < before:
+                    return "acted"
+        elif kind == "CHAMPION":
+            # AMBUSH: deploy the champion to a lane at reaction speed. Not a
+            # spell → resolves immediately (no chain), then priority reopens.
+            if self._deploy_ambush_champion(side, lane if lane is not None else 0):
+                return "acted"
+        elif kind == "UNIT" and len(action) > 3:
+            # An AMBUSH unit from hand, at reaction speed.
+            if self._play_ambush_unit(player, idx, action[3]):
+                return "acted"
+        elif kind == "HIDDEN_PLAY":
+            # Play a facedown card for [0] at reaction speed (§737.1.b).
+            if self._play_from_hidden(side, lane if lane is not None else 0):
+                return "acted"
+        elif kind == "ABILITY":
+            # A REACTION ability resolves at once (resource abilities can't be
+            # reacted to) and its player keeps priority. One that put a spell on
+            # the chain (FLOW) passes priority like a played spell.
+            depth = len(self.gs.chain)
+            if self._use_ability_now(player, idx, lane):
+                return "kept" if len(self.gs.chain) == depth else "acted"
+        return "noop"
+
+    def _resolve_chain(self) -> None:
+        """Resolve the chain LIFO, each spell to its caster's trash."""
         while self.gs.chain:
             item = self.gs.chain.pop()
             actor = self.gs.get_player(item.player)
@@ -4638,58 +4640,72 @@ class GameLoop:
                 if self.verbose:
                     print(f"    {self.gs.focus_player} passes (passes={passes}/2)")
             else:
+                step = self._showdown_step(focus_player, self.gs.focus_player, action, bf_idx)
+                if step == "kept":
+                    passes = 0
+                    continue      # an ability resolved: focus stays
                 # An action that does nothing counts as a pass (see _run_chain).
-                passes += 1
-                kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
-                if kind == "SPELL" and idx is not None and 0 <= idx < len(focus_player.hand):
-                    card = focus_player.hand[idx]
-                    if isinstance(card, SpellCard):
-                        has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
-                        energy, power = self._effective_cost(card, focus_player, bf_idx)
-                        if has_action_or_reaction and self._pay_card(focus_player, card, energy, power):
-                            focus_player.remove_from_hand(idx)
-                            self._spell_played(card, focus_player)
-                            if self.verbose:
-                                print(f"    {self.gs.focus_player} plays SPELL in showdown: {card.name}")
-                            self.gs.chain.append(ChainItem(player=self.gs.focus_player, card=card, bf_idx=bf_idx))
-                            self._run_chain(self.gs.focus_player)
-                            passes = 0
-                elif kind == "UNIT" and len(action) > 3 and action[3] is not None:
-                    # An AMBUSH unit into the showdown's battlefield.
-                    if self._play_ambush_unit(focus_player, idx, action[3]):
-                        passes = 0
-                elif kind == "UNIT" and idx is not None and 0 <= idx < len(focus_player.hand):
-                    # ACTION unit (§732.1.c.1): played during a showdown (to base).
-                    card = focus_player.hand[idx]
-                    if isinstance(card, UnitCard) and card.has_keyword("ACTION"):
-                        before = len(focus_player.base_units)
-                        self._apply_action(focus_player, ("UNIT", idx, bf_idx, None))
-                        if len(focus_player.base_units) > before:
-                            passes = 0
-                elif kind == "GEAR" and idx is not None and 0 <= idx < len(focus_player.hand):
-                    # QUICK-DRAW gear (§745): played during a showdown.
-                    card = focus_player.hand[idx]
-                    if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
-                        before = len(focus_player.hand)
-                        self._apply_action(focus_player, ("GEAR", idx, bf_idx, None))
-                        if len(focus_player.hand) < before:
-                            passes = 0
-                elif kind == "CHAMPION":
-                    # AMBUSH: deploy the champion into the showdown lane at reaction speed.
-                    if self._deploy_ambush_champion(self.gs.focus_player, bf_idx):
-                        passes = 0
-                elif kind == "HIDDEN_PLAY":
-                    # Play a facedown card for [0] into the showdown lane (§737.1.b).
-                    if self._play_from_hidden(self.gs.focus_player, bf_idx):
-                        passes = 0
-                elif kind == "ABILITY":
-                    # ACTION / REACTION ability: resolves at once, focus stays.
-                    if self._use_ability_now(focus_player, idx, lane):
-                        passes = 0
-                        continue
+                passes = 0 if step == "acted" else passes + 1
 
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 
+        self._finish_showdown(bf_idx, attacker)
+
+    def _showdown_step(self, player: Player, side: str, action, bf_idx: int) -> str:
+        """`side` (with focus) takes `action` in the showdown at `bf_idx`: "acted"
+        (focus passes), "kept" (an ACTION / REACTION ability resolved; focus
+        stays) or "noop"."""
+        kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
+        if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
+            card = player.hand[idx]
+            if isinstance(card, SpellCard):
+                has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
+                energy, power = self._effective_cost(card, player, bf_idx)
+                if has_action_or_reaction and self._pay_card(player, card, energy, power):
+                    player.remove_from_hand(idx)
+                    self._spell_played(card, player)
+                    if self.verbose:
+                        print(f"    {side} plays SPELL in showdown: {card.name}")
+                    self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=bf_idx))
+                    self._run_chain(side)
+                    return "acted"
+        elif kind == "UNIT" and len(action) > 3 and action[3] is not None:
+            # An AMBUSH unit into the showdown's battlefield.
+            if self._play_ambush_unit(player, idx, action[3]):
+                return "acted"
+        elif kind == "UNIT" and idx is not None and 0 <= idx < len(player.hand):
+            # ACTION unit (§732.1.c.1): played during a showdown (to base).
+            card = player.hand[idx]
+            if isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+                before = len(player.base_units)
+                self._apply_action(player, ("UNIT", idx, bf_idx, None))
+                if len(player.base_units) > before:
+                    return "acted"
+        elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
+            # QUICK-DRAW gear (§745): played during a showdown.
+            card = player.hand[idx]
+            if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+                before = len(player.hand)
+                self._apply_action(player, ("GEAR", idx, bf_idx, None))
+                if len(player.hand) < before:
+                    return "acted"
+        elif kind == "CHAMPION":
+            # AMBUSH: deploy the champion into the showdown lane at reaction speed.
+            if self._deploy_ambush_champion(side, bf_idx):
+                return "acted"
+        elif kind == "HIDDEN_PLAY":
+            # Play a facedown card for [0] into the showdown lane (§737.1.b).
+            if self._play_from_hidden(side, bf_idx):
+                return "acted"
+        elif kind == "ABILITY":
+            # ACTION / REACTION ability: resolves at once, focus stays.
+            if self._use_ability_now(player, idx, lane):
+                return "kept"
+        return "noop"
+
+    def _finish_showdown(self, bf_idx: int, attacker: str) -> None:
+        """Both players passed: the showdown ends, then combat if the battlefield
+        is contested, else a conquer."""
         self.gs.showdown_active = False
         self.gs.showdown_bf_idx = None
         self.gs.showdown_attacker = None

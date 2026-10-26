@@ -175,6 +175,11 @@ class Observation:
     my_runes: int
     opp_runes: int
     battlefields: tuple[BattlefieldView, ...] = field(default_factory=tuple)
+    # The battlefield a showdown is running at (None: no showdown), and the
+    # spells on the chain (public), the viewer's and the opponent's.
+    showdown_bf: Optional[int] = None
+    my_chain: tuple[str, ...] = ()
+    opp_chain: tuple[str, ...] = ()
 
     @staticmethod
     def _uview(u) -> "UnitView":
@@ -227,6 +232,9 @@ class Observation:
             my_runes=me.total_runes_in_play(),
             opp_runes=opp.total_runes_in_play(),
             battlefields=tuple(bview(bf) for bf in gs.battlefields),
+            showdown_bf=gs.showdown_bf_idx if gs.showdown_active else None,
+            my_chain=tuple(i.card.name for i in gs.chain if i.player == viewer),
+            opp_chain=tuple(i.card.name for i in gs.chain if i.player != viewer),
         )
 
     def to_dict(self) -> dict:
@@ -254,6 +262,9 @@ class Observation:
             "my_runes": self.my_runes,
             "opp_runes": self.opp_runes,
             "battlefields": [b.to_dict() for b in self.battlefields],
+            "showdown_bf": self.showdown_bf,
+            "my_chain": list(self.my_chain),
+            "opp_chain": list(self.opp_chain),
         }
 
 

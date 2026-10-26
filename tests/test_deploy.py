@@ -213,8 +213,9 @@ def test_observation_and_encoding_see_deployed_gear():
     vec_a = encode_observation(obs_a)
     vec_b = encode_observation(Observation.from_state(loop.gs, "B"))
     assert vec_a.shape == vec_b.shape == (OBS_DIM,)
-    # Bags are [hand, trash, my board, opp board], each VOCAB_SIZE wide, at the end.
-    my_board_a = vec_a[OBS_DIM - 2 * VOCAB_SIZE:OBS_DIM - VOCAB_SIZE]
-    opp_board_b = vec_b[OBS_DIM - VOCAB_SIZE:]
+    # Bags are [hand, trash, my board, opp board, my chain, opp chain], each
+    # VOCAB_SIZE wide, at the end.
+    my_board_a = vec_a[OBS_DIM - 4 * VOCAB_SIZE:OBS_DIM - 3 * VOCAB_SIZE]
+    opp_board_b = vec_b[OBS_DIM - 3 * VOCAB_SIZE:OBS_DIM - 2 * VOCAB_SIZE]
     assert my_board_a[bomb] == 1.0           # A sees its own Bomb
     assert opp_board_b[bomb] == 1.0          # B sees the enemy Bomb

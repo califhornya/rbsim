@@ -65,3 +65,80 @@ def test_visits_prefer_searched_actions():
     assert agent.last_visits
     top = max(agent.last_visits, key=agent.last_visits.get)
     assert agent.last_visits[top] > 0
+
+
+def test_search_makes_the_choices_inside_an_action():
+    """A kill spell with two enemy targets: the baseline takes the first (the
+    1-Might one). With a value that counts Might on the board, the search's
+    choice variants find the 6-Might target, and the real game kills it."""
+    from riftbound.ai.net_mcts import _ForcedChoice
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.effects import _position_value
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+
+    class BoardValue(NetGuidedMCTSAgent):
+        def _evaluate(self, clone, side, legal_ga):
+            return {a.to_engine(): 1.0 / len(legal_ga) for a in legal_ga}, self._net_value(clone, side)
+
+        def _net_value(self, clone, side):
+            return max(-1.0, min(1.0, _position_value(clone, side) / 20))
+
+    a = Player(name="A", deck=Deck(cards=[UnitCard(name=f"C{i}") for i in range(5)]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[UnitCard(name=f"D{i}") for i in range(5)]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    gs.active = "A"
+    small, big = UnitInPlay(UnitCard(name="Small", might=1)), UnitInPlay(UnitCard(name="Big", might=6))
+    gs.battlefields[0].add_unit("B", small)
+    gs.battlefields[0].add_unit("B", big)
+    a.hand.append(CARD_REGISTRY["Death from Below"].instantiate())
+    a.energy = 10
+    torch.manual_seed(0)
+    a.agent = BoardValue(a, RiftboundNet(), iterations=60, rng=random.Random(0))
+    loop = GameLoop(gs)
+
+    act = a.agent.decide_action(b)
+    assert act[0] == "SPELL"
+    assert isinstance(loop.chooser, _ForcedChoice)
+    assert any(isinstance(k[0], tuple) for k in a.agent.last_visits)     # variants searched
+    loop._apply_action(a, act)
+    assert gs.battlefields[0].units_B == [small]
+    assert loop.chooser is None                                         # released
+
+
+def test_search_casts_a_spell_in_a_showdown():
+    """A's 3-Might unit attacks B's 4: losing. With Grim Resolve (+3, ACTION) in
+    hand and a value that counts the board, the showdown search casts it (the
+    agent used to pass in every showdown)."""
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.effects import _position_value
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+
+    class BoardValue(NetGuidedMCTSAgent):
+        def _evaluate(self, clone, side, legal_ga):
+            return {a.to_engine(): 1.0 / len(legal_ga) for a in legal_ga}, self._net_value(clone, side)
+
+        def _net_value(self, clone, side):
+            return max(-1.0, min(1.0, _position_value(clone, side) / 20))
+
+    a = Player(name="A", deck=Deck(cards=[UnitCard(name=f"C{i}") for i in range(5)]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[UnitCard(name=f"D{i}") for i in range(5)]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    gs.active = "A"
+    gs.battlefields[0].add_unit("A", UnitInPlay(UnitCard(name="Mine", might=3)))
+    gs.battlefields[0].add_unit("B", UnitInPlay(UnitCard(name="Theirs", might=4)))
+    gs.showdown_active, gs.showdown_bf_idx, gs.showdown_attacker, gs.focus_player = True, 0, "A", "A"
+    a.hand.append(CARD_REGISTRY["Grim Resolve"].instantiate())
+    a.energy = 5
+    torch.manual_seed(0)
+    a.agent = BoardValue(a, RiftboundNet(), iterations=40, rng=random.Random(0))
+    GameLoop(gs)
+    act = a.agent.decide_showdown_action(b, 0)
+    assert act[0] == "SPELL" and act[1] == 0

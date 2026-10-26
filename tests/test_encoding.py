@@ -16,7 +16,7 @@ from riftbound.ai.encoding import (
     legal_mask,
 )
 from riftbound.ai.env import RiftboundEnv
-from riftbound.core.decisions import DecisionPoint, GameAction
+from riftbound.core.decisions import DecisionPoint, GameAction, Observation
 
 REPO = Path(__file__).resolve().parent.parent
 KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
@@ -97,3 +97,23 @@ def test_full_game_encodes_every_step():
         steps += 1
         assert steps < 2000
     assert info["done"]
+
+
+def test_encoding_sees_turn_player_showdown_and_chain():
+    import random
+    from riftbound.ai.encoding import VOCAB_SIZE, card_index
+    from riftbound.core.cards import SpellCard
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import ChainItem, GameState
+
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, active="A")
+    gs.showdown_active, gs.showdown_bf_idx = True, 1
+    gs.chain.append(ChainItem(player="B", card=SpellCard(name="Rebuke"), bf_idx=1))
+    va = encode_observation(Observation.from_state(gs, "A"))
+    vb = encode_observation(Observation.from_state(gs, "B"))
+    assert not np.array_equal(va, vb)
+    i = card_index("Rebuke")
+    assert va[OBS_DIM - VOCAB_SIZE + i] == 1.0              # A sees B's spell as the opponent's
+    assert vb[OBS_DIM - 2 * VOCAB_SIZE + i] == 1.0          # B sees it as its own
