@@ -237,8 +237,10 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
             log(f"[iter {it + 1}] examples+={new} buffer={len(buffer)} loss={stats['loss']:.4f} "
                 f"(policy {stats['policy_loss']:.3f}, value {stats['value_loss']:.3f}){vs} "
                 f"{record['seconds']}s")
-            # A file named STOP next to the checkpoint ends the run here, saved.
-            if checkpoint is not None and (Path(checkpoint).parent / "STOP").exists():
+            # A file named STOP (or STOP.txt) next to the checkpoint ends the run
+            # here, saved.
+            if checkpoint is not None and any((Path(checkpoint).parent / n).exists()
+                                              for n in ("STOP", "STOP.txt")):
                 log(f"STOP file found: stopping after iteration {it + 1}")
                 break
             if pool is not None and pause:
