@@ -514,11 +514,23 @@ Progress:
    headless). Verified end-to-end (loss decreases across iterations).
 
 Still to build / tune:
-5. **Scale + tune the training** on a rented GPU box (more games/iters/MCTS sims,
-   LR schedule, larger net, eval vs. baselines). This is the "run it big" phase.
-6. **True self-play refinements** — Dirichlet exploration noise at the root,
-   temperature schedule for move selection, and (optionally) a two-controller
-   driver. The current loop already self-plays (both seats = the net's MCTS).
+5. **Scale + tune the training.** [DONE 2026-10-26, branch `net-choices`] the
+   loop runs on the user's PC, gently (`riftbound/compute.py`: a quarter of the
+   cores, below-normal priority, one thread each, a pause between iterations;
+   the user's cooling isn't great): `selfplay.train` plays each iteration's
+   games in worker processes over a deck pool, trains on a replay buffer
+   (each new example seen ~twice), and every few iterations plays the net
+   against simple_trade; `scripts/train_selfplay.py --decks ... --run-dir runs/x`
+   (`runs/` is git-ignored: net.pt + log.jsonl, `--resume`). Training decks: the
+   two Vendetta precons the user sent (`precon_zed.json`, `precon_shen.json`;
+   Shen's chosen champion assumed Shen Leader of the Kinkou Order). The net
+   agent now also searches showdown and reaction decisions (it used to pass)
+   and the observation encodes the turn player, the showdown and the chain
+   (OBS_DIM 6779). Still to tune: MCTS budget, LR schedule, net size; a ~3 ms
+   state clone per simulation is the main cost.
+6. **True self-play refinements** — [DONE] Dirichlet exploration noise at the
+   root and visit-proportional moves for the first decisions
+   (`NetGuidedMCTSAgent(explore=True)`). Optional: a two-controller driver.
 7. [DONE] **Learned mulligan + battlefield** — both are now net-value-guided (they
    use the trained net, so they improve as it learns):
    - `NetGuidedMCTSAgent.decide_mulligan` scores every keep/return combo by the net's

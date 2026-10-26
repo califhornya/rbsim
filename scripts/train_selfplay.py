@@ -17,6 +17,7 @@ the machine keeps plenty of headroom. Every --eval-every iterations the net play
 from __future__ import annotations
 
 import argparse
+import functools
 import glob
 import json
 from pathlib import Path
@@ -60,7 +61,8 @@ def main() -> None:
             start = lines[-1]["iteration"] if lines else 0
     else:
         net = RiftboundNet()
-    print(f"decks={[d.name for d in decks]} start={start}")
+    log = functools.partial(print, flush=True)       # a redirected log stays current
+    log(f"decks={[d.name for d in decks]} start={start}")
 
     train(
         net, decks,
@@ -69,9 +71,9 @@ def main() -> None:
         batch_size=args.batch_size, lr=args.lr, buffer_size=args.buffer_size,
         checkpoint=ckpt, log_path=log_path, start_iteration=start, seed=args.seed + start,
         workers=args.workers, eval_every=args.eval_every, eval_games=args.eval_games,
-        pause=args.pause, rest=args.rest,
+        pause=args.pause, rest=args.rest, log=log,
     )
-    print("done.")
+    log("done.")
 
 
 if __name__ == "__main__":
