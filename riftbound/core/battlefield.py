@@ -55,6 +55,11 @@ class Battlefield:
     # side -> (turn, excess combat damage it assigned here): "if you assigned 3
     # or more excess damage" (Vi Piltover Enforcer, Yeti Brawler).
     excess_damage: dict = field(default_factory=dict)
+    # The combat here (§466.2): ids of units that got their Attacker/Defender
+    # designation (their attack/defend triggers fired), and whether its start
+    # of combat effects happened. Cleared when the combat ends.
+    combat_designated: set = field(default_factory=set)
+    combat_started: bool = False
     # Gear deployed here (DEPLOY §830), per controlling side.
     gear_A: List[DeployedGear] = field(default_factory=list)
     gear_B: List[DeployedGear] = field(default_factory=list)

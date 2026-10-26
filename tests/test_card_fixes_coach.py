@@ -253,3 +253,40 @@ def test_the_final_point_by_conquer_needs_every_battlefield_scored():
     loop, a, _ = _setup()
     loop.gs.points_A = 7
     assert loop._gain_points("A", 1, "hold", loop.gs.battlefields[0]) == 1   # holding is free
+
+
+def test_attack_triggers_open_the_combat_showdown_so_players_can_still_act():
+    """§466.2: a combat opens with its showdown; attack / defend triggers come
+    first, then both players act, then damage. Shadow Clone banishes a unit
+    from the trash, Zed Master of Shadows becomes EMPOWERED, and its ACTION
+    is offered before damage (it fired after the showdown, just before
+    damage)."""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, _ = _setup()
+    gs = loop.gs
+    gs.legend_A = CARD_REGISTRY["Zed Master of Shadows"].instantiate()
+    gs.legend_unit_A = UnitInPlay(card=gs.legend_A, ready=True)
+    a.trash = [CARD_REGISTRY["Punching Poro"].instantiate()]
+    a.hand = [UnitCard(name="Spare")]
+    clone = UnitInPlay(card=CARD_REGISTRY["Shadow Clone"].instantiate(), ready=True)
+    clone.is_token = True
+    gs.battlefields[0].add_unit("A", clone)
+    gs.battlefields[0].add_unit("B", UnitInPlay(card=UnitCard(name="Wall", might=3)))
+    seen = []
+
+    class Agent:
+        def __init__(self, side):
+            self.side = side
+
+        def decide_showdown_action(self, opponent, bf_idx):
+            legal = legal_actions(loop, DecisionPoint.SHOWDOWN_ACTION, self.side)
+            if self.side == "A":
+                seen.append(([c.name for c in a.banished], [ga.label for ga in legal]))
+            return ("PASS", None, None)
+    a.agent, gs.B.agent = Agent("A"), Agent("B")
+    loop._run_showdown(0, "A")
+    banished, labels = seen[0]
+    assert banished == ["Punching Poro"]                    # the trigger came first
+    assert any("Zed Master of Shadows" in lbl for lbl in labels)
+    assert gs.battlefields[0].units_A == [clone] and not gs.battlefields[0].units_B

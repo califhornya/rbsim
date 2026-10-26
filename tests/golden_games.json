@@ -1009,8 +1009,7 @@
         {
           "A": [],
           "B": [
-            "Lonely Poro",
-            "Lonely Poro"
+            "Adaptatron"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1018,7 +1017,7 @@
         {
           "A": [],
           "B": [
-            "Yasuo Remorseful"
+            "Scuttle Crab"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1031,37 +1030,37 @@
         "base_units": [
           "Tideturner"
         ],
-        "deck": 27,
-        "energy": 9,
-        "hand": 0,
+        "deck": 25,
+        "energy": 10,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 6,
-          "FURY": 5
+          "FURY": 6
         },
-        "runes_in_play": 11,
-        "trash": 10
+        "runes_in_play": 12,
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 3,
+        "base_gear": 4,
         "base_units": [
-          "Scuttle Crab"
+          "Lonely Poro"
         ],
-        "deck": 21,
+        "deck": 19,
         "energy": 12,
-        "hand": 2,
+        "hand": 0,
         "power_pool": {
           "CALM": 6,
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 10
+        "trash": 14
       },
-      "points_A": 7,
+      "points_A": 6,
       "points_B": 8,
-      "spells_cast": 11,
-      "turns": 17,
-      "units_played": 11,
+      "spells_cast": 13,
+      "turns": 21,
+      "units_played": 13,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1376,7 +1375,7 @@
         {
           "A": [],
           "B": [
-            "Fizz Trickster"
+            "Pyke Dockside Butcher"
           ],
           "controller": "B",
           "last_controller": null
@@ -1387,20 +1386,20 @@
             "Sharkling"
           ],
           "controller": "B",
-          "last_controller": null
+          "last_controller": "B"
         }
       ],
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 5,
+        "base_gear": 4,
         "base_units": [
           "Stellacorn Herder",
-          "Lonely Poro"
+          "Stellacorn Herder"
         ],
         "deck": 25,
         "energy": 0,
-        "hand": 2,
+        "hand": 3,
         "power_pool": {
           "CALM": 4,
           "CHAOS": 6
@@ -1413,20 +1412,20 @@
         "base_gear": 4,
         "base_units": [],
         "deck": 27,
-        "energy": 0,
-        "hand": 3,
+        "energy": 3,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 2,
-          "FURY": 3
+          "CHAOS": 5,
+          "FURY": 2
         },
-        "runes_in_play": 5,
-        "trash": 5
+        "runes_in_play": 7,
+        "trash": 7
       },
-      "points_A": 4,
+      "points_A": 2,
       "points_B": 8,
-      "spells_cast": 11,
+      "spells_cast": 8,
       "turns": 14,
-      "units_played": 10,
+      "units_played": 11,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0

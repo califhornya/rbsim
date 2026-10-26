@@ -4683,6 +4683,9 @@ class GameLoop:
                 self._resolve_triggered_effects(u.card, "on_showdown_begin", sd_bf,
                                                 actor, opponent,
                                                 context_extra={"battlefield": sd_bf})
+        # A contested battlefield: this is the combat showdown, its attack /
+        # defend triggers come first (§466.2), then both players act.
+        self._open_combat(sd_bf, attacker)
 
         passes = 0
         rounds = 0
@@ -4704,6 +4707,8 @@ class GameLoop:
                     print(f"    {self.gs.focus_player} passes (passes={passes}/2)")
             else:
                 step = self._showdown_step(focus_player, self.gs.focus_player, action, bf_idx)
+                # A unit that arrived (AMBUSH) becomes an Attacker / Defender now.
+                self._open_combat(sd_bf, attacker)
                 if step == "kept":
                     passes = 0
                     continue      # an ability resolved: focus stays
@@ -4779,7 +4784,9 @@ class GameLoop:
         if bf.units_A and bf.units_B:
             # Contested: run combat
             self._phase_combat_and_conquer_single(bf_idx, attacker)
-        elif bf.units_A and not bf.units_B:
+            return
+        bf.combat_designated, bf.combat_started = set(), False   # no combat after all
+        if bf.units_A and not bf.units_B:
             # A controls
             if bf.can_score_conquer("A"):
                 self._gain_points("A", 1, "conquer", bf)
@@ -4795,6 +4802,48 @@ class GameLoop:
                 if self.verbose:
                     print(f"  [CONQUER] B conquers BF{bf_idx} (uncontested showdown) -> +1 VP")
                 self._fire_scoring_trigger("on_conquer", bf, "B")
+
+    def _open_combat(self, bf: Battlefield, attacker: str) -> None:
+        """The combat at `bf` opens (§466.2): start of combat effects, then the
+        units there become Attackers / Defenders and their attack / defend
+        triggers fire, attacker's first. It opens with the combat showdown, so
+        both players can still act before damage (a unit banished for Shadow
+        Clone empowers Zed's legend, whose ACTION is then usable). A unit that
+        arrives later gets its designation and triggers when this runs again."""
+        defender = self.gs.other(attacker)
+        if not (bf.units_A and bf.units_B):
+            return
+        atk_actor, atk_opp = self.gs.get_player(attacker), self.gs.get_player(defender)
+        if not bf.combat_started:
+            bf.combat_started = True
+            # "When combat starts here, the attacker and defender each ADD [1]"
+            # (Threshold of the Gray).
+            if bf.card is not None:
+                for side in (attacker, defender):
+                    self._resolve_triggered_effects(bf.card, "on_combat_start_here", bf,
+                                                    self.gs.get_player(side),
+                                                    self.gs.get_player(self.gs.other(side)),
+                                                    context_extra={"battlefield": bf})
+        new = {side: [u for u in bf._units_for(side) if id(u) not in bf.combat_designated]
+               for side in (attacker, defender)}
+        for side in new:
+            bf.combat_designated.update(id(u) for u in new[side])
+        for unit in new[attacker]:
+            for card in [unit.card] + list(unit.gear):
+                self._resolve_triggered_effects(card, "on_attack", bf, atk_actor, atk_opp,
+                                                context_extra={"battlefield": bf})
+            self._apply_disarm(unit, bf, defender)
+        # "When a friendly unit attacks / defends (alone), ..." (Mask of Foresight).
+        for side, trig in ((attacker, "on_friendly_attack"), (defender, "on_friendly_defend")):
+            fighters = list(bf._units_for(side))
+            for unit in new[side]:
+                self._fire_units_trigger(trig, side, triggering_card=unit.card,
+                                         extra={"battlefield": bf, "triggering_unit": unit,
+                                                "alone": len(fighters) == 1})
+        for unit in new[defender]:
+            for card in [unit.card] + list(unit.gear):
+                self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
+                                                context_extra={"battlefield": bf})
 
     def _phase_combat_and_conquer_single(self, bf_idx: int, attacker: str) -> None:
         """Resolve combat for a single battlefield."""
@@ -4813,34 +4862,11 @@ class GameLoop:
                 f"A_might={mightA} [{namesA}] vs B_might={mightB} [{namesB}]"
             )
 
-        # Attack/Defend triggers fire once, before damage, as designations are set.
+        # Units that fight without having been designated in the showdown (a
+        # combat with no showdown, a unit arriving late) get their triggers now.
         defender = self.gs.other(attacker)
-        atk_actor, atk_opp = self.gs.get_player(attacker), self.gs.get_player(defender)
-        for unit in list(bf.units_A if attacker == "A" else bf.units_B):
-            for card in [unit.card] + list(unit.gear):
-                self._resolve_triggered_effects(card, "on_attack", bf, atk_actor, atk_opp,
-                                                context_extra={"battlefield": bf})
-            self._apply_disarm(unit, bf, defender)
-        # "When a friendly unit attacks / defends (alone), ..." (Mask of Foresight).
-        for side, trig in ((attacker, "on_friendly_attack"), (defender, "on_friendly_defend")):
-            fighters = list(bf._units_for(side))
-            for unit in fighters:
-                self._fire_units_trigger(trig, side, triggering_card=unit.card,
-                                         extra={"battlefield": bf, "triggering_unit": unit,
-                                                "alone": len(fighters) == 1})
-        for unit in list(bf.units_A if defender == "A" else bf.units_B):
-            for card in [unit.card] + list(unit.gear):
-                self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
-                                                context_extra={"battlefield": bf})
-
-        # "When combat starts here, the attacker and defender each ADD [1]"
-        # (Threshold of the Gray).
-        if bf.card is not None:
-            for side in (attacker, defender):
-                self._resolve_triggered_effects(bf.card, "on_combat_start_here", bf,
-                                                self.gs.get_player(side),
-                                                self.gs.get_player(self.gs.other(side)),
-                                                context_extra={"battlefield": bf})
+        self._open_combat(bf, attacker)
+        bf.combat_designated, bf.combat_started = set(), False
         stats = bf.resolve_combat_might(attacker_side=attacker, **self._combat_mods(bf, attacker))
         bf.excess_damage = {"A": (self.gs.turn, stats.excess_by_A), "B": (self.gs.turn, stats.excess_by_B)}
 
