@@ -22455,7 +22455,7 @@
       {
         "effect": "discard_card",
         "trigger": "on_play",
-        "target": "opponent",
+        "target": "chosen_player",
         "amount": 1
       }
     ]
@@ -26169,7 +26169,7 @@
       {
         "effect": "burn",
         "trigger": "on_move",
-        "target": "opponent",
+        "target": "chosen_player",
         "amount": 1,
         "condition": {
           "type": "moves_this_turn_exactly",

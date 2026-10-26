@@ -2812,7 +2812,9 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for _ in range(count):
         if not player.hand:
             break
-        ctx.loop._discard(player, player.hand[0])
+        # The discarding player picks the card (baseline: the first one).
+        ctx.loop._discard(player, ctx.loop.choose("discard", side, list(player.hand),
+                                                  player.hand[0], ctx.card))
 
 
 @effect("play_token")

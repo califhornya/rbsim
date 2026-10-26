@@ -214,3 +214,25 @@ def test_renata_glasc_scores_for_four_mind_at_a_battlefield():
     score = abilities()[1]
     loop._apply_action(a, score.to_engine())
     assert loop.gs.points_A == 1 and not renata.ready
+
+
+def test_blade_twirler_burns_the_player_you_choose():
+    """ "The first time I move each turn, choose a player. They BURN 1": the
+    opponent by default, yourself if you pick it (it always burned the
+    opponent)."""
+    for pick_me in (False, True):
+        loop, a, (twirler,) = _setup("Blade Twirler")
+        a.deck.cards = [UnitCard(name="Mine")]
+        loop.gs.B.deck.cards = [UnitCard(name="Theirs")]
+        asked = []
+
+        def chooser(_loop, kind, side, options, default, source, pick_me=pick_me):
+            if kind == "player":
+                asked.append(options[default] is _loop.gs.B)
+                return options.index(_loop.gs.A if pick_me else _loop.gs.B)
+            return None
+        loop.chooser = chooser
+        loop._apply_action(a, ("MOVE", 0, 2, 0))
+        assert asked == [True]
+        burned = a if pick_me else loop.gs.B
+        assert [c.name for c in burned.trash] == ["Mine" if pick_me else "Theirs"]

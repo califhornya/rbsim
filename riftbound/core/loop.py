@@ -143,6 +143,11 @@ class EffectContext:
             return self.opponent
         if key in self._CHOOSER_TARGET_ALIASES:
             return self.actor  # safe fallback; real pick happens in _resolve_targets
+        if key == "chosen_player":
+            # "Choose a player. They BURN 1" (Blade Twirler): either one;
+            # baseline the opponent.
+            return self.loop.choose("player", self.actor_side, [self.opponent, self.actor],
+                                    self.opponent, self.card)
         raise ValueError(f"Unknown player target '{target}'")
 
     def _units_for_side(self, side: str) -> list[UnitInPlay]:
