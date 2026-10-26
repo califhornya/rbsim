@@ -77,3 +77,36 @@ def test_noop_action_ends_action_phase():
     assert result.winner in ("A", "B", "DRAW")
     # The guard ends each action phase promptly rather than spinning to the cap.
     assert player_a.agent.calls < 50
+
+
+def test_unpayable_spells_in_a_showdown_count_as_passes():
+    """Both players kept proposing a spell they couldn't pay for (agents read the
+    printed cost, the engine adds taxes): the failed play didn't count as a pass,
+    so the showdown never ended."""
+    from riftbound.core.cards import SpellCard
+
+    class Broke:
+        def __init__(self, player):
+            self.player = player
+            self.calls = 0
+
+        def decide_showdown_action(self, opponent, bf_idx):
+            self.calls += 1
+            return ("SPELL", 0, bf_idx)
+
+        def decide_reaction(self, opponent, chain):
+            self.calls += 1
+            return ("SPELL", 0, 0)
+
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, turn=1, max_turns=3, active="A")
+    loop = GameLoop(gs)
+    for p in (a, b):
+        p.hand.append(SpellCard(name="Too Dear", cost_energy=99, keywords=["ACTION", "REACTION"]))
+        p.agent = Broke(p)
+    bf = gs.battlefields[0]
+    bf.add_unit("A", UnitInPlay(UnitCard(name="X", might=2)))
+    bf.add_unit("B", UnitInPlay(UnitCard(name="Y", might=2)))
+    loop._run_showdown(0, "A")                    # must return
+    assert a.agent.calls + b.agent.calls <= 4

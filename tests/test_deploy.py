@@ -128,6 +128,19 @@ def test_bomb_token_goes_to_battlefield_with_most_enemies():
     assert not loop.gs.A.base_units          # not spawned as a unit at base
 
 
+def test_bomb_tokens_are_cards_and_never_reach_a_hand():
+    # The effect deployed the registry spec itself; "return all to hand" then
+    # put that spec in a hand and the next legality check crashed.
+    loop = _loop()
+    bf0 = loop.gs.battlefields[0]
+    ctx = EffectContext(loop, UnitCard(name="Amateur Demolitionist"), loop.gs.A, loop.gs.B, bf0)
+    from riftbound.core.effects import REGISTRY
+    REGISTRY["play_token"](ctx, {"token_name": "Bomb", "count": 2})
+    assert all(isinstance(dg.card, GearCard) for bf in loop.gs.battlefields for dg in bf.gear_A)
+    REGISTRY["return_all_to_hand"](ctx, {})
+    assert loop.gs.A.hand == []
+
+
 def test_bomb_chain_kills_other_bombs_and_hits_enemies():
     loop = _loop()
     bf = loop.gs.battlefields[0]

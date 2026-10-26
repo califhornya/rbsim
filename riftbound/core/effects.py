@@ -71,7 +71,9 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             kills = amount >= max(0, u.might - u.damage)
             return (id(u) in enemy_ids, kills, u.might)
 
-        units = sorted(_choosable(ctx, cands), key=value, reverse=True)[:int(spec.get("count", 1))]
+        cands = sorted(_choosable(ctx, cands), key=value, reverse=True)
+        units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands,
+                                     cands[:int(spec.get("count", 1))], ctx.card)
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
     ctx.damage_units(units, amount)
@@ -122,6 +124,8 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         except Exception:  # noqa: BLE001
             i = 0
     i = max(0, min(i, len(modes) - 1))
+    free = list(range(len(modes)))
+    used = None
     if spec.get("unique_per_turn"):
         # "Choose one that hasn't been chosen this turn" (Aphelios).
         used = ctx.loop.gs.modes_chosen.setdefault((id(ctx.card), ctx.loop.gs.turn), set())
@@ -129,6 +133,8 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if not free:
             return
         i = i if i in free else free[0]
+    i = ctx.loop.choose("mode", ctx.actor_side, free, free[free.index(i)], ctx.card)
+    if used is not None:
         used.add(i)
     chosen = modes[i]
     subs = chosen if isinstance(chosen, list) else [chosen]
@@ -213,7 +219,7 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             kills = a.might >= e.might - e.damage
             survives = e.might < a.might - a.damage
             return (kills and survives, kills, survives, e.might)
-        b = max(enemies, key=value)
+        b = loop.choose(_kind("target", spec), me, enemies, max(enemies, key=value), ctx.card)
     loop._note_chosen(ctx.card, me, [a, b])
     a_might, b_might = a.might, b.might
     ctx.damage_units([b], a_might)
@@ -246,9 +252,10 @@ def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         def gain(u):
             base = u.base_might_override if u.base_might_override is not None else int(u.card.might or 0)
             return amount - base if id(u) in friends else base - amount
-        units = sorted(units, key=gain, reverse=True)[:1]
-        if units and gain(units[0]) <= 0:
+        units = sorted(units, key=gain, reverse=True)
+        if not units or gain(units[0]) <= 0:
             return       # "you may": it helps no one
+        units = [ctx.loop.choose(_kind("target", spec), ctx.actor_side, units, units[0], ctx.card)]
         ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
     for unit in units:
         current = unit.base_might_override if unit.base_might_override is not None else int(unit.card.might or 0)
@@ -653,7 +660,7 @@ def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         loop.gs.add_xp(me, -xp)
     if not cands:
         return
-    unit = max(cands, key=lambda u: u.might)
+    unit = loop.choose(_kind("target", spec), me, cands, max(cands, key=lambda u: u.might), ctx.card)
     loop._note_chosen(ctx.card, me, [unit])
     prev = loop._locate_unit(unit)[1].controller()
     bf = loop._take_control(unit, me)
@@ -1226,7 +1233,7 @@ def _damage_shield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         bf = where[1] if where else None
         enemy = sum(x.might for x in bf._units_for(ctx.opponent_side)) if bf else 0
         return (enemy >= u.might - u.damage, u.might)
-    unit = max(mine, key=threatened)
+    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine, max(mine, key=threatened), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
     unit.damage_shield += int(spec.get("amount", 7))
 
@@ -1371,7 +1378,8 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     (Altar of Memories): the costliest card goes to the bottom."""
     hand = ctx.actor.hand
     if hand:
-        card = max(hand, key=_zone_value)
+        card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, list(hand),
+                               max(hand, key=_zone_value), ctx.card)
         hand.remove(card)
         ctx.actor.deck.cards.insert(0, card)
         ctx.loop._note_recycled(ctx.actor_side)
@@ -1425,7 +1433,7 @@ def _return_all_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         for bf in loop.gs.battlefields:
             for dg in list(bf.gear_for(side)):
                 bf.gear_for(side).remove(dg)
-                if not getattr(dg.card, "is_token", False):
+                if not (dg.is_token or getattr(dg.card, "is_token", False)):
                     player.hand.append(dg.card)
 
 
@@ -1438,7 +1446,7 @@ def _keep_one_kill_rest(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         units = _units_at(ctx, side, "anywhere")
         if len(units) < 2:
             continue
-        keep = max(units, key=lambda u: u.might)
+        keep = loop.choose(_kind("keep", spec), side, units, max(units, key=lambda u: u.might), ctx.card)
         by_bf = {}
         for unit in units:
             if unit is keep:
@@ -1616,6 +1624,8 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
     playable = [c for c in cands if price(c) is not None]
     pick = max(playable, key=_zone_value) if playable else None
     if pick is not None:
+        pick = loop.choose(_kind("card", spec), chooser_side, playable, pick, ctx.card)
+    if pick is not None:
         revealed.remove(pick)
         energy, power = price(pick)
         if mode == "ignore_energy":
@@ -1709,6 +1719,7 @@ def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         unit = max(units, key=lambda u: (losing(u), u.might))
     else:
         unit = max(units, key=lambda u: (_attack_value(ctx, me, u, place(u)) if place(u) else 0, u.might))
+    unit = loop.choose(_kind("target", spec), me, units, unit, ctx.card)
     bf = place(unit)
     where = loop._locate_unit(unit)
     if where is None:
@@ -1750,6 +1761,8 @@ def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
     else:
         runes = {d: len(rs) for d, rs in player.rune_pool.items() if rs}
         domain = max(runes, key=runes.get) if runes else next(iter(Domain))
+    domain = ctx.loop.choose(_kind("domain", spec), ctx._side_for_player(player),
+                             list(Domain), domain, ctx.card)
     player.add_power(domain, amount)
 
 
@@ -2142,10 +2155,17 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         return list(units)
     # Units picked one by one ("a unit", "up to two units" = count): that's a
     # choice, for "when you choose me" and "you've chosen enemy units twice".
+    # Baseline: list order (the bias side first).
     units = _choosable(ctx, units)
-    picked = units[:max(1, int(spec.get("count", 1) or 1))]
+    picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units,
+                                  units[:max(1, int(spec.get("count", 1) or 1))], ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     return picked
+
+
+def _kind(what: str, spec: Mapping[str, Any]) -> str:
+    """The name of a choice an effect makes ("target:kill_unit"), for GameLoop.choose."""
+    return f"{what}:{spec.get('effect', '?')}"
 
 
 def _choosable(ctx: "EffectContext", units: list) -> list:
@@ -2481,9 +2501,12 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             return None, False
         if side == me:
             best = max(others, key=lambda bf: _attack_value(ctx, side, unit, bf))
-            return best, _attack_value(ctx, side, unit, best) > 0
-        # An enemy is moved where it fights worst for them.
-        return min(others, key=lambda bf: _attack_value(ctx, side, unit, bf)), True
+            if _attack_value(ctx, side, unit, best) <= 0:
+                return best, False
+        else:
+            # An enemy is moved where it fights worst for them.
+            best = min(others, key=lambda bf: _attack_value(ctx, side, unit, bf))
+        return loop.choose(_kind("destination", spec), me, others, best, ctx.card), True
 
     def priority(item):
         side, unit = item
@@ -2500,8 +2523,13 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             return (losing, unit.might)
         return (not at_bf, unit.might)                     # send a base unit in
 
+    order = sorted(candidates, key=priority, reverse=True)
+    if not scope_all:
+        # Which unit(s): the baseline's priority order, one choice per unit.
+        picked = loop.choose_many(_kind("target", spec), me, order, order[:count], ctx.card)
+        order = picked + [c for c in order if not any(c is p for p in picked)]
     moved = 0
-    for side, unit in sorted(candidates, key=priority, reverse=True):
+    for side, unit in order:
         if moved >= count:
             break
         dst_bf, ok = destination_for(side, unit)
@@ -2611,7 +2639,8 @@ def _swap_position(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             candidates.append(u)
     if not candidates:
         return
-    target = max(candidates, key=lambda u: u.might)
+    target = ctx.loop.choose(_kind("target", spec), ctx.actor_side, candidates,
+                             max(candidates, key=lambda u: u.might), ctx.card)
     tgt_loc, tgt_list = locate(target)
 
     def place(unit, loc):
@@ -2672,8 +2701,10 @@ def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
     player = ctx._player_for_target(target)
     count = int(spec.get("count", spec.get("amount", 1)))
-    picks = sorted((c for c in player.trash if _zone_effect_card_ok(c, spec)),
-                   key=_zone_value, reverse=True)[:count]
+    cands = sorted((c for c in player.trash if _zone_effect_card_ok(c, spec)),
+                   key=_zone_value, reverse=True)
+    picks = ctx.loop.choose_many(_kind("card", spec), ctx._side_for_player(player), cands,
+                                 cands[:count], ctx.card)
     for card in picks:
         player.trash.remove(card)
         player.hand.append(card)
@@ -2713,7 +2744,11 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         side = ctx._side_for_player(player)
         bf = _deploy_destination(ctx, spec, side)
         for _ in range(count):
-            ctx.loop._deploy_gear(side, bf, token_spec, is_token=True)
+            # A real gear card (the registry spec has no state: a "return all"
+            # put it in a hand).
+            card = token_spec.instantiate()
+            card.is_token = True
+            ctx.loop._deploy_gear(side, bf, card, is_token=True)
         return
     side = ctx._side_for_player(player)
     location = str(spec.get("location", "base")).lower()
@@ -2738,7 +2773,8 @@ def _deploy_destination(ctx: "EffectContext", spec: Mapping[str, Any], side: str
         return ctx.battlefield
     bfs = ctx.loop.gs.battlefields
     enemy = "B" if side == "A" else "A"
-    return max(bfs, key=lambda b: (b.count(enemy), -bfs.index(b)))
+    return ctx.loop.choose("deploy", side, list(bfs),
+                           max(bfs, key=lambda b: (b.count(enemy), -bfs.index(b))), ctx.card)
 
 
 @effect("kill_other_deployed_here")
@@ -2901,8 +2937,9 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             return
         top = deck.cards[-1]
         agent = getattr(ctx.actor, "agent", None)
-        if agent is not None and hasattr(agent, "decide_predict_recycle") \
-                and agent.decide_predict_recycle(top):
+        recycle = bool(agent is not None and hasattr(agent, "decide_predict_recycle")
+                       and agent.decide_predict_recycle(top))
+        if ctx.loop.choose("predict_recycle", ctx.actor_side, [False, True], recycle, ctx.card):
             deck.cards.pop()
             deck.cards.insert(0, top)   # recycle to bottom (front of the list)
             ctx.loop._note_recycled(ctx.actor_side)
@@ -2941,6 +2978,7 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     keepable = [c for c in top if _zone_card_matches(c, tf) and _energy_ok(c)]
     if keepable:
         best = max(keepable, key=lambda c: int(getattr(c, "might", 0) or 0))
+        best = ctx.loop.choose(_kind("keep", spec), ctx.actor_side, keepable, best, ctx.card)
         top.remove(best)
         ctx.actor.hand.append(best)
     deck.cards[:0] = top  # recycle remainder to the bottom
@@ -2977,6 +3015,9 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
         picks = [c for c in picks
                  if int(c.cost_energy or 0) <= int(victim.cost_energy or 0)
                  and int(c.cost_power or 0) <= int(victim.cost_power or 0)]
+    if picks:
+        chosen = loop.choose_many(_kind("card", spec), side, picks, picks[:count], ctx.card)
+        picks = chosen + [c for c in picks if not any(c is x for x in chosen)]
     played = 0
     for card in picks:
         if played >= count:
