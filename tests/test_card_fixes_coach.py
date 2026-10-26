@@ -290,3 +290,51 @@ def test_attack_triggers_open_the_combat_showdown_so_players_can_still_act():
     assert banished == ["Punching Poro"]                    # the trigger came first
     assert any("Zed Master of Shadows" in lbl for lbl in labels)
     assert gs.battlefields[0].units_A == [clone] and not gs.battlefields[0].units_B
+
+
+def test_morgana_vindictive_doubles_the_damage_marked_on_a_unit():
+    """ "When you play me, deal damage to a unit equal to the damage marked on
+    it" (it dealt 0: the spec had no amount)."""
+    loop, a, _ = _setup()
+    hurt = UnitInPlay(card=UnitCard(name="Hurt", might=5))
+    hurt.damage = 3
+    fresh = UnitInPlay(card=UnitCard(name="Fresh", might=2))
+    loop.gs.battlefields[0].add_unit("B", fresh)
+    loop.gs.battlefields[0].add_unit("B", hurt)
+    morgana = CARD_REGISTRY["Morgana Vindictive"].instantiate()
+    loop._resolve_triggered_effects(morgana, "on_play", loop.gs.battlefields[0], a, loop.gs.B,
+                                    context_extra={"battlefield": loop.gs.battlefields[0]})
+    assert hurt not in loop.gs.battlefields[0].units_B          # 3 more: dead
+    assert fresh in loop.gs.battlefields[0].units_B and fresh.damage == 0
+
+
+def test_a_unit_anywhere_and_the_same_unit_for_it():
+    """Perfect Execution "Ready a unit and give it ASSAULT 3": a unit in base
+    can be chosen (spells only saw their battlefield's units), and one choice
+    covers both effects (each asked its own target)."""
+    from riftbound.core.enums import Domain
+    loop, a, _ = _setup(energy=9)
+    a.add_power(Domain.FURY, 2)
+    zed = UnitInPlay(card=UnitCard(name="Zed", might=4), ready=True)
+    a.base_units.append(zed)
+    loop.gs.battlefields[0].add_unit("B", UnitInPlay(card=UnitCard(name="Morgana", might=5)))
+    a.hand = [CARD_REGISTRY["Perfect Execution"].instantiate()]
+    asked = []
+
+    def chooser(_loop, kind, side, options, default, source):
+        asked.append(kind)
+        return options.index(zed) if zed in options else None
+    loop.chooser = chooser
+    loop._apply_action(a, ("SPELL", 0, 0))
+    assert [k for k in asked if k.startswith("target")] == ["target:ready_unit"]
+    assert zed.keyword_value("ASSAULT") == 3
+
+
+def test_showstopper_buffs_a_unit_in_base_then_moves_it():
+    loop, a, _ = _setup(energy=9)
+    poro = UnitInPlay(card=UnitCard(name="Poro", might=2))
+    a.base_units.append(poro)
+    loop.gs.battlefields[1].add_unit("A", UnitInPlay(card=UnitCard(name="Elsewhere", might=1)))
+    card = CARD_REGISTRY["Showstopper"].instantiate()
+    loop._resolve_card_effects(card, loop.gs.battlefields[1], a, loop.gs.B)
+    assert poro.might_counters == 1 and poro not in a.base_units

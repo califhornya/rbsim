@@ -159,7 +159,8 @@
         "timing": "action",
         "target": "chosen_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -191,7 +192,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 3,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -314,7 +316,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -346,7 +349,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "battlefield"
       }
     ]
   },
@@ -503,7 +507,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 5
+        "amount": 5,
+        "where": "battlefield"
       }
     ]
   },
@@ -571,7 +576,8 @@
         },
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -609,7 +615,8 @@
         "amount": 2,
         "cost": {
           "tap": true
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -857,7 +864,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 4
+        "amount": 4,
+        "where": "battlefield"
       },
       {
         "effect": "draw_cards",
@@ -1031,13 +1039,15 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "anywhere"
       }
     ]
   },
@@ -1741,7 +1751,8 @@
         "effect": "stun_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -1769,7 +1780,8 @@
       {
         "effect": "stun_unit",
         "trigger": "on_play",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -1829,7 +1841,8 @@
         "effect": "buff_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -1960,13 +1973,14 @@
         "timing": "action",
         "target": "chosen_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "give_keyword",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit",
+        "target": "it",
         "keyword": "TANK",
         "duration": "this_turn"
       }
@@ -2179,7 +2193,8 @@
       {
         "effect": "buff_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -2362,7 +2377,8 @@
         "amount_source": "self_might",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -2394,14 +2410,15 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "friendly_unit",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "give_keyword",
         "trigger": "on_cast",
         "timing": "action",
         "keyword": "TEMPORARY",
-        "target": "friendly_unit"
+        "target": "it"
       }
     ]
   },
@@ -2854,7 +2871,8 @@
         "trigger": "on_play",
         "target": "chosen_unit",
         "amount": 8,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -2957,7 +2975,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 6
+        "amount": 6,
+        "where": "battlefield"
       }
     ]
   },
@@ -3124,7 +3143,8 @@
         "cost": {
           "tap": true
         },
-        "minimum": 1
+        "minimum": 1,
+        "where": "anywhere"
       }
     ]
   },
@@ -3179,7 +3199,8 @@
         "effect": "deal_damage",
         "trigger": "on_play",
         "target": "enemy_unit",
-        "amount": 6
+        "amount": 6,
+        "where": "battlefield"
       }
     ]
   },
@@ -3213,7 +3234,8 @@
         "amount": 4,
         "target": "chosen_unit",
         "duration": "this_turn",
-        "minimum": 1
+        "minimum": 1,
+        "where": "anywhere"
       }
     ]
   },
@@ -3282,7 +3304,8 @@
         "target": "chosen_unit",
         "amount": 1,
         "duration": "this_turn",
-        "min_might": 1
+        "min_might": 1,
+        "where": "anywhere"
       },
       {
         "effect": "draw_cards",
@@ -3353,7 +3376,8 @@
         "target": "chosen_unit",
         "amount": -2,
         "duration": "this_turn",
-        "min_might": 1
+        "min_might": 1,
+        "where": "anywhere"
       }
     ]
   },
@@ -3574,7 +3598,8 @@
         "effect": "recall_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       },
       {
         "effect": "channel_rune",
@@ -3613,7 +3638,8 @@
         "target": "chosen_unit",
         "scope": "single",
         "amount": 6,
-        "count": 2
+        "count": 2,
+        "where": "anywhere"
       }
     ]
   },
@@ -4272,7 +4298,8 @@
         },
         "target_filter": {
           "is_exhausted": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -4550,7 +4577,8 @@
       {
         "effect": "ready_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -4669,7 +4697,8 @@
         "effect": "buff_unit",
         "trigger": "on_play",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "where": "anywhere"
       }
     ]
   },
@@ -4830,7 +4859,8 @@
         "amount": 1,
         "target_filter": {
           "exclude_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -4980,7 +5010,8 @@
         "effect": "ready_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -5251,7 +5282,8 @@
         "timing": "action",
         "target": "chosen_unit",
         "amount": 7,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -5550,7 +5582,8 @@
           "params": {
             "n": 1
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -5795,7 +5828,8 @@
         "target": "chosen_unit",
         "target_filter": {
           "might_at_most": 3
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -5895,7 +5929,8 @@
         "effect": "recall_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -5933,7 +5968,7 @@
         "effect": "ready_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "friendly_unit"
+        "target": "it"
       }
     ]
   },
@@ -6148,7 +6183,8 @@
         "effect": "give_keyword",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "keyword": "TEMPORARY"
+        "keyword": "TEMPORARY",
+        "where": "battlefield"
       }
     ]
   },
@@ -6183,7 +6219,8 @@
         },
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -7010,7 +7047,8 @@
         "scope": "single",
         "amount": 2,
         "count": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -7043,7 +7081,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -7071,7 +7110,8 @@
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -7099,12 +7139,14 @@
       {
         "effect": "kill_unit",
         "trigger": "on_cast",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       },
       {
         "effect": "kill_unit",
         "trigger": "on_cast",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -7226,7 +7268,8 @@
         "effect": "kill_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "battlefield"
       },
       {
         "effect": "draw_cards",
@@ -7646,7 +7689,8 @@
       {
         "effect": "stun_unit",
         "trigger": "on_play",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -7737,7 +7781,8 @@
         "target": "friendly_unit",
         "condition": {
           "type": "triggering_unit_buffed"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -7769,7 +7814,8 @@
       {
         "effect": "kill_unit",
         "trigger": "on_cast",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -7936,7 +7982,8 @@
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -7974,7 +8021,8 @@
       {
         "effect": "buff_unit",
         "trigger": "on_recycle",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -8435,37 +8483,43 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       },
       {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       }
     ]
   },
@@ -8616,7 +8670,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "amount": 5,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -8700,7 +8755,8 @@
         "target": "chosen_unit",
         "condition": {
           "type": "you_already_played_another_card_this_turn"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -8817,7 +8873,8 @@
         "cost": {
           "energy": 1,
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -8921,7 +8978,8 @@
         "effect": "ready_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -8961,7 +9019,8 @@
       {
         "effect": "buff_unit",
         "trigger": "on_stun_enemy",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -8991,7 +9050,8 @@
       {
         "effect": "stun_unit",
         "trigger": "on_cast",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "battlefield"
       },
       {
         "effect": "move_unit",
@@ -9218,7 +9278,8 @@
         "keyword": "GANKING",
         "cost": {
           "exhaust_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -9319,12 +9380,13 @@
         "effect": "buff_unit",
         "trigger": "on_cast",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "where": "base"
       },
       {
         "effect": "move_unit",
         "trigger": "on_cast",
-        "target": "friendly_unit",
+        "target": "it",
         "from": "base"
       }
     ]
@@ -10146,7 +10208,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "battlefield"
       }
     ]
   },
@@ -10311,7 +10374,8 @@
         "timing": "action",
         "target": "friendly_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -10449,7 +10513,8 @@
         "effect": "kill_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -10796,7 +10861,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 8
+        "amount": 8,
+        "where": "anywhere"
       }
     ]
   },
@@ -11253,7 +11319,8 @@
           "power": 1,
           "domain": "FURY",
           "energy": 1
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "keywords": []
@@ -12015,7 +12082,8 @@
         "duration": "this_turn",
         "condition": {
           "type": "moved_to_battlefield"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -12464,7 +12532,8 @@
         "duration": "this_turn",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -12810,7 +12879,8 @@
         "target_filter": {
           "subtype": "Mech",
           "exclude_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -12947,7 +13017,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": -2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -12989,7 +13060,8 @@
         "additional_cost": {
           "power": 1,
           "domain": "MIND"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -13077,7 +13149,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "battlefield"
       },
       {
         "effect": "play_token",
@@ -14301,7 +14374,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "enemy_unit",
-        "amount_source": "self_might"
+        "amount_source": "self_might",
+        "where": "anywhere"
       }
     ]
   },
@@ -14486,7 +14560,8 @@
         "duration": "this_turn",
         "condition": {
           "type": "moved_to_battlefield"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -14769,7 +14844,8 @@
           "params": {
             "n": 5
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -15116,12 +15192,14 @@
       {
         "effect": "recall_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       },
       {
         "effect": "recall_unit",
         "trigger": "on_play",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -15314,7 +15392,8 @@
         "target_filter": {
           "exclude_self": true,
           "might_at_most": 3
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -15977,7 +16056,8 @@
         "target": "enemy_unit",
         "target_filter": {
           "might_at_most": 3
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -16107,7 +16187,8 @@
         "target": "chosen_unit",
         "target_filter": {
           "might_at_most": 2
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -16165,7 +16246,8 @@
         "effect": "kill_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -16709,7 +16791,8 @@
         "additional_cost": {
           "power": 1,
           "domain": "ORDER"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -18168,7 +18251,8 @@
         },
         "amount": 3,
         "target": "chosen_unit",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -18354,7 +18438,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 3,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -18422,7 +18507,8 @@
       {
         "effect": "ready_unit",
         "trigger": "on_cast",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -18455,13 +18541,14 @@
         "timing": "action",
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "give_keyword",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit",
+        "target": "it",
         "keyword": "GANKING",
         "duration": "this_turn"
       }
@@ -18561,7 +18648,8 @@
       {
         "effect": "double_damage_this_turn",
         "trigger": "on_cast",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -18593,7 +18681,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 2,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -18705,7 +18794,8 @@
         "trigger": "on_cast",
         "target": "chosen_unit",
         "amount": 4,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -18802,7 +18892,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "chosen_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       }
     ]
   },
@@ -18832,7 +18923,8 @@
       {
         "effect": "recall_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -18912,7 +19004,8 @@
           "params": {
             "zone": "facedown"
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -19019,7 +19112,8 @@
         },
         "condition": {
           "type": "this_is_at_battlefield"
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -19049,7 +19143,8 @@
         "trigger": "on_conquer",
         "target": "friendly_unit",
         "amount": 8,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -19224,7 +19319,8 @@
               }
             }
           }
-        }
+        },
+        "where": "anywhere"
       },
       {
         "effect": "grant_temporary_might",
@@ -19238,7 +19334,8 @@
           "params": {
             "amount": 6
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -19478,7 +19575,8 @@
           "params": {
             "amount": 6
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -19621,7 +19719,8 @@
         "effect": "stun_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -19768,7 +19867,8 @@
           "Cat",
           "Dog",
           "Poro"
-        ]
+        ],
+        "where": "anywhere"
       }
     ]
   },
@@ -20014,7 +20114,8 @@
         "additional_cost": {
           "power": 1,
           "domain": "CALM"
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -20435,7 +20536,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": -4,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "predict",
@@ -20546,7 +20648,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": -10,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -20577,7 +20680,8 @@
         "effect": "deal_damage",
         "trigger": "on_death",
         "target": "enemy_unit",
-        "amount": 4
+        "amount": 4,
+        "where": "anywhere"
       }
     ]
   },
@@ -20771,7 +20875,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "amount": 3,
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -20800,7 +20905,8 @@
         "effect": "grant_temporary_might",
         "trigger": "on_second_draw",
         "target": "friendly_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       }
     ]
   },
@@ -21550,7 +21656,8 @@
         "timing": "action",
         "target": "friendly_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -22030,7 +22137,8 @@
         "cost": {
           "spend_xp": 3,
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -22355,7 +22463,8 @@
         "effect": "deal_damage",
         "trigger": "on_play",
         "amount": 1,
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -22702,13 +22811,15 @@
         "effect": "recall_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       },
       {
         "effect": "recall_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -22883,7 +22994,8 @@
         "target": "enemy_unit",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -23062,7 +23174,8 @@
         "target": "chosen_unit",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -23835,7 +23948,8 @@
         "target": "chosen_unit",
         "target_filter": {
           "might_at_most": 3
-        }
+        },
+        "where": "battlefield"
       }
     ]
   },
@@ -23911,7 +24025,8 @@
         "cost": {
           "tap": true,
           "sacrifice_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -24000,12 +24115,14 @@
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       },
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -24037,7 +24154,8 @@
         "target_filter": {
           "lacks_keyword": "TEMPORARY"
         },
-        "keyword": "TEMPORARY"
+        "keyword": "TEMPORARY",
+        "where": "anywhere"
       },
       {
         "effect": "draw_cards",
@@ -24707,7 +24825,8 @@
         "trigger": "on_friendly_unit_played",
         "target": "friendly_unit",
         "amount": 1,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ]
   },
@@ -24816,7 +24935,8 @@
         "effect": "kill_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ]
   },
@@ -24862,7 +24982,8 @@
           "params": {
             "n": 3
           }
-        }
+        },
+        "where": "anywhere"
       }
     ]
   },
@@ -26390,7 +26511,8 @@
               "type": "kicker_paid"
             }
           }
-        }
+        },
+        "where": "battlefield"
       },
       {
         "effect": "deal_damage",
@@ -26403,7 +26525,8 @@
         },
         "additional_cost": {
           "discard_cards": 1
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -26472,7 +26595,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 2,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -26535,12 +26659,13 @@
       {
         "effect": "ready_unit",
         "trigger": "on_cast",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       },
       {
         "effect": "give_temporary_assault",
         "trigger": "on_cast",
-        "target": "chosen_unit",
+        "target": "it",
         "amount": 3,
         "duration": "this_turn"
       }
@@ -26652,7 +26777,8 @@
         "target": "enemy_unit",
         "target_filter": {
           "subtype": "Calm"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -26718,7 +26844,9 @@
       {
         "effect": "deal_damage",
         "trigger": "on_play",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "amount_source": "its_damage",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -26825,7 +26953,8 @@
         "target": "friendly_unit",
         "target_filter": {
           "exclude_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -27027,7 +27156,8 @@
         "effect": "grant_temporary_might",
         "trigger": "on_play",
         "amount": 3,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -27210,12 +27340,13 @@
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "where": "anywhere"
       },
       {
         "effect": "cant_be_chosen_this_turn",
         "trigger": "on_cast",
-        "target": "friendly_unit"
+        "target": "it"
       }
     ],
     "variants": [
@@ -27327,7 +27458,7 @@
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "chosen_unit",
+        "target": "it",
         "amount": 2
       }
     ],
@@ -28249,7 +28380,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 4,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -28284,7 +28416,8 @@
           "discard_type": "gear",
           "energy": 1,
           "tap": true
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -28320,7 +28453,8 @@
           "subtype": "Body"
         },
         "amount": -5,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -28549,7 +28683,8 @@
         "target_filter": {
           "exclude_self": true,
           "is_exhausted": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -28705,7 +28840,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 2,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -28920,7 +29056,8 @@
               "type": "this_is_empowered"
             }
           }
-        }
+        },
+        "where": "anywhere"
       },
       {
         "effect": "grant_temporary_might",
@@ -28933,7 +29070,8 @@
         },
         "condition": {
           "type": "this_is_empowered"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -29082,7 +29220,8 @@
         "trigger": "on_cast",
         "target": "chosen_unit",
         "amount": 6,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -29147,7 +29286,8 @@
         "additional_cost": {
           "power": 1,
           "domain": "BODY"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -29566,7 +29706,8 @@
         "optional": true,
         "cost": {
           "energy": 1
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -29817,7 +29958,8 @@
         },
         "additional_cost": {
           "energy": 1
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -30136,7 +30278,8 @@
         "target_filter": {
           "might_at_most": 3,
           "at_battlefield": true
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -30339,7 +30482,8 @@
         "target": "chosen_unit",
         "target_filter": {
           "subtype": "Dragon"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -30500,7 +30644,8 @@
         "additional_cost": {
           "power": 1,
           "domain": "ORDER"
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -30906,7 +31051,8 @@
         "target": "enemy_unit",
         "target_filter": {
           "subtype": "Chaos"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -31262,7 +31408,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "target": "enemy_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "battlefield"
       },
       {
         "effect": "move_unit",
@@ -31333,7 +31480,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -31496,7 +31644,8 @@
               }
             }
           }
-        }
+        },
+        "where": "battlefield"
       },
       {
         "effect": "deal_damage",
@@ -31508,7 +31657,8 @@
           "params": {
             "count": 7
           }
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -31544,7 +31694,8 @@
         "duration": "this_turn",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -31701,7 +31852,8 @@
         "cost": {
           "disempower_self": true,
           "tap": true
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -31765,7 +31917,8 @@
           "disempower_self": true,
           "power": 1,
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -31796,7 +31949,8 @@
         "target": "enemy_unit",
         "target_filter": {
           "might_less_than_self": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -31839,7 +31993,8 @@
           "disempower_self": true
         },
         "target": "friendly_unit",
-        "amount": 2
+        "amount": 2,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -32332,7 +32487,8 @@
         "trigger": "on_play",
         "target": "chosen_unit",
         "amount": 1,
-        "count": 2
+        "count": 2,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -32365,7 +32521,8 @@
         "timing": "action",
         "target": "chosen_unit",
         "amount_source": "self_might",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -32489,7 +32646,8 @@
         "trigger": "on_play",
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -32551,7 +32709,8 @@
       {
         "effect": "ready_unit",
         "trigger": "on_cast",
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -32713,7 +32872,8 @@
         "additional_cost": {
           "kill_friendly_unit": true,
           "or_gear": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -33097,7 +33257,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "predict",
@@ -33172,7 +33333,8 @@
         "target": "chosen_unit",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -33206,7 +33368,8 @@
         "target": "chosen_unit",
         "additional_cost": {
           "exhaust_friendly_unit": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -33367,7 +33530,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "ready_runes",
@@ -33480,7 +33644,8 @@
         "trigger": "on_play",
         "target": "friendly_unit",
         "amount": 3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -33883,7 +34048,8 @@
         "effect": "grant_temporary_might",
         "trigger": "on_exhaust",
         "target": "friendly_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -33944,7 +34110,8 @@
         "timing": "reaction",
         "target": "chosen_unit",
         "amount_source": "friendly_exhausted_units",
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -34037,7 +34204,8 @@
         },
         "condition": {
           "type": "kicker_paid"
-        }
+        },
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -34189,7 +34357,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount_source": "shown_energy_cost"
+        "amount_source": "shown_energy_cost",
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -34252,7 +34421,8 @@
         "trigger": "on_play",
         "target": "enemy_unit",
         "amount": -3,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -34281,7 +34451,8 @@
         "effect": "deal_damage",
         "trigger": "on_cast",
         "amount": 10,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "anywhere"
       },
       {
         "effect": "draw_cards",
@@ -34365,7 +34536,8 @@
         "target": "friendly_unit",
         "additional_cost": {
           "kill_friendly_unit": false
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -34673,7 +34845,8 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -34905,7 +35078,8 @@
         "effect": "deal_damage",
         "trigger": "on_move",
         "target": "chosen_unit",
-        "amount": 3
+        "amount": 3,
+        "where": "battlefield"
       }
     ],
     "variants": [
@@ -34997,7 +35171,8 @@
         "target_filter": {
           "exclude_self": true
         },
-        "amount": 3
+        "amount": 3,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -35038,7 +35213,8 @@
         "amount_source": "shown_might",
         "condition": {
           "type": "showed_off"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -35800,7 +35976,8 @@
         "target": "enemy_unit",
         "cost": {
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -36166,7 +36343,8 @@
           "power": 1,
           "tap": true,
           "domain": "CHAOS"
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -36377,13 +36555,15 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "where": "anywhere"
       },
       {
         "effect": "stun_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -36724,7 +36904,8 @@
         "effect": "buff_unit",
         "trigger": "on_friendly_unit_death",
         "target": "friendly_unit",
-        "amount": 1
+        "amount": 1,
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -36918,7 +37099,8 @@
         "target": "chosen_unit",
         "additional_cost": {
           "discard_cards": 1
-        }
+        },
+        "where": "anywhere"
       },
       {
         "effect": "kill_unit",
@@ -36926,7 +37108,8 @@
         "target": "chosen_unit",
         "additional_cost": {
           "discard_cards": 1
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -37155,14 +37338,16 @@
         "trigger": "on_cast",
         "target": "enemy_unit",
         "amount": -2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
         "target": "friendly_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -37277,7 +37462,8 @@
         "cost": {
           "energy": 1,
           "tap": true
-        }
+        },
+        "where": "anywhere"
       }
     ],
     "variants": [
@@ -37310,7 +37496,8 @@
         "timing": "action",
         "target": "friendly_unit",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       }
     ],
     "variants": [

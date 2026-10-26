@@ -36,9 +36,12 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     a group ("all enemy units here", `filter: all_units_at_battlefields`) each
     take it; `split: true` divides the amount among the enemies here, killing
     in order ("5 damage split among enemy units here"). Baseline pick for a
-    single target: an enemy over a friend, one the damage kills, the mightiest."""
-    amount = _amount(ctx, spec)
-    if amount <= 0:
+    single target: an enemy over a friend, one the damage kills, the mightiest.
+    `amount_source: its_damage`: each target takes the damage marked on it
+    (Morgana Vindictive)."""
+    its_damage = spec.get("amount_source") == "its_damage"
+    amount = 0 if its_damage else _amount(ctx, spec)
+    if amount <= 0 and not its_damage:
         return
     target = str(spec.get("target", "enemy_unit")).lower()
     if target in ("opponent", "enemy"):
@@ -68,14 +71,21 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         enemy_ids |= {id(u) for u in ctx.opponent.base_units}
 
         def value(u):
-            kills = amount >= max(0, u.might - u.damage)
-            return (id(u) in enemy_ids, kills, u.might)
+            dealt = u.damage if its_damage else amount
+            kills = dealt > 0 and dealt >= max(0, u.might - u.damage)
+            return (id(u) in enemy_ids and dealt > 0, kills, u.might)
 
         cands = sorted(_choosable(ctx, cands), key=value, reverse=True)
         units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands,
                                      cands[:int(spec.get("count", 1))], ctx.card)
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
+        ctx.extra["it"] = units
+    if its_damage:
+        for u in units:
+            if u.damage > 0:
+                ctx.damage_units([u], u.damage)
+        return
     ctx.damage_units(units, amount)
 
 
@@ -2210,6 +2220,16 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         # The unit that caused this trigger ("give it +1 [might]").
         unit = ctx.extra.get("triggering_unit")
         return [unit] if unit is not None else []
+    if target == "it":
+        # "Ready a unit and give it ASSAULT 3": the unit(s) the card's previous
+        # effect chose, if still on the board.
+        on_board = {id(u) for bf in ctx.loop.gs.battlefields for u in bf.units_A + bf.units_B}
+        on_board |= {id(u) for p in (ctx.loop.gs.A, ctx.loop.gs.B) for u in p.base_units}
+        return [u for u in ctx.extra.get("it", []) if id(u) in on_board]
+    # Where "a unit" may be: `where` "anywhere" (the text names no place:
+    # base or any battlefield), "battlefield" (any battlefield) or "base";
+    # without it, the units here (a spell's battlefield, the source's).
+    where = str(spec.get("where", "")).lower()
     if target in _EVERYWHERE_TARGETS:
         # "Give friendly units +5" / "Deal 3 to all units in bases": not only here.
         who, where = _EVERYWHERE_TARGETS[target]
@@ -2219,15 +2239,18 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     elif target in _BOTH_SIDES_TARGETS:
         units = list(ctx.battlefield.units_A) + list(ctx.battlefield.units_B)
     elif target in _CHOOSER_TARGETS:
-        friendly = list(ctx._units_for_side(ctx.actor_side))
-        enemy = list(ctx._units_for_side(ctx.opponent_side))
+        friendly = _units_where(ctx, ctx.actor_side, where)
+        enemy = _units_where(ctx, ctx.opponent_side, where)
         units = enemy + friendly if bias == "enemy" else friendly + enemy
+    elif where:
+        units = _units_where(ctx, ctx._side_for_player(ctx._player_for_target(target)), where)
     else:
         units = ctx._units_for_target(target)
     tf = spec.get("target_filter")
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
-    if not units and scope == "single" and not target.startswith("all")             and not isinstance(ctx.card, SpellCard) and target not in _BOTH_SIDES_TARGETS:
+    if not units and scope == "single" and not target.startswith("all") and not where \
+            and not isinstance(ctx.card, SpellCard) and target not in _BOTH_SIDES_TARGETS:
         # An ability or trigger isn't aimed at one battlefield the way a spell is
         # (a legend's "give a unit ASSAULT 2"): with no candidate here, look at
         # the other battlefields, then base.
@@ -2235,6 +2258,8 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         if tf:
             units = [u for u in units if _passes_filter(u, tf, ctx)]
     if not units:
+        if scope == "single":
+            ctx.extra["it"] = []
         return []
     if scope != "single" or target.startswith("all"):
         return list(units)
@@ -2251,7 +2276,24 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units,
                                   units[:max(1, int(spec.get("count", 1) or 1))], ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
+    ctx.extra["it"] = picked
     return picked
+
+
+def _units_where(ctx: "EffectContext", side: str, where: str) -> list:
+    """`side`'s units a target may pick: here only (no `where`), or every
+    battlefield ("battlefield") and the base too ("anywhere"); here first, so
+    the baseline's pick is the one it made when only here counted."""
+    here = list(ctx._units_for_side(side))
+    if not where:
+        return here
+    gs = ctx.loop.gs
+    if where == "base":                    # "a friendly unit in your base" (Showstopper)
+        return list(gs.get_player(side).base_units)
+    out = here + [u for bf in gs.battlefields if bf is not ctx.battlefield for u in bf._units_for(side)]
+    if where == "anywhere":
+        out += list(gs.get_player(side).base_units)
+    return out
 
 
 def _kind(what: str, spec: Mapping[str, Any]) -> str:
@@ -2556,6 +2598,10 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
     if target in ("self", "this", "me"):
         src = _source_unit(ctx)
         candidates = [(me, src)] if src is not None else []
+    elif target == "it":
+        # "Buff a friendly unit in your base, then move it" (Showstopper).
+        candidates = [(w[0], u) for u in ctx.extra.get("it", [])
+                      for w in [loop._locate_unit(u)] if w is not None]
     else:
         enemy = any(k in target for k in ("enemy", "opponent"))
         friendly = any(k in target for k in ("friendly", "ally", "actor"))
@@ -2568,6 +2614,7 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
     if not target.startswith("all"):
         candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me)]
     if not candidates:
+        ctx.extra["it"] = []
         return
 
     dest = spec.get("destination")
@@ -2621,7 +2668,7 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         # Which unit(s): the baseline's priority order, one choice per unit.
         picked = loop.choose_many(_kind("target", spec), me, order, order[:count], ctx.card)
         order = picked + [c for c in order if not any(c is p for p in picked)]
-    moved = 0
+    moved, moved_units = 0, []
     for side, unit in order:
         if moved >= count:
             break
@@ -2632,6 +2679,8 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             if spec.get("ready") and loop._can_ready(unit):
                 unit.ready = True
             moved += 1
+            moved_units.append(unit)
+    ctx.extra["it"] = moved_units          # "Move a friendly unit and ready it"
 
 
 @effect("give_keyword")
