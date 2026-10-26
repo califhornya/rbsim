@@ -43,7 +43,7 @@ from riftbound.ai.encoding import (
 )
 from riftbound.ai.heuristics.base_agent import Action, Agent
 from riftbound.ai.net import RiftboundNet, predict
-from riftbound.core.decisions import DecisionPoint, Observation
+from riftbound.core.decisions import DecisionPoint, Observation, describe_option
 from riftbound.core.legality import legal_actions
 
 _PASS: Action = ("PASS", None, None)
@@ -77,11 +77,13 @@ class _ChoiceProbe:
 
     def __init__(self, me: str, force=None):
         self.me, self.force, self.first = me, force, None
+        self.labels: Optional[list] = None      # the first choice's options, described
 
     def __call__(self, loop, kind, side, options, default, source):
         if self.first is not None or not _searchable(kind, side, self.me, len(options)):
             return None
         self.first = (kind, len(options), default)
+        self.labels = [describe_option(loop, side, o) for o in options]
         if self.force is not None and tuple(self.force[:2]) == (kind, len(options)):
             return self.force[2]
         return None
@@ -110,7 +112,7 @@ class _ForcedChoice(_ChoiceProbe):
 
 
 class _Node:
-    __slots__ = ("N", "W", "P", "children", "expanded", "value")
+    __slots__ = ("N", "W", "P", "children", "expanded", "value", "labels")
 
     def __init__(self):
         self.N = 0
@@ -119,6 +121,7 @@ class _Node:
         self.children: dict = {}   # action_tuple -> _Node
         self.expanded = False
         self.value = 0.0
+        self.labels: dict = {}     # variant key -> its option, described
 
 
 class NetGuidedMCTSAgent(Agent):
@@ -217,17 +220,33 @@ class NetGuidedMCTSAgent(Agent):
         root_legal = legal_actions(self.loop, DecisionPoint.TURN_ACTION, side)
         if len(root_legal) <= 1:
             return root_legal[0].to_engine() if root_legal else _PASS
+        root = self.search(DecisionPoint.TURN_ACTION, root_legal, cards_played=cards_played)
+        return self._conclude(root, side, root_legal)
 
+    def search(self, point: DecisionPoint, legal: list, *, cards_played: int = 0,
+               bf_idx: Optional[int] = None) -> _Node:
+        """Search a decision with these legal actions (the main turn, or one ply
+        in a showdown / on a chain); the root's children (actions and their
+        choice variants) carry the visits N and total values W."""
+        self._ensure_rng()
+        side = self.player.name
         root = _Node()
-        for _ in range(self.iterations):
-            self._iterate(root, side, cards_played)
+        if point == DecisionPoint.TURN_ACTION:
+            for _ in range(self.iterations):
+                self._iterate(root, side, cards_played)
+        else:
+            for _ in range(self.reaction_iterations):
+                self._iterate_now(root, side, point, legal, bf_idx)
+        return root
 
-        if not root.children:
+    def _conclude(self, root: _Node, side: str, legal: list) -> Action:
+        """Record the visit distribution (and the training example) and play."""
+        if not root.children or not any(c.N for c in root.children.values()):
             return _PASS
         total = sum(c.N for c in root.children.values()) or 1
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None:
-            self._record_example(side, root_legal)
+            self._record_example(side, legal)
         return self._play(root, side)
 
     def _play(self, root: _Node, side: str) -> Action:
@@ -333,7 +352,7 @@ class NetGuidedMCTSAgent(Agent):
             loop._recompute_passives()
             cpt += 1
             if force is None and probe.first is not None:
-                key = self._split_child(node, action, probe.first)
+                key = self._split_child(node, action, probe.first, probe.labels)
             node = node.children[key]
             path.append(node)
         else:
@@ -344,7 +363,7 @@ class NetGuidedMCTSAgent(Agent):
             n.W += value
 
     @staticmethod
-    def _split_child(node: _Node, action, first) -> tuple:
+    def _split_child(node: _Node, action, first, labels: Optional[list] = None) -> tuple:
         """The action met a choice: one child per option (at most _MAX_VARIANTS:
         the baseline's and the first others), sharing the action's prior; the
         baseline's keeps the existing child. Returns that child's key."""
@@ -355,6 +374,8 @@ class NetGuidedMCTSAgent(Agent):
             key = (action, (kind, n, j))
             node.children[key] = child if j == default else _Node()
             node.P[key] = prior / len(options)
+            if labels and j < len(labels):
+                node.labels[key] = labels[j]
         return (action, (kind, n, default))
 
     def _puct_select(self, node: _Node, legal: list):
@@ -423,16 +444,8 @@ class NetGuidedMCTSAgent(Agent):
         legal = legal_actions(self.loop, point, side)
         if len(legal) <= 1:
             return legal[0].to_engine() if legal else _PASS
-        root = _Node()
-        for _ in range(self.reaction_iterations):
-            self._iterate_now(root, side, point, legal, bf_idx)
-        if not root.children or not any(c.N for c in root.children.values()):
-            return _PASS
-        total = sum(c.N for c in root.children.values()) or 1
-        self.last_visits = {a: c.N / total for a, c in root.children.items()}
-        if self.record is not None:
-            self._record_example(side, legal)
-        return self._play(root, side)
+        root = self.search(point, legal, bf_idx=bf_idx)
+        return self._conclude(root, side, legal)
 
     def _iterate_now(self, root: _Node, side: str, point: DecisionPoint, legal: list,
                      bf_idx: Optional[int]) -> None:
@@ -469,7 +482,7 @@ class NetGuidedMCTSAgent(Agent):
         if value is None:
             value = self._net_value(clone, side)
         if force is None and probe.first is not None:
-            key = self._split_child(root, action, probe.first)
+            key = self._split_child(root, action, probe.first, probe.labels)
         child = root.children[key]
         for n in (root, child):
             n.N += 1

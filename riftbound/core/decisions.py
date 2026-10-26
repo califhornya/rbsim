@@ -379,3 +379,33 @@ class DecisionRequest:
             "observation": self.observation.to_dict(),
             "legal_actions": [a.to_dict() for a in self.legal_actions],
         }
+
+
+def describe_option(loop, side: str, option) -> str:
+    """A short label for one option of a GameLoop.choose choice, as `side` sees
+    it: a unit (yours or theirs, Might, where), a card (type, cost), a
+    battlefield, a domain, a mode, yes / no."""
+    from .battlefield import Battlefield
+    from .combat import UnitInPlay
+    if isinstance(option, tuple) and option and isinstance(option[-1], UnitInPlay):
+        option = option[-1]                    # (side, unit) in effect moves
+    if isinstance(option, UnitInPlay):
+        where = loop._locate_unit(option)
+        whose = "yours" if where and where[0] == side else "theirs"
+        at = "base" if where is None or where[1] is None else \
+            f"battlefield {loop.gs.battlefields.index(where[1])}"
+        token = ", token" if option.is_token else ""
+        return f"{option.card.name} ({whose}, Might {option.might}, {at}{token})"
+    if isinstance(option, Battlefield):
+        i = loop.gs.battlefields.index(option)
+        return f"battlefield {i}" + (f" ({option.card.name})" if option.card is not None else "")
+    if isinstance(option, bool):
+        return "yes" if option else "no"
+    if hasattr(option, "cost_energy"):
+        cat = getattr(getattr(option, "category", None), "name", "card")
+        return f"{option.name} ({cat.lower()}, {option.cost_energy or 0} energy)"
+    if isinstance(option, tuple):
+        return str(getattr(option[0], "name", option[0]))
+    if isinstance(option, int):
+        return f"mode {option + 1}"
+    return str(getattr(option, "name", option))

@@ -544,6 +544,20 @@ Still to build / tune:
 6. **True self-play refinements** — [DONE] Dirichlet exploration noise at the
    root and visit-proportional moves for the first decisions
    (`NetGuidedMCTSAgent(explore=True)`). Optional: a two-controller driver.
+6b. [DONE 2026-10-26, branch `coach`] **Coach mode** — the user asked to guide
+   learning. `scripts/coach.py` (or double-click `scripts/allenatore.bat`)
+   serves a local page (Italian, 127.0.0.1:8765): the net plays one seat
+   (`ai/coach.py` `CoachAgent`), and at each decision with more than one option
+   the coach sees its top three moves (visit share, estimated win) and accepts
+   one or picks any legal move; for a move the coach picked, the choices inside
+   it are asked too. Coached decisions are saved per finished game
+   (`runs/coach/coach_*.npz`, policy target = the coach's move, z = the result)
+   and `train_selfplay.py --coach-dir runs/coach` mixes them in
+   (`--coach-fraction`, 10% of each batch). "Segnala un problema" appends the
+   situation and the note to `runs/coach/reports.jsonl`. Not coached: the
+   mulligan, and choices during the opponent's moves (combat damage while
+   defending). The net's early win estimates look miscalibrated (4-6% at turn
+   1 with Zed vs Shen).
 7. [DONE] **Learned mulligan + battlefield** — both are now net-value-guided (they
    use the trained net, so they improve as it learns):
    - `NetGuidedMCTSAgent.decide_mulligan` scores every keep/return combo by the net's

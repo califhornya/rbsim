@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allenatore Riftbound</title>
+<style>
+:root {
+  --bg: #f4f2ee; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #dedad3;
+  --accent: #2f5bd3; --accent-ink: #ffffff; --good: #1f8a4c; --bad: #c0392b; --warn: #b7791f;
+  --mine: #e8f0ff; --theirs: #fdecea; --chip: #f1efe9; --shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15161a; --panel: #1e2026; --ink: #ececf1; --muted: #9a9ca6; --line: #31343c;
+    --accent: #6b8cff; --accent-ink: #0d1020; --good: #4cc17f; --bad: #ff7b6b; --warn: #e3b25a;
+    --mine: #1f2a44; --theirs: #3a2224; --chip: #2a2d35; --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+header h1 { font-size: 16px; margin: 0; font-weight: 650; }
+.pill { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--chip); }
+.pill.waiting { background: var(--accent); color: var(--accent-ink); }
+.pill.thinking { background: var(--chip); color: var(--muted); }
+.pill.over { background: var(--good); color: #fff; }
+.spacer { flex: 1; }
+.stat { color: var(--muted); font-size: 12px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 14px; padding: 14px 16px; }
+@media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px; box-shadow: var(--shadow); }
+.panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  margin: 0 0 8px; font-weight: 650; }
+.side { display: flex; flex-direction: column; gap: 14px; }
+.player { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.player .who { font-weight: 650; }
+.kv { color: var(--muted); }
+.kv b { color: var(--ink); font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; align-items: flex-start; }
+.zone-label { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+.bfs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+@media (max-width: 640px) { .bfs { grid-template-columns: 1fr; } }
+.bf { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.bf.showdown { outline: 2px solid var(--warn); }
+.bf-title { display: flex; justify-content: space-between; gap: 6px; font-weight: 600; margin-bottom: 4px; }
+.badge { font-size: 11px; padding: 1px 6px; border-radius: 5px; background: var(--chip); color: var(--muted); font-weight: 600; }
+.badge.mine { background: var(--mine); color: var(--accent); }
+.badge.theirs { background: var(--theirs); color: var(--bad); }
+.unit, .card { border-radius: 7px; padding: 4px 7px; background: var(--chip); border: 1px solid var(--line);
+  font-size: 12.5px; cursor: help; max-width: 100%; }
+.unit.mine { background: var(--mine); }
+.unit.theirs { background: var(--theirs); }
+.unit.exhausted { opacity: .55; }
+.unit .might { font-weight: 700; margin-left: 4px; }
+.unit .dmg { color: var(--bad); font-weight: 700; margin-left: 3px; }
+.tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+.tag { font-size: 10.5px; padding: 0 5px; border-radius: 4px; background: rgba(127,127,127,.15); color: var(--muted); }
+.tag.warn { color: var(--warn); }
+.card .cost { color: var(--muted); margin-left: 4px; }
+.decision h3 { margin: 0 0 6px; font-size: 15px; }
+.sugg { border: 1px solid var(--line); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+.sugg .label { font-weight: 600; margin-bottom: 4px; }
+.bar { height: 6px; border-radius: 3px; background: var(--chip); overflow: hidden; margin: 4px 0; }
+.bar > div { height: 100%; background: var(--accent); }
+.meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+button { font: inherit; border: 0; border-radius: 7px; padding: 6px 12px; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+button.secondary { background: var(--chip); color: var(--ink); border: 1px solid var(--line); }
+button:disabled { opacity: .5; cursor: default; }
+select, textarea { font: inherit; width: 100%; padding: 6px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); }
+textarea { min-height: 64px; resize: vertical; }
+.option { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; }
+.option.default { border-color: var(--accent); }
+.log { max-height: 260px; overflow: auto; font: 12px/1.35 ui-monospace, Consolas, monospace;
+  color: var(--muted); white-space: pre-wrap; }
+.muted { color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid2 label { font-size: 12px; color: var(--muted); }
+.result { font-size: 15px; font-weight: 650; margin-bottom: 8px; }
+.result.won { color: var(--good); } .result.lost { color: var(--bad); }
+.note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Allenatore Riftbound</h1>
+  <span id="status" class="pill">…</span>
+  <span class="spacer"></span>
+  <span id="stats" class="stat"></span>
+</header>
+<main>
+  <section class="panel" id="board"><p class="muted">Avvia una partita dal pannello a destra.</p></section>
+  <aside class="side">
+    <section class="panel" id="newgame"></section>
+    <section class="panel decision" id="decision"></section>
+    <section class="panel">
+      <h2>Segnala un problema</h2>
+      <textarea id="note" placeholder="Es.: questa carta non dovrebbe poter fare…, la rete ha ignorato…"></textarea>
+      <div style="display:flex; gap:8px; margin-top:6px; align-items:center">
+        <button class="secondary" id="sendReport">Invia segnalazione</button>
+        <span id="reportOk" class="note"></span>
+      </div>
+      <div class="note">Salva la situazione di gioco attuale insieme alla tua nota.</div>
+    </section>
+    <section class="panel">
+      <h2>Cosa succede</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </aside>
+</main>
+<script>
+const POINT = { turn_action: "Il tuo turno", showdown_action: "Showdown", reaction: "Reazione" };
+function kindLabel(kind) {
+  const [head, rest] = kind.split(":");
+  const map = {
+    target: "Bersaglio", mode: "Quale modo", equip: "Su quale unità attaccare l'Equipment",
+    combat_damage_order: "Quale unità nemica uccidere per prima in combattimento",
+    cost_unit: "Cosa usare per pagare il costo", discard: "Quale carta scartare",
+    destination: "Dove spostare l'unità", deploy: "Dove schierare il gear", domain: "Di quale dominio prendere il Power",
+    keep: "Quale carta tenere", predict_recycle: "Mandare in fondo al mazzo la carta in cima?",
+    card: "Quale carta", show_off: "Cosa mostrare (SHOW OFF)", disarm: "Quale nemico indebolire (DISARM)",
+    spend_buff: "Quale buff spendere", cost_banish: "Quale carta bandire dal cimitero",
+    cost_extras: "Quanto spendere per ridurre il costo", first_unit_here: "Quale unità rimandare in base",
+  };
+  if (head === "optional") {
+    if (rest === "accelerate") return "Pagare ACCELERATE?";
+    if (rest === "additional_cost") return "Pagare il costo aggiuntivo?";
+    if (rest === "SHOW OFF") return "Usare SHOW OFF?";
+    return "Usare questo effetto?";
+  }
+  return (map[head] || kind) + (head === "target" && rest ? ` (${rest.replace(/_/g, " ")})` : "");
+}
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let S = null, lastKey = "", busy = false;
+
+function tip(name) {
+  const c = (S && S.cards && S.cards[name]) || {};
+  const head = [c.type, c.cost != null ? `${c.cost} energia` : "", c.might != null ? `Might ${c.might}` : ""].filter(Boolean).join(", ");
+  return esc(`${name}${head ? " — " + head : ""}${c.text ? "\n\n" + c.text : ""}`);
+}
+function unitHtml(u, side) {
+  const tags = [];
+  if (!u.ready) tags.push('<span class="tag">esausta</span>');
+  if (u.stunned) tags.push('<span class="tag warn">stordita</span>');
+  if (u.buffed) tags.push('<span class="tag">buff</span>');
+  if (u.empowered) tags.push('<span class="tag">potenziata</span>');
+  if (u.is_token) tags.push('<span class="tag">token</span>');
+  (u.keywords || []).forEach((k) => tags.push(`<span class="tag">${esc(k)}</span>`));
+  (u.gear || []).forEach((g) => tags.push(`<span class="tag" title="${tip(g)}">⚙ ${esc(g)}</span>`));
+  return `<div class="unit ${side} ${u.ready ? "" : "exhausted"}" title="${tip(u.name)}">
+    ${esc(u.name)}<span class="might">${u.might}</span>${u.damage ? `<span class="dmg">−${u.damage}</span>` : ""}
+    ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}</div>`;
+}
+const units = (list, side) => (list && list.length ? list.map((u) => unitHtml(u, side)).join("") : '<span class="muted">—</span>');
+const cards = (names) => (names && names.length ? names.map((n) => {
+  const c = (S.cards || {})[n] || {};
+  return `<div class="card" title="${tip(n)}">${esc(n)}${c.cost != null ? `<span class="cost">${c.cost}</span>` : ""}</div>`;
+}).join("") : '<span class="muted">—</span>');
+function power(p) {
+  const e = Object.entries(p || {}).filter(([, n]) => n);
+  return e.length ? e.map(([d, n]) => `${d[0]}${d.slice(1).toLowerCase()} ${n}`).join(", ") : "0";
+}
+function playerLine(o, who) {
+  const m = who === "my";
+  const pts = m ? o.my_points : o.opp_points;
+  return `<div class="player">
+    <span class="who">${m ? "Tu" : "Avversario"}</span>
+    <span class="kv">Punti <b>${pts}/${o.victory_score}</b></span>
+    <span class="kv">Energia <b>${m ? o.my_energy : o.opp_energy}</b></span>
+    <span class="kv">Power <b>${power(m ? o.my_power : o.opp_power)}</b></span>
+    <span class="kv">Rune <b>${m ? o.my_runes_ready : o.opp_runes_ready}/${m ? o.my_runes : o.opp_runes}</b> pronte</span>
+    <span class="kv">${m ? "Mano" : "Carte in mano"} <b>${m ? o.my_hand.length : o.opp_hand_count}</b></span>
+    <span class="kv">Mazzo <b>${m ? o.my_deck_count : o.opp_deck_count}</b></span>
+    <span class="kv" title="${(m ? o.my_trash : o.opp_trash).map(esc).join("\n")}">Cimitero <b>${(m ? o.my_trash : o.opp_trash).length}</b></span>
+    ${(m ? o.my_legend : o.opp_legend) ? `<span class="card" title="${tip(m ? o.my_legend : o.opp_legend)}">Leggenda: ${esc(m ? o.my_legend : o.opp_legend)}${(m ? o.my_legend_ready : o.opp_legend_ready) ? "" : " (esausta)"}</span>` : ""}
+    ${(m ? o.my_champion : o.opp_champion) ? `<span class="card" title="${tip(m ? o.my_champion : o.opp_champion)}">Campione: ${esc(m ? o.my_champion : o.opp_champion)}</span>` : ""}
+  </div>`;
+}
+function renderBoard() {
+  const o = S.observation, el = document.getElementById("board");
+  if (!o) { el.innerHTML = '<p class="muted">Avvia una partita dal pannello a destra.</p>'; return; }
+  const me = o.viewer, chain = [...(o.opp_chain || []).map((n) => "avv.: " + n), ...(o.my_chain || []).map((n) => "tu: " + n)];
+  const bfs = o.battlefields.map((bf, i) => {
+    const mine = me === "A" ? bf.A : bf.B, theirs = me === "A" ? bf.B : bf.A;
+    const ctrl = bf.controller == null ? '<span class="badge">libero</span>'
+      : bf.controller === me ? '<span class="badge mine">tuo</span>' : '<span class="badge theirs">avversario</span>';
+    const mg = me === "A" ? bf.gear_A : bf.gear_B, og = me === "A" ? bf.gear_B : bf.gear_A;
+    const fd = bf.facedown ? `<span class="badge">carta coperta: ${bf.facedown === me ? "tua" : "avversaria"}</span>` : "";
+    return `<div class="bf ${o.showdown_bf === i ? "showdown" : ""}">
+      <div class="bf-title"><span title="${bf.named ? tip(bf.named) : ""}">Campo ${i}${bf.named ? ": " + esc(bf.named) : ""}</span><span>${ctrl}</span></div>
+      ${o.showdown_bf === i ? '<div class="badge" style="margin-bottom:4px">showdown in corso</div>' : ""} ${fd}
+      <div class="zone-label">Avversario</div><div class="row">${units(theirs, "theirs")}${og.length ? cards(og) : ""}</div>
+      <div class="zone-label">Tu</div><div class="row">${units(mine, "mine")}${mg.length ? cards(mg) : ""}</div>
+    </div>`;
+  }).join("");
+  el.innerHTML = `
+    <h2>Turno ${o.turn} — ${o.active === me ? "tocca a te" : "tocca all'avversario"}</h2>
+    ${playerLine(o, "opp")}
+    <div class="zone-label">Base avversaria</div><div class="row">${units(o.opp_base_units, "theirs")}${o.opp_base_gear.length ? cards(o.opp_base_gear) : ""}</div>
+    <div class="bfs">${bfs}</div>
+    <div class="zone-label">La tua base</div><div class="row">${units(o.my_base_units, "mine")}${o.my_base_gear.length ? cards(o.my_base_gear) : ""}</div>
+    ${chain.length ? `<div class="zone-label">Sulla pila</div><div class="row">${chain.map((c) => `<div class="card">${esc(c)}</div>`).join("")}</div>` : ""}
+    <div style="margin-top:10px">${playerLine(o, "my")}</div>
+    <div class="zone-label">La tua mano</div><div class="row">${cards(o.my_hand)}</div>`;
+}
+function numbered(labels) {
+  // Two copies of a card in hand give two identical moves: "(copia 2)".
+  const total = {}, seen = {};
+  labels.forEach((l) => total[l] = (total[l] || 0) + 1);
+  return labels.map((l) => total[l] > 1 ? `${l} (copia ${seen[l] = (seen[l] || 0) + 1})` : l);
+}
+function renderDecision() {
+  const el = document.getElementById("decision"), p = S.pending;
+  if (S.status === "thinking") { el.innerHTML = '<h2>Decisione</h2><p class="muted">La rete sta pensando o l\'avversario sta giocando…</p>'; return; }
+  if (!p) { el.innerHTML = '<h2>Decisione</h2><p class="muted">Nessuna decisione in attesa.</p>'; return; }
+  if (p.type === "choice") {
+    el.innerHTML = `<h2>Scelta</h2><h3>${esc(kindLabel(p.kind))}</h3>
+      ${p.source ? `<div class="note" style="margin-bottom:8px">Per: ${esc(p.source)}</div>` : ""}
+      ${p.options.map((opt, i) => `<div class="option ${i === p.default ? "default" : ""}">
+        <span>${esc(opt)}${i === p.default ? ' <span class="badge">scelta del motore</span>' : ""}</span>
+        <button data-option="${i}">Scegli</button></div>`).join("")}`;
+    el.querySelectorAll("[data-option]").forEach((b) => b.onclick = () => send({ option: +b.dataset.option }));
+    return;
+  }
+  el.innerHTML = `<h2>${esc(POINT[p.point] || p.point)}</h2>
+    <h3>Le mosse che la rete preferisce</h3>
+    ${p.suggestions.map((s, i) => `<div class="sugg">
+      <div class="label">${i + 1}. ${esc(s.label)}</div>
+      <div class="bar"><div style="width:${Math.round(s.share * 100)}%"></div></div>
+      <div class="meta"><span>esplorata ${Math.round(s.share * 100)}%</span><span>stima di vittoria ${Math.round(s.win * 100)}%</span></div>
+      <div style="margin-top:6px"><button data-sugg="${i}">${i === 0 ? "Va bene, gioca questa" : "Gioca questa"}</button></div>
+    </div>`).join("")}
+    <h3 style="margin-top:10px">Oppure scegli tu</h3>
+    <select id="other">${numbered(p.actions).map((a, i) => `<option value="${i}">${esc(a)}</option>`).join("")}</select>
+    <div style="margin-top:6px"><button class="secondary" id="playOther">Gioca la mossa scelta</button></div>
+    <div class="note">Se scegli tu, ti verranno chieste anche le scelte dentro la mossa (bersagli, modi…).</div>`;
+  el.querySelectorAll("[data-sugg]").forEach((b) => b.onclick = () => send({ suggestion: +b.dataset.sugg }));
+  document.getElementById("playOther").onclick = () => send({ action: +document.getElementById("other").value });
+}
+function renderNewGame() {
+  const el = document.getElementById("newgame"), playing = S.status === "thinking" || S.status === "waiting";
+  if (playing) {
+    el.innerHTML = `<h2>Partita</h2><div class="muted">${esc(S.info.deck_mine)} (tu) contro ${esc(S.info.deck_opp)} — avversario: ${S.info.opponent === "net" ? "la rete" : "bot euristico"}</div>
+      <div style="margin-top:8px"><button class="secondary" id="abandon">Abbandona (non salva)</button></div>`;
+    document.getElementById("abandon").onclick = async () => { if (confirm("Abbandonare la partita? Le decisioni non verranno salvate.")) await post("/api/abandon", {}); };
+    return;
+  }
+  const opts = S.decks.map((d) => `<option value="${esc(d.path)}">${esc(d.name)}</option>`).join("");
+  const r = S.result;
+  const res = r ? (r.error ? `<div class="result lost">Errore: ${esc(r.error)}</div>`
+    : `<div class="result ${r.you_won ? "won" : "lost"}">${r.you_won ? "Hai vinto" : r.winner === "DRAW" ? "Pareggio" : "Hai perso"} in ${r.turns} turni</div>
+       <div class="note">Salvate ${S.decisions} decisioni, di cui ${S.corrections} tue correzioni.</div>`) : "";
+  el.innerHTML = `<h2>Nuova partita</h2>${res}
+    <div class="grid2">
+      <div><label>Il tuo mazzo</label><select id="mine">${opts}</select></div>
+      <div><label>Mazzo avversario</label><select id="opp">${opts}</select></div>
+      <div><label>Posto</label><select id="seat"><option value="A">A</option><option value="B">B</option></select></div>
+      <div><label>Avversario</label><select id="vs"><option value="net">La rete</option><option value="simple_trade">Bot euristico</option></select></div>
+    </div>
+    <div style="margin-top:8px"><button id="start">Inizia partita</button></div>
+    <div class="note">Rete: ${esc(S.net)}</div>`;
+  if (S.decks.length > 1) document.getElementById("opp").selectedIndex = 1;
+  document.getElementById("start").onclick = () => post("/api/new", {
+    deck_mine: document.getElementById("mine").value, deck_opp: document.getElementById("opp").value,
+    seat: document.getElementById("seat").value, opponent: document.getElementById("vs").value });
+}
+function render() {
+  const st = document.getElementById("status");
+  st.className = "pill " + S.status;
+  st.textContent = { idle: "In attesa", thinking: "Sta giocando…", waiting: "Tocca a te decidere", over: "Partita finita" }[S.status] || S.status;
+  document.getElementById("stats").textContent = S.status === "idle" ? "" : `decisioni ${S.decisions} · correzioni ${S.corrections}`;
+  renderBoard(); renderDecision(); renderNewGame();
+  const log = document.getElementById("log");
+  log.textContent = (S.log || []).join("\n"); log.scrollTop = log.scrollHeight;
+}
+async function post(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json(); if (j.error) alert(j.error); lastKey = ""; await poll(); return j;
+}
+async function send(answer) { if (busy) return; busy = true; try { await post("/api/answer", answer); } finally { busy = false; } }
+document.getElementById("sendReport").onclick = async () => {
+  const note = document.getElementById("note").value.trim(); if (!note) return;
+  const j = await post("/api/report", { note }); if (j.ok) { document.getElementById("note").value = ""; document.getElementById("reportOk").textContent = "Salvata, grazie!"; }
+};
+async function poll() {
+  try {
+    const r = await fetch("/api/state"); S = await r.json();
+    const key = JSON.stringify([S.status, S.pending, S.observation, (S.log || []).length, S.result, S.decisions]);
+    if (key !== lastKey) { lastKey = key; render(); }
+  } catch (e) { document.getElementById("status").textContent = "Server non raggiungibile"; }
+}
+setInterval(poll, 700); poll();
+</script>
+</body>
+</html>
