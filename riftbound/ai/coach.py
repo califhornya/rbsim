@@ -316,8 +316,27 @@ def _board_extras(gs, viewer: str) -> dict:
         return [{"domain": d.name, "ready": bool(r.ready)}
                 for d, rs in gs.get_player(side).rune_pool.items() for r in rs]
     moving = gs.pending_move
+
+    def fight(i, bf):
+        # The Might each side fights with here: the attacker's units with
+        # ASSAULT, the defender's with SHIELD; stunned units and units that deal
+        # no combat damage don't count (combat._total_might).
+        if gs.showdown_active and gs.showdown_bf_idx == i and gs.showdown_attacker:
+            attacker = gs.showdown_attacker
+        elif moving is not None and moving[0] == i:
+            attacker = moving[1]
+        else:
+            attacker = gs.active
+        out = {}
+        for side in ("A", "B"):
+            kw = "ASSAULT" if side == attacker else "SHIELD"
+            out[_rel(side, viewer)] = sum(u.might + u.keyword_value(kw) for u in bf._units_for(side)
+                                          if not u.stunned and not u.no_combat_damage)
+        return out
     return {
         "moving": None if moving is None else {"bf": moving[0], "who": _rel(moving[1], viewer)},
+        "fight": {str(i): fight(i, bf) for i, bf in enumerate(gs.battlefields)
+                  if bf.units_A and bf.units_B},
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
         "chain": [{"name": i.card.name, "owner": _rel(i.player, viewer), "bf": i.bf_idx}
                   for i in gs.chain],

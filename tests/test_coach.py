@@ -156,6 +156,32 @@ def test_while_moving_units_the_page_says_the_showdown_comes_next():
     assert _board_extras(gs, "A")["moving"] == {"bf": 0, "who": "me"}
 
 
+def test_a_fight_shows_the_might_with_assault_and_shield():
+    """The first coached Shen game: the page said 11 vs 8, the fight was 14 vs
+    12 (Shadow Fiend's ASSAULT 3, Shen's SHIELD, Disciple of Shen's SHIELD 3)."""
+    import random
+    from riftbound.ai.coach import _board_extras
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.loop import GameLoop
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    gs.active = "A"
+    loop = GameLoop(gs)
+    units = {n: UnitInPlay(card=CARD_REGISTRY[n].instantiate()) for n in (
+        "Shadow Fiend", "Shadowblade Lurker", "Blade Twirler",
+        "Shen Leader of the Kinkou Order", "Disciple of Shen")}
+    units["Shadow Fiend"].empowered = True
+    for n, u in units.items():
+        gs.battlefields[0].add_unit("B" if "Shen" in n else "A", u)
+    loop._recompute_passives()
+    assert _board_extras(gs, "A")["fight"] == {"0": {"me": 14, "opp": 12}}
+
+
 def test_the_log_tells_a_battlefield_discard_and_draw():
     from riftbound.ai.coach import _board_events
     from riftbound.core.cards import UnitCard

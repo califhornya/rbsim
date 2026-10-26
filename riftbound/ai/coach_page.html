@@ -315,7 +315,9 @@ function renderTable() {
     const mine = bf[me] || [], theirs = bf[them] || [];
     const ctrl = bf.controller == null ? `<span class="ctrl">${mine.length && theirs.length ? "Conteso" : "Libero"}</span>` : bf.controller === me
       ? '<span class="ctrl me">Lo controlli tu</span>' : '<span class="ctrl opp">Lo controlla l\'avversario</span>';
-    const sum = (l) => l.reduce((a, u) => a + (u.might || 0), 0);
+    // In a fight: the Might with ASSAULT (attacker) / SHIELD (defender).
+    const f = b.fight && b.fight[String(i)];
+    const sum = (l, who) => f ? f[who] : l.reduce((a, u) => a + (u.might || 0), 0);
     const fd = bf.facedown ? cardSlot(bf.facedown === me ? b.facedown_mine[String(i)] : null, `facedown:${i}`,
       { cls: "small", data: { facedown: bf.facedown === me ? "mine" : "theirs" } }) : "";
     const gm = (me === "A" ? bf.gear_A : bf.gear_B).map((g, j) => cardSlot(g, `gear:me:${i}:${j}`, { cls: "small" })).join("");
@@ -328,7 +330,7 @@ function renderTable() {
       <div class="bfmid">
         <div class="bfinfo l"><span class="name">${esc(bf.named || "Campo " + (i + 1))}</span>${ctrl}${o.showdown_bf === i ? '<span class="sd">SHOWDOWN IN CORSO</span>' : ""}${moving}</div>
         <div class="bfcard" data-ref="bfcard:${i}">${bf.named ? face(bf.named) : ""}</div>
-        <div class="bfinfo"><span class="mt opp">Avversario ⚔ ${sum(theirs)}</span><span class="mt me">Tu ⚔ ${sum(mine)}</span><div class="bfx">${fd}</div></div>
+        <div class="bfinfo"><span class="mt opp">Avversario ⚔ ${sum(theirs, "opp")}</span><span class="mt me">Tu ⚔ ${sum(mine, "me")}</span><div class="bfx">${fd}</div></div>
       </div>
       <div class="row">${mine.map((u, j) => unitSlot(u, `unit:me:${i}:${j}`, "me")).join("")}${gm}</div>
     </div>`;
