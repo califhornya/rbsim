@@ -45,6 +45,12 @@ def test_a_coached_game_saves_its_decisions(tmp_path):
 
     def pick(pending):
         seen.append(pending["type"])
+        if pending["type"] == "mulligan":
+            # The opening hand, and the net's best mulligans (keep-all among them).
+            assert len(pending["hand"]) == 4 and pending["max"] == 2
+            assert 1 <= len(pending["suggestions"]) <= 3
+            assert all(len(s["return"]) <= 2 and s["text"] for s in pending["suggestions"])
+            return {"return": [0]}
         if pending["type"] == "choice":
             assert all(o["text"] for o in pending["options"])
             return {"option": pending["default"]}
@@ -59,7 +65,11 @@ def test_a_coached_game_saves_its_decisions(tmp_path):
     _play(session, pick)
     st = session.state()
     assert st["result"] and "error" not in st["result"], st["result"]
-    assert "decision" in seen
+    assert "decision" in seen and seen[0] == "mulligan"
+    texts = [e["text"] for e in st["events"]]
+    assert any(t.startswith("Mulligan: Rimanda ") for t in texts)
+    # The opponent's mulligan is told once the game is over.
+    assert texts[-1].startswith("Mulligan dell'avversario: ")
     files = list((tmp_path / "coach").glob("coach_*.npz"))
     assert len(files) == 1
     examples = load_coach_examples(tmp_path / "coach")
@@ -225,6 +235,10 @@ def test_the_net_passes_when_its_move_isnt_clearly_better():
     root.children[tank] = node(70, 0.10)
     agent.gs.pending_move = (0, "A")                                 # PASS would start a showdown
     assert agent.prefer_pass(root, tank) == tank
+    agent.gs.pending_move = None
+    fiend = ("UNIT", 2, 0)                                           # a 2-drop on turn 2: play it
+    root.children = {fiend: node(64, -0.79), _PASS: node(26, -0.72)}
+    assert agent.prefer_pass(root, fiend) == fiend
 
 
 def test_the_log_says_where_burned_cards_come_from():

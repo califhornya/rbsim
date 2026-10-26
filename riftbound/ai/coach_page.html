@@ -103,6 +103,7 @@ textarea { min-height: 60px; resize: vertical; }
 [data-ref].pick { cursor: pointer; }
 [data-ref].pick .face { animation: pulse 1.1s ease-in-out infinite; }
 .bf.pick { animation: pulsebox 1.1s ease-in-out infinite; cursor: pointer; }
+[data-ref].mull-out .face { animation: none; box-shadow: 0 0 0 3px var(--bad); filter: grayscale(.7) brightness(.7); }
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 3px var(--gold), 0 0 6px var(--gold); } 50% { box-shadow: 0 0 0 3px var(--gold), 0 0 22px var(--gold); } }
 @keyframes pulsebox { 0%,100% { box-shadow: inset 0 0 0 2px var(--gold); } 50% { box-shadow: inset 0 0 0 3px var(--gold), 0 0 18px var(--gold); } }
 .badge-n { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #1d1503;
@@ -267,6 +268,7 @@ const TYPES = { Unit: "Unità", Spell: "Magia", Gear: "Equipaggiamento", Champio
 const KW = { ASSAULT: "ASSAULT", SHIELD: "SHIELD", TANK: "TANK", BACKLINE: "BACKLINE", DEFLECT: "DEFLECT",
   GANKING: "GANKING", TEMPORARY: "TEMPORARY (muore a fine turno)", HIDDEN: "HIDDEN" };
 let S = null, lastKey = "", busy = false, focus = 0, pileOpen = null, setupOpen = false;
+let mullSel = [];   // the hand cards the coach is sending back at the mulligan
 const REF = {};          // data-ref -> what the preview shows
 
 /* ---------- cards ---------- */
@@ -408,7 +410,7 @@ function pct(w) { const p = Math.round(w * 100); return p < 1 ? "meno dell'1%" :
 
 function markTable() {
   const p = S.pending;
-  document.querySelectorAll("[data-ref]").forEach((el) => el.classList.remove("can", "sugg", "pick", "sugg-dst"));
+  document.querySelectorAll("[data-ref]").forEach((el) => el.classList.remove("can", "sugg", "pick", "sugg-dst", "mull-out"));
   document.querySelectorAll(".badge-n").forEach((el) => el.remove());
   if (!p || S.status !== "waiting") return;
   const badge = (el, text) => { if (el) el.insertAdjacentHTML("beforeend", `<span class="badge-n">${esc(text)}</span>`); };
@@ -420,6 +422,9 @@ function markTable() {
     Object.entries(bySrc).forEach(([ref, ks]) => { const el = node(ref); if (el) { el.classList.add("sugg"); badge(el, ks.join("·")); } });
     const s = p.suggestions[focus];
     if (s) { const a = p.actions[s.action], d = node(s.choice_ref || a.dst); if (d && (d.classList.contains("zone") || d.classList.contains("bf"))) d.classList.add("sugg-dst"); }
+  } else if (p.type === "mulligan") {
+    p.hand.forEach((c, i) => { const el = node(c.ref); if (!el) return;
+      if (mullSel.includes(i)) { el.classList.add("mull-out"); badge(el, "rimanda"); } else el.classList.add("pick"); });
   } else if (p.type === "choice") {
     // Options that share a place on the table (cards in a pile) are picked in the sidebar.
     const uses = {};
@@ -462,7 +467,8 @@ function renderSide() {
       <div><div class="n me">${o.my_points}</div><div class="who">Tu</div></div>
       <div class="muted">su ${o.victory_score}</div>
       <div><div class="n opp">${o.opp_points}</div><div class="who">Avversario</div></div></div>
-      <div class="turnline">Turno ${o.turn} · ${o.active === me ? "tocca a te" : "tocca all'avversario"}${alert ? `<span class="alert">${alert}</span>` : ""}</div>`;
+      <div class="turnline">${S.pending && S.pending.type === "mulligan" ? "Prima della partita: mulligan"
+        : `Turno ${o.turn} · ${o.active === me ? "tocca a te" : "tocca all'avversario"}`}${alert ? `<span class="alert">${alert}</span>` : ""}</div>`;
   } else $("#score").innerHTML = '<div class="muted">Nessuna partita in corso.</div>';
   renderCoach();
   // chain
@@ -514,6 +520,23 @@ function renderCoach() {
       d.onmouseenter = () => { const n = node(ref); if (n) n.style.outline = "3px solid #fff"; };
       d.onmouseleave = () => { const n = node(ref); if (n) n.style.outline = ""; };
     });
+    return;
+  }
+  if (p.type === "mulligan") {
+    const [best, ...alts] = p.suggestions || [];
+    const mine = mullSel.length ? "Rimanda " + mullSel.map((i) => p.hand[i].text).join(" e ") : "Tieni tutta la mano";
+    el.innerHTML = `<h2>Mulligan</h2><p class="ctx">${esc(p.context || "")}</p>
+      ${best ? `<div class="best"><div><div class="hint" style="color:var(--gold);font-weight:700">Il consiglio della rete</div>
+        <div class="what">${esc(best.text)}</div><div class="why">Secondo la rete, così vinci circa il ${pct(best.win)} delle volte.</div>
+        <button class="gold" data-sugg="0">Va bene, fai così</button></div></div>` : ""}
+      ${alts.map((s, k) => `<div class="alt"><span class="nb">${k + 2}</span>
+        <span class="t">${esc(s.text)}<small>Vinci circa il ${pct(s.win)}</small></span>
+        <button class="ghost" data-sugg="${k + 1}">Fai questa</button></div>`).join("")}
+      <div class="or">Oppure decidi tu</div>
+      <p class="hint">Clicca sul tavolo fino a ${p.max} carte della tua mano da rimandare; riclicca per tenerle.</p>
+      <button class="ghost" style="width:100%;margin-top:6px" id="mullgo">${esc(mine)}</button>`;
+    el.querySelectorAll("[data-sugg]").forEach((b) => b.onclick = () => send({ suggestion: +b.dataset.sugg }));
+    $("#mullgo").onclick = () => send({ return: mullSel.slice() });
     return;
   }
   const sg = p.suggestions || [], top = sg[0];
@@ -574,6 +597,15 @@ document.addEventListener("click", (ev) => {
   closeMenu();
   if (!el || !S) return;
   const ref = el.dataset.ref, p = S.pending;
+  if (S.status === "waiting" && p && p.type === "mulligan") {
+    const i = p.hand.findIndex((c) => c.ref === ref);
+    if (i >= 0) {
+      mullSel = mullSel.includes(i) ? mullSel.filter((x) => x !== i)
+        : mullSel.length < p.max ? [...mullSel, i].sort((a, b) => a - b) : mullSel;
+      renderCoach(); markTable();
+    }
+    return;
+  }
   if (S.status === "waiting" && p && p.type === "choice") {
     // The clicked card, or the battlefield around it, may be the option.
     for (let n = el; n; n = n.parentElement && n.parentElement.closest("[data-ref]")) {
@@ -682,6 +714,7 @@ $("#sendReport").onclick = async () => {
 };
 function render() {
   if (S.status !== "waiting") focus = 0;
+  if (!S.pending || S.pending.type !== "mulligan") mullSel = [];
   S._seen = seenResult === JSON.stringify(S.result);
   renderTable(); renderSide(); markTable(); renderModal();
   requestAnimationFrame(() => { squeeze(); drawArrows(); });

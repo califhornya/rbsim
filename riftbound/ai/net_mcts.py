@@ -272,10 +272,13 @@ class NetGuidedMCTSAgent(Agent):
         """PASS instead of `key` when `key` isn't clearly better: a free-looking
         move can spend what the opponent's turn needs (Shen's legend tapped for a
         TANK nobody fights with, energy a reaction would want). Not while a move
-        is held: PASS then starts its showdown (it isn't "do nothing")."""
+        is held: PASS then starts its showdown (it isn't "do nothing"). Only
+        abilities: a unit, spell or move the search prefers is played (the margin
+        made the net skip its 2-drop on turn 2, a noisy Q nudging it to PASS)."""
         p = root.children.get(_PASS)
         best = root.children.get(key)
         if key == _PASS or p is None or best is None or not p.N or not best.N \
+                or _split_key(key)[0][0] != "ABILITY" \
                 or getattr(self.gs, "pending_move", None) is not None:
             return key
         return _PASS if best.W / best.N - p.W / p.N < self.pass_margin else key
@@ -420,6 +423,15 @@ class NetGuidedMCTSAgent(Agent):
         the net's VALUE; keep the best. No hand-crafted rule — as the value net
         learns that a dead card in hand loses, it learns to mulligan it (e.g.
         Nocturne). Averaged over a few determinized draws to cut variance."""
+        best_combo, best_v = [], -1e30
+        for combo, v in self.mulligan_values():
+            if v > best_v:
+                best_v, best_combo = v, combo
+        return best_combo
+
+    def mulligan_values(self) -> list:
+        """(hand indices to send back, the net's value of the opening after it)
+        for every mulligan (§117: up to two cards), keep-all first."""
         self._ensure_rng()
         self._release_forced()
         side = self.player.name
@@ -427,9 +439,8 @@ class NetGuidedMCTSAgent(Agent):
         if n == 0:
             return []
         from riftbound.core.state import determinize
-        combos = [list(c) for r in range(3) for c in itertools.combinations(range(n), r)]
-        best_combo, best_v = [], -1e30
-        for combo in combos:
+        out = []
+        for combo in (list(c) for r in range(3) for c in itertools.combinations(range(n), r)):
             vals = []
             for _ in range(max(1, self.mulligan_samples)):
                 clone = self.gs.clone()
@@ -437,10 +448,8 @@ class NetGuidedMCTSAgent(Agent):
                 clone.get_player(side).mulligan(combo, clone.rng)
                 determinize(clone, observer=side, rng=clone.rng)
                 vals.append(self._value_only(clone, side))
-            v = sum(vals) / len(vals)
-            if v > best_v:
-                best_v, best_combo = v, combo
-        return best_combo
+            out.append((combo, sum(vals) / len(vals)))
+        return out
 
     # -- showdown / reaction decisions -----------------------------------------
 

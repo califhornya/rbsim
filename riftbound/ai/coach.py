@@ -201,6 +201,13 @@ def option_text(gs, viewer: str, option) -> str:
     return str(getattr(option, "name", option)).title()
 
 
+def mulligan_text(hand: list, back: list) -> str:
+    """A mulligan in words: the cards (names) sent back from `hand`."""
+    if not back:
+        return "Tieni tutta la mano"
+    return "Rimanda " + " e ".join(hand[i] for i in back)
+
+
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
               DecisionPoint.SHOWDOWN_ACTION: "Passa", DecisionPoint.REACTION: "Non reagire"}
 
@@ -519,6 +526,27 @@ class CoachAgent(NetGuidedMCTSAgent):
     def decide_reaction(self, opponent, chain):
         return self._coached(DecisionPoint.REACTION)
 
+    def decide_mulligan(self) -> list:
+        """The coach picks the cards (up to two) to send back; the net's three
+        best mulligans, by its value of the opening, are the advice."""
+        hand = [c.name for c in self.player.hand]
+        if not hand:
+            return []
+        self.session.opening = True        # no turn has started: nothing to log yet
+        self.session.thinking(DecisionPoint.MULLIGAN)
+        suggestions, seen = [], set()
+        for combo, v in sorted(self.mulligan_values(), key=lambda cv: -cv[1]):
+            names = tuple(sorted(hand[i] for i in combo))   # two copies: one idea
+            if names not in seen and len(suggestions) < 3:
+                seen.add(names)
+                suggestions.append({"return": combo, "win": (v + 1) / 2,
+                                    "text": mulligan_text(hand, combo)})
+        try:
+            return self.session.ask_mulligan(hand, suggestions)
+        finally:
+            self.session.opening = False
+            self.session.view = None       # the first turn's line comes next
+
     def _release_coach(self) -> None:
         chooser = getattr(self.loop, "chooser", None)
         if isinstance(chooser, _CoachChooser) and chooser.me == self.player.name:
@@ -627,6 +655,8 @@ class CoachSession:
         self.autoplay = False               # the net finishes the game on its own
         self._abandoned = False             # ... and nothing is saved
         self._thread: Optional[threading.Thread] = None
+        self.opp_mulligan: Optional[dict] = None   # told once the game is over
+        self.opening = False                # the coach's mulligan, before turn 1
 
     # -- the game thread ---------------------------------------------------------
 
@@ -670,6 +700,13 @@ class CoachSession:
                                move=True)
                 return action
             setattr(them.agent, name, watched)
+
+        def mulligan(_inner=them.agent.decide_mulligan, _p=them):
+            hand = [c.name for c in _p.hand]
+            back = _inner() or []
+            self.opp_mulligan = {"hand": hand, "returned": [hand[i] for i in back]}
+            return back
+        them.agent.decide_mulligan = mulligan
         self.gs, self.side = gs, seat
         self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
                      "deck_opp": Path(deck_opp).stem, "opponent": opponent,
@@ -694,6 +731,11 @@ class CoachSession:
             self.result = {"error": repr(exc)}
         finally:
             self._snapshot()
+            if self.opp_mulligan is not None:
+                m = self.opp_mulligan
+                self.event("sys", "Mulligan dell'avversario: " + (
+                    f"aveva rimandato {' e '.join(m['returned'])}" if m["returned"]
+                    else "aveva tenuto tutta la mano") + f" ({', '.join(m['hand'])})")
             log.sinks.pop(threading.get_ident(), None)
             self.pending = None
             self.status = "over"
@@ -708,8 +750,9 @@ class CoachSession:
         extras = _board_extras(self.gs, self.side)
         if view == self.view and extras == self.extras:
             return False
-        for who, text in _board_events(self.view, view):
-            self.event(who, text)
+        if not self.opening:
+            for who, text in _board_events(self.view, view):
+                self.event(who, text)
         self.view, self.extras = view, extras
         return True
 
@@ -756,6 +799,25 @@ class CoachSession:
         if not answer:                     # the net finishes alone: its move
             return {"suggestion": 0, "auto": True} if suggestions else {"action": 0, "auto": True}
         return answer
+
+    def ask_mulligan(self, hand: list, suggestions: list) -> list:
+        """The coach's mulligan: the hand indices to send back (up to two)."""
+        answer = self._wait({"type": "mulligan", "hand": [{"text": n, "ref": f"hand:{i}"}
+                                                          for i, n in enumerate(hand)],
+                             "suggestions": suggestions, "max": 2,
+                             "context": "La tua mano iniziale: puoi rimandare in fondo al mazzo "
+                                        "fino a 2 carte e pescarne altrettante."})
+        if "suggestion" in answer:
+            back = suggestions[int(answer["suggestion"])]["return"]
+        elif "return" in answer:
+            back = sorted({int(i) for i in answer["return"] if 0 <= int(i) < len(hand)})[:2]
+        else:                              # the net finishes alone: its mulligan
+            back = suggestions[0]["return"] if suggestions else []
+        if answer:
+            note = "" if not suggestions else " (come la rete)" if back == suggestions[0]["return"] \
+                else " (diversa dalla rete)"
+            self.event("me", f"Mulligan: {mulligan_text(hand, back)}{note}", move=True)
+        return back
 
     def ask_choice(self, kind: str, side: str, options: list, default: int,
                    source: Optional[str]) -> int:
@@ -825,7 +887,8 @@ class CoachSession:
         path = self.out_dir / "reports.jsonl"
         with open(path, "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "note": note,
-                                 **self.state(), "log": self._copy(self.log)}, default=str) + "\n")
+                                 **self.state(), "log": self._copy(self.log),
+                                 "opp_mulligan": self.opp_mulligan}, default=str) + "\n")
         return path
 
     # -- training examples -----------------------------------------------------------
