@@ -236,3 +236,20 @@ def test_blade_twirler_burns_the_player_you_choose():
         assert asked == [True]
         burned = a if pick_me else loop.gs.B
         assert [c.name for c in burned.trash] == ["Mine" if pick_me else "Theirs"]
+
+
+def test_the_final_point_by_conquer_needs_every_battlefield_scored():
+    """§473.1.b: at 7 points a conquer wins only if the other battlefield was
+    scored this turn too; otherwise its player draws a card instead."""
+    for other_scored, points, hand in ((False, 7, 1), (True, 8, 0)):
+        loop, a, _ = _setup()
+        a.deck.cards = [UnitCard(name="Top")]
+        loop.gs.points_A = 7
+        bf0, bf1 = loop.gs.battlefields
+        if other_scored:
+            bf1.mark_scored("A")
+        assert loop._gain_points("A", 1, "conquer", bf0) == points - 7
+        assert loop.gs.points_A == points and len(a.hand) == hand
+    loop, a, _ = _setup()
+    loop.gs.points_A = 7
+    assert loop._gain_points("A", 1, "hold", loop.gs.battlefields[0]) == 1   # holding is free

@@ -4507,6 +4507,15 @@ class GameLoop:
                 any(self._has_effect(u.card, "early_score_draws") for u in self._all_units_in_play()):
             self._draw_one(gs.get_player(side))
             return 0
+        points = gs.points_A if side == "A" else gs.points_B
+        if how == "conquer" and points + n >= gs.victory_score and any(
+                other is not bf and not (other.scored_this_turn_A if side == "A"
+                                         else other.scored_this_turn_B)
+                for other in gs.battlefields):
+            # The Final Point (§473.1.b): through a Conquer only after scoring
+            # every battlefield this turn; otherwise draw a card instead.
+            self._draw_one(gs.get_player(side))
+            return 0
         return n
 
     def _gain_points(self, side: str, n: int, how: str, bf: Optional[Battlefield] = None) -> int:
