@@ -2643,39 +2643,46 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         ctx.extra["it"] = []
         return
 
-    dest = spec.get("destination")
-    if dest is None:
-        dest = "base" if to_base_verb or candidates[0][0] == them else "battlefield"
-    dest = str(dest).lower()
+    def dest_kind(side):
+        # Per unit: the chosen unit's side decides (it went by the first
+        # candidate's, so a friendly unit picked after an enemy was "moved" to
+        # the base it was in, and the enemy moved instead).
+        dest = spec.get("destination")
+        if dest is None:
+            dest = "base" if to_base_verb or side == them else "battlefield"
+        return str(dest).lower()
 
-    def destination_for(side, unit):
+    def destinations(side, unit):
+        """Where `unit` may go: a list of battlefields, None standing for base."""
+        dest = dest_kind(side)
         where = loop._locate_unit(unit)
         cur = where[1] if where else None
         if dest == "base":
-            return None, True
+            return [None] if cur is not None else []
         if dest in ("here", "this_battlefield"):
-            ok = ctx.battlefield in gs.battlefields and cur is not ctx.battlefield
-            return ctx.battlefield, ok
+            return [ctx.battlefield] if ctx.battlefield in gs.battlefields and cur is not ctx.battlefield else []
         if dest in ("stunned_at", "deployed_at"):
             # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar)
             at = ctx.extra.get(dest)
-            return at, at is not None and cur is not at
+            return [at] if at is not None and cur is not at else []
         if dest == "to_or_from_base" and cur is not None:
-            return None, True
-        others = [bf for bf in gs.battlefields if bf is not cur]
-        if not others:
-            return None, False
+            return [None]
+        return [bf for bf in gs.battlefields if bf is not cur]
+
+    def destination_for(side, unit):
+        options = destinations(side, unit)
+        if len(options) == 1 or None in options:
+            return options[0]
         if side == me:
-            best = max(others, key=lambda bf: _attack_value(ctx, side, unit, bf))
-            if _attack_value(ctx, side, unit, best) <= 0:
-                return best, False
+            best = max(options, key=lambda bf: _attack_value(ctx, side, unit, bf))
         else:
             # An enemy is moved where it fights worst for them.
-            best = min(others, key=lambda bf: _attack_value(ctx, side, unit, bf))
-        return loop.choose(_kind("destination", spec), me, others, best, ctx.card), True
+            best = min(options, key=lambda bf: _attack_value(ctx, side, unit, bf))
+        return loop.choose(_kind("destination", spec), me, options, best, ctx.card)
 
     def priority(item):
         side, unit = item
+        dest = dest_kind(side)
         where = loop._locate_unit(unit)
         at_bf = where is not None and where[1] is not None
         if side == them:
@@ -2689,22 +2696,19 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             return (losing, unit.might)
         return (not at_bf, unit.might)                     # send a base unit in
 
+    # Only units that can go somewhere are chosen; a chosen unit moves (the
+    # move is the card's, not a "may": a pick no longer falls through to an
+    # unchosen unit).
+    candidates = [(s, u) for s, u in candidates if destinations(s, u)]
     order = sorted(candidates, key=priority, reverse=True)
     if not scope_all:
         # Which unit(s): the baseline's priority order, one choice per unit.
-        picked = loop.choose_many(_kind("target", spec), me, order, order[:count], ctx.card)
-        order = picked + [c for c in order if not any(c is p for p in picked)]
-    moved, moved_units = 0, []
+        order = loop.choose_many(_kind("target", spec), me, order, order[:count], ctx.card)
+    moved_units = []
     for side, unit in order:
-        if moved >= count:
-            break
-        dst_bf, ok = destination_for(side, unit)
-        if not ok:
-            continue
-        if loop._move_unit_by_effect(unit, dst_bf):
+        if loop._move_unit_by_effect(unit, destination_for(side, unit)):
             if spec.get("ready") and loop._can_ready(unit):
                 unit.ready = True
-            moved += 1
             moved_units.append(unit)
     ctx.extra["it"] = moved_units          # "Move a friendly unit and ready it"
 

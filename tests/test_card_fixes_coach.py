@@ -392,3 +392,25 @@ def test_return_and_kill_reach_a_unit_in_base():
     loop.gs.B.base_units.append(theirs)
     loop._resolve_card_effects(CARD_REGISTRY["Vengeance"].instantiate(), loop.gs.battlefields[0], a, loop.gs.B)
     assert theirs not in loop.gs.B.base_units and [c.name for c in loop.gs.B.trash] == ["Theirs"]
+
+
+def test_a_moved_unit_is_the_one_chosen():
+    """Twilight Step "Move a unit with 3 [might] or less": the coach chose their
+    own unit in base; the destination went by the first candidate (an enemy:
+    "to base"), the chosen unit was already there, and the enemy moved instead."""
+    from riftbound.core.enums import Domain
+    loop, a, _ = _setup(energy=5)
+    a.add_power(Domain.CHAOS, 2)
+    mine = UnitInPlay(card=UnitCard(name="Reveler", might=3), ready=True)
+    a.base_units.append(mine)
+    theirs = UnitInPlay(card=UnitCard(name="Merchant", might=2))
+    loop.gs.battlefields[0].add_unit("B", theirs)
+    a.hand = [CARD_REGISTRY["Twilight Step"].instantiate()]
+
+    def chooser(_loop, kind, side, options, default, source):
+        if kind.startswith("target"):
+            return next(i for i, o in enumerate(options) if (o[1] if isinstance(o, tuple) else o) is mine)
+        return None
+    loop.chooser = chooser
+    loop._apply_action(a, ("SPELL", 0, 0))
+    assert mine not in a.base_units and theirs in loop.gs.battlefields[0].units_B

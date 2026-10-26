@@ -397,21 +397,21 @@
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 4,
+        "base_gear": 6,
         "base_units": [],
-        "deck": 23,
-        "energy": 1,
-        "hand": 3,
+        "deck": 24,
+        "energy": 0,
+        "hand": 2,
         "power_pool": {
-          "CALM": 5,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 11,
-        "trash": 9
+        "runes_in_play": 10,
+        "trash": 7
       },
       "points_A": 8,
       "points_B": 2,
-      "spells_cast": 18,
+      "spells_cast": 16,
       "turns": 16,
       "units_played": 12,
       "winner": "A",
@@ -539,21 +539,21 @@
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 3,
         "base_units": [],
-        "deck": 25,
+        "deck": 24,
         "energy": 0,
         "hand": 5,
         "power_pool": {
-          "CALM": 2,
+          "CALM": 1,
           "CHAOS": 6
         },
-        "runes_in_play": 8,
-        "trash": 8
+        "runes_in_play": 7,
+        "trash": 7
       },
       "points_A": 8,
       "points_B": 3,
-      "spells_cast": 12,
+      "spells_cast": 11,
       "turns": 12,
       "units_played": 9,
       "winner": "A",
