@@ -23,8 +23,14 @@ def be_gentle() -> None:
         os.environ.setdefault(var, "1")
     if sys.platform == "win32":
         import ctypes
+        from ctypes import wintypes
         below_normal = 0x00004000
-        kernel32 = ctypes.windll.kernel32
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        # The process handle is pointer-sized: with ctypes' default int it was
+        # truncated and the call failed silently.
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        kernel32.SetPriorityClass.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+        kernel32.SetPriorityClass.restype = wintypes.BOOL
         kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), below_normal)
     else:
         try:
