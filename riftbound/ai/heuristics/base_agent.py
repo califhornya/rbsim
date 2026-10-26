@@ -47,7 +47,8 @@ class Agent(ABC):
         / learning agents may override to recycle a bad top card."""
         return False
 
-    def decide_mode(self, card, n_modes: int) -> int:
-        """Modal "choose one": pick which mode (0..n_modes-1) to resolve. Default:
-        the first mode. Search / learning agents may override to branch."""
-        return 0
+    def decide_mode(self, card, n_modes: int):
+        """Modal "choose one": which mode (0..n_modes-1) to resolve, or None for
+        no preference (the engine's baseline tries each mode and takes the best).
+        Search / learning agents may override to branch."""
+        return None

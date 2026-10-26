@@ -450,6 +450,46 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   trash and banishing instead of trashing); Neeko Blending In (a deckbuilding
   rule: extra legends).
 
+## Engine choices (branch `engine-choices`, 2026-10-26)
+The choices the rules give players inside effects, costs and combat are made by
+the engine with fixed baseline policies (the agents and the RL action space only
+pick top-level actions). Every one now goes through `GameLoop.choose` /
+`choose_many` (`kind`, side, options, the baseline's pick): targets, modes, "you
+may"s (effects, ACCELERATE, SHOW OFF, "you may" additional costs), the unit
+combat damage kills first, the unit an Equipment attaches to, the unit / gear /
+card a cost takes, cost extras, the Power domain, dig / predict, effect moves and
+their destination, deploy destination. No chooser: the baseline decides.
+`scripts/choice_audit.py` (report: `CHOICE_AUDIT.md`) plays random corpus decks
+and replays sampled choices with each alternative forced to measure the baselines.
+- [DONE] **Fixed baselines** (they lost to a random pick): "return a unit to
+  hand" and "-N Might to a unit" aim at an enemy first (Rebuke, Gust, Frigid
+  Touch...; they bounced / shrank our own unit); costs give up a token, then a
+  unit in base, then the weakest (it was the first unit on a battlefield, and it
+  went to the trash without dying: now DEATHKNELL, tokens cease to exist);
+  modes are tried on a copy of the game and the best position wins
+  (`effects._best_mode`, `_position_value`; it was always the first mode;
+  `Agent.decide_mode` now returns None for "no preference"); combat damage kills
+  the most Might it can (`combat.kill_order`; it was list order); ready / buff /
+  heal skip units they would do nothing to.
+- [DONE] **Data:** Sacrifice needs a Mighty unit (`unit_filter`, and is
+  unplayable without one: mandatory additional costs in `_play_forbidden`),
+  Zaun Punk kills a friendly gear (`kill_friendly_gear`; it killed a unit), Bard
+  Mercurial exhausts the legend (`exhaust_legend`), Detonation Amplifier and
+  Shimmering Swimmer may give up a gear (`or_gear`).
+- [DONE] **Bugs found:** showdown / chain infinite loop (KNOWN_ISSUES #26), card
+  value-equality (#25), effect-made Bomb tokens were the registry spec (a "return
+  all" put it in a hand: crash), EQUIP with a kill cost could attach to the
+  killed unit; optional effects are asked only once their condition holds.
+- **Still weak:** `equip` (first non-token unit on a battlefield; about as good
+  as a random pick, the only clearly positive gain left, +1.5 points per game),
+  effect-move targets (Yasuo Unforgiven, Ride the Wind), discards (first card in
+  hand / cheapest), the "you may" additional cost is always paid. The audit's
+  gains are measured with simple_trade on both seats; near the end of a game a
+  small change flips the heuristic opponent's plan, so rare choices are noisy.
+- **Next:** let search / the network make the frequent choices through
+  `choose` (MCTS can branch on them like on actions), starting with equip,
+  damage and Might targets, combat order.
+
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
 the real engine (reset/step/legal_actions/observation/reward vs a fixed opponent).

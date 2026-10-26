@@ -86,10 +86,11 @@ def test_udyr_spends_his_buff_for_a_new_mode_each_time():
     assert not loop._ability_usable(loop.gs.A, entry)        # no buff
     udyr.might_counters = 1
     loop._apply_action(loop.gs.A, ("ABILITY", "ACTIVATED", idx, None))
-    assert enemy.damage == 2 and udyr.might_counters == 0
+    # The baseline takes the mode worth most: stunning the 9-Might enemy.
+    assert enemy.stunned and enemy.damage == 0 and udyr.might_counters == 0
     udyr.might_counters = 1
     loop._apply_action(loop.gs.A, ("ABILITY", "ACTIVATED", idx, None))
-    assert enemy.stunned                                       # the next mode
+    assert enemy.damage == 2                                   # a new mode
 
 
 def test_albus_ferros_turns_base_buffs_into_runes():

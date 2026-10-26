@@ -165,6 +165,9 @@ class EffectSpec:
         passing to a handler. target/scope/duration are only included when set,
         so unset values defer to each handler's own default (backward compat)."""
         merged = dict(self.params)
+        # The verb, as a mode's or a sequence step's own dict carries it (the
+        # name of a choice the effect makes: GameLoop.choose).
+        merged.setdefault("effect", self.effect)
         if self.target is not None:
             merged["target"] = self.target
         if self.target_filter:

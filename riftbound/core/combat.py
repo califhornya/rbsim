@@ -147,11 +147,15 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
     return sum(unit.might for unit in units if not unit.stunned and not unit.no_combat_damage)
 
 
-def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False) -> List[UnitInPlay]:
+def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
+                     first=None, damage: int = 0) -> List[UnitInPlay]:
     """Damage-assignment order (§460.2.c): TANK units must take lethal first,
     BACKLINE units last, everyone else in between. On a Tank+Backline conflict
     the controller chooses — we resolve deterministically as Tank (take first).
-    `ignore_tank`: the assigner ignores TANK here (Dune Surfer)."""
+    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). `first(normal,
+    damage)` picks which of the units in between takes lethal first (the
+    assigner's choice, asked only when `damage` can't kill them all; see
+    kill_order), the rest then follow kill_order; without it, list order."""
     tanks: List[UnitInPlay] = []
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
@@ -165,7 +169,37 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False) -> List
     if ignore_tank:
         # Free to choose the order: the most kills first.
         normal.sort(key=lambda u: u.might - u.damage)
+    if first is not None:
+        alive = [u for u in normal if not _is_dead(u)]
+        left = damage - sum(_lethal(u) for u in tanks if not _is_dead(u))
+        if len(alive) > 1 and 0 < left < sum(_lethal(u) for u in alive):
+            lead = first(alive, left)
+            rest = kill_order([u for u in alive if u is not lead], left - _lethal(lead))
+            normal = [lead] + rest + [u for u in normal if _is_dead(u)]
     return tanks + normal + backline
+
+
+def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
+    """The order to assign `damage` to `units` in (lethal first, one by one) that
+    kills the most enemy Might, then the most units: the best set it can kill,
+    mightiest first, then the others in list order. Exact for up to 10 units."""
+    if len(units) > 10:
+        return sorted(units, key=lambda u: _lethal(u))
+    best, best_value = [], (0, 0)
+    for mask in range(1, 1 << len(units)):
+        pick = [u for i, u in enumerate(units) if mask >> i & 1]
+        if sum(_lethal(u) for u in pick) > damage:
+            continue
+        value = (sum(u.might for u in pick), len(pick))
+        if value > best_value:
+            best, best_value = pick, value
+    best = sorted(best, key=lambda u: -u.might)
+    return best + [u for u in units if not any(u is b for b in best)]
+
+
+def _lethal(unit: UnitInPlay) -> int:
+    """Damage that kills `unit` as _apply_damage assigns it (1 for a 0-might unit)."""
+    return 1 if unit.might == 0 else max(0, unit.might - unit.damage)
 
 
 def _is_dead(unit: UnitInPlay) -> bool:
@@ -178,7 +212,7 @@ def _is_dead(unit: UnitInPlay) -> bool:
 
 
 def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
-                  ignore_tank: bool = False) -> tuple[int, int]:
+                  ignore_tank: bool = False, first=None) -> tuple[int, int]:
     """Apply damage to the provided units; return (kills, damage_assigned).
 
     Lethal-first per §460.2.c: assign each unit its lethal amount before moving
@@ -192,7 +226,7 @@ def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
     take = take or (lambda unit, amount: amount)
     assigned = 0
     kills = 0
-    for unit in _ordered_targets(units, ignore_tank):
+    for unit in _ordered_targets(units, ignore_tank, first, damage):
         if damage <= 0:
             break
         if _is_dead(unit):
@@ -223,11 +257,15 @@ def resolve_might_combat(
     ignore_tank_a: bool = False,
     ignore_tank_b: bool = False,
     might_mods: Optional[dict] = None,
+    first_a=None,
+    first_b=None,
 ) -> CombatStats:
     """Resolve simultaneous combat between two unit groups.
 
     attacker_side: "A" if A is attacking (Turn Player), "B" otherwise.
     Attackers gain ASSAULT bonus; defenders gain SHIELD bonus.
+    `first_a` / `first_b`: which of A's / B's units its opponent kills first
+    (see _ordered_targets).
     """
     stats = CombatStats()
 
@@ -245,8 +283,8 @@ def resolve_might_combat(
     damage_to_a = _total_might(units_b)
     damage_to_b = _total_might(units_a)
 
-    kills_a, assigned_a = _apply_damage(units_a, damage_to_a, take, ignore_tank_a)
-    kills_b, assigned_b = _apply_damage(units_b, damage_to_b, take, ignore_tank_b)
+    kills_a, assigned_a = _apply_damage(units_a, damage_to_a, take, ignore_tank_a, first_a)
+    kills_b, assigned_b = _apply_damage(units_b, damage_to_b, take, ignore_tank_b, first_b)
 
     stats.kills_A = kills_a
     stats.kills_B = kills_b

@@ -37,3 +37,16 @@ def test_guard_priority_absorbs_spell_damage_first():
 
     assert bf.count("B") == 0
     assert guard not in bf.units_B
+
+
+def test_kill_order_kills_the_most_might():
+    from riftbound.core.combat import kill_order
+    two, three, five = (UnitInPlay(UnitCard(name=n, might=m)) for n, m in (("2", 2), ("3", 3), ("5", 5)))
+    # 5 damage: the 5 alone or 2 + 3 kill the same Might; two kills win the tie.
+    assert kill_order([five, two, three], 5)[:2] == [three, two]
+    # 8 damage: 5 + 3 beats 5 + 2 and 2 + 3.
+    assert kill_order([two, three, five], 8)[:2] == [five, three]
+    # 4 damage: the 3 beats the 2.
+    assert kill_order([two, three, five], 4)[0] is three
+    # Nothing killable: list order.
+    assert kill_order([five, three], 2) == [five, three]
