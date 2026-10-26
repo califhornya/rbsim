@@ -221,7 +221,8 @@
         "trigger": "on_discarded",
         "optional": true,
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       }
     ]
@@ -1276,7 +1277,8 @@
         "optional": true,
         "cost": {
           "energy": 1,
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       }
     ]
@@ -1530,7 +1532,8 @@
         },
         "count": 1,
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CALM"
         }
       }
     ]
@@ -3671,7 +3674,8 @@
         "trigger": "on_attack",
         "optional": true,
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "MIND"
         }
       }
     ]
@@ -5180,7 +5184,8 @@
         "optional": true,
         "cost": {
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "BODY"
         }
       }
     ]
@@ -6328,7 +6333,8 @@
         "target": "self",
         "cost": {
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "CHAOS"
         }
       }
     ]
@@ -8182,7 +8188,8 @@
         "cost": {
           "energy": 1,
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "ORDER"
         },
         "kill_friendly": true,
         "might_margin": 1,
@@ -11243,7 +11250,9 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "FURY",
+          "energy": 1
         }
       }
     ],
@@ -11421,7 +11430,8 @@
           "energy": 1,
           "power": 1,
           "recycle": 1,
-          "tap": true
+          "tap": true,
+          "domain": "FURY"
         },
         "token_name": "Mech"
       }
@@ -12382,7 +12392,8 @@
         "timing": "action",
         "target": "friendly_unit",
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CALM"
         }
       }
     ]
@@ -12976,7 +12987,8 @@
         "amount": -2,
         "duration": "this_turn",
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "MIND"
         }
       }
     ]
@@ -13509,7 +13521,8 @@
         "timing": "action",
         "target": "self",
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "MIND"
         }
       },
       {
@@ -13694,7 +13707,24 @@
         "count": 1,
         "cost": {
           "energy": 1,
-          "power": 1
+          "power": 1,
+          "domain": "MIND"
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
+      },
+      {
+        "effect": "score_point",
+        "trigger": "activated",
+        "timing": "action",
+        "target": "actor",
+        "amount": 1,
+        "cost": {
+          "energy": 4,
+          "power": 4,
+          "domain": "MIND",
+          "tap": true
         },
         "condition": {
           "type": "this_is_at_battlefield"
@@ -14340,7 +14370,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 2
+          "power": 2,
+          "domain": "BODY"
         }
       }
     ]
@@ -14876,7 +14907,8 @@
         "trigger": "on_move",
         "target": "friendly_unit",
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CHAOS"
         },
         "condition": {
           "type": "moved_to_battlefield"
@@ -16675,7 +16707,8 @@
           "type": "triggering_unit_is_mighty"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         }
       }
     ]
@@ -18943,7 +18976,8 @@
         "timing": "action",
         "cost": {
           "energy": 3,
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         },
         "condition": {
           "type": "you_already_played_another_card_this_turn"
@@ -18980,7 +19014,8 @@
         "target": "chosen_unit",
         "cost": {
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "FURY"
         },
         "condition": {
           "type": "this_is_at_battlefield"
@@ -19055,7 +19090,8 @@
           "params": {}
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       },
       {
@@ -19069,7 +19105,8 @@
           "params": {}
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       }
     ]
@@ -19975,7 +20012,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CALM"
         }
       }
     ]
@@ -22451,7 +22489,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CHAOS"
         }
       }
     ]
@@ -23275,7 +23314,8 @@
         "effect": "move_self_to_weaker_enemy_battlefield",
         "trigger": "activated",
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "CHAOS"
         }
       }
     ]
@@ -26395,7 +26435,8 @@
         "target": "self",
         "duration": "this_turn",
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         },
         "condition": {
           "type": "kicker_paid"
@@ -26565,7 +26606,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 2,
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       },
       {
@@ -26708,7 +26750,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 6,
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       }
     ],
@@ -26818,7 +26861,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 2,
-          "power": 1
+          "power": 1,
+          "domain": "FURY"
         }
       },
       {
@@ -27685,7 +27729,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 4,
-          "power": 1
+          "power": 1,
+          "domain": "CALM"
         }
       },
       {
@@ -28974,7 +29019,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 5,
-          "power": 1
+          "power": 1,
+          "domain": "BODY"
         }
       }
     ],
@@ -29099,7 +29145,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "BODY"
         }
       }
     ],
@@ -29133,7 +29180,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 3,
-          "power": 1
+          "power": 1,
+          "domain": "BODY"
         }
       },
       {
@@ -29210,7 +29258,8 @@
         "effect": "empower_self",
         "trigger": "activated",
         "cost": {
-          "power": 2
+          "power": 2,
+          "domain": "BODY"
         }
       }
     ],
@@ -29869,7 +29918,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 2,
-          "power": 1
+          "power": 1,
+          "domain": "CHAOS"
         }
       },
       {
@@ -30250,7 +30300,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 6,
-          "power": 2
+          "power": 2,
+          "domain": "CHAOS"
         }
       },
       {
@@ -30447,7 +30498,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         }
       }
     ],
@@ -30626,7 +30678,8 @@
         "trigger": "activated",
         "once_per_turn": true,
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         },
         "condition": {
           "type": "enemy_choices_this_turn_at_least",
@@ -30736,7 +30789,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 1,
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         }
       },
       {
@@ -30819,7 +30873,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 3,
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         }
       }
     ],
@@ -31047,7 +31102,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 1,
-          "power": 2
+          "power": 2,
+          "domain": "ORDER"
         }
       },
       {
@@ -32575,7 +32631,8 @@
         "cost": {
           "energy": 2,
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "FURY"
         }
       }
     ],
@@ -35152,7 +35209,8 @@
         "trigger": "on_play",
         "target": "friendly_unit",
         "additional_cost": {
-          "power": 1
+          "power": 1,
+          "domain": "BODY"
         },
         "condition": {
           "type": "kicker_paid"
@@ -36106,7 +36164,8 @@
         "target": "friendly_unit",
         "cost": {
           "power": 1,
-          "tap": true
+          "tap": true,
+          "domain": "CHAOS"
         }
       }
     ],
@@ -36276,7 +36335,8 @@
         "trigger": "trash_on_card_played",
         "optional": true,
         "cost": {
-          "power": 1
+          "power": 1,
+          "domain": "ORDER"
         },
         "condition": {
           "type": "triggering_card_matches",

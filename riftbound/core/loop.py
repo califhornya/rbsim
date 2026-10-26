@@ -1060,7 +1060,7 @@ class GameLoop:
             gear = card if unit is None and isinstance(card, GearCard) else None
             if parsed["tap"] and gear is not None and getattr(gear, "tapped", False):
                 return False      # "exhaust this" on an exhausted gear
-            if not self._pay_energy_and_generic(actor, parsed["energy"], parsed["power"]):
+            if not self._pay_energy_and_generic(actor, parsed["energy"], parsed["power"], parsed["domain"]):
                 return False
             if parsed["tap"] and unit is not None:
                 self._exhaust(unit)
@@ -1964,16 +1964,25 @@ class GameLoop:
             return True
         return any(actor.can_pay_cost(0, n, d) for d in list(actor.power_pool))
 
-    def _can_pay_energy_and_generic(self, actor: Player, energy: int, power: int) -> bool:
-        """Affordability of an ability / additional cost: Energy plus generic power.
+    def _can_pay_energy_and_generic(self, actor: Player, energy: int, power: int,
+                                    domain: Optional[Domain] = None) -> bool:
+        """Affordability of an ability / additional cost: Energy plus power of
+        `domain` ("[2] [fury]"), or generic power ([rune]) when it is None.
         (Player.can_pay_cost with no domain ignores power entirely — that made
         every such power cost free.)"""
-        return actor.energy >= (energy or 0) and self._can_pay_generic_power(actor, power or 0)
+        if actor.energy < (energy or 0):
+            return False
+        if domain is not None and power:
+            return actor.can_pay_cost(0, power, domain)
+        return self._can_pay_generic_power(actor, power or 0)
 
-    def _pay_energy_and_generic(self, actor: Player, energy: int, power: int) -> bool:
-        if not self._can_pay_energy_and_generic(actor, energy, power):
+    def _pay_energy_and_generic(self, actor: Player, energy: int, power: int,
+                                domain: Optional[Domain] = None) -> bool:
+        if not self._can_pay_energy_and_generic(actor, energy, power, domain):
             return False
         actor.energy -= energy or 0
+        if domain is not None and power:
+            return actor.pay_cost(0, power, domain)
         return self._pay_generic_power(actor, power or 0)
 
     def _pay_repeat(self, card: Card, ap: Player) -> bool:
@@ -2321,10 +2330,11 @@ class GameLoop:
         it could be."""
         energy = int(ac.get("energy", 0) or 0)
         power = int(ac.get("power", 0) or 0)
+        domain = Domain[ac["domain"]] if ac.get("domain") else None
         discard_n = int(ac.get("discard_cards", 0) or 0)
 
         # --- affordability check (no mutation yet) ---
-        if not self._can_pay_energy_and_generic(ap, energy, power):
+        if not self._can_pay_energy_and_generic(ap, energy, power, domain):
             return False
         # Never discard the very card being played (it may still be in hand).
         in_hand = any(c is card for c in ap.hand)
@@ -2340,7 +2350,7 @@ class GameLoop:
             target = self.choose(f"cost_unit:{verb}", side, objs, target, card)
 
         # --- payment ---
-        if not self._pay_energy_and_generic(ap, energy, power):
+        if not self._pay_energy_and_generic(ap, energy, power, domain):
             return False
         for _ in range(discard_n):
             idx = next((i for i, c in enumerate(ap.hand) if c is not card), None)
@@ -3770,7 +3780,7 @@ class GameLoop:
             if parsed["disempower"] and not getattr(gear, "empowered", False):
                 return False      # "Disempower this, ...": needs it empowered
             # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
-            if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], None):
+            if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return False
             if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
                 return False
@@ -3832,7 +3842,7 @@ class GameLoop:
     def _parse_activated_cost(cost) -> dict:
         """Normalize the mixed string/dict/None cost forms the generator emits."""
         import re
-        parsed = {"energy": 0, "power": 0, "tap": False, "recycle": 0,
+        parsed = {"energy": 0, "power": 0, "domain": None, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
                   "banish_from_trash": None, "discard": 0, "discard_type": None,
                   "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False}
@@ -3841,6 +3851,8 @@ class GameLoop:
         if isinstance(cost, dict):
             parsed["energy"] = int(cost.get("energy", 0) or 0)
             parsed["power"] = int(cost.get("power", 0) or 0)
+            # "[2] [fury]": the power's domain; None is generic ([rune]).
+            parsed["domain"] = Domain[cost["domain"]] if cost.get("domain") else None
             parsed["tap"] = bool(cost.get("tap") or cost.get("exhaust_self")
                                  or cost.get("exhaust"))
             parsed["recycle"] = int(cost.get("recycle_from_trash",
@@ -3979,7 +3991,7 @@ class GameLoop:
             return False
         if parsed["disempower"] and not (unit is not None and unit.empowered):
             return False   # "Disempower me" needs me empowered
-        if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
+        if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
             return False
         if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
             return False
@@ -4041,7 +4053,7 @@ class GameLoop:
             gear = entry["gear"]
             eff = entry["eff"]
             parsed = self._parse_activated_cost(eff.cost)
-            if not self._pay_gear(ap, parsed["energy"], parsed["power"], None):
+            if not self._pay_gear(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
             if parsed["tap"]:
                 self._exhaust_gear(gear, ap)
@@ -4071,7 +4083,7 @@ class GameLoop:
             self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
         parsed = self._adjust_ability_cost(unit, eff, self._parse_activated_cost(eff.cost), side)
         # Pay.
-        if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"]):
+        if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
             return
         if parsed["tap"] and unit is not None:
             self._exhaust(unit)

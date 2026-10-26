@@ -73,8 +73,7 @@
       "battlefields": [
         {
           "A": [
-            "Hwei Brooding Painter",
-            "Eager Apprentice"
+            "Hwei Brooding Painter"
           ],
           "B": [],
           "controller": "A",
@@ -102,7 +101,7 @@
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 15
+        "trash": 16
       },
       "player_B": {
         "banished": 0,
@@ -144,18 +143,26 @@
         {
           "A": [],
           "B": [
-            "Sharkling"
+            "Noxus Hopeful"
           ],
           "controller": "B",
           "last_controller": "A"
         },
         {
+          "A": [
+            "Diana Lunari"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
           "A": [],
           "B": [
-            "Tideturner"
+            "Baron Nashor"
           ],
           "controller": "B",
-          "last_controller": "B"
+          "last_controller": null
         }
       ],
       "final_active": "B",
@@ -163,40 +170,39 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Ravenbloom Student",
-          "Diana Lunari"
+          "Eager Apprentice"
         ],
-        "deck": 27,
-        "energy": 0,
-        "hand": 2,
+        "deck": 23,
+        "energy": 9,
+        "hand": 0,
         "power_pool": {
-          "CHAOS": 5,
+          "CHAOS": 7,
           "MIND": 5
         },
-        "runes_in_play": 10,
-        "trash": 9
+        "runes_in_play": 12,
+        "trash": 15
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 0,
+        "base_gear": 1,
         "base_units": [
-          "Treasure Hunter"
+          "Baron Nashor"
         ],
-        "deck": 27,
-        "energy": 1,
+        "deck": 25,
+        "energy": 2,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 4,
-          "FURY": 3
+          "CHAOS": 3,
+          "FURY": 6
         },
-        "runes_in_play": 7,
-        "trash": 9
+        "runes_in_play": 9,
+        "trash": 12
       },
-      "points_A": 4,
+      "points_A": 7,
       "points_B": 8,
-      "spells_cast": 13,
-      "turns": 11,
-      "units_played": 14,
+      "spells_cast": 16,
+      "turns": 15,
+      "units_played": 17,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -253,8 +259,8 @@
         "energy": 0,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 2,
-          "FURY": 2
+          "CHAOS": 3,
+          "FURY": 1
         },
         "runes_in_play": 4,
         "trash": 9
@@ -573,20 +579,17 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Mindsplitter"
-          ],
+          "A": [],
           "B": [],
-          "controller": "A",
+          "controller": null,
           "last_controller": "B"
         },
         {
-          "A": [],
-          "B": [
-            "Fizz Trickster",
-            "Eager Apprentice"
+          "A": [
+            "Noxus Hopeful"
           ],
-          "controller": "B",
+          "B": [],
+          "controller": "A",
           "last_controller": "B"
         }
       ],
@@ -594,38 +597,36 @@
       "player_A": {
         "banished": 0,
         "base_gear": 1,
-        "base_units": [
-          "Noxus Hopeful"
-        ],
-        "deck": 25,
-        "energy": 3,
+        "base_units": [],
+        "deck": 24,
+        "energy": 5,
         "hand": 2,
         "power_pool": {
           "CHAOS": 4,
-          "FURY": 3
+          "FURY": 5
         },
-        "runes_in_play": 7,
-        "trash": 11
+        "runes_in_play": 9,
+        "trash": 13
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [],
-        "deck": 24,
-        "energy": 9,
+        "deck": 23,
+        "energy": 10,
         "hand": 0,
         "power_pool": {
           "CHAOS": 7,
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 14
+        "trash": 17
       },
       "points_A": 8,
-      "points_B": 5,
-      "spells_cast": 16,
-      "turns": 15,
-      "units_played": 15,
+      "points_B": 7,
+      "spells_cast": 17,
+      "turns": 17,
+      "units_played": 16,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -764,7 +765,7 @@
         "trash": 16
       },
       "points_A": 2,
-      "points_B": 8,
+      "points_B": 9,
       "spells_cast": 14,
       "turns": 16,
       "units_played": 15,
@@ -885,8 +886,8 @@
         "energy": 7,
         "hand": 3,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 6
+          "CHAOS": 6,
+          "FURY": 5
         },
         "runes_in_play": 11,
         "trash": 9
@@ -1096,8 +1097,7 @@
         "energy": 2,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 4,
-          "FURY": 1
+          "CHAOS": 5
         },
         "runes_in_play": 5,
         "trash": 6
@@ -1368,9 +1368,11 @@
       "battlefields": [
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": "A"
+          "B": [
+            "Fizz Trickster"
+          ],
+          "controller": "B",
+          "last_controller": null
         },
         {
           "A": [],
@@ -1378,42 +1380,46 @@
             "Sharkling"
           ],
           "controller": "B",
-          "last_controller": "A"
+          "last_controller": null
         }
       ],
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 4,
-        "base_units": [],
+        "base_gear": 5,
+        "base_units": [
+          "Stellacorn Herder",
+          "Lonely Poro"
+        ],
         "deck": 25,
-        "energy": 1,
-        "hand": 4,
+        "energy": 0,
+        "hand": 2,
         "power_pool": {
-          "CALM": 2,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 8,
-        "trash": 7
+        "runes_in_play": 10,
+        "trash": 6
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 3,
+        "base_gear": 4,
         "base_units": [],
         "deck": 28,
         "energy": 0,
-        "hand": 1,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 4
+          "CHAOS": 2,
+          "FURY": 3
         },
-        "runes_in_play": 4,
-        "trash": 8
+        "runes_in_play": 5,
+        "trash": 5
       },
-      "points_A": 3,
-      "points_B": 8,
-      "spells_cast": 9,
-      "turns": 12,
-      "units_played": 8,
+      "points_A": 4,
+      "points_B": 9,
+      "spells_cast": 11,
+      "turns": 14,
+      "units_played": 10,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0

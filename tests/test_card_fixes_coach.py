@@ -169,3 +169,48 @@ def test_shen_cards_need_exactly_one_other_unit():
         assert disciple.has_keyword("SHIELD 3") == shield
         loop._fire_scoring_trigger("on_hold", bf0, "A")
         assert loop.gs.points_A == point
+
+
+def test_shadow_fiend_empower_pays_fury_not_any_power():
+    """EMPOWER [2] [fury]: the Power must be Fury (the engine took any domain,
+    so a Chaos rune was recycled)."""
+    from riftbound.core.enums import Domain
+    loop, a, (fiend,) = _setup("Shadow Fiend", energy=5)
+    a.add_power(Domain.CHAOS, 3)
+    assert not _use(loop, "Shadow Fiend")
+    a.add_power(Domain.FURY, 1)
+    assert _use(loop, "Shadow Fiend")
+    assert fiend.empowered and a.energy == 3
+    assert a.power_pool.get(Domain.FURY, 0) == 0 and a.power_pool[Domain.CHAOS] == 3
+
+
+def test_additional_costs_pay_their_domain():
+    """Blast Corps Cadet: "you may pay [1] [fury] as an additional cost"."""
+    from riftbound.core.enums import Domain
+    loop, a, _ = _setup(energy=1)
+    a.add_power(Domain.CHAOS, 2)
+    cadet = CARD_REGISTRY["Blast Corps Cadet"].instantiate()
+    ac = next(e.additional_cost for e in CARD_REGISTRY["Blast Corps Cadet"].effects
+              if e.additional_cost)
+    assert not loop._pay_one_additional_cost(cadet, a, ac, check_only=True)
+    a.add_power(Domain.FURY, 1)
+    assert loop._pay_one_additional_cost(cadet, a, ac)
+    assert a.energy == 0 and a.power_pool.get(Domain.FURY, 0) == 0
+
+
+def test_renata_glasc_scores_for_four_mind_at_a_battlefield():
+    """Renata Glasc, Mastermind: "[4] [mind] [mind] [mind] [mind], [tap]: Score
+    1 point" (the ability was missing)."""
+    from riftbound.core.enums import Domain
+    loop, a, _ = _setup(energy=5)
+    renata = UnitInPlay(card=CARD_REGISTRY["Renata Glasc Mastermind"].instantiate(), ready=True)
+    loop.gs.battlefields[0].add_unit("A", renata)
+
+    def abilities():
+        return [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if ga.kind == "ABILITY"]
+    a.add_power(Domain.MIND, 3)
+    assert len(abilities()) == 1          # only "[1] [mind]: Draw 1"
+    a.add_power(Domain.MIND, 1)
+    score = abilities()[1]
+    loop._apply_action(a, score.to_engine())
+    assert loop.gs.points_A == 1 and not renata.ready
