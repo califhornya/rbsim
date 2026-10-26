@@ -68,3 +68,19 @@ def test_a_stop_file_ends_the_run(tmp_path):
                  train_steps=1, batch_size=4, checkpoint=tmp_path / "net.pt", seed=0,
                  device=torch.device("cpu"), log=logs.append)
     assert sum(1 for line in logs if line.startswith("[iter")) == 1
+
+
+def test_training_keeps_a_copy_at_each_evaluation_and_the_best(tmp_path):
+    from riftbound.ai.selfplay import train
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    train(net, [KENNEN, ORNN], iterations=2, games_per_iter=1, mcts_iters=2, batch_size=4,
+          checkpoint=tmp_path / "net.pt", log_path=tmp_path / "log.jsonl", workers=0,
+          eval_every=1, eval_games=1, eval_vs=("random",), max_turns=8, pause=0,
+          device=torch.device("cpu"), log=lambda *a, **k: None)
+    assert (tmp_path / "net_0001.pt").exists() and (tmp_path / "net_0002.pt").exists()
+    assert (tmp_path / "net_best.pt").exists()
+    lines = (tmp_path / "log.jsonl").read_text().splitlines()
+    import json
+    rates = [json.loads(line)["lr"] for line in lines]
+    assert rates[0] > rates[1]                       # the learning rate decays

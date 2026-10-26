@@ -12,9 +12,12 @@ Two jobs, both deterministic and framework-light (numpy only; no torch here):
    maps a chosen slot back to the concrete legal action to play. MULLIGAN is a
    separate small head (a ``list[int]`` of hand cards to return), see the bottom.
 
-This is v1: card features are bag-of-counts over the card vocabulary. A learned
-embedding can replace them later without changing the contract (OBS_DIM would just
-change, which the net reads from this module).
+The state vector has two parts: DENSE_DIM scalar features (points, energy, runes,
+each battlefield's state...), then MAX_TOKENS rows of TOKEN_WIDTH, one per card
+the viewer can see: (zone, card id, features). A unit's row carries its state
+(Might, damage, ready, stunned, buff, keywords in effect...); a card in a zone
+(hand, trash, deck...) its number of copies. The network embeds each card once,
+the same wherever it is, and pools the rows zone by zone (net.py).
 """
 
 from __future__ import annotations
@@ -23,7 +26,7 @@ from typing import Optional
 
 import numpy as np
 
-from riftbound.core.decisions import GameAction, Observation
+from riftbound.core.decisions import UNIT_KEYWORDS, GameAction, Observation
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 # --- fixed dimensions ---------------------------------------------------------
@@ -39,47 +42,56 @@ _DOM_INDEX = {d: i for i, d in enumerate(DOMAINS)}
 CARD_VOCAB: tuple[str, ...] = tuple(sorted(CARD_REGISTRY.keys()))
 _CARD_INDEX = {name: i for i, name in enumerate(CARD_VOCAB)}
 VOCAB_SIZE = len(CARD_VOCAB)
+# Card ids in token rows: 0 = empty row, 1..VOCAB_SIZE = a card, then "unknown".
+UNKNOWN_CARD = VOCAB_SIZE + 1
+N_CARD_IDS = VOCAB_SIZE + 2
 
-# Battlefield-name vocabulary for the per-BF "named" one-hot (+1 for "no card").
-_BF_VOCAB: tuple[str, ...] = tuple(sorted(
-    name for name, spec in CARD_REGISTRY.items()
-    if getattr(spec.category, "name", "") == "BATTLEFIELD"
-))
-_BF_INDEX = {name: i for i, name in enumerate(_BF_VOCAB)}
-_BF_ONEHOT = len(_BF_VOCAB) + 1  # last slot = unnamed / unknown
+# Where a token's card is, from the viewer's side ("bf0" = battlefield 0).
+_LOCATIONS = ("base",) + tuple(f"bf{i}" for i in range(N_BF))
+ZONES: tuple[str, ...] = (
+    "my_hand", "my_trash", "opp_trash", "my_deck", "my_banished", "opp_banished",
+    "my_chain", "opp_chain", "my_legend", "opp_legend", "my_champion", "opp_champion",
+    *(f"{w}_units_{loc}" for w in ("my", "opp") for loc in _LOCATIONS),
+    *(f"{w}_attached_{loc}" for w in ("my", "opp") for loc in _LOCATIONS),
+    "my_base_gear", "opp_base_gear",
+    *(f"{w}_deployed_bf{i}" for w in ("my", "opp") for i in range(N_BF)),
+    *(f"battlefield_{i}" for i in range(N_BF)),
+)
+_ZONE = {z: i for i, z in enumerate(ZONES)}
+N_ZONES = len(ZONES)
 
-# Per-battlefield feature width: counts(2) + mights(2) + controller one-hot(3) +
-# deployed-gear counts(2) + named one-hot.
-_PER_BF = 2 + 2 + 3 + 2 + _BF_ONEHOT
+# A unit's row: Might, damage, ready, stunned, token, buffed, empowered,
+# Equipment count, then UNIT_KEYWORDS in effect. A card in a zone: copies / 3.
+N_TOKEN_FEATURES = 8 + len(UNIT_KEYWORDS)
+TOKEN_WIDTH = 2 + N_TOKEN_FEATURES
+MAX_TOKENS = 160
 
-# Scalar features (see _scalars): 14 counts, Power by domain for both players,
-# whether the viewer is the turn player, and where a showdown is running.
-_N_SCALARS = 14 + 2 * N_DOM + 1 + N_BF
+# Dense features (see _dense): 14 counts, Power by domain for both players, the
+# turn player, the showdown's battlefield, runes ready and by domain for both,
+# legends ready, champions available, cards played this turn, per battlefield
+# (controller x3, scored by each, facedown card of each, units and Might of each,
+# deployed gear of each) and units and Might in each base.
+_PER_BF_DENSE = 3 + 2 + 2 + 2 + 2 + 2
+DENSE_DIM = 14 + 2 * N_DOM + 1 + N_BF + 2 + 2 * N_DOM + 2 + 2 + 2 + N_BF * _PER_BF_DENSE + 4
 
-# Bags of card counts: my hand, my trash, my board, opp board, my spells on the
-# chain, opp spells on the chain.
-_N_BAGS = 6
-
-OBS_DIM = _N_SCALARS + N_BF * _PER_BF + _N_BAGS * VOCAB_SIZE
+OBS_DIM = DENSE_DIM + MAX_TOKENS * TOKEN_WIDTH
 
 
 def card_index(name: str) -> Optional[int]:
     return _CARD_INDEX.get(name)
 
 
+def card_id(name: Optional[str]) -> int:
+    """A card's id in token rows (1-based; UNKNOWN_CARD if not in the vocabulary)."""
+    i = _CARD_INDEX.get(name) if name else None
+    return UNKNOWN_CARD if i is None else i + 1
+
+
 # --- state encoding -----------------------------------------------------------
 
-def _bag(names) -> np.ndarray:
-    v = np.zeros(VOCAB_SIZE, dtype=np.float32)
-    for n in names:
-        i = _CARD_INDEX.get(n)
-        if i is not None:
-            v[i] += 1.0
-    return v
-
-
-def _scalars(obs: Observation) -> np.ndarray:
+def _dense(obs: Observation) -> np.ndarray:
     vs = max(1, obs.victory_score)
+    me = obs.viewer
     s = [
         obs.turn / 20.0,
         obs.my_points / vs,
@@ -96,66 +108,124 @@ def _scalars(obs: Observation) -> np.ndarray:
         obs.my_runes / 12.0,
         obs.opp_runes / 12.0,
     ]
-    for d in DOMAINS:
-        s.append(obs.my_power.get(d, 0) / 12.0)
-    for d in DOMAINS:
-        s.append(obs.opp_power.get(d, 0) / 12.0)
-    s.append(1.0 if obs.active == obs.viewer else 0.0)
-    s.extend(1.0 if obs.showdown_bf == i else 0.0 for i in range(N_BF))
-    return np.asarray(s, dtype=np.float32)
+    s += [obs.my_power.get(d, 0) / 12.0 for d in DOMAINS]
+    s += [obs.opp_power.get(d, 0) / 12.0 for d in DOMAINS]
+    s.append(1.0 if obs.active == me else 0.0)
+    s += [1.0 if obs.showdown_bf == i else 0.0 for i in range(N_BF)]
+    s += [obs.my_runes_ready / 12.0, obs.opp_runes_ready / 12.0]
+    s += [obs.my_rune_domains.get(d, 0) / 12.0 for d in DOMAINS]
+    s += [obs.opp_rune_domains.get(d, 0) / 12.0 for d in DOMAINS]
+    s += [float(obs.my_legend_ready), float(obs.opp_legend_ready)]
+    s += [float(obs.my_champion is not None), float(obs.opp_champion is not None)]
+    s += [obs.my_cards_played / 5.0, obs.opp_cards_played / 5.0]
+    bfs = list(obs.battlefields)
+    for i in range(N_BF):
+        if i >= len(bfs):
+            s += [0.0] * _PER_BF_DENSE
+            continue
+        bf = bfs[i]
+        mine, opp = (bf.A, bf.B) if me == "A" else (bf.B, bf.A)
+        ctrl = bf.controller
+        s += [float(ctrl == me), float(ctrl is not None and ctrl != me), float(ctrl is None)]
+        my_scored, opp_scored = (bf.scored_A, bf.scored_B) if me == "A" else (bf.scored_B, bf.scored_A)
+        s += [float(my_scored), float(opp_scored)]
+        s += [float(bf.facedown == me), float(bf.facedown is not None and bf.facedown != me)]
+        s += [len(mine) / 6.0, len(opp) / 6.0]
+        s += [sum(u.might for u in mine) / 20.0, sum(u.might for u in opp) / 20.0]
+        my_gear, opp_gear = (bf.gear_A, bf.gear_B) if me == "A" else (bf.gear_B, bf.gear_A)
+        s += [len(my_gear) / 4.0, len(opp_gear) / 4.0]
+    s += [len(obs.my_base_units) / 6.0, len(obs.opp_base_units) / 6.0,
+          sum(u.might for u in obs.my_base_units) / 20.0,
+          sum(u.might for u in obs.opp_base_units) / 20.0]
+    vec = np.asarray(s, dtype=np.float32)
+    assert vec.shape[0] == DENSE_DIM, f"dense {vec.shape[0]} != DENSE_DIM {DENSE_DIM}"
+    return vec
 
 
-def _bf_features(bfview, me_side: str) -> np.ndarray:
-    mine = bfview.A if me_side == "A" else bfview.B
-    opp = bfview.B if me_side == "A" else bfview.A
-    ctrl = bfview.controller
-    ctrl_me = 1.0 if ctrl == me_side else 0.0
-    ctrl_opp = 1.0 if (ctrl is not None and ctrl != me_side) else 0.0
-    ctrl_none = 1.0 if ctrl is None else 0.0
-    named = np.zeros(_BF_ONEHOT, dtype=np.float32)
-    idx = _BF_INDEX.get(bfview.named) if bfview.named else None
-    named[idx if idx is not None else _BF_ONEHOT - 1] = 1.0
-    my_gear = bfview.gear_A if me_side == "A" else bfview.gear_B
-    opp_gear = bfview.gear_B if me_side == "A" else bfview.gear_A
-    head = np.asarray([
-        len(mine) / 6.0, len(opp) / 6.0,
-        sum(u.might for u in mine) / 20.0, sum(u.might for u in opp) / 20.0,
-        ctrl_me, ctrl_opp, ctrl_none,
-        len(my_gear) / 4.0, len(opp_gear) / 4.0,
-    ], dtype=np.float32)
-    return np.concatenate([head, named])
+def _unit_features(u) -> list:
+    return [u.might / 10.0, u.damage / 10.0, float(u.ready), float(u.stunned),
+            float(u.is_token), float(u.buffed), float(u.empowered), len(u.gear) / 3.0] + \
+        [float(k in u.keywords) for k in UNIT_KEYWORDS]
+
+
+def _tokens(obs: Observation) -> list:
+    """(zone, card id, features) rows, most important first (a full table drops
+    the end: deck, banished)."""
+    me = obs.viewer
+    rows: list = []
+
+    def card(zone, name, feats=None):
+        rows.append((_ZONE[zone], card_id(name), feats or [1.0 / 3.0] + [0.0] * (N_TOKEN_FEATURES - 1)))
+
+    def counted(zone, names):
+        counts: dict = {}
+        for n in names:
+            counts[n] = counts.get(n, 0) + 1
+        for n in sorted(counts):
+            card(zone, n, [counts[n] / 3.0] + [0.0] * (N_TOKEN_FEATURES - 1))
+
+    bfs = list(obs.battlefields)
+    units = {("my", "base"): obs.my_base_units, ("opp", "base"): obs.opp_base_units}
+    for i, bf in enumerate(bfs[:N_BF]):
+        mine, opp = (bf.A, bf.B) if me == "A" else (bf.B, bf.A)
+        units[("my", f"bf{i}")], units[("opp", f"bf{i}")] = mine, opp
+    for (who, loc), us in units.items():
+        for u in us:
+            card(f"{who}_units_{loc}", u.name, _unit_features(u))
+    counted("my_chain", obs.my_chain)
+    counted("opp_chain", obs.opp_chain)
+    for zone, name, ready in (("my_legend", obs.my_legend, obs.my_legend_ready),
+                              ("opp_legend", obs.opp_legend, obs.opp_legend_ready)):
+        if name:
+            card(zone, name, [float(ready)] + [0.0] * (N_TOKEN_FEATURES - 1))
+    for zone, name in (("my_champion", obs.my_champion), ("opp_champion", obs.opp_champion)):
+        if name:
+            card(zone, name)
+    for i, bf in enumerate(bfs[:N_BF]):
+        if bf.named:
+            card(f"battlefield_{i}", bf.named)
+    counted("my_hand", obs.my_hand)
+    for (who, loc), us in units.items():
+        counted(f"{who}_attached_{loc}", [g for u in us for g in u.gear])
+    counted("my_base_gear", obs.my_base_gear)
+    counted("opp_base_gear", obs.opp_base_gear)
+    for i, bf in enumerate(bfs[:N_BF]):
+        my_gear, opp_gear = (bf.gear_A, bf.gear_B) if me == "A" else (bf.gear_B, bf.gear_A)
+        counted(f"my_deployed_bf{i}", my_gear)
+        counted(f"opp_deployed_bf{i}", opp_gear)
+    counted("my_trash", obs.my_trash)
+    counted("opp_trash", obs.opp_trash)
+    counted("my_banished", obs.my_banished)
+    counted("opp_banished", obs.opp_banished)
+    counted("my_deck", obs.my_deck)
+    return rows
 
 
 def encode_observation(obs: Observation) -> np.ndarray:
-    """Fixed-size float32 encoding of an information-set observation."""
-    me = obs.viewer
-    parts = [_scalars(obs)]
-
-    bfs = list(obs.battlefields)
-    for i in range(N_BF):
-        if i < len(bfs):
-            parts.append(_bf_features(bfs[i], me))
-        else:
-            parts.append(np.zeros(_PER_BF, dtype=np.float32))
-
-    # Bag-of-counts: my hand, my trash, my board, opp board (units + deployed
-    # gear), the chain's spells by caster.
-    my_board = [u.name for bf in bfs for u in (bf.A if me == "A" else bf.B)]
-    my_board += [u.name for u in obs.my_base_units]
-    my_board += [g for bf in bfs for g in (bf.gear_A if me == "A" else bf.gear_B)]
-    opp_board = [u.name for bf in bfs for u in (bf.B if me == "A" else bf.A)]
-    opp_board += [u.name for u in obs.opp_base_units]
-    opp_board += [g for bf in bfs for g in (bf.gear_B if me == "A" else bf.gear_A)]
-    parts.append(_bag(obs.my_hand))
-    parts.append(_bag(obs.my_trash))
-    parts.append(_bag(my_board))
-    parts.append(_bag(opp_board))
-    parts.append(_bag(obs.my_chain))
-    parts.append(_bag(obs.opp_chain))
-
-    vec = np.concatenate(parts).astype(np.float32)
+    """Fixed-size float32 encoding of an information-set observation: the dense
+    features, then the token table (see the module docstring)."""
+    table = np.zeros((MAX_TOKENS, TOKEN_WIDTH), dtype=np.float32)
+    for r, (zone, cid, feats) in enumerate(_tokens(obs)[:MAX_TOKENS]):
+        table[r, 0] = zone
+        table[r, 1] = cid
+        table[r, 2:] = feats
+    vec = np.concatenate([_dense(obs), table.reshape(-1)])
     assert vec.shape[0] == OBS_DIM, f"encoding {vec.shape[0]} != OBS_DIM {OBS_DIM}"
     return vec
+
+
+def token_rows(vec: np.ndarray) -> list:
+    """The card rows of an encoded state as (zone, card name, features): for
+    tests and debugging."""
+    table = np.asarray(vec[DENSE_DIM:]).reshape(MAX_TOKENS, TOKEN_WIDTH)
+    out = []
+    for row in table:
+        cid = int(round(row[1]))
+        if cid == 0:
+            continue
+        name = CARD_VOCAB[cid - 1] if 1 <= cid <= VOCAB_SIZE else "?"
+        out.append((ZONES[int(round(row[0]))], name, row[2:]))
+    return out
 
 
 # --- action space -------------------------------------------------------------

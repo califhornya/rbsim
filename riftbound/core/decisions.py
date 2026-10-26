@@ -109,6 +109,12 @@ class GameAction:
 
 # --- observation (information set for one player) -----------------------------
 
+# Keywords a unit view reports as in effect (printed, granted or passive): the
+# ones that change how it fights, moves or can be chosen.
+UNIT_KEYWORDS = ("ASSAULT", "SHIELD", "TANK", "BACKLINE", "DEFLECT", "GANKING",
+                 "TEMPORARY", "HIDDEN")
+
+
 @dataclass(frozen=True)
 class UnitView:
     name: str
@@ -117,11 +123,17 @@ class UnitView:
     stunned: bool
     is_token: bool
     gear: tuple[str, ...]
+    damage: int = 0
+    buffed: bool = False
+    empowered: bool = False
+    keywords: tuple[str, ...] = ()       # of UNIT_KEYWORDS, in effect now
 
     def to_dict(self) -> dict:
         return {
             "name": self.name, "might": self.might, "ready": self.ready,
             "stunned": self.stunned, "is_token": self.is_token, "gear": list(self.gear),
+            "damage": self.damage, "buffed": self.buffed, "empowered": self.empowered,
+            "keywords": list(self.keywords),
         }
 
 
@@ -134,6 +146,10 @@ class BattlefieldView:
     # Gear deployed here (DEPLOY §830), by name, per controlling side. Public.
     gear_A: tuple[str, ...] = ()
     gear_B: tuple[str, ...] = ()
+    # Who has scored here this turn, who has a facedown card here (not which).
+    scored_A: bool = False
+    scored_B: bool = False
+    facedown: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {
@@ -143,6 +159,9 @@ class BattlefieldView:
             "named": self.named,
             "gear_A": list(self.gear_A),
             "gear_B": list(self.gear_B),
+            "scored_A": self.scored_A,
+            "scored_B": self.scored_B,
+            "facedown": self.facedown,
         }
 
 
@@ -180,6 +199,28 @@ class Observation:
     showdown_bf: Optional[int] = None
     my_chain: tuple[str, ...] = ()
     opp_chain: tuple[str, ...] = ()
+    # What else is public (or known to the viewer): the cards left in the
+    # viewer's own Main Deck (sorted: the order stays hidden), banished cards,
+    # legends (and whether they're ready), champions still in the Champion Zone,
+    # unattached gear in base, ready runes and runes by domain, cards played
+    # this turn.
+    my_deck: tuple[str, ...] = ()
+    my_banished: tuple[str, ...] = ()
+    opp_banished: tuple[str, ...] = ()
+    my_legend: Optional[str] = None
+    opp_legend: Optional[str] = None
+    my_legend_ready: bool = False
+    opp_legend_ready: bool = False
+    my_champion: Optional[str] = None
+    opp_champion: Optional[str] = None
+    my_base_gear: tuple[str, ...] = ()
+    opp_base_gear: tuple[str, ...] = ()
+    my_runes_ready: int = 0
+    opp_runes_ready: int = 0
+    my_rune_domains: dict = field(default_factory=dict)
+    opp_rune_domains: dict = field(default_factory=dict)
+    my_cards_played: int = 0
+    opp_cards_played: int = 0
 
     @staticmethod
     def _uview(u) -> "UnitView":
@@ -190,6 +231,10 @@ class Observation:
             stunned=u.stunned,
             is_token=u.is_token,
             gear=tuple(getattr(g, "name", "?") for g in u.gear),
+            damage=int(u.damage or 0),
+            buffed=u.might_counters > 0,
+            empowered=bool(getattr(u, "empowered", False)),
+            keywords=tuple(k for k in UNIT_KEYWORDS if u.has_keyword(k)),
         )
 
     @classmethod
@@ -205,7 +250,30 @@ class Observation:
                 named=getattr(bf.card, "name", None) if bf.card else None,
                 gear_A=tuple(dg.card.name for dg in bf.gear_A),
                 gear_B=tuple(dg.card.name for dg in bf.gear_B),
+                scored_A=bool(bf.scored_this_turn_A),
+                scored_B=bool(bf.scored_this_turn_B),
+                facedown=bf.facedown.owner if bf.facedown is not None else None,
             )
+
+        def legend(side):
+            unit = gs.legend_unit_A if side == "A" else gs.legend_unit_B
+            card = gs.legend_A if side == "A" else gs.legend_B
+            name = unit.card.name if unit is not None else getattr(card, "name", None)
+            return name, bool(unit.ready) if unit is not None else False
+
+        def champion(side):
+            card = gs.champion_A if side == "A" else gs.champion_B
+            deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
+            return None if card is None or deployed else card.name
+
+        def runes(p):
+            return (sum(1 for rs in p.rune_pool.values() for r in rs if r.ready),
+                    {d.name: len(rs) for d, rs in p.rune_pool.items() if rs})
+
+        other = gs.other(viewer)
+        my_leg, opp_leg = legend(viewer), legend(other)
+        my_ready, my_doms = runes(me)
+        opp_ready, opp_doms = runes(opp)
 
         my_pts, opp_pts = (gs.points_A, gs.points_B) if viewer == "A" else (gs.points_B, gs.points_A)
         return cls(
@@ -235,6 +303,18 @@ class Observation:
             showdown_bf=gs.showdown_bf_idx if gs.showdown_active else None,
             my_chain=tuple(i.card.name for i in gs.chain if i.player == viewer),
             opp_chain=tuple(i.card.name for i in gs.chain if i.player != viewer),
+            my_deck=tuple(sorted(c.name for c in me.deck.cards)),
+            my_banished=tuple(c.name for c in me.banished),
+            opp_banished=tuple(c.name for c in opp.banished),
+            my_legend=my_leg[0], opp_legend=opp_leg[0],
+            my_legend_ready=my_leg[1], opp_legend_ready=opp_leg[1],
+            my_champion=champion(viewer), opp_champion=champion(other),
+            my_base_gear=tuple(g.name for g in me.base_gear),
+            opp_base_gear=tuple(g.name for g in opp.base_gear),
+            my_runes_ready=my_ready, opp_runes_ready=opp_ready,
+            my_rune_domains=my_doms, opp_rune_domains=opp_doms,
+            my_cards_played=int(gs.cards_played_this_turn.get(viewer, 0)),
+            opp_cards_played=int(gs.cards_played_this_turn.get(other, 0)),
         )
 
     def to_dict(self) -> dict:
@@ -265,6 +345,17 @@ class Observation:
             "showdown_bf": self.showdown_bf,
             "my_chain": list(self.my_chain),
             "opp_chain": list(self.opp_chain),
+            "my_deck_size": len(self.my_deck),
+            "my_banished": list(self.my_banished),
+            "opp_banished": list(self.opp_banished),
+            "my_legend": self.my_legend, "opp_legend": self.opp_legend,
+            "my_legend_ready": self.my_legend_ready, "opp_legend_ready": self.opp_legend_ready,
+            "my_champion": self.my_champion, "opp_champion": self.opp_champion,
+            "my_base_gear": list(self.my_base_gear), "opp_base_gear": list(self.opp_base_gear),
+            "my_runes_ready": self.my_runes_ready, "opp_runes_ready": self.opp_runes_ready,
+            "my_rune_domains": dict(self.my_rune_domains),
+            "opp_rune_domains": dict(self.opp_rune_domains),
+            "my_cards_played": self.my_cards_played, "opp_cards_played": self.opp_cards_played,
         }
 
 

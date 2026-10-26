@@ -202,20 +202,15 @@ def test_deploy_keyword_ignores_reminder_text():
 
 
 def test_observation_and_encoding_see_deployed_gear():
-    from riftbound.ai.encoding import OBS_DIM, VOCAB_SIZE, card_index, encode_observation
+    from riftbound.ai.encoding import OBS_DIM, encode_observation, token_rows
     from riftbound.core.decisions import Observation
 
     loop = _loop()
     loop._deploy_gear("A", loop.gs.battlefields[0], CARD_REGISTRY["Bomb"], is_token=True)
     obs_a = Observation.from_state(loop.gs, "A")
     assert obs_a.battlefields[0].gear_A == ("Bomb",)
-    bomb = card_index("Bomb")
     vec_a = encode_observation(obs_a)
     vec_b = encode_observation(Observation.from_state(loop.gs, "B"))
     assert vec_a.shape == vec_b.shape == (OBS_DIM,)
-    # Bags are [hand, trash, my board, opp board, my chain, opp chain], each
-    # VOCAB_SIZE wide, at the end.
-    my_board_a = vec_a[OBS_DIM - 4 * VOCAB_SIZE:OBS_DIM - 3 * VOCAB_SIZE]
-    opp_board_b = vec_b[OBS_DIM - 3 * VOCAB_SIZE:OBS_DIM - 2 * VOCAB_SIZE]
-    assert my_board_a[bomb] == 1.0           # A sees its own Bomb
-    assert opp_board_b[bomb] == 1.0          # B sees the enemy Bomb
+    assert ("my_deployed_bf0", "Bomb") in [(z, c) for z, c, _ in token_rows(vec_a)]
+    assert ("opp_deployed_bf0", "Bomb") in [(z, c) for z, c, _ in token_rows(vec_b)]

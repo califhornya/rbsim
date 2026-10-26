@@ -18,6 +18,8 @@ Requires the `rl` extra (torch). Run headless via `scripts/train_selfplay.py`.
 from __future__ import annotations
 
 import json
+import math
+import shutil
 import random
 import tempfile
 import time
@@ -149,7 +151,8 @@ def _eval_task(task) -> tuple[str, float]:
 
 def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
           games_per_iter: int = 16, mcts_iters: int = 100, train_steps: int = 0,
-          batch_size: int = 128, lr: float = 1e-3, buffer_size: int = 50000,
+          batch_size: int = 128, lr: float = 1e-3, lr_final: Optional[float] = None,
+          buffer_size: int = 50000,
           checkpoint: Optional[Path] = None, log_path: Optional[Path] = None,
           start_iteration: int = 0, seed: int = 0, workers: Optional[int] = None,
           eval_every: int = 5, eval_games: int = 20,
@@ -160,12 +163,14 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     two decks drawn from `decks`, mirrors included). `workers`: processes for
     the games (None: riftbound.compute.default_workers(); 0: in this process).
     `train_steps` gradient steps per iteration (0: enough for each new example
-    to be seen about twice). Every `eval_every` iterations the net plays
-    `eval_games` games against each agent of `eval_vs` (simple_trade, and
-    random as a sanity check), seats alternating. `pause`
-    seconds between iterations and `rest` after each game let the machine
-    breathe. Saves `checkpoint` and appends a JSON line per iteration to
-    `log_path`."""
+    to be seen about twice). The learning rate goes from `lr` down to
+    `lr_final` (default lr / 10) over the run, on a cosine. Every `eval_every`
+    iterations the net plays `eval_games` games against each agent of
+    `eval_vs` (simple_trade, and random as a sanity check), seats alternating,
+    and a copy of the net is kept (net_0050.pt...; net_best.pt: the best
+    against the first agent). `pause` seconds between iterations and `rest`
+    after each game let the machine breathe. Saves `checkpoint` and appends a
+    JSON line per iteration to `log_path`."""
     from multiprocessing import Pool
 
     from riftbound.ai.net import save_checkpoint
@@ -178,6 +183,8 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
         be_gentle()                   # the trainer too: low priority, one thread
     net.to(device)
     opt = torch.optim.Adam(net.parameters(), lr=lr)
+    lr_final = lr / 10 if lr_final is None else lr_final
+    best = -1.0
     buffer: deque = deque(maxlen=buffer_size)
     rng = random.Random(seed)
     tmp = None
@@ -195,6 +202,10 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     try:
         for it in range(start_iteration, start_iteration + iterations):
             t0 = time.time()
+            progress = (it - start_iteration) / max(1, iterations - 1)
+            rate = lr_final + 0.5 * (lr - lr_final) * (1 + math.cos(math.pi * progress))
+            for group in opt.param_groups:
+                group["lr"] = rate
             save_checkpoint(net.to("cpu"), weights)
             net.to(device)
             tasks = []
@@ -213,7 +224,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
                          for _ in range(n_steps)]
                 stats = {k: mean(s[k] for s in steps) for k in stats}
             record = {"iteration": it + 1, "games": games_per_iter, "examples": new,
-                      "buffer": len(buffer), **stats}
+                      "buffer": len(buffer), "lr": rate, **stats}
             if eval_every and (it + 1) % eval_every == 0 and eval_games:
                 save_checkpoint(net.to("cpu"), weights)
                 net.to(device)
@@ -226,6 +237,13 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
                     scores.setdefault(opponent, []).append(score)
                 for opponent, xs in scores.items():
                     record[f"vs_{opponent}"] = mean(xs)
+                if checkpoint is not None:
+                    snap = Path(checkpoint).with_name(f"net_{it + 1:04d}.pt")
+                    shutil.copyfile(weights, snap)
+                    score = record.get(f"vs_{eval_vs[0]}", -1.0) if eval_vs else -1.0
+                    if score > best:
+                        best = score
+                        shutil.copyfile(weights, Path(checkpoint).with_name("net_best.pt"))
             record["seconds"] = round(time.time() - t0, 1)
             if checkpoint is not None:
                 save_checkpoint(net.to("cpu"), checkpoint)

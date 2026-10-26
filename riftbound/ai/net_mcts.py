@@ -186,12 +186,9 @@ class NetGuidedMCTSAgent(Agent):
         return priors, value
 
     def _net_value(self, clone, side: str) -> float:
-        obs = Observation.from_state(clone, side)
-        vec = encode_observation(obs)
-        # value is independent of the mask; pass the current legal mask for cheapness.
-        legal_ga = legal_actions(self._loop_for(clone), DecisionPoint.TURN_ACTION, side)
-        _probs, value = predict(self.net, vec, legal_mask(legal_ga))
-        return value
+        # The value doesn't depend on the legal mask: no legal-action list (it
+        # was a third of a search's time).
+        return self._value_only(clone, side)
 
     def _value_only(self, clone, side: str) -> float:
         """Net value of a state, mask-independent — used for pre-turn (mulligan)
