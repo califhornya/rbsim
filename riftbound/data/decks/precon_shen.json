@@ -1,0 +1,120 @@
+{
+  "name": "Shen Leader of the Kinkou Order",
+  "legend": "Shen Eye of Twilight",
+  "champion": "Shen Leader of the Kinkou Order",
+  "runes": [
+    {
+      "domain": "CALM",
+      "count": 6
+    },
+    {
+      "domain": "ORDER",
+      "count": 6
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Threshold of the Gray"
+    },
+    {
+      "name": "Kinkou Temple"
+    },
+    {
+      "name": "Grove of the God-Willow"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Steel Paws",
+      "count": 1
+    },
+    {
+      "name": "Shadow Dash",
+      "count": 1
+    },
+    {
+      "name": "Kennen Keeper of Balance",
+      "count": 1
+    },
+    {
+      "name": "Sacred Protector",
+      "count": 2
+    },
+    {
+      "name": "Noxian Emissary",
+      "count": 2
+    },
+    {
+      "name": "Lacerate",
+      "count": 1
+    },
+    {
+      "name": "Ki Barrier",
+      "count": 1
+    },
+    {
+      "name": "Soulspinner",
+      "count": 2
+    },
+    {
+      "name": "Keeper of Law",
+      "count": 2
+    },
+    {
+      "name": "Disciple of Shen",
+      "count": 3
+    },
+    {
+      "name": "Dragon Form",
+      "count": 1
+    },
+    {
+      "name": "Shen Scourge of Shadows",
+      "count": 2
+    },
+    {
+      "name": "Resonating Strike",
+      "count": 1
+    },
+    {
+      "name": "Pakaa Protector",
+      "count": 2
+    },
+    {
+      "name": "Twilight Shroud",
+      "count": 1
+    },
+    {
+      "name": "Serene Ascetic",
+      "count": 2
+    },
+    {
+      "name": "Mournful Witness",
+      "count": 3
+    },
+    {
+      "name": "Hand Hammer",
+      "count": 2
+    },
+    {
+      "name": "Field Musicians",
+      "count": 2
+    },
+    {
+      "name": "Loyal Poro",
+      "count": 2
+    },
+    {
+      "name": "Shen Kinkou",
+      "count": 1
+    },
+    {
+      "name": "Discipline",
+      "count": 2
+    },
+    {
+      "name": "Charm",
+      "count": 2
+    }
+  ]
+}

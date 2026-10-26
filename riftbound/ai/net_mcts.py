@@ -126,7 +126,9 @@ class NetGuidedMCTSAgent(Agent):
 
     def __init__(self, player, net: RiftboundNet, iterations: int = 100,
                  c_puct: float = 1.5, rng: Optional[random.Random] = None,
-                 mulligan_samples: int = 3, reaction_iterations: Optional[int] = None):
+                 mulligan_samples: int = 3, reaction_iterations: Optional[int] = None,
+                 explore: bool = False, dirichlet_alpha: float = 0.3,
+                 noise_frac: float = 0.25, temperature_moves: int = 10):
         super().__init__(player)
         self.net = net
         self.iterations = iterations
@@ -135,6 +137,14 @@ class NetGuidedMCTSAgent(Agent):
         self.c_puct = c_puct
         self.mulligan_samples = mulligan_samples
         self._rng = rng
+        # Self-play exploration (AlphaZero): Dirichlet noise on the root priors,
+        # and for the first `temperature_moves` searched decisions an action
+        # drawn in proportion to its visits instead of the most visited.
+        self.explore = explore
+        self.dirichlet_alpha = dirichlet_alpha
+        self.noise_frac = noise_frac
+        self.temperature_moves = temperature_moves
+        self._decisions = 0
         # Last root visit distribution (action_tuple -> visit share), for the
         # self-play trainer's policy target and for debugging.
         self.last_visits: dict = {}
@@ -221,11 +231,33 @@ class NetGuidedMCTSAgent(Agent):
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None:
             self._record_example(side, root_legal)
-        # Most-visited action (AlphaZero's move choice), with its searched option.
-        action, force = _split_key(max(root.children.items(), key=lambda kv: kv[1].N)[0])
+        return self._play(root, side)
+
+    def _play(self, root: _Node, side: str) -> Action:
+        """The root child to play: the most visited (AlphaZero's move choice), or
+        early in an exploring game one drawn in proportion to its visits; its
+        searched option is forced in the real game."""
+        self._decisions += 1
+        items = [(k, c) for k, c in root.children.items() if c.N > 0] or list(root.children.items())
+        if self.explore and self._decisions <= self.temperature_moves:
+            key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
+        else:
+            key = max(items, key=lambda kv: kv[1].N)[0]
+        action, force = _split_key(key)
         if force is not None:
             self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
         return action
+
+    def _add_noise(self, node: _Node) -> None:
+        """Dirichlet noise on a root's priors, so self-play also tries what the
+        net doesn't (yet) favour."""
+        if not self.explore or len(node.P) < 2:
+            return
+        noise = [self._rng.gammavariate(self.dirichlet_alpha, 1.0) for _ in node.P]
+        total = sum(noise) or 1.0
+        f = self.noise_frac
+        for key, n in zip(list(node.P), noise):
+            node.P[key] = (1 - f) * node.P[key] + f * n / total
 
     def _record_example(self, side: str, root_legal: list) -> None:
         """Append (state, MCTS visit policy, legal mask, player) for training."""
@@ -282,6 +314,8 @@ class NetGuidedMCTSAgent(Agent):
                 node.children = {t: _Node() for t in priors}
                 node.expanded = True
                 node.value = v
+                if node is root:
+                    self._add_noise(node)
                 value = v
                 break
 
@@ -401,10 +435,7 @@ class NetGuidedMCTSAgent(Agent):
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None:
             self._record_example(side, legal)
-        action, force = _split_key(max(root.children.items(), key=lambda kv: kv[1].N)[0])
-        if force is not None:
-            self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
-        return action
+        return self._play(root, side)
 
     def _iterate_now(self, root: _Node, side: str, point: DecisionPoint, legal: list,
                      bf_idx: Optional[int]) -> None:
@@ -419,6 +450,7 @@ class NetGuidedMCTSAgent(Agent):
             root.P = priors
             root.children = {t: _Node() for t in priors}
             root.expanded = True
+            self._add_noise(root)
             root.N += 1
             root.W += value
             return

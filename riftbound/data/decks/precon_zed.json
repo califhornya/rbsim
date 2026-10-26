@@ -1,0 +1,104 @@
+{
+  "name": "Zed From the Shadows",
+  "legend": "Zed Master of Shadows",
+  "champion": "Zed From the Shadows",
+  "runes": [
+    {
+      "domain": "FURY",
+      "count": 6
+    },
+    {
+      "domain": "CHAOS",
+      "count": 6
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Zaun Warrens"
+    },
+    {
+      "name": "Shadow Temple"
+    },
+    {
+      "name": "Threshold of the Gray"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Blade Twirler",
+      "count": 3
+    },
+    {
+      "name": "Punching Poro",
+      "count": 3
+    },
+    {
+      "name": "Ruthless Strike",
+      "count": 3
+    },
+    {
+      "name": "Shadow Assassin",
+      "count": 3
+    },
+    {
+      "name": "Kinkou Lifeblade",
+      "count": 3
+    },
+    {
+      "name": "Shadow Order Disciple",
+      "count": 3
+    },
+    {
+      "name": "Shadowblade Lurker",
+      "count": 3
+    },
+    {
+      "name": "Traveling Merchant",
+      "count": 2
+    },
+    {
+      "name": "Perfect Execution",
+      "count": 2
+    },
+    {
+      "name": "Shadow Fiend",
+      "count": 2
+    },
+    {
+      "name": "Gust Monk",
+      "count": 2
+    },
+    {
+      "name": "Twilight Step",
+      "count": 2
+    },
+    {
+      "name": "Twilight Reveler",
+      "count": 1
+    },
+    {
+      "name": "Ravenbloom Prefect",
+      "count": 1
+    },
+    {
+      "name": "Wind and Ghosts",
+      "count": 1
+    },
+    {
+      "name": "Death Mark",
+      "count": 1
+    },
+    {
+      "name": "Zed Without a Sound",
+      "count": 2
+    },
+    {
+      "name": "Morgana Vindictive",
+      "count": 1
+    },
+    {
+      "name": "Mel Defiant Soul",
+      "count": 1
+    }
+  ]
+}
