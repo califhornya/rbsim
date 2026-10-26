@@ -526,8 +526,13 @@ Still to build / tune:
    Shen's chosen champion assumed Shen Leader of the Kinkou Order). The net
    agent now also searches showdown and reaction decisions (it used to pass)
    and the observation encodes the turn player, the showdown and the chain
-   (OBS_DIM 6779). Still to tune: MCTS budget, LR schedule, net size; a ~3 ms
-   state clone per simulation is the main cost.
+   (OBS_DIM 6779). Still to tune: MCTS budget, LR schedule, net size.
+   `GameState.clone` pickles (1.7x faster self-play than deepcopy).
+   **First run** (`runs/precons-1`, 2026-10-26): 30 iterations x 16 games, 100
+   simulations, 4 workers, ~35 min at ~5% CPU. Against simple_trade over 100
+   games (seats and decks alternating): the untrained net 0.00, the trained one
+   0.35 ± 0.05 (Shen 0.44, Zed 0.26). The in-training evaluation (20 games) is
+   too noisy to follow a trend: use more games or fewer, larger checks.
 6. **True self-play refinements** — [DONE] Dirichlet exploration noise at the
    root and visit-proportional moves for the first decisions
    (`NetGuidedMCTSAgent(explore=True)`). Optional: a two-controller driver.
