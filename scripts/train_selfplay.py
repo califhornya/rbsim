@@ -13,7 +13,9 @@ thread each; riftbound/compute.py), with --pause seconds between iterations, so
 the machine keeps plenty of headroom. Every --eval-every iterations the net plays
 --eval-games games against each --eval-vs agent (simple_trade, and random as a
 sanity check). The run directory holds the checkpoint (net.pt) and one JSON line
-per iteration (log.jsonl); --resume continues it. A file named STOP in the run
+per iteration (log.jsonl), and at each evaluation a copy of the net (net_0050.pt...)
+and the best one so far against the first --eval-vs agent (net_best.pt); --resume
+continues it. A file named STOP in the run
 directory (or STOP.txt) ends the run after the current iteration, everything saved.
 """
 from __future__ import annotations
@@ -35,6 +37,8 @@ def main() -> None:
                     help="Gradient steps per iteration (0: each new example seen ~twice)")
     ap.add_argument("--batch-size", type=int, default=128)
     ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--lr-final", type=float, default=None,
+                    help="Learning rate at the end of the run, cosine from --lr (default: lr / 10)")
     ap.add_argument("--buffer-size", type=int, default=50000)
     ap.add_argument("--workers", type=int, default=None,
                     help="Game processes (default: a quarter of the cores; 0: this process)")
@@ -71,7 +75,8 @@ def main() -> None:
         net, decks,
         iterations=args.iterations, games_per_iter=args.games_per_iter,
         mcts_iters=args.mcts_iters, train_steps=args.train_steps,
-        batch_size=args.batch_size, lr=args.lr, buffer_size=args.buffer_size,
+        batch_size=args.batch_size, lr=args.lr, lr_final=args.lr_final,
+        buffer_size=args.buffer_size,
         checkpoint=ckpt, log_path=log_path, start_iteration=start, seed=args.seed + start,
         workers=args.workers, eval_every=args.eval_every, eval_games=args.eval_games,
         eval_vs=args.eval_vs,

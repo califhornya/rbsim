@@ -533,6 +533,14 @@ Still to build / tune:
    games (seats and decks alternating): the untrained net 0.00, the trained one
    0.35 ± 0.05 (Shen 0.44, Zed 0.26). The in-training evaluation (20 games) is
    too noisy to follow a trend: use more games or fewer, larger checks.
+   200 more iterations (230 in all) left it at 0.34 ± 0.05: a plateau.
+   **Richer observation** (branch `richer-obs`): every unit's state, all public
+   zones, card embeddings pooled by zone (OBS_DIM 2959, 0.79M parameters), plus
+   a cosine learning-rate decay and a snapshot at each evaluation. Same 230
+   iterations from scratch (`runs/precons-2`, ~3 h at ~5-10% CPU): the final net
+   0.50 ± 0.05 against simple_trade over 100 games (Shen 0.70, Zed 0.30). The
+   "best" snapshot picked by the 40-game evaluations (iteration 160, 0.525)
+   measured 0.40 over 100 games: 40 games are too few to pick a net by.
 6. **True self-play refinements** — [DONE] Dirichlet exploration noise at the
    root and visit-proportional moves for the first decisions
    (`NetGuidedMCTSAgent(explore=True)`). Optional: a two-controller driver.

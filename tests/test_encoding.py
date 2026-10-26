@@ -101,7 +101,7 @@ def test_full_game_encodes_every_step():
 
 def test_encoding_sees_turn_player_showdown_and_chain():
     import random
-    from riftbound.ai.encoding import VOCAB_SIZE, card_index
+    from riftbound.ai.encoding import token_rows
     from riftbound.core.cards import SpellCard
     from riftbound.core.player import Deck, Player, RuneDeck
     from riftbound.core.state import ChainItem, GameState
@@ -114,6 +114,28 @@ def test_encoding_sees_turn_player_showdown_and_chain():
     va = encode_observation(Observation.from_state(gs, "A"))
     vb = encode_observation(Observation.from_state(gs, "B"))
     assert not np.array_equal(va, vb)
-    i = card_index("Rebuke")
-    assert va[OBS_DIM - VOCAB_SIZE + i] == 1.0              # A sees B's spell as the opponent's
-    assert vb[OBS_DIM - 2 * VOCAB_SIZE + i] == 1.0          # B sees it as its own
+    assert ("opp_chain", "Rebuke") in [(z, c) for z, c, _ in token_rows(va)]   # B's spell, seen by A
+    assert ("my_chain", "Rebuke") in [(z, c) for z, c, _ in token_rows(vb)]
+
+
+def test_encoding_sees_each_units_state_and_the_public_zones():
+    import random
+    from riftbound.ai.encoding import token_rows
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+
+    a = Player(name="A", deck=Deck(cards=[UnitCard(name="Gust Monk")]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[UnitCard(name="Hidden One")]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, active="A", battlefields=[Battlefield(), Battlefield()])
+    tired = UnitInPlay(UnitCard(name="Blade Twirler", might=3), ready=False, damage=2)
+    gs.battlefields[1].add_unit("A", tired)
+    b.trash.append(UnitCard(name="Shadow Assassin"))
+    rows = token_rows(encode_observation(Observation.from_state(gs, "A")))
+    unit = next(f for z, c, f in rows if (z, c) == ("my_units_bf1", "Blade Twirler"))
+    assert unit[0] == 0.3 and unit[1] == 0.2 and unit[2] == 0.0          # Might 3, damage 2, exhausted
+    assert ("opp_trash", "Shadow Assassin") in [(z, c) for z, c, _ in rows]
+    assert ("my_deck", "Gust Monk") in [(z, c) for z, c, _ in rows]      # my deck's cards, not theirs
+    assert not any(z.startswith("opp_deck") or c == "Hidden One" for z, c, _ in rows)
