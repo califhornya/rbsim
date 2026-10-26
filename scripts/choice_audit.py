@@ -46,6 +46,8 @@ from statistics import mean
 
 import typer
 
+from riftbound.compute import default_workers
+
 ROOT = Path(__file__).resolve().parents[1]
 
 app = typer.Typer(add_completion=False)
@@ -268,6 +270,8 @@ _AGENT = "simple_trade"
 
 def _init(decks, agent):
     global _DECKS, _AGENT
+    from riftbound.compute import be_gentle
+    be_gentle()
     warnings.filterwarnings("ignore")
     _DECKS, _AGENT = decks, agent
 
@@ -442,7 +446,8 @@ def main(
     n_decks: int = typer.Option(120, "--decks", help="Random decks to build"),
     agent: str = typer.Option("simple_trade", "--agent", help="simple_trade | random"),
     seed: int = typer.Option(7, "--seed"),
-    workers: int = typer.Option(max(1, (os.cpu_count() or 2) - 2), "--workers"),
+    workers: int = typer.Option(default_workers(), "--workers",
+                                help="Worker processes (default: a quarter of the cores)"),
     out: Path = typer.Option(ROOT / "CHOICE_AUDIT.md", "--out"),
     raw: Path = typer.Option(None, "--raw", help="Optional: write the per-choice results as JSON"),
     only: str = typer.Option("", "--only", help="Comma-separated kind prefixes to replay (e.g. mode,discard)"),

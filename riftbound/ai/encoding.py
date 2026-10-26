@@ -52,10 +52,15 @@ _BF_ONEHOT = len(_BF_VOCAB) + 1  # last slot = unnamed / unknown
 # deployed-gear counts(2) + named one-hot.
 _PER_BF = 2 + 2 + 3 + 2 + _BF_ONEHOT
 
-# Scalar features (see _scalars); kept in a list so the count is self-documenting.
-_N_SCALARS = 14 + 2 * N_DOM
+# Scalar features (see _scalars): 14 counts, Power by domain for both players,
+# whether the viewer is the turn player, and where a showdown is running.
+_N_SCALARS = 14 + 2 * N_DOM + 1 + N_BF
 
-OBS_DIM = _N_SCALARS + N_BF * _PER_BF + 4 * VOCAB_SIZE
+# Bags of card counts: my hand, my trash, my board, opp board, my spells on the
+# chain, opp spells on the chain.
+_N_BAGS = 6
+
+OBS_DIM = _N_SCALARS + N_BF * _PER_BF + _N_BAGS * VOCAB_SIZE
 
 
 def card_index(name: str) -> Optional[int]:
@@ -95,6 +100,8 @@ def _scalars(obs: Observation) -> np.ndarray:
         s.append(obs.my_power.get(d, 0) / 12.0)
     for d in DOMAINS:
         s.append(obs.opp_power.get(d, 0) / 12.0)
+    s.append(1.0 if obs.active == obs.viewer else 0.0)
+    s.extend(1.0 if obs.showdown_bf == i else 0.0 for i in range(N_BF))
     return np.asarray(s, dtype=np.float32)
 
 
@@ -131,7 +138,8 @@ def encode_observation(obs: Observation) -> np.ndarray:
         else:
             parts.append(np.zeros(_PER_BF, dtype=np.float32))
 
-    # Bag-of-counts: my hand, my trash, my board, opp board (units + deployed gear).
+    # Bag-of-counts: my hand, my trash, my board, opp board (units + deployed
+    # gear), the chain's spells by caster.
     my_board = [u.name for bf in bfs for u in (bf.A if me == "A" else bf.B)]
     my_board += [u.name for u in obs.my_base_units]
     my_board += [g for bf in bfs for g in (bf.gear_A if me == "A" else bf.gear_B)]
@@ -142,6 +150,8 @@ def encode_observation(obs: Observation) -> np.ndarray:
     parts.append(_bag(obs.my_trash))
     parts.append(_bag(my_board))
     parts.append(_bag(opp_board))
+    parts.append(_bag(obs.my_chain))
+    parts.append(_bag(obs.opp_chain))
 
     vec = np.concatenate(parts).astype(np.float32)
     assert vec.shape[0] == OBS_DIM, f"encoding {vec.shape[0]} != OBS_DIM {OBS_DIM}"

@@ -10,9 +10,11 @@ clone (hidden opponent info resampled per iteration, as in ISMCTS), then plays t
 **most-visited** root action. This is the search half of AlphaZero; the self-play
 training loop (next chunk) will feed the visit distributions back as policy targets.
 
-Requires the optional `rl` extra (torch), via `net.py`. Search focuses on the main
-turn action (like ISMCTS); mulligan/showdown/reaction stay simple in v1 (documented
-deferrals — folding them into the learned policy is later work).
+Requires the optional `rl` extra (torch), via `net.py`. The main turn is searched
+over the player's actions until the turn passes; a decision in a showdown or on an
+open chain gets a one-ply search (`_search_now`: each option played until the chain
+and the showdown settle, both players then passing); the mulligan compares the
+net's value of each keep.
 
 **Choices inside an action** (a spell's target, a mode, the unit an Equipment
 goes on, which enemy combat damage kills first, a "you may"...; GameLoop.choose)
@@ -87,18 +89,19 @@ class _ChoiceProbe:
 
 class _ForcedChoice(_ChoiceProbe):
     """The searched option, forced in the real game for the action just
-    returned: fires at the player's first searched choice, then puts the loop's
-    previous chooser back; any other choice goes to that chooser."""
+    returned: fires at the player's first choice of that kind and number of
+    options, then puts the loop's previous chooser back; any other choice goes
+    to that chooser."""
 
     def __init__(self, me: str, force, loop, previous):
         super().__init__(me, force)
         self.loop, self.previous = loop, previous
 
     def __call__(self, loop, kind, side, options, default, source):
-        if self.first is None and _searchable(kind, side, self.me, len(options)):
-            pick = super().__call__(loop, kind, side, options, default, source)
+        if _searchable(kind, side, self.me, len(options)) and \
+                tuple(self.force[:2]) == (kind, len(options)):
             self.release()
-            return pick
+            return self.force[2]
         return self.previous(loop, kind, side, options, default, source) if self.previous else None
 
     def release(self) -> None:
@@ -123,10 +126,12 @@ class NetGuidedMCTSAgent(Agent):
 
     def __init__(self, player, net: RiftboundNet, iterations: int = 100,
                  c_puct: float = 1.5, rng: Optional[random.Random] = None,
-                 mulligan_samples: int = 3):
+                 mulligan_samples: int = 3, reaction_iterations: Optional[int] = None):
         super().__init__(player)
         self.net = net
         self.iterations = iterations
+        # Showdown / reaction decisions search one ply: a quarter of the budget.
+        self.reaction_iterations = reaction_iterations or max(8, iterations // 4)
         self.c_puct = c_puct
         self.mulligan_samples = mulligan_samples
         self._rng = rng
@@ -368,8 +373,94 @@ class NetGuidedMCTSAgent(Agent):
                 best_v, best_combo = v, combo
         return best_combo
 
+    # -- showdown / reaction decisions -----------------------------------------
+
     def decide_showdown_action(self, opponent, bf_idx: int) -> Action:
-        return _PASS
+        return self._search_now(DecisionPoint.SHOWDOWN_ACTION, bf_idx)
 
     def decide_reaction(self, opponent, chain) -> Action:
-        return _PASS
+        return self._search_now(DecisionPoint.REACTION, None)
+
+    def _search_now(self, point: DecisionPoint, bf_idx: Optional[int]) -> Action:
+        """A decision in a showdown (with focus) or on an open chain: one-ply
+        PUCT over the legal actions and their choice variants. Each is played on
+        a determinized copy until things settle (the chain resolved, then the
+        showdown over with its combat, both players passing) and the net's
+        value of that position counts. Free when passing is the only option."""
+        self._ensure_rng()
+        side = self.player.name
+        legal = legal_actions(self.loop, point, side)
+        if len(legal) <= 1:
+            return legal[0].to_engine() if legal else _PASS
+        root = _Node()
+        for _ in range(self.reaction_iterations):
+            self._iterate_now(root, side, point, legal, bf_idx)
+        if not root.children or not any(c.N for c in root.children.values()):
+            return _PASS
+        total = sum(c.N for c in root.children.values()) or 1
+        self.last_visits = {a: c.N / total for a, c in root.children.items()}
+        if self.record is not None:
+            self._record_example(side, legal)
+        action, force = _split_key(max(root.children.items(), key=lambda kv: kv[1].N)[0])
+        if force is not None:
+            self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
+        return action
+
+    def _iterate_now(self, root: _Node, side: str, point: DecisionPoint, legal: list,
+                     bf_idx: Optional[int]) -> None:
+        from riftbound.core.loop import GameLoop
+        from riftbound.core.state import determinize
+        clone = self.gs.clone()
+        clone.rng = random.Random(self._rng.randrange(1 << 30))
+        determinize(clone, observer=side, rng=clone.rng)
+        loop = GameLoop(clone)
+        if not root.expanded:
+            priors, value = self._evaluate(clone, side, legal)
+            root.P = priors
+            root.children = {t: _Node() for t in priors}
+            root.expanded = True
+            root.N += 1
+            root.W += value
+            return
+        key = self._puct_select(root, [a.to_engine() for a in legal])
+        if key is None:
+            return
+        action, force = _split_key(key)
+        probe = _ChoiceProbe(side, force)
+        loop.chooser = probe
+        if action != _PASS:
+            player = clone.get_player(side)
+            if point == DecisionPoint.SHOWDOWN_ACTION:
+                loop._showdown_step(player, side, action, bf_idx)
+            else:
+                loop._reaction_step(player, side, action)
+        loop.chooser = None
+        self._settle(loop)
+        value = self._terminal_value(clone, side)
+        if value is None:
+            value = self._net_value(clone, side)
+        if force is None and probe.first is not None:
+            key = self._split_child(root, action, probe.first)
+        child = root.children[key]
+        for n in (root, child):
+            n.N += 1
+            n.W += value
+
+    @staticmethod
+    def _settle(loop) -> None:
+        """Resolve the chain, then end the showdown (combat included), as if
+        both players passed from here."""
+        gs = loop.gs
+        if gs.chain:
+            loop._resolve_chain()
+        if gs.showdown_active and gs.showdown_bf_idx is not None:
+            loop._finish_showdown(gs.showdown_bf_idx, gs.showdown_attacker)
+
+    @staticmethod
+    def _terminal_value(clone, side: str) -> Optional[float]:
+        vs = clone.victory_score
+        if clone.points_A >= vs or clone.points_B >= vs:
+            pa, pb = clone.points_A, clone.points_B
+            win = (pa > pb) if side == "A" else (pb > pa)
+            return 1.0 if win else (-1.0 if pa != pb else 0.0)
+        return None
