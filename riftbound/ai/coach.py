@@ -294,11 +294,14 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
 
 def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
     """The option a suggestion forces at its first choice, found by playing the
-    action on a copy of the game: {"text", "ref"} (empty if never reached)."""
+    action on a copy of the game: {"text", "ref"} (empty if never reached).
+    Targets picked before it (the only one there is: Twilight Step's unit with
+    3 Might or less) are named too."""
     from riftbound.core.loop import GameLoop
     clone = gs.clone()
     loop = GameLoop(clone)
     seen: dict = {}
+    targets: list = []
 
     def chooser(_loop, kind, s, options, default, source):
         if not seen and s == side and (kind, len(options)) == tuple(force[:2]):
@@ -306,8 +309,10 @@ def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
             head = kind.partition(":")[0]
             text = f"{question(kind)} {option_text(clone, side, opt)}" if head == "optional" \
                 else f"{_SHORT.get(head, 'scelta')}: {option_text(clone, side, opt)}"
-            seen.update(text=text, ref=option_ref(clone, side, opt))
+            seen.update(text=", ".join(targets + [text]), ref=option_ref(clone, side, opt))
             return force[2]
+        if not seen and s == side and kind.startswith("target"):
+            targets.append(f"{_SHORT['target']}: {option_text(clone, side, options[default])}")
         return None
 
     loop.chooser = chooser

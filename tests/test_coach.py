@@ -254,3 +254,28 @@ def test_the_log_says_where_burned_cards_come_from():
     lines = [t for _, t in _board_events(before, Observation.from_state(gs, "A").to_dict())]
     assert sum(t.startswith("Dal mazzo al cimitero: ") for t in lines) == 2
     assert sum(t.startswith("Peschi ") for t in lines) == 1
+
+
+def test_a_suggested_move_names_the_unit_it_moves():
+    """Twilight Step "Move a unit with 3 [might] or less": the net searches the
+    destination; the only unit that qualifies is named in the advice too."""
+    import random
+    from riftbound.ai.coach import _choice_preview
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.core.enums import Domain
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    gs.active = "A"
+    a.energy = 6
+    a.add_power(Domain.CHAOS, 3)
+    a.hand = [CARD_REGISTRY["Twilight Step"].instantiate()]
+    a.base_units.append(UnitInPlay(card=CARD_REGISTRY["Shadow Order Disciple"].instantiate()))
+    b.base_units.append(UnitInPlay(card=CARD_REGISTRY["Kinkou Lifeblade"].instantiate()))
+    seen = _choice_preview(gs, "A", ("SPELL", 0, 1), ("destination:move_unit", 2, 1), 0)
+    assert seen["text"].startswith("bersaglio: Shadow Order Disciple (tua")
+    assert seen["text"].endswith("verso: campo 2") and seen["ref"] == "bf:1"
