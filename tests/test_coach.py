@@ -312,3 +312,27 @@ def test_the_advice_names_the_card_of_a_you_may_and_banishes_are_logged():
     loop._apply_action(a, ("PASS", None, None))
     lines = [t for _, t in _board_events(before, Observation.from_state(gs, "A").to_dict())]
     assert "Bandita una tua carta: Punching Poro" in lines
+
+
+def test_an_opponent_discard_then_draw_is_not_a_burn():
+    """Traveling Merchant "discard 1 then draw 1" for the opponent read as
+    "Dal mazzo avversario al cimitero" (its hand is hidden, the count stays)."""
+    import random
+    from riftbound.ai.coach import _board_events
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.decisions import Observation
+    from riftbound.core.loop import GameLoop
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+    b = Player(name="B", deck=Deck(cards=[UnitCard(name="Top")]), rune_deck=RuneDeck([]))
+    gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+    loop = GameLoop(gs)
+    b.hand = [UnitCard(name="Twilight Reveler")]
+    before = Observation.from_state(gs, "A").to_dict()
+    loop._discard(b, b.hand[0])
+    b.draw()
+    after = Observation.from_state(gs, "A").to_dict()
+    lines = [t for _, t in _board_events(before, after, ["Twilight Reveler"])]
+    assert lines == ["L'avversario scarta Twilight Reveler", "L'avversario pesca 1 carta"]

@@ -363,9 +363,10 @@ def _board_extras(gs, viewer: str) -> dict:
     }
 
 
-def _board_events(prev: Optional[dict], cur: dict) -> list:
+def _board_events(prev: Optional[dict], cur: dict, opp_discards: Optional[list] = None) -> list:
     """What changed between two of the coach's views, as (who, text) lines:
-    a new turn, points, control of a battlefield, a showdown, units gone."""
+    a new turn, points, control of a battlefield, a showdown, units gone.
+    `opp_discards`: names of the cards the opponent discarded in between."""
     me = cur["viewer"]
     them = "B" if me == "A" else "A"
     names = [bf["named"] or f"campo {i + 1}" for i, bf in enumerate(cur["battlefields"])]
@@ -436,11 +437,19 @@ def _board_events(prev: Optional[dict], cur: dict) -> list:
             if drawn:
                 out.append(("me", f"Peschi {', '.join(new[:drawn])}"))
         else:
-            gained = max(0, cur["opp_hand_count"] - prev["opp_hand_count"])
+            # The opponent's hand is hidden: its discards come from the engine
+            # (`opp_discards`; Traveling Merchant's "discard 1 then draw 1"
+            # looked like a burn), the rest that left the deck is a draw if the
+            # hand grew, else a burn.
+            discarded = Counter(opp_discards or ())
+            gained = max(0, cur["opp_hand_count"] - prev["opp_hand_count"] + sum(discarded.values()))
             drawn = min(left_deck, gained) if gained else 0
             burned = left_deck - drawn
             for name in sorted((+to_trash).elements()):
-                if burned > 0:
+                if discarded[name] > 0:
+                    discarded[name] -= 1
+                    out.append(("opp", f"L'avversario scarta {name}"))
+                elif burned > 0:
                     burned -= 1
                     out.append(("opp", f"Dal mazzo avversario al cimitero: {name}"))
                 else:
@@ -674,6 +683,7 @@ class CoachSession:
         self._thread: Optional[threading.Thread] = None
         self.opp_mulligan: Optional[dict] = None   # told once the game is over
         self.opening = False                # the coach's mulligan, before turn 1
+        self.opp_discards: list = []        # since the last snapshot (its hand is hidden)
 
     # -- the game thread ---------------------------------------------------------
 
@@ -739,6 +749,14 @@ class CoachSession:
         log.sinks[threading.get_ident()] = self.log
         try:
             self.loop = GameLoop(self.gs, verbose=True)
+            opp = self.gs.get_player(self.gs.other(self.side))
+
+            def discard(player, card, _inner=self.loop._discard):
+                # A discard is public (the card goes to the trash face up).
+                if player is opp and card in player.hand:
+                    self.opp_discards.append(card.name)
+                return _inner(player, card)
+            self.loop._discard = discard
             result = self.loop.start()
             self.result = {"winner": result.winner, "turns": result.turns,
                            "you_won": result.winner == self.side}
@@ -768,8 +786,9 @@ class CoachSession:
         if view == self.view and extras == self.extras:
             return False
         if not self.opening:
-            for who, text in _board_events(self.view, view):
+            for who, text in _board_events(self.view, view, self.opp_discards):
                 self.event(who, text)
+        self.opp_discards = []
         self.view, self.extras = view, extras
         return True
 
