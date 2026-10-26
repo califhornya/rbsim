@@ -148,3 +148,24 @@ def test_ruthless_strike_deals_five_to_one_unit_when_kicked():
         assert sum(k.startswith("target") for k in asked) == 1
         assert big.damage == dealt and small.damage == 0
         assert [c.name for c in a.hand] == ([] if kick else ["Fodder"])
+
+
+def test_shen_cards_need_exactly_one_other_unit():
+    """Shen Leader of the Kinkou Order and Disciple of Shen say "exactly one
+    other unit you control here": a third unit turns them off (they read
+    "two or more")."""
+    for others, point, shield in ((1, 1, True), (2, 0, False)):
+        loop, a, _ = _setup()
+        bf0 = loop.gs.battlefields[0]
+        shen = UnitInPlay(card=CARD_REGISTRY["Shen Leader of the Kinkou Order"].instantiate())
+        bf0.add_unit("A", shen)
+        disciple = UnitInPlay(card=CARD_REGISTRY["Disciple of Shen"].instantiate())
+        bf1 = loop.gs.battlefields[1]
+        bf1.add_unit("A", disciple)
+        for i in range(others):
+            bf0.add_unit("A", UnitInPlay(card=UnitCard(name=f"Pal{i}", might=1)))
+            bf1.add_unit("A", UnitInPlay(card=UnitCard(name=f"Mate{i}", might=1)))
+        loop._recompute_passives()
+        assert disciple.has_keyword("SHIELD 3") == shield
+        loop._fire_scoring_trigger("on_hold", bf0, "A")
+        assert loop.gs.points_A == point
