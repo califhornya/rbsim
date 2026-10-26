@@ -119,3 +119,32 @@ def test_lux_crownguard_exhausts_for_two_energy_for_spells():
     loop, a, (lux,) = _setup("Lux Crownguard")
     assert _use(loop, "Lux Crownguard")
     assert not lux.ready and a.earmarked_energy_spell == 2
+
+
+def test_ruthless_strike_deals_five_to_one_unit_when_kicked():
+    """'Deal 3 to a unit. If you paid the additional cost, deal 5 to it instead':
+    one target, not 3 to one unit and 2 more to a second one."""
+    from riftbound.core.enums import Domain
+    for kick, dealt in ((True, 5), (False, 3)):
+        loop, a, _ = _setup(energy=10)
+        for d in Domain:
+            a.add_power(d, 3)
+        a.hand = [CARD_REGISTRY["Ruthless Strike"].instantiate(), UnitCard(name="Fodder", might=1)]
+        big = UnitInPlay(card=UnitCard(name="Big", might=8), ready=True)
+        small = UnitInPlay(card=UnitCard(name="Small", might=3), ready=True)
+        loop.gs.battlefields[0].add_unit("B", big)
+        loop.gs.battlefields[0].add_unit("B", small)
+        asked = []
+
+        def chooser(_loop, kind, side, options, default, source, kick=kick):
+            asked.append(kind)
+            if kind.startswith("optional:"):
+                return options.index(kick)
+            if kind.startswith("target"):
+                return options.index(big)
+            return None
+        loop.chooser = chooser
+        loop._apply_action(a, ("SPELL", 0, 0))
+        assert sum(k.startswith("target") for k in asked) == 1
+        assert big.damage == dealt and small.damage == 0
+        assert [c.name for c in a.hand] == ([] if kick else ["Fodder"])
