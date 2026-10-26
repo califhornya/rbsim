@@ -93,8 +93,12 @@ class _ProbeLoop(GameLoop):
                 self.sound_violations.append((self.gs.turn, a.label))
 
         # Completeness: whatever the agent really does, if it makes progress, must
-        # be in the legal menu.
-        if action[0] != "PASS":
+        # be in the legal menu — except, while a move is being declared, an action
+        # that doesn't join it: that ends the move (its showdown), as PASS does.
+        pending = self.gs.pending_move
+        ends_move = pending is not None and not (
+            action[0] == "MOVE" and len(action) > 3 and action[3] == pending[0])
+        if action[0] != "PASS" and not ends_move:
             before, after = _apply_on_clone(self, ap.name, action, cards_played_this_turn)
             if before != after and _key(action) not in legal_keys:
                 self.completeness_violations.append((self.gs.turn, action))

@@ -38,6 +38,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
     "on_combat_start_here", "on_equipment_attached", "on_friendly_empowered", "on_banish_own",
+    "on_become_empowered", "on_you_discard",
     "on_unit_played_here", "on_self_played", "trash_on_card_played", "on_enemy_gear_played",
     "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
@@ -3319,11 +3320,15 @@ class GameLoop:
 
         base_index = len(self.gs.battlefields)
 
-        # Units moved to a battlefield arrive together; anything else this player
-        # does first lets the showdown they started happen.
+        # A Standard Move is declared one unit at a time: units moved to the same
+        # battlefield in a row move together (§144.3). Anything else ends the
+        # move, and its showdown happens first (§323.11): the action chosen
+        # before it isn't taken, the player decides again on the board the
+        # showdown left (legal_actions offers only PASS or joining the move).
         pending = self.gs.pending_move
         if pending is not None and not (kind == "MOVE" and dst_lane == pending[0]):
             self._flush_pending_move()
+            return
         if kind != "MOVE":
             self.gs.move_group = None       # the units moved together are done
 
@@ -3487,6 +3492,11 @@ class GameLoop:
             arg = lane  # lane actually contains the argument
             if ability_id == "ACTIVATED":
                 self._apply_activated_ability(ap, opponent, arg)
+
+        # A unit played to a battlefield it contests: its showdown starts as
+        # soon as the play is done (§323.11); nothing joins it.
+        if kind != "MOVE" and self.gs.pending_move is not None:
+            self._flush_pending_move()
 
     # ------------------------------------------------------------------
     # Generic activated abilities (Round 4 Tier 2 / D3)
@@ -3825,7 +3835,7 @@ class GameLoop:
         parsed = {"energy": 0, "power": 0, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
                   "banish_from_trash": None, "discard": 0, "discard_type": None,
-                  "spend_buff": None, "kill_other_token": False}
+                  "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False}
         if cost is None:
             return parsed
         if isinstance(cost, dict):
@@ -3845,6 +3855,7 @@ class GameLoop:
             parsed["discard_type"] = cost.get("discard_type")         # "Discard a gear"
             parsed["spend_buff"] = cost.get("spend_buff")             # "self" / "other" / "any"
             parsed["kill_other_token"] = bool(cost.get("kill_other_token"))
+            parsed["kill_other_friendly"] = bool(cost.get("kill_other_friendly"))  # "Kill a friendly unit"
         elif isinstance(cost, str):
             for tok in cost.split(","):
                 t = tok.strip().lower()
@@ -3891,12 +3902,17 @@ class GameLoop:
             holder = self._buff_to_spend(side, unit, parsed["spend_buff"])
             if holder is not None:
                 holder.might_counters -= 1
-        if parsed.get("kill_other_token"):
-            victim = self._token_to_kill(side, unit)
-            if victim is not None:
-                # "Kill a friendly unit or gear" (Malzahar Fanatic): any of them.
-                others = [u for u in self._friendly_units_of(side) if u is not unit]
-                victim = self.choose("cost_unit:kill", side, others + list(ap.base_gear), victim)
+        if parsed.get("kill_other_token") or parsed.get("kill_other_friendly"):
+            others = [u for u in self._friendly_units_of(side) if u is not unit]
+            if parsed.get("kill_other_token"):
+                victim = self._token_to_kill(side, unit)
+                if victim is not None:
+                    # "Kill a friendly unit or gear" (Malzahar Fanatic): any of them.
+                    victim = self.choose("cost_unit:kill", side, others + list(ap.base_gear), victim)
+            else:
+                victim = self._friendly_to_kill(side, unit)
+                if victim is not None:
+                    victim = self.choose("cost_unit:kill", side, others, victim)
             if isinstance(victim, UnitInPlay):
                 where = self._locate_unit(victim)
                 if where[1] is None:
@@ -3913,6 +3929,8 @@ class GameLoop:
         kind = parsed.get("discard_type")
         if kind == "gear":
             return [c for c in ap.hand if isinstance(c, GearCard)]
+        if kind == "spell":                 # "Discard a spell" (Mel Defiant Soul)
+            return [c for c in ap.hand if isinstance(c, SpellCard)]
         return list(ap.hand)
 
     def _buff_to_spend(self, side: str, unit, who: str):
@@ -3931,6 +3949,14 @@ class GameLoop:
     def _friendly_units_of(self, side: str) -> list:
         return [u for bf in self.gs.battlefields for u in bf._units_for(side)] + \
             list(self.gs.get_player(side).base_units)
+
+    def _friendly_to_kill(self, side: str, unit):
+        """ "Kill a friendly unit" as a cost (Escaped Grayback): baseline, a token
+        first, else the weakest other friendly unit."""
+        others = [u for u in self._friendly_units_of(side) if u is not unit]
+        if not others:
+            return None
+        return min(others, key=lambda u: (not u.is_token, u.might))
 
     def _token_to_kill(self, side: str, unit):
         """ "Kill a friendly unit or gear" as a cost (Malzahar Fanatic): baseline,
@@ -3964,6 +3990,8 @@ class GameLoop:
         if parsed["spend_buff"] and self._buff_to_spend(side, unit, parsed["spend_buff"]) is None:
             return False
         if parsed["kill_other_token"] and self._token_to_kill(side, unit) is None:
+            return False
+        if parsed["kill_other_friendly"] and self._friendly_to_kill(side, unit) is None:
             return False
         if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
             return False
@@ -4282,7 +4310,8 @@ class GameLoop:
 
     def _empower(self, card: Card, side: str) -> None:
         """Empower a unit, legend or gear `side` controls; if it wasn't already,
-        "When you empower something else, empower me" (Mel, Ambessa)."""
+        its own "When I become EMPOWERED" (Apprentice Mage, Kharox) and "When
+        you empower something else, empower me" (Mel, Ambessa)."""
         unit = self._find_unit_by_card(card)
         if self._is_empowered(card):
             return
@@ -4290,6 +4319,11 @@ class GameLoop:
             unit.empowered = True
         else:
             card.empowered = True
+        where = self._locate_unit(unit) if unit is not None else None
+        bf = (where[1] if where else None) or self.gs.battlefields[0]
+        self._resolve_triggered_effects(card, "on_become_empowered", bf, self.gs.get_player(side),
+                                        self.gs.get_player(self.gs.other(side)),
+                                        context_extra={"battlefield": bf})
         self._fire_units_trigger("on_friendly_empowered", side, exclude_card=card,
                                  triggering_card=card)
 
@@ -4488,6 +4522,9 @@ class GameLoop:
         self._resolve_triggered_effects(card, "on_discarded", anchor, player,
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": anchor})
+        # "When you discard one or more cards" (Jinx Rebel). Approximation: once
+        # per card discarded, not once per discard event.
+        self._fire_units_trigger("on_you_discard", side, triggering_card=card)
 
     def _fire_leaves_board(self, card: Card, owner_side: str, bf: Battlefield) -> None:
         """Fire a card's `leaves_board` triggered effects. 'Leaving the board'
@@ -5002,6 +5039,12 @@ class GameLoop:
             else:
                 act = ap.agent.decide_action(op, cards_played=cards_played_this_turn)
             if act[0] == "PASS":
+                if gs.pending_move is not None:
+                    # Done declaring a move: its showdown, then the turn goes on.
+                    self._flush_pending_move()
+                    self._recompute_passives()
+                    actions_this_turn += 1
+                    continue
                 if self.verbose:
                     print(f"  {ap.name} passes")
                 break
@@ -5010,11 +5053,14 @@ class GameLoop:
             # MOVE the engine silently refuses) would loop forever. Treat an
             # action that makes no progress as an implicit PASS. The absolute
             # cap is a belt-and-suspenders bound; real turns play far fewer.
+            # (An action that ended a move ran its showdown instead: progress.)
             before = self._action_fingerprint(ap, op)
+            held = gs.pending_move
             self._apply_action(ap, act, cards_played_this_turn=cards_played_this_turn)
             self._recompute_passives()
             actions_this_turn += 1
-            if self._action_fingerprint(ap, op) == before:
+            ended_move = held is not None and gs.pending_move is None
+            if self._action_fingerprint(ap, op) == before and not ended_move:
                 if self.verbose:
                     print(f"  {ap.name} no-op action {act} — ending action phase")
                 break

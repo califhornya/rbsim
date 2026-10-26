@@ -42,3 +42,6 @@ riftbound/data/cards/all_cards.json.preimport.bak
 
 # Training runs (checkpoints, logs)
 runs/
+
+# Card art copied from a saved RiftMana page (scripts/import_card_images.py): stays local
+riftbound/data/card_images/

@@ -64,8 +64,8 @@ def test_playing_to_an_enemy_battlefield_starts_the_fight():
     vanguard.cost_energy, vanguard.cost_power = 0, None
     loop.gs.A.hand = [vanguard]
     loop._apply_action(loop.gs.A, ("UNIT", 0, 0, 1))
-    assert bf1.contested_this_turn and loop.gs.pending_move == (1, "A")
-    loop._flush_pending_move()
+    # The showdown starts as soon as the play is done (§323.11): nothing joins it.
+    assert bf1.contested_this_turn and loop.gs.pending_move is None
     assert not bf1.units_B and [u.card for u in bf1.units_A] == [vanguard]
 
 

@@ -339,8 +339,9 @@ class NetGuidedMCTSAgent(Agent):
             if key is None:
                 value = self._net_value(clone, side)
                 break
-            if key == _PASS:
+            if key == _PASS and clone.pending_move is None:
                 # Stop-here: evaluate the position where we choose to end acting.
+                # (PASS during a move ends the move: its showdown, then more turn.)
                 path.append(node.children[key])
                 value = self._net_value(clone, side)
                 break

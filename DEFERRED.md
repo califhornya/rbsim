@@ -558,6 +558,52 @@ Still to build / tune:
    mulligan, and choices during the opponent's moves (combat damage while
    defending). The net's early win estimates look miscalibrated (4-6% at turn
    1 with Zed vs Shen).
+   Visual table (2026-10-26, after the user found the text page unreadable;
+   layout modelled on RiftAtlas): card images (`scripts/import_card_images.py`
+   copies them from a saved RiftMana card list into the git-ignored
+   `riftbound/data/card_images/`), hover preview with the unit's live state,
+   the net's ideas as gold numbers + an arrow, click a card for its moves,
+   choices picked on the table, an Italian log of both players' moves and of
+   what changed (points, control, deaths), a pause before each opponent move
+   (`--pause`). Runes are shown by domain, not one by one: the engine taps
+   them all into Energy and Power at the start of the turn. Not seen live yet:
+   the chain panel and reaction prompts. "Fermati qui e salva" (the net
+   finishes the game alone; only the coach's decisions are saved, with the
+   result) and "Ho sbagliato l'ultima mossa" (drops the last decision).
+   Rules fix from the first coach report: after a Standard Move the engine let
+   the mover take any action, which started the held showdown first and then
+   applied the action chosen before it, with stale hand/unit indices (a coach
+   played a unit to base "before" the showdown). Now (§144.3, §323.11, §308.1.a)
+   while a move is held only PASS ("done: the showdown starts", then the turn
+   goes on) or another unit joining the same move is legal; any other action
+   from an agent that doesn't consult legality just ends the move and isn't
+   taken; a unit played to a battlefield fights at once. Golden games
+   regenerated. The net's observation doesn't show a held move yet (only the
+   legal mask does); add it at the next OBS_DIM change. Nets trained before
+   this saw the old semantics.
+   Second round of coach reports (2026-10-26 evening). Zaun Warrens' conquer
+   effect did resolve, but the engine picked the discard for the coach and the
+   page didn't say: now the choices inside an accepted suggestion (other than
+   the one the net searched) are the coach's, and the Italian log tells draws,
+   discards and cards going to the trash. All 47 cards mentioning EMPOWER were
+   checked against their images (tests/test_card_fixes_coach.py): Steel Paws
+   EMPOWER is [7] (RiftMana's text says [1]), Aurok General [3][order];
+   EMPOWER abilities added to Akali Deadly Weapon, Mel Newly Awakened, Mel
+   Defiant Soul (discard a spell), Escaped Grayback (kill a friendly unit: new
+   cost key `kill_other_friendly`); Punching Poro's cost was never read. New
+   trigger `on_become_empowered` (Apprentice Mage PREDICT 2, Kharox BURN 3,
+   Tail-Cloaked Matriarch, Mel Defiant Soul's banish: new effect `banish_unit`,
+   filter `at_battlefield`). The 6 cost-less activated abilities (never
+   offered) fixed: Sett Brawler (spend my buff), Lux Crownguard ([tap]),
+   Fretful Feline (on_readied), Jinx Rebel (new trigger `on_you_discard`).
+   Still approximate: Jinx fires once per card discarded (not per discard
+   event); Kharox doesn't play a unit from their trash; Akali Deadly Weapon
+   deals 1 even when Empowered; Mel Newly Awakened's Empowered passive and
+   Renekton Brute's "Might 10+: empower me" aren't modeled; Legion Marauder pays
+   [1] (not "or [order]"); PREDICT 2+ reorders but never recycles; activated
+   costs pay Power of any domain (Shadow Fiend's [fury] isn't enforced). Not
+   reproduced: Steel Paws "paying 2" for its old [1] EMPOWER — the engine
+   charged 1; likely two payments seen in one board update.
 7. [DONE] **Learned mulligan + battlefield** — both are now net-value-guided (they
    use the trained net, so they improve as it learns):
    - `NetGuidedMCTSAgent.decide_mulligan` scores every keep/return combo by the net's
