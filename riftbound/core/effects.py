@@ -112,18 +112,11 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Modal "choose one" (§ modal): the actor picks one mode; its sub-effect(s)
     resolve. A mode is either a single effect dict or a list of effect dicts.
-    Default (heuristic / no agent): the first mode."""
+    An agent's decide_mode picks; without a preference the baseline tries each
+    mode on a copy of the game and takes the best (_best_mode)."""
     modes = spec.get("modes") or []
     if not modes:
         return
-    agent = getattr(ctx.actor, "agent", None)
-    i = 0
-    if agent is not None and hasattr(agent, "decide_mode"):
-        try:
-            i = int(agent.decide_mode(ctx.card, len(modes)))
-        except Exception:  # noqa: BLE001
-            i = 0
-    i = max(0, min(i, len(modes) - 1))
     free = list(range(len(modes)))
     used = None
     if spec.get("unique_per_turn"):
@@ -132,16 +125,77 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         free = [j for j in range(len(modes)) if j not in used]
         if not free:
             return
-        i = i if i in free else free[0]
+    agent = getattr(ctx.actor, "agent", None)
+    i = None
+    if agent is not None and hasattr(agent, "decide_mode"):
+        try:
+            i = agent.decide_mode(ctx.card, len(modes))
+            i = None if i is None else max(0, min(int(i), len(modes) - 1))
+        except Exception:  # noqa: BLE001
+            i = None
+    if i is None:
+        i = _best_mode(ctx, modes, free)
+    i = i if i in free else free[0]
     i = ctx.loop.choose("mode", ctx.actor_side, free, free[free.index(i)], ctx.card)
     if used is not None:
         used.add(i)
-    chosen = modes[i]
-    subs = chosen if isinstance(chosen, list) else [chosen]
-    for sub in subs:
+    _run_mode(ctx, modes[i])
+
+
+def _run_mode(ctx: "EffectContext", mode) -> None:
+    for sub in mode if isinstance(mode, list) else [mode]:
         handler = REGISTRY.get(sub.get("effect"))
         if handler:
             handler(ctx, sub)
+
+
+def _best_mode(ctx: "EffectContext", modes: list, free: list) -> int:
+    """Baseline "choose one": each mode resolved on a copy of the game, the one
+    leaving the best position for its player (_position_value) wins; ties go to
+    the first. A spell a mode counters counts as what it would have been worth.
+    (One level only: a modal effect inside the copy takes its first mode.)"""
+    import copy
+    from .loop import EffectContext, GameLoop
+    if len(free) < 2 or getattr(ctx.loop, "_lookahead", False):
+        return free[0]
+    gs = ctx.loop.gs
+    best, best_value = free[0], None
+    for j in free:
+        memo = {id(p.agent): None for p in (gs.A, gs.B) if p.agent is not None}
+        gs2, card2, bf2, extra2 = copy.deepcopy((gs, ctx.card, ctx.battlefield, ctx.extra), memo)
+        loop2 = GameLoop(gs2)
+        loop2._lookahead = True
+        ctx2 = EffectContext(loop2, card2, gs2.get_player(ctx.actor_side),
+                             gs2.get_player(ctx.opponent_side), bf2, extra2)
+        chain_before = list(gs2.chain)
+        try:
+            _run_mode(ctx2, modes[j])
+        except Exception:  # noqa: BLE001
+            continue
+        value = _position_value(gs2, ctx.actor_side)
+        for item in chain_before:
+            if not any(item is x for x in gs2.chain):     # countered
+                worth = 1 + 1.5 * (int(item.card.cost_energy or 0) + int(item.card.cost_power or 0))
+                value += worth if item.player != ctx.actor_side else -worth
+        if best_value is None or value > best_value:
+            best, best_value = j, value
+    return best
+
+
+def _position_value(gs, side: str) -> float:
+    """A rough score of `side`'s position against the opponent's, to compare
+    the results of a choice: each unit counts its Might left (0 if stunned:
+    it deals no combat damage) + 1, each card in hand and rune 1, each point 4,
+    each battlefield controlled 2."""
+    def score(s: str) -> float:
+        p = gs.get_player(s)
+        units = [u for bf in gs.battlefields for u in bf._units_for(s)] + list(p.base_units)
+        v = sum(1 + (0 if u.stunned else max(0, u.might - u.damage)) for u in units)
+        v += len(p.hand) + sum(len(rs) for rs in p.rune_pool.values())
+        v += 4 * (gs.points_A if s == "A" else gs.points_B)
+        v += 2 * sum(1 for bf in gs.battlefields if bf.controller() == s)
+        return v
+    return score(side) - score(gs.other(side))
 
 
 @effect("sequence")
@@ -1825,7 +1879,8 @@ def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     amount = _amount(ctx, spec)
     floor = spec.get("minimum", spec.get("min_might"))
-    for unit in _resolve_targets(ctx, spec):
+    # "Give a unit -2 [might]" (Frigid Touch): an enemy first.
+    for unit in _resolve_targets(ctx, spec, bias="enemy" if amount < 0 else "none"):
         if amount < 0:
             ctx.loop._fire_might_reduced(unit, ctx.actor_side)
         if amount < 0 and floor is not None:
@@ -1872,7 +1927,8 @@ def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("ready_unit")
 def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")},
+                                 prefer=lambda u: u.ready or not ctx.loop._can_ready(u)):
         if not ctx.loop._can_ready(unit):
             continue
         was_ready = unit.ready
@@ -1948,7 +2004,7 @@ def _grant_temporary_might_per_friendly(ctx: "EffectContext", spec: Mapping[str,
 
 @effect("buff_unit")
 def _buff_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, spec):
+    for unit in _resolve_targets(ctx, spec, prefer=lambda u: u.might_counters >= 1):
         if unit.might_counters < 1:  # BUFF is non-stacking (max 1 per unit)
             unit.might_counters += 1
             where = ctx.loop._locate_unit(unit)
@@ -2108,11 +2164,14 @@ _EVERYWHERE_TARGETS = {
 _CHOOSER_TARGETS = {"chosen_unit", "chosen", "any_unit", "a_unit", "unit"}
 
 
-def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str = "none") -> list:
+def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str = "none",
+                     prefer=None) -> list:
     """Return the list of units an effect should hit, honoring target + scope + target_filter.
 
     `bias` ("enemy" | "friendly" | "none") only affects a chooser target ("a unit"):
     it decides which side the deterministic baseline picks first for a single target.
+    `prefer`: a sort key for a single pick within that side, lowest first (ready
+    an exhausted unit, not one already ready).
     """
     target = str(spec.get("target", "actor")).lower()
     scope = str(spec.get("scope", "single")).lower()
@@ -2155,8 +2214,14 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         return list(units)
     # Units picked one by one ("a unit", "up to two units" = count): that's a
     # choice, for "when you choose me" and "you've chosen enemy units twice".
-    # Baseline: list order (the bias side first).
+    # Baseline: list order (the bias side first), `prefer` within that side.
     units = _choosable(ctx, units)
+    if prefer is not None and units:
+        def side(u):
+            where = ctx.loop._locate_unit(u)
+            return where[0] if where else None
+        lead = side(units[0])
+        units = sorted(units, key=lambda u: (side(u) != lead, prefer(u)))
     picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units,
                                   units[:max(1, int(spec.get("count", 1) or 1))], ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
@@ -2375,7 +2440,8 @@ _ENEMY_GEAR_HINTS = {"enemy_gear", "chosen_gear", "gear"}
 
 @effect("heal_unit")
 def _heal_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")},
+                                 prefer=lambda u: u.damage == 0):
         unit.damage = 0
 
 
@@ -2383,9 +2449,10 @@ def _heal_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Return units to their owner's hand. Every recall_unit card reads
     'return ... to its owner's hand': the card leaves play (tokens cease to
-    exist) and attached gear is recovered to the owner's base."""
+    exist) and attached gear is recovered to the owner's base. "Return a
+    unit" (Rebuke, Gust): an enemy first."""
     gs = ctx.loop.gs
-    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}):
+    for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}, bias="enemy"):
         for side in ("A", "B"):
             units = _bf_units(ctx, side)
             if unit in units:

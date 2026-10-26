@@ -499,3 +499,20 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   `::test_swap_position_conserves_with_duplicate_units`. Golden regenerated (a few games shifted
   in detail from now-correct duplicate handling + Tideturner; no winner flips). With this fixed,
   Tideturner is wired (`swap_position`, LIVE).
+
+## 25. (FIXED 2026-10-26) Card value-equality lost or duplicated cards (the #24 bug, for cards)
+- **Root cause:** `Card` and its subclasses were `@dataclass` with VALUE equality, so two
+  copies of a card compared equal and `zone.remove(card)` took the first equal copy. Fizz
+  Trickster plays a spell from the trash and recycles it: with two Eclipses in the trash, the
+  played one went to the deck AND stayed in the trash, the other vanished. Found by
+  `tests/test_invariants.py` once the choice fixes sent a game down that path.
+- **Fix:** `@dataclass(eq=False)` on `Card` and every subclass (cards.py). Regression test:
+  `test_choice_baselines.py::test_recycling_a_spell_played_from_the_trash_keeps_both_copies`.
+
+## 26. (FIXED 2026-10-26) Showdowns and reaction chains could loop forever
+- **Root cause:** in `_run_showdown` / `_run_chain` an action that did nothing (a spell the
+  player couldn't pay for: agents read the printed cost, the engine adds DEFLECT and taxes)
+  neither counted as a pass nor reset the passes, so two players proposing one each never
+  stopped. 1 of 3000 corpus self-play games hung (scripts/choice_audit.py).
+- **Fix:** a failed action counts as a pass, plus a 200-round cap per showdown / chain.
+  Regression test: `test_no_hang.py::test_unpayable_spells_in_a_showdown_count_as_passes`.

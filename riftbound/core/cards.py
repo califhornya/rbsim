@@ -7,9 +7,15 @@ from uuid import uuid4
 from .enums import CardType, Domain
 
 
-@dataclass
+@dataclass(eq=False)
 class Card:
-    """Base Riftbound card model used by the simulator."""
+    """Base Riftbound card model used by the simulator.
+
+    IDENTITY equality (``eq=False``, on every subclass too), as for UnitInPlay
+    (KNOWN_ISSUES #24): two copies of a card are different cards. With value
+    equality ``trash.remove(card)`` took the first equal copy, so recycling a
+    spell played from the trash (Fizz Trickster) moved one Eclipse to the deck
+    and lost the other."""
     name: str
     category: CardType
     cost_energy: int = 0
@@ -41,7 +47,7 @@ class Card:
                     return 1
         return 0
 
-@dataclass
+@dataclass(eq=False)
 class UnitCard(Card):
     """Unit cards represent creatures that can contest battlefields."""
 
@@ -71,7 +77,7 @@ class UnitCard(Card):
             effects=list(effects or []),
         )
 
-@dataclass
+@dataclass(eq=False)
 class SpellCard(Card):
     """Spell cards resolve an immediate effect when cast."""
 
@@ -104,7 +110,7 @@ class SpellCard(Card):
         self.damage = damage
 
 
-@dataclass
+@dataclass(eq=False)
 class GearCard(Card):
     def __init__(
         self,
@@ -135,7 +141,7 @@ class GearCard(Card):
         )
 
 
-@dataclass
+@dataclass(eq=False)
 class RuneCard(Card):
     def __init__(
         self,
@@ -158,7 +164,7 @@ class RuneCard(Card):
         )
 
 
-@dataclass
+@dataclass(eq=False)
 class LegendCard(Card):
     def __init__(
         self,
@@ -187,7 +193,7 @@ class LegendCard(Card):
         )
 
 
-@dataclass
+@dataclass(eq=False)
 class BattlefieldCard(Card):
     def __init__(
         self,

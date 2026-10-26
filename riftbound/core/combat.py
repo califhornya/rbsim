@@ -152,9 +152,10 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
     """Damage-assignment order (§460.2.c): TANK units must take lethal first,
     BACKLINE units last, everyone else in between. On a Tank+Backline conflict
     the controller chooses — we resolve deterministically as Tank (take first).
-    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). `first(normal)`
-    picks which of the units in between takes lethal first (the assigner's
-    choice, asked only when `damage` can't kill them all); default list order."""
+    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). `first(normal,
+    damage)` picks which of the units in between takes lethal first (the
+    assigner's choice, asked only when `damage` can't kill them all; see
+    kill_order), the rest then follow kill_order; without it, list order."""
     tanks: List[UnitInPlay] = []
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
@@ -172,9 +173,28 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
         alive = [u for u in normal if not _is_dead(u)]
         left = damage - sum(_lethal(u) for u in tanks if not _is_dead(u))
         if len(alive) > 1 and 0 < left < sum(_lethal(u) for u in alive):
-            lead = first(alive)
-            normal = [lead] + [u for u in normal if u is not lead]
+            lead = first(alive, left)
+            rest = kill_order([u for u in alive if u is not lead], left - _lethal(lead))
+            normal = [lead] + rest + [u for u in normal if _is_dead(u)]
     return tanks + normal + backline
+
+
+def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
+    """The order to assign `damage` to `units` in (lethal first, one by one) that
+    kills the most enemy Might, then the most units: the best set it can kill,
+    mightiest first, then the others in list order. Exact for up to 10 units."""
+    if len(units) > 10:
+        return sorted(units, key=lambda u: _lethal(u))
+    best, best_value = [], (0, 0)
+    for mask in range(1, 1 << len(units)):
+        pick = [u for i, u in enumerate(units) if mask >> i & 1]
+        if sum(_lethal(u) for u in pick) > damage:
+            continue
+        value = (sum(u.might for u in pick), len(pick))
+        if value > best_value:
+            best, best_value = pick, value
+    best = sorted(best, key=lambda u: -u.might)
+    return best + [u for u in units if not any(u is b for b in best)]
 
 
 def _lethal(unit: UnitInPlay) -> int:

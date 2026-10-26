@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState, ChainItem
 from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
-from .combat import UnitInPlay
+from .combat import UnitInPlay, kill_order
 from .player import Player
 from .battlefield import Battlefield, DeployedGear, FacedownCard
 from riftbound.registry.cards_registry import CARD_REGISTRY, EffectSpec
@@ -2239,21 +2240,59 @@ class GameLoop:
     # ------------------------------------------------------------------
     # Additional costs / kicker at play time (B1)
 
-    def _first_friendly_unit_for_cost(self, ap: Player):
-        """First friendly UnitInPlay on any battlefield, else a base unit, else None
-        (the unit an additional cost kills / exhausts / returns)."""
+    def _cost_objects(self, card: Card, ap: Player, ac: dict) -> tuple[str, list, object]:
+        """What an additional cost takes from the board: (verb, the legal
+        objects, the baseline's pick), or ("", [], None) when it takes nothing.
+        `kill_friendly_unit` (with `or_gear`: "a friendly unit or gear"; with
+        `unit_filter` {"is_mighty": true}: Sacrifice), `kill_friendly_gear`
+        (Zaun Punk), `exhaust_friendly_unit` (a ready one), `exhaust_legend`
+        (Bard Mercurial), `return_friendly_unit`. Baseline: what the player
+        misses least — a token, then a unit in base (not fighting), then the
+        weakest unit or the cheapest gear."""
         side = "A" if ap is self.gs.A else "B"
-        for bf in self.gs.battlefields:
-            units = bf.units_A if side == "A" else bf.units_B
-            if units:
-                return units[0]
-        return ap.base_units[0] if ap.base_units else None
+        units = [u for u in self._friendly_units_of(side) if u.card is not card]
+        gear = [g for g in list(ap.base_gear) + self._controlled_attached_gear(side) if g is not card]
+        if ac.get("unit_filter", {}).get("is_mighty"):
+            units = [u for u in units if u.might >= 5]
+        if ac.get("kill_friendly_unit"):
+            verb, objs = "kill", units + (gear if ac.get("or_gear") else [])
+        elif ac.get("kill_friendly_gear"):
+            verb, objs = "kill", gear
+        elif ac.get("exhaust_friendly_unit"):
+            verb, objs = "exhaust", [u for u in units if u.ready]
+        elif ac.get("exhaust_legend"):
+            legend = self._legend_unit(side)
+            verb, objs = "exhaust", [legend] if legend is not None and legend.ready else []
+        elif ac.get("return_friendly_unit"):
+            verb, objs = "return", units
+        else:
+            return "", [], None
+        if not objs:
+            return verb, [], None
+
+        def spare(o):
+            if isinstance(o, UnitInPlay):
+                in_base = self._locate_unit(o) is not None and self._locate_unit(o)[1] is None
+                return (not o.is_token, not in_base, o.might)
+            return (not getattr(o, "is_token", False), False, int(o.cost_energy or 0))
+        return verb, objs, min(objs, key=spare)
+
+    @staticmethod
+    def _additional_cost_optional(card: Card) -> bool:
+        """ "You may ... as an additional cost" (Zed, Dune Devourer, Meditation),
+        not "As an additional cost to play this, kill a friendly unit". A kicker
+        phrased otherwise ("you may kill another friendly unit or gear to draw
+        1") is optional."""
+        spec = CARD_REGISTRY.get(card.name)
+        text = ((spec.raw or {}).get("effect") or "") if spec else ""
+        sentences = [s for s in re.split(r"(?<=[.)])\s+", text) if "additional cost" in s.lower()]
+        return not sentences or any("you may" in s.lower() for s in sentences)
 
     def _try_pay_additional_costs(self, card: Card, ap: Player) -> bool:
         """If the card has an effect carrying an `additional_cost` (kicker), try to
-        pay the first affordable one. Policy: always pay when affordable (the
-        baseline agents are not kicker-aware). Sets `card._kicker_paid = True` when
-        paid. One kicker per card. Returns whether anything was paid."""
+        pay the first affordable one; a "you may" one is the player's choice
+        (baseline: pay). Sets `card._kicker_paid = True` when paid. One kicker per
+        card. Returns whether anything was paid."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return False
@@ -2261,6 +2300,11 @@ class GameLoop:
             ac = getattr(es, "additional_cost", None)
             if not ac:
                 continue
+            side = "A" if ap is self.gs.A else "B"
+            if self._additional_cost_optional(card) and \
+                    self._pay_one_additional_cost(card, ap, ac, check_only=True) and \
+                    not self.choose("optional:additional_cost", side, [True, False], True, card):
+                return False
             if self._pay_one_additional_cost(card, ap, ac):
                 card._kicker_paid = True
                 if self.verbose:
@@ -2269,15 +2313,14 @@ class GameLoop:
             break  # only the first additional_cost is considered (one kicker/card)
         return False
 
-    def _pay_one_additional_cost(self, card: Card, ap: Player, ac: dict) -> bool:
+    def _pay_one_additional_cost(self, card: Card, ap: Player, ac: dict,
+                                 check_only: bool = False) -> bool:
         """Check an additional_cost dict is affordable, then pay it atomically.
-        Returns True iff fully paid (no partial payment)."""
+        Returns True iff fully paid (no partial payment); `check_only`: whether
+        it could be."""
         energy = int(ac.get("energy", 0) or 0)
         power = int(ac.get("power", 0) or 0)
         discard_n = int(ac.get("discard_cards", 0) or 0)
-        kill = bool(ac.get("kill_friendly_unit"))
-        exhaust = bool(ac.get("exhaust_friendly_unit"))
-        bounce = bool(ac.get("return_friendly_unit"))
 
         # --- affordability check (no mutation yet) ---
         if not self._can_pay_energy_and_generic(ap, energy, power):
@@ -2286,14 +2329,14 @@ class GameLoop:
         in_hand = any(c is card for c in ap.hand)
         if discard_n and len(ap.hand) < discard_n + (1 if in_hand else 0):
             return False
-        target_unit = self._first_friendly_unit_for_cost(ap) if (kill or exhaust or bounce) else None
-        if (kill or exhaust or bounce) and target_unit is None:
+        verb, objs, target = self._cost_objects(card, ap, ac)
+        if verb and target is None:
             return False
+        if check_only:
+            return True
         side = "A" if ap is self.gs.A else "B"
-        if target_unit is not None:
-            what = "kill" if kill else "return" if bounce else "exhaust"
-            target_unit = self.choose(f"cost_unit:{what}", side, self._friendly_units_of(side),
-                                      target_unit, card)
+        if target is not None:
+            target = self.choose(f"cost_unit:{verb}", side, objs, target, card)
 
         # --- payment ---
         if not self._pay_energy_and_generic(ap, energy, power):
@@ -2304,15 +2347,31 @@ class GameLoop:
                 return False
             hand = [c for c in ap.hand if c is not card]
             self._discard(ap, self.choose("discard", side, hand, ap.hand[idx], card))
-        if target_unit is not None:
-            if exhaust:
-                self._exhaust(target_unit)
-            if kill or bounce:
-                self._remove_unit_from_play(target_unit, side)
-                (ap.hand if bounce else ap.trash).append(target_unit.card)
+        if isinstance(target, UnitInPlay):
+            where = self._locate_unit(target)
+            if verb == "exhaust":
+                self._exhaust(target)
+            elif where is not None:
+                if where[1] is None:
+                    ap.base_units.remove(target)
+                else:
+                    where[1].remove_unit(side, target)
+                if verb == "kill":
+                    # It dies (DEATHKNELL, "when a friendly unit dies"); a token
+                    # ceases to exist.
+                    self._route_deaths([(target, side)], where[1] or self.gs.battlefields[0],
+                                       in_base=where[1] is None)
+                else:
+                    ap.base_gear.extend(target.gear)
+                    target.gear = []
+                    if not target.is_token:
+                        ap.hand.append(target.card)
+                    self._fire_leaves_board(target.card, side, where[1] or self.gs.battlefields[0])
             # "... no more Energy and no more Power than the killed unit"
             # (Heedless Resurrection) reads the unit this cost took.
-            card._cost_unit = target_unit.card
+            card._cost_unit = target.card
+        elif target is not None:
+            self._remove_gear(target, ap)
         return True
 
     def _find_unit_by_card(self, card: Card):
@@ -4364,6 +4423,11 @@ class GameLoop:
             return True      # "kill a Bird, Cat, Dog, or Poro you control"
         spec = CARD_REGISTRY.get(card.name)
         for es in (spec.effects if spec else ()):
+            # "As an additional cost to play this, kill a friendly [Mighty]
+            # unit" (Sacrifice): not without one.
+            if es.additional_cost and not self._additional_cost_optional(card) and \
+                    not self._pay_one_additional_cost(card, actor, es.additional_cost, check_only=True):
+                return True
             if es.effect == "play_restriction" and \
                     self.gs.turns_taken.get(side, 0) < int(es.params.get("min_turn", 0)):
                 return True
@@ -4763,8 +4827,10 @@ class GameLoop:
             return any(self._has_effect(u.card, "ignore_tank_here") for u in bf._units_for(side))
 
         def first(assigner):
-            # Which enemy unit `assigner`'s damage kills first (default: list order).
-            return lambda units: self.choose("combat_damage_order", assigner, units, units[0])
+            # Which enemy unit `assigner`'s damage kills first. Baseline: the
+            # order that kills the most Might (combat.kill_order).
+            return lambda units, damage: self.choose("combat_damage_order", assigner, units,
+                                                     kill_order(units, damage)[0])
         return {"take": lambda u, a: self._take_damage(u, a, "combat"),
                 "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
                 "might_mods": mods, "first_a": first("B"), "first_b": first("A")}

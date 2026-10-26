@@ -290,12 +290,15 @@ def _regret(job) -> dict:
     others = [i for i in range(ev.n) if i != ev.default]
     opts = others if len(others) <= 3 else sorted(rng.sample(others, 3))
 
+    labels: list = []
+
     def run(j, seed):
         audit = Audit(force=(k, j))
         winner = play(_DECKS, game, _AGENT, audit, resample_seed=seed)
         got = audit.events[k] if len(audit.events) > k else None
         if got is None or (got.kind, got.n, got.source) != (ev.kind, ev.n, ev.source):
             raise RuntimeError("replay diverged")
+        labels[:] = audit.options
         return _score(winner, ev.side)
 
     try:
@@ -313,7 +316,10 @@ def _regret(job) -> dict:
             "stage1_default": stage1[ev.default],
             "stage1_alts": mean(stage1[j] for j in opts),
             "spread": max(stage1.values()) - min(stage1.values()),
-            "base": mean(base2), "alt": mean(alt2), "gain": mean(alt2) - mean(base2)}
+            "base": mean(base2), "alt": mean(alt2), "gain": mean(alt2) - mean(base2),
+            # What the options were and how each did in stage 1 (index -> win rate).
+            "options": labels, "default": ev.default, "best": best,
+            "stage1": {str(j): v for j, v in stage1.items()}}
 
 
 # ---------------------------------------------------------------------------
@@ -353,6 +359,11 @@ def _report(games: int, agent: str, survey: dict, results: list, n_decks: int,
         "**per game** = gain × how often the choice comes up: the win rate a player would "
         "gain per game if this choice were made well.",
         "",
+        "How to read it: both players are a deterministic heuristic, so near the end of a "
+        "game a small change can flip the opponent's whole plan and the result with it. A "
+        "large gain on a rare choice is often that, not a better pick. **baseline vs a "
+        "random pick** is the steadier sign of whether a baseline rule is sensible.",
+        "",
         "## By kind of choice",
         "",
         "| choice | times/game | real % | sampled | baseline vs a random pick (pts) | gain (pts) "
@@ -384,8 +395,12 @@ def _report(games: int, agent: str, survey: dict, results: list, n_decks: int,
             f"{len(rs)} | {100 * mean(vs_random) if rs else 0:+.1f} | "
             f"{100 * g:+.1f} ± {100 * _stderr(gains):.1f} | "
             f"{(100 * worse / len(rs)) if rs else 0:.0f}% | {100 * impact:+.2f} |")
-    total = sum(max(0.0, t[0]) for t in rows)
-    lines += ["", f"Total over the choices with a positive gain: **{100 * total:+.1f} points per game**.",
+    clear = [(impact, fam) for impact, fam, rs, gains, g in rows
+             if len(gains) > 1 and g > 2 * _stderr(gains)]
+    total = sum(impact for impact, _ in clear)
+    lines += ["", f"Choices whose gain is clearly positive (more than 2 standard errors): "
+              f"{', '.join(f'`{f}`' for _, f in clear) or 'none'} — "
+              f"**{100 * total:+.1f} points per game** in all.",
               "", "\\* share of sampled choices where the best alternative wins at least 10 "
               "points more often than the baseline's pick. **baseline vs a random pick**: the "
               "baseline's win rate minus the average alternative's (stage 1); positive means the "
@@ -430,6 +445,7 @@ def main(
     workers: int = typer.Option(max(1, (os.cpu_count() or 2) - 2), "--workers"),
     out: Path = typer.Option(ROOT / "CHOICE_AUDIT.md", "--out"),
     raw: Path = typer.Option(None, "--raw", help="Optional: write the per-choice results as JSON"),
+    only: str = typer.Option("", "--only", help="Comma-separated kind prefixes to replay (e.g. mode,discard)"),
 ) -> None:
     deck_dir = Path(tempfile.mkdtemp(prefix="choice_audit_"))
     decks = random_decks(n_decks, seed, deck_dir)
@@ -460,7 +476,10 @@ def main(
         # Sample: up to per_kind per family, then fill to `events` in proportion.
         rng = random.Random(seed)
         jobs = []
+        prefixes = [p.strip() for p in only.split(",") if p.strip()]
         for fam, items in sorted(real.items()):
+            if prefixes and not any(fam.startswith(p) for p in prefixes):
+                continue
             rng.shuffle(items)
             jobs += [(g, k, ev, r1, r2) for g, k, ev in items[:per_kind]]
         rng.shuffle(jobs)

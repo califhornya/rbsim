@@ -50,7 +50,8 @@ def test_units_moved_together_fight_together():
     loop._flush_pending_move()                         # the player is done moving
     bf = loop.gs.battlefields[0]
     assert bf.units_B == []                            # 2 + 3 beat the 4-Might Wall
-    assert [u.card.name for u in bf.units_A] == ["Three"]
+    # The Wall's 4 damage kills the mightiest unit it can (combat.kill_order).
+    assert [u.card.name for u in bf.units_A] == ["Two"]
 
 
 def test_any_other_action_starts_the_held_showdown():

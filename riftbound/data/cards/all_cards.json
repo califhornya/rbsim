@@ -13411,7 +13411,7 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "exhaust_friendly_unit": true
+          "exhaust_legend": true
         },
         "destination": "battlefield"
       }
@@ -16023,7 +16023,7 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "kill_friendly_unit": true
+          "kill_friendly_gear": true
         }
       }
     ]
@@ -24264,7 +24264,10 @@
         "timing": "reaction",
         "count": 2,
         "additional_cost": {
-          "kill_friendly_unit": true
+          "kill_friendly_unit": true,
+          "unit_filter": {
+            "is_mighty": true
+          }
         },
         "condition": {
           "type": "kicker_paid"
@@ -24277,7 +24280,10 @@
         "amount": 1,
         "exhausted": true,
         "additional_cost": {
-          "kill_friendly_unit": true
+          "kill_friendly_unit": true,
+          "unit_filter": {
+            "is_mighty": true
+          }
         },
         "condition": {
           "type": "kicker_paid"
@@ -32583,7 +32589,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "kill_friendly_unit": true
+          "kill_friendly_unit": true,
+          "or_gear": true
         }
       }
     ],
@@ -32700,7 +32707,8 @@
           "type": "kicker_paid"
         },
         "additional_cost": {
-          "kill_friendly_unit": true
+          "kill_friendly_unit": true,
+          "or_gear": true
         }
       }
     ],
