@@ -486,9 +486,11 @@ and replays sampled choices with each alternative forced to measure the baseline
   hand / cheapest), the "you may" additional cost is always paid. The audit's
   gains are measured with simple_trade on both seats; near the end of a game a
   small change flips the heuristic opponent's plan, so rare choices are noisy.
-- **Next:** let search / the network make the frequent choices through
-  `choose` (MCTS can branch on them like on actions), starting with equip,
-  damage and Might targets, combat order.
+- [DONE] **The net-guided search makes them** (`net_mcts.SEARCH_CHOICES`): an
+  action's first searched choice splits its child into one per option, the
+  net's value decides, the option is forced in the real game. Only choices
+  made during the player's own actions (not while defending, not hidden ones:
+  dig, predict) and only the first one per action.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
