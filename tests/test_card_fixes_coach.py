@@ -338,3 +338,28 @@ def test_showstopper_buffs_a_unit_in_base_then_moves_it():
     card = CARD_REGISTRY["Showstopper"].instantiate()
     loop._resolve_card_effects(card, loop.gs.battlefields[1], a, loop.gs.B)
     assert poro.might_counters == 1 and poro not in a.base_units
+
+
+def test_an_ability_timing_is_not_a_card_keyword():
+    """Zed Without a Sound: "ACTION [1] [Chaos]: Move me and a Shadow Clone you
+    control to each other's locations" is an ability's timing; the unit itself
+    isn't played in showdowns (it was offered there). The ability swaps."""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.enums import Domain
+    from riftbound.core.legality import legal_actions
+    zed_card = CARD_REGISTRY["Zed Without a Sound"].instantiate()
+    assert not zed_card.has_keyword("ACTION")
+    loop, a, _ = _setup(energy=9)
+    a.add_power(Domain.CHAOS, 2)
+    loop.gs.showdown_active, loop.gs.showdown_bf_idx = True, 0
+    a.hand = [zed_card]
+    assert all(ga.kind != "UNIT" for ga in legal_actions(loop, DecisionPoint.SHOWDOWN_ACTION, "A"))
+    loop.gs.showdown_active, loop.gs.showdown_bf_idx = False, None
+    zed = UnitInPlay(card=CARD_REGISTRY["Zed Without a Sound"].instantiate(), ready=True)
+    a.base_units.append(zed)
+    clone = UnitInPlay(card=CARD_REGISTRY["Shadow Clone"].instantiate(), ready=True)
+    clone.is_token = True
+    loop.gs.battlefields[1].add_unit("A", clone)
+    assert _use(loop, "Zed Without a Sound")
+    assert zed in loop.gs.battlefields[1].units_A and clone in a.base_units
+    assert a.energy == 8 and a.power_pool.get(Domain.CHAOS, 0) == 1

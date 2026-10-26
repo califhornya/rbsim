@@ -463,7 +463,11 @@ def _printed_keyword_heads(rules_text: str) -> set[str]:
         start = prefix == "" or prefix.endswith((".", "\n", "!"))
         header = t[m.end():].lstrip(" \t").startswith(("[>]", ">"))
         kw = m.group(1)
-        if not (start or chained) or header or kw == "EMPOWERED":
+        # "ACTION [1] [chaos]: Move me ..." / "ACTION Discard 1, [1] [fury]:
+        # Banish me ...": the timing of the ability its sentence holds.
+        sentence = re.split(r"[.\n¶]", t[m.end():], maxsplit=1)[0]
+        ability = kw in ("ACTION", "REACTION") and ":" in sentence
+        if not (start or chained) or header or ability or kw == "EMPOWERED":
             continue
         last_end = m.end()
         found.append(kw)

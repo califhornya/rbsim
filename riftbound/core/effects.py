@@ -2770,20 +2770,33 @@ def _swap_position(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if my_loc is None:
         return
     # Friendly, non-token units at a different location; pick the strongest.
+    # `with_name`: only units with that name, tokens too (Zed Without a Sound:
+    # "Move me and a Shadow Clone you control to each other's locations").
+    named = spec.get("with_name")
+
+    def eligible(u):
+        return u is not me and (u.card.name == named if named else not u.is_token)
     candidates = []
     for i, bf in enumerate(gs.battlefields):
         lst = bf.units_A if side == "A" else bf.units_B
         for u in lst:
-            if u is not me and not u.is_token and ("bf", i) != my_loc:
+            if eligible(u) and ("bf", i) != my_loc:
                 candidates.append(u)
     for u in ctx.actor.base_units:
-        if u is not me and not u.is_token and my_loc != "base":
+        if eligible(u) and my_loc != "base":
             candidates.append(u)
     if not candidates:
         return
     target = ctx.loop.choose(_kind("target", spec), ctx.actor_side, candidates,
                              max(candidates, key=lambda u: u.might), ctx.card)
     tgt_loc, tgt_list = locate(target)
+    if named:
+        # Real moves: their move triggers fire, a battlefield entered is contested.
+        def bf_of(loc):
+            return None if loc == "base" else gs.battlefields[loc[1]]
+        loop._move_unit_by_effect(me, bf_of(tgt_loc))
+        loop._move_unit_by_effect(target, bf_of(my_loc))
+        return
 
     def place(unit, loc):
         if loc == "base":

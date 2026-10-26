@@ -1379,9 +1379,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "add_power",
@@ -2829,9 +2827,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "add_power",
@@ -3400,9 +3396,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "gain_energy",
@@ -3900,9 +3894,7 @@
         "rarity": "Rare"
       }
     ],
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "gain_power_any_domain",
@@ -4147,9 +4139,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "add_power",
@@ -5610,9 +5600,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "add_power",
@@ -6952,9 +6940,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "add_power",
@@ -10577,9 +10563,7 @@
         "rarity": "Epic"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "gain_energy",
@@ -12450,9 +12434,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "swap_position",
@@ -13572,9 +13554,7 @@
         "rarity": "Showcase"
       }
     ],
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "deal_damage",
@@ -13624,9 +13604,7 @@
         "rarity": "Rare"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": []
   },
   {
@@ -14720,9 +14698,7 @@
         "rarity": "Epic"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "gain_power_any_domain",
@@ -19817,9 +19793,7 @@
         "rarity": "Uncommon"
       }
     ],
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "signpost_move",
@@ -19982,7 +19956,6 @@
       }
     ],
     "keywords": [
-      "REACTION",
       "LEVEL 6"
     ],
     "effects": [
@@ -19992,7 +19965,8 @@
         "amount": 1,
         "cost": {
           "tap": true
-        }
+        },
+        "timing": "reaction"
       },
       {
         "effect": "gain_power_any_domain",
@@ -20006,7 +19980,8 @@
           "params": {
             "amount": 6
           }
-        }
+        },
+        "timing": "reaction"
       }
     ]
   },
@@ -21573,9 +21548,7 @@
         "rarity": "Common"
       }
     ],
-    "keywords": [
-      "REACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "gain_energy",
@@ -25229,9 +25202,7 @@
         "rarity": "Epic"
       }
     ],
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "stun_unit",
@@ -28939,8 +28910,7 @@
     "set": "Vendetta",
     "keywords": [
       "EMPOWER",
-      "EMPOWERED",
-      "REACTION"
+      "EMPOWERED"
     ],
     "effects": [
       {
@@ -30362,14 +30332,23 @@
     "effect": "When I conquer, play a 0 [might] Shadow Clone unit token to your base. (It has \"When I attack, you may banish a unit from your trash. If you do, give me ASSAULT 4 this turn.\")\nACTION [1] [Chaos]: Move me and a Shadow Clone you control to each other's locations.",
     "effect_equipped": null,
     "set": "Vendetta",
-    "keywords": [
-      "ACTION"
-    ],
+    "keywords": [],
     "effects": [
       {
         "effect": "play_token",
         "trigger": "on_conquer",
         "token_name": "Shadow Clone"
+      },
+      {
+        "effect": "swap_position",
+        "trigger": "activated",
+        "timing": "action",
+        "with_name": "Shadow Clone",
+        "cost": {
+          "energy": 1,
+          "power": 1,
+          "domain": "CHAOS"
+        }
       }
     ],
     "variants": [
@@ -31444,6 +31423,7 @@
       {
         "effect": "gain_energy",
         "trigger": "activated",
+        "timing": "reaction",
         "amount": 2,
         "cost": {
           "power": 2,
@@ -33111,8 +33091,7 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [
-      "ASSAULT",
-      "ACTION"
+      "ASSAULT"
     ],
     "effects": [
       {
