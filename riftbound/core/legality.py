@@ -80,7 +80,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                         actions.append(GameAction("UNIT", idx, 0, dst, f"Play {card.name} to BF{dst}"))
         elif isinstance(card, SpellCard):
             for lane in range(n_bf):
-                if _affordable(loop, ap, card, lane):
+                if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, side, lane):
                     actions.append(GameAction.play("SPELL", idx, lane, f"Cast {card.name} @BF{lane}"))
         elif isinstance(card, GearCard):
             if _affordable(loop, ap, card):
@@ -171,7 +171,7 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
     for idx, card in enumerate(ap.hand):
         if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
             for lane in range(n_bf):
-                if _affordable(loop, ap, card, lane):
+                if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
         # QUICK-DRAW gear (§745): has Reaction — playable at reaction speed.
         elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
@@ -204,7 +204,7 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     actions: list[GameAction] = [GameAction.pass_()]
     for idx, card in enumerate(ap.hand):
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
-            if _affordable(loop, ap, card, lane):
+            if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
         # ACTION units (§732.1.c.1): may be played during showdowns (to base).
         elif isinstance(card, UnitCard) and card.has_keyword("ACTION"):

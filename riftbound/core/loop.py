@@ -335,6 +335,27 @@ Action = Tuple[str, Optional[int], Optional[int], Optional[int]]
 # main phase): real ones take a handful.
 _PRIORITY_ROUNDS_CAP = 200
 
+# The choices a spell makes as it is put on the chain (§355.3-355.5): targets,
+# modes, move destinations, players. The rest (a discard from the hand, a card
+# looked at in the deck, a "you may") are made as it resolves.
+_DECLARED_CHOICES = ("target", "mode", "destination", "player")
+
+
+class _Ignored(Exception):
+    """An instruction whose declared target is no longer legal as the spell
+    resolves: it isn't followed (§359.3.e.5-6)."""
+
+
+def _same_option(option, chosen) -> bool:
+    """Whether a choice's option is the declared one: the same object (a unit,
+    a battlefield, a player), or the same number for a mode."""
+    if isinstance(chosen, tuple):
+        return isinstance(option, tuple) and len(option) == len(chosen) and \
+            all(_same_option(o, c) for o, c in zip(option, chosen))
+    if chosen is None or isinstance(chosen, (bool, int, str)):
+        return option == chosen and type(option) is type(chosen)
+    return option is chosen
+
 
 class GameLoop:
     """Core turn structure, extended with Might combat, rune channeling and movement."""
@@ -348,6 +369,17 @@ class GameLoop:
         # Sees (and may replace) every choice the engine makes for a player:
         # see `choose`. None: the baseline policies decide.
         self.chooser = None
+        # Told every choice made (the coach's log): on_choice(kind, side,
+        # n_options, chosen, source); a spell's declared choices are told as
+        # it goes on the chain, not again as it resolves.
+        self.on_choice = None
+        # Declared choices (§355): the spell instruction running and how many
+        # choices it made [run, instruction, n]; the spell whose choices are
+        # being declared (on a copy of the game) or replayed (as it resolves).
+        self._slot: Optional[list] = None
+        self._declaring: Optional[dict] = None     # {"card", "choices"}
+        self._replay: Optional[dict] = None        # {"card", "choices"}
+        self._in_many = False
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -364,24 +396,152 @@ class GameLoop:
         fixed baseline policy. `options` are the legal choices and `pick` the
         baseline's (one of them, by identity). Returns `pick`, or the option a
         `chooser` returns the index of: chooser(loop, kind, side, options,
-        default_index, source) -> int | None (None keeps the baseline's)."""
-        if self.chooser is None or not options:
-            return pick
-        default = next((i for i, o in enumerate(options) if o is pick), 0)
-        i = self.chooser(self, kind, side, options, default, source)
-        return pick if i is None else options[i]
+        default_index, source) -> int | None (None keeps the baseline's).
+
+        A spell's targets, modes and move destinations are declared as it goes
+        on the chain (_declare_choices); as it resolves they are replayed: the
+        declared option if it is still one (legal), else the instruction is
+        ignored (_Ignored)."""
+        slot = self._choice_slot(kind, source)
+        if slot is not None and self._replay is not None and slot in self._replay["choices"]:
+            chosen = self._replay["choices"][slot][2]
+            hit = next((o for o in options if _same_option(o, chosen)), _Ignored)
+            if hit is _Ignored:
+                raise _Ignored(kind)
+            return hit
+        got = pick
+        if self.chooser is not None and options:
+            default = next((i for i, o in enumerate(options) if o is pick), 0)
+            i = self.chooser(self, kind, side, options, default, source)
+            got = pick if i is None else options[i]
+        self._chose(slot, kind, side, options, got, source)
+        return got
 
     def choose_many(self, kind: str, side: str, options: list, picks: list, source=None) -> list:
         """`choose` for "up to N" picks: one choice per pick, in the baseline's
-        order, each among the options not taken yet."""
-        if self.chooser is None:
-            return picks
-        order = list(picks) + [o for o in options if not any(o is p for p in picks)]
-        out: list = []
-        for _ in picks:
-            left = [o for o in order if not any(o is t for t in out)]
-            out.append(self.choose(kind, side, left, left[0], source))
+        order, each among the options not taken yet. Replayed (see `choose`),
+        the declared options still legal are kept (§359.3.e.8)."""
+        slot = self._choice_slot(kind, source)
+        if slot is not None and self._replay is not None and slot in self._replay["choices"]:
+            chosen = self._replay["choices"][slot][2]
+            hit = [o for o in options if any(_same_option(o, c) for c in chosen)]
+            if chosen and not hit:
+                raise _Ignored(kind)
+            return hit
+        out: list = list(picks)
+        if self.chooser is not None:
+            order = list(picks) + [o for o in options if not any(o is p for p in picks)]
+            out = []
+            self._in_many = True
+            try:
+                for _ in picks:
+                    left = [o for o in order if not any(o is t for t in out)]
+                    out.append(self.choose(kind, side, left, left[0], source))
+            finally:
+                self._in_many = False
+        self._chose(slot, kind, side, options, out, source)
         return out
+
+    def _choice_slot(self, kind: str, source):
+        """The key of a choice the spell being declared or replayed makes
+        (run, instruction, nth choice in it), None for any other choice."""
+        if self._slot is None or self._in_many or not kind.startswith(_DECLARED_CHOICES):
+            return None
+        spell = (self._replay or self._declaring or {}).get("card")
+        if spell is None or source is not spell:
+            return None
+        key = tuple(self._slot)
+        self._slot[2] += 1
+        return key
+
+    def _chose(self, slot, kind: str, side: str, options: list, got, source) -> None:
+        if self._in_many:
+            return
+        if slot is not None and self._declaring is not None:
+            self._declaring["choices"][slot] = (kind, len(options), got)
+        elif self.on_choice is not None and options:
+            self.on_choice(kind, side, len(options), got, source)
+
+    def _put_on_chain(self, item: ChainItem) -> None:
+        """A spell goes on the chain with its choices made (§355)."""
+        self.gs.chain.append(item)
+        item.declared = self._declare_choices(item)
+
+    def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
+        """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
+        only with a valid choice for every target. Checked for the instructions
+        that choose a unit (or a spell to counter: effects.has_valid_target);
+        conditional ones (a kicker's "deal 5 instead") need one of them to
+        have a target. "Up to N" can choose none (§355.13)."""
+        from .effects import has_valid_target
+        spec = CARD_REGISTRY.get(card.name)
+        if spec is None or "up to" in str((spec.raw or {}).get("effect") or "").lower():
+            return True
+        ctx = EffectContext(self, card, self.gs.get_player(side),
+                            self.gs.get_player(self.gs.other(side)), self.gs.battlefields[lane])
+        plain, conditional = [], []
+        for es in spec.effects:
+            if es.trigger not in ("on_play", "on_cast") or getattr(es, "optional", False):
+                continue
+            params = es.merged_params()
+            if params.get("target") == "it":
+                continue
+            ok = has_valid_target(ctx, {**params, "effect": es.effect})
+            if ok is not None:
+                (conditional if es.condition else plain).append(ok)
+        if plain:
+            return all(plain)
+        return any(conditional) if conditional else True
+
+    def _declare_choices(self, item: ChainItem) -> Optional[dict]:
+        """The choices `item`'s spell makes as it is put on the chain (§355.3-
+        355.5): its resolution is run on a copy of the game (nothing responds
+        there), its player choosing as usual (the chooser: the coach, the
+        search) and the choices that are targets, modes, move destinations or
+        players are kept, mapped back to this game's objects. A copy can't
+        declare (its spells resolve choosing then), and a lookahead doesn't."""
+        if getattr(self, "_dry_run", False) or getattr(self, "_lookahead", False) \
+                or not isinstance(item.card, SpellCard):
+            return None
+        import copy
+        gs = self.gs
+        memo = {id(p.agent): None for p in (gs.A, gs.B) if p.agent is not None}
+        gs2, card2 = copy.deepcopy((gs, item.card), memo)
+        back = {id(memo[id(o)]): o for o in memo.get(id(memo), []) if id(o) in memo}
+        loop2 = GameLoop(gs2)
+        loop2._dry_run = True
+        real = self.chooser
+
+        def chooser(_loop, kind, side, options, default, source):
+            # Only the declared choices are the player's now; the rest are
+            # asked again as the spell resolves.
+            if real is None or source is not card2 or not kind.startswith(_DECLARED_CHOICES):
+                return None
+            return real(_loop, kind, side, options, default, source)
+        loop2.chooser = chooser
+        loop2._declaring = {"card": card2, "choices": {}}
+        item2 = gs2.chain.pop()
+        try:
+            loop2._resolve_card_effects(card2, gs2.battlefields[item2.bf_idx],
+                                        gs2.get_player(item2.player),
+                                        gs2.get_player(gs2.other(item2.player)))
+        except Exception:  # noqa: BLE001 — a declaration never stops the game
+            pass
+
+        def real_of(x):
+            if isinstance(x, tuple):
+                return tuple(real_of(e) for e in x)
+            if isinstance(x, list):
+                return [real_of(e) for e in x]
+            if x is None or isinstance(x, (bool, int, str)):
+                return x
+            return back.get(id(x), x)
+        declared = {slot: (kind, n, real_of(got))
+                    for slot, (kind, n, got) in loop2._declaring["choices"].items()}
+        if self.on_choice is not None:
+            for kind, n, got in declared.values():
+                self.on_choice(kind, item.player, n, got, item.card)
+        return declared
 
     # ====== PHASE HELPERS ======
 
@@ -928,9 +1088,10 @@ class GameLoop:
                 and getattr(card, "_repeat_paid", False):
             runs = 2
 
+        outer_slot = self._slot
         try:
-            for _ in range(runs):
-                for effect_spec in play_specs:
+            for run in range(runs):
+                for i, effect_spec in enumerate(play_specs):
                     # Asked once the condition holds: a "you may" that can't
                     # happen is no choice.
                     if not self._check_condition(effect_spec.condition, card, actor, opponent, None):
@@ -940,17 +1101,25 @@ class GameLoop:
                     handler = EFFECT_REGISTRY.get(effect_spec.effect)
                     if not handler:
                         continue
+                    self._slot = [run, i, 0]       # this instruction's declared choices
                     # Resilience: a single malformed spec (e.g. a parser-emitted
                     # target/param the handler can't satisfy) must not abort the
                     # whole match. Skip + log instead. See KNOWN_ISSUES for the
                     # known offenders to fix at the spec/handler level.
                     try:
                         handler(context, effect_spec.merged_params())
+                    except _Ignored:
+                        # Its target is no longer legal: not followed, nor is
+                        # an instruction about "it" (§359.3.e.14.a).
+                        context.extra["it"] = []
+                        if self.verbose:
+                            print(f"  [TARGET-ILLEGAL] {card.name}: {effect_spec.effect} ignored")
                     except Exception as exc:  # noqa: BLE001
                         if self.verbose:
                             print(f"  [EFFECT-SKIP] {card.name}: "
                                   f"{effect_spec.effect} failed: {exc}")
         finally:
+            self._slot = outer_slot
             # Kicker is consumed by this resolution; reset so a replayed instance
             # (return_from_trash, Yorick, ...) doesn't inherit a stale flag.
             if getattr(card, "_kicker_paid", False):
@@ -2244,7 +2413,7 @@ class GameLoop:
         ap = self.gs.get_player(side)
         if isinstance(card, SpellCard):
             self._spell_played(card, ap, from_zone="facedown")
-            self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+            self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
             self._run_chain(side)
         else:  # unit / champion / gear-as-unit → enters at that battlefield
             self._play_unit(card, side, bf=bf, from_zone="facedown")
@@ -2959,7 +3128,7 @@ class GameLoop:
         opponent may react). Cost already handled, card out of its zone."""
         ap = self.gs.get_player(side)
         self._spell_played(card, ap, from_zone=from_zone)
-        self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+        self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
         self._run_chain(side)
 
     def _spell_played(self, card: Card, ap: Player, from_zone: str = "hand") -> None:
@@ -3393,6 +3562,8 @@ class GameLoop:
             card = ap.hand[idx]
             if isinstance(card, SpellCard):
                 target_lane = lane if lane is not None else 0
+                if not self._spell_has_targets(card, ap.name, target_lane):
+                    return                       # §355.8: no valid target, no play
                 # DEFLECT: if this spell targets enemy units and the opponent
                 # controls DEFLECT units at the target battlefield, the spell
                 # costs that much more energy (additional cost, §809).
@@ -3403,7 +3574,7 @@ class GameLoop:
                 self._spell_played(card, ap)
                 if self.verbose:
                     print(f"  {ap.name} plays SPELL: {card.name} at BF{target_lane}")
-                self.gs.chain.append(ChainItem(player=ap.name, card=card, bf_idx=target_lane))
+                self._put_on_chain(ChainItem(player=ap.name, card=card, bf_idx=target_lane))
                 self._run_chain(ap.name)
                 if self.recorder:
                     self.recorder.record_play(
@@ -3666,7 +3837,7 @@ class GameLoop:
                 self.gs.showdown_bf_idx is not None else 0
             if self.gs.chain:
                 self._spell_played(card, ap, from_zone=zone)
-                self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+                self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
             else:
                 self._cast_spell_now(card, side, lane, from_zone=zone)
 
@@ -4600,10 +4771,10 @@ class GameLoop:
                 if lane is None or not (0 <= lane < len(self.gs.battlefields)):
                     lane = 0
                 energy, power = self._effective_cost(card, player, lane)
-                if self._pay_card(player, card, energy, power):
+                if self._spell_has_targets(card, side, lane) and                         self._pay_card(player, card, energy, power):
                     player.remove_from_hand(idx)
                     self._spell_played(card, player)
-                    self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=lane))
+                    self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
                     return "acted"
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
             # QUICK-DRAW gear (§745): played at reaction speed.
@@ -4642,7 +4813,12 @@ class GameLoop:
             actor = self.gs.get_player(item.player)
             opponent = self.gs.get_player(self.gs.other(item.player))
             battlefield = self.gs.battlefields[item.bf_idx]
-            self._resolve_card_effects(item.card, battlefield, actor, opponent)
+            outer = self._replay
+            self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
+            try:
+                self._resolve_card_effects(item.card, battlefield, actor, opponent)
+            finally:
+                self._replay = outer
 
             if self.recorder:
                 before_a = list(battlefield.units_A)
@@ -4729,12 +4905,12 @@ class GameLoop:
             if isinstance(card, SpellCard):
                 has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
                 energy, power = self._effective_cost(card, player, bf_idx)
-                if has_action_or_reaction and self._pay_card(player, card, energy, power):
+                if has_action_or_reaction and self._spell_has_targets(card, side, bf_idx) and                         self._pay_card(player, card, energy, power):
                     player.remove_from_hand(idx)
                     self._spell_played(card, player)
                     if self.verbose:
                         print(f"    {side} plays SPELL in showdown: {card.name}")
-                    self.gs.chain.append(ChainItem(player=side, card=card, bf_idx=bf_idx))
+                    self._put_on_chain(ChainItem(player=side, card=card, bf_idx=bf_idx))
                     self._run_chain(side)
                     return "acted"
         elif kind == "UNIT" and len(action) > 3 and action[3] is not None:

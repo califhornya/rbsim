@@ -492,6 +492,39 @@ and replays sampled choices with each alternative forced to measure the baseline
   made during the player's own actions (not while defending, not hidden ones:
   dig, predict) and only the first one per action.
 
+## Declared choices (§355, 2026-10-27)
+Before, a spell chose its targets as it resolved; the coach couldn't see what an
+opponent's spell aimed at, and a unit moved in reaction just made the spell hit
+another one. Now (`GameLoop._put_on_chain` / `_declare_choices`, tests in
+tests/test_declared_targets.py):
+- [DONE] As a spell goes on the chain its resolution runs on a deep copy of the
+  game, its player choosing as usual (the chooser: coach, search); the choices
+  that are targets, modes, move destinations or players are kept on the
+  ChainItem (`declared`, mapped back to the real objects). As it resolves they
+  are replayed; a declared option no longer among the legal ones raises
+  `_Ignored` and that instruction (and an "it" after it) isn't followed
+  (§359.3.e); "up to N" keeps its legal ones. Other choices (a discard from the
+  hand, cards looked at in the deck, "you may") stay at resolution.
+- [DONE] §355.8 / §358: a spell is offered (legal_actions) and played (the
+  engine refuses it too) only with a valid choice for each instruction that
+  chooses a unit (`effects.has_valid_target`: the _resolve_targets pool, moves'
+  `_move_candidates`) or a spell to counter. Conditional instructions (a
+  kicker's "deal 5 instead") need one of them to have a target; a card whose
+  text says "up to" may have none.
+- [DONE] `GameLoop.on_choice` tells every choice once (declared ones as the
+  spell is played); the coach logs them and shows them on the chain.
+- Approximations left: costs are paid before the choices are declared (rules:
+  choose, then pay; DEFLECT's tax still goes by the spell's battlefield, not
+  its target); "when you choose me" triggers fire as the spell resolves, not as
+  it is played; a later instruction's choice is made on the copy after the
+  earlier ones resolved (it can't name a unit the first one kills); the §355.8
+  check doesn't cover gear, battlefield or trash targets, nor spells played
+  facedown, by FLOW or from banishment; a move effect sends an enemy to its
+  base only (Charm can't pull an enemy in from its base, §355.4);
+  Resonating Strike's "a battlefield you control" is the spell's battlefield,
+  unchecked. Cost: a deep copy per spell played (heuristic games 2.4x slower,
+  net self-play ~8% per decision).
+
 ## Radiance Rules FAQ (playriftbound.com, 2026-10-26) — rulings vs engine
 Official FAQ; it overrides the Core Rules where they differ. Audit of each ruling:
 

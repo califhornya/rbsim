@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Optional
 
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
@@ -2010,21 +2010,20 @@ def _score_point(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         ctx.loop._fire_units_trigger("on_opponent_scores", ctx.loop.gs.other(side))
 
 
+def _counterable(card, spec: Mapping[str, Any]) -> bool:
+    """A spell `counter_spell` may counter: its printed cost within the limits."""
+    power = card.cost_power or 0
+    return (card.cost_energy or 0) <= int(spec.get("max_energy", 4)) \
+        and int(spec.get("min_power", 0)) <= power <= int(spec.get("max_power", 1))
+
+
 @effect("counter_spell")
 def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    max_energy = int(spec.get("max_energy", 4))
-    max_power = int(spec.get("max_power", 1))
     chain = ctx.loop.gs.chain
-    if not chain:
+    if not chain or not _counterable(chain[-1].card, spec):
         return
     target_item = chain[-1]
     target_card = target_item.card
-    if target_card.cost_energy > max_energy:
-        return
-    if (target_card.cost_power or 0) < int(spec.get("min_power", 0)):
-        return
-    if (target_card.cost_power or 0) > max_power:
-        return
     owner = ctx.loop.gs.get_player(target_item.player)
     tax = int(spec.get("unless_pays", 0) or 0)
     if tax and owner.energy >= tax:
@@ -2309,6 +2308,26 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     ctx.extra["it"] = picked
     return picked
+
+
+# A spell's targets that are a choice of one unit (§355.5): "a unit", "an enemy unit".
+_SINGLE_UNIT_TARGETS = _CHOOSER_TARGETS | {"enemy_unit", "friendly_unit"}
+
+
+def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[bool]:
+    """§355.8 for one instruction of a spell about to be played: whether the
+    unit (or spell, for a counter) it chooses has a valid choice now. None: an
+    instruction this check doesn't know to target anything."""
+    effect = spec.get("effect")
+    if effect == "counter_spell":
+        chain = ctx.loop.gs.chain
+        return bool(chain) and _counterable(chain[-1].card, spec)
+    target = str(spec.get("target", "")).lower()
+    if str(spec.get("scope", "single")).lower() != "single" or target not in _SINGLE_UNIT_TARGETS:
+        return None
+    if effect in ("move_unit", "move_units_to_base"):
+        return bool(_move_candidates(ctx, spec, effect == "move_units_to_base"))
+    return bool(_choosable(ctx, _resolve_targets(ctx, {**spec, "scope": "all"})))
 
 
 def _units_where(ctx: "EffectContext", side: str, where: str) -> list:
@@ -2605,6 +2624,65 @@ def _attack_value(ctx: "EffectContext", side: str, unit, bf) -> int:
     return 0
 
 
+def _move_candidates(ctx: "EffectContext", spec: Mapping[str, Any], to_base_verb: bool) -> list:
+    """The (side, unit) pairs a move effect may move: the ones its target names
+    that can be chosen and can go somewhere (a chosen unit moves: the move is
+    the card's, not a "may", so a pick never falls through to another unit)."""
+    loop = ctx.loop
+    me, them = ctx.actor_side, ctx.opponent_side
+    target = str(spec.get("target", "friendly_unit")).lower()
+    if target in ("self", "this", "me"):
+        src = _source_unit(ctx)
+        candidates = [(me, src)] if src is not None else []
+    elif target == "it":
+        # "Buff a friendly unit in your base, then move it" (Showstopper).
+        candidates = [(w[0], u) for u in ctx.extra.get("it", [])
+                      for w in [loop._locate_unit(u)] if w is not None]
+    else:
+        enemy = any(k in target for k in ("enemy", "opponent"))
+        friendly = any(k in target for k in ("friendly", "ally", "actor"))
+        default_from = "here" if (to_base_verb or target.endswith("_here")) else "anywhere"
+        frm = str(spec.get("from", default_from)).lower()
+        sides = [them] if enemy else [me] if friendly else [them, me]
+        candidates = [(s, u) for s in sides for u in _units_at(ctx, s, frm)]
+    tf = spec.get("target_filter")
+    if tf:
+        candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
+    if not target.startswith("all"):
+        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me)]
+    return [(s, u) for s, u in candidates if _move_destinations(ctx, spec, to_base_verb, s, u)]
+
+
+def _move_dest_kind(ctx: "EffectContext", spec: Mapping[str, Any], to_base_verb: bool, side: str) -> str:
+    # Per unit: the chosen unit's side decides (it went by the first
+    # candidate's, so a friendly unit picked after an enemy was "moved" to
+    # the base it was in, and the enemy moved instead).
+    dest = spec.get("destination")
+    if dest is None:
+        dest = "base" if to_base_verb or side == ctx.opponent_side else "battlefield"
+    return str(dest).lower()
+
+
+def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_verb: bool,
+                       side: str, unit) -> list:
+    """Where `unit` may go: a list of battlefields, None standing for base."""
+    gs = ctx.loop.gs
+    dest = _move_dest_kind(ctx, spec, to_base_verb, side)
+    where = ctx.loop._locate_unit(unit)
+    cur = where[1] if where else None
+    if dest == "base":
+        return [None] if cur is not None else []
+    if dest in ("here", "this_battlefield"):
+        return [ctx.battlefield] if ctx.battlefield in gs.battlefields and cur is not ctx.battlefield else []
+    if dest in ("stunned_at", "deployed_at"):
+        # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar)
+        at = ctx.extra.get(dest)
+        return [at] if at is not None and cur is not at else []
+    if dest == "to_or_from_base" and cur is not None:
+        return [None]
+    return [bf for bf in gs.battlefields if bf is not cur]
+
+
 @effect("move_unit")
 def _move_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     _move_units(ctx, spec, to_base_verb=False)
@@ -2635,55 +2713,16 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
     target = str(spec.get("target", "friendly_unit")).lower()
     scope_all = str(spec.get("scope", "")).lower() == "all" or target.startswith("all_")
     count = len(gs.battlefields) * 99 if scope_all else int(spec.get("count", 1))
-    tf = spec.get("target_filter")
-
-    if target in ("self", "this", "me"):
-        src = _source_unit(ctx)
-        candidates = [(me, src)] if src is not None else []
-    elif target == "it":
-        # "Buff a friendly unit in your base, then move it" (Showstopper).
-        candidates = [(w[0], u) for u in ctx.extra.get("it", [])
-                      for w in [loop._locate_unit(u)] if w is not None]
-    else:
-        enemy = any(k in target for k in ("enemy", "opponent"))
-        friendly = any(k in target for k in ("friendly", "ally", "actor"))
-        default_from = "here" if (to_base_verb or target.endswith("_here")) else "anywhere"
-        frm = str(spec.get("from", default_from)).lower()
-        sides = [them] if enemy else [me] if friendly else [them, me]
-        candidates = [(s, u) for s in sides for u in _units_at(ctx, s, frm)]
-    if tf:
-        candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
-    if not target.startswith("all"):
-        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me)]
+    candidates = _move_candidates(ctx, spec, to_base_verb)
     if not candidates:
         ctx.extra["it"] = []
         return
 
     def dest_kind(side):
-        # Per unit: the chosen unit's side decides (it went by the first
-        # candidate's, so a friendly unit picked after an enemy was "moved" to
-        # the base it was in, and the enemy moved instead).
-        dest = spec.get("destination")
-        if dest is None:
-            dest = "base" if to_base_verb or side == them else "battlefield"
-        return str(dest).lower()
+        return _move_dest_kind(ctx, spec, to_base_verb, side)
 
     def destinations(side, unit):
-        """Where `unit` may go: a list of battlefields, None standing for base."""
-        dest = dest_kind(side)
-        where = loop._locate_unit(unit)
-        cur = where[1] if where else None
-        if dest == "base":
-            return [None] if cur is not None else []
-        if dest in ("here", "this_battlefield"):
-            return [ctx.battlefield] if ctx.battlefield in gs.battlefields and cur is not ctx.battlefield else []
-        if dest in ("stunned_at", "deployed_at"):
-            # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar)
-            at = ctx.extra.get(dest)
-            return [at] if at is not None and cur is not at else []
-        if dest == "to_or_from_base" and cur is not None:
-            return [None]
-        return [bf for bf in gs.battlefields if bf is not cur]
+        return _move_destinations(ctx, spec, to_base_verb, side, unit)
 
     def destination_for(side, unit):
         options = destinations(side, unit)
@@ -2712,10 +2751,6 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             return (losing, unit.might)
         return (not at_bf, unit.might)                     # send a base unit in
 
-    # Only units that can go somewhere are chosen; a chosen unit moves (the
-    # move is the card's, not a "may": a pick no longer falls through to an
-    # unchosen unit).
-    candidates = [(s, u) for s, u in candidates if destinations(s, u)]
     order = sorted(candidates, key=priority, reverse=True)
     if not scope_all:
         # Which unit(s): the baseline's priority order, one choice per unit.

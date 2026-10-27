@@ -394,10 +394,10 @@ def test_the_log_names_the_opponents_target_and_the_coachs_only_option(tmp_path)
     gs.battlefields[0].add_unit("A", poro)
     gs.A.hand.append(CARD_REGISTRY["Twilight Step"].instantiate())
     charm, warrens = SimpleNamespace(name="Charm"), SimpleNamespace(name="Zaun Warrens")
-    session._log_choice("target", "B", [poro], poro, charm)
-    session._log_choice("discard", "A", gs.A.hand, gs.A.hand[0], warrens)
-    session._log_choice("target", "A", [poro, poro], poro, charm)     # asked on the page
-    session._log_choice("keep", "B", [poro], poro, charm)             # hidden
+    session._log_choice("target", "B", 1, poro, charm)
+    session._log_choice("discard", "A", len(gs.A.hand), gs.A.hand[0], warrens)
+    session._log_choice("target", "A", 2, poro, charm)     # asked on the page
+    session._log_choice("keep", "B", 1, poro, charm)     # hidden
     texts = [(e["who"], e["text"]) for e in session.state()["events"]]
     assert texts == [
         ("opp", f"Charm: bersaglio → Punching Poro (tua, Might 2, su {gs.battlefields[0].card.name})"),

@@ -18,6 +18,11 @@ class ChainItem:
     player: str    # "A" or "B"
     card: Card
     bf_idx: int
+    # The choices made as it was put on the chain (§355: targets, modes, move
+    # destinations, players), used when it resolves: GameLoop._declare_choices.
+    # {(run, instruction, n): (kind, n options, chosen)}; chosen is a list for
+    # an "up to N" choice.
+    declared: Optional[dict] = None
 
 
 @dataclass

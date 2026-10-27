@@ -201,6 +201,23 @@ def option_text(gs, viewer: str, option) -> str:
     return str(getattr(option, "name", option)).title()
 
 
+def _chosen_text(gs, viewer: str, got) -> str:
+    """A choice's answer in words: one option, or several ("up to two")."""
+    if isinstance(got, list):
+        return ", ".join(option_text(gs, viewer, o) for o in got) or "nessuno"
+    return option_text(gs, viewer, got)
+
+
+def declared_text(gs, viewer: str, item) -> str:
+    """What a spell on the chain chose as it was played (its targets, mode,
+    where it moves), as `viewer` reads it: "bersaglio: Zed (tua, ...)"."""
+    parts = []
+    for slot in sorted(item.declared or {}):
+        kind, _, got = item.declared[slot]
+        parts.append(f"{_SHORT.get(kind.partition(':')[0], 'scelta')}: {_chosen_text(gs, viewer, got)}")
+    return ", ".join(parts)
+
+
 def mulligan_text(hand: list, back: list) -> str:
     """A mulligan in words: the cards (names) sent back from `hand`."""
     if not back:
@@ -310,12 +327,12 @@ def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
             # "you may" of a card that isn't the move's (Shadow Clone attacking
             # when the showdown starts): name the card.
             name = getattr(source, "name", None)
-            text = f"{name + ': ' if name else ''}{question(kind)} {option_text(clone, side, opt)}" \
-                if head == "optional" else f"{_SHORT.get(head, 'scelta')}: {option_text(clone, side, opt)}"
-            seen.update(text=", ".join(targets + [text]), ref=option_ref(clone, side, opt))
+            text = f"{name + ': ' if name else ''}{question(kind)} {option_text(_loop.gs, side, opt)}" \
+                if head == "optional" else f"{_SHORT.get(head, 'scelta')}: {option_text(_loop.gs, side, opt)}"
+            seen.update(text=", ".join(targets + [text]), ref=option_ref(_loop.gs, side, opt))
             return force[2]
         if not seen and s == side and kind.startswith("target"):
-            targets.append(f"{_SHORT['target']}: {option_text(clone, side, options[default])}")
+            targets.append(f"{_SHORT['target']}: {option_text(_loop.gs, side, options[default])}")
         return None
 
     loop.chooser = chooser
@@ -356,8 +373,8 @@ def _board_extras(gs, viewer: str) -> dict:
         "fight": {str(i): fight(i, bf) for i, bf in enumerate(gs.battlefields)
                   if bf.units_A and bf.units_B},
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
-        "chain": [{"name": i.card.name, "owner": _rel(i.player, viewer), "bf": i.bf_idx}
-                  for i in gs.chain],
+        "chain": [{"name": i.card.name, "owner": _rel(i.player, viewer), "bf": i.bf_idx,
+                   "chose": declared_text(gs, viewer, i)} for i in gs.chain],
         "facedown_mine": {str(i): bf.facedown.card.name for i, bf in enumerate(gs.battlefields)
                           if bf.facedown is not None and bf.facedown.owner == viewer},
     }
@@ -599,7 +616,8 @@ class CoachAgent(NetGuidedMCTSAgent):
         if point == DecisionPoint.REACTION and gs.chain:
             top = gs.chain[-1]
             who = "L'avversario ha lanciato" if top.player != self.player.name else "Hai lanciato"
-            return f"{who} {top.card.name}: puoi rispondere con una reazione o lasciar correre."
+            chose = declared_text(gs, self.player.name, top)
+            return f"{who} {top.card.name}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
         if gs.pending_move is not None and gs.pending_move[1] == self.player.name:
             where = _bf_name(gs, gs.pending_move[0])
             return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
@@ -783,12 +801,7 @@ class CoachSession:
                     self.opp_discards.append(card.name)
                 return _inner(player, card)
             self.loop._discard = discard
-
-            def choose(kind, side, options, pick, source=None, _inner=self.loop.choose):
-                got = _inner(kind, side, options, pick, source)
-                self._log_choice(kind, side, options, got, source)
-                return got
-            self.loop.choose = choose
+            self.loop.on_choice = self._log_choice
             result = self.loop.start()
             self.result = {"winner": result.winner, "turns": result.turns,
                            "you_won": result.winner == self.side}
@@ -844,30 +857,34 @@ class CoachSession:
     _PUBLIC_CHOICES = {"target", "mode", "destination", "cost_unit", "equip", "deploy",
                        "spend_buff", "disarm", "first_unit_here", "player", "discard"}
 
-    def _log_choice(self, kind: str, side: str, options: list, got, source) -> None:
+    def _log_choice(self, kind: str, side: str, n_options: int, got, source) -> None:
+        """GameLoop.on_choice: a spell's targets are told as it goes on the
+        chain, other choices as they are made."""
         head = kind.partition(":")[0]
-        if head not in self._PUBLIC_CHOICES or not options or self.gs is None:
+        if head not in self._PUBLIC_CHOICES or not n_options or self.gs is None:
             return
         mine = side == self.side
-        if mine and len(options) > 1:
+        if mine and n_options > 1:
             return                         # asked on the page, logged there
         if not mine and head == "discard":
             return                         # opp_discards logs it
         name = getattr(source, "name", None)
         text = f"{name + ': ' if name else ''}{_SHORT.get(head, 'scelta')} → " \
-               f"{option_text(self.gs, self.side, got)}"
+               f"{_chosen_text(self.gs, self.side, got)}"
         self.event("me" if mine else "opp", text + (" (unica scelta)" if mine else ""))
 
     def notice_chain(self) -> None:
         """The opponent put a card on the chain and the coach can't respond:
-        hold the board until they have seen it (the page's "Continua")."""
+        hold the board until they have seen it and what it chose (the page's
+        "Continua")."""
         gs = self.gs
         if not gs.chain or gs.chain[-1].player == self.side or not self.stop_on_opp_chain:
             return
         top = gs.chain[-1]
         below = [i.card.name for i in gs.chain[:-1]]
-        context = f"L'avversario ha lanciato {top.card.name}" + (
-            f" (sopra {', '.join(reversed(below))})" if below else "") + \
+        chose = declared_text(gs, self.side, top)
+        context = f"L'avversario ha lanciato {top.card.name}" + (f" ({chose})" if chose else "") + (
+            f", sopra {', '.join(reversed(below))}" if below else "") + \
             ". Non hai reazioni da giocare: adesso si risolve."
         answer = self._wait({"type": "notice", "context": context, "card": top.card.name})
         if answer.get("quiet"):

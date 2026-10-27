@@ -141,7 +141,8 @@ def test_ruthless_strike_deals_five_to_one_unit_when_kicked():
             if kind.startswith("optional:"):
                 return options.index(kick)
             if kind.startswith("target"):
-                return options.index(big)
+                # Declared as it goes on the chain: on a copy of the game.
+                return next(i for i, o in enumerate(options) if o.card.name == "Big")
             return None
         loop.chooser = chooser
         loop._apply_action(a, ("SPELL", 0, 0))
