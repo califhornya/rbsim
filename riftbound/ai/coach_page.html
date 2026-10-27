@@ -301,6 +301,13 @@ function cardSlot(name, ref, opts = {}) {
 const emptySlot = (text, ref) => `<div class="slot empty" ${ref ? `data-ref="${ref}"` : ""}>${esc(text)}</div>`;
 
 /* ---------- the board ---------- */
+// Two battlefields with one name (both precons bring Threshold of the Gray): say which.
+function bfName(o, i) {
+  const bfs = o.battlefields, n = bfs[i].named;
+  if (!n) return "Campo " + (i + 1);
+  if (bfs.filter((b) => b.named === n).length < 2) return n;
+  return bfs.length === 2 ? `${n} (${i === 0 ? "sinistra" : "destra"})` : `${n} (${i + 1}°)`;
+}
 function renderTable() {
   for (const k in REF) delete REF[k];
   const o = S.observation;
@@ -330,7 +337,7 @@ function renderTable() {
     return `<div class="bf ${bf.controller == null ? "" : bf.controller === me ? "c-me" : "c-opp"} ${o.showdown_bf === i || moving ? "showdown" : ""}" data-ref="bf:${i}">
       <div class="row">${theirs.map((u, j) => unitSlot(u, `unit:opp:${i}:${j}`, "opp")).join("")}${go}</div>
       <div class="bfmid">
-        <div class="bfinfo l"><span class="name">${esc(bf.named || "Campo " + (i + 1))}</span>${ctrl}${o.showdown_bf === i ? '<span class="sd">SHOWDOWN IN CORSO</span>' : ""}${moving}</div>
+        <div class="bfinfo l"><span class="name">${esc(bfName(o, i))}</span>${ctrl}${o.showdown_bf === i ? '<span class="sd">SHOWDOWN IN CORSO</span>' : ""}${moving}</div>
         <div class="bfcard" data-ref="bfcard:${i}">${bf.named ? face(bf.named) : ""}</div>
         <div class="bfinfo"><span class="mt opp">Avversario ⚔ ${sum(theirs, "opp")}</span><span class="mt me">Tu ⚔ ${sum(mine, "me")}</span><div class="bfx">${fd}</div></div>
       </div>
@@ -462,7 +469,7 @@ function renderSide() {
   st.textContent = { idle: "Pronto", thinking: "Si gioca…", waiting: "Tocca a te decidere", over: "Partita finita" }[S.status] || S.status;
   // score
   if (o) {
-    const me = o.viewer, alert = o.showdown_bf != null ? `Showdown su ${esc(o.battlefields[o.showdown_bf].named || "campo " + (o.showdown_bf + 1))}` : "";
+    const me = o.viewer, alert = o.showdown_bf != null ? `Showdown su ${esc(bfName(o, o.showdown_bf))}` : "";
     $("#score").innerHTML = `<div class="board-score">
       <div><div class="n me">${o.my_points}</div><div class="who">Tu</div></div>
       <div class="muted">su ${o.victory_score}</div>
@@ -520,6 +527,16 @@ function renderCoach() {
       d.onmouseenter = () => { const n = node(ref); if (n) n.style.outline = "3px solid #fff"; };
       d.onmouseleave = () => { const n = node(ref); if (n) n.style.outline = ""; };
     });
+    return;
+  }
+  if (p.type === "notice") {
+    const c = card(p.card);
+    el.innerHTML = `<h2>Guarda</h2><p class="ctx">${esc(p.context)}</p>
+      <div class="best"><div class="thumb">${face(p.card)}</div><div><div class="what">${esc(p.card)}</div>
+        <div class="why" style="white-space:pre-line">${esc(c.text || "")}</div></div></div>
+      <button class="gold" style="width:100%;margin-top:8px" id="noticeOk">Continua</button>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="noticeQuiet"> Non fermarti più sulle magie dell'avversario in questa partita</label>`;
+    $("#noticeOk").onclick = () => send({ ok: true, quiet: $("#noticeQuiet").checked });
     return;
   }
   if (p.type === "mulligan") {

@@ -54,9 +54,16 @@ def test_a_coached_game_saves_its_decisions(tmp_path):
         if pending["type"] == "choice":
             assert all(o["text"] for o in pending["options"])
             return {"option": pending["default"]}
-        # Every move is described in Italian, the net's ideas point at moves.
+        if pending["type"] == "notice":
+            # An opponent's spell the coach can't answer: shown before it resolves.
+            assert pending["context"].startswith(f"L'avversario ha lanciato {pending['card']}")
+            return {"ok": True}
+        # Every move is described in Italian, the net's ideas point at moves,
+        # each idea once (two copies of a card are one idea).
         assert all(a["text"] for a in pending["actions"]) and pending["context"]
         assert all(0 <= s["action"] < len(pending["actions"]) for s in pending["suggestions"])
+        texts = [s["text"] for s in pending["suggestions"]]
+        assert len(texts) == len(set(texts))
         # Mostly the net's move; now and then the last legal action instead.
         if len(seen) % 4 == 0:
             return {"action": len(pending["actions"]) - 1}
@@ -336,3 +343,69 @@ def test_an_opponent_discard_then_draw_is_not_a_burn():
     after = Observation.from_state(gs, "A").to_dict()
     lines = [t for _, t in _board_events(before, after, ["Twilight Reveler"])]
     assert lines == ["L'avversario scarta Twilight Reveler", "L'avversario pesca 1 carta"]
+
+
+def test_an_opponent_spell_the_coach_cant_answer_holds_the_board(tmp_path):
+    """Coach note 2026-10-26: the opponent's spells went by too fast. With no
+    reaction to play the coach still sees the spell on the chain ("notice"),
+    until "Continua"; "quiet" stops it for the rest of the game."""
+    import random
+    import threading
+    from riftbound.ai.coach import CoachAgent
+    from riftbound.ai.net_mcts import _PASS
+    from riftbound.core.game_factory import build_game
+    from riftbound.core.loop import GameLoop
+    from riftbound.core.state import ChainItem
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    session = _session(tmp_path)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
+    gs.A.agent = CoachAgent(gs.A, RiftboundNet(), session, iterations=2, rng=random.Random(0))
+    session.gs, session.side, session.loop = gs, "A", GameLoop(gs)
+    gs.chain.append(ChainItem(player="B", card=CARD_REGISTRY["Charm"].instantiate(), bf_idx=0))
+    out = []
+
+    def react():
+        out.append(gs.A.agent.decide_reaction(gs.B, gs.chain))
+    thread = threading.Thread(target=react)
+    thread.start()
+    end = time.time() + 30
+    while session.state()["pending"] is None and time.time() < end:
+        time.sleep(0.005)
+    pending = session.state()["pending"]
+    assert pending["type"] == "notice" and pending["card"] == "Charm"
+    assert pending["context"].startswith("L'avversario ha lanciato Charm")
+    session.answer({"ok": True, "quiet": True})
+    thread.join(timeout=30)
+    assert out == [_PASS] and not session.stop_on_opp_chain
+    # Quiet: the next one goes by without stopping.
+    assert gs.A.agent.decide_reaction(gs.B, gs.chain) == _PASS
+
+
+def test_the_log_names_the_opponents_target_and_the_coachs_only_option(tmp_path):
+    from types import SimpleNamespace
+
+    from riftbound.core.game_factory import build_game
+    from riftbound.core.combat import UnitInPlay
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    session = _session(tmp_path)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
+    session.gs, session.side = gs, "A"
+    poro = UnitInPlay(card=CARD_REGISTRY["Punching Poro"].instantiate(), ready=True)
+    gs.battlefields[0].add_unit("A", poro)
+    gs.A.hand.append(CARD_REGISTRY["Twilight Step"].instantiate())
+    charm, warrens = SimpleNamespace(name="Charm"), SimpleNamespace(name="Zaun Warrens")
+    session._log_choice("target", "B", [poro], poro, charm)
+    session._log_choice("discard", "A", gs.A.hand, gs.A.hand[0], warrens)
+    session._log_choice("target", "A", [poro, poro], poro, charm)     # asked on the page
+    session._log_choice("keep", "B", [poro], poro, charm)             # hidden
+    texts = [(e["who"], e["text"]) for e in session.state()["events"]]
+    assert texts == [
+        ("opp", f"Charm: bersaglio → Punching Poro (tua, Might 2, su {gs.battlefields[0].card.name})"),
+        ("me", "Zaun Warrens: scarta → Twilight Step (magia, costo 2) (unica scelta)")]
+
+
+def test_two_battlefields_with_one_name_say_which():
+    from riftbound.ai.coach import _view_bf_names
+    same = [{"named": "Threshold of the Gray"}, {"named": "Threshold of the Gray"}]
+    assert _view_bf_names(same) == ["Threshold of the Gray (sinistra)", "Threshold of the Gray (destra)"]
+    assert _view_bf_names([{"named": "Zaun Warrens"}, {"named": None}]) == ["Zaun Warrens", "campo 2"]

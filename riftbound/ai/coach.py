@@ -111,8 +111,8 @@ def _rel(side: str, viewer: str) -> str:
 
 
 def _bf_name(gs, i: int) -> str:
-    bf = gs.battlefields[i]
-    return bf.card.name if bf.card is not None else f"campo {i + 1}"
+    return _view_bf_names([{"named": b.card.name if b.card is not None else None}
+                           for b in gs.battlefields])[i]
 
 
 def _unit_ref(gs, viewer: str, unit) -> Optional[str]:
@@ -363,13 +363,30 @@ def _board_extras(gs, viewer: str) -> dict:
     }
 
 
+def _view_bf_names(battlefields: list) -> list:
+    """The battlefields' names (of an Observation dict); two of the same (both
+    precons bring Threshold of the Gray) say where they are on the table."""
+    named = [bf["named"] for bf in battlefields]
+    out = []
+    for i, name in enumerate(named):
+        if not name:
+            out.append(f"campo {i + 1}")
+        elif named.count(name) < 2:
+            out.append(name)
+        elif len(named) == 2:
+            out.append(f"{name} ({'sinistra' if i == 0 else 'destra'})")
+        else:
+            out.append(f"{name} ({i + 1}°)")
+    return out
+
+
 def _board_events(prev: Optional[dict], cur: dict, opp_discards: Optional[list] = None) -> list:
     """What changed between two of the coach's views, as (who, text) lines:
     a new turn, points, control of a battlefield, a showdown, units gone.
     `opp_discards`: names of the cards the opponent discarded in between."""
     me = cur["viewer"]
     them = "B" if me == "A" else "A"
-    names = [bf["named"] or f"campo {i + 1}" for i, bf in enumerate(cur["battlefields"])]
+    names = _view_bf_names(cur["battlefields"])
     if prev is None or (prev["turn"], prev["active"]) != (cur["turn"], cur["active"]):
         whose = "a te" if cur["active"] == me else "all'avversario"
         out = [("turn", f"Turno {cur['turn']}: tocca {whose}")]
@@ -597,27 +614,35 @@ class CoachAgent(NetGuidedMCTSAgent):
         side = self.player.name
         legal = legal_actions(self.loop, point, side)
         if len(legal) <= 1:
+            if point == DecisionPoint.REACTION:
+                self.session.notice_chain()
             return legal[0].to_engine() if legal else _PASS
         self.session.thinking(point)
         root = self.search(point, legal, cards_played=cards_played, bf_idx=bf_idx)
         tuples = [a.to_engine() for a in legal]
         infos = [action_info(self.loop, side, side, point, t) for t in tuples]
         total = sum(c.N for c in root.children.values()) or 1
-        ranked = sorted(root.children.items(), key=lambda kv: -kv[1].N)[:3]
+        ranked = sorted(root.children.items(), key=lambda kv: -kv[1].N)
         if ranked and self.prefer_pass(root, ranked[0][0]) == _PASS and ranked[0][0] != _PASS:
             # The net would pass: its top move isn't clearly better (prefer_pass).
-            ranked = [(_PASS, root.children[_PASS])] + [kv for kv in ranked if kv[0] != _PASS][:2]
+            ranked = [(_PASS, root.children[_PASS])] + [kv for kv in ranked if kv[0] != _PASS]
         suggestions = []
         for key, child in ranked:
+            if len(suggestions) == 3:
+                break
             action, force = _split_key(key)
             if action not in tuples:
                 continue
             i = tuples.index(action)
             choice = _choice_preview(self.gs, side, action, force, cards_played) if force else {}
+            text = infos[i]["text"] + (f" → {choice['text']}" if choice else "")
+            same = next((s for s in suggestions if s["text"] == text), None)
+            if same is not None:              # two copies of a card in hand: one idea
+                same["share"] += child.N / total
+                continue
             q = child.W / child.N if child.N else 0.0
             suggestions.append({"key": key, "action": i, "share": child.N / total, "win": (q + 1) / 2,
-                                "text": infos[i]["text"] + (f" → {choice['text']}" if choice else ""),
-                                "choice": choice.get("text"), "choice_ref": choice.get("ref")})
+                                "text": text, "choice": choice.get("text"), "choice_ref": choice.get("ref")})
         answer = self.session.ask_decision(point, side, infos, suggestions, self._context(point, bf_idx))
         force = None
         if "suggestion" in answer:
@@ -684,6 +709,7 @@ class CoachSession:
         self.opp_mulligan: Optional[dict] = None   # told once the game is over
         self.opening = False                # the coach's mulligan, before turn 1
         self.opp_discards: list = []        # since the last snapshot (its hand is hidden)
+        self.stop_on_opp_chain = True       # hold the board on each opponent spell (notice_chain)
 
     # -- the game thread ---------------------------------------------------------
 
@@ -757,6 +783,12 @@ class CoachSession:
                     self.opp_discards.append(card.name)
                 return _inner(player, card)
             self.loop._discard = discard
+
+            def choose(kind, side, options, pick, source=None, _inner=self.loop.choose):
+                got = _inner(kind, side, options, pick, source)
+                self._log_choice(kind, side, options, got, source)
+                return got
+            self.loop.choose = choose
             result = self.loop.start()
             self.result = {"winner": result.winner, "turns": result.turns,
                            "you_won": result.winner == self.side}
@@ -806,6 +838,41 @@ class CoachSession:
         move is something a player chose to do (the rest is what happened)."""
         turn = self.gs.turn if self.gs is not None else 0
         self.events.append({"turn": turn, "who": who, "text": text, "move": move})
+
+    # Choices whose answer is public: the opponent's are logged, and the coach's
+    # when there was only one option (the page never asked).
+    _PUBLIC_CHOICES = {"target", "mode", "destination", "cost_unit", "equip", "deploy",
+                       "spend_buff", "disarm", "first_unit_here", "player", "discard"}
+
+    def _log_choice(self, kind: str, side: str, options: list, got, source) -> None:
+        head = kind.partition(":")[0]
+        if head not in self._PUBLIC_CHOICES or not options or self.gs is None:
+            return
+        mine = side == self.side
+        if mine and len(options) > 1:
+            return                         # asked on the page, logged there
+        if not mine and head == "discard":
+            return                         # opp_discards logs it
+        name = getattr(source, "name", None)
+        text = f"{name + ': ' if name else ''}{_SHORT.get(head, 'scelta')} → " \
+               f"{option_text(self.gs, self.side, got)}"
+        self.event("me" if mine else "opp", text + (" (unica scelta)" if mine else ""))
+
+    def notice_chain(self) -> None:
+        """The opponent put a card on the chain and the coach can't respond:
+        hold the board until they have seen it (the page's "Continua")."""
+        gs = self.gs
+        if not gs.chain or gs.chain[-1].player == self.side or not self.stop_on_opp_chain:
+            return
+        top = gs.chain[-1]
+        below = [i.card.name for i in gs.chain[:-1]]
+        context = f"L'avversario ha lanciato {top.card.name}" + (
+            f" (sopra {', '.join(reversed(below))})" if below else "") + \
+            ". Non hai reazioni da giocare: adesso si risolve."
+        answer = self._wait({"type": "notice", "context": context, "card": top.card.name})
+        if answer.get("quiet"):
+            self.stop_on_opp_chain = False
+            self.event("sys", "Non mi fermo più sulle magie dell'avversario in questa partita")
 
     def thinking(self, point: DecisionPoint) -> None:
         self._snapshot()
