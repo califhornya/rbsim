@@ -2192,9 +2192,11 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     card = unit.card
     if tf.get("exclude_self") and card is ctx.card:
         return False
-    if "has_keyword" in tf and not card.has_keyword(str(tf["has_keyword"])):
+    # The unit's keywords now (granted ones too: Shen's TANK for Kinkou Temple).
+    has = unit.has_keyword if hasattr(unit, "has_keyword") else card.has_keyword
+    if "has_keyword" in tf and not has(str(tf["has_keyword"])):
         return False
-    if "lacks_keyword" in tf and card.has_keyword(str(tf["lacks_keyword"])):
+    if "lacks_keyword" in tf and has(str(tf["lacks_keyword"])):
         return False
     cat = _card_category_name(card)
     if tf.get("is_gear") and cat != "GEAR":
@@ -2361,6 +2363,8 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     if effect == "counter_spell":
         chain = ctx.loop.gs.chain
         return bool(chain) and _counterable(chain[-1].card, spec)
+    if effect == "play_token" and spec.get("location") == "enemy_occupied":
+        return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()
     if str(spec.get("scope", "single")).lower() != "single" or target not in _SINGLE_UNIT_TARGETS:
         return None
@@ -2719,10 +2723,24 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         return [at] if at is not None and cur is not at else []
     if dest == "to_or_from_base" and cur is not None:
         return [None]
+    others = [bf for bf in gs.battlefields if bf is not cur]
+    if dest == "any":
+        # "Move a unit" naming no place: any location other than its own, its
+        # base included (§355.4.a).
+        return ([None] if cur is not None else []) + others
     if dest == "friendly_occupied":
         # "to a battlefield where you have units" (Shadow Dash)
-        return [bf for bf in gs.battlefields if bf is not cur and bf._units_for(ctx.actor_side)]
-    return [bf for bf in gs.battlefields if bf is not cur]
+        return [bf for bf in others if bf._units_for(ctx.actor_side)]
+    if dest == "controlled_battlefield":
+        # "to a battlefield you control" (Call to Battle)
+        return [bf for bf in others if bf.controller() == ctx.actor_side]
+    if dest == "enemy_occupied":
+        # "to an occupied enemy battlefield" (Cataclysm)
+        return [bf for bf in others if bf._units_for(ctx.opponent_side)]
+    if dest == "open":
+        # "to an open battlefield": unoccupied and uncontrolled (§170.11.c)
+        return [bf for bf in others if not bf.units_A and not bf.units_B and bf.controller() is None]
+    return others
 
 
 @effect("move_unit")
@@ -2768,13 +2786,16 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
 
     def destination_for(side, unit):
         options = destinations(side, unit)
-        if len(options) == 1 or None in options:
+        if len(options) == 1:
             return options[0]
-        if side == me:
-            best = max(options, key=lambda bf: _attack_value(ctx, side, unit, bf))
+        fields = [bf for bf in options if bf is not None]
+        if side == them and None in options or not fields:
+            best = None                    # an enemy goes back to its base
+        elif side == me:
+            best = max(fields, key=lambda bf: _attack_value(ctx, side, unit, bf))
         else:
             # An enemy is moved where it fights worst for them.
-            best = min(options, key=lambda bf: _attack_value(ctx, side, unit, bf))
+            best = min(fields, key=lambda bf: _attack_value(ctx, side, unit, bf))
         return loop.choose(_kind("destination", spec), me, options, best, ctx.card)
 
     def priority(item):
@@ -3005,8 +3026,10 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("play_token")
 def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Play `count` tokens (GameLoop._play_token). `location`: "base" (default),
-    "here" (this battlefield; base if the source is in base) or "moved_from"
-    (where the moving unit left, Lillia: "play a Sprite there"). `might`
+    "here" (this battlefield; base if the source is in base), "moved_from"
+    (where the moving unit left, Lillia: "play a Sprite there"), "choose" (the
+    text names no place: base or a battlefield its player controls) or
+    "enemy_occupied" (a chosen battlefield with enemy units). `might`
     overrides the token's Might ("a 2 [might] Sand Soldier")."""
     token_name = str(spec.get("token_name", "Recruit"))
     count = int(spec.get("count", spec.get("amount", 1)))
@@ -3041,6 +3064,20 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     elif location == "moved_from":
         origin = ctx.extra.get("moved_from")
         bf = origin if origin in ctx.loop.gs.battlefields else None
+    elif location == "choose":
+        # The text says no place: a played unit goes to its player's base or a
+        # battlefield they control (§440.2.c, §355.2), their choice when the
+        # token is played. Baseline: base.
+        options = [None] + [b for b in ctx.loop.gs.battlefields if b.controller() == side]
+        bf = ctx.loop.choose("token_location", side, options, None, ctx.card) if len(options) > 1 else None
+    elif location == "enemy_occupied":
+        # "Choose an occupied enemy battlefield. Play three ... there" (Rally for
+        # War): a target; the baseline takes the one with the fewest enemies.
+        options = [b for b in ctx.loop.gs.battlefields if b._units_for(ctx.opponent_side)]
+        if not options:
+            return
+        bf = ctx.loop.choose(_kind("target", spec), side, options,
+                             min(options, key=lambda b: len(b._units_for(ctx.opponent_side))), ctx.card)
     for _ in range(count):
         ctx.loop._play_token(token_name, side, bf=bf, ready=ready, might=spec.get("might"))
 

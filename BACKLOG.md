@@ -21,6 +21,18 @@ Fixed (2026-10-27, tests/test_precon_cards.py):
 - [x] Dragon Form — any unit, not only at the spell's battlefield; a spell
       must choose one even when it helps no one.
 - [x] Ki Barrier — any unit (it was friendly units only).
+- [x] Gust Monk — "banish a card from any trash to give a unit ASSAULT 2" was
+      two independent effects (ASSAULT even with nothing banished, only your
+      trash): now one effect with the cost (`any_trash`).
+- [x] Ravenbloom Prefect — an invented "costs 3 or more" condition: any gear.
+- [x] Shadow Order Disciple — burn and +1 were two separate "you may"s (the +1
+      without burning): one choice.
+- [x] Kinkou Temple — battlefields' Might/keyword passives were never applied
+      (also Trifarian War Camp, Windswept Hillock, Black Flame Altar, Packed
+      Amphitheater), it named only "friendly" units, and "with TANK" read the
+      printed keywords only (Shen's granted TANK didn't count).
+- [x] Death Mark, Zed From the Shadows — the token goes where you choose.
+- [x] Charm, Twilight Step — any destination (see C).
 
 To check (each [ ] until a test covers every sentence):
 - Zed deck: Zed Master of Shadows (legend), Zed From the Shadows, Zed Without
@@ -51,6 +63,14 @@ To check (each [ ] until a test covers every sentence):
       verify every recall path.
 - [ ] Mournful Witness-style "when a combat I was in ends" is encoded as
       "when I win a combat".
+- [x] A cost inside a played card's instruction ("spend a buff to ...") was
+      never paid (Wildclaw Shaman spent nothing). tests/test_instruction_costs.py
+- [x] `has_keyword` filters read only printed keywords, not granted ones.
+- [x] Tokens: "play a token" naming no place went to base (rules: base or a
+      battlefield you control, the player's choice, §440.2.c/§355.2); "here"
+      tokens on 11 cards went to base too (Sprite Mother, Faithful
+      Manufactor, Vanguard Captain, Royal Guard...); Rally for War's "occupied
+      enemy battlefield". 58 specs set from the text (`location`).
 
 ## C. Rules approximations (engine systems)
 - [ ] Spells: costs are paid before the choices are declared (§356-357 say
@@ -60,8 +80,11 @@ To check (each [ ] until a test covers every sentence):
       played.
 - [ ] §355.8 check: gear, battlefield and trash targets; spells played
       facedown, by FLOW or from banishment.
-- [ ] Move effects: an enemy only goes to its base (§355.4: any valid
-      location, e.g. Charm pulling an enemy in from its base).
+- [x] Move effects naming no place: any location but the unit's own, base
+      included (§355.4), chosen (destination `any`; 11 cards). Destinations
+      from the text: to a battlefield you control (Call to Battle), to an
+      occupied enemy battlefield (Cataclysm), to its base (Janna, Isolate,
+      Overzealous Fan), where you have units (Shadow Dash), open (§170.11.c).
 - [ ] Move tax (Gravity Field; who pays, §FAQ), Angler Wyrm's opponent moving
       their own unit.
 - [ ] HIDDEN: hiding from the Champion Zone (§737.1.b); a card played from

@@ -182,3 +182,161 @@ def test_ki_barrier_may_choose_any_unit():
     _cast(loop, a, "Ki Barrier")
     assert sorted(asked[0]) == ["Mine", "Theirs"]
     assert theirs.damage_shield == 7 and mine.damage_shield == 0
+
+
+def _chooser(loop, picks):
+    """A chooser answering by kind prefix: picks = {kind prefix: f(options) -> index};
+    records (kind, option names) of every choice."""
+    seen = []
+
+    def chooser(_loop, kind, side, options, default, source):
+        seen.append((kind, [getattr(getattr(o, "card", None), "name", None) or getattr(o, "name", o)
+                            for o in options]))
+        for prefix, f in picks.items():
+            if kind.startswith(prefix):
+                return f(_loop, options)
+        return None
+    loop.chooser = chooser
+    return seen
+
+
+# -- Moves name no place: any location but its own, its base included (§355.4) --
+
+def test_charm_may_move_an_enemy_to_a_battlefield_or_its_base():
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 2)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    seen = _chooser(loop, {"destination": lambda l, o: next(i for i, x in enumerate(o) if x is l.gs.battlefields[1])})
+    _cast(loop, a, "Charm")
+    dest = [opts for kind, opts in seen if kind.startswith("destination")][0]
+    assert len(dest) == 2 and None in dest                    # its base or the other battlefield
+    assert enemy in loop.gs.battlefields[1].units_B
+
+
+def test_charm_pulls_an_enemy_out_of_its_base():
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 2)
+    b.base_units.append(enemy)
+    assert _castable(loop, a, "Charm")
+    _chooser(loop, {"destination": lambda l, o: 0})
+    _cast(loop, a, "Charm")
+    assert enemy in loop.gs.battlefields[0].units_B
+
+
+def test_twilight_step_may_send_your_unit_home():
+    loop, a, b = _setup()
+    mine = _unit("Mine", 3)
+    loop.gs.battlefields[0].add_unit("A", mine)
+    _chooser(loop, {"destination": lambda l, o: o.index(None)})
+    _cast(loop, a, "Twilight Step")
+    assert mine in a.base_units
+
+
+# -- Tokens: "play a token" naming no place goes to base or a battlefield you
+# control, the player's choice (§440.2.c, §355.2); "here" is where the card is --
+
+def test_death_mark_plays_its_shadow_clone_where_you_choose():
+    loop, a, b = _setup()
+    loop.gs.battlefields[1].add_unit("A", _unit("Holder", 2))   # I control battlefield 2
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(5)]
+    seen = _chooser(loop, {"token_location": lambda l, o: 1})
+    _cast(loop, a, "Death Mark")
+    where = [opts for kind, opts in seen if kind == "token_location"][0]
+    assert len(where) == 2                                      # base, battlefield 2
+    assert [u.card.name for u in loop.gs.battlefields[1].units_A] == ["Holder", "Shadow Clone"]
+    assert len(a.trash) == 3 + 1                                # BURN 3, the spell
+
+
+def test_a_token_played_here_goes_where_the_card_is():
+    loop, a, b = _setup()
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 2))
+    a.hand = [CARD_REGISTRY["Faithful Manufactor"].instantiate()]
+    loop._apply_action(a, ("UNIT", 0, 0, 0))                   # to battlefield 1, which I control
+    names = [u.card.name for u in loop.gs.battlefields[0].units_A]
+    assert names.count("Recruit") == 1 and "Faithful Manufactor" in names
+
+
+# -- Gust Monk: "You may pay [1] as an additional cost to play me. When you play
+# me, if you paid the additional cost, banish a card from any trash to give a
+# unit ASSAULT 2 this turn." -------------------------------------------------------
+
+def test_gust_monk_banishes_from_any_trash_to_give_assault_two():
+    loop, a, b = _setup()
+    target = _unit("Target", 2)
+    loop.gs.battlefields[0].add_unit("A", target)
+    b.trash.append(UnitCard(name="Theirs", might=1))
+    a.hand = [CARD_REGISTRY["Gust Monk"].instantiate()]
+    energy = a.energy
+    _choose(loop, "Target")
+    loop._apply_action(a, ("UNIT", 0, 0))
+    assert a.energy == energy - 2 - 1                           # its cost and the [1]
+    assert [c.name for c in b.banished] == ["Theirs"] and not b.trash
+    assert target.keyword_value("ASSAULT") == 2
+
+
+def test_gust_monk_gives_nothing_with_every_trash_empty():
+    loop, a, b = _setup()
+    target = _unit("Target", 2)
+    loop.gs.battlefields[0].add_unit("A", target)
+    a.hand = [CARD_REGISTRY["Gust Monk"].instantiate()]
+    loop._apply_action(a, ("UNIT", 0, 0))
+    assert target.keyword_value("ASSAULT") == 0
+
+
+# -- Shadow Order Disciple: "When I move, you may BURN 1 to give me +1 [might]
+# this turn." One choice: no burn, no +1. ------------------------------------------
+
+def test_shadow_order_disciple_burns_to_get_one_in_a_single_choice():
+    for take in (True, False):
+        loop, a, b = _setup()
+        sod = _unit("Shadow Order Disciple")
+        a.base_units.append(sod)
+        a.deck.cards = [UnitCard(name="Top", might=1)]
+        seen = _chooser(loop, {"optional:": lambda l, o: o.index(take)})
+        loop._apply_action(a, ("MOVE", 0, 2, 0))
+        loop._flush_pending_move()
+        assert sum(k.startswith("optional:") for k, _ in seen) == 1
+        assert (sod.might, len(a.trash)) == ((sod.card.might + 1, 1) if take else (sod.card.might, 0))
+
+
+# -- Ravenbloom Prefect: "When an opponent plays a gear, you may banish me to
+# banish it." Any gear (there was an invented "costs 3 or more"). -------------------
+
+def test_ravenbloom_prefect_answers_any_gear():
+    loop, a, b = _setup()
+    prefect = _unit("Ravenbloom Prefect")
+    b.base_units.append(prefect)
+    a.hand = [CARD_REGISTRY["Hand Hammer"].instantiate()]       # costs 1
+    loop._apply_action(a, ("GEAR", 0, 0))
+    assert prefect not in b.base_units and prefect.card in b.banished
+    assert any(c.name == "Hand Hammer" for c in a.banished)
+
+
+# -- Kinkou Temple: "Units here with TANK have +1 [might]." Both players'. ---------
+
+def test_kinkou_temple_gives_one_to_every_tank_here():
+    loop, a, b = _setup()
+    temple = CARD_REGISTRY["Kinkou Temple"].instantiate()
+    loop.gs.battlefields[0].card = temple
+    mine, theirs, plain = _unit("Mine", 2), _unit("Theirs", 2), _unit("Plain", 2)
+    for u in (mine, theirs):
+        u.turn_keywords.append("TANK")
+    loop.gs.battlefields[0].add_unit("A", mine)
+    loop.gs.battlefields[0].add_unit("A", plain)
+    loop.gs.battlefields[0].add_unit("B", theirs)
+    loop._recompute_passives()
+    assert (mine.might, theirs.might, plain.might) == (3, 3, 2)
+
+
+def test_battlefield_passives_reach_the_units_on_it():
+    """They were never applied: Trifarian War Camp, Windswept Hillock."""
+    loop, a, b = _setup()
+    loop.gs.battlefields[0].card = CARD_REGISTRY["Trifarian War Camp"].instantiate()
+    loop.gs.battlefields[1].card = CARD_REGISTRY["Windswept Hillock"].instantiate()
+    here, there, home = _unit("Here", 2), _unit("There", 2), _unit("Home", 2)
+    loop.gs.battlefields[0].add_unit("B", here)
+    loop.gs.battlefields[1].add_unit("A", there)
+    a.base_units.append(home)
+    loop._recompute_passives()
+    assert (here.might, there.might, home.might) == (3, 2, 2)
+    assert there.has_keyword("GANKING") and not here.has_keyword("GANKING")

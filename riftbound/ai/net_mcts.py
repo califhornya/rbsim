@@ -54,7 +54,7 @@ _MAX_TURN_ACTIONS = 30
 # Hidden ones (dig and predict look at the deck) and the Power domain (six
 # options, rarely mattering) keep their baseline.
 SEARCH_CHOICES = ("target:", "mode", "equip", "combat_damage_order", "cost_unit:",
-                  "destination", "optional:", "deploy", "discard", "player")
+                  "destination", "optional:", "deploy", "discard", "player", "token_location")
 _MAX_VARIANTS = 6
 
 

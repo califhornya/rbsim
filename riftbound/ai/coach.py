@@ -87,6 +87,7 @@ _QUESTIONS = {
     "cost_extras": "Quanto spendere per ridurre il costo?",
     "first_unit_here": "Quale unità rimandare in base?",
     "player": "Quale giocatore scegliere?",
+    "token_location": "Dove giocare il token?",
 }
 # The same choices in a few words, after a suggested move ("→ bersaglio: Zed").
 _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damage_order":
@@ -94,7 +95,7 @@ _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damag
           "destination": "verso", "deploy": "schiera su", "domain": "Power",
           "keep": "tiene", "card": "carta", "show_off": "mostra", "disarm": "indebolisce",
           "spend_buff": "spende il buff di", "cost_banish": "bandisce",
-          "first_unit_here": "rimanda in base", "player": "giocatore"}
+          "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in"}
 _OPTIONAL = {"accelerate": "Pagare ACCELERATE? (l'unità entra pronta)",
              "additional_cost": "Pagare il costo aggiuntivo?", "SHOW OFF": "Usare SHOW OFF?"}
 
@@ -187,6 +188,8 @@ def option_text(gs, viewer: str, option) -> str:
     i = next((i for i, bf in enumerate(gs.battlefields) if bf is option), None)
     if i is not None:
         return _bf_name(gs, i)
+    if option is None:                     # a place choice: None is the base
+        return "Base"
     if isinstance(option, bool):
         return "Sì" if option else "No"
     if option is gs.A or option is gs.B:

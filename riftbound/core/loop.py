@@ -1098,6 +1098,11 @@ class GameLoop:
                         continue
                     if not self._wants_optional(actor, card, effect_spec):
                         continue
+                    # "Banish a card from any trash to give a unit ASSAULT 2"
+                    # (Gust Monk): no payment, no effect.
+                    if effect_spec.cost and not self._pay_triggered_cost(
+                            card, actor, effect_spec, additional=False):
+                        continue
                     handler = EFFECT_REGISTRY.get(effect_spec.effect)
                     if not handler:
                         continue
@@ -1208,15 +1213,18 @@ class GameLoop:
                     print(f"  [EFFECT-SKIP] {card.name}: "
                           f"{es.effect} ({trigger}) failed: {exc}")
 
-    def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec) -> bool:
+    def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec,
+                            additional: bool = True) -> bool:
         """Pay a triggered effect's `cost` (activated-style: tap/energy/power/
         spend_xp/recycle/sacrifice) and/or `additional_cost` (kicker-style).
         Baseline policy: pay when affordable. Returns True when there was nothing
         to pay or it was fully paid; False when a cost existed but was
         unaffordable (the ability then doesn't fire). Sets card._kicker_paid on a
-        successful payment so a `kicker_paid` condition passes. KNOWN_ISSUES #12."""
+        successful payment so a `kicker_paid` condition passes. KNOWN_ISSUES #12.
+        `additional=False`: only the `cost` (a played card's kicker was paid as
+        it was played)."""
         cost = getattr(es, "cost", None)
-        ac = getattr(es, "additional_cost", None)
+        ac = getattr(es, "additional_cost", None) if additional else None
         if not cost and not ac:
             return True
         side = "A" if actor is self.gs.A else "B"
@@ -1390,6 +1398,32 @@ class GameLoop:
             for g in list(actor.base_gear):
                 if self._equip_cost(g) is None:
                     self._apply_gear_passives(g, side, anchor, actor, opponent)
+        for bf in self.gs.battlefields:
+            self._apply_battlefield_passives(bf)
+
+    # A battlefield's own Might and keyword passives; its other passives are
+    # rule markers read where they apply (_bf_passive_amount).
+    _BATTLEFIELD_GRANTS = ("grant_might", "give_keyword")
+
+    def _apply_battlefield_passives(self, bf: Battlefield) -> None:
+        """"Units here have +1 [might]" (Trifarian War Camp), "Units here with
+        TANK have +1 [might]" (Kinkou Temple), "Units here have GANKING"
+        (Windswept Hillock): for the units on it, both players'. A passive about
+        "you" is its controller's (none while nobody controls it)."""
+        spec = CARD_REGISTRY.get(bf.card.name) if bf.card is not None else None
+        if spec is None:
+            return
+        for es in spec.effects:
+            if es.trigger != "passive" or es.effect not in self._BATTLEFIELD_GRANTS:
+                continue
+            both = str(es.target or "").lower() in ("all_units_here", "all_units", "battlefield")
+            side = "A" if both else bf.controller()
+            if side is None:
+                continue
+            actor, opponent = self.gs.get_player(side), self.gs.get_player(self.gs.other(side))
+            if not self._check_condition(es.condition, bf.card, actor, opponent, {"battlefield": bf}):
+                continue
+            self._apply_passive_grant(None, EffectContext(self, bf.card, actor, opponent, bf), es)
 
     def _apply_unit_passives(self, unit, side, bf, actor, opponent) -> None:
         spec = CARD_REGISTRY.get(unit.card.name)
@@ -4020,7 +4054,7 @@ class GameLoop:
         import re
         parsed = {"energy": 0, "power": 0, "domain": None, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
-                  "banish_from_trash": None, "discard": 0, "discard_type": None,
+                  "banish_from_trash": None, "banish_any_trash": False, "discard": 0, "discard_type": None,
                   "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False}
         if cost is None:
             return parsed
@@ -4039,6 +4073,7 @@ class GameLoop:
             parsed["disempower"] = bool(cost.get("disempower_self"))
             # "Banish a unit from your trash": the card type(s), e.g. "unit".
             parsed["banish_from_trash"] = cost.get("banish_from_trash")
+            parsed["banish_any_trash"] = bool(cost.get("any_trash"))  # "from any trash" (Gust Monk)
             parsed["discard"] = int(cost.get("discard", 0) or 0)     # "Discard 1, [tap]: ..."
             parsed["discard_type"] = cost.get("discard_type")         # "Discard a gear"
             parsed["spend_buff"] = cost.get("spend_buff")             # "self" / "other" / "any"
@@ -4056,17 +4091,25 @@ class GameLoop:
                     parsed["energy"] = int(t)
         return parsed
 
-    @staticmethod
-    def _trash_card_to_banish(ap: Player, parsed: dict):
-        """The card a "banish a <type> from your trash" cost takes: the cheapest
-        matching one (the least likely to be played back)."""
+    def _trash_banish_options(self, ap: Player, parsed: dict) -> list:
+        """The cards a "banish a <type> from your trash" cost may take; "from
+        any trash" (`banish_any_trash`): the opponent's first, then yours."""
         from .effects import _zone_effect_card_ok
         kind = parsed.get("banish_from_trash")
         if not kind:
-            return None
+            return []
         spec = {"filter": kind} if isinstance(kind, str) else {"target_filter": kind}
-        cands = [c for c in ap.trash if _zone_effect_card_ok(c, spec)]
-        return min(cands, key=lambda c: c.cost_energy or 0) if cands else None
+        trash = list(ap.trash)
+        if parsed.get("banish_any_trash"):
+            trash = list(self.gs.get_player(self.gs.other(ap.name)).trash) + trash
+        return [c for c in trash if _zone_effect_card_ok(c, spec)]
+
+    def _trash_card_to_banish(self, ap: Player, parsed: dict):
+        """The card such a cost takes by default: from the opponent's trash
+        when it may, else the cheapest (the least likely to be played back)."""
+        cands = self._trash_banish_options(ap, parsed)
+        theirs = [c for c in cands if c not in ap.trash]
+        return min(theirs or cands, key=lambda c: c.cost_energy or 0) if cands else None
 
     def _pay_discard_and_banish(self, ap: Player, parsed: dict, unit=None) -> None:
         """Pay a cost's "banish a <type> from your trash", "Discard N" (the
@@ -4075,12 +4118,9 @@ class GameLoop:
         if parsed.get("banish_from_trash"):
             card = self._trash_card_to_banish(ap, parsed)
             if card is not None:
-                from .effects import _zone_effect_card_ok
-                kind = parsed["banish_from_trash"]
-                spec = {"filter": kind} if isinstance(kind, str) else {"target_filter": kind}
-                card = self.choose("cost_banish", side,
-                                   [c for c in ap.trash if _zone_effect_card_ok(c, spec)], card)
-            self._banish_from_trash(ap, card)
+                card = self.choose("cost_banish", side, self._trash_banish_options(ap, parsed), card)
+            owner = ap if card is None or card in ap.trash else self.gs.get_player(self.gs.other(side))
+            self._banish_from_trash(owner, card)
         for _ in range(parsed.get("discard", 0)):
             cands = self._discardable(ap, parsed)
             if cands:
