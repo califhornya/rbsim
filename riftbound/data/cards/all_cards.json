@@ -27385,12 +27385,20 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reveal_and_choose",
+        "effect": "reveal_top",
         "trigger": "on_move",
-        "count": 1,
         "target_filter": {
           "is_unit": true
-        }
+        },
+        "otherwise": "trash",
+        "else": [
+          {
+            "effect": "grant_temporary_might",
+            "target": "self",
+            "amount": 2,
+            "duration": "this_turn"
+          }
+        ]
       }
     ],
     "variants": [
@@ -30491,7 +30499,8 @@
       {
         "effect": "set_base_might",
         "trigger": "on_cast",
-        "target": "unit",
+        "target": "chosen_unit",
+        "where": "anywhere",
         "amount": 5
       }
     ],
@@ -30850,6 +30859,8 @@
       {
         "effect": "damage_shield",
         "trigger": "on_cast",
+        "target": "chosen_unit",
+        "where": "anywhere",
         "amount": 7
       }
     ],
@@ -30878,6 +30889,8 @@
       {
         "effect": "disempower_then_kill",
         "trigger": "on_cast",
+        "target": "chosen_unit",
+        "where": "anywhere",
         "might_at_most": 3
       }
     ],
@@ -31703,7 +31716,15 @@
         "effect": "move_unit",
         "trigger": "on_cast",
         "target": "enemy_unit",
-        "destination": "here"
+        "destination": "friendly_occupied"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_cast",
+        "target": "friendly_units_with_it",
+        "amount": 1,
+        "duration": "this_turn",
+        "only_if_count": 2
       }
     ],
     "variants": [

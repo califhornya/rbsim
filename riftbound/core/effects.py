@@ -329,8 +329,8 @@ def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             base = u.base_might_override if u.base_might_override is not None else int(u.card.might or 0)
             return amount - base if id(u) in friends else base - amount
         units = sorted(units, key=gain, reverse=True)
-        if not units or gain(units[0]) <= 0:
-            return       # "you may": it helps no one
+        if not units or (gain(units[0]) <= 0 and not isinstance(ctx.card, SpellCard)):
+            return       # "you may": it helps no one (a spell must choose one)
         units = [ctx.loop.choose(_kind("target", spec), ctx.actor_side, units, units[0], ctx.card)]
         ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
     for unit in units:
@@ -1209,12 +1209,17 @@ def _ready_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("disempower_then_kill")
 def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Choose a unit. If it's EMPOWERED, disempower it. Then kill it if it has
-    3 [might] or less" (Lacerate): the mightiest enemy that ends at 3 or less."""
+    3 [might] or less" (Lacerate): any unit, anywhere (`target` / `where`,
+    default chosen_unit anywhere). Baseline: an enemy it kills (the mightiest),
+    else an empowered enemy."""
     loop = ctx.loop
     cap = int(spec.get("might_at_most", 3))
-    enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "anywhere"))
-    if not enemies:
+    pool = {**spec, "target": spec.get("target", "chosen_unit"),
+            "where": spec.get("where", "anywhere"), "scope": "all"}
+    units = _choosable(ctx, _resolve_targets(ctx, pool))
+    if not units:
         return
+    enemies = {id(u) for u in _units_at(ctx, ctx.opponent_side, "anywhere")}
 
     def after(u):
         was = u.empowered
@@ -1224,19 +1229,17 @@ def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
         u.empowered = was
         loop._recompute_passives()
         return m
-    killable = [u for u in enemies if after(u) <= cap]
-    unit = max(killable or enemies, key=lambda u: (u.empowered, u.might))
+
+    def value(u):
+        return (id(u) in enemies, after(u) <= cap, u.empowered, u.might)
+    unit = loop.choose(_kind("target", spec), ctx.actor_side, units, max(units, key=value), ctx.card)
     loop._note_chosen(ctx.card, ctx.actor_side, [unit])
-    unit.empowered = False
+    loop._disempower(unit.card)
     loop._recompute_passives()
     if unit.might <= cap:
-        where = loop._locate_unit(unit)
-        if where[1] is None:
-            ctx.opponent.base_units.remove(unit)
-        else:
-            where[1].remove_unit(ctx.opponent_side, unit)
-        loop._route_deaths([(unit, ctx.opponent_side)], where[1] or loop.gs.battlefields[0],
-                           in_base=where[1] is None)
+        side, bf = _take_off_board(ctx, unit)
+        loop._route_deaths([(unit, side)], bf or ctx.battlefield, in_base=bf is None,
+                           killer=(ctx.actor_side, ctx.card))
 
 
 @effect("move_empowerment")
@@ -1335,18 +1338,22 @@ def _kill_damaged_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
 
 @effect("damage_shield")
 def _damage_shield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Prevent the next 7 damage that would be dealt to it this turn" (Ki
-    Barrier): the friendly unit losing its fight, else the mightiest."""
-    mine = _choosable(ctx, _units_at(ctx, ctx.actor_side, "anywhere"))
-    if not mine:
+    """ "Choose a unit. Prevent the next 7 damage that would be dealt to it
+    this turn" (Ki Barrier): any unit (`target` / `where`, default chosen_unit
+    anywhere). Baseline: the friendly unit losing its fight, else the mightiest."""
+    pool = {**spec, "target": spec.get("target", "chosen_unit"),
+            "where": spec.get("where", "anywhere"), "scope": "all"}
+    units = _choosable(ctx, _resolve_targets(ctx, pool))
+    if not units:
         return
+    friends = {id(u) for u in _friendly_units(ctx)}
 
     def threatened(u):
         where = ctx.loop._locate_unit(u)
         bf = where[1] if where else None
         enemy = sum(x.might for x in bf._units_for(ctx.opponent_side)) if bf else 0
-        return (enemy >= u.might - u.damage, u.might)
-    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine, max(mine, key=threatened), ctx.card)
+        return (id(u) in friends, enemy >= u.might - u.damage, u.might)
+    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, units, max(units, key=threatened), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
     unit.damage_shield += int(spec.get("amount", 7))
 
@@ -1857,6 +1864,28 @@ def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
     ctx.reveal_top_draw_if_spell(target=str(spec.get("target", "actor")))
 
 
+@effect("reveal_top")
+def _reveal_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Reveal the top card of your Main Deck. If it's a unit, draw it.
+    Otherwise, put it in your trash and give me +2 [might] this turn" (Pakaa
+    Protector). `target_filter`: what is drawn; `otherwise`: "trash" or "top"
+    (stays on top, the default); `else`: effects run when it isn't drawn."""
+    player = ctx.actor
+    if not player.deck.cards:
+        return
+    top = player.deck.cards[-1]
+    if _zone_card_matches(top, spec.get("target_filter") or {}):
+        ctx.draw_cards(1)
+        return
+    if spec.get("otherwise") == "trash":
+        player.deck.cards.pop()
+        player.trash.append(top)
+    for sub in spec.get("else") or []:
+        handler = REGISTRY.get(sub.get("effect"))
+        if handler:
+            handler(ctx, sub)
+
+
 @effect("gain_power_any_domain")
 def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ADD [rune] (§ "add"): gain `amount` Power of a domain of the player's
@@ -2250,6 +2279,16 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         # The unit that caused this trigger ("give it +1 [might]").
         unit = ctx.extra.get("triggering_unit")
         return [unit] if unit is not None else []
+    if target == "friendly_units_with_it":
+        # "If you have exactly two units there, they each get +1 [might]"
+        # (Shadow Dash): your units where the unit the previous effect chose
+        # is; `only_if_count`: none unless there are exactly that many.
+        where = next((w for w in map(ctx.loop._locate_unit, ctx.extra.get("it", [])) if w), None)
+        if where is None:
+            return []
+        units = list(ctx.loop.gs.get_player(ctx.actor_side).base_units) if where[1] is None             else list(where[1]._units_for(ctx.actor_side))
+        n = spec.get("only_if_count")
+        return [] if n is not None and len(units) != int(n) else units
     if target == "it":
         # "Ready a unit and give it ASSAULT 3": the unit(s) the card's previous
         # effect chose, if still on the board.
@@ -2680,6 +2719,9 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         return [at] if at is not None and cur is not at else []
     if dest == "to_or_from_base" and cur is not None:
         return [None]
+    if dest == "friendly_occupied":
+        # "to a battlefield where you have units" (Shadow Dash)
+        return [bf for bf in gs.battlefields if bf is not cur and bf._units_for(ctx.actor_side)]
     return [bf for bf in gs.battlefields if bf is not cur]
 
 
