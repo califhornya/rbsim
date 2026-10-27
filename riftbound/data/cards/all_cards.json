@@ -33885,20 +33885,33 @@
       {
         "effect": "mode_choice",
         "trigger": "on_exhaust",
+        "unique_per_turn": true,
         "modes": [
           {
             "effect": "buff_unit",
             "target": "self",
             "amount": 1
           },
-          {
-            "effect": "stun_unit",
-            "target": "enemy_unit"
-          },
-          {
-            "effect": "ready_unit",
-            "target": "self"
-          }
+          [
+            {
+              "effect": "spend_buff",
+              "target": "self"
+            },
+            {
+              "effect": "stun_unit",
+              "target": "enemy_unit"
+            }
+          ],
+          [
+            {
+              "effect": "spend_buff",
+              "target": "self"
+            },
+            {
+              "effect": "ready_unit",
+              "target": "self"
+            }
+          ]
         ]
       }
     ],

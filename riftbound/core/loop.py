@@ -5140,6 +5140,7 @@ class GameLoop:
                 self._snapshot_state()
             return Result("B", gs.turn, self.units_played, self.spells_cast)
 
+        gs.in_ending_phase = True
         self._fire_turn_trigger("on_end_of_turn", gs.active)
         self._resolve_delayed_effects()
         self._return_borrowed_units()
@@ -5153,6 +5154,7 @@ class GameLoop:
         # Cleanup: a facedown card whose owner no longer controls its battlefield is
         # removed to its owner's trash (§106.4.d / §322.8).
         self._cleanup_hidden_cards()
+        gs.in_ending_phase = False
 
         if self.verbose:
             bf0 = gs.battlefields[0]

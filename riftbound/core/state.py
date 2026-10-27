@@ -116,6 +116,8 @@ class GameState:
     jhin_pile: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
+    # True while the active player's Ending Phase runs (Runeblade Anvil).
+    in_ending_phase: bool = False
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.

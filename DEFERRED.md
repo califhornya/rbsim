@@ -492,6 +492,58 @@ and replays sampled choices with each alternative forced to measure the baseline
   made during the player's own actions (not while defending, not hidden ones:
   dig, predict) and only the first one per action.
 
+## Radiance Rules FAQ (playriftbound.com, 2026-10-26) — rulings vs engine
+Official FAQ; it overrides the Core Rules where they differ. Audit of each ruling:
+
+Fixed (2026-10-27, tests/test_radiance_faq.py):
+- **Riven, Broken Blade**: `unique_per_turn`, and the "Spend my buff to ..." modes
+  are `[spend_buff self, ...]` lists, offered only while she has a buff, spent on
+  resolution (`_mode_payable`). `modes_chosen` is now keyed by the card, not
+  `id()`, so a cloned game (search) remembers the modes taken.
+- **Runeblade Anvil**: leaving during your own Ending Phase (`gs.in_ending_phase`)
+  keeps the card playable through your next turn.
+
+Divergences to fix:
+2. **Angler Wyrm**: encoded as *you* moving an enemy unit. FAQ: the chosen
+   opponent picks and moves one of *their* units that can actually move (can't pick
+   a Hunker Down'd one if another can move; no movable unit → instruction negated);
+   they pay any move tax (Gravity Field) themselves, and if they won't, no move.
+3. **Baron Nashor + Riven, the Exile**: `add_battlefield` creates Baron with
+   `ready=False`. FAQ: played to a battlefield you control under Riven, he enters
+   ready at the Baron Pit (both replacement effects apply, §355.2). Baron himself
+   needs rewriting first: `_add_battlefield` gives a one-off permanent +2 to the
+   units on the board then (not a "+2 while I'm here" aura), the Pit's
+   "move here from anywhere" isn't modeled, a second Baron doesn't enter the
+   existing Pit, and the card sits in two zones (KNOWN_ISSUES). Not in the precon
+   decks.
+
+Already consistent: Standard Move fires exhaust triggers before move triggers (§203).
+
+Rulings on card text not yet implemented (apply when implementing):
+- **Kharox + Neeko, Blending In**: opponent playing your Neeko from your trash adds
+  one of *their own* deckbuilding legends (only if their deck/sideboard has a Neeko).
+  Kharox's "play a unit from their trash" and Neeko's effects are missing.
+- **Mobilize / Catalyst of Aeons + Seraphic Wyvern**: "if you couldn't channel"
+  refers only to the spell's own channel; Wyvern's extra rune failing doesn't make
+  you draw (§359.3.e.14.c). Missing: the draw clause; Wyvern applies only to the
+  Beginning-Phase channel, not to spell channels.
+- **Atakhan**: Energy/Power are paid *before* non-standard costs (kill a friendly
+  unit), so that unit isn't in the trash yet for Mordekaiser, Iron Revenant
+  (§357.1-2). The additional cost itself is not implemented.
+- **Gravity Field**: tax not implemented. Paid by whoever is instructed to move, if
+  they're an opponent of the Field's controller (Charm: the caster pays if the
+  Field is the opponent's; Angler Wyrm: the moving opponent pays). Standard Move:
+  can't be attempted if the move/cost is impossible; declining the cost undoes it
+  (unit not exhausted).
+- **Ekko, Revolutionary + Possession**: not in the corpus. Ruling: you can use his
+  banish-and-replay ability and you control him when he returns (§378, §191.2).
+
+Not verified (check when touching these cards):
+- **Meticulous Restorationist + Mordekaiser, Iron Revenant**: "play me for [order]"
+  is an alternate cost of a unit, so Mordekaiser's unit/gear-only Power may pay it.
+- **Hunters' Circle + Baron Nashor**: the reduction applies (location/cost fixed at
+  finalization; Baron's Pit move is a later replacement) → [9][C][C][C].
+
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over
 the real engine (reset/step/legal_actions/observation/reward vs a fixed opponent).

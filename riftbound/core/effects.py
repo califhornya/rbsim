@@ -127,14 +127,15 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     modes = spec.get("modes") or []
     if not modes:
         return
-    free = list(range(len(modes)))
+    free = [j for j in range(len(modes)) if _mode_payable(ctx, modes[j])]
     used = None
     if spec.get("unique_per_turn"):
-        # "Choose one that hasn't been chosen this turn" (Aphelios).
-        used = ctx.loop.gs.modes_chosen.setdefault((id(ctx.card), ctx.loop.gs.turn), set())
-        free = [j for j in range(len(modes)) if j not in used]
-        if not free:
-            return
+        # "Choose one that hasn't been chosen this turn" (Aphelios). Keyed by the
+        # card itself, not id(): a cloned game (search) keeps the record.
+        used = ctx.loop.gs.modes_chosen.setdefault((ctx.card, ctx.loop.gs.turn), set())
+        free = [j for j in free if j not in used]
+    if not free:
+        return
     agent = getattr(ctx.actor, "agent", None)
     i = None
     if agent is not None and hasattr(agent, "decide_mode"):
@@ -150,6 +151,17 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if used is not None:
         used.add(i)
     _run_mode(ctx, modes[i])
+
+
+def _mode_payable(ctx: "EffectContext", mode) -> bool:
+    """A mode that starts by spending the source's buff ("Spend my buff to STUN
+    an enemy unit", Riven Broken Blade) can only be chosen while it has one; the
+    buff is spent when the mode resolves."""
+    steps = mode if isinstance(mode, list) else [mode]
+    if steps and steps[0].get("effect") == "spend_buff" and steps[0].get("target") == "self":
+        src = _source_unit(ctx)
+        return src is not None and src.might_counters > 0
+    return True
 
 
 def _run_mode(ctx: "EffectContext", mode) -> None:
@@ -1633,7 +1645,8 @@ def _banish_top_playable(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Banish the top card of your Main Deck. Until your next Ending Phase,
     you may play that card. (You still pay its costs.)" (Runeblade Anvil,
     Akali Brash): GameLoop offers it as a "banished_play" ability until the
-    end of the player's next turn (this turn, if it is theirs)."""
+    end of the player's next turn (this turn, if it is theirs and its Ending
+    Phase hasn't begun; FAQ: during it, their following turn)."""
     player, side = ctx.actor, ctx.actor_side
     if not player.deck.cards:
         return
@@ -1642,7 +1655,10 @@ def _banish_top_playable(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.loop._note_banished(side)
     gs = ctx.loop.gs
     card._banish_play_side = side
-    card._banish_play_until = gs.turn if gs.active == side else gs.turn + 1
+    if gs.active != side:
+        card._banish_play_until = gs.turn + 1
+    else:
+        card._banish_play_until = gs.turn + 2 if gs.in_ending_phase else gs.turn
 
 
 @effect("reveal_play_top")
