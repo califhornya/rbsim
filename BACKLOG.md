@@ -34,20 +34,20 @@ Fixed (2026-10-27, tests/test_precon_cards.py):
 - [x] Death Mark, Zed From the Shadows — the token goes where you choose.
 - [x] Charm, Twilight Step — any destination (see C).
 
+- [x] The whole Zed deck and its battlefields (2026-10-28): every sentence of
+      every card has a test (tests/test_precon_cards.py,
+      tests/test_card_fixes_coach.py).
+- [x] Shen deck, checked: Shen Eye of Twilight, Shen Leader of the Kinkou
+      Order, Shen Scourge of Shadows, Shen Kinkou, Kennen Keeper of Balance,
+      Steel Paws (DEFLECT, see C), Sacred Protector, Noxian Emissary (its
+      EMPOWERED DEATHKNELL never fired: the unit was off the board when the
+      condition was read), Soulspinner, Keeper of Law, Disciple of Shen,
+      Kinkou Temple.
+
 To check (each [ ] until a test covers every sentence):
-- Zed deck: Zed Master of Shadows (legend), Zed From the Shadows, Zed Without
-  a Sound, Morgana Vindictive, Mel Defiant Soul, Blade Twirler, Punching Poro,
-  Ruthless Strike, Shadow Assassin, Kinkou Lifeblade, Shadow Order Disciple,
-  Shadowblade Lurker, Traveling Merchant, Perfect Execution, Shadow Fiend,
-  Gust Monk, Twilight Step, Twilight Reveler, Ravenbloom Prefect, Wind and
-  Ghosts, Death Mark (and its Shadow Clone token); battlefields Zaun Warrens,
-  Shadow Temple, Threshold of the Gray.
-- Shen deck: Shen Eye of Twilight (legend), Shen Leader of the Kinkou Order,
-  Shen Scourge of Shadows, Shen Kinkou, Kennen Keeper of Balance, Steel Paws,
-  Sacred Protector, Noxian Emissary, Soulspinner, Keeper of Law, Disciple of
-  Shen, Resonating Strike, Twilight Shroud, Serene Ascetic, Mournful Witness,
-  Hand Hammer, Field Musicians, Loyal Poro, Discipline, Charm; battlefields
-  Kinkou Temple, Grove of the God-Willow.
+- Shen deck: Resonating Strike, Twilight Shroud, Serene Ascetic, Mournful
+  Witness, Hand Hammer, Field Musicians, Loyal Poro, Discipline, Charm;
+  battlefield Grove of the God-Willow.
 
 ## B. Engine bugs that reach many cards
 - [ ] `all_units_here` damage hits only the effect's controller's units
@@ -61,8 +61,8 @@ To check (each [ ] until a test covers every sentence):
       every handler.
 - [ ] Generic recall must keep damage / exhausted / buffs (KNOWN_ISSUES #8):
       verify every recall path.
-- [ ] Mournful Witness-style "when a combat I was in ends" is encoded as
-      "when I win a combat".
+- [x] Mournful Witness-style "when a combat I was in ends" was encoded as
+      "when I win a combat" (trigger on_combat_end).
 - [x] A cost inside a played card's instruction ("spend a buff to ...") was
       never paid (Wildclaw Shaman spent nothing). tests/test_instruction_costs.py
 - [x] `has_keyword` filters read only printed keywords, not granted ones.
@@ -74,8 +74,12 @@ To check (each [ ] until a test covers every sentence):
 
 ## C. Rules approximations (engine systems)
 - [ ] Spells: costs are paid before the choices are declared (§356-357 say
-      choose, then pay); DEFLECT's tax goes by the spell's battlefield, not
-      its target.
+      choose, then pay).
+- [x] DEFLECT (§809): the tax was Energy, by the spell's battlefield and only
+      for spells naming an enemy target. Now [rune] (Power) per enemy unit
+      with DEFLECT a spell or ability chooses, paid as it chooses (a spell as
+      it goes on the chain); a unit you can't pay for can't be chosen. Heisho
+      Shell and Decree of Insight ignore it.
 - [ ] "When you choose me" triggers fire as the spell resolves, not as it is
       played.
 - [ ] §355.8 check: gear, battlefield and trash targets; spells played

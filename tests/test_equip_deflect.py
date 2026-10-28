@@ -1,6 +1,6 @@
 """Equip §744 (attached gear buffs its host via grant_might) and Deflect §408/§809
-(a spell targeting an opponent's battlefield costs extra energy = the max DEFLECT
-value among enemy units there). Correctness checks for two MECHANICS.md PARTIAL rows.
+(choosing an enemy unit with DEFLECT N costs N [rune] more, paid as the choice
+is made). Correctness checks for two MECHANICS.md PARTIAL rows.
 """
 
 from __future__ import annotations
@@ -33,47 +33,33 @@ def test_attached_gear_grants_might():
     assert unit.might == 5          # 2 + 3 from the equipped gear
 
 
-# --- Deflect §809: opponent's DEFLECT units surcharge a targeted spell ---
+# --- Deflect §809: "Opponents must pay [rune] to choose me with a spell or ability" ---
 
-BOLT = "TST Bolt"
-
-
-@pytest.fixture
-def bolt():
-    CARD_REGISTRY[BOLT] = CardSpec.from_dict({
-        "name": BOLT, "category": "SPELL",
-        "effects": [{"effect": "deal_damage", "trigger": "on_cast",
-                     "target": "enemy_unit", "amount": 2}],
-    })
-    yield CARD_REGISTRY[BOLT].instantiate()
-    CARD_REGISTRY.pop(BOLT, None)
+def _warded(loop, side="B", keywords=("DEFLECT 2",)):
+    unit = UnitInPlay(UnitCard(name="Warded", might=2, keywords=list(keywords)))
+    loop.gs.battlefields[0]._units_for(side).append(unit)
+    return unit
 
 
-def test_deflect_surcharges_targeted_spell(bolt):
+def test_choosing_an_enemy_deflect_unit_costs_its_value_in_power():
     loop = _loop(); loop.gs.active = "A"
-    bf = loop.gs.battlefields[0]
-    bf.units_B.append(UnitInPlay(UnitCard(name="Warded", might=2, keywords=["DEFLECT 2"])))
-    assert loop._deflect_surcharge(bolt, 0) == 2         # pay +2 to target through DEFLECT
+    assert loop._deflect_tax(_warded(loop), "A", None) == 2
 
 
-def test_no_deflect_no_surcharge(bolt):
+def test_no_deflect_no_tax():
     loop = _loop(); loop.gs.active = "A"
-    bf = loop.gs.battlefields[0]
-    bf.units_B.append(UnitInPlay(UnitCard(name="Plain", might=2)))
-    assert loop._deflect_surcharge(bolt, 0) == 0
+    assert loop._deflect_tax(_warded(loop, keywords=()), "A", None) == 0
 
 
-def test_deflect_only_charges_enemy_targeting_spells():
-    # a friendly-targeting spell is not surcharged even if enemy DEFLECT is present
-    name = "TST Buff"
-    CARD_REGISTRY[name] = CardSpec.from_dict({
-        "name": name, "category": "SPELL",
-        "effects": [{"effect": "buff_unit", "trigger": "on_cast", "target": "friendly_unit"}],
-    })
-    try:
-        loop = _loop(); loop.gs.active = "A"
-        loop.gs.battlefields[0].units_B.append(
-            UnitInPlay(UnitCard(name="Warded", might=2, keywords=["DEFLECT 3"])))
-        assert loop._deflect_surcharge(CARD_REGISTRY[name].instantiate(), 0) == 0
-    finally:
-        CARD_REGISTRY.pop(name, None)
+def test_your_own_deflect_unit_costs_you_nothing():
+    loop = _loop(); loop.gs.active = "A"
+    assert loop._deflect_tax(_warded(loop, side="A"), "A", None) == 0
+
+
+def test_a_deflect_unit_you_cannot_pay_for_cannot_be_chosen():
+    from riftbound.core.enums import Domain
+    loop = _loop(); loop.gs.active = "A"
+    warded = _warded(loop)
+    assert not loop._can_choose(warded, "A")
+    loop.gs.A.add_power(Domain.FURY, 2)
+    assert loop._can_choose(warded, "A")

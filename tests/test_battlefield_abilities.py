@@ -127,27 +127,15 @@ def test_sandswept_tomb_reduces_power_for_friendly_targeting_spells():
         CARD_REGISTRY.pop(enemy.name, None)
 
 
-def test_heisho_shell_waives_deflect_surcharge():
-    """DEFLECT normally surcharges an enemy-targeting spell; Heisho Shell waives it."""
-    spec = CardSpec.from_dict({
-        "name": "TST Deflect Bolt", "category": "Spell",
-        "effects": [{"effect": "deal_damage", "amount": 2}],  # no target → enemy
-    })
-    CARD_REGISTRY[spec.name] = spec
-    try:
-        bolt = SpellCard(name="TST Deflect Bolt")
-        # Plain battlefield with a DEFLECT 2 enemy unit → surcharge 2.
-        plain = _bare_loop()
-        plain.gs.battlefields[0].units_B.append(
-            UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True))
-        assert plain._deflect_surcharge(bolt, 0) == 2
-
-        # Same unit, but the battlefield waives DEFLECT while paying here → 0.
-        heisho = _bare_loop()
-        heisho.gs.battlefields[0] = Battlefield(
-            card=BattlefieldCard(name="Heisho Shell of the World"))
-        heisho.gs.battlefields[0].units_B.append(
-            UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True))
-        assert heisho._deflect_surcharge(bolt, 0) == 0
-    finally:
-        CARD_REGISTRY.pop(spec.name, None)
+def test_heisho_shell_waives_deflect_for_what_is_chosen_there():
+    """'Players ignore DEFLECT while paying for spells and abilities choosing
+    something here.'"""
+    plain = _bare_loop()
+    warden = UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True)
+    plain.gs.battlefields[0].units_B.append(warden)
+    assert plain._deflect_tax(warden, "A", None) == 2
+    heisho = _bare_loop()
+    heisho.gs.battlefields[0] = Battlefield(card=BattlefieldCard(name="Heisho Shell of the World"))
+    warden = UnitInPlay(UnitCard(name="Warden", might=1, keywords=["DEFLECT 2"]), ready=True)
+    heisho.gs.battlefields[0].units_B.append(warden)
+    assert heisho._deflect_tax(warden, "A", None) == 0

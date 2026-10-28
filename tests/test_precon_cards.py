@@ -535,3 +535,202 @@ def test_threshold_of_the_gray_gives_attacker_and_defender_one_energy():
     loop._apply_action(a, ("MOVE", 0, 2, 0))
     loop._flush_pending_move()
     assert ("A", 1) in seen and ("B", 1) in seen
+
+
+def test_blade_twirler_burns_only_on_its_first_move_each_turn():
+    """'The first time I move each turn, choose a player. They BURN 1.'"""
+    loop, a, b = _setup()
+    twirler = _unit("Blade Twirler")
+    a.base_units.append(twirler)
+    b.deck.cards = [UnitCard(name=f"B{i}", might=1) for i in range(3)]
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()
+    assert len(b.trash) == 1
+    twirler.ready = True
+    loop._apply_action(a, ("MOVE", 0, 0, 2))                # back to base: a second move
+    assert len(b.trash) == 1
+
+
+def test_punching_poro_empowered_has_one_more():
+    """'EMPOWER — Discard 1. EMPOWERED I have +1 [might].'"""
+    loop, a, b = _setup()
+    poro = _unit("Punching Poro")
+    a.base_units.append(poro)
+    a.hand = [UnitCard(name="Spare", might=1)]
+    assert poro.might == 2
+    assert _use(loop, a, "Punching Poro")
+    assert poro.empowered and poro.might == 3
+
+
+def test_shadow_fiend_empowered_has_assault_three_attacking():
+    """'EMPOWER [2] [fury]. EMPOWERED I have ASSAULT 3.'"""
+    loop, a, b = _setup()
+    fiend = _unit("Shadow Fiend")
+    a.base_units.append(fiend)
+    assert fiend.keyword_value("ASSAULT") == 0
+    assert _use(loop, a, "Shadow Fiend")
+    assert fiend.keyword_value("ASSAULT") == 3 and fiend.might == 2   # +3 only while attacking
+
+
+def test_ruthless_strike_hits_only_a_unit_at_a_battlefield():
+    """'Deal 3 to a unit at a battlefield.' A unit in a base isn't offered."""
+    loop, a, b = _setup()
+    home = _unit("Home", 2)
+    b.base_units.append(home)
+    there = _unit("There", 2)
+    loop.gs.battlefields[1].add_unit("B", there)
+    asked = []
+    _choose(loop, "There", asked)
+    _cast(loop, a, "Ruthless Strike", lane=0)
+    assert all("Home" not in names for names in asked)
+    assert not _on_board(loop, there) and _on_board(loop, home)
+
+
+def test_morgana_vindictive_ambushes_only_where_you_have_units():
+    """'AMBUSH (You may play me as a REACTION to a battlefield where you have
+    units.)'"""
+    loop, a, b = _setup()
+    morgana = CARD_REGISTRY["Morgana Vindictive"].instantiate()
+    assert loop._ambush_unit_lanes(morgana, "A") == []
+    loop.gs.battlefields[1].add_unit("A", _unit("Mine", 2))
+    assert loop._ambush_unit_lanes(morgana, "A") == [1]
+
+
+# -- The Shen deck ---------------------------------------------------------------
+
+def _fight(loop, bf_idx=0, attacker="A"):
+    loop.gs.battlefields[bf_idx].contested_this_turn = True
+    loop._phase_combat_and_conquer_single(bf_idx, attacker)
+
+
+def test_shen_kinkou_reacts_to_a_battlefield_you_control_with_shield_two_and_tank():
+    """'REACTION (... including to a battlefield you control.) SHIELD 2 TANK'"""
+    loop, a, b = _setup()
+    card = CARD_REGISTRY["Shen Kinkou"].instantiate()
+    assert loop._ambush_unit_lanes(card, "A") == []
+    loop.gs.battlefields[1].add_unit("A", _unit("Mine", 1))
+    assert loop._ambush_unit_lanes(card, "A") == [1]
+    shen = _unit("Shen Kinkou")
+    assert shen.keyword_value("SHIELD") == 2 and shen.has_keyword("TANK")
+
+
+def test_shen_scourge_of_shadows_draws_holding_with_exactly_one_other_unit():
+    """'When I hold, if there is exactly one other unit you control here, draw 1.'"""
+    for others, drawn in ((1, 1), (0, 0), (2, 0)):
+        loop, a, b = _setup()
+        a.deck.cards = [UnitCard(name="Top", might=1)]
+        bf = loop.gs.battlefields[0]
+        bf.add_unit("A", _unit("Shen Scourge of Shadows"))
+        for i in range(others):
+            bf.add_unit("A", _unit(f"Pal{i}", 1))
+        loop._fire_scoring_trigger("on_hold", bf, "A")
+        assert len(a.hand) == drawn
+
+
+def test_shen_leader_has_shield_one():
+    assert _unit("Shen Leader of the Kinkou Order").keyword_value("SHIELD") == 1
+
+
+def test_steel_paws_deflect_taxes_an_opponent_choosing_it():
+    """'DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)'"""
+    loop, a, b = _setup()
+    for d in Domain:
+        a.power_pool.pop(d, None)
+        a.floating_power.pop(d, None)
+    paws = _unit("Steel Paws")
+    loop.gs.battlefields[0].add_unit("B", paws)
+    _choose(loop, "Steel Paws")
+    assert not _castable(loop, a, "Ruthless Strike")       # no [rune] for the tax
+    a.add_power(Domain.FURY, 1)
+    _cast(loop, a, "Ruthless Strike", lane=0)
+    assert not _on_board(loop, paws) and not a.power_pool.get(Domain.FURY)
+    decree = CARD_REGISTRY["Decree of Insight"].instantiate()
+    assert loop._deflect_tax(paws, "A", decree) == 0        # "Ignore DEFLECT while paying"
+
+
+def test_keeper_of_law_costs_two_order_less_with_a_two_unit_battlefield():
+    """'I cost [2] [order] less if you control a battlefield with exactly two
+    units there.' (printed [5] [order])"""
+    loop, a, b = _setup()
+    keeper = CARD_REGISTRY["Keeper of Law"].instantiate()
+    assert tuple(loop._effective_cost(keeper, a)) == (5, 1)
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("One", 1))
+    bf.add_unit("A", _unit("Two", 1))
+    assert tuple(loop._effective_cost(keeper, a)) == (3, 0)
+    bf.add_unit("A", _unit("Three", 1))
+    assert tuple(loop._effective_cost(keeper, a)) == (5, 1)
+
+
+def test_soulspinner_ambushes_where_you_have_units():
+    loop, a, b = _setup()
+    card = CARD_REGISTRY["Soulspinner"].instantiate()
+    assert loop._ambush_unit_lanes(card, "A") == []
+    loop.gs.battlefields[0].add_unit("A", _unit("Mine", 1))
+    assert loop._ambush_unit_lanes(card, "A") == [0]
+
+
+def test_noxian_emissary_empowered_deathknell_plays_two_recruits():
+    """'EMPOWER [1] [Order]. EMPOWERED DEATHKNELL Play two 1 [Might] Recruit unit
+    tokens to your base.'"""
+    for empower in (True, False):
+        loop, a, b = _setup()
+        emissary = _unit("Noxian Emissary")
+        loop.gs.battlefields[0].add_unit("A", emissary)
+        if empower:
+            assert _use(loop, a, "Noxian Emissary") and emissary.empowered
+        loop.gs.battlefields[0].add_unit("B", _unit("Big", 9))
+        _fight(loop, 0, "B")
+        recruits = [u for u in a.base_units if u.card.name == "Recruit"]
+        assert len(recruits) == (2 if empower else 0)
+        assert all(u.might == 1 for u in recruits)
+
+
+def test_sacred_protector_deals_combat_damage_only_beside_exactly_one_other_unit():
+    """'I don't deal combat damage unless I'm at a battlefield with exactly one
+    other unit you control.'"""
+    for pals, enemy_dies in ((0, False), (1, True)):
+        loop, a, b = _setup()
+        bf = loop.gs.battlefields[0]
+        bf.add_unit("A", _unit("Sacred Protector"))
+        for i in range(pals):
+            bf.add_unit("A", _unit(f"Pal{i}", 0))
+        enemy = _unit("Enemy", 5)
+        bf.add_unit("B", enemy)
+        loop._recompute_passives()
+        _fight(loop, 0, "A")
+        assert (not _on_board(loop, enemy)) == enemy_dies
+
+
+def test_kennen_keeper_of_balance_pays_two_to_stun_and_grows_beside_a_stunned_enemy():
+    """'When you play me or I attack, you may pay [2] to STUN a unit. While
+    there's a stunned enemy unit here, I have +2 [might].'"""
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 3)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    a.hand = [CARD_REGISTRY["Kennen Keeper of Balance"].instantiate()]
+    _chooser(loop, {"optional:stun_unit": lambda l, o: o.index(True),
+                    "target": lambda l, o: next(i for i, u in enumerate(o)
+                                                if getattr(u, "card", None) and u.card.name == "Enemy")})
+    energy = a.energy
+    loop._apply_action(a, ("UNIT", 0, 0))
+    kennen = next(u for u in a.base_units if u.card.name == "Kennen Keeper of Balance")
+    assert enemy.stunned and energy - a.energy == 3 + 2
+    loop._recompute_passives()
+    assert kennen.might == 2                                 # in base: not "here"
+    a.base_units.remove(kennen)
+    loop.gs.battlefields[0].add_unit("A", kennen)
+    loop._recompute_passives()
+    assert kennen.might == 4
+
+
+def test_shen_eye_of_twilight_gives_a_friendly_unit_tank():
+    """'ACTION [tap]: Give a friendly unit TANK this turn.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_A = CARD_REGISTRY["Shen Eye of Twilight"].instantiate()
+    loop.gs.legend_unit_A = UnitInPlay(card=loop.gs.legend_A, ready=True)
+    mine = _unit("Mine", 2)
+    a.base_units.append(mine)
+    b.base_units.append(_unit("Theirs", 2))
+    assert _use(loop, a, "Shen Eye of Twilight")
+    assert mine.has_keyword("TANK") and not loop.gs.legend_unit_A.ready

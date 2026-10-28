@@ -28494,6 +28494,10 @@
         "amount": -5,
         "duration": "this_turn",
         "where": "anywhere"
+      },
+      {
+        "effect": "ignore_deflect",
+        "trigger": "passive"
       }
     ],
     "variants": [

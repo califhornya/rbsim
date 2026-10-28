@@ -23,6 +23,8 @@ class ChainItem:
     # {(run, instruction, n): (kind, n options, chosen)}; chosen is a list for
     # an "up to N" choice.
     declared: Optional[dict] = None
+    # Its DEFLECT tax was paid as it was put on the chain (GameLoop._put_on_chain).
+    deflect_paid: bool = False
 
 
 @dataclass

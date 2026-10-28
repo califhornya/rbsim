@@ -465,7 +465,12 @@ class GameLoop:
     def _put_on_chain(self, item: ChainItem) -> None:
         """A spell goes on the chain with its choices made (§355)."""
         self.gs.chain.append(item)
+        self._declared_deflect = 0
         item.declared = self._declare_choices(item)
+        # DEFLECT on the units its choices took (§809): paid now, as it chooses.
+        if self._declared_deflect:
+            self._pay_generic_power(self.gs.get_player(item.player), self._declared_deflect)
+            item.deflect_paid = True
 
     def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
         """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
@@ -538,6 +543,7 @@ class GameLoop:
             return back.get(id(x), x)
         declared = {slot: (kind, n, real_of(got))
                     for slot, (kind, n, got) in loop2._declaring["choices"].items()}
+        self._declared_deflect = int(loop2._declaring.get("deflect", 0))
         if self.on_choice is not None:
             for kind, n, got in declared.values():
                 self.on_choice(kind, item.player, n, got, item.card)
@@ -1328,6 +1334,16 @@ class GameLoop:
         gs = self.gs
         enemy = gs.other(chooser)
         located = [(u, self._locate_unit(u)) for u in units]
+        # DEFLECT (§809): paid as the choice is made. A spell's choices are made
+        # as it goes on the chain (the copy that declares them adds the tax up,
+        # _put_on_chain pays it); its resolution doesn't pay again.
+        tax = sum(self._deflect_tax(u, chooser, source) for u in units)
+        if tax:
+            declaring = getattr(self, "_declaring", None)
+            if declaring is not None:
+                declaring["deflect"] = declaring.get("deflect", 0) + tax
+            elif not getattr(self, "_deflect_paid", False):
+                self._pay_generic_power(gs.get_player(chooser), tax)
         from_spell_or_unit = isinstance(source, (SpellCard, UnitCard))
         if from_spell_or_unit and any(w is not None and w[0] == enemy for _, w in located):
             gs.enemy_choices_this_turn[chooser] = gs.enemy_choices_this_turn.get(chooser, 0) + 1
@@ -1601,38 +1617,20 @@ class GameLoop:
                 return 1
         return default
 
-    def _deflect_surcharge(self, card: Card, target_lane: int,
-                           caster: Optional[str] = None) -> int:
-        """Extra energy a spell costs because the caster's opponent has DEFLECT
-        units at the target battlefield (§809). Applies only when the spell targets
-        the opponent. Returns the max DEFLECT value among eligible enemy units.
-        `caster` defaults to the active player (a reaction's caster may not be)."""
-        # Battlefield that waives DEFLECT while paying here (e.g. Heisho Shell of
-        # the World) → no surcharge regardless of who the spell targets.
-        if 0 <= target_lane < len(self.gs.battlefields):
-            if self._bf_passive_amount(self.gs.battlefields[target_lane], "ignore_deflect_here"):
-                return 0
-        spec = CARD_REGISTRY.get(card.name)
-        effects = list(spec.effects) if spec and spec.effects else []
-        # Determine whether the spell targets enemy units.
-        targets_enemy = False
-        for es in effects:
-            tgt = (es.target or "").lower()
-            if tgt in self._ENEMY_TARGETS:
-                targets_enemy = True
-                break
-            # deal_damage with no explicit target defaults to opponent.
-            if es.effect == "deal_damage" and es.target is None:
-                targets_enemy = True
-                break
-        if not targets_enemy:
+    def _deflect_tax(self, unit: UnitInPlay, chooser: str, source: Optional[Card]) -> int:
+        """The [rune] `chooser` pays for its spell or ability `source` to choose
+        `unit` (DEFLECT, §809: "Opponents must pay [rune] to choose me"): its
+        DEFLECT value if it is an enemy unit, 0 where DEFLECT is ignored ("Ignore
+        DEFLECT while paying this spell's cost": Decree of Insight; Heisho Shell
+        of the World for what is chosen there)."""
+        where = self._locate_unit(unit)
+        if where is None or where[0] == chooser:
             return 0
-        if not (0 <= target_lane < len(self.gs.battlefields)):
+        if source is not None and self._has_effect(source, "ignore_deflect"):
             return 0
-        bf = self.gs.battlefields[target_lane]
-        opp_side = self.gs.other(caster or self.gs.active)
-        enemy_units = bf.units_A if opp_side == "A" else bf.units_B
-        return max((u.keyword_value("DEFLECT") for u in enemy_units), default=0)
+        if where[1] is not None and self._bf_passive_amount(where[1], "ignore_deflect_here"):
+            return 0
+        return unit.keyword_value("DEFLECT")
 
     def _check_condition(
         self,
@@ -1834,7 +1832,10 @@ class GameLoop:
             return bool(unit and unit.might_counters > 0)
         if ctype == "this_is_empowered":
             # Vendetta EMPOWERED dependent ability: fires only while the source
-            # (unit, legend or gear) carries the empowered status.
+            # (unit, legend or gear) carries the empowered status. EMPOWERED
+            # DEATHKNELL (Noxian Emissary): as it was when it died.
+            if "died_empowered" in (extra or {}) and self._find_unit_by_card(card) is None:
+                return bool(extra["died_empowered"])
             return self._is_empowered(card)
         if ctype == "you_control_subtype":
             # The corpus writes the tag as "subtype" (older specs as "tag").
@@ -2690,7 +2691,6 @@ class GameLoop:
         if isinstance(card, SpellCard):
             energy += self._vex_cheerless_delta(side, energy)
         if isinstance(card, SpellCard) and lane is not None:
-            energy += self._deflect_surcharge(card, lane, side)
             e_red, p_red = self._bf_cost_reduction(card, lane)
             energy -= e_red
             if power is not None and p_red:
@@ -4516,7 +4516,8 @@ class GameLoop:
                     self._resolve_triggered_effects(
                         card, "on_death", bf, actor, opponent,
                         context_extra={"battlefield": bf, "died_alone": alone,
-                                       "died_might": dead_unit.might},
+                                       "died_might": dead_unit.might,
+                                       "died_empowered": dead_unit.empowered},
                     )
             dead_unit.gear = []
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
@@ -4681,14 +4682,20 @@ class GameLoop:
         return sum(1 for u in bf._units_for(self.gs.other(side))
                    if self._has_effect(u.card, "group_move_toll"))
 
-    def _can_choose(self, unit: UnitInPlay, chooser: str) -> bool:
-        """Whether a spell or ability of `chooser` can choose `unit`: not an
-        enemy unit that "can't be chosen by enemy spells and abilities" (Ruin
-        Runner, Alpha Wildclaw; Twilight Shroud this turn)."""
+    def _can_choose(self, unit: UnitInPlay, chooser: str, source: Optional[Card] = None) -> bool:
+        """Whether a spell or ability (`source`) of `chooser` can choose `unit`:
+        not an enemy unit that "can't be chosen by enemy spells and abilities"
+        (Ruin Runner, Alpha Wildclaw; Twilight Shroud this turn), nor one with
+        DEFLECT whose [rune] the chooser can't pay."""
         where = self._locate_unit(unit)
         if where is None or where[0] == chooser:
             return True
-        return not (unit.unchoosable or unit.cant_be_chosen_turn == self.gs.turn)
+        if unit.unchoosable or unit.cant_be_chosen_turn == self.gs.turn:
+            return False
+        if getattr(self, "_deflect_paid", False):
+            return True              # a spell resolving: paid as it chose
+        tax = self._deflect_tax(unit, chooser, source)
+        return not tax or self._can_pay_generic_power(self.gs.get_player(chooser), tax)
 
     def _can_move_to_base(self, unit: UnitInPlay, src_bf: Optional[Battlefield]) -> bool:
         """ "I can't move to base" / "Units can't move to base" (Determined
@@ -4907,12 +4914,13 @@ class GameLoop:
             actor = self.gs.get_player(item.player)
             opponent = self.gs.get_player(self.gs.other(item.player))
             battlefield = self.gs.battlefields[item.bf_idx]
-            outer = self._replay
+            outer, outer_paid = self._replay, getattr(self, "_deflect_paid", False)
             self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
+            self._deflect_paid = item.deflect_paid
             try:
                 self._resolve_card_effects(item.card, battlefield, actor, opponent)
             finally:
-                self._replay = outer
+                self._replay, self._deflect_paid = outer, outer_paid
 
             if self.recorder:
                 before_a = list(battlefield.units_A)

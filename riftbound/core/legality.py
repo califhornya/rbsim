@@ -5,7 +5,7 @@ player actually do right now?".
 
 Design: these functions take the live ``GameLoop`` (not a bare ``GameState``) so
 they can reuse the engine's own cost helpers — ``_cost_reduction``,
-``_deflect_surcharge``, ``activatable_abilities``, ``_parse_activated_cost``,
+``_can_choose`` (DEFLECT), ``activatable_abilities``, ``_parse_activated_cost``,
 ``_activated_affordable`` — rather than reimplementing them and risking drift.
 Search passes a loop built over a *clone* (whose agents are stripped, so building
 a loop over it has no side effects); the live game passes its own loop.

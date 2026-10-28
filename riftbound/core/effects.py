@@ -1598,7 +1598,7 @@ def _each_player_bounces(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Starting with the next player, each player may return a unit to its
     owner's hand" (Whirlwind): each returns the other's mightiest unit."""
     for chooser, victim in ((ctx.opponent_side, ctx.actor_side), (ctx.actor_side, ctx.opponent_side)):
-        units = [u for u in _units_at(ctx, victim, "anywhere") if ctx.loop._can_choose(u, chooser)]
+        units = [u for u in _units_at(ctx, victim, "anywhere") if ctx.loop._can_choose(u, chooser, ctx.card)]
         if units:
             _unit_leaves_to(ctx, max(units, key=lambda u: u.might), victim, "hand")
 
@@ -2396,7 +2396,7 @@ def _kind(what: str, spec: Mapping[str, Any]) -> str:
 
 def _choosable(ctx: "EffectContext", units: list) -> list:
     """The units this effect's controller may choose (GameLoop._can_choose)."""
-    return [u for u in units if ctx.loop._can_choose(u, ctx.actor_side)]
+    return [u for u in units if ctx.loop._can_choose(u, ctx.actor_side, ctx.card)]
 
 
 def _fallback_units(ctx: "EffectContext", target: str, bias: str) -> list:
@@ -2692,7 +2692,7 @@ def _move_candidates(ctx: "EffectContext", spec: Mapping[str, Any], to_base_verb
     if tf:
         candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
     if not target.startswith("all"):
-        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me)]
+        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me, ctx.card)]
     return [(s, u) for s, u in candidates if _move_destinations(ctx, spec, to_base_verb, s, u)]
 
 
