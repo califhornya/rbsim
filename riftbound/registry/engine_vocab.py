@@ -131,6 +131,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there"
     "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
     "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
+    "played_to_battlefield_this_turn",   # "if you've played a unit or gear to a battlefield this turn"
+    "your_turn_from_facedown",           # "If it's your turn and you played this from face down"
+    "no_open_battlefields",              # "if there are no open battlefields"
     "this_is_at_battlefield",            # the source unit is at a battlefield (not in base)
     "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
     "triggering_unit_has_subtype",       # subtype: the unit that caused the trigger has this tag ("another Dragon")
@@ -228,7 +231,8 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "cards_in_hand", "enemies_here", "friendly_units_here",
     "n_friendly_with_tag", "n_distinct_tags_among_friendlies",
     # SHOW OFF (§832): the shown object's info, snapshotted as the card was played.
-    "shown_might", "shown_power_cost", "shown_energy_cost",
+    "shown_might", "shown_power_cost", "shown_energy_cost", "chosen_friendly_gear_energy",
+    "self_shield",
     # Per-count cost reductions ("I cost [1] less for each ...").
     "cards_played_this_turn", "friendly_exhausted_units",
     "battlefields_conquered_this_turn", "hold_points_this_turn",
@@ -300,7 +304,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # of Water), _recompute_passives (Leona Zealot), buff_unit (Lee Sin Ascetic),
     # _cost_extras (Wallop, Call to Glory)
     "sett_save", "lone_fighter_bonus", "stunned_enemies_here_minus", "unlimited_buffs",
-    "spend_buff_free", "discard_for_energy",
+    "spend_buff_free", "discard_for_energy", "return_gear_for_energy",
     # Spiritforged: Soraka Wanderer, Ezreal Prodigy, Jax Unmatched, Renata Glasc
     # Chem-Baroness (GameLoop._try_replace_death, _pay_one_additional_cost,
     # _quick_draw, _gold_bonus)
@@ -316,6 +320,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
     "accelerate_non_hand",
     "spells_repeat_in_showdown", "reaction_tax_in_showdown", "channel_plus_one",
+    "spells_reaction_in_showdown",
     "sacrifice_instead_of_dying", "mech_instead_of_tokens", "double_tokens_once",
     # cost rules (GameLoop._cost_extras, _effective_cost, _adjust_ability_cost,
     # _play_forbidden, _destination_surcharge, hiding)

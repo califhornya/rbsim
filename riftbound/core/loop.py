@@ -64,7 +64,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_control_this_battlefield",
     "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty",
     "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
-    "you_have_n_or_fewer_runes", "friendly_deployed_gear_here",
+    "you_have_n_or_fewer_runes", "friendly_deployed_gear_here", "played_to_battlefield_this_turn",
+    "your_turn_from_facedown", "no_open_battlefields",
     "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
     "fewer_runes_than_opponent",
     "cards_played_this_turn_exactly", "opponent_played_n_spells_this_turn",
@@ -251,10 +252,12 @@ class EffectContext:
             return
 
         player = self._player_for_target(target)
+        drawn = 0
         for _ in range(count):
-            card = self.loop._draw_one(player)   # Burn Out (§418) when deck empties
+            card = self.loop._draw_one(player, overflow=False)   # Burn Out (§418) when deck empties
             if not card:
                 break
+            drawn += 1
             if self.loop.recorder:
                 self.loop.recorder.record_draw(
                     player.name,
@@ -262,6 +265,8 @@ class EffectContext:
                     card,
                     source=source,
                 )
+        if drawn:
+            self.loop._zero_point_overflow(player, drawn)
 
     def gain_energy(self, amount: int, *, target: str = "actor") -> None:
         if amount == 0:
@@ -960,7 +965,8 @@ class GameLoop:
         shown_* amount sources. The object comes from the card's `show_off`
         marker spec (its target_filter); without one, any card qualifies.
         Baseline policy: show off whenever possible, picking the object with the
-        highest Might, then Power cost, then Energy cost."""
+        highest value the card reads (its shown_* amount; Might by default),
+        then Might, Power cost, Energy cost."""
         card._showed_off = False
         card._shown = None
         if not card.has_keyword("SHOW OFF"):
@@ -987,9 +993,14 @@ class GameLoop:
         candidates = [(c, m) for (c, m) in candidates if self._show_off_matches(c, tf)]
         if not candidates or not self._wants_optional_keyword(actor, card, "SHOW OFF"):
             return
-        obj, might = self.choose("show_off", side, candidates, max(candidates, key=lambda cm: (
-            cm[1], int(getattr(cm[0], "cost_power", 0) or 0),
-            int(getattr(cm[0], "cost_energy", 0) or 0))), card)
+        reads = next((str(es.params.get("amount_source")) for es in (spec.effects if spec else ())
+                      if str(es.params.get("amount_source") or "").startswith("shown_")), "shown_might")
+
+        def value(cm):
+            power, energy = int(getattr(cm[0], "cost_power", 0) or 0), int(getattr(cm[0], "cost_energy", 0) or 0)
+            first = {"shown_power_cost": power, "shown_energy_cost": energy}.get(reads, cm[1])
+            return first, cm[1], power, energy
+        obj, might = self.choose("show_off", side, candidates, max(candidates, key=value), card)
         card._showed_off = True
         card._shown = {
             "might": might,
@@ -1066,7 +1077,7 @@ class GameLoop:
             self._resolve_triggered_effects(dg.card, trigger, bf, actor, opponent,
                                             context_extra={"battlefield": bf})
 
-    def _draw_one(self, player: Player):
+    def _draw_one(self, player: Player, overflow: bool = True):
         """Draw one card, applying Burn Out (§418) when the Main Deck is empty:
         draw what's possible, recycle the trash into the deck (randomized), an
         opponent gains 1 point, then complete the draw. Returns the card, or None
@@ -1076,7 +1087,7 @@ class GameLoop:
         if card is None:
             self._burn_out(player)
             card = player.draw()
-        if card is not None:
+        if card is not None and overflow:
             self._zero_point_overflow(player)
             player.draws_this_turn += 1
             if player.draws_this_turn == 2:
@@ -1084,12 +1095,12 @@ class GameLoop:
                 self._fire_units_trigger("on_second_draw", "A" if player is self.gs.A else "B")
         return card
 
-    def _zero_point_overflow(self, player: Player) -> None:
+    def _zero_point_overflow(self, player: Player, drawn: int = 1) -> None:
         """ "When you draw 1 or more cards with 9 or more other cards in your hand,
         discard your hand, kill this, and choose an opponent. They score 1
-        point." (Zero Point Inflection)"""
+        point." (Zero Point Inflection): after the draw, `drawn` cards at once."""
         zpi = next((g for g in player.base_gear if self._has_effect(g, "zero_point_overflow")), None)
-        if zpi is None or len(player.hand) - 1 < 9:
+        if zpi is None or len(player.hand) - drawn < 9:
             return
         with self._discard_event():
             for c in list(player.hand):
@@ -1607,10 +1618,14 @@ class GameLoop:
     def _apply_equipment_conditions(self, unit, actor, opponent, bf) -> None:
         """An Equipment's conditional Might for its unit ("I have +2 [might]
         while I'm at a battlefield with exactly one other unit you control":
-        Hand Hammer), checked as the unit."""
+        Hand Hammer), checked as the unit; and its keywords ("SHIELD 2":
+        Nazuman Ntofo, Serrated Dirk's ASSAULT 2, Protector's Shield's TANK)."""
         for g in unit.gear:
             gspec = CARD_REGISTRY.get(g.name)
             for es in (gspec.effects if gspec else ()):
+                if es.effect == "give_keyword" and es.trigger == "passive" and not es.condition \
+                        and str(es.params.get("keyword", "")).strip():
+                    unit.passive_keywords.add(str(es.params["keyword"]).strip())
                 if es.effect == "equip_conditional_might" and self._check_condition(
                         es.condition, unit.card, actor, opponent, {"battlefield": bf, "gear": g}):
                     unit.passive_might += int(es.params.get("amount", 0))
@@ -1779,9 +1794,14 @@ class GameLoop:
         opponent: Player,
         extra: Optional[dict],
     ) -> bool:
-        """Evaluate an effect's optional condition. None = always true."""
+        """Evaluate an effect's optional condition. None = always true;
+        `negate`: the opposite ("Play a Gold ... If [so], play three instead":
+        The Waters' Wage)."""
         if not cond:
             return True
+        if cond.get("negate"):
+            return not self._check_condition({k: v for k, v in cond.items() if k != "negate"},
+                                              card, actor, opponent, extra)
         ctype = cond.get("type")
         params = cond.get("params", {})
         side = "A" if actor is self.gs.A else "B"
@@ -1990,6 +2010,13 @@ class GameLoop:
             return to is not None and to != "base" and (me is None or me[1] is not to)
         if ctype == "not_your_turn":
             return side != self.gs.active
+        if ctype == "your_turn_from_facedown":
+            # "If it's your turn and you played this from face down" (The Waters' Wage)
+            return side == self.gs.active and getattr(card, "_hidden_bf", None) is not None
+        if ctype == "no_open_battlefields":
+            # "if there are no open battlefields" (Demon Shade, §170.11.c)
+            return not any(not bf.units_A and not bf.units_B and bf.controller() is None
+                           for bf in self.gs.battlefields)
         if ctype == "triggering_card_from_zone":
             # "When you play a card from face down" (zone "facedown").
             return extra.get("triggering_card") is not None and \
@@ -2029,6 +2056,9 @@ class GameLoop:
         if ctype == "triggering_card_not_from_hand":
             # "When you play a card from anywhere other than your hand".
             return extra.get("triggering_card") is not None and extra.get("from_zone", "hand") != "hand"
+        if ctype == "played_to_battlefield_this_turn":
+            # "if you've played a unit or gear to a battlefield this turn" (Hold 'Em)
+            return any(bf.plays_here.get(side, (-1, 0))[0] == self.gs.turn for bf in self.gs.battlefields)
         if ctype == "you_already_played_another_card_this_turn":
             # Another card than this one: a LEGION card's own play is already
             # counted while its "when you play me" resolves.
@@ -3049,6 +3079,12 @@ class GameLoop:
                 # If you do, reduce my cost by [2]" (Brazen Buccaneer).
                 if any(c is not card for c in self.gs.get_player(side).hand):
                     out.update(energy=int(es.params.get("amount", 2)), discards=1)
+            elif kind == "return_gear_for_energy":
+                # "You may return a friendly gear to its owner's hand as an
+                # additional cost to play me. If you do, I cost [2] less"
+                # (Skystrike Squadron).
+                if self.gs.get_player(side).base_gear or self._controlled_attached_gear(side):
+                    out.update(energy=int(es.params.get("amount", 2)), gear_returns=1)
             elif kind == "spend_buff_free":
                 # "As you play this, you may spend a buff as an additional cost.
                 # If you do, ignore this spell's cost" (Wallop, Call to Glory).
@@ -3073,8 +3109,8 @@ class GameLoop:
                 less = {**extras, key: k, "power": k} if k else {x: v for x, v in extras.items()
                                                                 if x not in (key, "power")}
                 options.append((less, energy, (power or 0) + back))
-        if "xp" in extras or "discards" in extras:
-            less = {x: v for x, v in extras.items() if x not in ("xp", "discards", "energy")}
+        if "xp" in extras or "discards" in extras or "gear_returns" in extras:
+            less = {x: v for x, v in extras.items() if x not in ("xp", "discards", "gear_returns", "energy")}
             options.append((less, energy + extras.get("energy", 0), power))
         options = [o for o in options if o is options[0] or self._can_pay_card(ap, card, o[1], o[2])]
         return self.choose("cost_extras", side, options, options[0], card)
@@ -3100,6 +3136,12 @@ class GameLoop:
         if extras.get("xp"):
             self.gs.add_xp(side, -extras["xp"])
         ap = self.gs.get_player(side)
+        if extras.get("gear_returns"):
+            from .effects import _return_gear     # a token or the cheapest, base first
+            ctx = EffectContext(self, card or ap.hand[0], ap, self.gs.get_player(self.gs.other(side)),
+                                self.gs.battlefields[0], {})
+            _return_gear(ctx, lambda pool: min(pool, key=lambda e: (
+                e[0] is not None, not getattr(e[1], "is_token", False), e[1].cost_energy or 0)))
         with self._discard_event():
             for _ in range(extras.get("discards", 0)):
                 hand = [c for c in ap.hand if c is not card]
@@ -4388,12 +4430,25 @@ class GameLoop:
         """_card_timing, with what `side`'s cards grant: "Your gear with DEPLOY
         have ACTION" (Jarvan IV Martial Paragon)."""
         timing = self._card_timing(card)
+        if timing != "reaction" and self._has_reaction(card, side):
+            return "reaction"
         if timing is None and isinstance(card, GearCard) and card.has_keyword("DEPLOY") \
                 and self._side_has_passive(side, "deploy_gear_action"):
             return "action"
         if timing is None and self._quick_draw(card, side):
             return "reaction"                    # QUICK-DRAW has REACTION (§745)
         return timing
+
+    def _has_reaction(self, card: Card, side: str) -> bool:
+        """A spell's REACTION: printed, or "While I'm in a showdown, your spells
+        have REACTION" (Kai'Sa Rebel, at the showdown's battlefield)."""
+        if card.has_keyword("REACTION"):
+            return True
+        gs = self.gs
+        if not isinstance(card, SpellCard) or not gs.showdown_active or gs.showdown_bf_idx is None:
+            return False
+        return any(self._has_effect(u.card, "spells_reaction_in_showdown")
+                   for u in gs.battlefields[gs.showdown_bf_idx]._units_for(side))
 
     def _quick_draw(self, card: Card, side: str) -> bool:
         """`card` has QUICK-DRAW: printed, or "Your Equipment everywhere have
@@ -4528,6 +4583,7 @@ class GameLoop:
                         owner.trash.append(c)
                 self.gs.jhin_pile[side] = []
                 owner.unlock_runes(4)
+                self._extra_channel(side)
                 self._draw_one(owner)
         else:
             owner.trash.append(card)
@@ -5764,7 +5820,7 @@ class GameLoop:
         kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
         if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
             card = player.hand[idx]
-            if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
+            if isinstance(card, SpellCard) and self._has_reaction(card, side):
                 if lane is None or not (0 <= lane < len(self.gs.battlefields)):
                     lane = 0
                 energy, power = self._effective_cost(card, player, lane)
@@ -5901,7 +5957,7 @@ class GameLoop:
         if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
             card = player.hand[idx]
             if isinstance(card, SpellCard):
-                has_action_or_reaction = card.has_keyword("ACTION") or card.has_keyword("REACTION")
+                has_action_or_reaction = card.has_keyword("ACTION") or self._has_reaction(card, side)
                 energy, power = self._effective_cost(card, player, bf_idx)
                 if has_action_or_reaction and self._spell_has_targets(card, side, bf_idx) and                         self._pay_card(player, card, energy, power):
                     player.remove_from_hand(idx)

@@ -134,7 +134,7 @@ def test_seraphic_wyvern_and_coalesced_energy():
     loop._phase_beginning("A")
     assert loop.gs.A.total_runes_in_play() == 3
     _fire(loop, _card("Coalesced Energy"), "on_end_of_turn")
-    assert loop.gs.A.total_runes_in_play() == 4
+    assert loop.gs.A.total_runes_in_play() == 5      # "channel 4" + the Wyvern's 1
 
 
 def test_mordekaiser_twice_slain_kills_a_friend_instead_once_a_turn():

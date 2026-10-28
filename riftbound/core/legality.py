@@ -184,7 +184,7 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
     n_bf = len(loop.gs.battlefields)
     actions: list[GameAction] = [GameAction.pass_()]
     for idx, card in enumerate(ap.hand):
-        if isinstance(card, SpellCard) and card.has_keyword("REACTION"):
+        if isinstance(card, SpellCard) and loop._has_reaction(card, ap.name):
             for lane in range(n_bf):
                 if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
@@ -218,7 +218,7 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
     lane = gs.showdown_bf_idx if gs.showdown_bf_idx is not None else 0
     actions: list[GameAction] = [GameAction.pass_()]
     for idx, card in enumerate(ap.hand):
-        if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
+        if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or loop._has_reaction(card, ap.name)):
             if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
         # ACTION units (§732.1.c.1): may be played during showdowns (to base).

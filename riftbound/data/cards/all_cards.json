@@ -35584,7 +35584,7 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount_source": "shown_energy_cost",
+        "amount_source": "chosen_friendly_gear_energy",
         "where": "battlefield"
       }
     ],
@@ -35833,12 +35833,8 @@
     ],
     "effects": [
       {
-        "effect": "give_keyword",
-        "trigger": "on_showdown_begin",
-        "target_filter": {
-          "is_spell": true
-        },
-        "keyword": "REACTION"
+        "effect": "spells_reaction_in_showdown",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -36070,7 +36066,7 @@
         "trigger": "cost_modifier",
         "amount": 2,
         "condition": {
-          "type": "you_already_played_another_card_this_turn"
+          "type": "played_to_battlefield_this_turn"
         }
       },
       {
@@ -36105,7 +36101,14 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "SHIELD 2"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-071",
@@ -36186,8 +36189,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reveal_top_draw_if_spell",
-        "trigger": "on_move"
+        "effect": "reveal_top",
+        "trigger": "on_move",
+        "target_filter": {
+          "is_unit": true,
+          "might_at_least": 5
+        },
+        "otherwise": "recycle"
       }
     ],
     "variants": [
@@ -36215,13 +36223,9 @@
     ],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 2,
-        "target": "self",
-        "condition": {
-          "type": "kicker_paid"
-        }
+        "effect": "return_gear_for_energy",
+        "trigger": "passive",
+        "amount": 2
       }
     ],
     "variants": [
@@ -36311,8 +36315,9 @@
         "effect": "deal_damage",
         "trigger": "on_move",
         "target": "chosen_unit",
-        "amount": 3,
-        "where": "battlefield"
+        "amount_source": "self_shield",
+        "where": "battlefield",
+        "optional": true
       }
     ],
     "variants": [
@@ -36406,6 +36411,18 @@
         },
         "amount": 3,
         "where": "anywhere"
+      },
+      {
+        "effect": "recall_unit",
+        "trigger": "on_self_played",
+        "target": "self",
+        "to": "deck_bottom",
+        "condition": {
+          "type": "triggering_card_from_zone",
+          "params": {
+            "zone": "facedown"
+          }
+        }
       }
     ],
     "variants": [
@@ -36506,6 +36523,10 @@
     "set": "Radiance",
     "keywords": [],
     "effects": [
+      {
+        "effect": "opponents_cant_play_spells",
+        "trigger": "on_cast"
+      },
       {
         "effect": "move_unit",
         "trigger": "on_cast",
@@ -37067,7 +37088,20 @@
         "effect": "play_token",
         "trigger": "on_cast",
         "token_name": "Gold",
-        "exhausted": true
+        "condition": {
+          "type": "your_turn_from_facedown",
+          "negate": true
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "token_name": "Gold",
+        "count": 3,
+        "ready": true,
+        "condition": {
+          "type": "your_turn_from_facedown"
+        }
       }
     ],
     "variants": [
@@ -37102,6 +37136,13 @@
         "target_filter": {
           "is_gear": true
         }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_cast",
+        "timing": "action",
+        "token_name": "Gold",
+        "target": "it_controller"
       }
     ],
     "variants": [
@@ -37135,13 +37176,21 @@
         "modes": [
           {
             "effect": "move_unit",
-            "target": "friendly_unit"
+            "target": "friendly_unit",
+            "destination": "open",
+            "condition": {
+              "type": "no_open_battlefields",
+              "negate": true
+            }
           },
           {
             "effect": "give_keyword",
             "target": "friendly_unit",
             "keyword": "GANKING",
-            "duration": "this_turn"
+            "duration": "this_turn",
+            "condition": {
+              "type": "no_open_battlefields"
+            }
           }
         ]
       }
@@ -37256,7 +37305,8 @@
             "effect": "draw_cards",
             "count": 1,
             "additional_cost": {
-              "power": 1
+              "power": 1,
+              "domain": "CHAOS"
             }
           }
         ]
@@ -37418,7 +37468,8 @@
       {
         "effect": "set_base_might",
         "trigger": "on_move",
-        "target": "unit",
+        "target": "chosen_unit",
+        "where": "anywhere",
         "amount": 4,
         "other": true,
         "optional": true
@@ -37482,6 +37533,16 @@
           "tap": true
         },
         "token_name": "Bomb"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "on_defend",
+        "target": "self",
+        "amount": 2,
+        "optional": true,
+        "additional_cost": {
+          "kill_friendly_gear": true
+        }
       }
     ],
     "variants": [

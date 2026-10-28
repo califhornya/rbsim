@@ -275,6 +275,9 @@ Recurring parser errors identified from the human verdicts in
   or onto passive_keywords on attach. Tests: Serrated Dirk wearer attacks at
   +2 might; Recurve Bow wearer deals 2 on attack; both stop when the gear is
   removed / the wearer dies.
+- **(FIXED, keyword facet, Radiance part 2):** an Equipment's passive
+  give_keyword is its unit's (`GameLoop._apply_equipment_conditions`). Test:
+  test_nazuman_ntofo_gives_shield_two.
 
 ## 8. Recall always heals+exhausts; per rules a generic recall must NOT (found spot-check rescued)
 - **Rule (user):** "Recalls do not affect the state of the Permanent being recalled.

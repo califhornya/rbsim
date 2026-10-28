@@ -192,16 +192,27 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _mode_payable(ctx: "EffectContext", mode) -> bool:
     """A mode that starts by spending the source's buff ("Spend my buff to STUN
     an enemy unit", Riven Broken Blade) can only be chosen while it has one; the
-    buff is spent when the mode resolves."""
+    buff is spent when the mode resolves. A mode's `condition` ("if there are
+    no open battlefields": Demon Shade) and `additional_cost` ("Pay [chaos] to
+    draw 1": Reckless Innovator) gate it too."""
     steps = mode if isinstance(mode, list) else [mode]
     if steps and steps[0].get("effect") == "spend_buff" and steps[0].get("target") == "self":
         src = _source_unit(ctx)
         return src is not None and src.might_counters > 0
+    if steps and steps[0].get("condition") and not ctx.loop._check_condition(
+            steps[0]["condition"], ctx.card, ctx.actor, ctx.opponent, ctx.extra):
+        return False
+    if steps and steps[0].get("additional_cost") and not ctx.loop._pay_one_additional_cost(
+            ctx.card, ctx.actor, steps[0]["additional_cost"], check_only=True):
+        return False
     return True
 
 
 def _run_mode(ctx: "EffectContext", mode) -> None:
     for sub in mode if isinstance(mode, list) else [mode]:
+        if sub.get("additional_cost") and not ctx.loop._pay_one_additional_cost(
+                ctx.card, ctx.actor, sub["additional_cost"]):
+            return
         handler = REGISTRY.get(sub.get("effect"))
         if handler:
             handler(ctx, sub)
@@ -459,13 +470,12 @@ def _return_gear_ready_pump(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     """ "You may return a friendly gear to its owner's hand as an additional
     cost to play me. If you paid, ready me and give me +[might] this turn
     equal to the Energy cost of the gear you returned." (Spirit of the Forge):
-    the costliest gear in base."""
-    base = [g for g in ctx.actor.base_gear if not getattr(g, "is_token", False)]
+    the costliest friendly gear, in base or attached."""
     me = _source_unit(ctx)
-    if not base or me is None:
+    if me is None:
         return
-    gear = _return_gear(ctx, lambda pool: max((e for e in pool if e[0] is None),
-                                              key=lambda e: e[1].cost_energy or 0))
+    gear = _return_gear(ctx, lambda pool: max(pool, key=lambda e: (
+        e[1].cost_energy or 0, not getattr(e[1], "is_token", False))))
     if gear is not None:
         if ctx.loop._can_ready(me):
             me.ready = True
@@ -834,6 +844,7 @@ def _recycle_runes_channel(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
             rune.ready = True
             p.rune_deck.runes.append(rune)
     p.unlock_runes(int(spec.get("amount", 4)), exhausted=True)
+    ctx.loop._extra_channel(ctx.actor_side)
 
 
 @effect("guess_type_draw")
@@ -1920,6 +1931,7 @@ def _spend_buffs_for_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
             spent += 1
     if spent:
         ctx.actor.unlock_runes(spent, exhausted=True)
+        ctx.loop._extra_channel(ctx.actor_side)
 
 
 def _send_home(ctx: "EffectContext", units: list) -> None:
@@ -2132,16 +2144,17 @@ def _mechanical_bandit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     card with the lowest Energy cost, draw it. Recycle the rest." (Mechanical
     Bandit)"""
     mine, theirs = ctx.actor.deck.cards, ctx.opponent.deck.cards
-    if not mine:
-        return
-    my_top = mine.pop()
-    their_top = theirs.pop() if theirs else None
-    if their_top is None or (my_top.cost_energy or 0) <= (their_top.cost_energy or 0):
-        ctx.actor.hand.append(my_top)
-    else:
-        mine.insert(0, my_top)
+    my_top = mine[-1] if mine else None
+    their_top = theirs[-1] if theirs else None
+    ctx.loop._note_revealed(ctx.actor_side, [c for c in (my_top, their_top) if c is not None])
     if their_top is not None:
-        theirs.insert(0, their_top)
+        theirs.insert(0, theirs.pop())
+    if my_top is None:
+        return
+    if their_top is None or (my_top.cost_energy or 0) <= (their_top.cost_energy or 0):
+        ctx.draw_cards(1)
+    else:
+        mine.insert(0, mine.pop())
 
 
 @effect("next_unit_any_battlefield")
@@ -2513,6 +2526,12 @@ def _cant_be_chosen_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
         unit.cant_be_chosen_turn = ctx.loop.gs.turn
 
 
+@effect("opponents_cant_play_spells")
+def _opponents_cant_play_spells(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Opponents can't play spells this turn" (Cataclysm)."""
+    ctx.loop.gs.cant_play_spells_turn[ctx.opponent_side] = ctx.loop.gs.turn
+
+
 @effect("opponents_cant_play_cards")
 def _opponents_cant_play_cards(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Opponents can't play cards this turn" (Brynhir Thundersong)."""
@@ -2616,6 +2635,7 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
         # [1] to channel 1 rune exhausted" (Ripper's Bay).
         owner.energy -= 1
         owner.unlock_runes(1, exhausted=True)
+        loop._extra_channel("A" if owner is loop.gs.A else "B")
     if unit.is_token:
         return
     owner = loop.gs.get_player(loop._owner_of(unit.card, side))
@@ -3135,6 +3155,7 @@ def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for player in players:
         before = player.total_runes_in_play()
         player.unlock_runes(count, exhausted=_coerce_bool(spec.get("exhausted", False)))
+        ctx.loop._extra_channel("A" if player is ctx.loop.gs.A else "B")
         if spec.get("draw_if_short") and player.total_runes_in_play() - before < count:
             # "Channel 2 runes exhausted. If you couldn't channel 2 runes this way,
             # draw 1" (Catalyst of Aeons, Mobilize).
@@ -3442,6 +3463,8 @@ def _zone_card_matches(card, tf: Mapping[str, Any]) -> bool:
         return False                    # "a Bird, Cat, Dog, or Poro" (Starhound)
     if tf.get("not_spell") and cat == "SPELL":
         return False                    # "a unit, gear ... with Energy cost [7]" (Nasus Curator)
+    if "might_at_least" in tf and int(getattr(card, "might", 0) or 0) < int(tf["might_at_least"]):
+        return False                    # "If it's MIGHTY" (Raving Witness)
     return True
 
 
@@ -3834,10 +3857,11 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
     if src == "killed_might":
         # "If you do, give +[might] equal to its Might" (Deathgrip)
         return int(ctx.extra.get("killed_might", 0))
-    if src == "self_assault":
-        # "deal damage equal to my ASSAULT" (Lucian Gunslinger)
+    if src in ("self_assault", "self_shield"):
+        # "deal damage equal to my ASSAULT" (Lucian Gunslinger), "my SHIELD"
+        # (Armored Tusker)
         u = _source_unit(ctx)
-        return u.keyword_value("ASSAULT") if u else 0
+        return u.keyword_value(src[len("self_"):].upper()) if u else 0
     if src == "discarded_energy":
         # "Discard 1. Deal its Energy cost as damage" (Get Excited!)
         card = ctx.extra.get("discarded")
@@ -3889,6 +3913,13 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for g in gear if loop._equip_cost(g) is not None)
     if src == "friendly_exhausted_units":
         return sum(1 for u in _friendly_units(ctx) if not u.ready)
+    if src == "chosen_friendly_gear_energy":
+        # "Choose a friendly gear. Deal damage equal to its Energy cost"
+        # (Improvised Projectile): the costliest one.
+        loop = ctx.loop
+        gear = list(ctx.actor.base_gear) + loop._controlled_attached_gear(ctx.actor_side) + [
+            dg.card for bf in loop.gs.battlefields for dg in bf.gear_for(ctx.actor_side)]
+        return max((int(g.cost_energy or 0) for g in gear), default=0)
     if src in ("shown_might", "shown_power_cost", "shown_energy_cost"):
         shown = getattr(ctx.card, "_shown", None) or {}
         return int(shown.get(src[len("shown_"):], 0))
@@ -4041,7 +4072,8 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Return units to their owner's hand. Every recall_unit card reads
     'return ... to its owner's hand': the card leaves play (tokens cease to
     exist) and attached gear is recovered to the owner's base. "Return a
-    unit" (Rebuke, Gust): an enemy first."""
+    unit" (Rebuke, Gust): an enemy first. `to: deck_bottom`: recycled instead
+    ("recycle me": Elnuk Herd)."""
     gs = ctx.loop.gs
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}, bias="enemy"):
         if ctx.loop._gangplank_redirect(unit, spec):
@@ -4054,7 +4086,11 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         owner.base_gear.extend(unit.gear)
         unit.gear = []
         if not getattr(unit, "is_token", False):
-            gs.get_player(ctx.loop._owner_of(unit.card, side)).hand.append(unit.card)
+            owner_of = gs.get_player(ctx.loop._owner_of(unit.card, side))
+            if spec.get("to") == "deck_bottom":
+                owner_of.deck.cards.insert(0, unit.card)
+            else:
+                owner_of.hand.append(unit.card)
             unit.card._owner = None
         # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
         ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
@@ -4529,6 +4565,12 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         player = ctx._player_for_target(str(spec.get("target", "actor")))
     except ValueError:
         player = ctx.actor
+    if spec.get("target") == "it_controller":
+        # "Kill a gear. Its controller plays a Gold" (An Offer You Can't Refuse)
+        side = ctx.extra.get("it_controller")
+        if side is None:
+            return
+        player = ctx.loop.gs.get_player(side)
     token_spec = CARD_REGISTRY.get(token_name)
     if token_spec is not None and "DEPLOY" in token_spec.keywords:
         # Gear token with DEPLOY (§830): all `count` go to a single battlefield.

@@ -315,7 +315,23 @@ Open, found on the way:
   (exhaust a MIGHTY unit ability), Resplendent Rostrum (one [tap]: draw and
   channel), Watchful Curator (gear DEFLECT on gear choices), Lost to the Sands
   (the baseline's mode choice now values gear).
-Then: Radiance parts 2-3 (RAD-056..), Proving Grounds.
+- [ ] Radiance, part 2: RAD-056..112 read (57 cards; Overloaded Traveler has
+  no text), 55 tested, 20 fixed: Equipment keywords never reached their unit
+  (Nazuman Ntofo's SHIELD 2, Serrated Dirk, Cloth Armor, Hexdrinker, Boots of
+  Swiftness, Hunter's Machete, Protector's Shield: KNOWN_ISSUES #7's keyword
+  facet); Seraphic Wyvern only in the Channel Phase (now every channel);
+  mode costs and conditions were ignored (Reckless Innovator drew for free,
+  Demon Shade); Improvised Projectile (a friendly gear's Energy cost, was 0),
+  The Empyrean (shows off the most Power), Kai'Sa Rebel (spells have
+  REACTION in her showdown), Spirit of the Forge (attached gear too), Zero
+  Point Inflection (checked after the whole draw), Hold 'Em (a unit or gear
+  to a battlefield), Raving Witness (MIGHTY, was "a spell"), Skystrike
+  Squadron (the gear really returned), Armored Tusker (its SHIELD), Elnuk
+  Herd (recycled from face down), Cataclysm (no enemy spells), The Waters'
+  Wage (three ready Golds), An Offer You Can't Refuse (their Gold), Lulu
+  Whimsical (a unit anywhere), Ziggs Explosive (gear for +2 defending),
+  Mechanical Bandit (a real draw). Not modeled: Bushwhack Trap (E).
+Then: Radiance part 3 (RAD-113..T02), Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of
