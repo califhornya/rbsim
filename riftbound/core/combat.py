@@ -149,13 +149,13 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
 
 def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
                      first=None, damage: int = 0) -> List[UnitInPlay]:
-    """Damage-assignment order (§460.2.c): TANK units must take lethal first,
+    """Damage-assignment order (§467.2.c): TANK units must take lethal first,
     BACKLINE units last, everyone else in between. On a Tank+Backline conflict
     the controller chooses — we resolve deterministically as Tank (take first).
-    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). `first(normal,
-    damage)` picks which of the units in between takes lethal first (the
-    assigner's choice, asked only when `damage` can't kill them all; see
-    kill_order), the rest then follow kill_order; without it, list order."""
+    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). Within each
+    group the assigner orders the units while the damage left can't kill them
+    all: `first(units, damage)` picks the next one to take lethal (one choice
+    per unit; see kill_order for the baseline); without it, list order."""
     tanks: List[UnitInPlay] = []
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
@@ -169,14 +169,33 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
     if ignore_tank:
         # Free to choose the order: the most kills first.
         normal.sort(key=lambda u: u.might - u.damage)
-    if first is not None:
-        alive = [u for u in normal if not _is_dead(u)]
-        left = damage - sum(_lethal(u) for u in tanks if not _is_dead(u))
-        if len(alive) > 1 and 0 < left < sum(_lethal(u) for u in alive):
-            lead = first(alive, left)
-            rest = kill_order([u for u in alive if u is not lead], left - _lethal(lead))
-            normal = [lead] + rest + [u for u in normal if _is_dead(u)]
-    return tanks + normal + backline
+    if first is None:
+        return tanks + normal + backline
+    out: List[UnitInPlay] = []
+    for group in (tanks, normal, backline):
+        ordered, damage = _chosen_order(group, damage, first)
+        out += ordered
+    return out
+
+
+def _chosen_order(group: List[UnitInPlay], damage: int, first) -> tuple:
+    """`group` in the assigner's order and the damage left after it: one choice
+    per next unit while `damage` can't kill all the living ones, the rest in
+    kill_order (the dead last)."""
+    alive = [u for u in group if not _is_dead(u)]
+    dead = [u for u in group if _is_dead(u)]
+    order: List[UnitInPlay] = []
+    while len(alive) > 1 and 0 < damage < sum(_lethal(u) for u in alive):
+        pick = first(alive, damage)
+        order.append(pick)
+        alive = [u for u in alive if u is not pick]
+        damage -= _lethal(pick)
+    if damage > 0:
+        rest = kill_order(alive, damage) if alive else []
+        damage -= sum(_lethal(u) for u in alive)
+    else:
+        rest = alive
+    return order + rest + dead, max(0, damage)
 
 
 def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
@@ -198,8 +217,10 @@ def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
 
 
 def _lethal(unit: UnitInPlay) -> int:
-    """Damage that kills `unit` as _apply_damage assigns it (1 for a 0-might unit)."""
-    return 1 if unit.might == 0 else max(0, unit.might - unit.damage)
+    """Damage that kills `unit` as _apply_damage assigns it (1 for a 0-might
+    unit), plus what its damage shield would prevent (Ki Barrier: "Opponents
+    can assign it extra combat damage to kill it")."""
+    return (1 if unit.might == 0 else max(0, unit.might - unit.damage)) + unit.damage_shield
 
 
 def _is_dead(unit: UnitInPlay) -> bool:
@@ -232,13 +253,16 @@ def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
         if _is_dead(unit):
             continue  # already dead this combat — skip
         if unit.might == 0:
-            # 0-might unit: any damage kills. Assign 1 to register the kill.
-            unit.damage += take(unit, 1)
-            damage -= 1
-            assigned += 1
-            kills += 1
+            # 0-might unit: any damage kills. Assign 1 to register the kill
+            # (more through a damage shield).
+            n = min(1 + unit.damage_shield, damage)
+            unit.damage += take(unit, n)
+            damage -= n
+            assigned += n
+            if _is_dead(unit):
+                kills += 1
             continue
-        remaining = unit.might - unit.damage
+        remaining = unit.might - unit.damage + unit.damage_shield
         to_assign = min(remaining, damage)
         unit.damage += take(unit, to_assign)
         damage -= to_assign

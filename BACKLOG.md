@@ -103,8 +103,10 @@ Section A is done: both precon decks are checked card by card.
       their own unit.
 - [ ] HIDDEN: hiding from the Champion Zone (§737.1.b); a card played from
       facedown chooses only at its battlefield (§737.1.d).
-- [ ] Combat damage: the assigner chooses the order (only Dune Surfer's side
-      does); extra damage assigned through a Ki Barrier shield.
+- [x] Combat damage: the assigner orders every unit while the damage runs
+      short (one choice per unit, TANK group first, BACKLINE last; it chose
+      only the first); a Ki Barrier shield counts in lethal, so extra damage
+      kills through it.
 - [ ] Stacking EMPOWER (Radiance §442.1.c.1 / §827.1.c.5): binary today.
 - [ ] Multiple additional costs (kickers) on one card: the engine pays the
       first affordable one; check the Core Rules.

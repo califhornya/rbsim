@@ -161,3 +161,33 @@ def test_attackers_recalled_after_combat_keep_their_buff_and_status():
     bf.contested_this_turn = True
     loop._phase_combat_and_conquer_single(0, "A")
     assert attacker in a.base_units and attacker.might_counters == 1 and not attacker.ready
+
+
+def test_the_assigner_orders_every_unit_while_damage_runs_short():
+    """§467.2.c: the attacker assigns lethal unit by unit in the order they
+    choose (only the first was asked, the rest were the engine's)."""
+    from riftbound.core.combat import resolve_might_combat
+    a_units = [UnitInPlay(card=UnitCard(name="Hitter", might=5))]
+    b_units = [UnitInPlay(card=UnitCard(name=n, might=2)) for n in ("X", "Y", "Z")]
+    asked = []
+
+    def first(units, damage):
+        asked.append(([u.card.name for u in units], damage))
+        return next(u for u in units if u.card.name == ("Z" if len(units) == 3 else "X"))
+    resolve_might_combat(a_units, b_units, attacker_side="A", first_b=first)
+    assert asked == [(["X", "Y", "Z"], 5), (["X", "Y"], 3)]
+    assert [u.card.name for u in b_units] == ["Y"]                # Z then X died
+
+
+def test_extra_combat_damage_kills_through_a_ki_barrier():
+    """Ki Barrier: 'Prevent the next 7 damage ... (Opponents can assign it
+    extra combat damage to kill it.)'"""
+    from riftbound.core.combat import resolve_might_combat
+    loop, a, b = _setup()
+    shielded = UnitInPlay(card=UnitCard(name="Shielded", might=2))
+    shielded.damage_shield = 7
+    a_units = [UnitInPlay(card=UnitCard(name="Hitter", might=9))]
+    b_units = [shielded]
+    resolve_might_combat(a_units, b_units, attacker_side="A",
+                         take=lambda u, n: loop._take_damage(u, n, "combat"))
+    assert not b_units
