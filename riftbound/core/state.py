@@ -66,6 +66,10 @@ class GameState:
     # moving units to the same battlefield: those units moved together (Core
     # Rules §144.3) and fight together. (battlefield index, moving side).
     pending_move: Optional[tuple] = None
+    # Showdowns staged by units an effect moved into a battlefield they contest
+    # (Twilight Step): (battlefield index, moving side), run at the next
+    # cleanup with no chain or showdown going on (§462).
+    staged_showdowns: list = field(default_factory=list)
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
     showdown_attacker: Optional[str] = None   # who started the showdown (Rengar Pouncing)

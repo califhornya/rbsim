@@ -414,4 +414,45 @@ def test_a_moved_unit_is_the_one_chosen():
         return None
     loop.chooser = chooser
     loop._apply_action(a, ("SPELL", 0, 0))
-    assert mine not in a.base_units and theirs in loop.gs.battlefields[0].units_B
+    # Mine moved (and fought there at once); theirs wasn't sent to its base.
+    assert mine in loop.gs.battlefields[0].units_A
+    assert theirs not in loop.gs.B.base_units and theirs.card in loop.gs.B.trash
+
+
+def test_a_unit_moved_by_a_spell_conquers_at_once_and_can_move_back():
+    """Twilight Step on your own unit into an empty battlefield: no exhaust,
+    the showdown opens as soon as the spell is done (it waited for the end of
+    the turn, so moving back with a Standard Move never conquered), then a
+    Standard Move takes it home."""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.enums import Domain
+    from riftbound.core.legality import legal_actions
+
+    class Passer:
+        def __init__(self, player):
+            self.player = player
+
+        def decide_showdown_action(self, *a):
+            return ("PASS", None, None)
+
+        def decide_reaction(self, *a):
+            return ("PASS", None, None)
+    loop, a, _ = _setup(energy=5)
+    a.agent, loop.gs.B.agent = Passer(a), Passer(loop.gs.B)
+    a.add_power(Domain.CHAOS, 2)
+    mine = UnitInPlay(card=UnitCard(name="Reveler", might=3), ready=True)
+    a.base_units.append(mine)
+    a.hand = [CARD_REGISTRY["Twilight Step"].instantiate()]
+    bf0 = loop.gs.battlefields[0]
+
+    def chooser(_loop, kind, side, options, default, source):
+        if kind.startswith("destination"):
+            return next(i for i, o in enumerate(options) if o is bf0)
+        return None
+    loop.chooser = chooser
+    loop._apply_action(a, ("SPELL", 0, 0))
+    assert mine in bf0.units_A and mine.ready
+    assert loop.gs.points_A == 1 and bf0.scored_this_turn_A
+    back = [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if ga.kind == "MOVE"]
+    loop._apply_action(a, back[0].to_engine())
+    assert mine in a.base_units and loop.gs.points_A == 1

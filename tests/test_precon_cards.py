@@ -136,8 +136,10 @@ def test_shadow_dash_moves_an_enemy_where_you_have_two_units_and_they_get_one():
     b.base_units.append(enemy)
     _choose(loop, "Enemy")
     _cast(loop, a, "Shadow Dash", lane=0)
-    assert enemy in loop.gs.battlefields[1].units_B
-    assert [u.might for u in mine] == [3, 3] and enemy.might == 3
+    # Moved in, it fights at once (§462): 3 against 3 + 3, the units with +1.
+    assert enemy not in b.base_units and enemy.card in b.trash
+    survivors = loop.gs.battlefields[1].units_A
+    assert len(survivors) == 1 and survivors[0].might == 3
 
 
 def test_shadow_dash_gives_nothing_without_exactly_two_units_there():
@@ -147,8 +149,9 @@ def test_shadow_dash_gives_nothing_without_exactly_two_units_there():
         loop.gs.battlefields[1].add_unit("A", u)
     loop.gs.battlefields[0].add_unit("B", _unit("Enemy", 3))
     _cast(loop, a, "Shadow Dash", lane=0)
-    assert len(loop.gs.battlefields[1].units_B) == 1
-    assert [u.might for u in mine] == [2, 2, 2]
+    # Moved in, it fights at once (§462); no +1 with three units there.
+    assert not loop.gs.battlefields[0].units_B and not loop.gs.battlefields[1].units_B
+    assert [u.might for u in loop.gs.battlefields[1].units_A] == [2, 2]
 
 
 def test_shadow_dash_needs_a_battlefield_with_your_units():
@@ -340,3 +343,195 @@ def test_battlefield_passives_reach_the_units_on_it():
     loop._recompute_passives()
     assert (here.might, there.might, home.might) == (3, 2, 2)
     assert there.has_keyword("GANKING") and not here.has_keyword("GANKING")
+
+
+# -- The rest of the Zed deck ----------------------------------------------------
+
+def _abilities(loop, side="A"):
+    return [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, side) if ga.kind == "ABILITY"]
+
+
+def _use(loop, a, name) -> bool:
+    for ga in _abilities(loop):
+        if ga.label.endswith(f"({name})"):
+            loop._apply_action(a, ga.to_engine())
+            loop._recompute_passives()
+            return True
+    return False
+
+
+def _zed_legend(loop):
+    gs = loop.gs
+    gs.legend_A = CARD_REGISTRY["Zed Master of Shadows"].instantiate()
+    gs.legend_unit_A = UnitInPlay(card=gs.legend_A, ready=True)
+    return gs.legend_unit_A
+
+
+def test_zed_master_of_shadows_empowers_on_banishing_your_card_then_loots():
+    """'When you banish a card you own, empower me. ACTION Disempower me,
+    [tap]: Discard 1, then draw 1.'"""
+    loop, a, b = _setup()
+    legend = _zed_legend(loop)
+    assert not _use(loop, a, "Zed Master of Shadows")        # needs EMPOWERED
+    b.trash.append(UnitCard(name="Theirs", might=1))
+    a.trash.append(UnitCard(name="Mine", might=1))
+    loop._banish_from_trash(b, b.trash[0])                    # not mine: nothing
+    assert not legend.empowered
+    loop._banish_from_trash(a, a.trash[0])
+    assert legend.empowered
+    a.hand = [UnitCard(name="Old", might=1)]
+    a.deck.cards = [UnitCard(name="New", might=1)]
+    assert _use(loop, a, "Zed Master of Shadows")
+    assert not legend.empowered and not legend.ready
+    assert [c.name for c in a.hand] == ["New"] and "Old" in [c.name for c in a.trash]
+
+
+def test_zed_from_the_shadows_discards_for_a_shadow_clone():
+    """'You may discard 1 as an additional cost to play me. When you play me, if
+    you paid the additional cost, play a 0 [might] Shadow Clone unit token.'"""
+    for pay in (True, False):
+        loop, a, b = _setup()
+        champ = CARD_REGISTRY["Zed From the Shadows"].instantiate()
+        a.hand = [champ, UnitCard(name="Spare", might=1)]
+        _chooser(loop, {"optional:additional_cost": lambda l, o: o.index(pay)})
+        loop._apply_action(a, ("UNIT", 0, 0))
+        names = [u.card.name for u in a.base_units]
+        assert ("Shadow Clone" in names) == pay and (len(a.hand) == 0) == pay
+
+
+def test_zed_without_a_sound_conquers_for_a_clone_and_swaps_with_it():
+    """'When I conquer, play a 0 [might] Shadow Clone unit token to your base.
+    ACTION [1] [Chaos]: Move me and a Shadow Clone you control to each
+    other's locations.'"""
+    loop, a, b = _setup()
+    zed = _unit("Zed Without a Sound")
+    a.base_units.append(zed)
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()                                # conquers the open battlefield
+    clone = next(u for u in a.base_units if u.card.name == "Shadow Clone")
+    zed.ready = True
+    energy = a.energy
+    assert _use(loop, a, "Zed Without a Sound")
+    assert zed in a.base_units and clone in loop.gs.battlefields[0].units_A
+    assert a.energy == energy - 1
+
+
+def test_shadow_assassin_enters_ready_with_its_name_in_your_trash():
+    """'I enter ready if you have a card with my name in your trash.'"""
+    for in_trash in (True, False):
+        loop, a, b = _setup()
+        if in_trash:
+            a.trash.append(CARD_REGISTRY["Shadow Assassin"].instantiate())
+        a.hand = [CARD_REGISTRY["Shadow Assassin"].instantiate()]
+        loop._apply_action(a, ("UNIT", 0, 0))
+        assert a.base_units[0].ready == in_trash
+
+
+def test_kinkou_lifeblade_empowered_has_one_more_and_ganking():
+    """'EMPOWER [2]. EMPOWERED: I have +1 [might] and GANKING.'"""
+    loop, a, b = _setup()
+    blade = _unit("Kinkou Lifeblade")
+    a.base_units.append(blade)
+    energy = a.energy
+    assert _use(loop, a, "Kinkou Lifeblade")
+    assert a.energy == energy - 2 and blade.empowered
+    assert blade.might == blade.card.might + 1 and blade.has_keyword("GANKING")
+
+
+def test_shadowblade_lurker_costs_two_less_per_copy_in_your_trash():
+    """'I cost [2] less for each card with my name in your trash.'"""
+    loop, a, b = _setup()
+    card = CARD_REGISTRY["Shadowblade Lurker"].instantiate()
+    assert loop._effective_cost(card, a)[0] == 5
+    a.trash += [CARD_REGISTRY["Shadowblade Lurker"].instantiate() for _ in range(2)]
+    assert loop._effective_cost(card, a)[0] == 1
+
+
+def test_traveling_merchant_loots_when_it_moves():
+    """'When I move, discard 1, then draw 1.'"""
+    loop, a, b = _setup()
+    a.base_units.append(_unit("Traveling Merchant"))
+    a.hand = [UnitCard(name="Old", might=1)]
+    a.deck.cards = [UnitCard(name="New", might=1)]
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()
+    assert [c.name for c in a.hand] == ["New"] and [c.name for c in a.trash] == ["Old"]
+
+
+def test_perfect_execution_readies_and_gives_assault_three_and_flows():
+    """'Ready a unit and give it ASSAULT 3 this turn. FLOW [3] [Fury].'"""
+    loop, a, b = _setup()
+    tired = _unit("Tired", 2)
+    tired.ready = False
+    a.base_units.append(tired)
+    _choose(loop, "Tired")
+    _cast(loop, a, "Perfect Execution")
+    assert tired.ready and tired.keyword_value("ASSAULT") == 3
+    assert loop._flow_cost(a.trash[-1], "A") == (3, 1, Domain.FURY)
+
+
+def test_death_mark_flows_for_one_and_two_runes():
+    """'FLOW [1] [Rune] [Rune].'"""
+    loop, a, b = _setup()
+    assert loop._flow_cost(CARD_REGISTRY["Death Mark"].instantiate(), "A") == (1, 2, None)
+
+
+def test_twilight_reveler_readies_another_friendly_unit_when_it_attacks():
+    """'When I attack, ready another friendly unit.'"""
+    loop, a, b = _setup()
+    reveler = _unit("Twilight Reveler")
+    home = _unit("Home", 2)
+    home.ready = False
+    a.base_units += [reveler, home]
+    loop.gs.battlefields[0].add_unit("B", _unit("Wall", 9))
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()                                # the combat at battlefield 1
+    assert home.ready and not reveler.ready
+
+
+def _battlefield(loop, i, name):
+    loop.gs.battlefields[i].card = CARD_REGISTRY[name].instantiate()
+
+
+def test_zaun_warrens_loots_when_you_conquer_it():
+    """'When you conquer here, discard 1, then draw 1.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Zaun Warrens")
+    a.base_units.append(_unit("Mover", 2))
+    a.hand = [UnitCard(name="Old", might=1)]
+    a.deck.cards = [UnitCard(name="New", might=1)]
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()
+    assert [c.name for c in a.hand] == ["New"] and [c.name for c in a.trash] == ["Old"]
+
+
+def test_shadow_temple_burns_three_when_you_hold_it():
+    """'When you hold here, BURN 3.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Shadow Temple")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 2))
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(5)]
+    loop._score_holds("A") if hasattr(loop, "_score_holds") else loop._phase_beginning("A")
+    assert len(a.trash) == 3
+
+
+def test_threshold_of_the_gray_gives_attacker_and_defender_one_energy():
+    """'When combat starts here, the attacker and defender each ADD [1].'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Threshold of the Gray")
+    a.base_units.append(_unit("Attacker", 2))
+    loop.gs.battlefields[0].add_unit("B", _unit("Defender", 5))
+    a.energy, b.energy = 0, 0
+    seen = []
+
+    class Agent:
+        def __init__(self, p):
+            self.p = p
+
+        def decide_showdown_action(self, opponent, bf_idx):
+            seen.append((self.p.name, self.p.energy))
+            return ("PASS", None, None)
+    a.agent, b.agent = Agent(a), Agent(b)
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._flush_pending_move()
+    assert ("A", 1) in seen and ("B", 1) in seen

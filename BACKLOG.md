@@ -80,6 +80,10 @@ To check (each [ ] until a test covers every sentence):
       played.
 - [ ] §355.8 check: gear, battlefield and trash targets; spells played
       facedown, by FLOW or from banishment.
+- [x] A unit an effect moves into a battlefield contests it (§452) and its
+      showdown runs as soon as no chain or showdown is going on (§462): it
+      waited for the end of the turn, so Twilight Step + a Standard Move back
+      never conquered (GameState.staged_showdowns).
 - [x] Move effects naming no place: any location but the unit's own, base
       included (§355.4), chosen (destination `any`; 11 cards). Destinations
       from the text: to a battlefield you control (Call to Battle), to an

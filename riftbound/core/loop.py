@@ -38,7 +38,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
     "on_enemy_unit_died", "on_discarded", "on_friendly_chosen", "on_gear_ability_used",
     "on_combat_start_here", "on_equipment_attached", "on_friendly_empowered", "on_banish_own",
-    "on_become_empowered", "on_you_discard",
+    "on_become_empowered", "on_you_discard", "on_combat_end",
     "on_unit_played_here", "on_self_played", "trash_on_card_played", "on_enemy_gear_played",
     "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
@@ -56,7 +56,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "cards_burned_this_turn_at_least",
     "friendly_total_might_at_least", "you_control_n_or_more_gear",
     "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
-    "card_with_my_name_in_trash", "opponent_controls_stunned_unit",
+    "card_with_my_name_in_trash", "opponent_controls_stunned_unit", "stunned_enemy_here",
     "you_control_this_battlefield",
     "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty",
     "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
@@ -1096,6 +1096,8 @@ class GameLoop:
                     # happen is no choice.
                     if not self._check_condition(effect_spec.condition, card, actor, opponent, None):
                         continue
+                    if effect_spec.cost and not self._triggered_cost_affordable(card, actor, effect_spec):
+                        continue
                     if not self._wants_optional(actor, card, effect_spec):
                         continue
                     # "Banish a card from any trash to give a unit ASSAULT 2"
@@ -1188,7 +1190,9 @@ class GameLoop:
                     es.condition, card, actor, opponent, context_extra):
                 continue
             # Optional ("you may ...") effects: let the actor decline BEFORE paying
-            # any cost. Default (no agent / heuristic agents) is yes.
+            # any cost (asked only when it can be paid). Default: yes.
+            if es.cost and not self._triggered_cost_affordable(card, actor, es):
+                continue
             if not self._wants_optional(actor, card, es):
                 continue
             # Pay any cost / additional_cost the triggered ability carries BEFORE
@@ -1212,6 +1216,11 @@ class GameLoop:
                 if self.verbose:
                     print(f"  [EFFECT-SKIP] {card.name}: "
                           f"{es.effect} ({trigger}) failed: {exc}")
+
+    def _triggered_cost_affordable(self, card: Card, actor: Player, es: EffectSpec) -> bool:
+        """Whether an effect's `cost` (activated-style) can be paid now."""
+        parsed = self._parse_activated_cost(es.cost)
+        return self._activated_affordable(actor, self._find_unit_by_card(card), parsed)
 
     def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec,
                             additional: bool = True) -> bool:
@@ -1904,6 +1913,14 @@ class GameLoop:
         if ctype == "you_control_this_battlefield":
             bf = extra.get("battlefield")
             return bf is not None and bf.controller() == side
+        if ctype == "stunned_enemy_here":
+            # "While there's a stunned enemy unit here" (Kennen Keeper of
+            # Balance): at the battlefield the card's unit is at.
+            unit = self._find_unit_by_card(card)
+            where = self._locate_unit(unit) if unit is not None else None
+            bf = where[1] if where else None
+            them = "B" if actor is self.gs.A else "A"
+            return bf is not None and any(u.stunned for u in bf._units_for(them))
         if ctype == "opponent_controls_stunned_unit":
             other = self.gs.other(side)
             return any(u.stunned for bf in self.gs.battlefields
@@ -1947,13 +1964,15 @@ class GameLoop:
         # target_was_stunned.
         return False
 
-    def _cost_reduction(self, card: Card, actor: Player) -> int:
+    def _cost_reduction(self, card: Card, actor: Player, power: bool = False) -> int:
         """Static / conditional flat energy cost reduction (Round 4 Tier 2).
         Sums every `reduce_cost` effect (trigger `cost_modifier`) on the card whose
         optional condition currently holds. Dynamic (amount_source) reductions are
         A reduction with an `amount_source` scales: "I cost [1] less for each card
         you've played this turn" → amount_source cards_played_this_turn (times
-        `amount`, default 1). Returns a non-negative energy amount to subtract."""
+        `amount`, default 1). Returns a non-negative energy amount to subtract;
+        with `power`, the Power ("I cost [2] [order] less": `power` 1, Keeper
+        of Law)."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return 0
@@ -1965,7 +1984,9 @@ class GameLoop:
                 continue
             if not self._check_condition(es.condition, card, actor, opponent, None):
                 continue
-            if es.params.get("amount_source"):
+            if power:
+                total += int(es.params.get("power", 0) or 0)
+            elif es.params.get("amount_source"):
                 ctx = EffectContext(self, card, actor, opponent, self.gs.battlefields[0])
                 per = int(es.params.get("amount", 1) or 1)
                 total += per * _effect_amount(ctx, {"amount_source": es.params["amount_source"]})
@@ -2686,7 +2707,8 @@ class GameLoop:
             if sbf.card is not None and self._has_effect(sbf.card, "reaction_tax_in_showdown"):
                 energy += 1     # Mystic Vortex: [rune] more, paid as Energy
         if power:
-            power = max(0, power - self._aura_power_reduction(card, actor))
+            power = max(0, power - self._aura_power_reduction(card, actor)
+                        - self._cost_reduction(card, actor, power=True))
         discount = self._next_card_discount(card, side)
         if discount is not None:
             energy -= int(discount.get("energy", 0))
@@ -3488,8 +3510,10 @@ class GameLoop:
     def _move_unit_by_effect(self, unit: UnitInPlay, dst_bf: Optional[Battlefield]) -> bool:
         """Move a unit as an effect says ("Move an enemy unit to its base"): no
         exhaust (that is the Standard Move's cost), its move triggers fire. A
-        battlefield it contests fights at the end of the turn. Returns whether
-        it moved (it may already be there or off the board)."""
+        battlefield it contests gets its showdown as soon as nothing else is
+        going on (_run_staged_showdowns), so it can conquer and then still move
+        back with a Standard Move. Returns whether it moved (it may already be
+        there or off the board)."""
         where = self._locate_unit(unit)
         if where is None:
             return False
@@ -3505,12 +3529,39 @@ class GameLoop:
         if dst_bf is None:
             self.gs.get_player(side).base_units.append(unit)
         else:
+            prev_controller = dst_bf.controller()
             dst_bf.add_unit(side, unit)
+            self._effect_arrival(dst_bf, side, prev_controller)
         if self.verbose:
             to = "base" if dst_bf is None else f"BF{self.gs.battlefields.index(dst_bf)}"
             print(f"  {unit.card.name} ({side}) is moved to {to}")
         self._fire_move_triggers(unit, side, src_bf, dst_bf)
         return True
+
+    def _effect_arrival(self, bf: Battlefield, side: str, prev_controller) -> None:
+        """A unit an effect moved to `bf` contests it like any move (§452): its
+        showdown is staged; one going on there already takes it in."""
+        gained = prev_controller != side and bf.controller() == side
+        if not (gained or (bf.units_A and bf.units_B)):
+            return
+        bf.contested_this_turn = True
+        bf.prev_controller = prev_controller
+        dst = self.gs.battlefields.index(bf)
+        if self.gs.showdown_active and self.gs.showdown_bf_idx == dst:
+            return
+        if (dst, side) not in self.gs.staged_showdowns:
+            self.gs.staged_showdowns.append((dst, side))
+
+    def _run_staged_showdowns(self) -> None:
+        """The showdowns effect moves staged, once no chain or showdown is going
+        on (§462), each where the battlefield is still contested."""
+        gs = self.gs
+        while gs.staged_showdowns and not gs.showdown_active and not gs.chain \
+                and gs.pending_move is None:
+            dst, side = gs.staged_showdowns.pop(0)
+            bf = gs.battlefields[dst]
+            if bf.units_A or bf.units_B:
+                self._run_showdown(dst, attacker=side)
 
     def _flush_pending_move(self) -> None:
         """Start the showdown a held Standard Move owes (see GameState.pending_move):
@@ -3717,6 +3768,9 @@ class GameLoop:
         # soon as the play is done (§323.11); nothing joins it.
         if kind != "MOVE" and self.gs.pending_move is not None:
             self._flush_pending_move()
+        # A unit a spell or ability moved into a battlefield (Twilight Step).
+        if kind != "MOVE":
+            self._run_staged_showdowns()
 
     # ------------------------------------------------------------------
     # Generic activated abilities (Round 4 Tier 2 / D3)
@@ -4934,6 +4988,8 @@ class GameLoop:
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 
         self._finish_showdown(bf_idx, attacker)
+        # A unit an effect moved elsewhere during this showdown: its turn now.
+        self._run_staged_showdowns()
 
     def _showdown_step(self, player: Player, side: str, action, bf_idx: int) -> str:
         """`side` (with focus) takes `action` in the showdown at `bf_idx`: "acted"
@@ -5114,6 +5170,16 @@ class GameLoop:
                     self.gs.get_player(side).base_units.append(unit)
             if self.verbose:
                 print(f"  [RECALL] {attacker}'s attackers at BF{bf_idx} return to base")
+
+        # "When a combat that I was in ends" (Mournful Witness): the units that
+        # fought and are still on the board, here or recalled.
+        for side, fought in (("A", before_A), ("B", before_B)):
+            for unit in fought:
+                if self._locate_unit(unit) is not None:
+                    self._resolve_triggered_effects(unit.card, "on_combat_end", bf,
+                                                    self.gs.get_player(side),
+                                                    self.gs.get_player(self.gs.other(side)),
+                                                    context_extra={"battlefield": bf})
 
         # on_win_combat: a side won if it still has units and the other doesn't.
         if bf.units_A and not bf.units_B:
@@ -5344,6 +5410,7 @@ class GameLoop:
         advance to the next player/turn. Returns a Result on a combat victory."""
         gs = self.gs
         self._flush_pending_move()   # search agents end turns without a PASS
+        self._run_staged_showdowns()
         self._phase_showdown(gs.active, gs.other(gs.active))
 
         self._phase_combat_and_conquer(gs.active)

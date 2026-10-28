@@ -25,6 +25,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_unit_death",
     "on_play_spell",
     "on_win_combat",
+    "on_combat_end",                            # "When a combat that I was in ends"
     "passive",                                  # continuous abilities
     "activated",                                # main-phase tap-style
     "cost_modifier",                            # reduce_cost effects
@@ -108,6 +109,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_no_other_units",        # "I enter ready if you control no other units"
     "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
     "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
+    "stunned_enemy_here",                # "While there's a stunned enemy unit here" (Kennen)
     "you_control_this_battlefield",      # "... if you control this battlefield" (DEPLOY gear, battlefields)
     "cards_in_hand_at_most",             # n: "if you have one or fewer cards in your hand"
     "first_turn_of_player",              # the actor's first turn of the game
