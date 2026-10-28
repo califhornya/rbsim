@@ -338,7 +338,7 @@ _PRIORITY_ROUNDS_CAP = 200
 # The choices a spell makes as it is put on the chain (§355.3-355.5): targets,
 # modes, move destinations, players. The rest (a discard from the hand, a card
 # looked at in the deck, a "you may") are made as it resolves.
-_DECLARED_CHOICES = ("target", "mode", "destination", "player")
+_DECLARED_CHOICES = ("target", "mode", "destination", "player", "battlefield", "tag")
 
 
 class _Ignored(Exception):

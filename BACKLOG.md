@@ -50,9 +50,19 @@ Section A is done: both precon decks are checked card by card.
       battlefield": The Ruination and Angler Beast now reach every unit,
       Flurry of Blades every battlefield (KNOWN_ISSUES 0b; the other
       `battlefield` targets are token locations or battlefield passives).
-- [ ] Handlers that pick a unit without `loop.choose` (Lacerate's kind): the
-      choice is the engine's, never the player's, and isn't declared. Audit
-      every handler.
+- [x] Handlers that picked a unit without `loop.choose` (Lacerate's kind):
+      audited every handler; 30 now ask the player (the old pick is the
+      baseline): Convergent Mutation, Stalking Wolf, Shady Spectacles, Leblanc
+      Deceiver, Chronobreak, Bedeviling Stranger, Ivern Friend to All, Bone
+      Skewer, Shard of Undoing (its owner), Dusk Rose Lab, Stare Down, Tricksy
+      Tentacles, Temptation, Divine Judgment (each player), Twisted Fate,
+      Teemo Strategist, Fox-Fire, Here to Help, Glowstone, Profiteer, Jax
+      Grandmaster at Arms, K'Sante, Alpha Strike, Shakedown (its controller),
+      Maduli, Keeper's Verdict (its owner, top or bottom), Bottled
+      Constellation, Acceleration Gate, Switcheroo, deployed-gear moves,
+      Forgotten Relic. New choice kinds `battlefield` and `tag`.
+      tests/test_player_choices.py. Still the baseline's: how Alpha Strike
+      splits its damage, Tricksy Tentacles' destination (their base).
 - [ ] Generic recall must keep damage / exhausted / buffs (KNOWN_ISSUES #8):
       verify every recall path.
 - [x] Mournful Witness-style "when a combat I was in ends" was encoded as

@@ -345,12 +345,17 @@ def _match_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Choose a friendly unit. This turn, increase its Might to the Might of
     another friendly unit" (Convergent Mutation): the weakest friendly unit at a
     battlefield rises to the mightiest friendly unit."""
-    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    mine = _choosable(ctx, _units_at(ctx, ctx.actor_side, "anywhere"))
     if len(mine) < 2:
         return
     top = max(mine, key=lambda u: u.might)
     at_bf = [u for u in mine if u is not top and ctx.loop._locate_unit(u)[1] is not None]
     low = min(at_bf or [u for u in mine if u is not top], key=lambda u: u.might)
+    # The player's two choices: the unit, then the other one it matches.
+    low = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine, low, ctx.card)
+    others = [u for u in mine if u is not low]
+    top = ctx.loop.choose(_kind("target", spec) + ":other", ctx.actor_side, others,
+                          max(others, key=lambda u: u.might), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [low])
     low.temporary_might += max(0, top.might - low.might)
 
@@ -464,6 +469,7 @@ def _kill_pet_cost(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not pets:
         return
     victim = min(pets, key=lambda u: (loop._locate_unit(u)[1] is not here, u.might))
+    victim = loop.choose("cost_unit:kill_pet_cost", side, pets, victim, ctx.card)
     where = loop._locate_unit(victim)
     if where[1] is None:
         ctx.actor.base_units.remove(victim)
@@ -500,16 +506,16 @@ def _copy_card(card):
 def _copy_friendly_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "As this is attached to a unit, choose another friendly unit. The
     equipped unit becomes a copy of that unit for as long as this is
-    attached to it." (Shady Spectacles): the mightiest other friendly unit."""
+    attached to it." (Shady Spectacles): the player's choice (baseline: the
+    mightiest other friendly unit)."""
     unit = ctx.extra.get("triggering_unit")
     if unit is None or unit.copied_from is not None or ctx.card not in unit.gear:
         return
     others = [u for u in _units_at(ctx, ctx.actor_side, "anywhere") if u is not unit]
     if not others:
         return
-    model = max(others, key=lambda u: int(u.card.might or 0))
-    if int(model.card.might or 0) <= int(unit.card.might or 0):
-        return
+    model = ctx.loop.choose(_kind("target", spec), ctx.actor_side, others,
+                            max(others, key=lambda u: int(u.card.might or 0)), ctx.card)
     unit.copied_from = unit.card
     unit.card = _copy_card(model.card)
 
@@ -518,14 +524,17 @@ def _copy_friendly_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _reflection_copy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "You may discard 1 and exhaust me to play a ready Reflection unit token
     there. It becomes a copy of another unit there. Give it TEMPORARY."
-    (Leblanc Deceiver): a copy of the mightiest unit there."""
+    (Leblanc Deceiver): the player picks the discard and the unit (baseline:
+    the least useful card, the mightiest unit there)."""
     loop = ctx.loop
     bf = ctx.battlefield
     there = list(bf.units_A) + list(bf.units_B)
     if not there or not ctx.actor.hand:
         return
-    loop._discard(ctx.actor, min(ctx.actor.hand, key=_zone_value))
-    model = max(there, key=lambda u: u.might)
+    loop._discard(ctx.actor, loop.choose("discard", ctx.actor_side, list(ctx.actor.hand),
+                                         min(ctx.actor.hand, key=_zone_value), ctx.card))
+    model = loop.choose(_kind("target", spec), ctx.actor_side, there,
+                        max(there, key=lambda u: u.might), ctx.card)
     token = loop._play_token("Reflection", ctx.actor_side, bf=bf, ready=True)
     if token is None:
         return
@@ -547,7 +556,9 @@ def _chronobreak(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     def worth(u):
         spec_ = CARD_REGISTRY.get(u.card.name)
         return u.damage > 0 or bool(spec_ and any(es.trigger == "on_play" for es in spec_.effects))
-    picks = [u for u in _units_at(ctx, side, "anywhere") if not u.is_token and worth(u)]
+    # "Any amount": one choice per unit you control (baseline: the worthwhile ones).
+    picks = [u for u in _units_at(ctx, side, "anywhere")
+             if loop.choose(_kind("optional", spec), side, [True, False], worth(u), u.card)]
     for unit in picks:
         if not loop._pay_generic_power(ap, 1):
             break
@@ -584,7 +595,10 @@ def _bounce_enemy_at_crowded_battlefield(ctx: "EffectContext", spec: Mapping[str
     if not crowded:
         return
     bf = max(crowded, key=lambda b: max(u.might for u in b._units_for(ctx.opponent_side)))
-    unit = max(_choosable(ctx, list(bf._units_for(ctx.opponent_side))), key=lambda u: u.might)
+    bf = ctx.loop.choose(_kind("battlefield", spec), ctx.actor_side, crowded, bf, ctx.card)
+    enemies = _choosable(ctx, list(bf._units_for(ctx.opponent_side)))
+    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
+                           max(enemies, key=lambda u: u.might), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
     _unit_leaves_to(ctx, unit, ctx.opponent_side, "hand")
 
@@ -666,8 +680,9 @@ def _choose_pet_tag(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if me is None:
         return
     have = {t for u in _units_at(ctx, ctx.actor_side, "anywhere") for t in u.tags}
-    pick = next((t for t in ("Bird", "Cat", "Dog", "Poro") if t not in have), "Bird")
-    me.extra_tags.append(pick)
+    tags = ["Bird", "Cat", "Dog", "Poro"]
+    pick = next((t for t in tags if t not in have), "Bird")
+    me.extra_tags.append(ctx.loop.choose(_kind("tag", spec), ctx.actor_side, tags, pick, ctx.card))
 
 
 @effect("hostage_from_hand")
@@ -708,9 +723,11 @@ def _pull_unit_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not units:
         return
     bf = max(loop.gs.battlefields, key=lambda b: sum(u.might for u in b._units_for(ctx.actor_side)))
+    bf = loop.choose(_kind("battlefield", spec), ctx.actor_side, list(loop.gs.battlefields), bf, ctx.card)
     mine = sum(u.might for u in bf._units_for(ctx.actor_side))
     beaten = [c for c in units if int(c.might or 0) <= mine]
-    card = max(beaten or units, key=lambda c: int(c.might or 0))
+    card = loop.choose(_kind("card", spec), ctx.actor_side, units,
+                       max(beaten or units, key=lambda c: int(c.might or 0)), ctx.card)
     ctx.opponent.hand.remove(card)
     prev = bf.controller()
     unit = loop._play_unit(card, ctx.opponent_side, bf=bf, from_zone="hand")
@@ -866,7 +883,8 @@ def _opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
     units = _units_at(ctx, ctx.opponent_side, "anywhere")
     if not units:
         return
-    victim = min(units, key=lambda u: (not u.is_token, u.might))
+    victim = loop.choose(_kind("target", spec), ctx.opponent_side, units,
+                         min(units, key=lambda u: (not u.is_token, u.might)), ctx.card)
     where = loop._locate_unit(victim)
     if where[1] is None:
         ctx.opponent.base_units.remove(victim)
@@ -880,10 +898,12 @@ def _opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
 def _sacrifice_token_here_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "You may kill a unit you control here to draw 1" (Dusk Rose Lab):
     baseline, only a token."""
-    tokens = [u for u in ctx.battlefield._units_for(ctx.actor_side) if u.is_token]
+    here = list(ctx.battlefield._units_for(ctx.actor_side))
+    tokens = [u for u in here if u.is_token]
     if not tokens:
         return
-    victim = min(tokens, key=lambda u: u.might)
+    victim = ctx.loop.choose("cost_unit:" + str(spec.get("effect")), ctx.actor_side, here,
+                             min(tokens, key=lambda u: u.might), ctx.card)
     ctx.battlefield.remove_unit(ctx.actor_side, victim)
     ctx.loop._route_deaths([(victim, ctx.actor_side)], ctx.battlefield)
     ctx.draw_cards(1, target="actor")
@@ -928,9 +948,12 @@ def _stare_down(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     mine = _units_at(ctx, ctx.actor_side, "anywhere")
     if not mine:
         return
-    ref = max(mine, key=lambda u: u.might)
+    ref = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine,
+                          max(mine, key=lambda u: u.might), ctx.card)
     best = max(ctx.loop.gs.battlefields,
                key=lambda bf: sum(u.might for u in bf._units_for(ctx.opponent_side) if u.might < ref.might))
+    best = ctx.loop.choose(_kind("battlefield", spec), ctx.actor_side, list(ctx.loop.gs.battlefields),
+                           best, ctx.card)
     _send_home(ctx, [u for u in list(best._units_for(ctx.opponent_side)) if u.might < ref.might])
     ctx.loop.gs.add_xp(ctx.actor_side, int(spec.get("xp", 1)))
 
@@ -944,7 +967,9 @@ def _move_enemies_total_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
     picked, total = [], 0
     for u in sorted(_choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield")),
                     key=lambda u: u.might, reverse=True):
-        if total + u.might <= cap:
+        # "Any number": one choice per unit that still fits.
+        if total + u.might <= cap and ctx.loop.choose(_kind("optional", spec), ctx.actor_side,
+                                                      [True, False], True, u.card):
             picked.append(u)
             total += u.might
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
@@ -958,18 +983,21 @@ def _move_enemy_to_its_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
     if they have a unit there, else to another battlefield where they do."""
     loop = ctx.loop
     them = ctx.opponent_side
-    for u in sorted(_choosable(ctx, _units_at(ctx, them, "battlefield")), key=lambda u: -u.might):
+
+    def places(u):
         cur = loop._locate_unit(u)[1]
-        if ctx.opponent.base_units:
-            dst = None
-        else:
-            others = [bf for bf in loop.gs.battlefields if bf is not cur and bf._units_for(them)]
-            if not others:
-                continue
-            dst = others[0]
-        loop._note_chosen(ctx.card, ctx.actor_side, [u])
-        if loop._move_unit_by_effect(u, dst):
-            return
+        out = [None] if cur is not None and [x for x in ctx.opponent.base_units if x is not u] else []
+        return out + [bf for bf in loop.gs.battlefields
+                      if bf is not cur and [x for x in bf._units_for(them) if x is not u]]
+    cands = [u for u in sorted(_choosable(ctx, _units_at(ctx, them, "anywhere")), key=lambda u: -u.might)
+             if places(u)]
+    if not cands:
+        return
+    u = loop.choose(_kind("target", spec), ctx.actor_side, cands, cands[0], ctx.card)
+    options = places(u)
+    dst = loop.choose(_kind("destination", spec), ctx.actor_side, options, options[0], ctx.card)
+    loop._note_chosen(ctx.card, ctx.actor_side, [u])
+    loop._move_unit_by_effect(u, dst)
 
 
 @effect("card_sharp")
@@ -1001,7 +1029,8 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for side in ("A", "B"):
         p = loop.gs.get_player(side)
         units = sorted(_units_at(ctx, side, "anywhere"), key=lambda u: u.might, reverse=True)
-        for u in units[keep:]:
+        kept = loop.choose_many("keep:units", side, units, units[:keep], ctx.card)
+        for u in [u for u in units if not any(u is k for k in kept)]:
             where = loop._locate_unit(u)
             if where[1] is None:
                 p.base_units.remove(u)
@@ -1013,7 +1042,8 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             if not u.is_token:
                 p.deck.cards.insert(0, u.card)
         gear = sorted(p.base_gear, key=_zone_value, reverse=True)
-        for g in gear[keep:]:
+        kept = loop.choose_many("keep:gear", side, gear, gear[:keep], ctx.card)
+        for g in [g for g in gear if not any(g is k for k in kept)]:
             p.base_gear.remove(g)
             if not getattr(g, "is_token", False):
                 p.deck.cards.insert(0, g)
@@ -1023,7 +1053,8 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             r.ready = True
             p.rune_deck.runes.append(r)
         hand = sorted(p.hand, key=_zone_value, reverse=True)
-        for c in hand[keep:]:
+        kept = loop.choose_many("keep:hand", side, hand, hand[:keep], ctx.card)
+        for c in [c for c in hand if not any(c is k for k in kept)]:
             p.hand.remove(c)
             p.deck.cards.insert(0, c)
 
@@ -1041,7 +1072,8 @@ def _twisted_fate_reveal(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     runes.append(rune)
     enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
     if rune.domain is Domain.FURY and enemies:
-        first = max(enemies, key=lambda u: (2 >= u.might - u.damage, u.might))
+        first = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
+                                max(enemies, key=lambda u: (2 >= u.might - u.damage, u.might)), ctx.card)
         ctx.damage_units([first], 2)
         ctx.damage_units([u for u in ctx.battlefield._units_for(ctx.opponent_side) if u is not first], 1)
     elif rune.domain is Domain.MIND:
@@ -1056,14 +1088,18 @@ def _teemo_reveal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     Deal 1 to that unit for each card with HIDDEN revealed this way, then
     recycle the revealed cards." (Teemo Strategist)"""
     enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
+    if not enemies:
+        return
+    # Chosen first, then the reveal (baseline: the mightiest).
+    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
+                           max(enemies, key=lambda u: u.might), ctx.card)
+    ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
     deck = ctx.actor.deck.cards
     revealed = [deck.pop() for _ in range(min(5, len(deck)))]
     n = sum(1 for c in revealed if c.has_keyword("HIDDEN"))
     for c in revealed:
         deck.insert(0, c)
-    if enemies and n:
-        unit = max(enemies, key=lambda u: (n >= u.might - u.damage, u.might))
-        ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    if n:
         ctx.damage_units([unit], n)
 
 
@@ -1083,13 +1119,24 @@ def _kill_total_might_at_battlefield(ctx: "EffectContext", spec: Mapping[str, An
                 total += u.might
         return picked
     best = max(loop.gs.battlefields, key=lambda bf: sum(u.might for u in plan(bf)))
-    victims = plan(best)
+    best = loop.choose(_kind("battlefield", spec), ctx.actor_side, list(loop.gs.battlefields), best, ctx.card)
+    baseline = plan(best)
+    victims, total = [], 0
+    # "Any number of units" (either player's): one choice per unit that still fits.
+    for u in _choosable(ctx, list(best.units_A) + list(best.units_B)):
+        if total + u.might <= cap and loop.choose(_kind("optional", spec), ctx.actor_side, [True, False],
+                                                  any(u is b for b in baseline), u.card):
+            victims.append(u)
+            total += u.might
     if not victims:
         return
     loop._note_chosen(ctx.card, ctx.actor_side, victims)
+    dead = []
     for u in victims:
-        best.remove_unit(ctx.opponent_side, u)
-    loop._route_deaths([(u, ctx.opponent_side) for u in victims], best)
+        side = loop._locate_unit(u)[0]
+        best.remove_unit(side, u)
+        dead.append((u, side))
+    loop._route_deaths(dead, best)
 
 
 @effect("mechanical_bandit")
@@ -1139,11 +1186,25 @@ def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str
             best = (card, dests, energy, power)
     if best is None:
         return
+    playable = []
+    for card in ap.hand:
+        if not isinstance(card, UnitCard):
+            continue
+        dests = [d for d in loop._unit_play_destinations(card, side)
+                 if d is not None and loop.gs.battlefields[d].controller() == side]
+        energy, power = loop._effective_cost(card, ap)
+        energy = max(0, energy - reduce)
+        if dests and loop._can_pay_card(ap, card, energy, power):
+            playable.append((card, dests, energy, power))
+    best = next(x for x in playable if x[0] is best[0])
+    best = loop.choose(_kind("card", spec), side, playable, best, ctx.card)
     card, dests, energy, power = best
     loop._pay_card(ap, card, energy, power)
     ap.hand.remove(card)
-    bf = max((loop.gs.battlefields[d] for d in dests),
-             key=lambda b: sum(u.might for u in b._units_for(ctx.opponent_side)))
+    options = [loop.gs.battlefields[d] for d in dests]
+    bf = loop.choose(_kind("battlefield", spec), side, options,
+                     max(options, key=lambda b: sum(u.might for u in b._units_for(ctx.opponent_side))),
+                     ctx.card)
     unit = loop._play_unit(card, side, bf=bf)
     loop._unit_played_here(bf, side, unit)
 
@@ -1185,6 +1246,7 @@ def _give_this_to_opponent(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
     it goes to the opponent's base."""
     loop = ctx.loop
     me = ctx.actor
+    who = loop.choose("player", ctx.actor_side, [ctx.opponent, me], ctx.opponent, ctx.card)
     if ctx.card in me.base_gear:
         me.base_gear.remove(ctx.card)
     else:
@@ -1192,7 +1254,7 @@ def _give_this_to_opponent(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
         if holder is None:
             return
         holder.gear.remove(ctx.card)
-    ctx.opponent.base_gear.append(ctx.card)
+    who.base_gear.append(ctx.card)          # recalled to that player's base
 
 
 @effect("ready_gear")
@@ -1255,6 +1317,11 @@ def _move_empowerment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     src = next((c for c in holders if loop._is_empowered(c) and not _uses_empowered(c)), None)
     dst = next((c for c in holders if not loop._is_empowered(c) and _uses_empowered(c)), None)
     if src is not None and dst is not None:
+        # The player's choices (baseline: from one that doesn't use it to one that does).
+        froms = [c for c in holders if loop._is_empowered(c)]
+        src = loop.choose(_kind("target", spec) + ":from", side, froms, src, ctx.card)
+        tos = [c for c in holders if not loop._is_empowered(c) and c is not src]
+        dst = loop.choose(_kind("target", spec), side, tos, dst, ctx.card)
         loop._disempower(src)
         loop._empower(dst, side)
 
@@ -1291,17 +1358,20 @@ def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     if str(spec.get("from", "detached")) == "attached":
         holders = [u for u in mine if u.gear and loop._locate_unit(u)[1] is None]
-        gear = next((g for u in holders for g in u.gear if loop._equip_cost(g) is not None), None)
-        if gear is None or not at_bf:
+        gears = [g for u in holders for g in u.gear if loop._equip_cost(g) is not None]
+        if not gears or not at_bf:
             return
+        gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
         next(u for u in holders if gear in u.gear).gear.remove(gear)
-        target = max(at_bf, key=lambda u: u.might)
+        target = loop.choose("equip", ctx.actor_side, at_bf, max(at_bf, key=lambda u: u.might), ctx.card)
     else:
-        gear = next((g for g in ctx.actor.base_gear if loop._equip_cost(g) is not None), None)
-        if gear is None:
+        gears = [g for g in ctx.actor.base_gear if loop._equip_cost(g) is not None]
+        if not gears:
             return
+        gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
         ctx.actor.base_gear.remove(gear)
-        target = max(at_bf or mine, key=lambda u: u.might)
+        target = loop.choose("equip", ctx.actor_side, mine,
+                             max(at_bf or mine, key=lambda u: u.might), ctx.card)
     target.gear.append(gear)
     loop._fire_attached(target, ctx.actor_side)
 
@@ -1370,10 +1440,12 @@ def _double_damage_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
 def _double_shield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Double the SHIELD of a unit you control here this turn" (K'Sante
     Dauntless): the unit here with the most SHIELD."""
-    units = [u for u in ctx.battlefield._units_for(ctx.actor_side) if u.keyword_value("SHIELD")]
+    units = list(ctx.battlefield._units_for(ctx.actor_side))
     if units:
-        unit = max(units, key=lambda u: u.keyword_value("SHIELD"))
-        unit.turn_keywords.append(f"SHIELD {unit.keyword_value('SHIELD')}")
+        unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, units,
+                               max(units, key=lambda u: u.keyword_value("SHIELD")), ctx.card)
+        if unit.keyword_value("SHIELD"):
+            unit.turn_keywords.append(f"SHIELD {unit.keyword_value('SHIELD')}")
 
 
 @effect("unit_split_damage")
@@ -1386,7 +1458,8 @@ def _unit_split_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
     if not mine or not enemies:
         return
-    source = max(mine, key=lambda u: u.might)
+    source = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine,
+                             max(mine, key=lambda u: u.might), ctx.card)
     pool = source.might
     plan = []
     for e in sorted(enemies, key=lambda u: u.might - u.damage):
@@ -1416,9 +1489,12 @@ def _damage_unless_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "anywhere"))
     if not enemies:
         return
-    unit = max(enemies, key=lambda u: (amount >= u.might - u.damage, u.might))
+    unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
+                           max(enemies, key=lambda u: (amount >= u.might - u.damage, u.might)), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
-    if amount >= unit.might - unit.damage:
+    # Its controller chooses: let you draw, or take the damage.
+    if ctx.loop.choose(_kind("optional", spec), ctx.opponent_side, [True, False],
+                       amount >= unit.might - unit.damage, ctx.card):
         ctx.draw_cards(int(spec.get("draw", 2)), target="actor")
     else:
         ctx.damage_units([unit], amount)
@@ -1469,7 +1545,9 @@ def _move_self_to_weaker_enemy_battlefield(ctx: "EffectContext", spec: Mapping[s
             and me.might > sum(u.might for u in bf._units_for(ctx.opponent_side))
             and ctx.loop._locate_unit(me)[1] is not bf]
     if opts:
-        ctx.loop._move_unit_by_effect(me, max(opts, key=lambda bf: len(bf._units_for(ctx.opponent_side))))
+        dst = ctx.loop.choose(_kind("destination", spec), ctx.actor_side, opts,
+                              max(opts, key=lambda bf: len(bf._units_for(ctx.opponent_side))), ctx.card)
+        ctx.loop._move_unit_by_effect(me, dst)
 
 
 @effect("ready_or_exhaust_legend")
@@ -1506,8 +1584,8 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 
 def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
-    """Take a unit off the board to its owner's hand or the top of their Main
-    Deck (`to`: "hand" / "deck_top"); its gear goes to its owner's hand when
+    """Take a unit off the board to its owner's hand or the top or bottom of
+    their Main Deck (`to`: "hand" / "deck_top" / "deck_bottom"); its gear goes to its owner's hand when
     the unit goes to hand, else to base. A token ceases to exist."""
     loop = ctx.loop
     where = loop._locate_unit(unit)
@@ -1534,6 +1612,8 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
         return
     if to == "hand":
         owner.hand.append(unit.card)
+    elif to == "deck_bottom":
+        owner.deck.cards.insert(0, unit.card)
     else:
         owner.deck.cards.append(unit.card)
 
@@ -1588,9 +1668,12 @@ def _tuck_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     puts it on top."""
     enemies = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
     if enemies:
-        unit = max(enemies, key=lambda u: u.might)
+        unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
+                               max(enemies, key=lambda u: u.might), ctx.card)
         ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
-        _unit_leaves_to(ctx, unit, ctx.opponent_side, "deck_top")
+        where = ctx.loop.choose(_kind("mode", spec), ctx.opponent_side, ["deck_top", "deck_bottom"],
+                                "deck_top", ctx.card)
+        _unit_leaves_to(ctx, unit, ctx.opponent_side, where)
 
 
 @effect("each_player_bounces")
@@ -1631,13 +1714,23 @@ def _sacrifice_for_points(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     loop = ctx.loop
     me, side = ctx.actor, ctx.actor_side
     count = int(spec.get("count", 3))
-    units = [u for u in _units_at(ctx, side, "anywhere") if u.is_token]
-    gear = [g for g in me.base_gear if getattr(g, "is_token", False) and g is not ctx.card]
-    if len(units) + len(gear) < count:
+    all_units = [u for u in _units_at(ctx, side, "anywhere") if u.card is not ctx.card]
+    all_gear = [g for g in me.base_gear if g is not ctx.card]
+    if len(all_units) + len(all_gear) < count:
         return
-    for g in gear[:count]:
+    units = [u for u in all_units if u.is_token]
+    gear = [g for g in all_gear if getattr(g, "is_token", False)]
+    if not loop.choose(_kind("optional", spec), side, [True, False],
+                       len(units) + len(gear) >= count, ctx.card):
+        return
+    # Which ones (baseline: tokens first, then the weakest units).
+    from .combat import UnitInPlay
+    order = gear + units + sorted([u for u in all_units if not u.is_token], key=lambda u: u.might) + \
+        [g for g in all_gear if not getattr(g, "is_token", False)]
+    picked = loop.choose_many("cost_unit:" + str(spec.get("effect")), side, order, order[:count], ctx.card)
+    for g in [x for x in picked if not isinstance(x, UnitInPlay)]:
         loop._remove_gear(g, me)
-    for u in units[:max(0, count - len(gear))]:
+    for u in [x for x in picked if isinstance(x, UnitInPlay)]:
         where = loop._locate_unit(u)
         if where[1] is None:
             me.base_units.remove(u)
@@ -1939,7 +2032,9 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "Ready up to 4 units": the controller's exhausted units, mightiest first.
         exhausted = sorted((u for u in _friendly_units(ctx) if not u.ready and ctx.loop._can_ready(u)),
                            key=lambda u: u.might, reverse=True)
-        for unit in exhausted[:int(spec["amount"])]:
+        picks = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, exhausted,
+                                     exhausted[:int(spec["amount"])], ctx.card)
+        for unit in picks:
             unit.ready = True
             ctx.loop._fire_readied(unit, ctx.actor_side)
         return
@@ -2886,6 +2981,16 @@ def _swap_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             best_gain, best = gain, (u_f, u_e)
     if best is not None:
         u_f, u_e = best
+        loop = ctx.loop
+        bfs = [bf for bf in gs.battlefields if len(bf.units_A) + len(bf.units_B) >= 2]
+        here = loop.choose(_kind("battlefield", spec), side, bfs, loop._locate_unit(u_f)[1], ctx.card)
+        there = list(here.units_A) + list(here.units_B)
+        if not any(u is u_f for u in there):
+            u_f, u_e = there[0], there[1]
+        u_f = loop.choose(_kind("target", spec), side, there, u_f, ctx.card)
+        others = [u for u in there if u is not u_f]
+        u_e = loop.choose(_kind("target", spec) + ":other", side, others,
+                          u_e if any(u is u_e for u in others) else others[0], ctx.card)
         m_f, m_e = u_f.might, u_e.might
         u_f.temporary_might += (m_e - m_f)
         u_e.temporary_might += (m_f - m_e)
@@ -3124,11 +3229,15 @@ def _move_deployed_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not sources:
         return
     src = min(sources, key=lambda b: b.count(side))
+    src = ctx.loop.choose(_kind("battlefield", spec) + ":from", side, sources, src, ctx.card)
     dests = [b for b in bfs if b is not src]
     if not dests:
         return
-    dst = max(dests, key=lambda b: b.count(side))
-    dg = src.gear_for(side).pop(0)
+    dst = ctx.loop.choose(_kind("battlefield", spec), side, dests,
+                          max(dests, key=lambda b: b.count(side)), ctx.card)
+    gear = src.gear_for(side)
+    dg = ctx.loop.choose(_kind("card", spec), side, list(gear), gear[0], ctx.card)
+    gear.remove(dg)
     dst.gear_for(side).append(dg)
     ctx.loop._recompute_passives()
 
@@ -3151,8 +3260,10 @@ def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         mine = _units_at(ctx, ctx.actor_side, "anywhere")
         at_bf = [u for u in mine if ctx.loop._locate_unit(u)[1] is not None]
         for card in burned:
-            if isinstance(card, UnitCard) and (at_bf or mine):
-                max(at_bf or mine, key=lambda u: u.might).temporary_might += int(card.might or 0)
+            if isinstance(card, UnitCard) and mine:
+                unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, mine,
+                                       max(at_bf or mine, key=lambda u: u.might), ctx.card)
+                unit.temporary_might += int(card.might or 0)
 
 
 @effect("empower_self")

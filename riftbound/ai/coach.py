@@ -88,6 +88,7 @@ _QUESTIONS = {
     "first_unit_here": "Quale unità rimandare in base?",
     "player": "Quale giocatore scegliere?",
     "token_location": "Dove giocare il token?",
+    "battlefield": "Quale campo di battaglia scegliere?", "tag": "Quale tag scegliere?",
 }
 # The same choices in a few words, after a suggested move ("→ bersaglio: Zed").
 _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damage_order":
@@ -95,7 +96,8 @@ _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damag
           "destination": "verso", "deploy": "schiera su", "domain": "Power",
           "keep": "tiene", "card": "carta", "show_off": "mostra", "disarm": "indebolisce",
           "spend_buff": "spende il buff di", "cost_banish": "bandisce",
-          "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in"}
+          "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in",
+          "battlefield": "campo", "tag": "tag"}
 _OPTIONAL = {"accelerate": "Pagare ACCELERATE? (l'unità entra pronta)",
              "additional_cost": "Pagare il costo aggiuntivo?", "SHOW OFF": "Usare SHOW OFF?"}
 
