@@ -98,6 +98,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes",
     "you_have_n_or_more_units_here",
     "spell_cost_at_least",
+    "spell_printed_cost_at_least",
     "this_is_alone",
     "this_is_mighty",
     "triggering_unit_is_mighty",

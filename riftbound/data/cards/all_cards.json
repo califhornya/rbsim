@@ -10420,12 +10420,12 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "passive",
+        "trigger": "on_play_spell",
         "target": "self",
         "amount": 3,
         "duration": "this_turn",
         "condition": {
-          "type": "spell_cost_at_least",
+          "type": "spell_printed_cost_at_least",
           "params": {
             "n": 5
           }
@@ -10493,6 +10493,11 @@
         "amount": 3,
         "duration": "this_turn",
         "where": "anywhere"
+      },
+      {
+        "effect": "fight",
+        "trigger": "on_cast",
+        "first": "it"
       }
     ]
   },
@@ -10897,11 +10902,10 @@
     ],
     "effects": [
       {
-        "effect": "replace_death_with_recall",
+        "effect": "ward_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "friendly_unit",
-        "duration": "this_turn"
+        "free": true
       }
     ]
   },
@@ -10932,11 +10936,11 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "trigger": "passive",
+        "trigger": "on_play_spell",
         "condition": {
-          "type": "spell_cost_at_least",
+          "type": "spell_printed_cost_at_least",
           "params": {
-            "amount": 5
+            "n": 5
           }
         },
         "target": "self",
@@ -11051,7 +11055,7 @@
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "all_friendly_units_here",
+        "target": "all_friendly_units_anywhere",
         "scope": "all",
         "amount": 2,
         "duration": "this_turn"
@@ -14856,7 +14860,8 @@
     "effects": [
       {
         "effect": "fight",
-        "trigger": "on_cast"
+        "trigger": "on_cast",
+        "where": "battlefield"
       }
     ]
   },

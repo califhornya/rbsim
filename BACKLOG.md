@@ -277,7 +277,7 @@ Open, found on the way:
   Monster Harpoon, Back Off, Spectral Centaur (+2 per death), Sprite Burst
   (ready), Crescent Strike, Yuumi, Heroic Charge, Towering Pairofant, Shadow
   Watcher, Vi Hotheaded's [fury], Leblanc Fragmented, Concentrate, Repulse.
-- [ ] Vendetta, part 1: 38 cards fixed, each tested (tests/test_corpus_vendetta.py):
+- [x] Vendetta, part 1: 38 cards fixed, each tested (tests/test_corpus_vendetta.py):
   the EMPOWER family (Baccai Sandspinner, Frostcoat Mother, Grumpy Rockbear
   costs; Rage Amplifier, Aurok General, Dame the Despoiler, Ambessa The Wolf,
   Gangplank Naval, Tail-Cloaked Matriarch, Mel Soul's Reflection, Akali Rogue
@@ -288,11 +288,11 @@ Open, found on the way:
   Roar, Jagged Cutlass, Noxian Demolitionist, Rampage, Wild Claw, Corrupted
   Dragon, Spiderling, Illaoi, Ocean Drake, Dominus, Nasus Curator, Public
   Execution, Consuming Curse.
-- [ ] Vendetta, part 2: VEN-002..077 read (59 cards), 36 tested, 5 fixed:
+- [x] Vendetta, part 2: VEN-002..077 read (59 cards), 36 tested, 5 fixed:
   Forsaken Baccai / Oasis Raider count runes before the channel, Mesmerize
   (a friendly unit in base too), Clairvoyance (PREDICT 5), Iterative Design
   ("[Flow] [2] [Mind]" cost parsed); Brutal Hunter's Might 4 (from the user).
-- [ ] Vendetta, part 3: VEN-078..156 read (58 cards past part 1), 56 tested
+- [x] Vendetta, part 3: VEN-078..156 read (58 cards past part 1), 56 tested
   (Shady Spectacles already was), 4 fixed: ASSAULT / SHIELD were only added for
   the damage, now from the Attacker / Defender designation to the end of the
   combat (§807.1.d: Ambessa Respected and Feared's "less Might than me"),
@@ -300,7 +300,7 @@ Open, found on the way:
   Renekton Butcher of the Sands' Energy was free (now only units and units'
   abilities); Acceleration Gate readied only units (now gear and runes too).
   Open: Rebuttal (VEN-152) has only "REACTION" in the card data.
-- [ ] Radiance, part 1: RAD-001..055 read (55 cards), 54 tested
+- [x] Radiance, part 1: RAD-001..055 read (55 cards), 54 tested
   (tests/test_corpus_radiance.py; Trinket Peddler's DISARM via Ahri /
   Chronomancer), 15 fixed: Brawl (ASSAULT = the unit's Might, was 1),
   Lingering Animus (a gear death counts), Forbidden Technique (played from the
@@ -315,7 +315,7 @@ Open, found on the way:
   (exhaust a MIGHTY unit ability), Resplendent Rostrum (one [tap]: draw and
   channel), Watchful Curator (gear DEFLECT on gear choices), Lost to the Sands
   (the baseline's mode choice now values gear).
-- [ ] Radiance, part 2: RAD-056..112 read (57 cards; Overloaded Traveler has
+- [x] Radiance, part 2: RAD-056..112 read (57 cards; Overloaded Traveler has
   no text), 55 tested, 20 fixed: Equipment keywords never reached their unit
   (Nazuman Ntofo's SHIELD 2, Serrated Dirk, Cloth Armor, Hexdrinker, Boots of
   Swiftness, Hunter's Machete, Protector's Shield: KNOWN_ISSUES #7's keyword
@@ -331,7 +331,7 @@ Open, found on the way:
   Wage (three ready Golds), An Offer You Can't Refuse (their Gold), Lulu
   Whimsical (a unit anywhere), Ziggs Explosive (gear for +2 defending),
   Mechanical Bandit (a real draw). Not modeled: Bushwhack Trap (E).
-- [ ] Radiance, part 3: RAD-113..T02 read (56 cards; the 10 battlefields and
+- [x] Radiance, part 3: RAD-113..T02 read (56 cards; the 10 battlefields and
   15 others already had tests), 28 tested, 17 fixed: unit abilities never paid
   "exhaust a friendly unit" (Riven Deserter's missing ready, once a turn);
   "Choose two" ran one mode (Encore); "a unit or gear" killed only units
@@ -347,7 +347,20 @@ Open, found on the way:
   friend); Angler Wyrm, Transpositionist, Ziggs and K'Sante lost an ACTION the
   text doesn't print (§145.2). Not modeled: Seraphine Starry-Eyed Songstress,
   Orianna Lady of Clockwork, Neeko (E).
-Then: Proving Grounds.
+- [x] Proving Grounds (24 cards) read, all tested
+  (tests/test_corpus_proving_grounds.py), 6 fixed: Lux Illuminated and Lux Lady
+  of Luminosity never fired ("When you play a spell that costs 5 or more" was a
+  passive; now the printed cost, not what was paid: Core Rules, Sky Splitter
+  example); Highlander did nothing (now as Tactical Retreat); Gentlemen's Duel
+  lacked the fight; Decisive Strike buffed one battlefield (now every friendly
+  unit). Systemic: "They deal damage equal to their Mights" took enemies only at
+  battlefields (Challenge, Rampage, Realm of Death, Clash of Giants: now
+  anywhere; Marching Orders keeps "at a battlefield"), and its damage counted
+  as the spell's (Annie Fiery's Bonus Damage, spell immunity): now dealt by the
+  units (Core Rules, Challenge example).
+
+D is done: every set read. Open only: Rebuttal (VEN-152), its text is missing
+from the card data (only "REACTION"); needs the printed text.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of

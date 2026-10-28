@@ -334,8 +334,8 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Choose a friendly unit and an enemy unit. They deal damage equal to
     their Mights to each other" (Challenge). `first`: "friendly" (default),
     "self" ("We deal ...", Carnivorous Snapvine) or "any" (Clash of Giants:
-    "two units", two enemies when there are two). The enemy is at a
-    battlefield. Baseline pick: the enemy our unit kills without dying, else
+    "two units", two enemies when there are two). The enemy is anywhere,
+    `where: battlefield` "an enemy unit at a battlefield" (Marching Orders). Baseline pick: the enemy our unit kills without dying, else
     one it kills, else one it survives, mightiest first; our mightiest unit.
     `friendly_might` / `enemy_might`: "Give an enemy unit -2 [might] this turn
     and a friendly unit +2 [might] this turn. They deal damage ..." (Realm of
@@ -344,7 +344,7 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     gs = loop.gs
     me, them = ctx.actor_side, ctx.opponent_side
     mod_a, mod_b = int(spec.get("friendly_might", 0)), int(spec.get("enemy_might", 0))
-    enemies = _choosable(ctx, [u for bf in gs.battlefields for u in bf._units_for(them)])
+    enemies = _choosable(ctx, _units_at(ctx, them, str(spec.get("where", "anywhere"))))
     first = str(spec.get("first", "friendly")).lower()
     if first == "any" and len(enemies) >= 2:
         a, b = sorted(enemies, key=lambda u: u.might, reverse=True)[:2]
@@ -375,8 +375,8 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             ctx.extra["it"] = [unit]
             REGISTRY["grant_temporary_might"](ctx, {"target": "it", "amount": amount, "duration": "this_turn"})
     a_might, b_might = a.might, b.might
-    ctx.damage_units([b], a_might)
-    ctx.damage_units([a], b_might)
+    ctx.damage_units([b], a_might, "unit", me)
+    ctx.damage_units([a], b_might, "unit", them)
 
 
 @effect("set_base_might")
@@ -1123,8 +1123,8 @@ def _fight_it_with_another(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
                         max(others, key=lambda u: u.might), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [b])
     a_might, b_might = a.might, b.might
-    ctx.damage_units([b], a_might)
-    ctx.damage_units([a], b_might)
+    ctx.damage_units([b], a_might, "unit", side)
+    ctx.damage_units([a], b_might, "unit", side)
 
 
 @effect("stormbringer")

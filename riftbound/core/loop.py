@@ -49,7 +49,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
-    "spell_cost_at_least", "this_is_alone", "this_is_mighty",
+    "spell_cost_at_least", "spell_printed_cost_at_least", "this_is_alone", "this_is_mighty",
     "triggering_unit_is_mighty", "kicker_paid",
     "friendly_unit_died_this_turn", "you_played_n_spells_this_turn",
     "you_already_played_another_card_this_turn", "controller_has_xp_at_least",
@@ -196,10 +196,13 @@ class EffectContext:
         if self.loop.recorder:
             self.loop._record_spell_deaths(self.battlefield, before_a, before_b)
 
-    def damage_units(self, units: list, amount: int) -> None:
+    def damage_units(self, units: list, amount: int, kind: str = "spell",
+                     by: Optional[str] = None) -> None:
         """Deal `amount` to each of these units, wherever they are (plus a
         battlefield's bonus damage there); the ones it kills die together per
-        battlefield (replacements, DEATHKNELL, ...)."""
+        battlefield (replacements, DEATHKNELL, ...). `kind` "unit": a unit deals
+        it, not the spell ("They deal damage equal to their Mights", Core Rules
+        Challenge example), by a unit of side `by`."""
         from .combat import _is_dead
         if amount <= 0:
             return
@@ -211,7 +214,7 @@ class EffectContext:
             side, bf = where
             unit.damage += self.loop._take_damage(
                 unit, amount + self.loop._bf_passive_amount(bf, "bonus_damage_here"),
-                "spell", self.actor_side, self.card)
+                kind, by or self.actor_side, self.card)
             if _is_dead(unit):
                 if bf is None:
                     self.loop.gs.get_player(side).base_units.remove(unit)
@@ -220,7 +223,7 @@ class EffectContext:
                 dead_at.setdefault(id(bf), (bf, []))[1].append((unit, side))
         for bf, dead in dead_at.values():
             self.loop._route_deaths(dead, bf or self.loop.gs.battlefields[0], in_base=bf is None,
-                                    killer=(self.actor_side, self.card))
+                                    killer=(by or self.actor_side, self.card))
 
     def grant_might(self, amount: int, *, target: str = "actor", scope: str = "all") -> None:
         if amount == 0:
@@ -1846,6 +1849,11 @@ class GameLoop:
         if ctype == "spell_cost_at_least":
             # "When you play a spell, if you spent [4] or more" (_fire_spell_played)
             return int(extra.get("triggering_spell_cost", 0)) >= _threshold()
+        if ctype == "spell_printed_cost_at_least":
+            # "When you play a spell that costs 5 or more" (Lux): the printed
+            # cost, whatever was paid (Core Rules, Sky Splitter example)
+            trig = extra.get("triggering_card")
+            return int(getattr(trig, "cost_energy", 0) or 0) >= _threshold()
         if ctype == "none_played_this_turn":
             # "the first friendly non-token gear played each turn" (Ornn's Forge):
             # no card matching `filter` played by you yet this turn.
