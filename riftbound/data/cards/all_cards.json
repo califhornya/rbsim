@@ -9710,7 +9710,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "extra_facedown_slot",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "OGN-279",
@@ -37410,7 +37415,12 @@
     "keywords": [
       "DEPLOY"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "extra_facedown_slot",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-108",

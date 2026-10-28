@@ -12,7 +12,8 @@ if TYPE_CHECKING:
 @dataclass
 class FacedownCard:
     """A card in a battlefield's Facedown Zone (Core Rules §106.4), placed there by
-    the Hidden keyword's Hide action. Max one per battlefield; may only exist while
+    the Hidden keyword's Hide action. Max one per battlefield unless an effect
+    raises it (§107.3.b.1: Bandle Tree, Bushwhack Trap); may only exist while
     ``owner`` controls the battlefield. ``turn_hidden`` gates the "playable from the
     NEXT turn onward" rule (§737.1.b)."""
     card: "Card"
@@ -53,7 +54,9 @@ class Battlefield:
     held_by: Optional[str] = None      # control(): who controls it by the rules
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
-    facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
+    # Facedown Zone occupants (Hidden keyword), oldest first. One at most unless
+    # an effect raises the zone's capacity (GameLoop._facedown_capacity).
+    facedowns: List[FacedownCard] = field(default_factory=list)
     # side -> the turn it last conquered here ("a battlefield you conquered this turn").
     conquered_turn: dict = field(default_factory=dict)
     # side -> (turn, excess combat damage it assigned here): "if you assigned 3
@@ -79,6 +82,16 @@ class Battlefield:
 
     def gear_for(self, who: str) -> List[DeployedGear]:
         return self.gear_A if who == "A" else self.gear_B
+
+    @property
+    def facedown(self) -> Optional[FacedownCard]:
+        """The first facedown card here, None if there is none. A single-slot
+        shorthand: setting it replaces every facedown card here."""
+        return self.facedowns[0] if self.facedowns else None
+
+    @facedown.setter
+    def facedown(self, fd: Optional[FacedownCard]) -> None:
+        self.facedowns = [] if fd is None else [fd]
 
     def count(self, who: str) -> int:
         return len(self._units_for(who))

@@ -243,17 +243,17 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     # observer knows a card is hidden there, but not which. Fold them into the
     # unseen pool and resample, preferring a HIDDEN-keyword identity so the public
     # "a card is hidden here" fact stays consistent.
-    opp_facedowns = [bf for bf in gs.battlefields
-                     if bf.facedown is not None and bf.facedown.owner == other]
-    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedown.card for bf in opp_facedowns]
+    opp_facedowns = [(bf, slot) for bf in gs.battlefields
+                     for slot, fd in enumerate(bf.facedowns) if fd.owner == other]
+    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedowns[slot].card for bf, slot in opp_facedowns]
     rng.shuffle(pool)
-    for bf in opp_facedowns:
+    for bf, slot in opp_facedowns:
         pick = next((c for c in pool if c.has_keyword("HIDDEN")), pool[0] if pool else None)
         if pick is None:
             continue
         pool.remove(pick)
-        bf.facedown = FacedownCard(card=pick, owner=bf.facedown.owner,
-                                   turn_hidden=bf.facedown.turn_hidden)
+        fd = bf.facedowns[slot]
+        bf.facedowns[slot] = FacedownCard(card=pick, owner=fd.owner, turn_hidden=fd.turn_hidden)
 
     n_hand = len(opp.hand)
     opp.hand = pool[:n_hand]

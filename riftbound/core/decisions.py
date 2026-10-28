@@ -95,8 +95,9 @@ class GameAction:
         return cls("HIDE", hand_idx, lane, None, label)
 
     @classmethod
-    def hidden_play(cls, lane: int, label: str) -> "GameAction":
-        return cls("HIDDEN_PLAY", None, lane, None, label)
+    def hidden_play(cls, lane: int, label: str, slot: int = 0) -> "GameAction":
+        # idx: the card's slot in that Facedown Zone, None for the first.
+        return cls("HIDDEN_PLAY", slot or None, lane, None, label)
 
     @classmethod
     def move(cls, src: int, dst: int, label: str, unit: Optional[int] = None) -> "GameAction":
@@ -146,10 +147,10 @@ class BattlefieldView:
     # Gear deployed here (DEPLOY §830), by name, per controlling side. Public.
     gear_A: tuple[str, ...] = ()
     gear_B: tuple[str, ...] = ()
-    # Who has scored here this turn, who has a facedown card here (not which).
+    # Who has scored here this turn, who has each facedown card here (not which).
     scored_A: bool = False
     scored_B: bool = False
-    facedown: Optional[str] = None
+    facedowns: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         return {
@@ -161,7 +162,7 @@ class BattlefieldView:
             "gear_B": list(self.gear_B),
             "scored_A": self.scored_A,
             "scored_B": self.scored_B,
-            "facedown": self.facedown,
+            "facedowns": list(self.facedowns),
         }
 
 
@@ -252,7 +253,7 @@ class Observation:
                 gear_B=tuple(dg.card.name for dg in bf.gear_B),
                 scored_A=bool(bf.scored_this_turn_A),
                 scored_B=bool(bf.scored_this_turn_B),
-                facedown=bf.facedown.owner if bf.facedown is not None else None,
+                facedowns=tuple(fd.owner for fd in bf.facedowns),
             )
 
         def legend(side):

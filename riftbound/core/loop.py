@@ -1527,6 +1527,7 @@ class GameLoop:
                     self._apply_gear_passives(g, side, anchor, actor, opponent)
         for bf in self.gs.battlefields:
             self._apply_battlefield_passives(bf)
+            self._trim_facedowns(bf)
         for side in ("A", "B"):
             # "Buffs give an additional +1 [might] to friendly units this turn"
             # (Stand United).
@@ -2210,7 +2211,7 @@ class GameLoop:
         if ctype == "facedown_card_here":
             # "if you control a facedown card here" (Evelynn in Control).
             bf = extra.get("battlefield")
-            return bf is not None and bf.facedown is not None and bf.facedown.owner == side
+            return bf is not None and any(fd.owner == side for fd in bf.facedowns)
         if ctype == "played_unit_gear_spell_this_turn":
             # "if you've played a non-token unit, a non-token gear, and a spell
             # this turn" (Swain Visionary).
@@ -2220,8 +2221,7 @@ class GameLoop:
                     and any(isinstance(c, SpellCard) for c in played))
         if ctype == "controller_has_facedown_card":
             # "if you control a facedown card at a battlefield" (Mushroom Pouch).
-            return any(bf.facedown is not None and bf.facedown.owner == side
-                       for bf in self.gs.battlefields)
+            return any(fd.owner == side for bf in self.gs.battlefields for fd in bf.facedowns)
         # Conditions needing context the engine doesn't track yet → safe False
         # (effects gated on them simply don't fire): excess_damage_at_least,
         # target_was_stunned.
@@ -2700,9 +2700,34 @@ class GameLoop:
 
     def _hide_lanes(self, side: str) -> list:
         """Battlefields where `side` may Hide a card: it must control the
-        battlefield (§106.4.c) and the Facedown Zone must be empty (§106.4.b)."""
+        battlefield (§106.4.c) and the Facedown Zone must have room (§107.3.b)."""
         return [i for i, bf in enumerate(self.gs.battlefields)
-                if bf.control() == side and bf.facedown is None]
+                if bf.control() == side and len(bf.facedowns) < self._facedown_capacity(bf)]
+
+    def _facedown_capacity(self, bf: Battlefield) -> int:
+        """How many cards the Facedown Zone at `bf` holds (§107.3.b): one, plus
+        one if the battlefield says "You may hide an additional card here"
+        (Bandle Tree), plus one per Bushwhack Trap its controller has here ("While
+        you control this battlefield, you may hide an additional card here")."""
+        cap = 1
+        if bf.card is not None and self._has_effect(bf.card, "extra_facedown_slot"):
+            cap += 1
+        side = bf.control()
+        if side is not None:
+            cap += sum(1 for dg in bf.gear_for(side) if self._has_effect(dg.card, "extra_facedown_slot"))
+        return cap
+
+    def _trim_facedowns(self, bf: Battlefield) -> None:
+        """§107.3.b.2: if the Facedown Zone's capacity drops below the cards in
+        it (a Bushwhack Trap left, or its controller lost the battlefield), the
+        excess goes to the trash. Engine default: the newest go first."""
+        cap = self._facedown_capacity(bf)
+        while len(bf.facedowns) > cap:
+            fd = bf.facedowns.pop()
+            self.gs.get_player(fd.owner).trash.append(fd.card)
+            if self.verbose:
+                print(f"  {fd.owner} trashes facedown {fd.card.name} @BF{self.gs.battlefields.index(bf)}"
+                      " (no room)")
 
     def _hide_card(self, side: str, idx, lane: int) -> bool:
         """Hide the hand card at `idx` (or the champion: `idx` "champion", from the
@@ -2738,7 +2763,7 @@ class GameLoop:
         else:
             ap.remove_from_hand(idx)
         bf = self.gs.battlefields[lane]
-        bf.facedown = FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn)
+        bf.facedowns.append(FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn))
         if self.verbose:
             print(f"  {side} HIDEs {card.name} facedown @BF{lane}")
         if bf.card is not None:
@@ -2766,25 +2791,25 @@ class GameLoop:
         battlefield is removed to its owner's trash. Called during end-of-turn
         cleanup."""
         for bf in self.gs.battlefields:
-            fd = bf.facedown
-            if fd is not None and bf.control() != fd.owner:
+            for fd in [fd for fd in bf.facedowns if bf.control() != fd.owner]:
                 self.gs.get_player(fd.owner).trash.append(fd.card)
-                bf.facedown = None
+                bf.facedowns.remove(fd)
 
-    def _hidden_playable_lanes(self, side: str) -> list:
-        """Battlefields where `side` has a face-down card it may now play for [0]:
+    def _hidden_playable(self, side: str) -> list:
+        """(battlefield, slot) of each face-down card `side` may now play for [0]:
         it owns the facedown card and at least one turn has passed since hiding
         (§737.1.b 'beginning on the next turn'). Current control is NOT required —
         the facedown persists until the next Cleanup even if control is lost
         (§106.4.d), and playing a hidden card into a now-contested lane is the
         keyword's whole point. Loss-of-control removal is handled at cleanup."""
-        lanes = []
+        playable = []
         for i, bf in enumerate(self.gs.battlefields):
-            fd = bf.facedown
-            if fd is not None and fd.owner == side and self.gs.turn > fd.turn_hidden:
-                # "Your opponents' HIDDEN cards can't be revealed here" (Noxus Saboteur).
-                if any(self._has_effect(u.card, "no_enemy_reveals_here")
-                       for u in bf._units_for(self.gs.other(side))):
+            # "Your opponents' HIDDEN cards can't be revealed here" (Noxus Saboteur).
+            if any(self._has_effect(u.card, "no_enemy_reveals_here")
+                   for u in bf._units_for(self.gs.other(side))):
+                continue
+            for slot, fd in enumerate(bf.facedowns):
+                if fd.owner != side or self.gs.turn <= fd.turn_hidden:
                     continue
                 # A spell needs a valid target at this battlefield (§811.1.d).
                 if isinstance(fd.card, SpellCard):
@@ -2794,19 +2819,22 @@ class GameLoop:
                             continue
                     finally:
                         del fd.card._hidden_bf
-                lanes.append(i)
-        return lanes
+                playable.append((i, slot))
+        return playable
 
-    def _play_from_hidden(self, side: str, lane: int) -> bool:
-        """Play a face-down card from its Facedown Zone for [0] (§737.1.b). A unit
-        enters at that battlefield; a spell resolves on a fresh chain aimed at that
-        battlefield (§737.1.c.3 / §737.1.d). Returns True on success."""
-        if lane not in self._hidden_playable_lanes(side):
+    def _hidden_playable_lanes(self, side: str) -> list:
+        """Battlefields where `side` has a face-down card it may now play."""
+        return sorted({lane for lane, _ in self._hidden_playable(side)})
+
+    def _play_from_hidden(self, side: str, lane: int, slot: int = 0) -> bool:
+        """Play the face-down card in `slot` of a Facedown Zone for [0] (§737.1.b).
+        A unit enters at that battlefield; a spell resolves on a fresh chain aimed
+        at that battlefield (§737.1.c.3 / §737.1.d). Returns True on success."""
+        if (lane, slot) not in self._hidden_playable(side):
             return False
         bf = self.gs.battlefields[lane]
-        fd = bf.facedown
+        fd = bf.facedowns.pop(slot)
         card = fd.card
-        bf.facedown = None
         ap = self.gs.get_player(side)
         # Its choices are made among what is at this battlefield (§811.1.d):
         # effects._resolve_targets reads the mark.
@@ -4249,9 +4277,10 @@ class GameLoop:
             self._hide_card(side, idx, lane)
 
         elif kind == "HIDDEN_PLAY" and isinstance(lane, int):
-            # Play a previously-hidden card for [0] during your own main phase.
+            # Play a previously-hidden card for [0] during your own main phase;
+            # idx is its slot in the Facedown Zone (Bandle Tree holds two).
             side = "A" if ap is self.gs.A else "B"
-            self._play_from_hidden(side, lane)
+            self._play_from_hidden(side, lane, idx or 0)
 
         elif kind == "MOVE":
             # Illegal during Showdown or Closed State (active chain), §144.1.
@@ -5884,7 +5913,7 @@ class GameLoop:
                 return "acted"
         elif kind == "HIDDEN_PLAY":
             # Play a facedown card for [0] at reaction speed (§737.1.b).
-            if self._play_from_hidden(side, lane if lane is not None else 0):
+            if self._play_from_hidden(side, lane if lane is not None else 0, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
             # A REACTION ability resolves at once (resource abilities can't be
@@ -6029,7 +6058,7 @@ class GameLoop:
                 return "acted"
         elif kind == "HIDDEN_PLAY":
             # Play a facedown card for [0] into the showdown lane (§737.1.b).
-            if self._play_from_hidden(side, bf_idx):
+            if self._play_from_hidden(side, bf_idx, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
             # ACTION / REACTION ability: resolves at once, focus stays.

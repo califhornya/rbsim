@@ -129,7 +129,7 @@ def _dense(obs: Observation) -> np.ndarray:
         s += [float(ctrl == me), float(ctrl is not None and ctrl != me), float(ctrl is None)]
         my_scored, opp_scored = (bf.scored_A, bf.scored_B) if me == "A" else (bf.scored_B, bf.scored_A)
         s += [float(my_scored), float(opp_scored)]
-        s += [float(bf.facedown == me), float(bf.facedown is not None and bf.facedown != me)]
+        s += [float(bf.facedowns.count(me)), float(sum(o != me for o in bf.facedowns))]
         s += [len(mine) / 6.0, len(opp) / 6.0]
         s += [sum(u.might for u in mine) / 20.0, sum(u.might for u in opp) / 20.0]
         my_gear, opp_gear = (bf.gear_A, bf.gear_B) if me == "A" else (bf.gear_B, bf.gear_A)

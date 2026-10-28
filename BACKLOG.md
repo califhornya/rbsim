@@ -330,7 +330,7 @@ Open, found on the way:
   Herd (recycled from face down), Cataclysm (no enemy spells), The Waters'
   Wage (three ready Golds), An Offer You Can't Refuse (their Gold), Lulu
   Whimsical (a unit anywhere), Ziggs Explosive (gear for +2 defending),
-  Mechanical Bandit (a real draw). Not modeled: Bushwhack Trap (E).
+  Mechanical Bandit (a real draw). Bushwhack Trap: modeled later (E).
 - [x] Radiance, part 3: RAD-113..T02 read (56 cards; the 10 battlefields and
   15 others already had tests), 28 tested, 17 fixed: unit abilities never paid
   "exhaust a friendly unit" (Riven Deserter's missing ready, once a turn);
@@ -363,8 +363,15 @@ D is done: every set read. Open only: Rebuttal (VEN-152), its text is missing
 from the card data (only "REACTION"); needs the printed text.
 
 ## E. Not modeled at all
-Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of
-Clockwork and The Ball as a unit (gear that becomes a unit), Ivern Green
+- [DONE] Bandle Tree and Bushwhack Trap: a Facedown Zone holds more than one
+  card (§107.3.b.1). `Battlefield.facedowns` is a list; the zone holds one,
+  +1 at Bandle Tree, +1 per Bushwhack Trap its controller has there
+  (`GameLoop._facedown_capacity`). Each facedown card is its own HIDDEN_PLAY
+  (index = slot). When the room shrinks (the Trap dies, its controller loses the
+  battlefield) the excess goes to the trash (§107.3.b.2). Tests in
+  tests/test_hidden.py.
+
+Orianna Lady of Clockwork and The Ball as a unit (gear that becomes a unit), Ivern Green
 Father (Brush battlefield), Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
 duplicate card), Svellsongur, Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
@@ -375,4 +382,7 @@ Circle + Baron.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
 Equip's unit, discards, effect-move targets, "you may" additional costs always
-paid; the observation doesn't show a held move.
+paid; the observation doesn't show a held move. A facedown card trashed for
+lack of room is the newest (the player should choose). The net's action space
+has one HIDDEN_PLAY per battlefield: with two facedown cards at Bandle Tree it
+can only play the first (the search and heuristic agents see both).

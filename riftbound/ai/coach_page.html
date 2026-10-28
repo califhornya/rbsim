@@ -327,8 +327,9 @@ function renderTable() {
     // In a fight: the Might with ASSAULT (attacker) / SHIELD (defender).
     const f = b.fight && b.fight[String(i)];
     const sum = (l, who) => f ? f[who] : l.reduce((a, u) => a + (u.might || 0), 0);
-    const fd = bf.facedown ? cardSlot(bf.facedown === me ? b.facedown_mine[String(i)] : null, `facedown:${i}`,
-      { cls: "small", data: { facedown: bf.facedown === me ? "mine" : "theirs" } }) : "";
+    // Facedown cards here (two at Bandle Tree): the viewer sees only their own.
+    const fd = (bf.facedowns || []).map((who, j) => cardSlot(who === me ? b.facedown_mine[`${i}:${j}`] : null,
+      `facedown:${i}:${j}`, { cls: "small", data: { facedown: who === me ? "mine" : "theirs" } })).join("");
     const gm = (me === "A" ? bf.gear_A : bf.gear_B).map((g, j) => cardSlot(g, `gear:me:${i}:${j}`, { cls: "small" })).join("");
     const go = (me === "A" ? bf.gear_B : bf.gear_A).map((g, j) => cardSlot(g, `gear:opp:${i}:${j}`, { cls: "small" })).join("");
     if (bf.named) REF[`bfcard:${i}`] = { name: bf.named, wide: true };

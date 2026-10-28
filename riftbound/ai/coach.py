@@ -15,7 +15,7 @@ The web page in scripts/coach.py drives a session through `state()`,
 table of card images: every action, suggestion and choice it gets carries an
 Italian description and the place on the table it refers to (a "ref": hand:2,
 unit:me:base:0, unit:opp:1:2, legend:me, champion:me, gear:me:base:0, bf:1,
-base:opp, facedown:0, trash:me, banished:me), and the session keeps a log of
+base:opp, facedown:0:0, trash:me, banished:me), and the session keeps a log of
 the game in Italian (the engine's own English log stays, for reports).
 """
 
@@ -147,8 +147,9 @@ def _card_ref(gs, viewer: str, card) -> Optional[str]:
             for j, dg in enumerate(bf.gear_for(side)):
                 if dg.card is card:
                     return f"gear:{rel}:{i}:{j}"
-            if bf.facedown is not None and bf.facedown.card is card:
-                return f"facedown:{i}"
+            for j, fd in enumerate(bf.facedowns):
+                if fd.card is card:
+                    return f"facedown:{i}:{j}"
         for u in [*p.base_units, *(u for bf in gs.battlefields for u in bf._units_for(side))]:
             if u.card is card or any(g is card for g in u.gear):
                 return _unit_ref(gs, viewer, u)
@@ -290,10 +291,11 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
             f"Mette una carta coperta su {_bf_name(gs, lane)}"
         to = f"bf:{lane}"
     elif kind == "HIDDEN_PLAY":
-        fd = gs.battlefields[lane].facedown
+        fds = gs.battlefields[lane].facedowns
+        fd = fds[idx or 0] if (idx or 0) < len(fds) else None
         text = f"Gioca la carta coperta {getattr(getattr(fd, 'card', None), 'name', '?')}" \
                f" su {_bf_name(gs, lane)}"
-        src = f"facedown:{lane}"
+        src = f"facedown:{lane}:{idx or 0}"
     elif kind == "ABILITY":
         entries = loop.activatable_abilities(side)
         e = entries[lane] if isinstance(lane, int) and 0 <= lane < len(entries) else {}
@@ -387,8 +389,8 @@ def _board_extras(gs, viewer: str) -> dict:
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
         "chain": [{"name": i.card.name, "owner": _rel(i.player, viewer), "bf": i.bf_idx,
                    "chose": declared_text(gs, viewer, i)} for i in gs.chain],
-        "facedown_mine": {str(i): bf.facedown.card.name for i, bf in enumerate(gs.battlefields)
-                          if bf.facedown is not None and bf.facedown.owner == viewer},
+        "facedown_mine": {f"{i}:{j}": fd.card.name for i, bf in enumerate(gs.battlefields)
+                          for j, fd in enumerate(bf.facedowns) if fd.owner == viewer},
     }
 
 

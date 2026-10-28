@@ -1,7 +1,8 @@
 """HIDDEN keyword (Core Rules §737 / §408 / §106.4).
 
 Hide: on your turn, in an Open State, pay 1 power to place a Hidden card facedown
-at a battlefield you control whose Facedown Zone is empty. From the NEXT turn it
+at a battlefield you control whose Facedown Zone has room (one card; two at
+Bandle Tree or with a Bushwhack Trap). From the NEXT turn it
 gains Reaction and may be played for [0] to that battlefield. Behavior lives on
 GameLoop._hide_card / _play_from_hidden and their legality enumeration.
 """
@@ -19,6 +20,7 @@ from riftbound.core.legality import legal_actions
 from riftbound.core.loop import GameLoop
 from riftbound.core.player import Deck, Player, Rune, RuneDeck
 from riftbound.core.state import GameState
+from riftbound.registry.cards_registry import CARD_REGISTRY
 
 
 def _loop(power: int = 2, turn: int = 1) -> GameLoop:
@@ -155,3 +157,95 @@ def test_legality_offers_hide_then_hidden_play():
     loop.gs.turn = 6
     react = {a.to_engine() for a in legal_actions(loop, DecisionPoint.REACTION, "A")}
     assert ("HIDDEN_PLAY", None, 0) in react
+
+
+# --- A Facedown Zone that holds more than one card (§107.3.b.1) --------------
+
+def _named_bf(loop, lane, name):
+    loop.gs.battlefields[lane].card = CARD_REGISTRY[name].instantiate()
+
+
+def test_bandle_tree_holds_a_second_facedown_card():
+    """Bandle Tree: 'You may hide an additional card here.'"""
+    loop = _loop(power=3)
+    _named_bf(loop, 0, "Bandle Tree")
+    loop.gs.A.hand.extend([_hidden_unit("One"), _hidden_unit("Two"), _hidden_unit("Three")])
+    _control(loop, "A", 0)
+    _control(loop, "A", 1)
+    assert loop._hide_card("A", 0, 0) and loop._hide_card("A", 0, 0)
+    assert [fd.card.name for fd in loop.gs.battlefields[0].facedowns] == ["One", "Two"]
+    assert loop._hide_lanes("A") == [1]                  # full here; one at a plain battlefield
+    assert loop._hide_card("A", 0, 0) is False
+    assert loop._hide_card("A", 0, 1) is True
+    assert loop._hide_lanes("A") == []
+
+
+def test_both_cards_at_bandle_tree_are_played_separately():
+    loop = _loop(power=2, turn=3)
+    _named_bf(loop, 0, "Bandle Tree")
+    one, two = _hidden_unit("One"), _hidden_unit("Two")
+    loop.gs.A.hand.extend([one, two])
+    _control(loop, "A", 0)
+    loop._hide_card("A", 0, 0)
+    loop._hide_card("A", 0, 0)
+    loop.gs.turn = 4
+    react = {a.to_engine() for a in legal_actions(loop, DecisionPoint.REACTION, "A")}
+    assert {("HIDDEN_PLAY", None, 0), ("HIDDEN_PLAY", 1, 0)} <= react
+    # The second one (slot 1), by the reaction path; the first stays hidden.
+    assert loop._reaction_step(loop.gs.A, "A", ("HIDDEN_PLAY", 1, 0)) == "acted"
+    bf = loop.gs.battlefields[0]
+    assert any(u.card is two for u in bf.units_A)
+    assert [fd.card for fd in bf.facedowns] == [one]
+    assert loop._hidden_playable("A") == [(0, 0)]
+
+
+def test_cleanup_trashes_every_facedown_card_at_a_lost_bandle_tree():
+    loop = _loop()
+    _named_bf(loop, 0, "Bandle Tree")
+    bf = loop.gs.battlefields[0]
+    bf.facedowns = [FacedownCard(card=_hidden_unit("One"), owner="A", turn_hidden=1),
+                    FacedownCard(card=_hidden_unit("Two"), owner="A", turn_hidden=1)]
+    _control(loop, "B", 0)                                # B alone there: A lost it
+    loop._cleanup_hidden_cards()
+    assert bf.facedowns == []
+    assert sorted(c.name for c in loop.gs.A.trash) == ["One", "Two"]
+
+
+def test_bushwhack_trap_gives_its_controller_a_second_facedown_card():
+    """Bushwhack Trap: 'While you or an ally control this battlefield, that
+    player may hide an additional card here.' When it dies the zone holds one
+    again and the newest card goes to the trash (§107.3.b.2)."""
+    loop = _loop(power=2)
+    loop.gs.A.hand.extend([_hidden_unit("One"), _hidden_unit("Two")])
+    _control(loop, "A", 0)
+    bf = loop.gs.battlefields[0]
+    loop._deploy_gear("A", bf, CARD_REGISTRY["Bushwhack Trap"].instantiate())
+    assert loop._facedown_capacity(bf) == 2
+    assert loop._hide_card("A", 0, 0) and loop._hide_card("A", 0, 0)
+    loop._kill_deployed_gear(bf, "A", list(bf.gear_A))
+    assert [fd.card.name for fd in bf.facedowns] == ["One"]
+    assert [c.name for c in loop.gs.A.trash] == ["Bushwhack Trap", "Two"]
+
+
+def test_an_enemy_bushwhack_trap_gives_nothing():
+    """The Trap's controller must control the battlefield: B's Trap at a
+    battlefield A controls leaves A one facedown card."""
+    loop = _loop()
+    _control(loop, "A", 0)
+    bf = loop.gs.battlefields[0]
+    loop._deploy_gear("B", bf, CARD_REGISTRY["Bushwhack Trap"].instantiate())
+    assert loop._facedown_capacity(bf) == 1
+
+
+def test_the_coach_and_the_observation_see_both_facedown_cards():
+    from riftbound.ai.coach import _board_extras, _card_ref
+    from riftbound.core.decisions import Observation
+    loop = _loop()
+    _named_bf(loop, 0, "Bandle Tree")
+    mine, theirs = _hidden_unit("Mine"), _hidden_unit("Theirs")
+    loop.gs.battlefields[0].facedowns = [FacedownCard(card=mine, owner="A", turn_hidden=1),
+                                         FacedownCard(card=theirs, owner="B", turn_hidden=1)]
+    assert _board_extras(loop.gs, "A")["facedown_mine"] == {"0:0": "Mine"}
+    assert _card_ref(loop.gs, "B", theirs) == "facedown:0:1"
+    obs = Observation.from_state(loop.gs, "A")
+    assert obs.battlefields[0].facedowns == ("A", "B")

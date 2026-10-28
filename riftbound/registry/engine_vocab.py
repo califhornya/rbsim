@@ -329,5 +329,6 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost_not_from_hand", "gear_discount_once", "vex_cheerless", "empower_discount_here",
     "dragon_roost", "requires_friendly_gear", "requires_pet", "hide_for_energy",
     "no_enemy_reveals_here",
+    "extra_facedown_slot",      # Bandle Tree, Bushwhack Trap: GameLoop._facedown_capacity
     "copy_tap_abilities", "group_move_toll", "jhin_pile", "zero_point_overflow", "rippers_bay",
 })

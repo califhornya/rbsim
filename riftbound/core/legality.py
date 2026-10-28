@@ -137,9 +137,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 for lane in hide_lanes:
                     actions.append(GameAction.hide("champion", lane, f"Hide {champ.name} @BF{lane}"))
         # Play a card you hid on a previous turn, for [0].
-        for lane in loop._hidden_playable_lanes(side):
-            fd = gs.battlefields[lane].facedown
-            actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+        actions.extend(_hidden_play_actions(loop, side))
 
     # --- abilities ---
     actions.extend(_ability_actions(loop, ap, side))
@@ -204,9 +202,7 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
         for lane in loop._ambush_legal_lanes(ap.name):
             actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     # HIDDEN: play a facedown card for [0] at reaction speed (§737.1.b).
-    for lane in loop._hidden_playable_lanes(ap.name):
-        fd = loop.gs.battlefields[lane].facedown
-        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+    actions.extend(_hidden_play_actions(loop, ap.name))
     # REACTION abilities (mana abilities like Seals and Gold among them).
     actions.extend(_ability_actions(loop, ap, ap.name))
     return actions
@@ -240,9 +236,18 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
             and _affordable(loop, ap, champ)):
         actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     # HIDDEN: play a facedown card into the showdown lane for [0] (§737.1.b).
-    if lane in loop._hidden_playable_lanes(ap.name):
-        fd = gs.battlefields[lane].facedown
-        actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}"))
+    actions.extend(_hidden_play_actions(loop, ap.name, only_lane=lane))
     # ACTION and REACTION abilities.
     actions.extend(_ability_actions(loop, ap, ap.name))
+    return actions
+
+
+def _hidden_play_actions(loop: "GameLoop", side: str, only_lane=None) -> list[GameAction]:
+    """Play each facedown card `side` may now play for [0] (§737.1.b), one action
+    per card: a Facedown Zone can hold two (Bandle Tree)."""
+    actions = []
+    for lane, slot in loop._hidden_playable(side):
+        if only_lane is None or lane == only_lane:
+            fd = loop.gs.battlefields[lane].facedowns[slot]
+            actions.append(GameAction.hidden_play(lane, f"Play {fd.card.name} from Hidden @BF{lane}", slot))
     return actions

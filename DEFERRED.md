@@ -439,8 +439,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   generic Power per damaged unit or unit with a play effect), Mystic Reversal
   (the opponent's latest spell on the chain resolves as ours).
 - **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
-  second facedown card at a battlefield: the Facedown Zone holds one);
-  Orianna Lady of Clockwork (a gear that becomes a unit); Ivern Green Father
+  second facedown card at a battlefield: the Facedown Zone holds one; modeled
+  2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit); Ivern Green Father
   (replacing a battlefield with a Brush token) and Baron Pit (a token
   battlefield nothing creates yet); Svellsongur (an Equipment copying its
   unit's text); Void Hatchling (a replacement on every reveal); Hextech
