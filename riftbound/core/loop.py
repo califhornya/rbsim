@@ -57,6 +57,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "friendly_total_might_at_least", "you_control_n_or_more_gear",
     "showed_off", "opponent_controls_a_battlefield", "you_control_no_other_units",
     "card_with_my_name_in_trash", "opponent_controls_stunned_unit", "stunned_enemy_here",
+    "empowered_times_at_least",
     "you_control_this_battlefield",
     "cards_in_hand_at_most", "first_turn_of_player", "rune_deck_empty",
     "enemy_alone_here", "one_on_one_here", "you_control_bf_with_exactly_n_units",
@@ -1918,6 +1919,10 @@ class GameLoop:
         if ctype == "you_control_this_battlefield":
             bf = extra.get("battlefield")
             return bf is not None and bf.controller() == side
+        if ctype == "empowered_times_at_least":
+            # "While I'm EMPOWERED three times" (Kayle Justified).
+            unit = self._find_unit_by_card(card)
+            return unit is not None and unit.empowered and max(unit.empower_times, 1) >= _threshold(1)
         if ctype == "stunned_enemy_here":
             # "While there's a stunned enemy unit here" (Kennen Keeper of
             # Balance): at the battlefield the card's unit is at.
@@ -2566,29 +2571,32 @@ class GameLoop:
         return not sentences or any("you may" in s.lower() for s in sentences)
 
     def _try_pay_additional_costs(self, card: Card, ap: Player) -> bool:
-        """If the card has an effect carrying an `additional_cost` (kicker), try to
-        pay the first affordable one; a "you may" one is the player's choice
-        (baseline: pay). Sets `card._kicker_paid = True` when paid. One kicker per
-        card. Returns whether anything was paid."""
+        """Pay the card's additional costs (kicker): each distinct one is its own
+        choice and payment, in any order (§356.2; one card can repeat the same
+        cost on several instructions: Pyke). A "you may" one is the player's
+        choice (baseline: pay). Sets `card._kicker_paid = True` when one is
+        paid. Returns whether anything was paid."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return False
+        side = "A" if ap is self.gs.A else "B"
+        seen: list = []
+        paid = False
         for es in spec.effects:
             ac = getattr(es, "additional_cost", None)
-            if not ac:
+            if not ac or ac in seen:
                 continue
-            side = "A" if ap is self.gs.A else "B"
+            seen.append(ac)
             if self._additional_cost_optional(card) and \
                     self._pay_one_additional_cost(card, ap, ac, check_only=True) and \
                     not self.choose("optional:additional_cost", side, [True, False], True, card):
-                return False
+                continue
             if self._pay_one_additional_cost(card, ap, ac):
                 card._kicker_paid = True
+                paid = True
                 if self.verbose:
                     print(f"  {ap.name} pays kicker for {card.name}: {ac}")
-                return True
-            break  # only the first additional_cost is considered (one kicker/card)
-        return False
+        return paid
 
     def _pay_one_additional_cost(self, card: Card, ap: Player, ac: dict,
                                  check_only: bool = False) -> bool:
@@ -3863,8 +3871,10 @@ class GameLoop:
 
         def _add_unit_abilities(unit, bf_idx):
             for eff in _abilities(unit.card):
-                # EMPOWER can only be activated while NOT already empowered.
-                if eff.effect == "empower_self" and getattr(unit, "empowered", False):
+                # EMPOWER can only be activated while NOT already empowered
+                # (unless it stacks: `max_times`, §827.1.c.5).
+                if eff.effect == "empower_self" and getattr(unit, "empowered", False) and \
+                        max(unit.empower_times, 1) >= int(eff.params.get("max_times", 1)):
                     continue
                 out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
             if self._has_effect(unit.card, "copy_tap_abilities"):
@@ -4407,7 +4417,7 @@ class GameLoop:
         if parsed["tap"] and unit is not None:
             self._exhaust(unit)
         if parsed["disempower"] and unit is not None:
-            unit.empowered = False
+            unit.empowered, unit.empower_times = False, 0
         self._recycle_from_trash(ap, parsed["recycle"])
         self._pay_discard_and_banish(ap, parsed, unit)
         if parsed["spend_xp"]:
@@ -4649,6 +4659,7 @@ class GameLoop:
             return
         if unit is not None:
             unit.empowered = True
+            unit.empower_times = 1
         else:
             card.empowered = True
         where = self._locate_unit(unit) if unit is not None else None
@@ -4663,6 +4674,7 @@ class GameLoop:
         unit = self._find_unit_by_card(card)
         if unit is not None:
             unit.empowered = False
+            unit.empower_times = 0
         else:
             card.empowered = False
 
@@ -5538,11 +5550,15 @@ class GameLoop:
         return None
 
     def _final_result(self) -> Result:
-        """Decide the winner by points once the turn cap is reached."""
+        """The turn cap reached: it counts as the time running out (Riftbound
+        has no turn limit), so a player leading by 2 or more points wins, else
+        it is a draw (TR 408.2.b)."""
+        from .match import TIME_LEAD_TO_WIN
         gs = self.gs
-        if gs.points_A > gs.points_B:
+        lead = gs.points_A - gs.points_B
+        if lead >= TIME_LEAD_TO_WIN:
             winner = "A"
-        elif gs.points_B > gs.points_A:
+        elif lead <= -TIME_LEAD_TO_WIN:
             winner = "B"
         else:
             winner = "DRAW"

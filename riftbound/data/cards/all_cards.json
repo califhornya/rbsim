@@ -31210,9 +31210,7 @@
     "set": "Vendetta",
     "keywords": [
       "EMPOWER",
-      "EMPOWERED",
-      "DEFLECT",
-      "GANKING"
+      "EMPOWERED"
     ],
     "effects": [
       {
@@ -31220,6 +31218,67 @@
         "trigger": "activated",
         "cost": {
           "energy": 3
+        },
+        "max_times": 3
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "empowered_times_at_least",
+          "params": {
+            "n": 1
+          }
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "empowered_times_at_least",
+          "params": {
+            "n": 2
+          }
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 2,
+        "condition": {
+          "type": "empowered_times_at_least",
+          "params": {
+            "n": 3
+          }
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT 3",
+        "condition": {
+          "type": "empowered_times_at_least",
+          "params": {
+            "n": 3
+          }
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "empowered_times_at_least",
+          "params": {
+            "n": 3
+          }
         }
       }
     ],

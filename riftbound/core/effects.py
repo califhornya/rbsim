@@ -1288,7 +1288,7 @@ def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
 
     def after(u):
         was = u.empowered
-        u.empowered = False
+        u.empowered, u.empower_times = False, 0
         loop._recompute_passives()
         m = u.might
         u.empowered = was
@@ -3308,6 +3308,10 @@ def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "self")).lower()
     tf = spec.get("target_filter") or {}
     if target in ("self", "this", "me"):
+        me = _source_unit(ctx)
+        if me is not None and me.empowered and max(me.empower_times, 1) < int(spec.get("max_times", 1)):
+            me.empower_times = max(me.empower_times, 1) + 1    # once more (Kayle Justified)
+            return
         loop._empower(ctx.card, ctx.actor_side)
     elif tf.get("is_gear"):
         # "Empower another gear" (Hextech Formula): one not yet empowered.
@@ -3334,7 +3338,7 @@ def _disempower(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     cands = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
     cands = [u for u in _choosable(ctx, cands) if u.empowered] if spec.get("only_empowered", True) else cands
     for u in cands[:1] if str(spec.get("scope", "single")) == "single" else cands:
-        u.empowered = False
+        u.empowered, u.empower_times = False, 0
         if spec.get("until_end_of_turn"):
             u.empower_flip_at_end = True             # "Empower it at end of turn"
 

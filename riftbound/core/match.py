@@ -240,6 +240,7 @@ def play_match(
     bf_chooser: Optional[BattlefieldChooser] = None,
     order_chooser: Optional[OrderChooser] = None,
     sideboarder: Optional[Sideboarder] = None,
+    bo1_altered_setup: bool = False,
 ) -> MatchResult:
     """Play a best-of-``best_of`` match and return the aggregate result.
 
@@ -247,6 +248,10 @@ def play_match(
     out; a best of 5 needs a longer one than the default), converted to turns
     across the whole match at ``minutes_per_turn``. ``max_turns`` is the per-game
     stall guard; reaching it counts as the time running out.
+    ``bo1_altered_setup`` (a best of 1 only): the head judge's altered setup
+    (TR 406.1.h): each player randomly selects one of their battlefields, the
+    designated player chooses to go first or last, and players sideboard as if
+    between games of a best of 3.
     """
     time_limit_turns = (clock_turns(time_limit_minutes, minutes_per_turn)
                         if time_limit_minutes is not None else None)
@@ -276,10 +281,11 @@ def play_match(
                 break                                 # time is up between games (TR 408.2.d)
             cap = min(max_turns, remaining + TIME_EXTRA_TURNS)
 
+        altered = bo1_altered_setup and best_of == 1
         bfs = {}
         for s in "AB":
             avail = available_battlefields(pools[s], plays[s])
-            pick = choose_bf(s, list(avail), i)
+            pick = match_rng.choice(list(avail)) if altered and avail else choose_bf(s, list(avail), i)
             if pick is None and avail:
                 pick = avail[0]
             if pick is not None and pick not in avail:
@@ -291,6 +297,7 @@ def play_match(
             designated = match_rng.choice(["A", "B"])
         else:
             designated = _other(games[-1].winner)     # the loser chooses
+        if games or altered:
             for s in "AB":
                 ctx = SideboardContext(side=s, game_index=i, deck_path=paths[s],
                                        registered=registered[s],

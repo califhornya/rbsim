@@ -296,3 +296,29 @@ def test_angler_wyrm_the_opponent_moves_a_unit_of_their_choice():
     REGISTRY["move_unit"](ctx, spec.merged_params())
     assert any(kind.startswith("target") and side == "B" for kind, side in seen)
     assert [u.card.name for u in loop.gs.battlefields[0].units_B] == ["Small"]
+
+
+def test_kayle_justified_is_empowered_up_to_three_times():
+    """'I can be EMPOWERED up to three times. I have +2 [might] for each time
+    I'm EMPOWERED. While I'm EMPOWERED three times, I have DEFLECT 3 and
+    GANKING.' (§442.1.c.1)"""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, b = _setup()
+    a.energy = 20
+    kayle = UnitInPlay(card=CARD_REGISTRY["Kayle Justified"].instantiate(), ready=True)
+    a.base_units.append(kayle)
+
+    def empower():
+        for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A"):
+            if ga.kind == "ABILITY" and ga.label.endswith("(Kayle Justified)"):
+                loop._apply_action(a, ga.to_engine())
+                loop._recompute_passives()
+                return True
+        return False
+    base = kayle.might
+    for times in (1, 2, 3):
+        assert empower()
+        assert kayle.empower_times == times and kayle.might == base + 2 * times
+    assert kayle.keyword_value("DEFLECT") == 3 and kayle.has_keyword("GANKING")
+    assert not empower() and a.energy == 20 - 9

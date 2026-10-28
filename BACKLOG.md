@@ -123,11 +123,16 @@ Section A is done: both precon decks are checked card by card.
       short (one choice per unit, TANK group first, BACKLINE last; it chose
       only the first); a Ki Barrier shield counts in lethal, so extra damage
       kills through it.
-- [ ] Stacking EMPOWER (Radiance §442.1.c.1 / §827.1.c.5): binary today.
-- [ ] Multiple additional costs (kickers) on one card: the engine pays the
-      first affordable one; check the Core Rules.
-- [ ] Single games score the 40-turn guard as "any lead wins"; matches use
-      the time rule. Best-of-1 setup (TR 406.1.h) not modeled.
+- [x] Stacking EMPOWER (§442.1.c.1 / §827.1.c.5): Kayle Justified, the only
+      such card, is empowered up to three times (+2 [might] each; DEFLECT 3 and
+      GANKING at three); `max_times`, UnitInPlay.empower_times.
+- [x] Multiple additional costs (§356.2): each distinct one is its own choice
+      and payment, in any order. No card has two different ones of its own
+      (Pyke repeats one on two instructions); ACCELERATE, DEFLECT and
+      battlefield surcharges are paid on their own paths.
+- [x] Single games at the turn guard follow TR 408.2.b like matches (a 2+
+      point lead wins, else a draw); the head judge's best-of-1 setup (TR
+      406.1.h) is an option of play_match (`bo1_altered_setup`).
 
 ## D. Cards encoded only in part (corpus)
 About 300 cards have more sentences than effect entries (a rough count: one

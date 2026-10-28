@@ -31,6 +31,9 @@ class UnitInPlay:
     passive_keywords: set = field(default_factory=set)  # keywords granted by passive abilities
     hidden: bool = False  # reserved for future HIDDEN keyword
     empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
+    # How many times it is EMPOWERED, for what may be empowered more than once
+    # (§442.1.c.1: Kayle Justified, up to three times); 1 otherwise when empowered.
+    empower_times: int = 0
     is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
     no_combat_damage: bool = False  # passive "I don't deal combat damage" (recomputed with passives)
     # Keywords effects gave this unit: until the end of the turn ("give it
