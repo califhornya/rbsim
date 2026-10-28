@@ -331,14 +331,32 @@ Open, found on the way:
   Wage (three ready Golds), An Offer You Can't Refuse (their Gold), Lulu
   Whimsical (a unit anywhere), Ziggs Explosive (gear for +2 defending),
   Mechanical Bandit (a real draw). Not modeled: Bushwhack Trap (E).
-Then: Radiance part 3 (RAD-113..T02), Proving Grounds.
+- [ ] Radiance, part 3: RAD-113..T02 read (56 cards; the 10 battlefields and
+  15 others already had tests), 28 tested, 17 fixed: unit abilities never paid
+  "exhaust a friendly unit" (Riven Deserter's missing ready, once a turn);
+  "Choose two" ran one mode (Encore); "a unit or gear" killed only units
+  (Mordekaiser Dominating, its discard now a cost of each trigger, not of
+  playing him; Mournful Spirit here; Burn Away banishes); Transpositionist
+  (plays a smaller unit free), Steadfast Outrider (gear counts; not in base),
+  Raucous Anthem (all your units, was one battlefield), Dockside Lock-Up (holds
+  to play the banished card), Seraphine Not Alone (+1 per other exhausted
+  unit), Ekko Boy Who Shattered Time (disempower: next unit [2] [rune] less,
+  killed at end of turn), Ziggs Hexplosives Expert ([rune] was free), Realm of
+  Death (they fight), K'Sante Pride of Nazumah (ASSAULT = its SHIELD), Ntofo
+  Strikes (deals its SHIELD), Blade of the Exile (EQUIP by exhausting a
+  friend); Angler Wyrm, Transpositionist, Ziggs and K'Sante lost an ACTION the
+  text doesn't print (§145.2). Not modeled: Seraphine Starry-Eyed Songstress,
+  Orianna Lady of Clockwork, Neeko (E).
+Then: Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of
 Clockwork and The Ball as a unit (gear that becomes a unit), Ivern Green
 Father (Brush battlefield), Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
 duplicate card), Svellsongur, Void Hatchling, Irelia
-Graceful, Endless Riches, Neeko Blending In; FAQ rulings for Kharox + Neeko,
+Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
+(a legend's optional extra cost on every spell: exhaust her and three friendly
+units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
 Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser, Hunters'
 Circle + Baron.
 

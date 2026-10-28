@@ -5,6 +5,9 @@ from typing import Iterable, List, Optional
 
 from .cards import UnitCard
 
+# "I have ASSAULT equal to my SHIELD" this turn (K'Sante Pride of Nazumah).
+ASSAULT_EQUALS_SHIELD = "ASSAULT = SHIELD"
+
 
 @dataclass(eq=False)
 class UnitInPlay:
@@ -149,7 +152,9 @@ class UnitInPlay:
         kw = keyword.upper()
         passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
         given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords,
-                                                      *self.combat_keywords))
+                                                      *self.combat_keywords) if k != ASSAULT_EQUALS_SHIELD)
+        if kw == "ASSAULT" and ASSAULT_EQUALS_SHIELD in self.turn_keywords:
+            given += self.keyword_value("SHIELD")      # K'Sante Pride of Nazumah
         return max(base, passive) + given
 
 

@@ -1482,3 +1482,423 @@ def test_staunch_survivor_and_siren_of_the_shallows_keywords():
     survivor, siren = _unit("Staunch Survivor"), _unit("Siren of the Shallows")
     assert survivor.keyword_value("ASSAULT") == 2 and survivor.keyword_value("SHIELD") == 2
     assert siren.has_keyword("DISARM") and siren.has_keyword("GANKING")
+
+
+# -- Part 3 (BACKLOG.md D, Radiance RAD-113..T02) ---------------------------------
+
+def _answer(loop, target=None, yes=True):
+    """Target choices pick the unit or card called `target`; every "you may" is `yes`."""
+    def chooser(_loop, kind, side, options, default, source):
+        if kind.startswith("optional:"):
+            return options.index(yes) if yes in options else None
+        if target is not None and kind.startswith(("target", "card")):
+            return next((i for i, o in enumerate(options)
+                         if getattr(getattr(o, "card", o), "name", None) == target), None)
+        return None
+    loop.chooser = chooser
+
+
+def _no_usable(loop, side, effect):
+    p = loop.gs.get_player(side)
+    return not any(e.get("eff") is not None and e["eff"].effect == effect and loop._ability_usable(p, e)
+                   for e in loop.activatable_abilities(side))
+
+
+def test_riven_deserter_grows_when_another_friend_exhausts():
+    """'When another friendly unit becomes exhausted, give me +1 [might] this turn.'"""
+    loop, a, b = _setup()
+    riven, friend = _unit("Riven Deserter"), _unit("Friend", 2)
+    a.base_units.extend([riven, friend])
+    loop._exhaust(riven)
+    assert riven.might == 5
+    loop._exhaust(friend)
+    assert riven.might == 6
+
+
+def test_riven_deserter_exhausts_a_friend_to_ready_a_unit_once_a_turn():
+    """'Exhaust a friendly unit: Ready a unit. Use this ability only once each turn.'"""
+    loop, a, b = _setup()
+    riven, friend, tired = _unit("Riven Deserter"), _unit("Friend", 2), _tired("Tired", 3)
+    a.base_units.extend([riven, friend, tired])
+    _answer(loop, "Tired")
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "ready_unit"))
+    assert tired.ready and not friend.ready and riven.might == 6
+    assert _no_usable(loop, "A", "ready_unit")
+
+
+def test_transpositionist_returns_a_friend_and_plays_a_smaller_unit_free():
+    """'[chaos], [tap]: Return a friendly unit to its owner's hand. You may play a
+    unit with less Might than that unit had, ignoring its cost.'"""
+    loop, a, b = _setup()
+    trans, big = _unit("Transpositionist"), _unit("Big", 5)
+    a.base_units.extend([trans, big])
+    small, same = UnitCard(name="Small", might=4, cost_energy=9), UnitCard(name="Same", might=5, cost_energy=9)
+    a.hand.extend([same, small])
+    _answer(loop, "Big")
+    chaos = a.power_pool[Domain.CHAOS]
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "recall_unit"))
+    assert big.card in a.hand and same in a.hand and small not in a.hand
+    assert any(u.card is small for u in a.base_units)
+    assert a.energy == 20 and a.power_pool[Domain.CHAOS] == chaos - 1 and not trans.ready
+
+
+def test_concert_poster_pays_one_for_a_recruit_on_play_and_on_conquer():
+    """'When you play this or when you conquer here, you may pay [1] to play a 1
+    [might] Recruit unit token to your base.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    loop._play_gear(_card("Concert Poster"), "A", 0)
+    assert [u.card.name for u in a.base_units] == ["Recruit"] and a.energy == 19
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Conqueror", 1))
+    loop._fire_scoring_trigger("on_conquer", bf, "A")
+    assert [u.card.name for u in a.base_units] == ["Recruit", "Recruit"] and a.energy == 18
+
+
+def test_for_demacia_gives_friends_at_one_battlefield_shield_two():
+    """'Choose a battlefield. Give friendly units there SHIELD 2 this turn.'"""
+    loop, a, b = _setup()
+    here, there, home = _unit("Here", 2), _unit("There", 2), _unit("Home", 2)
+    loop.gs.battlefields[0].add_unit("A", here)
+    loop.gs.battlefields[1].add_unit("A", there)
+    a.base_units.append(home)
+    _cast_now(loop, a, "For Demacia!")
+    assert here.keyword_value("SHIELD") == 2
+    assert not there.has_keyword("SHIELD") and not home.has_keyword("SHIELD")
+
+
+def test_herald_of_the_emperor_makes_a_friends_base_might_five():
+    """'When you play me, choose a friendly unit. Its base Might becomes 5 this turn.'"""
+    loop, a, b = _setup()
+    small = _unit("Small", 1)
+    a.base_units.append(small)
+    loop._play_unit(_card("Herald of the Emperor"), "A")
+    loop._recompute_passives()
+    assert small.might == 5
+
+
+def test_hunting_dog_leaves_a_deflect_bird():
+    """'DEATHKNELL Play a 1 [might] Bird unit token with DEFLECT to your base.'"""
+    loop, a, b = _setup()
+    dog = _unit("Hunting Dog")
+    loop.gs.battlefields[0].add_unit("A", dog)
+    _die(loop, dog)
+    bird = next(u for u in a.base_units if u.card.name == "Bird")
+    assert bird.might == 1 and bird.has_keyword("DEFLECT")
+
+
+def test_one_two_punch_buffs_a_friend_and_stuns_an_enemy():
+    """'BUFF a friendly unit and STUN an enemy unit.'"""
+    loop, a, b = _setup()
+    friend, enemy = _unit("Friend", 2), _unit("Enemy", 3)
+    loop.gs.battlefields[0].add_unit("A", friend)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    _cast_now(loop, a, "One-Two Punch")
+    assert friend.might == 3 and enemy.stunned
+
+
+def test_burn_away_banishes_a_small_unit_or_a_gear_and_burns_two():
+    """'Banish a unit with 3 [might] or less or a gear. BURN 2.'"""
+    loop, a, b = _setup()
+    gear = GearCard(name="Their Gear", cost_energy=4)
+    b.base_gear.append(gear)
+    big = _unit("Big", 5)
+    loop.gs.battlefields[0].add_unit("B", big)
+    _deck(a, *[SpellCard(name=f"S{i}") for i in range(3)])
+    _cast_now(loop, a, "Burn Away")
+    assert gear in b.banished and not b.base_gear and big in loop.gs.battlefields[0].units_B
+    assert len(a.trash) == 2 and len(a.deck.cards) == 1
+    loop, a, b = _setup()
+    small = _unit("Small", 3)
+    loop.gs.battlefields[0].add_unit("B", small)
+    _cast_now(loop, a, "Burn Away")
+    assert small.card in b.banished and not loop.gs.battlefields[0].units_B
+
+
+def test_mournful_spirit_may_kill_a_unit_or_gear_here():
+    """'DEATHKNELL You may kill a unit or gear here.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    spirit, here, there = _unit("Mournful Spirit"), _unit("Here", 2), _unit("There", 1)
+    loop.gs.battlefields[0].add_unit("A", spirit)
+    loop.gs.battlefields[0].add_unit("B", here)
+    loop.gs.battlefields[1].add_unit("B", there)
+    _die(loop, spirit)
+    assert here.card in b.trash and there in loop.gs.battlefields[1].units_B
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    spirit, there = _unit("Mournful Spirit"), _unit("There", 1)
+    loop.gs.battlefields[0].add_unit("A", spirit)
+    loop.gs.battlefields[1].add_unit("B", there)
+    standard = _card("Demacian Standard")
+    loop._play_gear(standard, "B", 0)
+    _die(loop, spirit)
+    assert standard in b.trash and there in loop.gs.battlefields[1].units_B
+
+
+def test_rousing_display_plays_two_recruits_or_four_showing_off():
+    """'SHOW OFF a card with Energy cost [7] or more. Play two 1 [Might] Recruit
+    unit tokens to your base. If you showed off, play four to your base instead.'"""
+    loop, a, b = _setup()
+    _cast_now(loop, a, "Rousing Display")
+    assert [u.card.name for u in a.base_units] == ["Recruit"] * 2
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    a.hand.append(UnitCard(name="Big", might=7, cost_energy=7))
+    loop._cast_spell_now(_card("Rousing Display"), "A")
+    assert [u.card.name for u in a.base_units] == ["Recruit"] * 4
+
+
+def test_steadfast_outrider_counts_other_units_and_gear_at_its_battlefield():
+    """'While there are 2 or more other friendly units and/or gear at my
+    battlefield, I have +2 [might].'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    rider = _unit("Steadfast Outrider")
+    bf.add_unit("A", rider)
+    bf.add_unit("A", _unit("F1", 1))
+    loop._recompute_passives()
+    assert rider.might == 3
+    loop._play_gear(_card("Demacian Standard"), "A", 0)
+    loop._recompute_passives()
+    assert rider.might == 5
+    loop, a, b = _setup()
+    rider = _unit("Steadfast Outrider")
+    a.base_units.extend([rider, _unit("F1", 1), _unit("F2", 1)])
+    loop._recompute_passives()
+    assert rider.might == 3
+
+
+def test_demacian_illuminators_buff_once_when_units_die_together():
+    """'When one or more friendly units die, BUFF a friendly unit.'"""
+    loop, a, b = _setup()
+    illum = _unit("Demacian Illuminators")
+    a.base_units.append(illum)
+    bf = loop.gs.battlefields[0]
+    d1, d2 = _unit("D1", 1), _unit("D2", 1)
+    loop._route_deaths([(d1, "A"), (d2, "A")], bf)
+    assert illum.might_counters == 1
+
+
+def test_jarvan_royal_heir_brings_a_friend_when_he_attacks():
+    """'ASSAULT, TANK. When I attack, you may move a unit you control to my battlefield.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    bf = loop.gs.battlefields[0]
+    jarvan, friend = _unit("Jarvan IV Royal Heir"), _unit("Friend", 2)
+    bf.add_unit("A", jarvan)
+    a.base_units.append(friend)
+    bf.add_unit("B", _unit("Defender", 1))
+    _attack_at(loop)
+    assert friend in bf.units_A and jarvan.has_keyword("TANK")
+
+
+def test_raucous_anthem_readies_all_your_units_and_gives_three():
+    """'Ready your units and give them +3 [Might] this turn.'"""
+    loop, a, b = _setup()
+    here, home = _tired("Here", 2), _tired("Home", 2)
+    loop.gs.battlefields[1].add_unit("A", here)
+    a.base_units.append(home)
+    _cast_now(loop, a, "Raucous Anthem")
+    assert here.ready and home.ready and (here.might, home.might) == (5, 5)
+
+
+def test_remember_the_fallen_plays_three_cheap_units_or_gear_from_the_trash():
+    """'Play up to 3 units and/or gear from your trash, each with Energy cost no
+    more than [3] and Power cost no more than [rune], ignoring their costs.'"""
+    loop, a, b = _setup()
+    u1, u2 = UnitCard(name="U1", might=2, cost_energy=3), UnitCard(name="U2", might=1, cost_energy=1)
+    g1, g2 = GearCard(name="G1", cost_energy=2), GearCard(name="G2", cost_energy=1)
+    big = UnitCard(name="Big", might=5, cost_energy=4)
+    a.trash.extend([u1, g1, big, u2, g2])
+    _cast_now(loop, a, "Remember the Fallen")
+    played = [u.card for u in a.base_units] + a.base_gear
+    assert len(played) == 3 and big in a.trash and len(a.trash) == 2
+
+
+def test_dockside_lockup_banishes_a_unit_here_and_plays_it_when_you_hold():
+    """'When you play this, banish a unit here. When you hold here, kill this to
+    play the banished card, ignoring its cost.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    bf = loop.gs.battlefields[0]
+    enemy, far = _unit("Enemy", 4), _unit("Far", 6)
+    bf.add_unit("B", enemy)
+    loop.gs.battlefields[1].add_unit("B", far)
+    lock = _card("Dockside Lock-Up")
+    loop._play_gear(lock, "A", 0)
+    assert enemy.card in b.banished and not bf.units_B and far in loop.gs.battlefields[1].units_B
+    bf.add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", bf, "A")
+    assert lock in a.trash and not bf.gear_A and enemy.card not in b.banished
+    assert any(u.card is enemy.card for u in loop._friendly_units_of("A"))
+
+
+def test_mordekaiser_dominating_discards_to_kill_a_unit_or_gear():
+    """'When you play me or when I attack, you may discard 1 to kill a unit or gear.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    gear = GearCard(name="Their Gear", cost_energy=4)
+    b.base_gear.append(gear)
+    loop._play_unit(_card("Mordekaiser Dominating"), "A")
+    assert gear in b.base_gear                       # nothing to discard
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    gear = GearCard(name="Their Gear", cost_energy=4)
+    b.base_gear.append(gear)
+    a.hand.append(SpellCard(name="Junk"))
+    loop._play_unit(_card("Mordekaiser Dominating"), "A")
+    assert gear in b.trash and [c.name for c in a.trash] == ["Junk"]
+
+
+def test_seraphine_not_alone_makes_recruits_and_counts_exhausted_friends():
+    """'When you play me or when I become exhausted, play a 1 [might] Recruit unit
+    token to your base. I have +1 [might] for each other exhausted unit you control.'"""
+    loop, a, b = _setup()
+    sera = loop._play_unit(_card("Seraphine Not Alone"), "A")
+    sera.ready = True
+    loop._exhaust(sera)
+    assert [u.card.name for u in a.base_units].count("Recruit") == 2
+    a.base_units.extend([_tired("T1", 1), _tired("T2", 1)])
+    loop._recompute_passives()
+    assert sera.might == 5          # T1, T2 and the two Recruits (tokens enter exhausted)
+
+
+def test_ekko_legend_disempowers_to_discount_the_next_unit_which_dies_at_end_of_turn():
+    """'EMPOWER [1], [tap]. Disempower me, [tap]: Reduce the cost of the next
+    unit you play this turn by [2] [rune] and give it "Kill me at end of the turn."'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Ekko Boy Who Shattered Time", empowered=True)
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "discount_next_card"))
+    assert not loop.gs.legend_unit_A.empowered
+    card = UnitCard(name="Next", might=4, cost_energy=5, cost_power=2)
+    assert loop._effective_cost(card, a) == (3, 1)
+    loop._count_card_played(card, "A")
+    unit = loop._play_unit(card, "A")
+    assert loop._effective_cost(UnitCard(name="After", might=1, cost_energy=5), a)[0] == 5
+    loop._resolve_delayed_effects()
+    assert unit not in a.base_units and card in a.trash
+
+
+def test_ziggs_legend_pays_energy_and_power_for_a_bomb():
+    """'[1] [rune], [tap]: Play a Bomb gear token to a battlefield.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Ziggs Hexplosives Expert")
+    power = sum(a.power_pool.values())
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "play_token"))
+    assert len(_bf_gear(loop, "A", "Bomb")) == 1
+    assert a.energy == 19 and sum(a.power_pool.values()) == power - 1
+
+
+def test_realm_of_death_shifts_might_then_the_two_fight():
+    """'Give an enemy unit -2 [might] this turn and a friendly unit +2 [might] this
+    turn. They deal damage equal to their Mights to each other.'"""
+    loop, a, b = _setup()
+    friend, enemy = _unit("Friend", 3), _unit("Enemy", 6)
+    loop.gs.battlefields[0].add_unit("A", friend)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    _cast_now(loop, a, "Realm of Death")
+    assert (friend.might, enemy.might) == (5, 4)
+    assert enemy.card in b.trash and friend.damage == 4
+
+
+def test_ksante_legend_gives_assault_equal_to_shield():
+    """'[1], [tap]: Give a friendly unit "I have ASSAULT equal to my SHIELD" this turn.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("K'Sante Pride of Nazumah")
+    friend = _unit("Friend", 2)
+    loop.gs.battlefields[0].add_unit("A", friend)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "give_keyword"))
+    assert friend.keyword_value("ASSAULT") == 0
+    friend.turn_keywords.append("SHIELD 3")
+    assert friend.keyword_value("ASSAULT") == 3 and a.energy == 19
+
+
+def test_ntofo_strikes_gives_shield_two_then_deals_its_shield():
+    """'Give a friendly unit SHIELD 2 this turn, then deal damage equal to its
+    SHIELD to an enemy unit.'"""
+    loop, a, b = _setup()
+    friend, enemy = _unit("Friend", 2), _unit("Enemy", 5)
+    friend.turn_keywords.append("SHIELD 1")
+    loop.gs.battlefields[0].add_unit("A", friend)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    _cast_now(loop, a, "Ntofo Strikes")
+    assert friend.keyword_value("SHIELD") == 3 and enemy.damage == 3
+
+
+def test_riven_legend_units_played_to_your_battlefields_enter_ready():
+    """'Units you play to battlefields you control enter ready.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Riven The Exile")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Holder", 1))
+    assert loop._play_unit(UnitCard(name="There", might=2), "A", bf=bf).ready
+    assert not loop._play_unit(UnitCard(name="Home", might=2), "A").ready
+
+
+def test_blade_of_the_exile_gives_ganking_and_equips_by_exhausting_a_friend():
+    """'+3 [might]. EQUIP [rune] or exhaust a friendly unit. GANKING.'"""
+    loop, a, b = _setup()
+    unit = _unit("Wearer", 2)
+    a.base_units.append(unit)
+    _equip(unit, "Blade of the Exile")
+    loop._recompute_passives()
+    assert unit.might == 5 and unit.has_keyword("GANKING")
+    loop, a, b = _setup()
+    a.power_pool = {}
+    friend = _unit("Friend", 1)
+    a.base_units.append(friend)
+    cost = loop._equip_cost(_card("Blade of the Exile"))
+    assert loop._can_pay_equip(a, cost) and loop._pay_equip(a, cost) and not friend.ready
+
+
+def test_encore_chooses_two_modes():
+    """'Choose two - Deal 2 to a unit. Play two 1 [Might] Recruit unit tokens.
+    Give up to two units each +1 [Might] this turn. Look at the top 2 cards of
+    your Main Deck, draw 1 and recycle the other.'"""
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 2)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    _deck(a, SpellCard(name="S1"), SpellCard(name="S2"))
+    _cast_now(loop, a, "Encore")
+    recruits = [u for u in loop._friendly_units_of("A") if u.card.name == "Recruit"]
+    done = [enemy.card in b.trash, len(recruits) == 2, len(a.hand) == 1]
+    assert sum(done) == 2
+
+
+def test_evelynn_legend_draws_once_a_turn_from_face_down_and_discards_off_turn():
+    """'Once each turn, when you play a card from face down, draw 1. Then, if
+    it's not your turn, discard 1.'"""
+    loop, a, b = _setup()
+    loop.gs.turn = 3
+    loop.gs.legend_unit_A = _unit("Evelynn Agony's Embrace")
+    _deck(a, *[SpellCard(name=f"S{i}") for i in range(4)])
+    for i in range(2):
+        loop.gs.battlefields[i].add_unit("A", _unit(f"Holder{i}", 1))
+        loop.gs.battlefields[i].facedown = FacedownCard(
+            card=UnitCard(name=f"Hidden{i}", might=1, keywords=["HIDDEN"]), owner="A", turn_hidden=1)
+    assert loop._play_from_hidden("A", 0)
+    assert len(a.hand) == 1 and not a.trash
+    assert loop._play_from_hidden("A", 1)
+    assert len(a.hand) == 1
+    loop, a, b = _setup()
+    loop.gs.turn, loop.gs.active = 3, "B"
+    loop.gs.legend_unit_A = _unit("Evelynn Agony's Embrace")
+    _deck(a, *[SpellCard(name=f"S{i}") for i in range(4)])
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop.gs.battlefields[0].facedown = FacedownCard(
+        card=UnitCard(name="Hidden", might=1, keywords=["HIDDEN"]), owner="A", turn_hidden=1)
+    assert loop._play_from_hidden("A", 0)
+    assert not a.hand and len(a.trash) == 1
+
+
+def test_the_ball_draws_or_hits_enemies_here_when_played():
+    """'When you play or move this, choose one - Draw 1. - Deal 2 to enemy units
+    here.' (As a unit, via Orianna Lady of Clockwork: BACKLOG E.)"""
+    loop, a, b = _setup()
+    e1, e2 = _unit("E1", 2), _unit("E2", 2)
+    loop.gs.battlefields[0].add_unit("B", e1)
+    loop.gs.battlefields[0].add_unit("B", e2)
+    _deck(a, SpellCard(name="S1"))
+    loop._play_gear(_card("The Ball"), "A", 0)
+    assert (e1.card in b.trash and e2.card in b.trash) != (len(a.hand) == 1)

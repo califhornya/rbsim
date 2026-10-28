@@ -1834,10 +1834,15 @@ class GameLoop:
             return actor.total_runes_in_play() >= _threshold()
         if ctype == "you_have_n_or_more_units_here":
             bf = extra.get("battlefield")
-            if bf is None:
-                return False
+            if bf is None or any(u.card is card for u in actor.base_units):
+                return False      # a unit in base isn't at a battlefield
             units = bf.units_A if side == "A" else bf.units_B
-            return len(units) >= _threshold()
+            n = len(units)
+            if params.get("with_gear"):
+                # "2 or more other friendly units and/or gear at my battlefield"
+                # (Steadfast Outrider): deployed gear and gear attached there.
+                n += len(bf.gear_for(side)) + sum(len(u.gear) for u in units)
+            return n >= _threshold()
         if ctype == "spell_cost_at_least":
             # "When you play a spell, if you spent [4] or more" (_fire_spell_played)
             return int(extra.get("triggering_spell_cost", 0)) >= _threshold()
@@ -2289,10 +2294,12 @@ class GameLoop:
         kill_friendly = bool(re.search(r"(?i)kill a friendly", clause))
         xp = re.search(r"(?i)spend\s+(\d+)\s*xp", clause)
         spend_xp = int(xp.group(1)) if xp else 0
+        # "EQUIP [rune] or exhaust a friendly unit" (Blade of the Exile): either.
+        or_exhaust = bool(re.search(r"(?i)\bor exhaust a friendly unit", clause))
         # `complex` now means an extra cost we still can't model (none currently).
         return {"energy": energy, "domain_power": domain_power, "generic": generic,
                 "recycle": recycle, "kill_friendly": kill_friendly,
-                "spend_xp": spend_xp, "complex": False}
+                "spend_xp": spend_xp, "or_exhaust": or_exhaust, "complex": False}
 
     @staticmethod
     def _equip_cost_minus_A(cost: dict) -> dict:
@@ -2311,6 +2318,11 @@ class GameLoop:
         return c
 
     def _can_pay_equip(self, ap: Player, cost: dict) -> bool:
+        if cost.get("or_exhaust") and not self._can_pay_equip_resources(ap, cost):
+            return self._unit_to_exhaust("A" if ap is self.gs.A else "B", None) is not None
+        return self._can_pay_equip_resources(ap, cost)
+
+    def _can_pay_equip_resources(self, ap: Player, cost: dict) -> bool:
         # Ornn's earmarked gear-power (generic) may cover any power position.
         earmark = ap.earmarked_power_gear
         if ap.energy < cost["energy"]:
@@ -2338,6 +2350,14 @@ class GameLoop:
         if not self._can_pay_equip(ap, cost):
             return False
         side = "A" if ap is self.gs.A else "B"
+        if cost.get("or_exhaust"):
+            # The Power when it can be paid (baseline), else the friendly unit.
+            unit = self._unit_to_exhaust(side, None)
+            pay = self._can_pay_equip_resources(ap, cost)
+            if unit is not None and (not pay or self.choose("equip_cost", side, ["power", "exhaust"],
+                                                            "power", None) == "exhaust"):
+                self._exhaust(unit)
+                return True
         ap.energy -= cost["energy"]
         # Spend earmarked gear-power first (generic portion, then domain portions).
         gen = cost["generic"]
@@ -3400,6 +3420,8 @@ class GameLoop:
         discount = self._next_card_discount(card, side)
         if discount is not None:
             gs.next_card_discounts[side].remove(discount)   # "the next card": used up
+            if discount.get("then"):
+                gs.delayed_effects.append((side, card, 0, dict(discount["then"])))
         gs.played_cards_this_turn[side].append(card)
         gs.cards_played_this_turn[side] = gs.cards_played_this_turn.get(side, 0) + 1
         if isinstance(card, SpellCard):
@@ -4915,6 +4937,8 @@ class GameLoop:
             return False   # "Disempower me" needs me empowered
         if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
             return False
+        if parsed["exhaust_friendly_unit"] and self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"]) is None:
+            return False   # "Exhaust a friendly unit: ..." (Riven Deserter)
         if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
             return False
         if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
@@ -5051,6 +5075,10 @@ class GameLoop:
             self._exhaust(unit)
         if parsed["disempower"] and unit is not None:
             unit.empowered, unit.empower_times = False, 0
+        if parsed["exhaust_friendly_unit"]:
+            other = self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"])
+            if other is not None:
+                self._exhaust(other)
         self._recycle_from_trash(ap, parsed["recycle"])
         self._pay_discard_and_banish(ap, parsed, unit)
         if parsed["spend_xp"]:

@@ -159,11 +159,19 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Modal "choose one" (§ modal): the actor picks one mode; its sub-effect(s)
     resolve. A mode is either a single effect dict or a list of effect dicts.
     An agent's decide_mode picks; without a preference the baseline tries each
-    mode on a copy of the game and takes the best (_best_mode)."""
+    mode on a copy of the game and takes the best (_best_mode). `choose: N`
+    ("Choose two", Encore): N different modes, one after another."""
     modes = spec.get("modes") or []
     if not modes:
         return
-    free = [j for j in range(len(modes)) if _mode_payable(ctx, modes[j])]
+    taken: set = set()
+    for _ in range(max(1, int(spec.get("choose", 1) or 1))):
+        if not _choose_one_mode(ctx, spec, modes, taken):
+            return
+
+
+def _choose_one_mode(ctx: "EffectContext", spec: Mapping[str, Any], modes: list, taken: set) -> bool:
+    free = [j for j in range(len(modes)) if j not in taken and _mode_payable(ctx, modes[j])]
     used = None
     if spec.get("unique_per_turn"):
         # "Choose one that hasn't been chosen this turn" (Aphelios). Keyed by the
@@ -171,7 +179,7 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         used = ctx.loop.gs.modes_chosen.setdefault((ctx.card, ctx.loop.gs.turn), set())
         free = [j for j in free if j not in used]
     if not free:
-        return
+        return False
     agent = getattr(ctx.actor, "agent", None)
     i = None
     if agent is not None and hasattr(agent, "decide_mode"):
@@ -186,7 +194,9 @@ def _mode_choice(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     i = ctx.loop.choose("mode", ctx.actor_side, free, free[free.index(i)], ctx.card)
     if used is not None:
         used.add(i)
+    taken.add(i)
     _run_mode(ctx, modes[i])
+    return True
 
 
 def _mode_payable(ctx: "EffectContext", mode) -> bool:
@@ -296,11 +306,14 @@ def _at_end_of_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("discount_next_card")
 def _discount_next_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "The next card (spell, ...) you play this turn costs [energy] [power]
-    less" (Astral Heron, Raging Firebrand): used by that card (filter)."""
+    less" (Astral Heron, Raging Firebrand): used by that card (filter). `then`:
+    an effect that card gets at the end of the turn ("give it 'Kill me at end of
+    the turn'": Ekko Boy Who Shattered Time)."""
     ctx.loop.gs.next_card_discounts[ctx.actor_side].append({
         "filter": dict(spec.get("filter") or {}),
         "energy": int(spec.get("energy", 0)),
         "power": int(spec.get("power", 0)),
+        "then": dict(spec["then"]) if spec.get("then") else None,
     })
 
 
@@ -323,10 +336,14 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     "self" ("We deal ...", Carnivorous Snapvine) or "any" (Clash of Giants:
     "two units", two enemies when there are two). The enemy is at a
     battlefield. Baseline pick: the enemy our unit kills without dying, else
-    one it kills, else one it survives, mightiest first; our mightiest unit."""
+    one it kills, else one it survives, mightiest first; our mightiest unit.
+    `friendly_might` / `enemy_might`: "Give an enemy unit -2 [might] this turn
+    and a friendly unit +2 [might] this turn. They deal damage ..." (Realm of
+    Death), given to the two chosen before they deal it."""
     loop = ctx.loop
     gs = loop.gs
     me, them = ctx.actor_side, ctx.opponent_side
+    mod_a, mod_b = int(spec.get("friendly_might", 0)), int(spec.get("enemy_might", 0))
     enemies = _choosable(ctx, [u for bf in gs.battlefields for u in bf._units_for(them)])
     first = str(spec.get("first", "friendly")).lower()
     if first == "any" and len(enemies) >= 2:
@@ -348,11 +365,15 @@ def _fight(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             return
 
         def value(e):
-            kills = a.might >= e.might - e.damage
-            survives = e.might < a.might - a.damage
+            kills = a.might + mod_a >= e.might + mod_b - e.damage
+            survives = e.might + mod_b < a.might + mod_a - a.damage
             return (kills and survives, kills, survives, e.might)
         b = loop.choose(_kind("target", spec), me, enemies, max(enemies, key=value), ctx.card)
     loop._note_chosen(ctx.card, me, [a, b])
+    for unit, amount in ((b, mod_b), (a, mod_a)):
+        if amount:
+            ctx.extra["it"] = [unit]
+            REGISTRY["grant_temporary_might"](ctx, {"target": "it", "amount": amount, "duration": "this_turn"})
     a_might, b_might = a.might, b.might
     ctx.damage_units([b], a_might)
     ctx.damage_units([a], b_might)
@@ -868,7 +889,8 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Banish an enemy unit at a battlefield with 3 Might or less" (Mel Defiant
     Soul): off the board into its owner's banishment — it doesn't die (no
     DEATHKNELL, not to the trash); a token just ceases to exist, its gear goes
-    to the trash."""
+    to the trash. `with_this`: the card is "banished with this" (Dockside
+    Lock-Up, played back by play_banished_with_this)."""
     loop = ctx.loop
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")},
                                  bias="enemy"):
@@ -883,6 +905,8 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         unit.gear.clear()
         if not unit.is_token:
             owner.banished.append(unit.card)
+            if spec.get("with_this"):
+                ctx.card._banished_with = list(getattr(ctx.card, "_banished_with", [])) + [unit.card]
 
 
 @effect("replay_self_to_base")
@@ -1450,7 +1474,14 @@ def _banish_with_this(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("play_banished_with_this")
 def _play_banished_with_this(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "[3] [mind], Banish this: Play all units banished with this, ignoring
-    their costs" (The Zero Drive)."""
+    their costs" (The Zero Drive). `kill_this`: "kill this to play the banished
+    card" (Dockside Lock-Up), only while one is still banished."""
+    waiting = [c for c in getattr(ctx.card, "_banished_with", [])
+               if any(x is c for p in (ctx.actor, ctx.opponent) for x in p.banished)]
+    if spec.get("kill_this"):
+        if not waiting:
+            return
+        _kill_gear(ctx, {"target": "self"})
     for card in list(getattr(ctx.card, "_banished_with", [])):
         for p in (ctx.actor, ctx.opponent):
             if any(c is card for c in p.banished):
@@ -1813,23 +1844,64 @@ def _public_execution(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("kill_unit_or_gear")
 def _kill_unit_or_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Kill an enemy Chaos unit or gear" (Decree of Unity): one choice among
-    both; baseline the mightiest unit, else the priciest gear."""
+    both; baseline the mightiest unit, else the priciest gear. `side: any` ("a
+    unit or gear", Mordekaiser Dominating: an enemy one is the baseline, none
+    when only friendly ones are left), `where: here` (Mournful Spirit), `banish`
+    ("Banish a unit with 3 [might] or less or a gear": Burn Away; the filter's
+    Might is the unit's)."""
     loop = ctx.loop
     tf = spec.get("target_filter") or {}
-    units = [u for u in _choosable(ctx, _units_at(ctx, ctx.opponent_side, "anywhere")) if _passes_filter(u, tf, ctx)]
-    gear = [getattr(e[2], "card", e[2]) for e in _gear_entries(ctx, enemy_first=True)
-            if e[0] == ctx.opponent_side and _gear_matches(e[2], tf)]
-    if not units and not gear:
+    here = spec.get("where") == "here"
+    sides = (ctx.opponent_side, ctx.actor_side) if spec.get("side") == "any" else (ctx.opponent_side,)
+    units, gear = [], []
+    for side in sides:
+        units += [u for u in _choosable(ctx, _units_at(ctx, side, "here" if here else "anywhere"))
+                  if _passes_filter(u, tf, ctx)]
+        gear += [getattr(e[2], "card", e[2]) for e in _gear_entries(ctx, enemy_first=True)
+                 if e[0] == side and _gear_matches(e[2], tf)
+                 and (not here or e[1] is ctx.battlefield
+                      or (isinstance(e[1], UnitInPlay) and e[1] in ctx.battlefield._units_for(side)))]
+    enemy_units = [u for u in units if loop._locate_unit(u)[0] == ctx.opponent_side]
+    enemy_gear = [g for g in gear if any(getattr(e[2], "card", e[2]) is g and e[0] == ctx.opponent_side
+                                         for e in _gear_entries(ctx, enemy_first=True))]
+    if not enemy_units and not enemy_gear:
         return
-    default = max(units, key=lambda u: u.might) if units else max(gear, key=_zone_value)
+    default = max(enemy_units, key=lambda u: u.might) if enemy_units else max(enemy_gear, key=_zone_value)
     pick = loop.choose(_kind("target", spec), ctx.actor_side, units + gear, default, ctx.card)
     if any(pick is g for g in gear):
-        _kill_gear(ctx, {"target": "chosen_gear", "_only": pick})
+        if spec.get("banish"):
+            _banish_gear(ctx, pick)
+        else:
+            _kill_gear(ctx, {"target": "chosen_gear", "_only": pick})
+        return
+    if spec.get("banish"):
+        ctx.extra["it"] = [pick]
+        _banish_unit(ctx, {"target": "it"})
         return
     where = _take_off_board(ctx, pick)
     if where is not None:
         loop._route_deaths([(pick, where[0])], where[1] or ctx.battlefield, in_base=where[1] is None,
                            killer=(ctx.actor_side, ctx.card))
+
+
+def _banish_gear(ctx: "EffectContext", gear) -> None:
+    """A gear in play goes to its owner's banishment (a token ceases to exist);
+    it doesn't die."""
+    entry = next(((s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True)
+                  if getattr(g, "card", g) is gear), None)
+    if entry is None:
+        return
+    side, holder, g = entry
+    owner = ctx.loop.gs.get_player(side)
+    if isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(g)
+    elif holder is not None:
+        holder.gear.remove(g)
+    else:
+        owner.base_gear.remove(g)
+    if not getattr(gear, "is_token", False):
+        owner.banished.append(gear)
+    ctx.loop._fire_leaves_board(gear, side, holder if isinstance(holder, Battlefield) else ctx.battlefield)
 
 
 @effect("look_recycle")
@@ -3870,6 +3942,14 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         # "Ready a friendly unit. It deals damage equal to its Might" (Last Breath)
         it = [u for u in ctx.extra.get("it") or [] if ctx.loop._locate_unit(u) is not None]
         return it[0].might if it else 0
+    if src == "it_shield":
+        # "Give a friendly unit SHIELD 2, then deal damage equal to its SHIELD" (Ntofo Strikes)
+        it = [u for u in ctx.extra.get("it") or [] if ctx.loop._locate_unit(u) is not None]
+        return it[0].keyword_value("SHIELD") if it else 0
+    if src == "other_friendly_exhausted_units":
+        # "+1 [might] for each other exhausted unit you control" (Seraphine Not Alone)
+        me = _source_unit(ctx)
+        return sum(1 for u in _friendly_units(ctx) if not u.ready and u is not me)
     if src == "gear_you_control":
         loop = ctx.loop
         return len(ctx.actor.base_gear) + len(loop._controlled_attached_gear(ctx.actor_side)) + \
@@ -4073,14 +4153,18 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     'return ... to its owner's hand': the card leaves play (tokens cease to
     exist) and attached gear is recovered to the owner's base. "Return a
     unit" (Rebuke, Gust): an enemy first. `to: deck_bottom`: recycled instead
-    ("recycle me": Elnuk Herd)."""
+    ("recycle me": Elnuk Herd). `then_play_smaller`: "You may play a unit with
+    less Might than that unit had, ignoring its cost" (Transpositionist)."""
     gs = ctx.loop.gs
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}, bias="enemy"):
         if ctx.loop._gangplank_redirect(unit, spec):
             continue
+        had = unit.might
         where = _take_off_board(ctx, unit)          # a base or any battlefield
         if where is None:
             continue
+        if spec.get("then_play_smaller"):
+            ctx.extra["recalled_might"] = had
         side, bf = where
         owner = gs.get_player(side)
         owner.base_gear.extend(unit.gear)
@@ -4094,6 +4178,15 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             unit.card._owner = None
         # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
         ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
+    if spec.get("then_play_smaller") and "recalled_might" in ctx.extra:
+        had = ctx.extra.pop("recalled_might")
+        options = [c for c in ctx.actor.hand if _card_category_name(c) in ("UNIT", "CHAMPION")
+                   and int(getattr(c, "might", 0) or 0) < had]
+        if options and ctx.loop.choose("optional:play_smaller", ctx.actor_side, [True, False], True, ctx.card):
+            card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, options,
+                                   max(options, key=_zone_value), ctx.card)
+            ctx.actor.hand.remove(card)
+            ctx.loop._play_unit(card, ctx.actor_side, from_zone="hand")
 
 
 def _units_at(ctx: "EffectContext", side: str, where: str) -> list:
