@@ -308,6 +308,8 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
             text, src = f"Gioca {e['card'].name} dal cimitero (FLOW)", f"trash:{rel}"
         elif e.get("type") == "banished_play":
             text, src = f"Gioca {e['card'].name} dalle carte bandite", f"banished:{rel}"
+        elif e.get("type") == "trash_play":
+            text, src = f"Gioca {e['card'].name} dal cimitero", f"trash:{rel}"
         elif e.get("type") == "gear_ability":
             text, src = f"Usa {e['gear'].name}", _card_ref(gs, viewer, e["gear"])
         elif e.get("type") == "bf_ability":

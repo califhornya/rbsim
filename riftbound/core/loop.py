@@ -45,7 +45,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
     "on_friendly_moves_from_here", "on_attached", "on_enemy_attack", "on_you_defend",
     "on_unit_dies_here", "granted_to_units_here", "on_recycle_rune", "trash_on_conquer",
-    "on_buff_spent", "on_friendly_becomes_mighty", "on_revealed",
+    "on_buff_spent", "on_friendly_becomes_mighty", "on_revealed", "on_you_move_enemy", "from_trash",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -82,7 +82,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "in_beginning_phase", "triggering_unit_here", "has_all_pet_tags", "signpost_possible",
     "friendly_mighty_unit_here", "spell_spent_this_turn_at_least", "none_played_this_turn",
     "enemy_unit_died_this_turn", "any_gear_in_play", "attached_this_turn", "died_in_combat",
-    "gear_with_cost_at_most_in_play", "this_unattached",
+    "gear_with_cost_at_most_in_play", "this_unattached", "unit_died_this_turn",
+    "friendly_died_in_beginning_phase", "played_from_hand",
     "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
     "target_was_stunned",
@@ -762,6 +763,16 @@ class GameLoop:
                                                 context_extra={"battlefield": bf})
         elif trigger == "on_hold":
             self.gs.hold_points_this_turn[side] = self.gs.hold_points_this_turn.get(side, 0) + 1
+        marker = "double_conquer_here" if trigger == "on_conquer" else "double_hold_here"
+        times = 1 + sum(1 for u in bf._units_for(side) if self._has_effect(u.card, marker))
+        for _ in range(times):
+            self._scoring_effects(trigger, bf, side, actor, opponent)
+
+    def _scoring_effects(self, trigger: str, bf: Battlefield, side: str, actor: Player,
+                         opponent: Player) -> None:
+        """The conquer / hold effects of one scoring: the units there (HUNT
+        included), their gear, the hostage, the legend, deployed gear, the
+        battlefield."""
         units = list(bf.units_A if side == "A" else bf.units_B)
         for unit in units:
             # HUNT keyword grants XP on Conquer or Hold.
@@ -1494,6 +1505,15 @@ class GameLoop:
                 for u in self._friendly_units_of(side):
                     u.passive_might += u.might_counters
         for bf in self.gs.battlefields:
+            # "Enemy units here with less Might than me don't deal combat
+            # damage" (Vilemaw).
+            for side in ("A", "B"):
+                for v in bf._units_for(side):
+                    if self._has_effect(v.card, "weaker_enemies_no_damage"):
+                        for e in bf._units_for(self.gs.other(side)):
+                            if e.might < v.might:
+                                e.no_combat_damage = True
+        for bf in self.gs.battlefields:
             # "Stunned enemy units here have -8 [might], to a minimum of 1
             # [might]" (Leona Zealot), after every other Might change.
             for side in ("A", "B"):
@@ -1819,6 +1839,15 @@ class GameLoop:
             return bool(getattr(card, "_kicker_paid", False))
         if ctype == "showed_off":
             return bool(getattr(card, "_showed_off", False))
+        if ctype == "unit_died_this_turn":
+            # "If a unit died this turn" (Towering Pairofant): either side's.
+            return any(self.gs.friendly_unit_died_this_turn.get(x, False) for x in ("A", "B"))
+        if ctype == "friendly_died_in_beginning_phase":
+            # "If a friendly unit died during your Beginning Phase this turn" (Shadow Watcher)
+            return self.gs.died_in_beginning.get(side) == self.gs.turn
+        if ctype == "played_from_hand":
+            # "If you played this from your hand" (Back Off)
+            return getattr(card, "_played_from", "hand") == "hand"
         if ctype == "this_unattached":
             # "(Use only if unattached.)" (The Zero Drive)
             return any(g is card for g in actor.base_gear)
@@ -2144,7 +2173,7 @@ class GameLoop:
             elif es.params.get("amount_source"):
                 ctx = EffectContext(self, card, actor, opponent, self.gs.battlefields[0])
                 per = int(es.params.get("amount", 1) or 1)
-                total += per * _effect_amount(ctx, {"amount_source": es.params["amount_source"]})
+                total += per * _effect_amount(ctx, dict(es.params))
             else:
                 total += int(es.params.get("amount", 0))
             if not power and es.params.get("min_cost") is not None:
@@ -2793,8 +2822,11 @@ class GameLoop:
             elif power:
                 power -= 1
 
+        xp = int(ac.get("spend_xp", 0) or 0)
         # --- affordability check (no mutation yet) ---
         if not self._can_pay_energy_and_generic(ap, energy, power, domain):
+            return False
+        if xp and self.gs.get_xp(side_) < xp:
             return False
         # Never discard the very card being played (it may still be in hand).
         in_hand = any(c is card for c in ap.hand)
@@ -2812,6 +2844,8 @@ class GameLoop:
         # --- payment ---
         if not self._pay_energy_and_generic(ap, energy, power, domain):
             return False
+        if xp:
+            self.gs.add_xp(side_, -xp)          # Safety Inspector
         for _ in range(discard_n):
             idx = next((i for i, c in enumerate(ap.hand) if c is not card), None)
             if idx is None:
@@ -3034,7 +3068,11 @@ class GameLoop:
 
     def _adjust_ability_cost(self, unit, eff, parsed: dict, side: str) -> dict:
         """ "EMPOWER costs of your units here cost [1] or [Rune] less" (Risen
-        Altar): Energy first, else Power."""
+        Altar): Energy first, else Power. "This ability costs [1] less for each
+        friendly unit with TEMPORARY" (Lillia Bashful Bloom)."""
+        if eff.params.get("less_per_temporary"):
+            n = sum(1 for u in self._friendly_units_of(side) if u.has_keyword("TEMPORARY"))
+            parsed = dict(parsed, energy=max(0, parsed["energy"] - n))
         if eff.effect != "empower_self" or unit is None:
             return parsed
         where = self._locate_unit(unit)
@@ -3529,6 +3567,7 @@ class GameLoop:
         if self.gs.next_spell_bonus.get(side) == self.gs.turn:
             card._bonus_damage_turn = self.gs.turn      # Ravenborn Tome
             del self.gs.next_spell_bonus[side]
+        card._played_from = from_zone
         if from_zone == "hand":
             # What its cost was reduced by spending (Wallop's buff): spent now.
             self._spend_cost_extras(self._cost_extras(card, side), side, card)
@@ -3615,9 +3654,17 @@ class GameLoop:
         return unit
 
     def _rally(self, unit: UnitInPlay, side: str) -> None:
-        """ "When a friendly unit is played this turn, buff it" (Rally the Troops)."""
+        """ "When a friendly unit is played this turn, buff it" (Rally the Troops);
+        "the next time you play a unit this turn, ready it and BUFF it" (Nami
+        Headstrong)."""
         if self.gs.rally_turn.get(side) == self.gs.turn and unit.might_counters < 1:
             unit.might_counters = 1
+        if self.gs.next_unit_ready_buff.get(side) == self.gs.turn:
+            del self.gs.next_unit_ready_buff[side]
+            if self._can_ready(unit):
+                unit.ready = True
+            if unit.might_counters < 1:
+                unit.might_counters = 1
 
     def _unit_played_here(self, bf: Battlefield, side: str, unit: UnitInPlay) -> None:
         """ "When a player plays a unit here" (Valley of Idols)."""
@@ -4254,6 +4301,12 @@ class GameLoop:
                     "action" if card.has_keyword("ACTION") else None
                 if timing in allowed:
                     out.append({"type": "flow", "card": card})
+        # "You may play me from your trash for [3] [fury]" (Undying Legion);
+        # "you may play this from your trash for [rune]" (Death from Below).
+        for card in ap.trash:
+            for cost, cond in self._trash_plays(card):
+                if self._card_timing(card) in allowed:
+                    out.append({"type": "trash_play", "card": card, "cost": cost, "cond": cond})
         # "Banish the top card of your Main Deck. Until your next Ending Phase,
         # you may play that card." (Runeblade Anvil, Akali Brash)
         for card in ap.banished:
@@ -4286,6 +4339,17 @@ class GameLoop:
         QUICK-DRAW" (Jax Unmatched)."""
         return isinstance(card, GearCard) and (card.has_keyword("QUICK-DRAW") or (
             self._equip_cost(card) is not None and self._side_has_passive(side, "equipment_quick_draw")))
+
+    def _trash_plays(self, card: Card) -> list:
+        """(cost, condition) for each way `card` may be played from its owner's
+        trash: a `from_trash` entry, or a grant this turn (card._trash_replay)."""
+        spec = CARD_REGISTRY.get(card.name)
+        out = [(es.cost or {}, es.condition) for es in (spec.effects if spec else ())
+               if es.trigger == "from_trash"]
+        grant = getattr(card, "_trash_replay", None)
+        if grant is not None and grant[0] == self.gs.turn:
+            out.append((grant[1], None))
+        return out
 
     def _banished_playable(self, card: Card, side: str) -> bool:
         return (getattr(card, "_banish_play_side", None) == side
@@ -4422,6 +4486,16 @@ class GameLoop:
         if entry["type"] == "flow":
             return self._can_pay_flow(ap, entry["card"], side) and \
                 self._spell_has_targets(entry["card"], side, self._zone_play_lane())
+        if entry["type"] == "trash_play":
+            card = entry["card"]
+            parsed = self._parse_activated_cost(entry["cost"])
+            if not any(c is card for c in ap.trash) or self._play_forbidden(ap, card):
+                return False
+            if not self._check_condition(entry["cond"], card, ap, self.gs.get_player(self.gs.other(side)), {}):
+                return False
+            if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
+                return False
+            return self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
         if entry["type"] == "banished_play":
             card = entry["card"]
             if card not in ap.banished or not self._banished_playable(card, side):
@@ -4734,6 +4808,15 @@ class GameLoop:
         if entry["type"] == "banished_play":
             self._play_banished(ap, entry["card"], side)
             return
+        if entry["type"] == "trash_play":
+            card = entry["card"]
+            parsed = self._parse_activated_cost(entry["cost"])
+            if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
+                return
+            ap.trash.remove(card)
+            card._trash_replay = None
+            self._play_from_zone_now(ap, card, side, "trash")
+            return
 
         if entry["type"] == "bf_ability":
             bf, eff = entry["bf"], entry["eff"]
@@ -4889,6 +4972,11 @@ class GameLoop:
                 if es is not None:
                     repl = ("base_gear", g, es)
                     break
+        if repl is None and dead_unit.ward_turn == self.gs.turn and dead_unit.ward_free:
+            # "The next time it would die this turn, heal it, exhaust it, and
+            # recall it instead" (Tactical Retreat).
+            dead_unit.ward_turn, dead_unit.ward_free = -1, False
+            return saved()
         if repl is None and dead_unit.ward_turn == self.gs.turn \
                 and owner.can_pay_cost(0, 1, Domain.FURY) and self.choose(
                     "optional:ward", owner_side, [True, False], True, dead_unit.card):
@@ -4981,6 +5069,15 @@ class GameLoop:
                                                 self.gs.get_player(self.gs.other(ksi)),
                                                 context_extra={"battlefield": bf})
         for dead_unit, owner_side in ordered:
+            if dead_unit.banish_if_dies_turn == self.gs.turn:
+                # "If it would die this turn, banish it instead" (Smite).
+                dead_unit.banish_if_dies_turn = -1
+                self.gs.get_player(owner_side).base_gear.extend(dead_unit.gear)
+                dead_unit.gear = []
+                if not dead_unit.is_token:
+                    self.gs.get_player(self._owner_of(dead_unit.card, owner_side)).banished.append(dead_unit.card)
+                self._fire_leaves_board(dead_unit.card, owner_side, bf)
+                continue
             if self._try_replace_death(dead_unit, owner_side, None if in_base else bf, in_combat):
                 continue
             owner = self.gs.get_player(owner_side)
@@ -4988,6 +5085,8 @@ class GameLoop:
             dead_unit.card._owner = None
             owner.base_gear.extend(dead_unit.gear)
             self.gs.friendly_unit_died_this_turn[owner_side] = True
+            if self.gs.in_beginning_phase and owner_side == self.gs.active:
+                self.gs.died_in_beginning[owner_side] = self.gs.turn     # Shadow Watcher
             truly_dead.append((dead_unit, owner_side))
         for dead_unit, owner_side in truly_dead:
             actor = self.gs.get_player(owner_side)
@@ -5014,6 +5113,9 @@ class GameLoop:
                                        "died_card": dead_unit.card},
                     )
             dead_unit.gear = []
+            if dead_unit.gold_on_death is not None and dead_unit.gold_on_death[1] == self.gs.turn:
+                # "When it dies this turn, play a Gold gear token exhausted" (Deadly Flourish)
+                self._play_token("Gold", dead_unit.gold_on_death[0])
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
@@ -5074,6 +5176,11 @@ class GameLoop:
             absorbed = min(unit.damage_shield, amount)
             unit.damage_shield -= absorbed
             amount -= absorbed
+        if kind == "combat" and source_side is None and owner is not None:
+            source_side = gs.other(owner)
+        if amount > 0 and source_side is not None and owner is not None and owner != source_side \
+                and self._side_has_passive(source_side, "lethal_damage"):
+            unit.doomed_turn = gs.turn          # Elder Dragon: any damage kills
         if amount > 0 and (gs.decree_turn == gs.turn or unit.doomed_turn == gs.turn):
             # Imperial Decree: dealt damage kills it; Noxian Guillotine: "Kill it
             # the next time it takes damage this turn".
@@ -5310,6 +5417,8 @@ class GameLoop:
         side = "A" if actor is self.gs.A else "B"
         if self.gs.cant_play_cards_turn.get(side) == self.gs.turn:
             return True
+        if isinstance(card, SpellCard) and self.gs.cant_play_spells_turn.get(side) == self.gs.turn:
+            return True      # "Its controller can't play spells this turn" (Lilting Lullaby)
         if self._has_effect(card, "requires_friendly_gear") and not (
                 actor.base_gear or self._controlled_attached_gear(side)):
             return True      # "As an additional cost to play me, return a friendly gear"
@@ -5828,10 +5937,12 @@ class GameLoop:
                 unit.clear_combat_bonuses()     # "... this combat" ends (§468.7)
 
         # on_win_combat: a side won if it still has units and the other doesn't.
-        if bf.units_A and not bf.units_B:
-            self._fire_units_trigger("on_win_combat", "A")
-        elif bf.units_B and not bf.units_A:
-            self._fire_units_trigger("on_win_combat", "B")
+        for winner in ("A", "B"):
+            if bf._units_for(winner) and not bf._units_for(self.gs.other(winner)):
+                self._fire_units_trigger("on_win_combat", winner)
+                for u in bf._units_for(winner):
+                    if u.win_xp_turn == self.gs.turn:
+                        self.gs.add_xp(winner, 2)       # Grim Resolve
 
         if bf.can_score_conquer(attacker):
             self._gain_points(attacker, 1, "conquer", bf)

@@ -559,6 +559,16 @@ listed here.
   (spells only, not abilities). Checked by a probe only: Card Sharp, Jayce
   Man of Progress, Here to Help, Temptation, Arise!, Royal Entourage,
   Direwing, Sterak's Gage, the Mech token.
+- Unleashed approximations: Iascylla moves the enemy at once (rules: at the
+  start of your next Main Phase); Undying Loyalty's "costs [2] less if you
+  choose a Bird, Cat, Dog, or Poro" is not modeled; Hextech Gauntlets' Equip
+  cost isn't reduced by the chosen unit's Might; Dancing Grenade's replays
+  resolve inside the first cast (no responses between them); Crescent
+  Guardian's [chaos] can be paid with no spell played (it then does nothing);
+  Death from Below can be replayed later that turn, not only right after.
+  Checked by a probe only: Heedless Resurrection, Stalking Wolf, Conscription,
+  Insightful Investigator, Bone Skewer, Tricksy Tentacles, Stare Down,
+  Keeper's Verdict, Alpha Strike, Leblanc Deceiver.
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.

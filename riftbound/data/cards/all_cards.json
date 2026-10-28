@@ -18746,7 +18746,10 @@
         "trigger": "on_play",
         "target": "enemy_unit",
         "scope": "single",
-        "amount": 2
+        "amount": 2,
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
       }
     ]
   },
@@ -18875,7 +18878,8 @@
         "timing": "action",
         "amount": 3,
         "target": "chosen_unit",
-        "where": "battlefield"
+        "where": "battlefield",
+        "banish_if_dies": true
       }
     ]
   },
@@ -18907,8 +18911,7 @@
         "trigger": "on_play",
         "target": "self",
         "condition": {
-          "type": "friendly_unit_died_this_turn",
-          "params": {}
+          "type": "unit_died_this_turn"
         }
       }
     ]
@@ -19052,6 +19055,9 @@
         "effect": "give_temporary_assault",
         "trigger": "on_play",
         "target": "all_friendly_units_here",
+        "target_filter": {
+          "exclude_self": true
+        },
         "amount": 1,
         "duration": "this_turn"
       }
@@ -19084,7 +19090,7 @@
       {
         "effect": "double_damage_this_turn",
         "trigger": "on_cast",
-        "target": "enemy_unit",
+        "target": "chosen_unit",
         "where": "anywhere"
       }
     ]
@@ -19118,7 +19124,26 @@
         "timing": "action",
         "amount": 2,
         "target": "chosen_unit",
-        "where": "battlefield"
+        "where": "battlefield",
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "controller_has_facedown_card"
+            }
+          }
+        }
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_cast",
+        "timing": "action",
+        "amount": 4,
+        "target": "chosen_unit",
+        "where": "battlefield",
+        "condition": {
+          "type": "controller_has_facedown_card"
+        }
       }
     ]
   },
@@ -19147,6 +19172,11 @@
         "effect": "draw_cards",
         "trigger": "on_cast",
         "count": 1
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "amount_source": "battlefields_controlled"
       }
     ]
   },
@@ -19325,11 +19355,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "deal_damage",
-        "trigger": "on_cast",
-        "target": "chosen_unit",
-        "amount": 2,
-        "where": "anywhere"
+        "effect": "dancing_grenade",
+        "trigger": "on_cast"
       }
     ]
   },
@@ -19360,7 +19387,8 @@
         "effect": "recall_unit",
         "trigger": "on_play",
         "target": "friendly_unit",
-        "where": "battlefield"
+        "where": "battlefield",
+        "optional": true
       }
     ]
   },
@@ -19500,9 +19528,8 @@
     ],
     "effects": [
       {
-        "effect": "play_from_trash",
-        "trigger": "activated",
-        "timing": "action",
+        "effect": "noop",
+        "trigger": "from_trash",
         "cost": {
           "energy": 3,
           "power": 1,
@@ -19670,9 +19697,14 @@
     ],
     "effects": [
       {
+        "effect": "double_conquer_here",
+        "trigger": "passive"
+      },
+      {
         "effect": "buff_unit",
         "trigger": "on_conquer",
-        "target": "friendly_unit"
+        "target": "friendly_unit",
+        "where": "anywhere"
       }
     ]
   },
@@ -19710,7 +19742,9 @@
         "target": "self",
         "duration": "this_turn",
         "cost": {
-          "energy": 2
+          "energy": 2,
+          "power": 1,
+          "domain": "FURY"
         }
       }
     ]
@@ -19967,10 +20001,7 @@
         "trigger": "on_play",
         "target": "self",
         "condition": {
-          "type": "friendly_unit_died_this_turn",
-          "params": {
-            "phase": "beginning"
-          }
+          "type": "friendly_died_in_beginning_phase"
         }
       }
     ]
@@ -20047,9 +20078,8 @@
     ],
     "effects": [
       {
-        "effect": "grant_might",
+        "effect": "equip_conditional_might",
         "trigger": "passive",
-        "target": "self",
         "amount": 1,
         "condition": {
           "type": "controller_has_xp_at_least",
@@ -20159,6 +20189,15 @@
         "timing": "action",
         "target": "chosen_unit",
         "where": "anywhere"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "action",
+        "count": 1,
+        "condition": {
+          "type": "played_from_hand"
+        }
       }
     ]
   },
@@ -20297,7 +20336,8 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "on_cast",
-        "target": "friendly_unit",
+        "timing": "reaction",
+        "target": "chosen_unit",
         "amount_source": "n_distinct_tags_among_friendlies",
         "tags": [
           "Bird",
@@ -20305,7 +20345,8 @@
           "Dog",
           "Poro"
         ],
-        "where": "anywhere"
+        "where": "anywhere",
+        "duration": "this_turn"
       }
     ]
   },
@@ -20577,6 +20618,10 @@
           "domain": "CALM"
         },
         "where": "anywhere"
+      },
+      {
+        "effect": "next_unit_ready_buff",
+        "trigger": "on_hold"
       }
     ]
   },
@@ -20715,10 +20760,7 @@
         "effect": "give_keyword",
         "trigger": "on_attack",
         "keyword": "TANK",
-        "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        },
+        "target": "it",
         "duration": "this_turn"
       },
       {
@@ -20735,10 +20777,7 @@
         "effect": "give_keyword",
         "trigger": "on_defend",
         "keyword": "TANK",
-        "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        },
+        "target": "it",
         "duration": "this_turn"
       }
     ]
@@ -20857,10 +20896,82 @@
         "effect": "reduce_cost",
         "trigger": "cost_modifier",
         "amount": 2,
+        "power": 1,
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "controller_has_xp_at_least",
+                "params": {
+                  "amount": 3
+                }
+              },
+              {
+                "type": "not",
+                "params": {
+                  "condition": {
+                    "type": "controller_has_xp_at_least",
+                    "params": {
+                      "amount": 6
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 4,
+        "power": 2,
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "controller_has_xp_at_least",
+                "params": {
+                  "amount": 6
+                }
+              },
+              {
+                "type": "not",
+                "params": {
+                  "condition": {
+                    "type": "controller_has_xp_at_least",
+                    "params": {
+                      "amount": 11
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 6,
+        "power": 3,
         "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
-            "amount": 3
+            "amount": 11
+          }
+        }
+      },
+      {
+        "effect": "cant_be_chosen",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "controller_has_xp_at_least",
+          "params": {
+            "amount": 16
           }
         }
       }
@@ -20893,6 +21004,10 @@
       "AMBUSH"
     ],
     "effects": [
+      {
+        "effect": "weaker_enemies_no_damage",
+        "trigger": "passive"
+      },
       {
         "effect": "draw_cards",
         "trigger": "on_hold",
@@ -21169,11 +21284,7 @@
     "effects": [
       {
         "effect": "grant_temporary_might",
-        "trigger": "passive",
-        "condition": {
-          "type": "friendly_unit_died_this_turn",
-          "params": {}
-        },
+        "trigger": "on_friendly_unit_death",
         "target": "self",
         "amount": 2,
         "duration": "this_turn"
@@ -21207,9 +21318,7 @@
         "token_name": "Sprite",
         "count": 2,
         "might": 3,
-        "keywords": [
-          "TEMPORARY"
-        ],
+        "ready": true,
         "location": "choose"
       }
     ]
@@ -21268,6 +21377,9 @@
         "effect": "give_temporary_shield",
         "trigger": "on_play",
         "target": "all_friendly_units_here",
+        "target_filter": {
+          "exclude_self": true
+        },
         "duration": "this_turn",
         "amount": 1
       }
@@ -21308,7 +21420,10 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "all_enemy_units_here",
-        "amount": 1
+        "amount": 1,
+        "target_filter": {
+          "not_it": true
+        }
       }
     ]
   },
@@ -21339,6 +21454,10 @@
         "amount": 3,
         "target": "enemy_unit",
         "where": "anywhere"
+      },
+      {
+        "effect": "gold_when_it_dies",
+        "trigger": "on_cast"
       }
     ]
   },
@@ -21451,8 +21570,7 @@
         "effect": "grant_might",
         "trigger": "passive",
         "target": "self",
-        "amount_source": "n_friendly_with_tag",
-        "tag": "TEMPORARY"
+        "amount_source": "friendly_temporary_here"
       }
     ]
   },
@@ -21478,9 +21596,10 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "buff_unit",
+        "effect": "grant_might",
         "trigger": "passive",
-        "target": "all_friendly_units_here",
+        "target": "friendly_unit",
+        "scope": "board",
         "target_filter": {
           "is_token": true
         },
@@ -21605,6 +21724,10 @@
         "effect": "discard_card",
         "trigger": "on_move",
         "count": 1
+      },
+      {
+        "effect": "hwei_discard_bonus",
+        "trigger": "on_move"
       }
     ]
   },
@@ -21638,6 +21761,10 @@
         "token_name": "Reflection",
         "count": 2,
         "location": "here"
+      },
+      {
+        "effect": "tokens_become_copies_of_me",
+        "trigger": "on_play"
       }
     ]
   },
@@ -21700,6 +21827,11 @@
       "ACTION"
     ],
     "effects": [
+      {
+        "effect": "temporary_swap",
+        "trigger": "on_cast",
+        "timing": "action"
+      },
       {
         "effect": "draw_cards",
         "trigger": "on_cast",
@@ -21830,6 +21962,10 @@
       "SHIELD 2"
     ],
     "effects": [
+      {
+        "effect": "double_hold_here",
+        "trigger": "passive"
+      },
       {
         "effect": "gain_power_any_domain",
         "trigger": "on_hold",
@@ -21992,9 +22128,38 @@
         "trigger": "cost_modifier",
         "amount": 2,
         "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "controller_has_xp_at_least",
+                "params": {
+                  "amount": 6
+                }
+              },
+              {
+                "type": "not",
+                "params": {
+                  "condition": {
+                    "type": "controller_has_xp_at_least",
+                    "params": {
+                      "amount": 11
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 4,
+        "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
-            "amount": 6
+            "amount": 11
           }
         }
       }
@@ -22135,6 +22300,11 @@
         "amount": 3,
         "duration": "this_turn",
         "where": "anywhere"
+      },
+      {
+        "effect": "xp_when_it_wins",
+        "trigger": "on_cast",
+        "timing": "action"
       }
     ]
   },
@@ -22393,9 +22563,9 @@
         "timing": "reaction",
         "modes": [
           {
-            "effect": "recycle_card",
-            "target": "opponent",
-            "count": 3
+            "effect": "recycle_from_trashes",
+            "amount": 3,
+            "opponents_only": true
           },
           {
             "effect": "draw_cards",
@@ -22505,7 +22675,9 @@
         "effect": "counter_spell",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "chosen_spell"
+        "target": "chosen_spell",
+        "enemy_choosing_mine": true,
+        "only_one": true
       }
     ]
   },
@@ -22945,11 +23117,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "deal_damage",
+        "effect": "lethal_damage",
+        "trigger": "passive"
+      },
+      {
+        "effect": "deal_one_each_location",
         "trigger": "on_play",
-        "amount": 1,
-        "target": "enemy_unit",
-        "where": "anywhere"
+        "amount": 1
       }
     ]
   },
@@ -22987,7 +23161,8 @@
         "target": "enemy_unit",
         "cost": {
           "spend_xp": 3
-        }
+        },
+        "optional": true
       }
     ]
   },
@@ -23079,12 +23254,25 @@
         "effect": "ready_unit",
         "trigger": "on_play",
         "target": "self",
-        "condition": {
-          "type": "kicker_paid"
-        },
         "additional_cost": {
           "power": 1,
           "domain": "CHAOS"
+        },
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "kicker_paid"
+              },
+              {
+                "type": "you_played_n_spells_this_turn",
+                "params": {
+                  "n": 1
+                }
+              }
+            ]
+          }
         }
       }
     ]
@@ -23152,6 +23340,12 @@
         "target": "enemy_unit",
         "from": "battlefield",
         "destination": "base"
+      },
+      {
+        "effect": "draw_if_enemy_alone_at_origin",
+        "trigger": "on_cast",
+        "timing": "action",
+        "count": 1
       }
     ]
   },
@@ -23474,16 +23668,17 @@
         "effect": "move_unit",
         "trigger": "on_play",
         "target": "enemy_unit",
-        "destination": "any"
+        "destination": "any",
+        "optional": true
       },
       {
         "effect": "stun_unit",
-        "trigger": "on_move",
-        "target": "enemy_unit",
+        "trigger": "on_you_move_enemy",
+        "target": "triggering_unit",
+        "optional": true,
         "cost": {
           "tap": true
-        },
-        "where": "anywhere"
+        }
       }
     ]
   },
@@ -23512,10 +23707,9 @@
     ],
     "effects": [
       {
-        "effect": "stun_unit",
+        "effect": "stun_or_return_attacker",
         "trigger": "on_cast",
-        "timing": "action",
-        "target": "enemy_unit"
+        "timing": "action"
       }
     ]
   },
@@ -23655,6 +23849,10 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "name_tag",
+        "trigger": "on_play"
+      },
+      {
         "effect": "grant_temporary_might",
         "trigger": "activated",
         "timing": "action",
@@ -23663,7 +23861,10 @@
         "cost": {
           "tap": true
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "target_filter": {
+          "has_named_tag": true
+        }
       }
     ]
   },
@@ -24043,13 +24244,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "banish_card",
-        "trigger": "on_play",
-        "target": "self",
-        "from": "trash",
-        "scope": "all",
-        "target_filter": {
-          "is_unit": true
+        "effect": "banish_trash_units_with_this",
+        "trigger": "on_play"
+      },
+      {
+        "effect": "play_one_banished_with_this",
+        "trigger": "activated",
+        "cost": {
+          "tap": true
         }
       }
     ]
@@ -24302,13 +24504,15 @@
         "timing": "action",
         "target": "friendly_unit",
         "amount": 1,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "where": "anywhere"
       },
       {
         "effect": "stun_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "target": "enemy_unit"
+        "target": "enemy_unit",
+        "where": "it_location"
       }
     ]
   },
@@ -24379,7 +24583,7 @@
       {
         "effect": "gain_xp",
         "trigger": "on_play",
-        "amount_source": "friendly_units_here"
+        "amount_source": "friendly_units"
       }
     ]
   },
@@ -24513,13 +24717,14 @@
         "effect": "grant_temporary_might",
         "trigger": "activated",
         "timing": "action",
-        "target": "friendly_unit",
+        "target": "chosen_unit",
         "amount": 2,
         "cost": {
           "tap": true,
           "sacrifice_self": true
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "duration": "this_turn"
       }
     ]
   },
@@ -24606,16 +24811,12 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "each_player_kills_unit",
         "trigger": "on_play",
-        "target": "friendly_unit",
-        "where": "anywhere"
-      },
-      {
-        "effect": "kill_unit",
-        "trigger": "on_play",
-        "target": "enemy_unit",
-        "where": "anywhere"
+        "additional_cost": {
+          "spend_xp": 3
+        },
+        "skip_actor_if_paid": true
       }
     ]
   },
@@ -24721,7 +24922,12 @@
         "trigger": "on_play",
         "target": "self",
         "target_filter": {
-          "subtype": "Dog"
+          "subtype_any": [
+            "Bird",
+            "Cat",
+            "Dog",
+            "Poro"
+          ]
         }
       }
     ]
@@ -24885,7 +25091,23 @@
       {
         "effect": "draw_cards",
         "trigger": "on_death",
-        "count": 1
+        "count": 1,
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "in_beginning_phase"
+            }
+          }
+        }
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "on_death",
+        "count": 2,
+        "condition": {
+          "type": "in_beginning_phase"
+        }
       }
     ]
   },
@@ -25000,13 +25222,10 @@
     ],
     "effects": [
       {
-        "effect": "replace_death_with_recall",
+        "effect": "ward_unit",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "friendly_unit",
-        "duration": "this_turn",
-        "heal": true,
-        "exhaust": true
+        "free": true
       }
     ]
   },
@@ -25165,6 +25384,10 @@
         "condition": {
           "type": "moved_to_battlefield"
         }
+      },
+      {
+        "effect": "play_unit_from_hand_free_energy",
+        "trigger": "on_death"
       }
     ]
   },
@@ -25412,7 +25635,8 @@
         "steps": [
           {
             "effect": "recall_unit",
-            "target": "friendly_unit"
+            "target": "friendly_unit",
+            "where": "battlefield"
           },
           {
             "effect": "play_token",
@@ -25449,6 +25673,12 @@
         "timing": "action",
         "target": "chosen_unit",
         "where": "battlefield"
+      },
+      {
+        "effect": "replay_from_trash_if_small",
+        "trigger": "on_cast",
+        "timing": "action",
+        "might_at_most": 3
       }
     ]
   },
@@ -25574,7 +25804,8 @@
         },
         "token_name": "Sprite",
         "ready": true,
-        "location": "choose"
+        "location": "choose",
+        "less_per_temporary": true
       }
     ]
   },
@@ -25605,7 +25836,8 @@
         "effect": "counter_spell",
         "trigger": "on_cast",
         "timing": "reaction",
-        "target": "chosen_spell"
+        "target": "chosen_spell",
+        "silence": true
       }
     ]
   },
@@ -25642,16 +25874,30 @@
     ],
     "effects": [
       {
-        "effect": "buff_unit",
+        "effect": "grant_might",
         "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 1,
         "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
             "amount": 6
           }
+        }
+      },
+      {
+        "effect": "enter_ready",
+        "trigger": "enter_ready_aura",
+        "filter": {
+          "is_unit": true
         },
-        "target": "all_friendly_units_here",
-        "amount": 1
+        "condition": {
+          "type": "controller_has_xp_at_least",
+          "params": {
+            "amount": 11
+          }
+        }
       }
     ]
   },
@@ -25719,7 +25965,8 @@
         "count": 1,
         "cost": {
           "tap": true
-        }
+        },
+        "optional": true
       }
     ]
   },
@@ -25745,13 +25992,25 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
+      },
+      {
         "effect": "stun_unit",
         "trigger": "activated",
         "timing": "action",
         "target": "enemy_unit",
         "cost": {
           "energy": 1,
+          "power": 1,
           "tap": true
+        },
+        "target_filter": {
+          "is_attacking": true
         }
       }
     ]
@@ -25808,12 +26067,28 @@
     "keywords": [],
     "effects": [
       {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self"
+      },
+      {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 1,
+        "amount_source": "n_distinct_tags_among_friendlies",
+        "tags": [
+          "Bird",
+          "Cat",
+          "Dog",
+          "Poro"
+        ]
+      },
+      {
         "effect": "stun_unit",
         "trigger": "on_attack",
         "target": "enemy_unit",
         "condition": {
-          "type": "you_control_subtype",
-          "params": {}
+          "type": "has_all_pet_tags"
         }
       }
     ]
@@ -25971,11 +26246,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "play_token",
-        "trigger": "on_cast",
-        "token_name": "Reflection",
-        "ready": true,
-        "location": "base"
+        "effect": "reflection_of_chosen",
+        "trigger": "on_cast"
       }
     ]
   },

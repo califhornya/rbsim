@@ -260,7 +260,24 @@ Open, found on the way:
   Poro Snax, Drag Under, Breakneck Mech, Pickpocket, Draven Audacious,
   Forecaster, Guards!, Fae Porter / Windsinger / Buhru Captain ("may"),
   Ancient Henge and Hextech Anomaly (any amount: X).
-Then every other set: Unleashed, Vendetta, Radiance, Proving Grounds.
+- [x] Unleashed (224 cards) read; 64 fixed, each tested
+  (tests/test_corpus_unleashed.py). Never worked: Undying Legion from the
+  trash (new entry type trash_play; Death from Below too), Elder Dragon's
+  lethal damage, Blast Cone's stun (on_you_move_enemy), Cursed Sarcophagus,
+  Red Brambleback / Blue Sentinel (conquer / hold effects twice), Vilemaw,
+  Master Yi Unstoppable's levels, Nami Headstrong's hold, Smite, Deadly
+  Flourish, Grim Resolve, Dancing Grenade, Keeper of Masks / Mirror Image
+  copies, Smoke and Mirrors, Hwei, The List, Existential Dread's return,
+  Isolate's draw, Rift Herald's DEATHKNELL, Tactical Retreat, Safety
+  Inspector, Lilting Lullaby's silence, Lillia Bashful Bloom's discount.
+  Wrong: Disposal Order recycled hand cards, Soul Sword's LEVEL bonus was
+  always on (an equipment's conditional +N), Petal Pixie read TEMPORARY as a
+  tag, Starhound only Dogs, Daisy!, Shadow, Soul Shepherd / Master Yi Wuju
+  Master / Scrutinizing Sergeant / Right of Conquest counted one battlefield,
+  Monster Harpoon, Back Off, Spectral Centaur (+2 per death), Sprite Burst
+  (ready), Crescent Strike, Yuumi, Heroic Charge, Towering Pairofant, Shadow
+  Watcher, Vi Hotheaded's [fury], Leblanc Fragmented, Concentrate, Repulse.
+Then every other set: Vendetta, Radiance, Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of

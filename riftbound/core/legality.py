@@ -167,6 +167,8 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
             label = f"Play {entry['card'].name} from trash (FLOW)"
         elif entry["type"] == "banished_play":
             label = f"Play {entry['card'].name} from banishment"
+        elif entry["type"] == "trash_play":
+            label = f"Play {entry['card'].name} from trash"
         elif entry["type"] == "gear_ability":
             label = f"Gear {entry['eff'].effect} ({entry['gear'].name})"
         elif entry["type"] == "bf_ability":

@@ -85,6 +85,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_buff_spent",                             # you spend a buff (Fae Dragon)
     "on_friendly_becomes_mighty",                # a friendly unit becomes MIGHTY (Fiora Worthy)
     "on_revealed",                               # revealed from your deck (Undertitan)
+    "on_you_move_enemy",                         # you move an enemy unit (Blast Cone)
+    "from_trash",                                # may be played from your trash (Undying Legion)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -183,6 +185,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "died_in_combat",                    # "When I die in combat" (Draven Audacious)
     "gear_with_cost_at_most_in_play",    # n: "kill a gear with Energy cost no more than [1]" (Pickpocket)
     "this_unattached",                   # "(Use only if unattached.)" (The Zero Drive)
+    "unit_died_this_turn",               # "If a unit died this turn" (Towering Pairofant)
+    "friendly_died_in_beginning_phase",  # Shadow Watcher
+    "played_from_hand",                  # "If you played this from your hand" (Back Off)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -207,6 +212,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "is_damaged",                        # "all damaged enemy units here" (Warwick Hunter)
     "is_attacking",                      # "Stun an attacking unit" (Thwonk!)
     "not_it",                            # "another unit" than the one just chosen (Piercing Light)
+    "has_named_tag",                     # "a unit with the named tag" (The List)
 })
 
 # amount_source values understood by effects._amount.
@@ -225,6 +231,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "other_battlefields_controlled",     # Seat of Power
     "discarded_energy", "it_might",      # Get Excited!, Last Breath
     "countered_energy", "killed_might", "self_assault",   # Riposte, Deathgrip, Lucian Gunslinger
+    "battlefields_controlled", "friendly_units", "friendly_temporary_here",
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -292,6 +299,8 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # Chem-Baroness (GameLoop._try_replace_death, _pay_one_additional_cost,
     # _quick_draw, _gold_bonus)
     "protect_weaker_here", "cheaper_optional_costs", "equipment_quick_draw", "gold_bonus",
+    # Unleashed: Red Brambleback, Blue Sentinel, Vilemaw, Elder Dragon
+    "double_conquer_here", "double_hold_here", "weaker_enemies_no_damage", "lethal_damage",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

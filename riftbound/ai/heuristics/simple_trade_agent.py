@@ -329,7 +329,7 @@ class SimpleTradeAgent(Agent):
             return None
         abilities = loop.activatable_abilities(my_side)
         for idx, entry in enumerate(abilities):
-            if entry["type"] in ("flow", "banished_play"):
+            if entry["type"] in ("flow", "banished_play", "trash_play"):
                 continue        # playing a card from a zone: _find_flow_play
             if entry["type"] == "bf_ability" and not loop._ability_usable(self.player, entry):
                 continue        # Black Market: once per turn

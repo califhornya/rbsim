@@ -49,6 +49,10 @@ class UnitInPlay:
     ward_turn: int = -1              # Unlicensed Armory: may be saved the next time it would die
     prevent_next_turn: int = -1      # Counter Strike: the next damage to it this turn is prevented
     was_mighty: bool = False         # "When a unit you control becomes MIGHTY" (Fiora Worthy)
+    ward_free: bool = False          # Tactical Retreat: the ward needs no payment
+    banish_if_dies_turn: int = -1    # Smite: "If it would die this turn, banish it instead"
+    gold_on_death: object = None     # Deadly Flourish: (side, turn) that plays a Gold when it dies
+    win_xp_turn: int = -1            # Grim Resolve: "When it wins a combat this turn, gain 2 XP"
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
@@ -98,7 +102,7 @@ class UnitInPlay:
             int(e.get("amount", 0))
             for g in self.gear
             for e in getattr(g, "effects", []) or []
-            if isinstance(e, dict) and e.get("effect") == "grant_might"
+            if isinstance(e, dict) and e.get("effect") == "grant_might" and not e.get("condition")
         )
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)

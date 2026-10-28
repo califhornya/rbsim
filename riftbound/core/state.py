@@ -146,6 +146,14 @@ class GameState:
     # 'This turn, that unit has "When I conquer, you may move me to my base"'
     # (Relentless Pursuit): (unit id, turn).
     conquer_return: list = field(default_factory=list)
+    # "Its controller can't play spells this turn" (Lilting Lullaby): side -> turn.
+    cant_play_spells_turn: dict = field(default_factory=dict)
+    # "When I hold, the next time you play a unit this turn, ready it and BUFF
+    # it" (Nami Headstrong): side -> turn.
+    next_unit_ready_buff: dict = field(default_factory=dict)
+    # A friendly unit died during that side's Beginning Phase (Shadow Watcher):
+    # side -> turn.
+    died_in_beginning: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
     # True while the active player's Ending Phase runs (Runeblade Anvil).

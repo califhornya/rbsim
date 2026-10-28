@@ -69,7 +69,8 @@ _ACTIVATED = re.compile(r"^(action |reaction )?[^.:]*\]\s*:|^(action|reaction)\b
 _BATTLEFIELD_FIRED = {"on_start_of_turn", "on_end_of_turn", "on_conquer", "on_hold",
                       "on_hide_here", "on_unit_played_here", "on_unit_moves_from_here",
                       "on_combat_start_here", "on_attack", "on_defend", "passive",
-                      "granted_to_legend"}
+                      "granted_to_legend", "granted_to_units_here", "on_play_spell",
+                      "on_first_unit_here", "on_unit_dies_here", "cost_aura", "activated"}
 _TYPE_DEAD_TRIGGERS: dict[str, set[str]] = {
     "spell": {"on_attack", "on_defend", "on_conquer", "on_hold", "on_move",
               "on_death", "on_start_of_turn", "on_end_of_turn"},
