@@ -135,15 +135,47 @@ Section A is done: both precon decks are checked card by card.
       406.1.h) is an option of play_match (`bo1_altered_setup`).
 
 ## D. Cards encoded only in part (corpus)
-About 300 cards have more sentences than effect entries (a rough count: one
-entry can cover two sentences). Named in the old notes and still open:
-Detonation Amplifier (DEATHKNELL twice here), Demacian Standard (return on
-hold), Jarvan IV Martial Paragon (DEPLOY gear have ACTION), The Academy and
+Method (2026-10-28): every card with ability text gets read (text, encoding,
+handler), not only the ~300 with more sentences than entries: a random sample
+of 30 had wrong cards with the "right" number of entries (Seat of Power fired
+on a trigger a battlefield never gets). `scripts/card_text_audit.py` puts the
+sentences next to the entries and flags whole classes of mistakes (a trigger
+phrase with no matching entry, an entry that can't fire on its card type, a
+number or "you may" / "for each" / "return to hand" missing from the
+entries); 351 cards flagged at the start. Each fix gets a test of the
+sentence (tests/test_corpus_cards.py). Order: the dead triggers, the cards
+named below, then set by set.
+
+Fixed:
+- [x] Dead triggers: "When you defend here" (Fortified Position, Durand
+      Memorial, Ravenbloom Conservatory) and deployed gear's "attack here"
+      (Demacian Standard) never fired (only units and their gear got attack /
+      defend triggers); now they fire as the combat opens. Ahri Nine-Tailed
+      Fox ("an enemy unit attacks a battlefield you control", new trigger
+      on_enemy_attack), Master Yi Wuju Bladesman (lone defender +2), Loyal
+      Pup ("When you defend at a battlefield", new trigger on_you_defend),
+      Seat of Power and Sunken Temple (were on_play: never fired; Seat now
+      draws per other battlefield you control, Sunken Temple needs a MIGHTY
+      unit and [1]). "This combat" is a duration now (Fortified Position,
+      Durand Memorial, Fiora Peerless: was this turn). Demacian Standard and
+      The Good Stuff return to hand when you hold.
+- [x] MIGHTY read the printed Might ("While I'm MIGHTY": Fiora Victorious;
+      "When you play a MIGHTY unit": Volibear Relentless Storm); now the
+      unit's Might.
+- [x] Control during a contest (§190.4.b): with units of both sides at a
+      battlefield the engine said no one controlled it; the holder keeps
+      control until the showdown / combat ends (Battlefield.control(), used by
+      every "battlefield you control": unit and token plays, REACTION units,
+      hide, conditions, Ahri). The showdown / combat machinery still runs on
+      controller() (None while contested).
+
+Named in the old notes and still open:
+Detonation Amplifier (DEATHKNELL twice here), Jarvan IV Martial Paragon (DEPLOY gear have ACTION), The Academy and
 Marai Spire (REPEAT), Curtain Call (per-mode REPEAT costs, "at a battlefield" /
 "at a base"), Temporal Breach (enemy units), Sumpworks Map (REACTION gear),
 Sivir Battle Mistress (recycle a rune), Mageseeker Warden (gear half),
 Heartening Soul (legends' ability), Showstopper / Resonating Strike / Call to
-Battle (move details), Akshan Mischievous, Loyal Pup (defend from base),
+Battle (move details), Akshan Mischievous,
 Kharox (play from their trash), Akali Deadly Weapon (2 when Empowered, where),
 Mel Newly Awakened, Renekton Brute, Legion Marauder ([1] or [body]),
 Mobilize / Catalyst of Aeons ("if you couldn't, draw 1"), Atakhan, Diana

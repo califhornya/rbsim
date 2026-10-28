@@ -76,6 +76,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "granted_to_legend",                         # a battlefield gives your legend an ability (Forge of the Fluft)
     "on_friendly_moves_from_here",               # a friendly unit moves from my location (Stealthy Pursuer)
     "on_attached",                               # this Equipment is attached to a unit (Shady Spectacles)
+    "on_enemy_attack",                           # an enemy unit attacks a battlefield you control (Ahri Nine-Tailed Fox)
+    "on_you_defend",                             # you defend at a battlefield, anywhere (Loyal Pup)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -165,6 +167,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_here",              # the unit is (or died) at my battlefield
     "has_all_pet_tags",                  # your units have Bird, Cat, Dog and Poro among them
     "signpost_possible",                 # Forgotten Signpost has a unit to exhaust and one to move
+    "friendly_mighty_unit_here",         # "When you conquer here with one or more MIGHTY units" (Sunken Temple)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -201,6 +204,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "cards_played_this_turn", "friendly_exhausted_units",
     "battlefields_conquered_this_turn", "hold_points_this_turn",
     "cards_with_my_name_in_trash",
+    "other_battlefields_controlled",     # Seat of Power
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -249,7 +253,8 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "victory_score_plus",       # Aspirant's Climb: read when the game is built
     # damage and combat rules (GameLoop._take_damage, _combat_mods, combat cleanup)
     "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
-    "lone_defender_minus", "attacking_with_another_bonus", "ignore_tank_here", "tie_recall_all",
+    "lone_defender_minus", "lone_defender_bonus", "attacking_with_another_bonus", "ignore_tank_here",
+    "tie_recall_all",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

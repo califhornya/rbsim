@@ -215,7 +215,7 @@ def _position_value(gs, side: str) -> float:
         v = sum(1 + (0 if u.stunned else max(0, u.might - u.damage)) for u in units)
         v += len(p.hand) + sum(len(rs) for rs in p.rune_pool.values())
         v += 4 * (gs.points_A if s == "A" else gs.points_B)
-        v += 2 * sum(1 for bf in gs.battlefields if bf.controller() == s)
+        v += 2 * sum(1 for bf in gs.battlefields if bf.control() == s)
         return v
     return score(side) - score(gs.other(side))
 
@@ -1181,7 +1181,7 @@ def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str
         if not isinstance(card, UnitCard):
             continue
         dests = [d for d in loop._unit_play_destinations(card, side)
-                 if d is not None and loop.gs.battlefields[d].controller() == side]
+                 if d is not None and loop.gs.battlefields[d].control() == side]
         energy, power = loop._effective_cost(card, ap)
         energy = max(0, energy - reduce)
         if dests and loop._can_pay_card(ap, card, energy, power) and \
@@ -1194,7 +1194,7 @@ def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str
         if not isinstance(card, UnitCard):
             continue
         dests = [d for d in loop._unit_play_destinations(card, side)
-                 if d is not None and loop.gs.battlefields[d].controller() == side]
+                 if d is not None and loop.gs.battlefields[d].control() == side]
         energy, power = loop._effective_cost(card, ap)
         energy = max(0, energy - reduce)
         if dests and loop._can_pay_card(ap, card, energy, power):
@@ -1224,8 +1224,13 @@ def _ready_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("return_gear_to_hand")
 def _return_gear_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Return a gear to its owner's hand" (Factory Recall): the opponent's
-    costliest gear (a token ceases to exist)."""
-    entries = [(s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True) if s == ctx.opponent_side]
+    costliest gear (a token ceases to exist). `target: self`: "return this to
+    its owner's hand" (The Good Stuff, Demacian Standard)."""
+    if spec.get("target") == "self":
+        entries = [(s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=False)
+                   if getattr(g, "card", g) is ctx.card]
+    else:
+        entries = [(s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True) if s == ctx.opponent_side]
     if not entries:
         return
     side, holder, gear = max(entries, key=lambda e: _zone_value(getattr(e[2], "card", e[2])))
@@ -1964,18 +1969,26 @@ def _reveal_top_draw_if_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
 def _reveal_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Reveal the top card of your Main Deck. If it's a unit, draw it.
     Otherwise, put it in your trash and give me +2 [might] this turn" (Pakaa
-    Protector). `target_filter`: what is drawn; `otherwise`: "trash" or "top"
-    (stays on top, the default); `else`: effects run when it isn't drawn."""
+    Protector). `target_filter`: what is drawn; `otherwise`: "trash", "recycle"
+    (to the bottom: Ravenbloom Conservatory) or "top" (stays on top, the
+    default); `else`: effects run when it isn't drawn."""
     player = ctx.actor
     if not player.deck.cards:
         return
     top = player.deck.cards[-1]
     if _zone_card_matches(top, spec.get("target_filter") or {}):
-        ctx.draw_cards(1)
+        if spec.get("to_hand"):
+            # "put it in your hand": not a draw (Ravenbloom Conservatory)
+            player.hand.append(player.deck.cards.pop())
+        else:
+            ctx.draw_cards(1)
         return
     if spec.get("otherwise") == "trash":
         player.deck.cards.pop()
         player.trash.append(top)
+    elif spec.get("otherwise") == "recycle":
+        player.deck.cards.pop()
+        player.deck.cards.insert(0, top)
     for sub in spec.get("else") or []:
         handler = REGISTRY.get(sub.get("effect"))
         if handler:
@@ -2105,8 +2118,12 @@ def _debuff_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("double_might")
 def _double_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    this_combat = str(spec.get("duration", "")).lower() == "this_combat"
     for unit in _resolve_targets(ctx, spec):
-        unit.temporary_might += unit.might  # this-turn doubling
+        if this_combat:
+            unit.combat_might += unit.might   # Fiora Peerless: "double my Might this combat"
+        else:
+            unit.temporary_might += unit.might  # this-turn doubling
 
 
 @effect("exhaust_unit")
@@ -2611,6 +2628,11 @@ def _amount(ctx: "EffectContext", spec: Mapping[str, Any]) -> int:
         return sum(1 for c in ctx.actor.trash if c.name == ctx.card.name and c is not ctx.card)
     if src == "battlefields_conquered_this_turn":
         return int(ctx.loop.gs.conquered_this_turn.get(ctx.actor_side, 0))
+    if src == "other_battlefields_controlled":
+        # "for each other battlefield you or allies control" (Seat of Power)
+        here = ctx.extra.get("battlefield") or ctx.battlefield
+        return sum(1 for bf in ctx.loop.gs.battlefields
+                   if bf is not here and bf.control() == ctx.actor_side)
     if src == "hold_points_this_turn":
         return int(ctx.loop.gs.hold_points_this_turn.get(ctx.actor_side, 0))
     if src == "cards_played_this_turn":
@@ -2781,9 +2803,9 @@ def _attack_value(ctx: "EffectContext", side: str, unit, bf) -> int:
     theirs = sum(u.might for u in bf._units_for("B" if side == "A" else "A"))
     if theirs and mine + unit.might >= theirs:
         return 3
-    if not theirs and bf.controller() != side:
+    if not theirs and bf.control() != side:
         return 2
-    if bf.controller() == side:
+    if bf.control() == side:
         return 1
     return 0
 
@@ -2839,8 +2861,9 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         return [None] if cur is not None else []
     if dest in ("here", "this_battlefield"):
         return [ctx.battlefield] if ctx.battlefield in gs.battlefields and cur is not ctx.battlefield else []
-    if dest in ("stunned_at", "deployed_at"):
-        # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar)
+    if dest in ("stunned_at", "deployed_at", "defended_at"):
+        # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar),
+        # "When you defend at a battlefield, you may move me there" (Loyal Pup)
         at = ctx.extra.get(dest)
         return [at] if at is not None and cur is not at else []
     if dest == "to_or_from_base" and cur is not None:
@@ -2855,7 +2878,7 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         return [bf for bf in others if bf._units_for(ctx.actor_side)]
     if dest == "controlled_battlefield":
         # "to a battlefield you control" (Call to Battle)
-        return [bf for bf in others if bf.controller() == ctx.actor_side]
+        return [bf for bf in others if bf.control() == ctx.actor_side]
     if dest == "enemy_occupied":
         # "to an occupied enemy battlefield" (Cataclysm)
         return [bf for bf in others if bf._units_for(ctx.opponent_side)]
@@ -2963,16 +2986,19 @@ def _give_keyword(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     keyword = str(spec.get("keyword", "")).strip()
     if not keyword:
         return
-    this_turn = str(spec.get("duration", "")).lower() == "this_turn"
+    duration = str(spec.get("duration", "")).lower()
     for unit in _resolve_targets(ctx, spec):
-        (unit.turn_keywords if this_turn else unit.granted_keywords).append(keyword)
+        (unit.combat_keywords if duration == "this_combat" else
+         unit.turn_keywords if duration == "this_turn" else unit.granted_keywords).append(keyword)
 
 
 def _give_temp_keyword(ctx: "EffectContext", spec: Mapping[str, Any], kw: str) -> None:
     amount = int(spec.get("amount", 1))
     token = f"{kw} {amount}"
+    this_combat = str(spec.get("duration", "")).lower() == "this_combat"
     for unit in _resolve_targets(ctx, spec):
-        unit.turn_keywords.append(token)    # "this turn"
+        # "this turn", or "this combat" (Fortified Position)
+        (unit.combat_keywords if this_combat else unit.turn_keywords).append(token)
 
 
 @effect("give_temporary_assault")
@@ -3209,7 +3235,7 @@ def _play_token(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # The text says no place: a played unit goes to its player's base or a
         # battlefield they control (§440.2.c, §355.2), their choice when the
         # token is played. Baseline: base.
-        options = [None] + [b for b in ctx.loop.gs.battlefields if b.controller() == side]
+        options = [None] + [b for b in ctx.loop.gs.battlefields if b.control() == side]
         bf = ctx.loop.choose("token_location", side, options, None, ctx.card) if len(options) > 1 else None
     elif location == "enemy_occupied":
         # "Choose an occupied enemy battlefield. Play three ... there" (Rally for

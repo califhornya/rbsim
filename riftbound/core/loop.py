@@ -42,7 +42,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_unit_played_here", "on_self_played", "trash_on_card_played", "on_enemy_gear_played",
     "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
-    "on_friendly_moves_from_here", "on_attached",
+    "on_friendly_moves_from_here", "on_attached", "on_enemy_attack", "on_you_defend",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -77,6 +77,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "cards_in_hand_exactly", "units_at_battlefields_exactly", "not", "friendly_gear_here",
     "excess_damage_at_least", "facedown_card_here", "played_unit_gear_spell_this_turn",
     "in_beginning_phase", "triggering_unit_here", "has_all_pet_tags", "signpost_possible",
+    "friendly_mighty_unit_here",
     "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
     "target_was_stunned",
@@ -1447,7 +1448,7 @@ class GameLoop:
             if es.trigger != "passive" or es.effect not in self._BATTLEFIELD_GRANTS:
                 continue
             both = str(es.target or "").lower() in ("all_units_here", "all_units", "battlefield")
-            side = "A" if both else bf.controller()
+            side = "A" if both else bf.control()
             if side is None:
                 continue
             actor, opponent = self.gs.get_player(side), self.gs.get_player(self.gs.other(side))
@@ -1693,12 +1694,19 @@ class GameLoop:
             units = bf.units_A if side == "A" else bf.units_B
             return len(units) <= 1
         if ctype == "this_is_mighty":
-            return int(getattr(card, "might", 0) or 0) >= 5
+            # Mighty = 5+ Might now (§ MIGHTY), not the printed number.
+            unit = self._find_unit_by_card(card)
+            return (unit.might if unit is not None else int(getattr(card, "might", 0) or 0)) >= 5
         if ctype == "triggering_unit_is_mighty":
             # Gate on the UNIT THAT JUST TRIGGERED this ability (e.g. the mighty
             # unit you just played), not the source card (KNOWN_ISSUES #15).
             trig = extra.get("triggering_card")
-            return int(getattr(trig, "might", 0) or 0) >= 5
+            unit = extra.get("triggering_unit") or (self._find_unit_by_card(trig) if trig else None)
+            return (unit.might if unit is not None else int(getattr(trig, "might", 0) or 0)) >= 5
+        if ctype == "friendly_mighty_unit_here":
+            # "When you conquer here with one or more MIGHTY units" (Sunken Temple).
+            bf = extra.get("battlefield")
+            return bf is not None and any(u.might >= 5 for u in bf._units_for(side))
         if ctype == "kicker_paid":
             return bool(getattr(card, "_kicker_paid", False))
         if ctype == "showed_off":
@@ -1790,7 +1798,7 @@ class GameLoop:
                 extra.get("from_zone", "hand") == params.get("zone")
         if ctype == "played_to_controlled_battlefield":
             bf = extra.get("played_to")
-            return bf is not None and bf.controller() == side
+            return bf is not None and bf.control() == side
         if ctype == "units_in_base_at_least":
             # "if you have two or more other units in your base"
             return sum(1 for u in actor.base_units if u.card is not card) >= _threshold(1)
@@ -1873,7 +1881,7 @@ class GameLoop:
             return count >= _threshold()
         if ctype == "opponent_controls_a_battlefield":
             other = self.gs.other(side)
-            return any(bf.controller() == other for bf in self.gs.battlefields)
+            return any(bf.control() == other for bf in self.gs.battlefields)
         if ctype == "you_control_no_other_units":
             return not [u for u in _friendly_units()
                         if u.card is not card and u is not self._legend_unit(side)]
@@ -1897,7 +1905,7 @@ class GameLoop:
             return len(enemies) == 1 and len(friends) == 1
         if ctype == "you_control_bf_with_exactly_n_units":
             n = _threshold(2)
-            return any(bf.controller() == side and len(bf.units_A) + len(bf.units_B) == n
+            return any(bf.control() == side and len(bf.units_A) + len(bf.units_B) == n
                        for bf in self.gs.battlefields)
         if ctype == "you_have_n_or_fewer_runes":
             return actor.total_runes_in_play() <= _threshold()
@@ -1918,7 +1926,7 @@ class GameLoop:
             return bf is not None and bool(bf.gear_for(side))
         if ctype == "you_control_this_battlefield":
             bf = extra.get("battlefield")
-            return bf is not None and bf.controller() == side
+            return bf is not None and bf.control() == side
         if ctype == "empowered_times_at_least":
             # "While I'm EMPOWERED three times" (Kayle Justified).
             unit = self._find_unit_by_card(card)
@@ -2399,7 +2407,7 @@ class GameLoop:
         """Battlefields where `side` may Hide a card: it must control the
         battlefield (§106.4.c) and the Facedown Zone must be empty (§106.4.b)."""
         return [i for i, bf in enumerate(self.gs.battlefields)
-                if bf.controller() == side and bf.facedown is None]
+                if bf.control() == side and bf.facedown is None]
 
     def _hide_card(self, side: str, idx, lane: int) -> bool:
         """Hide the hand card at `idx` (or the champion: `idx` "champion", from the
@@ -2461,7 +2469,7 @@ class GameLoop:
         cleanup."""
         for bf in self.gs.battlefields:
             fd = bf.facedown
-            if fd is not None and bf.controller() != fd.owner:
+            if fd is not None and bf.control() != fd.owner:
                 self.gs.get_player(fd.owner).trash.append(fd.card)
                 bf.facedown = None
 
@@ -2834,7 +2842,7 @@ class GameLoop:
             return parsed
         where = self._locate_unit(unit)
         bf = where[1] if where else None
-        if bf is None or bf.card is None or bf.controller() != side or \
+        if bf is None or bf.card is None or bf.control() != side or \
                 not self._has_effect(bf.card, "empower_discount_here"):
             return parsed
         parsed = dict(parsed)
@@ -2872,7 +2880,7 @@ class GameLoop:
         if dst is None:
             return 0
         bf = self.gs.battlefields[dst]
-        if bf.card is not None and self._has_effect(bf.card, "dragon_roost") and                 "Dragon" in (card.tags or []) and bf.controller() != side:
+        if bf.card is not None and self._has_effect(bf.card, "dragon_roost") and                 "Dragon" in (card.tags or []) and bf.control() != side:
             return 2
         return 0
 
@@ -3373,7 +3381,7 @@ class GameLoop:
                 ok = bf.conquered_turn.get(side) == gs.turn
             else:
                 pets = ("Bird", "Cat", "Dog", "Poro")
-                ok = (bf.controller() == side or "any" in perms
+                ok = (bf.control() == side or "any" in perms
                       or (bf.card is not None and self._has_effect(bf.card, "dragon_roost")
                           and "Dragon" in (card.tags or []))
                       or ("pet_battlefield" in perms and any(t in u.tags for u in mine for t in pets))
@@ -3405,7 +3413,7 @@ class GameLoop:
         if card.has_keyword("AMBUSH"):
             lanes |= {i for i, bf in enumerate(gs.battlefields) if bf._units_for(side)}
         if card.has_keyword("REACTION"):
-            lanes |= {i for i, bf in enumerate(gs.battlefields) if bf.controller() == side}
+            lanes |= {i for i, bf in enumerate(gs.battlefields) if bf.control() == side}
             if "attacking" in self._play_permissions(card, side) and gs.showdown_active                     and gs.showdown_attacker == side and gs.showdown_bf_idx is not None:
                 lanes.add(gs.showdown_bf_idx)
         if self._units_at_battlefields_with(gs.other(side), "warden_only_base"):
@@ -3907,7 +3915,7 @@ class GameLoop:
             # "While you control this battlefield, friendly legends have '[tap]:
             # Attach an Equipment ...'" (Forge of the Fluft).
             for bf in self.gs.battlefields:
-                if bf.card is not None and bf.controller() == side:
+                if bf.card is not None and bf.control() == side:
                     bspec = CARD_REGISTRY.get(bf.card.name)
                     for eff in (bspec.effects if bspec else ()):
                         if eff.trigger == "granted_to_legend" and \
@@ -5185,7 +5193,8 @@ class GameLoop:
         if not (bf.units_A and bf.units_B):
             return
         atk_actor, atk_opp = self.gs.get_player(attacker), self.gs.get_player(defender)
-        if not bf.combat_started:
+        fresh = not bf.combat_started
+        if fresh:
             bf.combat_started = True
             # "When combat starts here, the attacker and defender each ADD [1]"
             # (Threshold of the Gray).
@@ -5215,6 +5224,24 @@ class GameLoop:
             for card in [unit.card] + list(unit.gear):
                 self._resolve_triggered_effects(card, "on_defend", bf, atk_opp, atk_actor,
                                                 context_extra={"battlefield": bf})
+        # "When an enemy unit attacks a battlefield you control" (Ahri Nine-Tailed Fox).
+        if bf.control() == defender:
+            for unit in new[attacker]:
+                self._fire_units_trigger("on_enemy_attack", defender, triggering_card=unit.card,
+                                         extra={"battlefield": bf, "triggering_unit": unit})
+        if fresh:
+            # The players become Attacker / Defender (§466.2.c.3): "When you
+            # defend here" (Fortified Position), "When one or more friendly units
+            # attack here" (Demacian Standard, deployed here), "When you defend
+            # at a battlefield" (Loyal Pup, anywhere).
+            for side, trig in ((attacker, "on_attack"), (defender, "on_defend")):
+                if bf.card is not None:
+                    self._resolve_triggered_effects(bf.card, trig, bf, self.gs.get_player(side),
+                                                    self.gs.get_player(self.gs.other(side)),
+                                                    context_extra={"battlefield": bf})
+                self._fire_deployed_gear_trigger(trig, bf, side)
+            self._fire_units_trigger("on_you_defend", defender,
+                                     extra={"defended_at": bf})
 
     def _phase_combat_and_conquer_single(self, bf_idx: int, attacker: str) -> None:
         """Resolve combat for a single battlefield."""
@@ -5279,6 +5306,7 @@ class GameLoop:
                                                     self.gs.get_player(side),
                                                     self.gs.get_player(self.gs.other(side)),
                                                     context_extra={"battlefield": bf})
+                unit.clear_combat_bonuses()     # "... this combat" ends (§468.7)
 
         # on_win_combat: a side won if it still has units and the other doesn't.
         if bf.units_A and not bf.units_B:
@@ -5303,6 +5331,13 @@ class GameLoop:
         if bf.card is not None and self._has_effect(bf.card, "lone_defender_minus") \
                 and len(bf._units_for(defender)) == 1:
             mods[id(bf._units_for(defender)[0])] = -2
+        # "While a friendly unit defends alone, it gets +2 [might]" (Master Yi
+        # Wuju Bladesman, the defender's legend).
+        legend = self._legend_unit(defender)
+        if legend is not None and self._has_effect(legend.card, "lone_defender_bonus") \
+                and len(bf._units_for(defender)) == 1:
+            lone = id(bf._units_for(defender)[0])
+            mods[lone] = mods.get(lone, 0) + 2
         attackers = bf._units_for(attacker)
         if len(attackers) >= 2:
             for u in attackers:
@@ -5577,7 +5612,7 @@ class GameLoop:
                 idx,
                 bf.units_A,
                 bf.units_B,
-                controller=bf.controller(),
+                controller=bf.control(),
                 contested=bf.contested_this_turn,
                 points_a=self.gs.points_A,
                 points_b=self.gs.points_B,

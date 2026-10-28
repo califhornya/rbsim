@@ -8797,10 +8797,11 @@
     "effects": [
       {
         "effect": "debuff_might",
-        "trigger": "on_defend",
-        "target": "enemy_unit",
+        "trigger": "on_enemy_attack",
+        "target": "triggering_unit",
         "amount": 1,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "min_floor": 1
       }
     ]
   },
@@ -9634,8 +9635,9 @@
         "effect": "give_temporary_shield",
         "trigger": "on_defend",
         "target": "chosen_unit",
+        "where": "anywhere",
         "amount": 2,
-        "duration": "this_turn"
+        "duration": "this_combat"
       }
     ]
   },
@@ -10752,9 +10754,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "grant_temporary_might_if_alone",
-        "trigger": "on_defend",
-        "target": "friendly_unit",
+        "effect": "lone_defender_bonus",
+        "trigger": "passive",
         "amount": 2
       }
     ]
@@ -14484,7 +14485,7 @@
         "effect": "double_might",
         "trigger": "on_attack",
         "target": "self",
-        "duration": "this_turn",
+        "duration": "this_combat",
         "condition": {
           "type": "one_on_one_here"
         }
@@ -14493,7 +14494,7 @@
         "effect": "double_might",
         "trigger": "on_defend",
         "target": "self",
-        "duration": "this_turn",
+        "duration": "this_combat",
         "condition": {
           "type": "one_on_one_here"
         }
@@ -15020,8 +15021,10 @@
     "effects": [
       {
         "effect": "move_unit",
-        "trigger": "on_defend",
-        "target": "self"
+        "trigger": "on_you_defend",
+        "target": "self",
+        "destination": "defended_at",
+        "optional": true
       }
     ]
   },
@@ -17959,9 +17962,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reveal_top_draw_if_spell",
+        "effect": "reveal_top",
         "trigger": "on_defend",
-        "target": "actor"
+        "target_filter": {
+          "is_spell": true
+        },
+        "to_hand": true,
+        "otherwise": "recycle"
       }
     ]
   },
@@ -18014,8 +18021,8 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "count": 1,
-        "trigger": "on_play"
+        "trigger": "on_conquer",
+        "amount_source": "other_battlefields_controlled"
       }
     ]
   },
@@ -18041,8 +18048,15 @@
     "effects": [
       {
         "effect": "draw_cards",
+        "trigger": "on_conquer",
         "count": 1,
-        "trigger": "on_play"
+        "optional": true,
+        "cost": {
+          "energy": 1
+        },
+        "condition": {
+          "type": "friendly_mighty_unit_here"
+        }
       }
     ]
   },
@@ -36209,6 +36223,11 @@
         "effect": "draw_cards",
         "trigger": "on_play",
         "count": 3
+      },
+      {
+        "effect": "return_gear_to_hand",
+        "trigger": "on_hold",
+        "target": "self"
       }
     ],
     "variants": [
@@ -37976,6 +37995,12 @@
         "target": "friendly_unit",
         "amount": 2,
         "duration": "this_turn"
+      },
+      {
+        "effect": "return_gear_to_hand",
+        "trigger": "on_hold",
+        "target": "self",
+        "optional": true
       }
     ],
     "variants": [
@@ -38129,7 +38154,7 @@
         "trigger": "on_defend",
         "target": "friendly_unit",
         "keyword": "TANK",
-        "duration": "this_turn"
+        "duration": "this_combat"
       }
     ],
     "variants": [

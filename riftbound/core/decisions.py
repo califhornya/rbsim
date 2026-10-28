@@ -246,7 +246,7 @@ class Observation:
             return BattlefieldView(
                 A=tuple(cls._uview(u) for u in bf.units_A),
                 B=tuple(cls._uview(u) for u in bf.units_B),
-                controller=bf.controller(),
+                controller=bf.control(),
                 named=getattr(bf.card, "name", None) if bf.card else None,
                 gear_A=tuple(dg.card.name for dg in bf.gear_A),
                 gear_B=tuple(dg.card.name for dg in bf.gear_B),

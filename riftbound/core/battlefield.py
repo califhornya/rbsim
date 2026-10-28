@@ -47,6 +47,7 @@ class Battlefield:
     first_unit_here_B: bool = False
 
     last_controller: Optional[str] = None
+    held_by: Optional[str] = None      # control(): who controls it by the rules
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
     facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
@@ -79,11 +80,28 @@ class Battlefield:
         return len(self._units_for(who))
 
     def controller(self) -> Optional[str]:
+        """The side alone here, None while both sides (or neither) have units:
+        the contest state the showdown/combat machinery runs on. Effects that
+        say "a battlefield you control" read control()."""
         if self.units_A and not self.units_B:
             return "A"
         if self.units_B and not self.units_A:
             return "B"
         return None
+
+    def _note_control(self) -> None:
+        sole = self.controller()
+        if sole is not None or not (self.units_A or self.units_B):
+            self.held_by = sole
+
+    def control(self) -> Optional[str]:
+        """Who controls this battlefield by the rules (§190.4): the side with
+        units here; while both sides have units (a showdown or combat), the side
+        that held it before, since control can't change mid-contest (§190.4.b).
+        Approximation: a side moving alone onto an uncontrolled battlefield
+        controls it at once, not after its showdown."""
+        self._note_control()
+        return self.held_by
 
     def begin_turn_reset(self) -> None:
         
@@ -100,7 +118,9 @@ class Battlefield:
 
     def add_unit(self, who: str, unit: UnitInPlay) -> None:
         unit_list = self._units_for(who)
+        self._note_control()       # who held it before this arrival
         unit_list.append(unit)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -112,6 +132,7 @@ class Battlefield:
         unit_list = self._units_for(who)
         if unit in unit_list:
             unit_list.remove(unit)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -124,6 +145,7 @@ class Battlefield:
         for unit in unit_list:
             if unit.ready:
                 unit_list.remove(unit)
+                self._note_control()
                 if self.units_A and self.units_B:
                     self.contested_this_turn = True
                     if self.controller() is None:
@@ -139,6 +161,7 @@ class Battlefield:
         self.kills_B += stats.kills_B
         self.deaths_A += stats.deaths_A
         self.deaths_B += stats.deaths_B
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -182,6 +205,7 @@ class Battlefield:
 
         units = self._units_for(target)
         kills, dead = deal_direct_damage(units, damage, take)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:

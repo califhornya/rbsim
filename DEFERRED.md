@@ -525,6 +525,18 @@ tests/test_declared_targets.py):
   unchecked. Cost: a deep copy per spell played (heuristic games 2.4x slower,
   net self-play ~8% per decision).
 
+## Corpus pass (BACKLOG D, 2026-10-28)
+Progress and fixes are in BACKLOG.md section D; the approximations left are
+listed here.
+- Control (§190.4): `Battlefield.control()` keeps the holder in control while
+  both sides have units. A side that moves alone onto an uncontrolled
+  battlefield controls it at once (rules: after its showdown ends), and a
+  holder whose units all die mid-showdown loses control at once (rules: at
+  the end of the combat steps).
+- "This combat" bonuses end with the combat at that battlefield; Master Yi
+  Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
+  (like SHIELD), not to "MIGHTY" checks during the combat.
+
 ## Radiance Rules FAQ (playriftbound.com, 2026-10-26) — rulings vs engine
 Official FAQ; it overrides the Core Rules where they differ. Audit of each ruling:
 

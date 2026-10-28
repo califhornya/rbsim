@@ -41,6 +41,10 @@ class UnitInPlay:
     # keyword list is never changed (it would follow the card to every zone).
     turn_keywords: list = field(default_factory=list)
     granted_keywords: list = field(default_factory=list)
+    # "... this combat" (Fortified Position, Durand Memorial, Fiora Peerless):
+    # cleared when the combat ends (§468.7).
+    combat_keywords: list = field(default_factory=list)
+    combat_might: int = 0
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
@@ -69,9 +73,14 @@ class UnitInPlay:
         self.bonus_might = 0
         # gear, might_counters, aura_might, passives, hidden intentionally preserved
 
+    def clear_combat_bonuses(self) -> None:
+        self.combat_keywords = []
+        self.combat_might = 0
+
     def clear_turn_end_bonuses(self) -> None:
         self.temporary_might = 0
         self.turn_keywords = []
+        self.clear_combat_bonuses()
         self.base_might_override = None
         self.moves_this_turn = 0
         self.damage_shield = 0
@@ -90,7 +99,8 @@ class UnitInPlay:
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
         base = self.base_might_override if self.base_might_override is not None else int(self.card.might or 0)
-        return max(0, base + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+        return max(0, base + self.bonus_might + self.temporary_might + self.combat_might
+                   + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
 
     @property
     def tags(self) -> list:
@@ -104,7 +114,8 @@ class UnitInPlay:
             return True
         kw = keyword.upper()
         return any(k.upper() == kw or k.upper().startswith(kw + " ")
-                   for k in (*self.passive_keywords, *self.turn_keywords, *self.granted_keywords))
+                   for k in (*self.passive_keywords, *self.turn_keywords, *self.granted_keywords,
+                             *self.combat_keywords))
 
     @staticmethod
     def _kw_amount(k: str, kw: str) -> int:
@@ -126,7 +137,8 @@ class UnitInPlay:
         base = self.card.keyword_value(keyword)
         kw = keyword.upper()
         passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
-        given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords))
+        given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords,
+                                                      *self.combat_keywords))
         return max(base, passive) + given
 
 
