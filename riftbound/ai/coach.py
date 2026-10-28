@@ -246,6 +246,9 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
         and 0 <= idx < len(p.hand) else None
     name = card.name if card is not None else "?"
     src = f"hand:{idx}" if card is not None and side == viewer else None
+    if kind == "HIDE" and idx == "champion":            # from the Champion Zone
+        champ = gs.champion_A if side == "A" else gs.champion_B
+        name, src = (champ.name if champ is not None else "?"), f"champion:{rel}"
     to = None
     moving = gs.pending_move if gs.pending_move is not None and gs.pending_move[1] == side else None
     if kind == "PASS" and moving is not None and point == DecisionPoint.TURN_ACTION:

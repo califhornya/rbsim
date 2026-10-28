@@ -867,3 +867,40 @@ def test_grove_of_the_god_willow_draws_when_you_hold_it():
     loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
     loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
     assert [c.name for c in a.hand] == ["Top"]
+
+
+def test_a_card_played_from_facedown_chooses_only_at_its_battlefield():
+    """§811.1.d: a hidden spell's targets (and a hidden unit's play effect's)
+    come from the battlefield it was hidden at; a spell with none there can't
+    be played from facedown."""
+    from riftbound.core.battlefield import FacedownCard
+    loop, a, b = _setup()
+    bf0, bf1 = loop.gs.battlefields
+    bf0.add_unit("A", _unit("Holder", 1))
+    elsewhere = _unit("Elsewhere", 2)
+    bf1.add_unit("B", elsewhere)
+    loop.gs.turn = 3
+    bf0.facedown = FacedownCard(card=CARD_REGISTRY["Block"].instantiate(), owner="A", turn_hidden=1)
+    assert loop._hidden_playable_lanes("A") == [0]               # Holder is there
+    bf0.units_A.clear()
+    bf0.add_unit("B", _unit("Here", 2))
+    asked = []
+    _choose(loop, "Here", asked)
+    loop._play_from_hidden("A", 0)
+    assert all("Elsewhere" not in names for names in asked)
+    here = next(u for u in bf0.units_B if u.card.name == "Here")
+    assert here.keyword_value("SHIELD") == 3 and elsewhere.keyword_value("SHIELD") == 0
+
+
+def test_a_hidden_champion_can_be_hidden_from_the_champion_zone():
+    """§811.1.b: 'While this card is in your hand or in your Champion Zone ...
+    you may pay [A] to hide this facedown at a battlefield you control.'"""
+    loop, a, b = _setup()
+    loop.gs.champion_A = CARD_REGISTRY["Kennen Keeper of Balance"].instantiate()
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    hides = [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A")
+             if ga.kind == "HIDE" and ga.to_engine()[1] == "champion"]
+    assert hides
+    loop._apply_action(a, hides[0].to_engine())
+    assert loop.gs.battlefields[0].facedown.card is loop.gs.champion_A
+    assert loop.gs.champion_A_deployed

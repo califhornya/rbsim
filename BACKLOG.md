@@ -101,8 +101,12 @@ Section A is done: both precon decks are checked card by card.
       Overzealous Fan), where you have units (Shadow Dash), open (§170.11.c).
 - [ ] Move tax (Gravity Field; who pays, §FAQ), Angler Wyrm's opponent moving
       their own unit.
-- [ ] HIDDEN: hiding from the Champion Zone (§737.1.b); a card played from
-      facedown chooses only at its battlefield (§737.1.d).
+- [x] HIDDEN: a champion with HIDDEN can be hidden from the Champion Zone
+      (§811.1.b); a card played from facedown chooses only among what is at
+      its battlefield, and a spell with no valid target there can't be played
+      from facedown (§811.1.d). Training note: hiding the champion has no slot
+      in the net's action space yet (HIDE takes a hand index); add one when
+      the action space is next resized.
 - [x] Combat damage: the assigner orders every unit while the damage runs
       short (one choice per unit, TANK group first, BACKLINE last; it chose
       only the first); a Ki Barrier shield counts in lethal, so extra damage

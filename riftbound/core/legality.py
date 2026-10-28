@@ -125,6 +125,11 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 if card.has_keyword("HIDDEN"):
                     for lane in hide_lanes:
                         actions.append(GameAction.hide(idx, lane, f"Hide {card.name} @BF{lane}"))
+            # The champion, from the Champion Zone (§811.1.b).
+            champ = loop._hideable_champion(side)
+            if champ is not None:
+                for lane in hide_lanes:
+                    actions.append(GameAction.hide("champion", lane, f"Hide {champ.name} @BF{lane}"))
         # Play a card you hid on a previous turn, for [0].
         for lane in loop._hidden_playable_lanes(side):
             fd = gs.battlefields[lane].facedown

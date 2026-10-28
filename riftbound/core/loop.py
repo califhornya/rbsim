@@ -2392,14 +2392,20 @@ class GameLoop:
         return [i for i, bf in enumerate(self.gs.battlefields)
                 if bf.controller() == side and bf.facedown is None]
 
-    def _hide_card(self, side: str, idx: int, lane: int) -> bool:
-        """Hide the hand card at `idx` facedown at battlefield `lane` for the cost
-        of 1 generic power (§737.1.b). Hiding is not a Play and opens no chain
+    def _hide_card(self, side: str, idx, lane: int) -> bool:
+        """Hide the hand card at `idx` (or the champion: `idx` "champion", from the
+        Champion Zone, §811.1.b) facedown at battlefield `lane` for the cost of 1
+        generic power (§737.1.b). Hiding is not a Play and opens no chain
         (§737.1.c.2). Returns True on success."""
         ap = self.gs.get_player(side)
-        if not (0 <= idx < len(ap.hand)):
-            return False
-        card = ap.hand[idx]
+        if idx == "champion":
+            card = self._hideable_champion(side)
+            if card is None:
+                return False
+        else:
+            if not (isinstance(idx, int) and 0 <= idx < len(ap.hand)):
+                return False
+            card = ap.hand[idx]
         if not card.has_keyword("HIDDEN"):
             return False
         if lane not in self._hide_lanes(side):
@@ -2410,7 +2416,13 @@ class GameLoop:
             self._pay_generic_power(ap, 1)
         else:
             ap.energy -= 1           # Teemo Swift Scout: "pay [1] ... instead of [rune]"
-        ap.remove_from_hand(idx)
+        if idx == "champion":
+            if side == "A":
+                self.gs.champion_A_deployed = True      # it left the Champion Zone
+            else:
+                self.gs.champion_B_deployed = True
+        else:
+            ap.remove_from_hand(idx)
         bf = self.gs.battlefields[lane]
         bf.facedown = FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn)
         if self.verbose:
@@ -2422,6 +2434,12 @@ class GameLoop:
         # "When you hide a card" on the hider's units (Katarina Reckless).
         self._fire_units_trigger("on_hide", side)
         return True
+
+    def _hideable_champion(self, side: str):
+        """The champion in `side`'s Champion Zone if it has HIDDEN (§811.1.b)."""
+        champ = self.gs.champion_A if side == "A" else self.gs.champion_B
+        deployed = self.gs.champion_A_deployed if side == "A" else self.gs.champion_B_deployed
+        return champ if champ is not None and not deployed and champ.has_keyword("HIDDEN") else None
 
     def _can_hide_pay(self, ap: Player, side: str) -> bool:
         legend = self._legend_unit(side)
@@ -2453,6 +2471,14 @@ class GameLoop:
                 if any(self._has_effect(u.card, "no_enemy_reveals_here")
                        for u in bf._units_for(self.gs.other(side))):
                     continue
+                # A spell needs a valid target at this battlefield (§811.1.d).
+                if isinstance(fd.card, SpellCard):
+                    fd.card._hidden_bf = i
+                    try:
+                        if not self._spell_has_targets(fd.card, side, i):
+                            continue
+                    finally:
+                        del fd.card._hidden_bf
                 lanes.append(i)
         return lanes
 
@@ -2467,12 +2493,19 @@ class GameLoop:
         card = fd.card
         bf.facedown = None
         ap = self.gs.get_player(side)
-        if isinstance(card, SpellCard):
-            self._spell_played(card, ap, from_zone="facedown")
-            self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
-            self._run_chain(side)
-        else:  # unit / champion / gear-as-unit → enters at that battlefield
-            self._play_unit(card, side, bf=bf, from_zone="facedown")
+        # Its choices are made among what is at this battlefield (§811.1.d):
+        # effects._resolve_targets reads the mark.
+        card._hidden_bf = lane
+        try:
+            if isinstance(card, SpellCard):
+                self._spell_played(card, ap, from_zone="facedown")
+                self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
+                self._run_chain(side)
+            else:  # unit / champion / gear-as-unit → enters at that battlefield
+                self._play_unit(card, side, bf=bf, from_zone="facedown")
+        finally:
+            if hasattr(card, "_hidden_bf"):
+                del card._hidden_bf
         if self.verbose:
             print(f"  {side} plays {card.name} from Hidden @BF{lane} for [0]")
         return True

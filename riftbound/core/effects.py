@@ -60,7 +60,7 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         units = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
     else:
         cands = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
-        if not cands and not isinstance(ctx.card, SpellCard):
+        if not cands and not isinstance(ctx.card, SpellCard) and getattr(ctx.card, "_hidden_bf", None) is None:
             cands = _fallback_units(ctx, target, "enemy")
             if tf:
                 cands = [u for u in cands if _passes_filter(u, tf, ctx)]
@@ -2418,11 +2418,18 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         units = _units_where(ctx, ctx._side_for_player(ctx._player_for_target(target)), where)
     else:
         units = ctx._units_for_target(target)
+    hidden = getattr(ctx.card, "_hidden_bf", None)
+    if hidden is not None and where != "base" and not target.startswith("all") \
+            and target not in _BOTH_SIDES_TARGETS and target not in _EVERYWHERE_TARGETS:
+        # Played from facedown: chosen among what is at its battlefield (§811.1.d).
+        at = ctx.loop.gs.battlefields[hidden]
+        units = [u for u in units if any(u is x for x in at.units_A + at.units_B)]
     tf = spec.get("target_filter")
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
     if not units and scope == "single" and not target.startswith("all") and not where \
-            and not isinstance(ctx.card, SpellCard) and target not in _BOTH_SIDES_TARGETS:
+            and hidden is None and not isinstance(ctx.card, SpellCard) \
+            and target not in _BOTH_SIDES_TARGETS:
         # An ability or trigger isn't aimed at one battlefield the way a spell is
         # (a legend's "give a unit ASSAULT 2"): with no candidate here, look at
         # the other battlefields, then base.
