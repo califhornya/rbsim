@@ -80,6 +80,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_you_defend",                             # you defend at a battlefield, anywhere (Loyal Pup)
     "on_unit_dies_here",                         # battlefield: a non-token unit dies here (Black Rose Sanctum)
     "granted_to_units_here",                     # battlefield: units here have this ability (Gardens of Becoming)
+    "on_recycle_rune",                           # you recycle a rune (Sivir Battle Mistress)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -262,6 +263,11 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # battlefield cost rules (GameLoop._destination_discount, _gear_ability_discount,
     # _pay_repeat) and Altar of Blood (_try_replace_death)
     "first_play_here_discount", "first_gear_ability_discount", "repeat_discount", "altar_of_blood",
+    # Detonation Amplifier, Jarvan IV Martial Paragon, Mel Newly Awakened,
+    # Renekton Brute (GameLoop._route_deaths, _play_timing, _uncounterable,
+    # _extra_might_reduction, _recompute_passives)
+    "double_deathknell_here", "deploy_gear_action", "uncounterable", "extra_might_reduction",
+    "empower_at_might", "repeat_costs",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

@@ -981,3 +981,290 @@ def test_a_may_reveal_can_be_declined():
     loop.chooser = _always(False)
     loop._resolve_card_effects(CARD_REGISTRY["Fate Weaver"].instantiate(), loop.gs.battlefields[0], a, b)
     assert not a.hand and len(a.deck.cards) == 1
+
+
+# -- The cards named in the old notes ----------------------------------------------
+
+def test_mobilize_draws_when_no_rune_could_be_channelled():
+    """'Channel 1 rune exhausted, if you couldn't, draw 1.'"""
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    _cast_now(loop, a, "Mobilize")
+    assert len(a.hand) == 1
+    loop, a, b = _setup()
+    a.rune_deck = RuneDeck([Rune(Domain.FURY)])
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    _cast_now(loop, a, "Mobilize")
+    assert not a.hand
+
+
+def test_catalyst_of_aeons_draws_when_short_of_two_runes():
+    """'Channel 2 rune exhausted. If you couldn't channel 2 runes this way, draw 1.'"""
+    loop, a, b = _setup()
+    a.rune_deck = RuneDeck([Rune(Domain.FURY)])
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    runes = a.total_runes_in_play()
+    _cast_now(loop, a, "Catalyst of Aeons")
+    assert a.total_runes_in_play() == runes + 1 and len(a.hand) == 1
+
+
+def test_temporal_breach_can_reset_an_enemy_unit_for_its_owner():
+    """'Banish a unit, then its owner plays it to the same location, ignoring its
+    cost.'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    enemy = _unit("Enemy", 3)
+    enemy.damage = 2
+    bf.add_unit("B", enemy)
+    _pick(loop, "Enemy")
+    _cast_now(loop, a, "Temporal Breach")
+    again = [u for u in bf.units_B if u.card is enemy.card]
+    assert len(again) == 1 and again[0].damage == 0 and again[0] is not enemy
+
+
+def test_legion_marauder_empowers_for_one_energy_or_one_body():
+    """'EMPOWER - [1] or [body] (Pay either cost: Empower me.)'"""
+    loop, a, b = _setup()
+    marauder = _unit("Legion Marauder")
+    a.base_units.append(marauder)
+    costs = [e["eff"].cost for e in loop.activatable_abilities("A") if e["eff"].effect == "empower_self"]
+    assert costs == [{"energy": 1}, {"power": 1, "domain": "BODY"}]
+
+
+def test_renekton_brute_empowers_at_ten_might_and_then_has_deflect_and_ganking():
+    """'When my Might becomes 10 or more, empower me. EMPOWERED I have DEFLECT and
+    GANKING.'"""
+    loop, a, b = _setup()
+    ren = _unit("Renekton Brute")
+    a.base_units.append(ren)
+    loop._recompute_passives()
+    assert not ren.empowered
+    ren.temporary_might = 10 - ren.card.might
+    loop._recompute_passives()
+    assert ren.empowered and ren.has_keyword("DEFLECT") and ren.has_keyword("GANKING")
+
+
+def test_kharox_burns_three_then_plays_a_unit_from_their_trash_they_still_own():
+    """'When I become EMPOWERED, choose an opponent. They BURN 3. Then you may do
+    this: Choose a unit in their trash and play it, ignoring its cost.'"""
+    loop, a, b = _setup()
+    kharox = _unit("Kharox")
+    a.base_units.append(kharox)
+    b.deck.cards = [SpellCard(name="S1"), UnitCard(name="Theirs", might=4), SpellCard(name="S3")]
+    loop._empower(kharox.card, "A")
+    stolen = [u for u in a.base_units if u.card.name == "Theirs"]
+    assert len(stolen) == 1 and len(b.trash) == 2
+    loop._route_deaths([(stolen[0], "A")], loop.gs.battlefields[0], in_base=True)
+    assert stolen[0].card in b.trash and stolen[0].card not in a.trash   # its owner's
+
+
+def test_detonation_amplifier_doubles_friendly_deathknells_here():
+    """'Friendly DEATHKNELL effects here trigger an additional time.'"""
+    _spec("Test Knell", category="Unit", might=1,
+          effects=[{"effect": "draw_cards", "trigger": "on_death", "count": 1}])
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    bf.gear_for("A").append(DeployedGear(card=CARD_REGISTRY["Detonation Amplifier"].instantiate()))
+    knell = _unit("Test Knell")
+    bf.add_unit("A", knell)
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(3)]
+    bf.remove_unit("A", knell)
+    loop._route_deaths([(knell, "A")], bf)
+    assert len(a.hand) == 2
+
+
+def test_heartening_soul_gives_your_legend_a_pump():
+    """'Friendly legends have "[tap]: Give a unit +3 [might] this turn."'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Volibear Relentless Storm")
+    a.base_units.append(_unit("Heartening Soul"))
+    target = _unit("Target", 2)
+    loop.gs.battlefields[0].add_unit("A", target)
+    _pick(loop, "Target")
+    idx = next(i for i, e in enumerate(loop.activatable_abilities("A"))
+               if e["type"] == "ability" and e["unit"] is loop.gs.legend_unit_A
+               and e["eff"].effect == "grant_temporary_might")
+    loop._apply_activated_ability(a, b, idx)
+    assert target.might == 5 and not loop.gs.legend_unit_A.ready
+
+
+def test_jarvan_martial_paragon_lets_deploy_gear_be_played_in_showdowns():
+    """'Your gear with DEPLOY have ACTION.'"""
+    loop, a, b = _setup()
+    bomb = CARD_REGISTRY["Detonation Amplifier"].instantiate()
+    assert loop._play_timing(bomb, "A") is None
+    a.base_units.append(_unit("Jarvan IV Martial Paragon"))
+    assert loop._play_timing(bomb, "A") == "action"
+    assert loop._play_timing(bomb, "B") is None
+
+
+def test_sumpworks_map_is_offered_at_reaction_speed():
+    """'REACTION (Play any time, even before spells and abilities resolve.)'"""
+    from riftbound.core.legality import _reaction_actions
+    loop, a, b = _setup()
+    a.hand = [CARD_REGISTRY["Sumpworks Map"].instantiate()]
+    assert any(ga.kind == "GEAR" for ga in _reaction_actions(loop, a))
+
+
+def test_sivir_battle_mistress_makes_gold_when_you_recycle_a_rune():
+    """'When you recycle a rune, you may exhaust me to play a Gold gear token
+    exhausted.' Paying Power recycles runes."""
+    loop, a, b = _setup()
+    sivir = _unit("Sivir Battle Mistress")
+    loop.gs.legend_unit_A = sivir
+    a.power_pool, a.floating_power = {}, {}
+    a.rune_pool = {Domain.FURY: [Rune(Domain.FURY)]}
+    a.power_pool[Domain.FURY] = 1
+    assert a.pay_cost(0, 1, Domain.FURY)
+    loop._recompute_passives()
+    assert [g.name for g in a.base_gear] == ["Gold"] and not sivir.ready
+
+
+def test_call_to_battle_makes_the_opponent_follow_to_the_same_battlefield():
+    """'Move a unit you control to a battlefield you control. Then, choose an
+    opponent. They move a unit they control to the same battlefield.'"""
+    loop, a, b = _setup()
+    bf0 = loop.gs.battlefields[0]
+    bf0.add_unit("A", _unit("Holder", 1))
+    mine, theirs = _unit("Mine", 2), _unit("Theirs", 2)
+    a.base_units.append(mine)
+    b.base_units.append(theirs)
+    _cast_now(loop, a, "Call to Battle")
+    assert mine in bf0.units_A and theirs in bf0.units_B
+
+
+def test_atakhan_makes_the_defender_kill_one_of_their_units_there():
+    """'When I attack, the defender must kill one of their units here.' The
+    defender chooses."""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Atakhan"))
+    big, small = _unit("Big", 5), _unit("Small", 1)
+    bf.add_unit("B", big)
+    bf.add_unit("B", small)
+    asked = []
+    loop.chooser = lambda _l, kind, side, options, default, source: (
+        asked.append(side) or options.index(big) if kind.startswith("kill_own") else None)
+    loop._open_combat(bf, "A")
+    assert asked == ["B"] and big not in bf.units_B and small in bf.units_B
+
+
+def test_akshan_steals_an_equipment_until_he_leaves():
+    """'You may pay [body] [body] as an additional cost to play me. When you play
+    me, if you paid the additional cost, move an enemy gear to your base. You
+    control it until I leave the board. If it's an Equipment, attach it to me.'"""
+    loop, a, b = _setup()
+    blade = CARD_REGISTRY["Serrated Dirk"].instantiate()
+    b.base_gear.append(blade)
+    a.hand = [CARD_REGISTRY["Akshan Mischievous"].instantiate()]
+    loop._apply_action(a, ("UNIT", 0, 0))
+    akshan = next(u for u in a.base_units if u.card.name == "Akshan Mischievous")
+    assert blade in akshan.gear and blade not in b.base_gear
+    a.base_units.remove(akshan)
+    loop._route_deaths([(akshan, "A")], loop.gs.battlefields[0], in_base=True)
+    assert blade in b.base_gear and blade not in a.base_gear
+
+
+def test_mel_empowered_spells_cant_be_countered_and_reduce_one_more():
+    """'EMPOWERED Your spells and abilities can't be countered. If a spell or
+    ability you control would give -[might] to a unit it chooses, it gives an
+    additional -1 [might].'"""
+    from riftbound.core.state import ChainItem
+    loop, a, b = _setup()
+    mel = _unit("Mel Newly Awakened", empowered=True)
+    a.base_units.append(mel)
+    mine = SpellCard(name="Mine")
+    loop.gs.chain.append(ChainItem(player="A", card=mine, bf_idx=0))
+    _cast_now(loop, b, "Wind Wall")
+    assert loop.gs.chain and loop.gs.chain[-1].card is mine
+    loop.gs.chain.clear()
+    enemy = _unit("Enemy", 6)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    _pick(loop, "Enemy")
+    from riftbound.core.effects import REGISTRY
+    from riftbound.core.loop import EffectContext
+    ctx = EffectContext(loop, SpellCard(name="Shrink"), a, b, loop.gs.battlefields[0], {})
+    REGISTRY["grant_temporary_might"](ctx, {"target": "chosen_unit", "amount": -2})
+    assert enemy.might == 3
+
+
+def test_akali_deadly_weapon_hits_where_she_moved_for_two_when_empowered():
+    """'When I move, you may deal 1 to a unit at a battlefield I moved to or from.
+    If I'm Empowered, deal 2 instead.'"""
+    loop, a, b = _setup()
+    akali = _unit("Akali Deadly Weapon")
+    a.base_units.append(akali)
+    far, near = _unit("Far", 5), _unit("Near", 5)
+    loop.gs.battlefields[1].add_unit("B", far)
+    loop.gs.battlefields[0].add_unit("B", near)
+    _pick(loop, "Near")
+    loop._move_unit_by_effect(akali, loop.gs.battlefields[0])
+    assert near.damage == 1 and far.damage == 0
+    akali.empowered = True
+    loop._move_unit_by_effect(akali, None)
+    assert near.damage == 3
+
+
+def test_diana_lunari_predicts_then_reveals_for_one():
+    """'When a showdown begins here, you may pay [1]. If you do, PREDICT, then
+    reveal the top card of your Main Deck. If it's a spell, draw it.'"""
+    loop, a, b = _setup()
+    diana = _unit("Diana Lunari")
+    a.base_units.append(diana)
+    _deck(a, SpellCard(name="Top Spell"))
+    loop._resolve_triggered_effects(diana.card, "on_showdown_begin", loop.gs.battlefields[0], a, b)
+    assert [c.name for c in a.hand] == ["Top Spell"] and a.energy == 19
+
+
+def test_curtain_call_repeats_three_times_each_a_new_mode():
+    """'REPEAT - [1] / [rune] / [1][rune] ... Choose one you haven't already chosen
+    - Draw 1. - Deal 2 to a unit at a battlefield. - Deal 3 to a unit at a base. -
+    Give a unit at a battlefield -4 [might] this turn.'"""
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(3)]
+    at_bf, in_base = _unit("AtBf", 9), _unit("InBase", 9)
+    loop.gs.battlefields[0].add_unit("B", at_bf)
+    b.base_units.append(in_base)
+    power = sum(a.power_pool.values())
+    _play_spell(loop, a, "Curtain Call")
+    assert a.energy == 20 - 4 - 1 - 1 and sum(a.power_pool.values()) == power - 2
+    assert len(a.hand) == 1 and at_bf.damage == 2 and in_base.damage == 3
+    assert at_bf.might == 5
+
+
+def test_jinx_rebel_triggers_once_for_cards_discarded_together():
+    """'When you discard one or more cards, ready me and give me +1 [might] this
+    turn.'"""
+    loop, a, b = _setup()
+    jinx = _unit("Jinx Rebel")
+    jinx.ready = False
+    a.base_units.append(jinx)
+    a.hand = [UnitCard(name="X", might=1), UnitCard(name="Y", might=1)]
+    from riftbound.core.effects import REGISTRY
+    from riftbound.core.loop import EffectContext
+    REGISTRY["discard_card"](EffectContext(loop, SpellCard(name="Loot"), a, b, loop.gs.battlefields[0], {}),
+                             {"count": 2})
+    assert not a.hand and jinx.ready and jinx.might == jinx.card.might + 1
+
+
+def test_mageseeker_warden_stops_enemy_gear_being_readied():
+    """'While I'm at a battlefield, spells and abilities can't ready enemy units
+    and gears.'"""
+    loop, a, b = _setup()
+    loop.gs.battlefields[0].add_unit("B", _unit("Mageseeker Warden"))
+    gear = GearCard(name="Kit")
+    gear.tapped = True
+    a.base_gear.append(gear)
+    from riftbound.core.effects import REGISTRY
+    from riftbound.core.loop import EffectContext
+    REGISTRY["ready_gear"](EffectContext(loop, SpellCard(name="Ready"), a, b, loop.gs.battlefields[0], {}), {})
+    assert gear.tapped
+
+
+def test_showstopper_buffs_a_unit_in_base_then_moves_it_to_a_battlefield():
+    """'Buff a friendly unit in your base, then move it to a battlefield.'"""
+    loop, a, b = _setup()
+    unit = _unit("Star", 2)
+    a.base_units.append(unit)
+    _cast_now(loop, a, "Showstopper")
+    assert unit.might_counters == 1 and unit not in a.base_units

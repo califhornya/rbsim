@@ -186,8 +186,8 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             for lane in range(n_bf):
                 if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
-        # QUICK-DRAW gear (§745): has Reaction — playable at reaction speed.
-        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+        # REACTION gear (QUICK-DRAW §745, Sumpworks Map): playable at reaction speed.
+        elif isinstance(card, GearCard) and loop._play_timing(card, ap.name) == "reaction":
             if _affordable(loop, ap, card):
                 for lane in range(n_bf):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
@@ -227,8 +227,9 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         if isinstance(card, UnitCard) and lane in loop._ambush_unit_lanes(card, ap.name) \
                 and _affordable(loop, ap, card):
             actions.append(GameAction("UNIT", idx, lane, lane, f"AMBUSH {card.name} @BF{lane}"))
-        # QUICK-DRAW gear (§745): has Reaction — playable during a showdown.
-        elif isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+        # ACTION / REACTION gear (QUICK-DRAW §745, Jarvan IV's DEPLOY gear):
+        # playable during a showdown.
+        elif isinstance(card, GearCard) and loop._play_timing(card, ap.name) in ("action", "reaction"):
             if _affordable(loop, ap, card):
                 actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion into the showdown lane at reaction speed.

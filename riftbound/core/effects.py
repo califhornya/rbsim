@@ -915,6 +915,62 @@ def _sacrifice_token_here_draw(ctx: "EffectContext", spec: Mapping[str, Any]) ->
     ctx.draw_cards(1, target="actor")
 
 
+@effect("opponent_kills_own_here")
+def _opponent_kills_own_here(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When I attack, the defender must kill one of their units here"
+    (Atakhan): the defender picks; baseline their weakest."""
+    bf = ctx.extra.get("battlefield") or ctx.battlefield
+    theirs = list(bf._units_for(ctx.opponent_side))
+    if not theirs:
+        return
+    victim = ctx.loop.choose("kill_own:" + str(spec.get("effect")), ctx.opponent_side, theirs,
+                             min(theirs, key=lambda u: u.might), ctx.card)
+    _take_off_board(ctx, victim)
+    ctx.loop._route_deaths([(victim, ctx.opponent_side)], bf, killer=(ctx.actor_side, ctx.card))
+
+
+@effect("play_from_opponent_trash")
+def _play_from_opponent_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a unit in their trash and play it, ignoring its cost" (Kharox):
+    you control it, they still own it. Baseline: the mightiest."""
+    units = [c for c in ctx.opponent.trash if _zone_effect_card_ok(c, {"target_filter": {"is_unit": True}})]
+    if not units:
+        return
+    card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, units,
+                           max(units, key=lambda c: int(getattr(c, "might", 0) or 0)), ctx.card)
+    ctx.opponent.trash.remove(card)
+    card._owner = ctx.opponent_side
+    ctx.loop._play_unit(card, ctx.actor_side, from_zone="trash")
+
+
+@effect("steal_gear")
+def _steal_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Move an enemy gear to your base. You control it until I leave the
+    board. If it's an Equipment, attach it to me" (Akshan Mischievous): any
+    enemy gear (base, attached, deployed); baseline the costliest. It goes back
+    when this card leaves the board (GameLoop._return_stolen_gear)."""
+    loop = ctx.loop
+    entries = [(s, h, g) for s, h, g in _gear_entries(ctx, enemy_first=True) if s == ctx.opponent_side]
+    if not entries:
+        return
+    pick = max(entries, key=lambda e: _zone_value(getattr(e[2], "card", e[2])))
+    side, holder, gear = loop.choose(_kind("target", spec), ctx.actor_side, entries, pick, ctx.card)
+    card = getattr(gear, "card", gear)
+    if isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(gear)
+    elif holder is not None:
+        holder.gear.remove(gear)
+    else:
+        loop.gs.get_player(side).base_gear.remove(gear)
+    card._owner, card._stolen_by = side, ctx.card
+    me = _source_unit(ctx)
+    if me is not None and loop._equip_cost(card) is not None:
+        me.gear.append(card)
+        loop._fire_attached(me, ctx.actor_side)
+    else:
+        ctx.actor.base_gear.append(card)
+
+
 @effect("look_recycle")
 def _look_recycle(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Look at the top two cards of your Main Deck. You may recycle one or both
@@ -958,6 +1014,7 @@ def _recycle_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not player.rune_pool[rune.domain]:
         del player.rune_pool[rune.domain]
     player.rune_deck.recycle(rune)
+    player.runes_recycled = getattr(player, "runes_recycled", 0) + 1
 
 
 @effect("champion_from_trash")
@@ -1344,6 +1401,8 @@ def _ready_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     costliest. `may_detach`: "If it's an equipment, you may detach it"
     (Veiled Temple; baseline: it stays)."""
     loop = ctx.loop
+    if loop._readying_blocked(ctx.actor_side):
+        return                                   # Mageseeker Warden
     holders = {id(getattr(g, "card", g)): h for side, h, g in _gear_entries(ctx, enemy_first=False)
                if side == ctx.actor_side}
     gear = [getattr(g, "card", g) for side, _h, g in _gear_entries(ctx, enemy_first=False)
@@ -1700,6 +1759,8 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
         owner.unlock_runes(1, exhausted=True)
     if unit.is_token:
         return
+    owner = loop.gs.get_player(loop._owner_of(unit.card, side))
+    unit.card._owner = None
     if to == "hand":
         owner.hand.append(unit.card)
     elif to == "deck_bottom":
@@ -2001,6 +2062,9 @@ def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     gs = loop.gs
     me = ctx.actor_side
     units = [u for u in _units_at(ctx, me, "anywhere") if not u.is_token]
+    if spec.get("any_side"):
+        # "Banish a unit, then its owner plays it" (Temporal Breach): either side.
+        units += [u for u in _units_at(ctx, ctx.opponent_side, "anywhere") if not u.is_token]
     tf = spec.get("target_filter")
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
@@ -2161,7 +2225,12 @@ def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
     players = [ctx.actor, ctx.opponent] if target == "each_player" else [ctx._player_for_target(target)]
     for player in players:
+        before = player.total_runes_in_play()
         player.unlock_runes(count, exhausted=_coerce_bool(spec.get("exhausted", False)))
+        if spec.get("draw_if_short") and player.total_runes_in_play() - before < count:
+            # "Channel 2 runes exhausted. If you couldn't channel 2 runes this way,
+            # draw 1" (Catalyst of Aeons, Mobilize).
+            ctx.draw_cards(int(spec["draw_if_short"]), target="actor")
 
 
 @effect("grant_temporary_might")
@@ -2169,6 +2238,10 @@ def _grant_temporary_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
     amount = _amount(ctx, spec)
     floor = spec.get("minimum", spec.get("min_might"))
     # "Give a unit -2 [might]" (Frigid Touch): an enemy first.
+    if amount < 0 and not str(spec.get("target", "")).startswith("all"):
+        # "If a spell or ability you control would give -[might] to a unit it
+        # chooses, it gives an additional -1 [might]" (Mel Newly Awakened).
+        amount -= ctx.loop._extra_might_reduction(ctx.actor_side)
     for unit in _resolve_targets(ctx, spec, bias="enemy" if amount < 0 else "none"):
         if amount < 0:
             ctx.loop._fire_might_reduced(unit, ctx.actor_side)
@@ -2195,6 +2268,8 @@ def _grant_temporary_might_if_alone(ctx: "EffectContext", spec: Mapping[str, Any
 def _debuff_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Negative this-turn might with an optional floor (min resulting might)."""
     amount = abs(_amount(ctx, spec))
+    if not str(spec.get("target", "")).startswith("all"):
+        amount += ctx.loop._extra_might_reduction(ctx.actor_side)     # Mel Newly Awakened
     floor = int(spec.get("min_floor", spec.get("minimum", 0)))
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")}, bias="enemy"):
         base = unit.might
@@ -2250,7 +2325,7 @@ def _counterable(card, spec: Mapping[str, Any]) -> bool:
 @effect("counter_spell")
 def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     chain = ctx.loop.gs.chain
-    if not chain or not _counterable(chain[-1].card, spec):
+    if not chain or not _counterable(chain[-1].card, spec) or ctx.loop._uncounterable(chain[-1].player):
         return
     target_item = chain[-1]
     target_card = target_item.card
@@ -2573,7 +2648,8 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     effect = spec.get("effect")
     if effect == "counter_spell":
         chain = ctx.loop.gs.chain
-        return bool(chain) and _counterable(chain[-1].card, spec)
+        return (bool(chain) and _counterable(chain[-1].card, spec)
+                and not ctx.loop._uncounterable(chain[-1].player))
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()
@@ -2607,6 +2683,11 @@ def _units_where(ctx: "EffectContext", side: str, where: str) -> list:
     gs = ctx.loop.gs
     if where == "base":                    # "a friendly unit in your base" (Showstopper)
         return list(gs.get_player(side).base_units)
+    if where == "moved_bfs":
+        # "a unit at a battlefield I moved to or from" (Akali Deadly Weapon)
+        ends = [b for b in (ctx.extra.get("moved_from"), ctx.extra.get("moved_to"))
+                if isinstance(b, Battlefield)]
+        return [u for b in ends for u in b._units_for(side)]
     out = here + [u for bf in gs.battlefields if bf is not ctx.battlefield for u in bf._units_for(side)]
     if where == "anywhere":
         out += list(gs.get_player(side).base_units)
@@ -2863,7 +2944,8 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         owner.base_gear.extend(unit.gear)
         unit.gear = []
         if not getattr(unit, "is_token", False):
-            owner.hand.append(unit.card)
+            gs.get_player(ctx.loop._owner_of(unit.card, side)).hand.append(unit.card)
+            unit.card._owner = None
         # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
         ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
 
@@ -2947,6 +3029,10 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         return [None] if cur is not None else []
     if dest in ("here", "this_battlefield"):
         return [ctx.battlefield] if ctx.battlefield in gs.battlefields and cur is not ctx.battlefield else []
+    if dest == "same_as_last_move":
+        # "They move a unit they control to the same battlefield" (Call to Battle)
+        at = ctx.extra.get("last_move_dst")
+        return [at] if at is not None and cur is not at else []
     if dest in ("stunned_at", "deployed_at", "defended_at"):
         # "you may move me to that battlefield" (Vex Mocking, Jarvan IV Exemplar),
         # "When you defend at a battlefield, you may move me there" (Loyal Pup)
@@ -3064,6 +3150,7 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
             if spec.get("ready") and loop._can_ready(unit):
                 unit.ready = True
             moved_units.append(unit)
+            ctx.extra["last_move_dst"] = dst
     ctx.extra["it"] = moved_units          # "Move a friendly unit and ready it"
 
 
@@ -3268,12 +3355,13 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx._player_for_target(target)
     count = int(spec.get("count", spec.get("amount", 1)))
     side = "A" if player is ctx.loop.gs.A else "B"
-    for _ in range(count):
-        if not player.hand:
-            break
-        # The discarding player picks the card (baseline: the first one).
-        ctx.loop._discard(player, ctx.loop.choose("discard", side, list(player.hand),
-                                                  player.hand[0], ctx.card))
+    with ctx.loop._discard_event():
+        for _ in range(count):
+            if not player.hand:
+                break
+            # The discarding player picks the card (baseline: the first one).
+            ctx.loop._discard(player, ctx.loop.choose("discard", side, list(player.hand),
+                                                      player.hand[0], ctx.card))
 
 
 @effect("play_token")

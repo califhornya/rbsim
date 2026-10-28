@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
@@ -43,7 +44,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_enemy_might_reduced", "on_recycle", "on_three_exhausted", "on_friendly_gear_died_at_bf",
     "trash_on_spell_kill", "on_friendly_deploy", "granted_to_legend",
     "on_friendly_moves_from_here", "on_attached", "on_enemy_attack", "on_you_defend",
-    "on_unit_dies_here", "granted_to_units_here",
+    "on_unit_dies_here", "granted_to_units_here", "on_recycle_rune",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -882,11 +883,14 @@ class GameLoop:
                 self.gs.get_player(owner).base_units.append(unit)
 
     def _take_control(self, unit: UnitInPlay, new_side: str) -> Optional[Battlefield]:
-        """`new_side` takes control of `unit` where it is; returns its battlefield."""
+        """`new_side` takes control of `unit` where it is; returns its battlefield.
+        Its card remembers its owner (_owner_of)."""
         where = self._locate_unit(unit)
         if where is None:
             return None
         old, bf = where
+        if getattr(unit.card, "_owner", None) is None:
+            unit.card._owner = old
         if bf is None:
             self.gs.get_player(old).base_units.remove(unit)
             self.gs.get_player(new_side).base_units.append(unit)
@@ -894,6 +898,13 @@ class GameLoop:
             bf.remove_unit(old, unit)
             bf.add_unit(new_side, unit)
         return bf
+
+    @staticmethod
+    def _owner_of(card: Card, side: str) -> str:
+        """The side that owns `card`: the one it was taken from when another
+        player controls it (take control, Kharox), else its controller `side`.
+        A card leaving the board goes to its owner's zones (§ ownership)."""
+        return getattr(card, "_owner", None) or side
 
     def _extra_channel(self, side: str) -> None:
         """ "If you would channel runes, channel that many runes plus 1 exhausted
@@ -1044,8 +1055,9 @@ class GameLoop:
         zpi = next((g for g in player.base_gear if self._has_effect(g, "zero_point_overflow")), None)
         if zpi is None or len(player.hand) - 1 < 9:
             return
-        for c in list(player.hand):
-            self._discard(player, c)
+        with self._discard_event():
+            for c in list(player.hand):
+                self._discard(player, c)
         self._remove_gear(zpi, player)
         side = "A" if player is self.gs.A else "B"
         self._gain_points(self.gs.other(side), 1, "effect")
@@ -1101,7 +1113,7 @@ class GameLoop:
         # The play path tags the card instance with `_repeat_paid` when paid.
         if (card.has_keyword("REPEAT") or getattr(card, "_granted_repeat", False)) \
                 and getattr(card, "_repeat_paid", False):
-            runs = 2
+            runs = 1 + getattr(card, "_repeat_extra", 1)
 
         outer_slot = self._slot
         try:
@@ -1394,10 +1406,21 @@ class GameLoop:
                 units.append(lu)
         return units
 
+    def _drain_rune_recycles(self) -> None:
+        """ "When you recycle a rune" (Sivir Battle Mistress): runes recycled since
+        the last check (paying Power recycles runes: Player.recycle_rune), once
+        each. Approximation: it fires at the next state refresh, not mid-payment."""
+        for side in ("A", "B"):
+            p = self.gs.get_player(side)
+            n, p.runes_recycled = getattr(p, "runes_recycled", 0), 0
+            for _ in range(n):
+                self._fire_units_trigger("on_recycle_rune", side)
+
     def _recompute_passives(self) -> None:
         """Re-evaluate all continuous (trigger: passive) abilities and fold their
         grants into the passive_might / passive_keywords overlays. Called whenever
         board state changes so `UnitInPlay.might` stays correct (Round 4 Tier 2)."""
+        self._drain_rune_recycles()
         for u in self._all_units_in_play():
             if u.copied_from is not None and not any(self._has_effect(g, "copy_friendly_unit") for g in u.gear):
                 u.card, u.copied_from = u.copied_from, None     # Shady Spectacles came off
@@ -1432,6 +1455,19 @@ class GameLoop:
                     self._apply_gear_passives(g, side, anchor, actor, opponent)
         for bf in self.gs.battlefields:
             self._apply_battlefield_passives(bf)
+        # "When my Might becomes 10 or more, empower me" (Renekton Brute); its
+        # EMPOWERED abilities then apply (one more pass).
+        empowered = False
+        for side in ("A", "B"):
+            for u in self._friendly_units_of(side):
+                spec = CARD_REGISTRY.get(u.card.name)
+                for es in (spec.effects if spec else ()):
+                    if es.effect == "empower_at_might" and not u.empowered \
+                            and u.might >= int(es.params.get("amount", 10)):
+                        self._empower(u.card, side)
+                        empowered = True
+        if empowered:
+            self._recompute_passives()
 
     # A battlefield's own Might and keyword passives; its other passives are
     # rule markers read where they apply (_bf_passive_amount).
@@ -2243,6 +2279,27 @@ class GameLoop:
         if domain is not None and power:
             return actor.pay_cost(0, power, domain)
         return self._pay_generic_power(actor, power or 0)
+
+    def _pay_repeat_costs(self, card: Card, ap: Player, costs: list) -> int:
+        """Several REPEAT costs, each its own optional additional cost (Curtain
+        Call): pay those the player wants and can; returns how many were paid.
+        Marai Spire takes [1] off each."""
+        side = "A" if ap is self.gs.A else "B"
+        paid = 0
+        for cost in costs:
+            energy = int(cost.get("energy", 0) or 0)
+            if energy and self._controls_bf_with(side, "repeat_discount"):
+                energy -= 1
+            power = int(cost.get("power", 0) or 0)
+            if ap.energy < energy or (power and not self._can_pay_generic_power(ap, power)):
+                continue
+            if not self.choose("optional:repeat", side, [True, False], True, card):
+                continue
+            ap.energy -= energy
+            if power:
+                self._pay_generic_power(ap, power)
+            paid += 1
+        return paid
 
     def _pay_repeat(self, card: Card, ap: Player) -> bool:
         """Pay a spell's REPEAT cost if affordable: its printed cost
@@ -3335,7 +3392,15 @@ class GameLoop:
                 self._has_effect(u.card, "spells_repeat_in_showdown")
                 for u in self.gs.battlefields[self.gs.showdown_bf_idx]._units_for(side_)):
             card._granted_repeat = True                   # Syndra Transcendent
-        if card.has_keyword("REPEAT") or card._granted_repeat:
+        card._repeat_extra = 1
+        costs = next((es.params.get("costs") for es in (CARD_REGISTRY[card.name].effects
+                      if card.name in CARD_REGISTRY else ()) if es.effect == "repeat_costs"), None)
+        if costs:
+            # "REPEAT - [1] / [rune] / [1][rune] (You may pay each additional cost
+            # to repeat this spell's effect.)" (Curtain Call): one more run each.
+            card._repeat_extra = self._pay_repeat_costs(card, ap, costs)
+            card._repeat_paid = card._repeat_extra > 0
+        elif card.has_keyword("REPEAT") or card._granted_repeat:
             card._repeat_paid = self._pay_repeat(card, ap)
         self._show_off(card, ap)
         side = "A" if ap is self.gs.A else "B"
@@ -4031,14 +4096,17 @@ class GameLoop:
         if legend_unit is not None:
             _add_unit_abilities(legend_unit, None)
             # "While you control this battlefield, friendly legends have '[tap]:
-            # Attach an Equipment ...'" (Forge of the Fluft).
-            for bf in self.gs.battlefields:
-                if bf.card is not None and bf.control() == side:
-                    bspec = CARD_REGISTRY.get(bf.card.name)
-                    for eff in (bspec.effects if bspec else ()):
-                        if eff.trigger == "granted_to_legend" and \
-                                ((eff.timing or "").lower() or None) in allowed:
-                            out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
+            # Attach an Equipment ...'" (Forge of the Fluft); "Friendly legends
+            # have '[tap]: Give a unit +3 [might] this turn'" (Heartening Soul).
+            granters = [bf.card for bf in self.gs.battlefields
+                        if bf.card is not None and bf.control() == side]
+            granters += [src for src, _bf in self._sources_in_play(side) if src is not legend_unit.card]
+            for src in granters:
+                gspec = CARD_REGISTRY.get(src.name)
+                for eff in (gspec.effects if gspec else ()):
+                    if eff.trigger == "granted_to_legend" and \
+                            ((eff.timing or "").lower() or None) in allowed:
+                        out.append({"type": "ability", "unit": legend_unit, "bf_idx": None, "eff": eff})
         for gear in list(ap.base_gear):
             # Only Equipment (gear with an Equip ability) can be equipped.
             if window == "main" and self._equip_cost(gear) is not None:
@@ -4070,6 +4138,15 @@ class GameLoop:
         if card.has_keyword("REACTION") or (isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW")):
             return "reaction"
         return "action" if card.has_keyword("ACTION") else None
+
+    def _play_timing(self, card: Card, side: str):
+        """_card_timing, with what `side`'s cards grant: "Your gear with DEPLOY
+        have ACTION" (Jarvan IV Martial Paragon)."""
+        timing = self._card_timing(card)
+        if timing is None and isinstance(card, GearCard) and card.has_keyword("DEPLOY") \
+                and self._side_has_passive(side, "deploy_gear_action"):
+            return "action"
+        return timing
 
     def _banished_playable(self, card: Card, side: str) -> bool:
         return (getattr(card, "_banish_play_side", None) == side
@@ -4372,11 +4449,12 @@ class GameLoop:
                 card = self.choose("cost_banish", side, self._trash_banish_options(ap, parsed), card)
             owner = ap if card is None or card in ap.trash else self.gs.get_player(self.gs.other(side))
             self._banish_from_trash(owner, card)
-        for _ in range(parsed.get("discard", 0)):
-            cands = self._discardable(ap, parsed)
-            if cands:
-                self._discard(ap, self.choose("discard", side, cands,
-                                              min(cands, key=lambda c: c.cost_energy or 0)))
+        with self._discard_event():
+            for _ in range(parsed.get("discard", 0)):
+                cands = self._discardable(ap, parsed)
+                if cands:
+                    self._discard(ap, self.choose("discard", side, cands,
+                                                  min(cands, key=lambda c: c.cost_energy or 0)))
         if parsed.get("spend_buff"):
             holder = self._buff_to_spend(side, unit, parsed["spend_buff"])
             if holder is not None:
@@ -4726,7 +4804,8 @@ class GameLoop:
             if self._try_replace_death(dead_unit, owner_side, None if in_base else bf, in_combat):
                 continue
             owner = self.gs.get_player(owner_side)
-            self._to_trash(owner, dead_unit.card)
+            self._to_trash(self.gs.get_player(self._owner_of(dead_unit.card, owner_side)), dead_unit.card)
+            dead_unit.card._owner = None
             owner.base_gear.extend(dead_unit.gear)
             self.gs.friendly_unit_died_this_turn[owner_side] = True
             truly_dead.append((dead_unit, owner_side))
@@ -4739,6 +4818,11 @@ class GameLoop:
             # the gear itself is back in base by now).
             # "Your DEATHKNELL effects trigger an additional time" (Karthus).
             times = 2 if self._side_has_passive(owner_side, "double_deathknell") else 1
+            if not in_base:
+                # "Friendly DEATHKNELL effects here trigger an additional time"
+                # (Detonation Amplifier, deployed here).
+                times += sum(1 for dg in bf.gear_for(owner_side)
+                             if self._has_effect(dg.card, "double_deathknell_here"))
             for _ in range(times):
                 for card in [dead_unit.card] + list(dead_unit.gear):
                     self._resolve_triggered_effects(
@@ -4988,9 +5072,14 @@ class GameLoop:
         where = self._locate_unit(unit)
         if where is None:
             return True
-        other = self.gs.other(where[0])
-        return not any(self._has_effect(u.card, "warden_no_ready")
-                       for bf in self.gs.battlefields for u in bf._units_for(other))
+        return not self._readying_blocked(where[0])
+
+    def _readying_blocked(self, side: str) -> bool:
+        """ "While I'm at a battlefield, spells and abilities can't ready enemy
+        units and gears" (Mageseeker Warden): `side`'s opponent has one there."""
+        other = self.gs.other(side)
+        return any(self._has_effect(u.card, "warden_no_ready")
+                   for bf in self.gs.battlefields for u in bf._units_for(other))
 
     @staticmethod
     def _has_effect(card: Card, verb: str) -> bool:
@@ -5073,6 +5162,20 @@ class GameLoop:
             self.gs.points_B += n
         return n
 
+    def _empowered_with(self, side: str, verb: str) -> bool:
+        """An EMPOWERED unit of `side` has the passive `verb` (Mel Newly Awakened's
+        EMPOWERED abilities)."""
+        return any(u.empowered and self._has_effect(u.card, verb) for u in self._friendly_units_of(side))
+
+    def _uncounterable(self, side: str) -> bool:
+        """ "Your spells and abilities can't be countered" (Mel Newly Awakened)."""
+        return self._empowered_with(side, "uncounterable")
+
+    def _extra_might_reduction(self, side: str) -> int:
+        """ "If a spell or ability you control would give -[might] to a unit it
+        chooses, it gives an additional -1 [might]" (Mel Newly Awakened)."""
+        return 1 if self._empowered_with(side, "extra_might_reduction") else 0
+
     def _side_has_passive(self, side: str, verb: str) -> bool:
         """Whether something `side` has in play has a passive `verb` effect
         (Karthus Eternal's double_deathknell)."""
@@ -5095,9 +5198,28 @@ class GameLoop:
         self._resolve_triggered_effects(card, "on_discarded", anchor, player,
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": anchor})
-        # "When you discard one or more cards" (Jinx Rebel). Approximation: once
-        # per card discarded, not once per discard event.
-        self._fire_units_trigger("on_you_discard", side, triggering_card=card)
+        # "When you discard one or more cards" (Jinx Rebel): once per discard
+        # event (_discard_event groups the cards one instruction discards).
+        if getattr(self, "_discard_depth", 0):
+            self._discard_sides.add(side)
+        else:
+            self._fire_units_trigger("on_you_discard", side, triggering_card=card)
+
+    @contextmanager
+    def _discard_event(self):
+        """Cards discarded inside are one discard: "When you discard one or more
+        cards" fires once per player at the end."""
+        if not getattr(self, "_discard_depth", 0):
+            self._discard_sides = set()
+        self._discard_depth = getattr(self, "_discard_depth", 0) + 1
+        try:
+            yield
+        finally:
+            self._discard_depth -= 1
+            if self._discard_depth == 0:
+                for side in sorted(self._discard_sides):
+                    self._fire_units_trigger("on_you_discard", side)
+                self._discard_sides = set()
 
     def _fire_leaves_board(self, card: Card, owner_side: str, bf: Battlefield) -> None:
         """Fire a card's `leaves_board` triggered effects. 'Leaving the board'
@@ -5109,6 +5231,21 @@ class GameLoop:
             card, "leaves_board", bf, actor, opponent,
             context_extra={"battlefield": bf},
         )
+        self._return_stolen_gear(card)
+
+    def _return_stolen_gear(self, card: Card) -> None:
+        """ "You control it until I leave the board" (Akshan Mischievous): the gear
+        `card` took goes back to its owner's base, detached."""
+        for side in ("A", "B"):
+            holders = [(None, g) for g in self.gs.get_player(side).base_gear]
+            holders += [(u, g) for u in self._friendly_units_of(side) for g in u.gear]
+            for holder, g in holders:
+                if getattr(g, "_stolen_by", None) is not card:
+                    continue
+                (self.gs.get_player(side).base_gear if holder is None else holder.gear).remove(g)
+                owner = self._owner_of(g, side)
+                g._stolen_by, g._owner = None, None
+                self.gs.get_player(owner).base_gear.append(g)
 
     def _run_chain(self, caster: str) -> None:
         """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""
@@ -5153,9 +5290,9 @@ class GameLoop:
                     self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
                     return "acted"
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
-            # QUICK-DRAW gear (§745): played at reaction speed.
+            # REACTION gear (QUICK-DRAW §745, Sumpworks Map): played at reaction speed.
             card = player.hand[idx]
-            if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            if isinstance(card, GearCard) and self._play_timing(card, side) == "reaction":
                 before = len(player.hand)
                 self._apply_action(player, ("GEAR", idx, lane if lane is not None else 0, None))
                 if len(player.hand) < before:
@@ -5303,9 +5440,9 @@ class GameLoop:
                 if len(player.base_units) > before:
                     return "acted"
         elif kind == "GEAR" and idx is not None and 0 <= idx < len(player.hand):
-            # QUICK-DRAW gear (§745): played during a showdown.
+            # ACTION / REACTION gear (QUICK-DRAW §745): played during a showdown.
             card = player.hand[idx]
-            if isinstance(card, GearCard) and card.has_keyword("QUICK-DRAW"):
+            if isinstance(card, GearCard) and self._play_timing(card, side) in ("action", "reaction"):
                 before = len(player.hand)
                 self._apply_action(player, ("GEAR", idx, bf_idx, None))
                 if len(player.hand) < before:

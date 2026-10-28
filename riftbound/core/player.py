@@ -159,6 +159,8 @@ class Player:
         if not runes:
             self.rune_pool.pop(domain, None)
         self.rune_deck.recycle(rune)
+        # "When you recycle a rune" (Sivir Battle Mistress): GameLoop drains it.
+        self.runes_recycled = getattr(self, "runes_recycled", 0) + 1
         return True
 
     def channel(self) -> None:

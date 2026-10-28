@@ -4644,7 +4644,8 @@
         "effect": "channel_rune",
         "trigger": "on_cast",
         "amount": 1,
-        "exhausted": true
+        "exhausted": true,
+        "draw_if_short": 1
       }
     ]
   },
@@ -4766,7 +4767,8 @@
         "effect": "channel_rune",
         "trigger": "on_cast",
         "amount": 2,
-        "exhausted": true
+        "exhausted": true,
+        "draw_if_short": 1
       }
     ]
   },
@@ -14445,12 +14447,8 @@
     ],
     "effects": [
       {
-        "effect": "move_unit",
+        "effect": "steal_gear",
         "trigger": "on_play",
-        "target": "enemy_unit",
-        "target_filter": {
-          "is_gear": true
-        },
         "condition": {
           "type": "kicker_paid"
         },
@@ -17590,6 +17588,15 @@
     ],
     "keywords": [],
     "effects": [
+      {
+        "effect": "play_token",
+        "trigger": "on_recycle_rune",
+        "token_name": "Gold",
+        "optional": true,
+        "cost": {
+          "tap": true
+        }
+      },
       {
         "effect": "ready_unit",
         "trigger": "on_enemy_unit_died",
@@ -21163,13 +21170,24 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reveal_top_draw_if_spell",
+        "effect": "sequence",
         "trigger": "on_showdown_begin",
-        "target": "actor",
         "optional": true,
-        "additional_cost": {
+        "cost": {
           "energy": 1
-        }
+        },
+        "steps": [
+          {
+            "effect": "predict",
+            "amount": 1
+          },
+          {
+            "effect": "reveal_top",
+            "target_filter": {
+              "is_spell": true
+            }
+          }
+        ]
       }
     ]
   },
@@ -21918,6 +21936,13 @@
         "trigger": "on_cast",
         "target": "friendly_unit",
         "destination": "controlled_battlefield"
+      },
+      {
+        "effect": "move_unit",
+        "trigger": "on_cast",
+        "target": "enemy_unit",
+        "destination": "same_as_last_move",
+        "mover": "opponent"
       }
     ]
   },
@@ -24409,9 +24434,8 @@
     ],
     "effects": [
       {
-        "effect": "kill_unit",
-        "trigger": "on_attack",
-        "target": "enemy_unit"
+        "effect": "opponent_kills_own_here",
+        "trigger": "on_attack"
       }
     ]
   },
@@ -24848,8 +24872,25 @@
     ],
     "effects": [
       {
+        "effect": "repeat_costs",
+        "trigger": "passive",
+        "costs": [
+          {
+            "energy": 1
+          },
+          {
+            "power": 1
+          },
+          {
+            "energy": 1,
+            "power": 1
+          }
+        ]
+      },
+      {
         "effect": "mode_choice",
         "trigger": "on_cast",
+        "unique_per_turn": true,
         "modes": [
           {
             "effect": "draw_cards",
@@ -24858,16 +24899,19 @@
           {
             "effect": "deal_damage",
             "target": "chosen_unit",
+            "where": "battlefield",
             "amount": 2
           },
           {
             "effect": "deal_damage",
             "target": "chosen_unit",
+            "where": "base",
             "amount": 3
           },
           {
             "effect": "grant_temporary_might",
             "target": "chosen_unit",
+            "where": "battlefield",
             "amount": -4,
             "duration": "this_turn"
           }
@@ -27073,7 +27117,28 @@
         "effect": "deal_damage",
         "trigger": "on_move",
         "amount": 1,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "where": "moved_bfs",
+        "optional": true,
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_is_empowered"
+            }
+          }
+        }
+      },
+      {
+        "effect": "deal_damage",
+        "trigger": "on_move",
+        "amount": 2,
+        "target": "chosen_unit",
+        "where": "moved_bfs",
+        "optional": true,
+        "condition": {
+          "type": "this_is_empowered"
+        }
       },
       {
         "effect": "empower_self",
@@ -28726,7 +28791,8 @@
       {
         "effect": "blink_unit",
         "trigger": "on_cast",
-        "destination": "same_location"
+        "destination": "same_location",
+        "any_side": true
       }
     ],
     "variants": [
@@ -28829,6 +28895,14 @@
         "cost": {
           "energy": 3
         }
+      },
+      {
+        "effect": "uncounterable",
+        "trigger": "passive"
+      },
+      {
+        "effect": "extra_might_reduction",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -29010,6 +29084,14 @@
         "trigger": "activated",
         "cost": {
           "energy": 1
+        }
+      },
+      {
+        "effect": "empower_self",
+        "trigger": "activated",
+        "cost": {
+          "power": 1,
+          "domain": "BODY"
         }
       },
       {
@@ -29720,6 +29802,29 @@
         "target": "self",
         "cost": {
           "energy": 1
+        }
+      },
+      {
+        "effect": "empower_at_might",
+        "trigger": "passive",
+        "amount": 10
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "DEFLECT",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "give_keyword",
+        "trigger": "passive",
+        "target": "self",
+        "keyword": "GANKING",
+        "condition": {
+          "type": "this_is_empowered"
         }
       }
     ],
@@ -30555,6 +30660,11 @@
         "trigger": "on_become_empowered",
         "target": "opponent",
         "amount": 3
+      },
+      {
+        "effect": "play_from_opponent_trash",
+        "trigger": "on_become_empowered",
+        "optional": true
       }
     ],
     "variants": [
@@ -33174,6 +33284,10 @@
           "kill_friendly_unit": true,
           "or_gear": true
         }
+      },
+      {
+        "effect": "double_deathknell_here",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -33985,6 +34099,17 @@
       {
         "effect": "ready_legend",
         "trigger": "on_play"
+      },
+      {
+        "effect": "grant_temporary_might",
+        "trigger": "granted_to_legend",
+        "target": "chosen_unit",
+        "where": "anywhere",
+        "amount": 3,
+        "duration": "this_turn",
+        "cost": {
+          "tap": true
+        }
       }
     ],
     "variants": [
@@ -35733,6 +35858,10 @@
     "set": "Radiance",
     "keywords": [],
     "effects": [
+      {
+        "effect": "deploy_gear_action",
+        "trigger": "passive"
+      },
       {
         "effect": "channel_rune",
         "trigger": "on_conquer",

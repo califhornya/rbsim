@@ -202,17 +202,24 @@ Open, found on the way:
   a unit or gear, [3] and [rune] at most; Encore's last mode kept one and
   then drew and recycled a hand card; Ivern Nurturer's pet buff.
 
-Named in the old notes and still open:
-Detonation Amplifier (DEATHKNELL twice here), Jarvan IV Martial Paragon (DEPLOY gear have ACTION), The Academy and
-Marai Spire (REPEAT), Curtain Call (per-mode REPEAT costs, "at a battlefield" /
-"at a base"), Temporal Breach (enemy units), Sumpworks Map (REACTION gear),
-Sivir Battle Mistress (recycle a rune), Mageseeker Warden (gear half),
-Heartening Soul (legends' ability), Showstopper / Resonating Strike / Call to
-Battle (move details), Akshan Mischievous,
-Kharox (play from their trash), Akali Deadly Weapon (2 when Empowered, where),
-Mel Newly Awakened, Renekton Brute, Legion Marauder ([1] or [body]),
-Mobilize / Catalyst of Aeons ("if you couldn't, draw 1"), Atakhan, Diana
-Lunari (PREDICT), Neeko Blending In, Jinx Rebel (per discard event).
+- [x] The cards named in the old notes: Detonation Amplifier (DEATHKNELL
+  here twice), Jarvan IV Martial Paragon (DEPLOY gear have ACTION:
+  GameLoop._play_timing), The Academy, Marai Spire, Curtain Call (three
+  REPEAT costs, each a new mode, at a battlefield / at a base), Temporal
+  Breach (either side's unit), Sumpworks Map (REACTION gear, also offered),
+  Sivir Battle Mistress ("when you recycle a rune": paying Power recycles
+  runes), Mageseeker Warden (gear too), Heartening Soul (legends get its
+  ability), Showstopper, Call to Battle (the opponent follows), Akshan
+  Mischievous (steals a gear until he leaves), Kharox (plays a unit from
+  their trash; ownership is tracked: Card._owner, GameLoop._owner_of, so a
+  taken unit goes back to its owner's trash or hand), Akali Deadly Weapon,
+  Mel Newly Awakened, Renekton Brute, Legion Marauder, Mobilize / Catalyst
+  of Aeons, Atakhan's attack (the defender picks), Diana Lunari (PREDICT
+  first), Jinx Rebel (once per discard: GameLoop._discard_event). Neeko
+  Blending In is in E.
+- Open: Atakhan's additional cost ("kill a friendly unit ... I cost [1] less
+  for each Energy it costs and [order] less for each Power"), Jhin
+  Meticulous Killer's alternative cost.
 Then every other card, set by set.
 
 ## E. Not modeled at all
