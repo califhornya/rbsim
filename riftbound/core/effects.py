@@ -5,7 +5,7 @@ from typing import Any, Callable, Mapping, Optional
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 from .battlefield import Battlefield
-from .cards import SpellCard, UnitCard
+from .cards import GearCard, SpellCard, UnitCard
 from .combat import UnitInPlay
 
 EffectHandler = Callable[["EffectContext", Mapping[str, Any]], None]
@@ -46,6 +46,11 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "This deals 1 Bonus Damage for each card with this name in your trash"
         # (Consuming Curse)
         amount += _amount(ctx, {"amount_source": spec["bonus_source"]})
+    if amount > 0 and isinstance(ctx.card, GearCard):
+        # "Abilities of friendly gear deal 1 Bonus Damage" (Ziggs Short-Fused)
+        amount += sum(int(es.params.get("amount", 1)) for src, _bf in ctx.loop._sources_in_play(ctx.actor_side)
+                      for es in (CARD_REGISTRY[src.name].effects if src.name in CARD_REGISTRY else ())
+                      if es.trigger == "passive" and es.effect == "gear_ability_bonus_damage")
     if amount <= 0 and not its_damage:
         return
     target = str(spec.get("target", "enemy_unit")).lower()
@@ -245,6 +250,8 @@ def _position_value(gs, side: str) -> float:
         units = [u for bf in gs.battlefields for u in bf._units_for(s)] + list(p.base_units)
         v = sum(1 + (0 if u.stunned else max(0, u.might - u.damage)) for u in units)
         v += len(p.hand) + sum(len(rs) for rs in p.rune_pool.values())
+        v += len(p.base_gear) + sum(len(u.gear) for u in units) + \
+            sum(len(bf.gear_for(s)) for bf in gs.battlefields)
         v += 4 * (gs.points_A if s == "A" else gs.points_B)
         v += 2 * sum(1 for bf in gs.battlefields if bf.control() == s)
         return v
@@ -865,6 +872,20 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         unit.gear.clear()
         if not unit.is_token:
             owner.banished.append(unit.card)
+
+
+@effect("replay_self_to_base")
+def _replay_self_to_base(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Banish me, then play me to your base, ignoring my cost" (Ekko
+    Revolutionary): it comes back as a new object ("I enter ready")."""
+    me = _source_unit(ctx)
+    if me is None:
+        return
+    ctx.extra["it"] = [me]
+    _banish_unit(ctx, {"target": "it"})
+    if ctx.card in ctx.actor.banished:
+        ctx.actor.banished.remove(ctx.card)
+        ctx.loop._play_unit(ctx.card, ctx.actor_side, from_zone="banished")
 
 
 @effect("banish_or_return")
@@ -2692,6 +2713,8 @@ def _play_self_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     the cost is the effect's `cost`, paid before this runs."""
     if ctx.card in ctx.actor.trash:
         ctx.actor.trash.remove(ctx.card)
+        if spec.get("banish"):
+            ctx.card._flow_banish = True      # "Then banish this" (Forbidden Technique)
         ctx.loop._play_from_zone_now(ctx.actor, ctx.card, ctx.actor_side, "trash")
 
 
@@ -3075,12 +3098,15 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 pick.ready = True
                 ctx.loop._fire_readied(pick, ctx.actor_side)
         return
-    if target in ("all_friendly_units_anywhere", "your_units"):
-        # "Ready your units" (On the Hunt, Shurelya's Requiem): wherever they are.
-        for unit in _friendly_units(ctx):
+    if target in ("all_friendly_units_anywhere", "your_units", "all_enemy_units_anywhere"):
+        # "Ready your units" (On the Hunt, Shurelya's Requiem), "ready all enemy
+        # units" (Firebrand Raider): wherever they are.
+        side = ctx.opponent_side if target == "all_enemy_units_anywhere" else ctx.actor_side
+        units = _friendly_units(ctx) if side == ctx.actor_side else ctx.loop._friendly_units_of(side)
+        for unit in units:
             if not unit.ready and ctx.loop._can_ready(unit):
                 unit.ready = True
-                ctx.loop._fire_readied(unit, ctx.actor_side)
+                ctx.loop._fire_readied(unit, side)
         return
     scope = str(spec.get("scope", "all"))
     ctx.ready_units(target=target, scope=scope)
@@ -3185,6 +3211,8 @@ def _exhaust_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")},
                                  prefer=lambda u: u.ready or not ctx.loop._can_ready(u)):
+        if spec.get("cant_move"):
+            unit.cant_move_turn = ctx.loop.gs.turn     # "It can't move this turn" (Hunker Down)
         if not ctx.loop._can_ready(unit):
             continue
         was_ready = unit.ready
@@ -3290,7 +3318,12 @@ def _grant_temporary_might_per_friendly(ctx: "EffectContext", spec: Mapping[str,
 
 @effect("buff_unit")
 def _buff_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    for unit in _resolve_targets(ctx, spec, prefer=lambda u: u.might_counters >= 1):
+    instead = int(spec.get("if_buffed_might", 0) or 0)
+    for unit in _resolve_targets(ctx, spec, prefer=lambda u: not instead and u.might_counters >= 1):
+        if instead and unit.might_counters >= 1:
+            # "If it's already buffed, give it +2 [might] this turn instead" (Iridescent Avian)
+            unit.temporary_might += instead
+            continue
         # BUFF is non-stacking (max 1 per unit), but "I can have any number of
         # buffs" (Lee Sin Ascetic).
         if unit.might_counters < 1 or ctx.loop._has_effect(unit.card, "unlimited_buffs"):
@@ -3966,8 +3999,14 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             entries = [e for e in entries if e[0] == ctx.actor_side]
         elif target == "enemy_gear":
             entries = [e for e in entries if e[0] == ctx.opponent_side]
-        entries = [ctx.loop.choose(_kind("target", spec), ctx.actor_side, entries, entries[0],
-                                   ctx.card)] if entries else []
+        loop = ctx.loop
+        entries = [e for e in entries if loop._can_pay_generic_power(
+            ctx.actor, loop._gear_deflect_tax(e[0], ctx.actor_side, e[2]))]
+        entries = [loop.choose(_kind("target", spec), ctx.actor_side, entries, entries[0],
+                               ctx.card)] if entries else []
+        tax = loop._gear_deflect_tax(entries[0][0], ctx.actor_side, entries[0][2]) if entries else 0
+        if tax and getattr(loop, "_declaring", None) is None:
+            loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
 
     for side, holder, gear in entries:
         player = gs.get_player(side)
@@ -4253,6 +4292,8 @@ def _give_temp_keyword(ctx: "EffectContext", spec: Mapping[str, Any], kw: str) -
     token = f"{kw} {amount}"
     this_combat = str(spec.get("duration", "")).lower() == "this_combat"
     for unit in _resolve_targets(ctx, spec):
+        if spec.get("amount_source") == "target_might":
+            token = f"{kw} {unit.might}"     # "ASSAULT equal to its Might" (Brawl)
         # "this turn", or "this combat" (Fortified Position)
         (unit.combat_keywords if this_combat else unit.turn_keywords).append(token)
 

@@ -33644,7 +33644,7 @@
         "trigger": "on_cast",
         "timing": "action",
         "target": "chosen_unit",
-        "amount_source": "self_might",
+        "amount_source": "target_might",
         "duration": "this_turn",
         "where": "anywhere"
       }
@@ -33676,7 +33676,7 @@
         "trigger": "on_play",
         "target": "self",
         "condition": {
-          "type": "friendly_unit_died_this_turn"
+          "type": "friendly_unit_or_gear_died_this_turn"
         }
       }
     ],
@@ -33837,6 +33837,25 @@
         "trigger": "on_cast",
         "target": "chosen_unit",
         "where": "anywhere"
+      },
+      {
+        "effect": "play_self_from_trash",
+        "trigger": "trash_on_card_played",
+        "optional": true,
+        "cost": {
+          "energy": 1,
+          "power": 2,
+          "domain": "FURY"
+        },
+        "banish": true,
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "energy_at_least": 7
+            }
+          }
+        }
       }
     ],
     "variants": [
@@ -34183,7 +34202,15 @@
       {
         "effect": "ready_units",
         "trigger": "on_play",
-        "target": "all_enemy_units_here"
+        "target": "all_enemy_units_anywhere"
+      },
+      {
+        "effect": "others_enter_ready",
+        "trigger": "passive"
+      },
+      {
+        "effect": "no_awaken_ready",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -34250,10 +34277,15 @@
         "target": "self"
       },
       {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "target": "self",
-        "keyword": "ASSAULT 1"
+        "effect": "replay_self_to_base",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "discard": 1,
+          "energy": 1,
+          "power": 1,
+          "domain": "FURY"
+        }
       }
     ],
     "variants": [
@@ -34291,6 +34323,26 @@
         "cost": {
           "tap": true
         }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "token_name": "Recruit",
+        "cost": {
+          "tap": true,
+          "kill_friendly_gear": true
+        }
+      },
+      {
+        "effect": "play_token",
+        "trigger": "activated",
+        "timing": "action",
+        "token_name": "Mech",
+        "cost": {
+          "tap": true,
+          "kill_other_friendly": true
+        }
       }
     ],
     "variants": [
@@ -34319,6 +34371,11 @@
         "effect": "play_token",
         "trigger": "on_play",
         "token_name": "Bomb"
+      },
+      {
+        "effect": "gear_ability_bonus_damage",
+        "trigger": "passive",
+        "amount": 1
       }
     ],
     "variants": [
@@ -34463,7 +34520,8 @@
         "cost": {
           "tap": true
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "if_buffed_might": 2
       }
     ],
     "variants": [
@@ -34740,6 +34798,14 @@
     ],
     "effects": [
       {
+        "effect": "ready_unit",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "target": "friendly_unit",
+        "where": "anywhere",
+        "cant_move": true
+      },
+      {
         "effect": "draw_cards",
         "trigger": "on_cast",
         "timing": "reaction",
@@ -34775,6 +34841,18 @@
         "amount": 3,
         "duration": "this_turn",
         "where": "anywhere"
+      },
+      {
+        "effect": "draw_cards",
+        "trigger": "activated",
+        "timing": "action",
+        "count": 1,
+        "cost": {
+          "tap": true,
+          "exhaust_friendly_unit": {
+            "mighty": true
+          }
+        }
       }
     ],
     "variants": [
@@ -34830,13 +34908,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "target_filter": {
-          "is_gear": true
-        },
-        "keyword": "DEFLECT",
-        "scope": "board"
+        "effect": "gear_deflect",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -35179,23 +35252,23 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "draw_cards",
+        "effect": "sequence",
         "trigger": "activated",
         "timing": "action",
-        "count": 1,
         "cost": {
           "tap": true
-        }
-      },
-      {
-        "effect": "channel_rune",
-        "trigger": "activated",
-        "timing": "action",
-        "amount": 1,
-        "exhausted": true,
-        "cost": {
-          "tap": true
-        }
+        },
+        "steps": [
+          {
+            "effect": "draw_cards",
+            "count": 1
+          },
+          {
+            "effect": "channel_rune",
+            "amount": 1,
+            "exhausted": true
+          }
+        ]
       },
       {
         "effect": "grant_temporary_might",

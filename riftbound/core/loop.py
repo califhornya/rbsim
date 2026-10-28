@@ -580,9 +580,12 @@ class GameLoop:
         player = self.gs.get_player(active)
         exhausted = [u for u in player.base_units if not u.ready]
         exhausted += [u for bf in self.gs.battlefields for u in bf._units_for(active) if not u.ready]
-        player.ready_base_units()
-        for bf in self.gs.battlefields:
-            bf.ready_side(active)
+        if any(self._side_has_passive(s, "no_awaken_ready") for s in ("A", "B")):
+            exhausted = []           # "Units don't ready during the Awaken Phase" (Firebrand Raider)
+        else:
+            player.ready_base_units()
+            for bf in self.gs.battlefields:
+                bf.ready_side(active)
         for unit in exhausted:
             if unit.cant_ready:
                 unit.ready = False       # "I can't be readied" (Maduli)
@@ -1035,6 +1038,7 @@ class GameLoop:
             return
         owner = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
+        self.gs.friendly_gear_died_this_turn[side] = True
         for dg in dead:
             gear.remove(dg)
             if not dg.is_token:
@@ -1042,9 +1046,14 @@ class GameLoop:
             if self.verbose:
                 bf_idx = self.gs.battlefields.index(bf)
                 print(f"  [DEPLOY] {side}'s {dg.card.name} at BF{bf_idx} dies")
+        # "Your DEATHKNELL effects trigger an additional time" (Karthus), and
+        # "Friendly DEATHKNELL effects here ..." (Detonation Amplifier, here).
+        times = (2 if self._side_has_passive(side, "double_deathknell") else 1) + \
+            sum(1 for g in gear if self._has_effect(g.card, "double_deathknell_here"))
         for dg in dead:
-            self._resolve_triggered_effects(dg.card, "on_death", bf, owner, opponent,
-                                            context_extra={"battlefield": bf})
+            for _ in range(times):
+                self._resolve_triggered_effects(dg.card, "on_death", bf, owner, opponent,
+                                                context_extra={"battlefield": bf})
             if not dg.is_token:
                 self._fire_units_trigger("on_friendly_gear_died_at_bf", side, triggering_card=dg.card)
         self._recompute_passives()
@@ -1899,6 +1908,9 @@ class GameLoop:
             return bool(self.gs.friendly_unit_died_this_turn.get(self.gs.other(side), False))
         if ctype == "friendly_unit_died_this_turn":
             return bool(self.gs.friendly_unit_died_this_turn.get(side, False))
+        if ctype == "friendly_unit_or_gear_died_this_turn":
+            return bool(self.gs.friendly_unit_died_this_turn.get(side, False)
+                        or self.gs.friendly_gear_died_this_turn.get(side, False))
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
         if ctype == "your_legend_exhausted":
@@ -3549,6 +3561,7 @@ class GameLoop:
         # its battlefield.
         play_bf = deployed_bf or self.gs.battlefields[lane]
         opponent = self.gs.get_player(self.gs.other(side))
+        self._try_pay_additional_costs(card, ap)      # Detonation Amplifier
         self._show_off(card, ap)
         self._count_card_played(card, side)
         self._resolve_card_effects(card, play_bf, ap, opponent)
@@ -3837,6 +3850,8 @@ class GameLoop:
         from .effects import _zone_effect_card_ok
         if self.gs.units_enter_ready_turn.get(side) == self.gs.turn:
             return True
+        if any(self._side_has_passive(s, "others_enter_ready") for s in ("A", "B")):
+            return True              # "Other units enter ready" (Firebrand Raider)
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
         for src, src_bf in self._sources_in_play(side):
@@ -4589,6 +4604,13 @@ class GameLoop:
                 return False
             if parsed["spend_xp"] and self.gs.get_xp(side) < parsed["spend_xp"]:
                 return False
+            if parsed["kill_other_friendly"] and self._friendly_to_kill(side, None) is None:
+                return False
+            if parsed["kill_friendly_gear"] and self._gear_to_kill(side, gear) is None:
+                return False
+            if parsed["exhaust_friendly_unit"] and \
+                    self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"]) is None:
+                return False
         else:
             source = entry["unit"].card
             parsed = self._adjust_ability_cost(entry["unit"], eff, parsed, side)
@@ -4604,6 +4626,7 @@ class GameLoop:
         and "When this leaves the board" (Runeblade Anvil, Treasure Trove)."""
         card = getattr(gear, "card", gear)
         bf = self.gs.battlefields[0]
+        self.gs.friendly_gear_died_this_turn[side] = True
         self._resolve_triggered_effects(card, "on_death", bf, self.gs.get_player(side),
                                         self.gs.get_player(self.gs.other(side)),
                                         context_extra={"battlefield": bf})
@@ -4642,7 +4665,8 @@ class GameLoop:
         parsed = {"energy": 0, "power": 0, "domain": None, "tap": False, "recycle": 0,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
                   "banish_from_trash": None, "banish_any_trash": False, "discard": 0, "discard_type": None,
-                  "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False}
+                  "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False,
+                  "kill_friendly_gear": False, "exhaust_friendly_unit": None}
         if cost is None:
             return parsed
         if isinstance(cost, dict):
@@ -4666,6 +4690,9 @@ class GameLoop:
             parsed["spend_buff"] = cost.get("spend_buff")             # "self" / "other" / "any"
             parsed["kill_other_token"] = bool(cost.get("kill_other_token"))
             parsed["kill_other_friendly"] = bool(cost.get("kill_other_friendly"))  # "Kill a friendly unit"
+            parsed["kill_friendly_gear"] = bool(cost.get("kill_friendly_gear"))    # "Kill a friendly gear"
+            # "Exhaust a friendly (MIGHTY) unit": True or {"mighty": True}
+            parsed["exhaust_friendly_unit"] = cost.get("exhaust_friendly_unit")
         elif isinstance(cost, str):
             for tok in cost.split(","):
                 t = tok.strip().lower()
@@ -4773,6 +4800,33 @@ class GameLoop:
         if not others:
             return None
         return min(others, key=lambda u: (not u.is_token, u.might))
+
+    def _gear_to_kill(self, side: str, source):
+        """ "Kill a friendly gear" as a cost (Whirling Twirligig): baseline, a
+        token first, else the cheapest; not the gear paying it."""
+        ap = self.gs.get_player(side)
+        gear = [g for g in list(ap.base_gear) + self._controlled_attached_gear(side) if g is not source]
+        if not gear:
+            return None
+        default = min(gear, key=lambda g: (not getattr(g, "is_token", False), int(g.cost_energy or 0)))
+        return self.choose("cost_gear:kill", side, gear, default)
+
+    def _unit_to_exhaust(self, side: str, spec):
+        """ "Exhaust a friendly MIGHTY unit" as a cost (Invigorating Bloom): a
+        ready one; baseline, one in base first (it isn't fighting), the weakest."""
+        units = [u for u in self._friendly_units_of(side) if u.ready
+                 and not (isinstance(spec, dict) and spec.get("mighty") and u.might < 5)]
+        if not units:
+            return None
+        return min(units, key=lambda u: (self._locate_unit(u)[1] is not None, u.might))
+
+    def _gear_deflect_tax(self, gear_side: str, chooser: str, gear) -> int:
+        """The [rune] `chooser` pays to choose a gear of `gear_side` with a spell
+        or ability: "Your gear have DEFLECT" (Watchful Curator)."""
+        if gear_side == chooser:
+            return 0
+        card = getattr(gear, "card", gear)
+        return int(card.has_keyword("DEFLECT") or self._side_has_passive(gear_side, "gear_deflect"))
 
     def _token_to_kill(self, side: str, unit):
         """ "Kill a friendly unit or gear" as a cost (Malzahar Fanatic): baseline,
@@ -4898,6 +4952,14 @@ class GameLoop:
                 gear.empowered = False
             self._recycle_from_trash(ap, parsed["recycle"])
             self._pay_discard_and_banish(ap, parsed)
+            if parsed["kill_friendly_gear"]:
+                victim = self._gear_to_kill(side, gear)
+                if victim is not None:
+                    self._remove_gear(victim, ap)
+            if parsed["exhaust_friendly_unit"]:
+                unit = self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"])
+                if unit is not None:
+                    self._exhaust(unit)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
             if parsed["sacrifice"]:
@@ -6047,6 +6109,7 @@ class GameLoop:
         for winner in ("A", "B"):
             if bf._units_for(winner) and not bf._units_for(self.gs.other(winner)):
                 self._fire_units_trigger("on_win_combat", winner)
+                self._fire_deployed_gear_trigger("on_win_combat", bf, winner)   # Blossoming Dreamroot
                 for u in bf._units_for(winner):
                     if u.win_xp_turn == self.gs.turn:
                         self.gs.add_xp(winner, 2)       # Grim Resolve
@@ -6204,6 +6267,7 @@ class GameLoop:
         gs.next_units_enter_ready["A"] = gs.next_units_enter_ready["B"] = 0
         gs.friendly_unit_died_this_turn["A"] = False
         gs.friendly_unit_died_this_turn["B"] = False
+        gs.friendly_gear_died_this_turn["A"] = gs.friendly_gear_died_this_turn["B"] = False
         gs.discarded_this_turn["A"] = False
         gs.discarded_this_turn["B"] = False
         gs.cards_burned_this_turn["A"] = 0

@@ -300,7 +300,22 @@ Open, found on the way:
   Renekton Butcher of the Sands' Energy was free (now only units and units'
   abilities); Acceleration Gate readied only units (now gear and runes too).
   Open: Rebuttal (VEN-152) has only "REACTION" in the card data.
-Then: Radiance, Proving Grounds.
+- [ ] Radiance, part 1: RAD-001..055 read (55 cards), 54 tested
+  (tests/test_corpus_radiance.py; Trinket Peddler's DISARM via Ahri /
+  Chronomancer), 15 fixed: Brawl (ASSAULT = the unit's Might, was 1),
+  Lingering Animus (a gear death counts), Forbidden Technique (played from the
+  trash after a [7]+ card, then banished), Detonation Amplifier (a gear's
+  additional cost was never paid; a deployed gear's DEATHKNELL here twice,
+  Karthus too), Firebrand Raider (readies enemies in base too; other units
+  enter ready; no Awaken ready), Ekko Revolutionary (ACTION replay to base),
+  Whirling Twirligig (Recruit / Mech abilities: "kill a friendly gear / unit"
+  gear costs), Ziggs Short-Fused (gear abilities +1 Bonus Damage), Blossoming
+  Dreamroot (deployed gear "win a combat here"), Iridescent Avian (+2
+  instead if buffed), Hunker Down (ready, can't move), Invigorating Bloom
+  (exhaust a MIGHTY unit ability), Resplendent Rostrum (one [tap]: draw and
+  channel), Watchful Curator (gear DEFLECT on gear choices), Lost to the Sands
+  (the baseline's mode choice now values gear).
+Then: Radiance parts 2-3 (RAD-056..), Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of

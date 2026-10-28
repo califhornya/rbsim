@@ -173,6 +173,8 @@ class GameState:
     # "The next unit you play this turn enters ready" (Sun Disc): how many.
     next_units_enter_ready: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
+    # "If a friendly unit or gear died this turn" (Lingering Animus): the gear.
+    friendly_gear_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     conquered_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
