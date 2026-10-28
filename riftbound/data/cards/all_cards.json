@@ -4609,8 +4609,9 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "amount": 1,
-        "target": "all_units_here",
-        "scope": "all"
+        "target": "battlefield",
+        "scope": "all",
+        "filter": "all_units_at_battlefields"
       }
     ]
   },
@@ -22973,7 +22974,7 @@
       {
         "effect": "recall_unit",
         "trigger": "on_play",
-        "target": "battlefield",
+        "target": "all_units_anywhere",
         "scope": "all",
         "target_filter": {
           "might_at_most": 2,
@@ -24725,7 +24726,7 @@
       {
         "effect": "kill_unit",
         "trigger": "on_cast",
-        "target": "battlefield",
+        "target": "all_units_anywhere",
         "scope": "all"
       }
     ]

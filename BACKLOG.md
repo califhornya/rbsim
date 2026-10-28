@@ -44,12 +44,12 @@ Fixed (2026-10-27, tests/test_precon_cards.py):
 Section A is done: both precon decks are checked card by card.
 
 ## B. Engine bugs that reach many cards
-- [ ] `all_units_here` damage hits only the effect's controller's units
-      (KNOWN_ISSUES #11, still open): Frozen Fortress and every "each unit here".
-- [ ] `target: battlefield` + `scope: all` means "units at the spell's
-      battlefield", so "Kill all units" (The Ruination) and "return all units
-      with 2 [might] or less" (Angler Beast) miss the other battlefields and
-      the bases (KNOWN_ISSUES 0b; verify each such card).
+- [x] `all_units_here` damage hit only the effect's controller's units
+      (KNOWN_ISSUES #11): Frozen Fortress, Kog'Maw Caustic now hit both.
+- [x] `target: battlefield` + `scope: all` meant "units at the spell's
+      battlefield": The Ruination and Angler Beast now reach every unit,
+      Flurry of Blades every battlefield (KNOWN_ISSUES 0b; the other
+      `battlefield` targets are token locations or battlefield passives).
 - [ ] Handlers that pick a unit without `loop.choose` (Lacerate's kind): the
       choice is the engine's, never the player's, and isn't declared. Audit
       every handler.

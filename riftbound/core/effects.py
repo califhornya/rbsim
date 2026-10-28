@@ -2246,7 +2246,10 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
 
 # Targets that mean "units on both sides of this battlefield" (board-wide
 # spells like 'Kill all units' / 'return all units with 2 [might] or less').
-_BOTH_SIDES_TARGETS = {"battlefield", "both", "both_players", "everyone", "all_units"}
+# Every unit at the effect's battlefield, both players' ("Deal 1 to each unit
+# here": Frozen Fortress; "all units at my battlefield": Kog'Maw Caustic).
+_BOTH_SIDES_TARGETS = {"battlefield", "both", "both_players", "everyone", "all_units",
+                       "all_units_here"}
 _EVERYWHERE_TARGETS = {
     "all_friendly_units_anywhere": ("friendly", "anywhere"),
     "all_enemy_units_anywhere": ("enemy", "anywhere"),

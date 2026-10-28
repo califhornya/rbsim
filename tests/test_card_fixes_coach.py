@@ -456,3 +456,59 @@ def test_a_unit_moved_by_a_spell_conquers_at_once_and_can_move_back():
     back = [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if ga.kind == "MOVE"]
     loop._apply_action(a, back[0].to_engine())
     assert mine in a.base_units and loop.gs.points_A == 1
+
+
+def _both_sides(loop):
+    bf0, bf1 = loop.gs.battlefields
+    units = {"mine0": UnitInPlay(card=UnitCard(name="Mine0", might=1)),
+             "theirs0": UnitInPlay(card=UnitCard(name="Theirs0", might=1)),
+             "mine1": UnitInPlay(card=UnitCard(name="Mine1", might=1)),
+             "theirs_base": UnitInPlay(card=UnitCard(name="TheirsBase", might=1)),
+             "mine_base": UnitInPlay(card=UnitCard(name="MineBase", might=1))}
+    bf0.add_unit("A", units["mine0"])
+    bf0.add_unit("B", units["theirs0"])
+    bf1.add_unit("A", units["mine1"])
+    loop.gs.B.base_units.append(units["theirs_base"])
+    loop.gs.A.base_units.append(units["mine_base"])
+    return units
+
+
+def test_each_unit_here_means_both_players_units():
+    """Frozen Fortress "deal 1 to each unit here" and Kog'Maw Caustic "all units
+    at my battlefield" hit only their controller's units."""
+    loop, a, _ = _setup()
+    u = _both_sides(loop)
+    fortress = CARD_REGISTRY["Frozen Fortress"].instantiate()
+    bf0 = loop.gs.battlefields[0]
+    loop._resolve_triggered_effects(fortress, "on_start_of_turn", bf0, a, loop.gs.B,
+                                    context_extra={"battlefield": bf0})
+    on_board = {k for k, x in u.items() if loop._locate_unit(x) is not None}
+    assert on_board == {"mine1", "theirs_base", "mine_base"}
+
+
+def test_all_units_means_every_unit_and_at_battlefields_means_every_battlefield():
+    """The Ruination "Kill all units" and Flurry of Blades "all units at
+    battlefields" only reached the spell's battlefield."""
+    loop, a, _ = _setup()
+    u = _both_sides(loop)
+    loop._resolve_card_effects(CARD_REGISTRY["Flurry of Blades"].instantiate(),
+                               loop.gs.battlefields[0], a, loop.gs.B)
+    assert {k for k, x in u.items() if loop._locate_unit(x) is not None} == {"theirs_base", "mine_base"}
+    loop, a, _ = _setup()
+    u = _both_sides(loop)
+    loop._resolve_card_effects(CARD_REGISTRY["The Ruination"].instantiate(),
+                               loop.gs.battlefields[0], a, loop.gs.B)
+    assert all(loop._locate_unit(x) is None for x in u.values())
+
+
+def test_angler_beast_returns_every_small_unit_anywhere():
+    """'return all units with 2 [might] or less to their owners' hands'."""
+    loop, a, _ = _setup()
+    u = _both_sides(loop)
+    big = UnitInPlay(card=UnitCard(name="Big", might=5))
+    loop.gs.battlefields[1].add_unit("B", big)
+    loop._resolve_triggered_effects(CARD_REGISTRY["Angler Beast"].instantiate(), "on_play",
+                                    loop.gs.battlefields[0], a, loop.gs.B,
+                                    context_extra={"battlefield": loop.gs.battlefields[0]})
+    assert all(loop._locate_unit(x) is None for x in u.values()) and loop._locate_unit(big)
+    assert sorted(c.name for c in loop.gs.B.hand) == ["Theirs0", "TheirsBase"]
