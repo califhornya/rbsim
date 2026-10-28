@@ -287,7 +287,12 @@ Open, found on the way:
   Blast, Sky Cruiser, Plaza Guardian, Jayce Brilliant Inventor, Guttural
   Roar, Jagged Cutlass, Noxian Demolitionist, Rampage, Wild Claw, Corrupted
   Dragon, Spiderling, Illaoi, Ocean Drake, Dominus, Nasus Curator, Public
-  Execution, Consuming Curse. Rest of Vendetta: next batches.
+  Execution, Consuming Curse.
+- [ ] Vendetta, part 2: VEN-002..077 read (59 cards), 36 tested, 5 fixed:
+  Forsaken Baccai / Oasis Raider count runes before the channel, Mesmerize
+  (a friendly unit in base too), Clairvoyance (PREDICT 5), Iterative Design
+  ("[Flow] [2] [Mind]" cost parsed). Open: Brutal Hunter has no printed
+  Might in the card data. Rest of Vendetta (VEN-078..): next batch.
 Then: Radiance, Proving Grounds.
 
 ## E. Not modeled at all

@@ -574,6 +574,9 @@ listed here.
   Matriarch's "choose a unit ... play it" reads the unit from your trash;
   Decree of Focus's "being chosen by an enemy Fury spell" reads declared
   choices of spells on the chain (not abilities).
+  Part 2: Bottled Constellation fires with the start-of-turn triggers (after
+  the channel, before the draw), not at the Main Phase; Sanction empowers a
+  friendly unit or disempowers an enemy one (the text allows any unit).
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.

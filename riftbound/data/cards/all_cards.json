@@ -29004,13 +29004,15 @@
         "modes": [
           {
             "effect": "recall_unit",
-            "target": "friendly_unit"
+            "target": "friendly_unit",
+            "where": "anywhere"
           },
           {
             "effect": "grant_temporary_might",
             "target": "enemy_unit",
             "amount": -2,
-            "duration": "this_turn"
+            "duration": "this_turn",
+            "where": "anywhere"
           }
         ]
       }
@@ -29152,6 +29154,12 @@
       "PREDICT 5"
     ],
     "effects": [
+      {
+        "effect": "predict",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "amount": 5
+      },
       {
         "effect": "draw_cards",
         "trigger": "on_cast",

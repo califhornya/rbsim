@@ -604,6 +604,8 @@ class GameLoop:
 
     def _phase_beginning(self, active: str) -> int:
         self.gs.in_beginning_phase = True
+        self.gs.runes_at_beginning = (self.gs.turn, {s: self.gs.get_player(s).total_runes_in_play()
+                                                     for s in ("A", "B")})
         try:
             return self._phase_beginning_steps(active)
         finally:
@@ -2095,6 +2097,10 @@ class GameLoop:
             return any(u.card is card for bf in self.gs.battlefields
                        for u in (bf.units_A if side == "A" else bf.units_B))
         if ctype == "fewer_runes_than_opponent":
+            # "... at the start of your Beginning Phase": counted before the channel.
+            turn, runes = self.gs.runes_at_beginning
+            if turn == self.gs.turn and actor.name in runes and opponent.name in runes:
+                return runes[actor.name] < runes[opponent.name]
             return actor.total_runes_in_play() < opponent.total_runes_in_play()
         if ctype == "triggering_unit_has_subtype":
             trig = extra.get("triggering_card")

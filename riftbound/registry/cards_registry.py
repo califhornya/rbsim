@@ -415,8 +415,9 @@ _REPEAT_DISCARD = re.compile(r"REPEAT\W+Discard (\d+)", re.IGNORECASE)
 def _keyword_pip_cost(keyword: str, rules_text: str) -> Optional[Dict[str, Any]]:
     """A keyword's printed cost: "FLOW [4] [order] [order]" -> 4 Energy and two
     Order Power; "[rune]" is Power of any domain (domain None). None when the
-    keyword carries no number."""
-    m = re.search(keyword + r"\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)", rules_text)
+    keyword carries no number. Also "[Flow] [2] [Mind]" (Iterative Design)."""
+    m = re.search(r"\[?" + keyword + r"\]?\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)", rules_text,
+                  re.IGNORECASE)
     if not m:
         return None
     pips = re.findall(r"\[([A-Za-z]+)\]", m.group(2))

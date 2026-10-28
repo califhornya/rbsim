@@ -156,6 +156,9 @@ class GameState:
     died_in_beginning: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
+    # Runes each player controlled as the Beginning Phase started, before the
+    # channel (Forsaken Baccai): (turn, {side: runes}).
+    runes_at_beginning: tuple = (0, {})
     # True while the active player's Ending Phase runs (Runeblade Anvil).
     in_ending_phase: bool = False
     # Turns each player has started ("their third turn": Forgotten Monument).
