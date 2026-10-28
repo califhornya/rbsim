@@ -23255,7 +23255,8 @@
         "effect": "take_control",
         "trigger": "on_cast",
         "might_at_most": 3,
-        "xp_for_any": 5
+        "xp_for_any": 5,
+        "exhaust": true
       }
     ]
   },

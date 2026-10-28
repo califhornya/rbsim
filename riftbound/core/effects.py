@@ -739,8 +739,8 @@ def _pull_unit_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Take control of an enemy unit at a battlefield. `until_end_of_turn`:
     ready it, and it goes back to its owner's base at end of turn (Hostile
-    Takeover); else exhaust it and recall it to our base for good
-    (Conscription: one with 3 Might or less, any if 5 XP was spent)."""
+    Takeover); else recall it to our base for good, exhausted when the text
+    says so (Conscription: one with 3 Might or less, any if 5 XP was spent)."""
     loop = ctx.loop
     me = ctx.actor_side
     cands = _choosable(ctx, _units_at(ctx, ctx.opponent_side, "battlefield"))
@@ -763,7 +763,10 @@ def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             unit.ready = True
         loop._arrive_at(bf, me, prev)
     else:
-        loop._exhaust(unit) if unit.ready else None
+        # A recall changes nothing about the unit (§460); Conscription says
+        # "exhaust it" (`exhaust`), Possession doesn't.
+        if spec.get("exhaust") and unit.ready:
+            loop._exhaust(unit)
         bf.remove_unit(me, unit)
         ctx.actor.base_units.append(unit)
 

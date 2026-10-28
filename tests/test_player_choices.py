@@ -132,3 +132,32 @@ def test_fox_fire_player_picks_which_units_die():
     loop.chooser = chooser
     _resolve(loop, a, "Fox-Fire")
     assert keep in bf.units_B and kill not in bf.units_B
+
+
+def test_a_recall_changes_nothing_about_the_unit():
+    """§460: 'Recalls do not affect the state of the Permanent being recalled'
+    (damage, exhausted, buffs). Possession takes control and recalls; only
+    Conscription says 'exhaust it'."""
+    for card, exhausted in (("Possession", False), ("Conscription", True)):
+        loop, a, b = _setup()
+        enemy = _unit("Enemy", 2)                          # 3 with its buff: Conscription's cap
+        enemy.damage, enemy.might_counters = 1, 1
+        loop.gs.battlefields[0].add_unit("B", enemy)
+        _resolve(loop, a, card)
+        assert enemy in a.base_units
+        assert enemy.damage == 1 and enemy.might_counters == 1 and enemy.ready == (not exhausted)
+
+
+def test_attackers_recalled_after_combat_keep_their_buff_and_status():
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    attacker = _unit("Attacker", 2)
+    attacker.might_counters = 1
+    attacker.ready = False
+    wall = _unit("Wall", 9)
+    wall.stunned = True
+    bf.add_unit("A", attacker)
+    bf.add_unit("B", wall)
+    bf.contested_this_turn = True
+    loop._phase_combat_and_conquer_single(0, "A")
+    assert attacker in a.base_units and attacker.might_counters == 1 and not attacker.ready

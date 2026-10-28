@@ -63,8 +63,10 @@ Section A is done: both precon decks are checked card by card.
       Forgotten Relic. New choice kinds `battlefield` and `tag`.
       tests/test_player_choices.py. Still the baseline's: how Alpha Strike
       splits its damage, Tricksy Tentacles' destination (their base).
-- [ ] Generic recall must keep damage / exhausted / buffs (KNOWN_ISSUES #8):
-      verify every recall path.
+- [x] Generic recall keeps damage / exhausted / buffs (KNOWN_ISSUES #8, §460):
+      every recall path checked. Death replacements heal and exhaust because
+      every such card says so; Possession exhausted the unit it recalls (only
+      Conscription says "exhaust it"). tests/test_player_choices.py.
 - [x] Mournful Witness-style "when a combat I was in ends" was encoded as
       "when I win a combat" (trigger on_combat_end).
 - [x] A cost inside a played card's instruction ("spend a buff to ...") was
