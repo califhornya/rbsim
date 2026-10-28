@@ -3532,10 +3532,12 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("dig")
 @effect("reveal_and_choose")
 def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Look at the top N cards, keep the best (highest might) into hand, recycle
-    the rest to the bottom of the deck. Deterministic stand-in for player choice.
-    A card filter ("reveal a gear from among them") limits what may be kept; with
-    no match, nothing is kept."""
+    """Look at the top N cards, you may put one matching the filter into your
+    hand ("You may reveal a gear from among them and draw it"; `must`: "Put 1
+    into your hand"), the rest go to the bottom (`rest`: "trash" for "Put the
+    rest into your trash": Lightning Rush). Baseline: the mightiest. With
+    `if_kept_tag` [tags] and `then` an effect: "Then if you revealed a Bird,
+    Cat, Dog, or Poro, BUFF a friendly unit" (Ivern Nurturer)."""
     amount = int(spec.get("amount", spec.get("count", 1)))
     deck = ctx.actor.deck
     n = max(0, min(amount, len(deck.cards)))
@@ -3548,20 +3550,88 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.loop._offer_reveal_from_top(ctx.actor, top)
     if not top:
         return
-    tf = spec.get("target_filter") or spec.get("reveal_filter") or spec.get("filter")
-    tf = tf if isinstance(tf, Mapping) else {}
-    def _energy_ok(c) -> bool:
-        e = int(getattr(c, "cost_energy", 0) or 0)
-        return (("energy_at_most" not in tf or e <= int(tf["energy_at_most"]))
-                and ("energy_at_least" not in tf or e >= int(tf["energy_at_least"])))
-
-    keepable = [c for c in top if _zone_card_matches(c, tf) and _energy_ok(c)]
-    if keepable:
+    tf = spec.get("target_filter") or spec.get("reveal_filter")
+    legacy = spec.get("filter")
+    zone_spec = {"target_filter": tf if isinstance(tf, Mapping) else
+                 (legacy if isinstance(legacy, Mapping) else {}),
+                 "filter": legacy if isinstance(legacy, str) else None}
+    keepable = [c for c in top if _zone_effect_card_ok(c, zone_spec)]
+    kept = None
+    if keepable and (spec.get("must") or ctx.loop.choose("optional:keep", ctx.actor_side,
+                                                         [True, False], True, ctx.card)):
         best = max(keepable, key=lambda c: int(getattr(c, "might", 0) or 0))
-        best = ctx.loop.choose(_kind("keep", spec), ctx.actor_side, keepable, best, ctx.card)
-        top.remove(best)
-        ctx.actor.hand.append(best)
-    deck.cards[:0] = top  # recycle remainder to the bottom
+        kept = ctx.loop.choose(_kind("keep", spec), ctx.actor_side, keepable, best, ctx.card)
+        top.remove(kept)
+        ctx.actor.hand.append(kept)
+    if spec.get("rest") == "trash":
+        ctx.actor.trash.extend(top)
+    else:
+        deck.cards[:0] = top  # recycle remainder to the bottom
+    tags = set(spec.get("if_kept_tag") or ())
+    if kept is not None and tags & set(getattr(kept, "tags", None) or ()) and spec.get("then"):
+        handler = REGISTRY.get(spec["then"].get("effect"))
+        if handler:
+            handler(ctx, spec["then"])
+
+
+@effect("look_play")
+def _look_play(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Look at the top 5 cards of your Main Deck. You may play a unit from among
+    them. Its Energy cost is reduced by [5]. Then recycle the remaining cards"
+    (Reinforce); "reveal the top 2 cards ... You may banish one, then play it. If
+    it is a unit, you may play it here. Recycle the rest" (Rek'Sai Swarm Queen,
+    `banish`, `here`). Its cost is paid (less `reduce` Energy); baseline: the
+    costliest playable one."""
+    loop = ctx.loop
+    me, side = ctx.actor, ctx.actor_side
+    deck = me.deck
+    n = max(0, min(int(spec.get("amount", 1)), len(deck.cards)))
+    if n == 0:
+        return
+    top = deck.cards[-n:]
+    del deck.cards[-n:]
+    loop._offer_reveal_from_top(me, top)
+    reduce = int(spec.get("reduce", 0) or 0)
+
+    def cost(c):
+        energy, power = loop._effective_cost(c, me, from_zone="deck")
+        return max(0, energy - reduce), power
+
+    from .cards import UnitCard
+    ok = [c for c in top if _zone_effect_card_ok(c, {"target_filter": spec.get("target_filter") or {}})
+          and loop._can_pay_card(me, c, *cost(c))]
+    if ok and loop.choose("optional:" + str(spec.get("effect")), side, [True, False], True, ctx.card):
+        card = loop.choose(_kind("card", spec), side, ok, max(ok, key=_zone_value), ctx.card)
+        top.remove(card)
+        loop._pay_card(me, card, *cost(card))
+        zone = "deck"
+        if spec.get("banish"):
+            zone = "banished"           # "banish one, then play it"
+            loop._note_banished(side)
+        here = ctx.extra.get("battlefield") or ctx.battlefield
+        if isinstance(card, UnitCard) and spec.get("here") and here in loop.gs.battlefields and \
+                loop.choose("unit_location", side, [here, None], here, ctx.card) is here:
+            prev = here.controller()
+            loop._play_unit(card, side, bf=here, from_zone=zone)
+            loop._arrive_at(here, side, prev)
+        else:
+            loop._play_from_zone_now(me, card, side, zone)
+    deck.cards[:0] = top                # the rest to the bottom
+
+
+@effect("recycle_from_opponent_hand")
+def _recycle_from_opponent_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose an opponent. They reveal their hand and you choose a Mind card
+    from it. They recycle that card" (Decree of Strength): `domain`."""
+    opp = ctx.opponent
+    dom = str(spec.get("domain", "")).upper()
+    cands = [c for c in opp.hand if getattr(getattr(c, "domain", None), "name", "") == dom]
+    if not cands:
+        return
+    card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, cands, max(cands, key=_zone_value), ctx.card)
+    opp.hand.remove(card)
+    opp.deck.cards.insert(0, card)
+    ctx.loop._note_recycled(ctx.opponent_side)
 
 
 def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) -> None:

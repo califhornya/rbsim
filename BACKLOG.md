@@ -193,11 +193,14 @@ Fixed:
 Open, found on the way:
 - Jhin Meticulous Killer: "you may play me for [mind]" (an alternative cost
   in a domain the play path can't charge yet).
-- The "look at the top cards" family (`dig`): Reinforce and Rek'Sai Swarm
-  Queen play a card from among them, Lightning Rush trashes the rest, Decree
-  of Strength reveals the opponent's hand, Trifarian Captain's unit-or-gear
-  and [rune] limits, Encore's last mode, Ornn Blacksmith / Ivern Nurturer
-  "or when I hold", Ivern's buff.
+- [x] The "look at the top cards" family (`dig`): the kept card is a "you
+  may" now (`must` for Stacked Deck, Apprentice Smith, Encore); Reinforce and
+  Rek'Sai Swarm Queen play a card from among them (new `look_play`: paid,
+  Reinforce [5] less, Rek'Sai banished then played, here if a unit);
+  Lightning Rush trashes the rest; Decree of Strength recycles a Mind card
+  from the opponent's hand (was the caster's deck); Trifarian Captain only
+  a unit or gear, [3] and [rune] at most; Encore's last mode kept one and
+  then drew and recycled a hand card; Ivern Nurturer's pet buff.
 
 Named in the old notes and still open:
 Detonation Amplifier (DEATHKNELL twice here), Jarvan IV Martial Paragon (DEPLOY gear have ACTION), The Academy and

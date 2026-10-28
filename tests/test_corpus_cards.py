@@ -887,3 +887,97 @@ def test_amateur_recital_may_move_a_unit_at_a_battlefield_to_its_base():
     loop.chooser = None
     loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
     assert enemy in b.base_units
+
+
+# -- "Look at the top cards" -----------------------------------------------------
+
+def _deck(p, *cards):
+    """`cards` listed top first."""
+    p.deck.cards = list(reversed(cards))
+
+
+def _cast_now(loop, p, name):
+    o = loop.gs.get_player(loop.gs.other(p.name))
+    loop._resolve_card_effects(CARD_REGISTRY[name].instantiate(), loop.gs.battlefields[0], p, o)
+
+
+def test_reinforce_plays_a_unit_from_the_top_five_five_cheaper():
+    """'Look at the top 5 cards of your Main Deck. You may play a unit from among
+    them. Its Energy cost is reduced by [5]. Then recycle the remaining cards.'"""
+    loop, a, b = _setup()
+    big = UnitCard(name="Big", might=6, cost_energy=7)
+    _deck(a, SpellCard(name="S1"), big, SpellCard(name="S2"))
+    _cast_now(loop, a, "Reinforce")
+    assert any(u.card is big for u in a.base_units) and a.energy == 18
+    assert not a.hand and len(a.deck.cards) == 2
+
+
+def test_rek_sai_swarm_queen_banishes_one_and_plays_it_here():
+    """'When I attack, you may reveal the top 2 cards of your Main Deck. You may
+    banish one, then play it. If it is a unit, you may play it here. Recycle the
+    rest.'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    queen = _unit("Rek'Sai Swarm Queen")
+    bf.add_unit("A", queen)
+    bf.add_unit("B", _unit("Def", 9))
+    drone = UnitCard(name="Drone", might=2, cost_energy=2)
+    _deck(a, drone, SpellCard(name="Other"))
+    loop._open_combat(bf, "A")
+    assert any(u.card is drone for u in bf.units_A) and a.energy == 18
+    assert [c.name for c in a.deck.cards] == ["Other"]
+
+
+def test_lightning_rush_keeps_one_and_trashes_the_rest():
+    """'Look at the top 3 cards of your Main Deck. You may choose a card from among
+    them and draw it. Put the rest into your trash.'"""
+    loop, a, b = _setup()
+    _deck(a, UnitCard(name="A1", might=3), UnitCard(name="A2", might=1), UnitCard(name="A3", might=1))
+    _cast_now(loop, a, "Lightning Rush")
+    assert [c.name for c in a.hand] == ["A1"] and sorted(c.name for c in a.trash) == ["A2", "A3"]
+    assert not a.deck.cards
+
+
+def test_decree_of_strength_recycles_a_mind_card_from_the_opponents_hand():
+    """'Choose an opponent. They reveal their hand and you choose a Mind card from
+    it. They recycle that card.'"""
+    loop, a, b = _setup()
+    mind = UnitCard(name="Thinker", might=1, domain=Domain.MIND)
+    fury = UnitCard(name="Brute", might=1, domain=Domain.FURY)
+    b.hand = [fury, mind]
+    _cast_now(loop, a, "Decree of Strength")
+    assert b.hand == [fury] and b.deck.cards[0] is mind
+
+
+def test_trifarian_captain_finds_a_cheap_unit_or_gear_only():
+    """'... You may reveal from among them a unit or gear with Energy cost no more
+    than [3] and with Power cost no more than [rune] and draw it.'"""
+    loop, a, b = _setup()
+    spell = SpellCard(name="Cheap Spell", cost_energy=1)
+    pricey = UnitCard(name="Pricey", might=9, cost_energy=2, cost_power=2)
+    gear = GearCard(name="Kit", cost_energy=3)
+    _deck(a, spell, pricey, gear, UnitCard(name="Big", might=9, cost_energy=6))
+    _cast_now(loop, a, "Trifarian Captain")                 # its "when you play me"
+    assert [c.name for c in a.hand] == ["Kit"]
+
+
+def test_ivern_nurturer_buffs_when_he_finds_a_pet_and_also_when_he_holds():
+    """'When you play me or when I hold, look at the top 3 cards ... You may reveal
+    a unit from among them and draw it. Recycle the rest. Then if you revealed a
+    Bird, Cat, Dog, or Poro, do this: BUFF a friendly unit.'"""
+    loop, a, b = _setup()
+    ivern = _unit("Ivern Nurturer")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", ivern)
+    _deck(a, UnitCard(name="Kitty", might=1, tags=["Cat"]))
+    loop._fire_scoring_trigger("on_hold", bf, "A")
+    assert [c.name for c in a.hand] == ["Kitty"] and ivern.might_counters == 1
+
+
+def test_a_may_reveal_can_be_declined():
+    """'You may reveal a spell ... and draw it' (Fate Weaver): no card is taken."""
+    loop, a, b = _setup()
+    _deck(a, SpellCard(name="Big Spell", cost_energy=5))
+    loop.chooser = _always(False)
+    loop._resolve_card_effects(CARD_REGISTRY["Fate Weaver"].instantiate(), loop.gs.battlefields[0], a, b)
+    assert not a.hand and len(a.deck.cards) == 1

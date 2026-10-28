@@ -2167,9 +2167,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "dig",
+        "effect": "look_play",
         "trigger": "on_cast",
-        "amount": 5
+        "amount": 5,
+        "target_filter": {
+          "is_unit": true
+        },
+        "reduce": 5
       }
     ]
   },
@@ -6255,10 +6259,7 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 3,
-        "count": 1,
-        "suggested_vocab": [
-          "effect:dig_keep_recycle_rest"
-        ]
+        "must": true
       }
     ]
   },
@@ -12178,7 +12179,8 @@
         "amount": 1,
         "target_filter": {
           "card_type": "GEAR"
-        }
+        },
+        "must": true
       }
     ]
   },
@@ -16459,9 +16461,12 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "dig",
+        "effect": "look_play",
         "trigger": "on_attack",
-        "amount": 2
+        "amount": 2,
+        "banish": true,
+        "here": true,
+        "optional": true
       }
     ]
   },
@@ -20114,6 +20119,17 @@
         "amount": 3,
         "target_filter": {
           "is_unit": true
+        },
+        "if_kept_tag": [
+          "Bird",
+          "Cat",
+          "Dog",
+          "Poro"
+        ],
+        "then": {
+          "effect": "buff_unit",
+          "target": "friendly_unit",
+          "where": "anywhere"
         }
       },
       {
@@ -20122,6 +20138,17 @@
         "amount": 3,
         "target_filter": {
           "is_unit": true
+        },
+        "if_kept_tag": [
+          "Bird",
+          "Cat",
+          "Dog",
+          "Poro"
+        ],
+        "then": {
+          "effect": "buff_unit",
+          "target": "friendly_unit",
+          "where": "anywhere"
         }
       }
     ]
@@ -29438,12 +29465,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reveal_and_choose",
+        "effect": "recycle_from_opponent_hand",
         "trigger": "on_cast",
-        "target": "opponent",
-        "target_filter": {
-          "subtype": "Mind"
-        }
+        "domain": "MIND"
       }
     ],
     "variants": [
@@ -32186,7 +32210,7 @@
         "effect": "dig",
         "trigger": "on_cast",
         "amount": 3,
-        "count": 1
+        "rest": "trash"
       }
     ],
     "variants": [
@@ -37033,9 +37057,11 @@
       {
         "effect": "dig",
         "trigger": "on_play",
-        "count": 4,
+        "amount": 4,
+        "filter": "unit_or_gear",
         "target_filter": {
-          "energy_at_most": 3
+          "energy_at_most": 3,
+          "power_at_most": 1
         }
       }
     ],
@@ -37840,20 +37866,11 @@
             "amount": 1,
             "duration": "this_turn"
           },
-          [
-            {
-              "effect": "dig",
-              "amount": 2
-            },
-            {
-              "effect": "draw_cards",
-              "count": 1
-            },
-            {
-              "effect": "recycle_card",
-              "count": 1
-            }
-          ]
+          {
+            "effect": "dig",
+            "amount": 2,
+            "must": true
+          }
         ]
       }
     ],
