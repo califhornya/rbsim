@@ -47,6 +47,8 @@ class UnitInPlay:
     combat_might: int = 0
     doomed_turn: int = -1            # Noxian Guillotine: dies when it takes damage that turn
     ward_turn: int = -1              # Unlicensed Armory: may be saved the next time it would die
+    prevent_next_turn: int = -1      # Counter Strike: the next damage to it this turn is prevented
+    was_mighty: bool = False         # "When a unit you control becomes MIGHTY" (Fiora Worthy)
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn

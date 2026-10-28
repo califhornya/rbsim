@@ -82,6 +82,9 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "granted_to_units_here",                     # battlefield: units here have this ability (Gardens of Becoming)
     "on_recycle_rune",                           # you recycle a rune (Sivir Battle Mistress)
     "trash_on_conquer",                          # in the trash, you conquer (Super Mega Death Rocket!)
+    "on_buff_spent",                             # you spend a buff (Fae Dragon)
+    "on_friendly_becomes_mighty",                # a friendly unit becomes MIGHTY (Fiora Worthy)
+    "on_revealed",                               # revealed from your deck (Undertitan)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -176,6 +179,10 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "none_played_this_turn",             # filter: "the first friendly gear played each turn" (Ornn's Forge)
     "enemy_unit_died_this_turn",         # "If an enemy unit has died this turn" (Spoils of War)
     "any_gear_in_play",                  # "you may kill a gear. If you do, ..." (Adaptatron)
+    "attached_this_turn",                # "If this was attached to me this turn" (Brutalizer)
+    "died_in_combat",                    # "When I die in combat" (Draven Audacious)
+    "gear_with_cost_at_most_in_play",    # n: "kill a gear with Energy cost no more than [1]" (Pickpocket)
+    "this_unattached",                   # "(Use only if unattached.)" (The Zero Drive)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -198,6 +205,8 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
     "at_battlefield",                    # "a unit at a battlefield" (not in a base)
     "is_damaged",                        # "all damaged enemy units here" (Warwick Hunter)
+    "is_attacking",                      # "Stun an attacking unit" (Thwonk!)
+    "not_it",                            # "another unit" than the one just chosen (Piercing Light)
 })
 
 # amount_source values understood by effects._amount.
@@ -215,6 +224,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "cards_with_my_name_in_trash",
     "other_battlefields_controlled",     # Seat of Power
     "discarded_energy", "it_might",      # Get Excited!, Last Breath
+    "countered_energy", "killed_might", "self_assault",   # Riposte, Deathgrip, Lucian Gunslinger
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -278,6 +288,10 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # _cost_extras (Wallop, Call to Glory)
     "sett_save", "lone_fighter_bonus", "stunned_enemies_here_minus", "unlimited_buffs",
     "spend_buff_free", "discard_for_energy",
+    # Spiritforged: Soraka Wanderer, Ezreal Prodigy, Jax Unmatched, Renata Glasc
+    # Chem-Baroness (GameLoop._try_replace_death, _pay_one_additional_cost,
+    # _quick_draw, _gold_bonus)
+    "protect_weaker_here", "cheaper_optional_costs", "equipment_quick_draw", "gold_bonus",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

@@ -169,16 +169,18 @@
       "player_A": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 28,
-        "energy": 10,
-        "hand": 3,
+        "base_units": [
+          "Hwei Brooding Painter"
+        ],
+        "deck": 27,
+        "energy": 1,
+        "hand": 0,
         "power_pool": {
           "CHAOS": 5,
-          "MIND": 5
+          "MIND": 4
         },
-        "runes_in_play": 10,
-        "trash": 9
+        "runes_in_play": 9,
+        "trash": 12
       },
       "player_B": {
         "banished": 0,
@@ -196,9 +198,9 @@
       },
       "points_A": 1,
       "points_B": 8,
-      "spells_cast": 7,
+      "spells_cast": 10,
       "turns": 11,
-      "units_played": 10,
+      "units_played": 11,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0

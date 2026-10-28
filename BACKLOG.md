@@ -239,14 +239,34 @@ Open, found on the way:
   Wanderer ("assigned combat damage last" = BACKLINE), Blind Fury's card
   stays its owner's, Wielder of Water only while fighting. Single-gear kills
   now chosen (they took the first one).
-Then every other set: Spiritforged, Unleashed, Vendetta, Radiance, Proving
-Grounds.
+- [x] Spiritforged (222 cards) read; 62 fixed, each tested
+  (tests/test_corpus_spiritforged.py). Systemic: counters had a hidden [4] /
+  [rune] limit (Not So Fast, Hard Bargain, Riposte, Repulse, Abandon, Lilting
+  Lullaby); "becomes MIGHTY" only when played (Fiora Worthy / Grand Duelist:
+  now on_friendly_becomes_mighty); "when you spend a buff" (Fae Dragon:
+  GameLoop._spend_buff); "Ready your units" / "your Mechs" / "your other
+  units" reached only one battlefield (On the Hunt, Shurelya's Requiem,
+  Rumble Scrapper, Danger Zone, Undertitan); attach_gear attached the first
+  gear in base instead of itself (Edge of Night); MIGHTY counts left out the
+  base (Show of Strength). Spells with no target (Blood Rush, Feral
+  Strength, Punch First, Gem Jammer, Bonds of Strength, Bellows Breath,
+  Sudden Storm, Piercing Light, Thwonk!, Defiant Dance). Missing halves:
+  Angle Shot, Strike Down, Deathgrip, Blood Money, Rumble Hotheaded, Rell
+  Magnetic, Kato the Arm, Azir Ascendant, Relentless Pursuit, Counter
+  Strike, Rally the Troops, Arcane Shift, Riposte, Irelia Blade Dancer,
+  Renata Chem-Baroness, Ezreal Prodigy, Jax Unmatched, Soraka Wanderer, The
+  Zero Drive (text read from the image), Brutalizer (only the turn it's
+  attached), Needlessly Large Yordle ([calm] too), Battering Ram (minimum),
+  Poro Snax, Drag Under, Breakneck Mech, Pickpocket, Draven Audacious,
+  Forecaster, Guards!, Fae Porter / Windsinger / Buhru Captain ("may"),
+  Ancient Henge and Hextech Anomaly (any amount: X).
+Then every other set: Unleashed, Vendetta, Radiance, Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of
 Clockwork and The Ball as a unit (gear that becomes a unit), Ivern Green
 Father (Brush battlefield), Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
-duplicate card), Svellsongur, Void Hatchling, Hextech Anomaly, Irelia
+duplicate card), Svellsongur, Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In; FAQ rulings for Kharox + Neeko,
 Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser, Hunters'
 Circle + Baron.

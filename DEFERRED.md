@@ -549,6 +549,16 @@ listed here.
   fires at the next state refresh after the Power payment. Custom handlers
   checked only by reading: Twisted Fate Gambler, Teemo Strategist, Promising
   Future, Dazzling Aurora, Divine Judgment, Party Favors, Baited Hook.
+- Spiritforged approximations: Emperor's Divide moves every friendly unit at
+  the spell's battlefield ("any number" not chosen); Assembly Rig's "recycle a
+  unit from your trash" takes any card; Arcane Shift's unit comes back to its
+  base (the text names no place); Undertitan's ADD fires when reveal_top /
+  reveal_play_top reveal it, not on every reveal; The Zero Drive goes to the
+  trash, not banishment, when used; Kato the Arm also lends keywords given
+  for the turn; a counter that "chooses" reads the spell's declared choices
+  (spells only, not abilities). Checked by a probe only: Card Sharp, Jayce
+  Man of Progress, Here to Help, Temptation, Arise!, Royal Entourage,
+  Direwing, Sterak's Gage, the Mech token.
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.

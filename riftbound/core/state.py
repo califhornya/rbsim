@@ -140,6 +140,12 @@ class GameState:
     # "Buffs give an additional +1 [might] to friendly units this turn" (Stand
     # United): side -> turn.
     buff_bonus_turn: dict = field(default_factory=dict)
+    # "When a friendly unit is played this turn, buff it" (Rally the Troops):
+    # side -> turn.
+    rally_turn: dict = field(default_factory=dict)
+    # 'This turn, that unit has "When I conquer, you may move me to my base"'
+    # (Relentless Pursuit): (unit id, turn).
+    conquer_return: list = field(default_factory=list)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
     # True while the active player's Ending Phase runs (Runeblade Anvil).
