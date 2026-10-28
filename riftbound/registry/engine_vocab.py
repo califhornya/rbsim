@@ -227,6 +227,7 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
 # - ignore_deflect_here   battlefield passive read by Loop._deflect_tax
 # - ignore_deflect        a spell's own "Ignore DEFLECT while paying" (Loop._deflect_tax)
+# - move_tax_here         a deployed gear's tax to move to its battlefield (Loop._move_tax)
 # - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
 # - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
@@ -236,6 +237,7 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - enter_ready            enter_ready_aura marker read by Loop._enters_ready
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "ignore_deflect", "reduce_cost_here",
+    "move_tax_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
     "enter_ready", "double_equipment_might", "double_deathknell",
     # restrictions read where they apply (GameLoop._can_choose, _can_move_to_base,

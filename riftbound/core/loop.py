@@ -3789,6 +3789,10 @@ class GameLoop:
                 if ap.energy < toll:
                     return
                 ap.energy -= toll
+            joining = self.gs.pending_move is not None and self.gs.pending_move == (dst, side)
+            if dst != base_index and not joining and \
+                    not self._pay_move_tax(side, self.gs.battlefields[dst]):
+                return                       # Gravity Field's tax unpaid: no move
             if src_bf is None:
                 units.remove(unit)
             else:
@@ -4714,6 +4718,36 @@ class GameLoop:
         if not ready or not movers:
             return None
         return max(ready, key=lambda u: u.might), max(movers, key=lambda u: u.might)
+
+    def _move_tax(self, payer: str, dst_bf: Optional[Battlefield]) -> tuple:
+        """(Energy, Power) `payer` owes to move one or more units to `dst_bf`:
+        Gravity Field there, deployed by an opponent ("Opponents must pay [1]
+        [rune] to move one or more units to this battlefield"). Paid by whoever
+        is instructed to move (FAQ), once per move."""
+        energy = power = 0
+        if dst_bf is None:
+            return 0, 0
+        for dg in dst_bf.gear_for(self.gs.other(payer)):
+            spec = CARD_REGISTRY.get(dg.card.name)
+            for es in (spec.effects if spec else ()):
+                if es.effect == "move_tax_here":
+                    energy += int(es.params.get("energy", 1))
+                    power += int(es.params.get("power", 1))
+        return energy, power
+
+    def _can_pay_move_tax(self, payer: str, dst_bf: Optional[Battlefield]) -> bool:
+        energy, power = self._move_tax(payer, dst_bf)
+        player = self.gs.get_player(payer)
+        return player.energy >= energy and self._can_pay_generic_power(player, power)
+
+    def _pay_move_tax(self, payer: str, dst_bf: Optional[Battlefield]) -> bool:
+        """Pay the move tax to `dst_bf`; False (nothing paid) if it can't be."""
+        if not self._can_pay_move_tax(payer, dst_bf):
+            return False
+        energy, power = self._move_tax(payer, dst_bf)
+        player = self.gs.get_player(payer)
+        player.energy -= energy
+        return self._pay_generic_power(player, power)
 
     def _group_move_toll(self, side: str, dst: int) -> int:
         """ "Opponents must pay 1 for each unit beyond the first to move multiple

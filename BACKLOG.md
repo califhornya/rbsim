@@ -108,8 +108,11 @@ Section A is done: both precon decks are checked card by card.
       from the text: to a battlefield you control (Call to Battle), to an
       occupied enemy battlefield (Cataclysm), to its base (Janna, Isolate,
       Overzealous Fan), where you have units (Shadow Dash), open (§170.11.c).
-- [ ] Move tax (Gravity Field; who pays, §FAQ), Angler Wyrm's opponent moving
-      their own unit.
+- [x] Move tax: Gravity Field's "[1] [rune] to move one or more units to this
+      battlefield" is paid by whoever is instructed to move (FAQ), once per
+      move (units joining a held move don't pay again); unpaid, no move.
+      Angler Wyrm: the chosen opponent picks which of their units moves (and
+      pays any tax).
 - [x] HIDDEN: a champion with HIDDEN can be hidden from the Champion Zone
       (§811.1.b); a card played from facedown chooses only among what is at
       its battlefield, and a spell with no valid target there can't be played

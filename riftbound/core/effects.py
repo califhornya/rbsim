@@ -2813,7 +2813,8 @@ def _move_candidates(ctx: "EffectContext", spec: Mapping[str, Any], to_base_verb
     if tf:
         candidates = [(s, u) for s, u in candidates if _passes_filter(u, tf, ctx)]
     if not target.startswith("all"):
-        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, me, ctx.card)]
+        chooser = them if str(spec.get("mover", "")) == "opponent" else me
+        candidates = [(s, u) for s, u in candidates if loop._can_choose(u, chooser, ctx.card)]
     return [(s, u) for s, u in candidates if _move_destinations(ctx, spec, to_base_verb, s, u)]
 
 
@@ -2936,12 +2937,21 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
         return (not at_bf, unit.might)                     # send a base unit in
 
     order = sorted(candidates, key=priority, reverse=True)
+    # Who moves (and chooses): the effect's controller, or "Choose an opponent.
+    # They must move a unit they control" (Angler Wyrm: `mover` opponent).
+    mover = them if str(spec.get("mover", "")) == "opponent" else me
     if not scope_all:
         # Which unit(s): the baseline's priority order, one choice per unit.
-        order = loop.choose_many(_kind("target", spec), me, order, order[:count], ctx.card)
-    moved_units = []
+        order = loop.choose_many(_kind("target", spec), mover, order, order[:count], ctx.card)
+    moved_units, taxed = [], []
     for side, unit in order:
-        if loop._move_unit_by_effect(unit, destination_for(side, unit)):
+        dst = destination_for(side, unit)
+        # Gravity Field: the one instructed to move pays, once per battlefield.
+        if dst is not None and not any(dst is t for t in taxed):
+            if not loop._pay_move_tax(mover, dst):
+                continue
+            taxed.append(dst)
+        if loop._move_unit_by_effect(unit, dst):
             if spec.get("ready") and loop._can_ready(unit):
                 unit.ready = True
             moved_units.append(unit)

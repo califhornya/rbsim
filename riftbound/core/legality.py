@@ -114,6 +114,10 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                         continue      # "can't move to base" (Vilemaw's Lair, Sentry)
                     if loop._group_move_toll(side, dst) > ap.energy:
                         continue      # Mageseeker Investigator
+                    joining = gs.pending_move is not None and gs.pending_move == (dst, side)
+                    if dst != base_index and not joining and \
+                            not loop._can_pay_move_tax(side, gs.battlefields[dst]):
+                        continue      # Gravity Field's tax
                     actions.append(GameAction.move(
                         src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
 

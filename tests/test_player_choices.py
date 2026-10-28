@@ -49,7 +49,9 @@ def _resolve(loop, a, name, bf=0):
 
 
 def _named(name):
-    return lambda options: next(o for o in options if getattr(getattr(o, "card", None), "name", None) == name)
+    def unit(o):
+        return o[-1] if isinstance(o, tuple) else o      # move choices offer (side, unit)
+    return lambda options: next(o for o in options if getattr(getattr(unit(o), "card", None), "name", None) == name)
 
 
 def test_convergent_mutation_lets_the_player_pick_both_units():
@@ -237,3 +239,60 @@ def test_a_spell_needs_a_gear_or_trash_card_to_choose():
     assert not loop._spell_has_targets(CARD_REGISTRY["Morbid Return"].instantiate(), "A", 0)
     a.trash.append(UnitCard(name="Fallen", might=2))
     assert loop._spell_has_targets(CARD_REGISTRY["Morbid Return"].instantiate(), "A", 0)
+
+
+def _gravity_field(loop, side, bf_idx=0):
+    from riftbound.core.battlefield import DeployedGear
+    loop.gs.battlefields[bf_idx].gear_for(side).append(
+        DeployedGear(card=CARD_REGISTRY["Gravity Field"].instantiate()))
+
+
+def test_gravity_field_taxes_a_standard_move_once():
+    """'Opponents must pay [1] [rune] to move one or more units to this
+    battlefield': once for the units moving together; no tax, no move."""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.enums import Domain
+    from riftbound.core.legality import legal_actions
+    loop, a, b = _setup()
+    _gravity_field(loop, "B")
+    a.base_units += [_unit("One", 2), _unit("Two", 2)]
+    a.energy = 1
+    moves = [ga for ga in legal_actions(loop, DecisionPoint.TURN_ACTION, "A")
+             if ga.kind == "MOVE" and ga.to_engine()[3] == 0]
+    assert not moves                                           # no [rune] to pay
+    a.add_power(Domain.FURY, 1)
+    loop._apply_action(a, ("MOVE", 0, 2, 0))
+    loop._apply_action(a, ("MOVE", 0, 2, 0))                   # joins the move: no second tax
+    assert len(loop.gs.battlefields[0].units_A) == 2
+    assert a.energy == 0 and not a.power_pool.get(Domain.FURY)
+
+
+def test_gravity_field_is_paid_by_who_is_instructed_to_move():
+    """FAQ: Charm moves an enemy unit to a battlefield with your opponent's
+    Gravity Field: you pay. Your own Field doesn't tax you."""
+    from riftbound.core.enums import Domain
+    loop, a, b = _setup()
+    _gravity_field(loop, "B", 1)
+    enemy = _unit("Enemy", 2)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    a.energy = 5
+    a.add_power(Domain.CALM, 2)
+    _picker(loop, {"destination": ("A", lambda o: loop.gs.battlefields[1])})
+    _resolve(loop, a, "Charm")
+    assert enemy in loop.gs.battlefields[1].units_B and a.energy == 4
+
+
+def test_angler_wyrm_the_opponent_moves_a_unit_of_their_choice():
+    """'[tap]: Choose an opponent. They must move a unit they control to my
+    battlefield.'"""
+    from riftbound.core.effects import REGISTRY
+    loop, a, b = _setup()
+    wyrm = UnitInPlay(card=CARD_REGISTRY["Angler Wyrm"].instantiate(), ready=True)
+    loop.gs.battlefields[0].add_unit("A", wyrm)
+    b.base_units += [_unit("Big", 6), _unit("Small", 1)]
+    seen = _picker(loop, {"target": ("B", _named("Small"))})
+    spec = CARD_REGISTRY["Angler Wyrm"].effects[0]
+    ctx = EffectContext(loop, wyrm.card, a, b, loop.gs.battlefields[0])
+    REGISTRY["move_unit"](ctx, spec.merged_params())
+    assert any(kind.startswith("target") and side == "B" for kind, side in seen)
+    assert [u.card.name for u in loop.gs.battlefields[0].units_B] == ["Small"]
