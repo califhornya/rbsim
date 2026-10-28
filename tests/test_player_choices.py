@@ -191,3 +191,31 @@ def test_extra_combat_damage_kills_through_a_ki_barrier():
     resolve_might_combat(a_units, b_units, attacker_side="A",
                          take=lambda u, n: loop._take_damage(u, n, "combat"))
     assert not b_units
+
+
+def test_when_you_choose_me_fires_as_the_spell_is_played():
+    """A spell chooses as it goes on the chain (§355): Jae Medarda's 'When you
+    choose me with a spell, draw 1' happens before the opponent can react, not
+    when the spell resolves."""
+    from riftbound.core.enums import Domain
+    loop, a, b = _setup()
+    a.energy = 9
+    for d in Domain:
+        a.add_power(d, 2)
+    a.deck.cards = [UnitCard(name="Drawn", might=1)]
+    jae = UnitInPlay(card=CARD_REGISTRY["Jae Medarda"].instantiate(), ready=True)
+    a.base_units.append(jae)
+    a.hand = [CARD_REGISTRY["Discipline"].instantiate()]
+    hands_seen = []
+
+    class Watcher:
+        def __init__(self, player):
+            self.player = player
+
+        def decide_reaction(self, opponent, chain):
+            hands_seen.append([c.name for c in a.hand])
+            return ("PASS", None, None)
+    b.agent = Watcher(b)
+    loop._apply_action(a, ("SPELL", 0, 0))
+    assert hands_seen and hands_seen[0] == ["Drawn"]               # drawn before resolution
+    assert [c.name for c in a.hand] == ["Drawn"] and jae.might == jae.card.might + 2   # once, +2 resolved

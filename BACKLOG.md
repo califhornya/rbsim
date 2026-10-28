@@ -79,15 +79,21 @@ Section A is done: both precon decks are checked card by card.
       enemy battlefield". 58 specs set from the text (`location`).
 
 ## C. Rules approximations (engine systems)
-- [ ] Spells: costs are paid before the choices are declared (§356-357 say
-      choose, then pay).
+- [x] Spells: costs are paid before the choices are declared (§356-357 say
+      choose, then pay). Checked equivalent: the optional-cost choice (kicker)
+      is asked before the targets either way, Energy/Power payment changes no
+      target, and the only spells whose cost changes the board and that choose
+      a unit (Ki Burst: exhaust a friendly unit; Parallel Convergence: return
+      one) choose the same targets in either order. DEFLECT is part of the
+      choice (paid as the spell goes on the chain).
 - [x] DEFLECT (§809): the tax was Energy, by the spell's battlefield and only
       for spells naming an enemy target. Now [rune] (Power) per enemy unit
       with DEFLECT a spell or ability chooses, paid as it chooses (a spell as
       it goes on the chain); a unit you can't pay for can't be chosen. Heisho
       Shell and Decree of Insight ignore it.
-- [ ] "When you choose me" triggers fire as the spell resolves, not as it is
-      played.
+- [x] "When you choose me" triggers fired as the spell resolved: a spell's
+      declared choices now take effect as it goes on the chain (on_chosen,
+      DEFLECT, enemy-choice counts), not again at resolution.
 - [ ] §355.8 check: gear, battlefield and trash targets; spells played
       facedown, by FLOW or from banishment.
 - [x] A unit an effect moves into a battlefield contests it (§452) and its

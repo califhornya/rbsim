@@ -465,12 +465,19 @@ class GameLoop:
     def _put_on_chain(self, item: ChainItem) -> None:
         """A spell goes on the chain with its choices made (§355)."""
         self.gs.chain.append(item)
-        self._declared_deflect = 0
         item.declared = self._declare_choices(item)
-        # DEFLECT on the units its choices took (§809): paid now, as it chooses.
-        if self._declared_deflect:
-            self._pay_generic_power(self.gs.get_player(item.player), self._declared_deflect)
-            item.deflect_paid = True
+        if item.declared is not None:
+            # It chose as it went on the chain (§355): the units chosen pay their
+            # DEFLECT and hear "when you choose me" now, not as it resolves.
+            units = []
+            for _kind_, _n, got in item.declared.values():
+                for x in (got if isinstance(got, list) else [got]):
+                    x = x[-1] if isinstance(x, tuple) and x else x
+                    if isinstance(x, UnitInPlay) and not any(x is u for u in units):
+                        units.append(x)
+            if units:
+                self._note_chosen(item.card, item.player, units)
+            item.choices_noted = True
 
     def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
         """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
@@ -543,7 +550,6 @@ class GameLoop:
             return back.get(id(x), x)
         declared = {slot: (kind, n, real_of(got))
                     for slot, (kind, n, got) in loop2._declaring["choices"].items()}
-        self._declared_deflect = int(loop2._declaring.get("deflect", 0))
         if self.on_choice is not None:
             for kind, n, got in declared.values():
                 self.on_choice(kind, item.player, n, got, item.card)
@@ -1332,18 +1338,16 @@ class GameLoop:
         or unit abilities") and fire "when you choose me" (on_chosen) on the
         chooser's units chosen, with the source as triggering_card."""
         gs = self.gs
+        if getattr(self, "_declaring", None) is not None or getattr(self, "_choices_noted", False):
+            # The copy that declares a spell's choices, or the spell resolving
+            # after they took effect as it went on the chain (_put_on_chain).
+            return
         enemy = gs.other(chooser)
         located = [(u, self._locate_unit(u)) for u in units]
-        # DEFLECT (§809): paid as the choice is made. A spell's choices are made
-        # as it goes on the chain (the copy that declares them adds the tax up,
-        # _put_on_chain pays it); its resolution doesn't pay again.
+        # DEFLECT (§809): paid as the choice is made.
         tax = sum(self._deflect_tax(u, chooser, source) for u in units)
         if tax:
-            declaring = getattr(self, "_declaring", None)
-            if declaring is not None:
-                declaring["deflect"] = declaring.get("deflect", 0) + tax
-            elif not getattr(self, "_deflect_paid", False):
-                self._pay_generic_power(gs.get_player(chooser), tax)
+            self._pay_generic_power(gs.get_player(chooser), tax)
         from_spell_or_unit = isinstance(source, (SpellCard, UnitCard))
         if from_spell_or_unit and any(w is not None and w[0] == enemy for _, w in located):
             gs.enemy_choices_this_turn[chooser] = gs.enemy_choices_this_turn.get(chooser, 0) + 1
@@ -4725,7 +4729,7 @@ class GameLoop:
             return True
         if unit.unchoosable or unit.cant_be_chosen_turn == self.gs.turn:
             return False
-        if getattr(self, "_deflect_paid", False):
+        if getattr(self, "_choices_noted", False):
             return True              # a spell resolving: paid as it chose
         tax = self._deflect_tax(unit, chooser, source)
         return not tax or self._can_pay_generic_power(self.gs.get_player(chooser), tax)
@@ -4947,13 +4951,13 @@ class GameLoop:
             actor = self.gs.get_player(item.player)
             opponent = self.gs.get_player(self.gs.other(item.player))
             battlefield = self.gs.battlefields[item.bf_idx]
-            outer, outer_paid = self._replay, getattr(self, "_deflect_paid", False)
+            outer, outer_noted = self._replay, getattr(self, "_choices_noted", False)
             self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
-            self._deflect_paid = item.deflect_paid
+            self._choices_noted = item.choices_noted
             try:
                 self._resolve_card_effects(item.card, battlefield, actor, opponent)
             finally:
-                self._replay, self._deflect_paid = outer, outer_paid
+                self._replay, self._choices_noted = outer, outer_noted
 
             if self.recorder:
                 before_a = list(battlefield.units_A)
