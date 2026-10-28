@@ -9680,7 +9680,7 @@
     "cost_energy": null,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "",
+    "effect": "When you hold here, you may return your Chosen Champion from your trash to your Champion Zone if it is empty.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -9690,7 +9690,13 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "champion_from_trash",
+        "trigger": "on_hold",
+        "optional": true
+      }
+    ]
   },
   {
     "card_id": "OGN-282",
@@ -9801,10 +9807,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "recycle_card",
-        "trigger": "on_conquer",
-        "target": "self",
-        "amount": 1
+        "effect": "recycle_rune",
+        "trigger": "on_conquer"
       }
     ]
   },
@@ -9927,10 +9931,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "dig",
+        "effect": "look_recycle",
         "trigger": "on_conquer",
-        "amount": 2,
-        "recycle_up_to": 2
+        "amount": 2
       }
     ]
   },
@@ -17840,12 +17843,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "target_filter": {
-          "has_keyword": "REPEAT"
-        }
+        "effect": "repeat_discount",
+        "trigger": "passive"
       }
     ]
   },
@@ -17900,11 +17899,28 @@
     "effects": [
       {
         "effect": "reduce_cost",
-        "trigger": "cost_modifier",
+        "trigger": "cost_aura",
         "amount": 1,
-        "target_filter": {
-          "is_gear": true,
-          "non_token": true
+        "filter": {
+          "is_gear": true
+        },
+        "condition": {
+          "type": "all_of",
+          "params": {
+            "conditions": [
+              {
+                "type": "you_control_this_battlefield"
+              },
+              {
+                "type": "none_played_this_turn",
+                "params": {
+                  "filter": {
+                    "is_gear": true
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     ]
@@ -18086,7 +18102,7 @@
         "trigger": "on_hold",
         "amount": 1,
         "exhausted": true,
-        "target": "actor"
+        "target": "each_player"
       }
     ]
   },
@@ -18149,7 +18165,8 @@
         "effect": "ready_gear",
         "trigger": "on_conquer",
         "count": 1,
-        "optional": true
+        "optional": true,
+        "may_detach": true
       }
     ]
   },
@@ -18359,15 +18376,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "grant_temporary_might",
+        "effect": "grant_might",
         "trigger": "passive",
         "target": "self",
         "amount": 4,
-        "duration": "this_turn",
         "condition": {
-          "type": "spell_cost_at_least",
+          "type": "spell_spent_this_turn_at_least",
           "params": {
-            "amount": 4
+            "n": 4
           }
         }
       }
@@ -25707,7 +25723,8 @@
         "trigger": "on_play_spell",
         "target": "friendly_unit",
         "amount": 1,
-        "duration": "this_turn"
+        "duration": "this_turn",
+        "optional": true
       }
     ]
   },
@@ -25733,8 +25750,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "replace_death_with_recall",
-        "trigger": "death_replacement"
+        "effect": "altar_of_blood",
+        "trigger": "passive"
       }
     ]
   },
@@ -25764,7 +25781,8 @@
         "trigger": "on_hold",
         "target": "chosen_unit",
         "scope": "single",
-        "from": "battlefield"
+        "from": "battlefield",
+        "optional": true
       }
     ]
   },
@@ -25823,8 +25841,7 @@
     "effects": [
       {
         "effect": "sacrifice_token_here_draw",
-        "trigger": "on_start_of_turn",
-        "optional": true
+        "trigger": "on_start_of_turn"
       }
     ]
   },
@@ -25878,14 +25895,24 @@
     "effects": [
       {
         "effect": "predict",
-        "trigger": "passive",
+        "trigger": "on_play_spell",
+        "amount": 1,
         "condition": {
-          "type": "spell_cost_at_least",
+          "type": "all_of",
           "params": {
-            "amount": 4
+            "conditions": [
+              {
+                "type": "you_control_this_battlefield"
+              },
+              {
+                "type": "spell_cost_at_least",
+                "params": {
+                  "n": 4
+                }
+              }
+            ]
           }
-        },
-        "amount": 1
+        }
       }
     ]
   },
@@ -25941,10 +25968,8 @@
     "effects": [
       {
         "effect": "gain_xp",
-        "trigger": "activated",
-        "timing": "action",
+        "trigger": "granted_to_units_here",
         "amount": 1,
-        "target": "all_units_here",
         "cost": {
           "tap": true
         }
@@ -26002,7 +26027,8 @@
       {
         "effect": "move_ally_here_to_base",
         "trigger": "on_first_unit_here",
-        "optional": true
+        "optional": true,
+        "plays": "non_token_unit"
       }
     ]
   },
@@ -26028,10 +26054,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "give_keyword",
-        "trigger": "on_hold",
-        "target": "chosen_spell",
-        "keyword": "REPEAT"
+        "effect": "next_spell_repeat",
+        "trigger": "on_hold"
       }
     ]
   },
@@ -26124,14 +26148,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
+        "effect": "units_cost_more_this_turn",
         "trigger": "on_hold",
-        "amount": -1,
-        "target_filter": {
-          "non_token": true,
-          "is_unit": true
-        },
-        "duration": "this_turn"
+        "amount": 1
       }
     ]
   },
@@ -32306,15 +32325,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1,
-        "condition": {
-          "type": "you_control_this_battlefield"
-        },
-        "target_filter": {
-          "is_gear": true
-        }
+        "effect": "first_gear_ability_discount",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -38056,7 +38068,6 @@
       {
         "effect": "draw_cards",
         "trigger": "activated",
-        "timing": "action",
         "count": 1,
         "cost": {
           "power": 2
@@ -38087,11 +38098,8 @@
     "effects": [
       {
         "effect": "play_token",
-        "trigger": "on_friendly_unit_death",
+        "trigger": "on_unit_dies_here",
         "token_name": "Recruit",
-        "target_filter": {
-          "non_token": true
-        },
         "location": "base"
       }
     ],
@@ -38207,9 +38215,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
-        "amount": 1
+        "effect": "first_play_here_discount",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -38270,7 +38277,8 @@
         "effect": "predict",
         "trigger": "on_first_unit_here",
         "target": "actor",
-        "amount": 1
+        "amount": 1,
+        "plays": "unit_or_gear"
       }
     ],
     "variants": [
@@ -38296,15 +38304,20 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "discard_card",
+        "effect": "sequence",
         "trigger": "on_conquer",
-        "count": 1
-      },
-      {
-        "effect": "channel_rune",
-        "trigger": "on_conquer",
-        "amount": 1,
-        "exhausted": true
+        "optional": true,
+        "steps": [
+          {
+            "effect": "discard_card",
+            "count": 1
+          },
+          {
+            "effect": "channel_rune",
+            "amount": 1,
+            "exhausted": true
+          }
+        ]
       }
     ],
     "variants": [

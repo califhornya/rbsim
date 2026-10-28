@@ -78,6 +78,8 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_attached",                               # this Equipment is attached to a unit (Shady Spectacles)
     "on_enemy_attack",                           # an enemy unit attacks a battlefield you control (Ahri Nine-Tailed Fox)
     "on_you_defend",                             # you defend at a battlefield, anywhere (Loyal Pup)
+    "on_unit_dies_here",                         # battlefield: a non-token unit dies here (Black Rose Sanctum)
+    "granted_to_units_here",                     # battlefield: units here have this ability (Gardens of Becoming)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -168,6 +170,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "has_all_pet_tags",                  # your units have Bird, Cat, Dog and Poro among them
     "signpost_possible",                 # Forgotten Signpost has a unit to exhaust and one to move
     "friendly_mighty_unit_here",         # "When you conquer here with one or more MIGHTY units" (Sunken Temple)
+    "spell_spent_this_turn_at_least",    # n: "If you've spent [4] or more to play a spell this turn"
+    "none_played_this_turn",             # filter: "the first friendly gear played each turn" (Ornn's Forge)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -255,6 +259,9 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
     "lone_defender_minus", "lone_defender_bonus", "attacking_with_another_bonus", "ignore_tank_here",
     "tie_recall_all",
+    # battlefield cost rules (GameLoop._destination_discount, _gear_ability_discount,
+    # _pay_repeat) and Altar of Blood (_try_replace_death)
+    "first_play_here_discount", "first_gear_ability_discount", "repeat_discount", "altar_of_blood",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

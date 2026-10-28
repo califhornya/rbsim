@@ -899,17 +899,90 @@ def _opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
 
 @effect("sacrifice_token_here_draw")
 def _sacrifice_token_here_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "You may kill a unit you control here to draw 1" (Dusk Rose Lab):
-    baseline, only a token."""
+    """ "You may kill a unit you control here to draw 1" (Dusk Rose Lab): any
+    unit you control here; baseline yes only with a token there (its weakest)."""
     here = list(ctx.battlefield._units_for(ctx.actor_side))
+    if not here:
+        return
     tokens = [u for u in here if u.is_token]
-    if not tokens:
+    if not ctx.loop.choose("optional:" + str(spec.get("effect")), ctx.actor_side, [True, False],
+                           bool(tokens), ctx.card):
         return
     victim = ctx.loop.choose("cost_unit:" + str(spec.get("effect")), ctx.actor_side, here,
-                             min(tokens, key=lambda u: u.might), ctx.card)
+                             min(tokens or here, key=lambda u: u.might), ctx.card)
     ctx.battlefield.remove_unit(ctx.actor_side, victim)
     ctx.loop._route_deaths([(victim, ctx.actor_side)], ctx.battlefield)
     ctx.draw_cards(1, target="actor")
+
+
+@effect("look_recycle")
+def _look_recycle(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Look at the top two cards of your Main Deck. You may recycle one or both
+    of them. Put those you don't back in any order" (The Candlelit Sanctum):
+    the player picks which go to the bottom, then the order of the rest (top
+    first). Baseline: none recycled, the order kept."""
+    deck = ctx.actor.deck
+    n = max(0, min(int(spec.get("amount", 1)), len(deck.cards)))
+    if n == 0:
+        return
+    look = list(reversed(deck.cards[-n:]))          # top first
+    del deck.cards[-n:]
+    ctx.loop._offer_reveal_from_top(ctx.actor, look)
+    gone = [c for c in look
+            if ctx.loop.choose("optional:recycle", ctx.actor_side, [True, False], False, c)]
+    rest = [c for c in look if not any(c is g for g in gone)]
+    order = []
+    while rest:
+        first = ctx.loop.choose(_kind("order", spec), ctx.actor_side, list(rest), rest[0], ctx.card)
+        order.append(first)
+        rest.remove(first)
+    deck.cards.extend(reversed(order))               # the first chosen on top
+    deck.cards[:0] = gone                            # recycled to the bottom
+    if gone:
+        ctx.loop._note_recycled(ctx.actor_side)
+
+
+@effect("recycle_rune")
+def _recycle_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You must recycle one of your runes" (Sigil of the Storm): a rune you
+    control goes to the bottom of your Rune Deck, your pick; baseline an
+    exhausted one of your most plentiful domain."""
+    player = ctx.actor
+    runes = [r for rs in player.rune_pool.values() for r in rs]
+    if not runes:
+        return
+    count = {d: len(rs) for d, rs in player.rune_pool.items()}
+    pick = max(runes, key=lambda r: (not r.ready, count[r.domain]))
+    rune = ctx.loop.choose("rune:" + str(spec.get("effect")), ctx.actor_side, runes, pick, ctx.card)
+    player.rune_pool[rune.domain].remove(rune)
+    if not player.rune_pool[rune.domain]:
+        del player.rune_pool[rune.domain]
+    player.rune_deck.recycle(rune)
+
+
+@effect("champion_from_trash")
+def _champion_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may return your Chosen Champion from your trash to your Champion
+    Zone if it is empty" (Hallowed Tomb)."""
+    gs = ctx.loop.gs
+    side = ctx.actor_side
+    champ = gs.champion_A if side == "A" else gs.champion_B
+    empty = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
+    if champ is None or not empty or not any(c is champ for c in ctx.actor.trash):
+        return
+    ctx.actor.trash.remove(champ)
+    if side == "A":
+        gs.champion_A_deployed = False
+    else:
+        gs.champion_B_deployed = False
+
+
+@effect("units_cost_more_this_turn")
+def _units_cost_more_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Your non-token units cost [1] more to play this turn" (Vaults of Helia)."""
+    gs = ctx.loop.gs
+    gs.turn_cost_changes.append((ctx.actor_side, gs.turn, {"is_unit": True},
+                                 int(spec.get("amount", 1))))
 
 
 @effect("next_spell_repeat")
@@ -1208,8 +1281,7 @@ def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str
     bf = loop.choose(_kind("battlefield", spec), side, options,
                      max(options, key=lambda b: sum(u.might for u in b._units_for(ctx.opponent_side))),
                      ctx.card)
-    unit = loop._play_unit(card, side, bf=bf)
-    loop._unit_played_here(bf, side, unit)
+    loop._play_unit(card, side, bf=bf)
 
 
 @effect("ready_legend")
@@ -1268,12 +1340,23 @@ def _give_this_to_opponent(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
 @effect("ready_gear")
 def _ready_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Ready a gear" / "Ready 2 gear" (Jayce Defender of Tomorrow): your
-    exhausted gear, costliest first."""
+    exhausted gear (in base, attached or deployed), chosen; baseline the
+    costliest. `may_detach`: "If it's an equipment, you may detach it"
+    (Veiled Temple; baseline: it stays)."""
     loop = ctx.loop
-    gear = [g for g in list(ctx.actor.base_gear) + loop._controlled_attached_gear(ctx.actor_side)
-            if getattr(g, "tapped", False)]
-    for g in sorted(gear, key=_zone_value, reverse=True)[:int(spec.get("count", 1))]:
+    holders = {id(getattr(g, "card", g)): h for side, h, g in _gear_entries(ctx, enemy_first=False)
+               if side == ctx.actor_side}
+    gear = [getattr(g, "card", g) for side, _h, g in _gear_entries(ctx, enemy_first=False)
+            if side == ctx.actor_side and getattr(getattr(g, "card", g), "tapped", False)]
+    picks = sorted(gear, key=_zone_value, reverse=True)[:int(spec.get("count", 1))]
+    for g in loop.choose_many(_kind("target", spec), ctx.actor_side, gear, picks, ctx.card):
         g.tapped = False
+        holder = holders.get(id(g))
+        attached = holder is not None and not isinstance(holder, Battlefield)
+        if spec.get("may_detach") and attached and \
+                loop.choose("optional:detach", ctx.actor_side, [True, False], False, ctx.card):
+            holder.gear.remove(g)
+            ctx.actor.base_gear.append(g)
 
 
 @effect("disempower_then_kill")
@@ -1593,8 +1676,8 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
     """Take a unit off the board to its owner's hand or the top or bottom of
-    their Main Deck (`to`: "hand" / "deck_top" / "deck_bottom"); its gear goes to its owner's hand when
-    the unit goes to hand, else to base. A token ceases to exist."""
+    their Main Deck (`to`: "hand" / "deck_top" / "deck_bottom"); its gear
+    stays on the board, in base. A token ceases to exist."""
     loop = ctx.loop
     where = loop._locate_unit(unit)
     if where is None:
@@ -1604,10 +1687,9 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
         owner.base_units.remove(unit)
     else:
         where[1].remove_unit(side, unit)
-    if to == "hand":
-        owner.hand.extend(g for g in unit.gear if not getattr(g, "is_token", False))
-    else:
-        owner.base_gear.extend(unit.gear)
+    # Its Equipment stays on the board, detached where the unit was, then
+    # recalled to base (§436.4.b, §323.6).
+    owner.base_gear.extend(unit.gear)
     unit.gear = []
     loop._fire_leaves_board(unit.card, side, where[1] or loop.gs.battlefields[0])
     if to == "hand" and where[1] is not None and where[1].card is not None and \
@@ -2072,10 +2154,14 @@ def _add_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("channel_rune")
 def _channel_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Channel runes from the rune deck into play ('channel N rune(s)[, exhausted]')."""
-    player = ctx._player_for_target(str(spec.get("target", "actor")))
+    """Channel runes from the rune deck into play ('channel N rune(s)[, exhausted]').
+    `target: each_player`: "each player channels 1 rune exhausted" (The
+    Papertree), the actor first."""
     count = int(spec.get("count", spec.get("amount", 1)))
-    player.unlock_runes(count, exhausted=_coerce_bool(spec.get("exhausted", False)))
+    target = str(spec.get("target", "actor"))
+    players = [ctx.actor, ctx.opponent] if target == "each_player" else [ctx._player_for_target(target)]
+    for player in players:
+        player.unlock_runes(count, exhausted=_coerce_bool(spec.get("exhausted", False)))
 
 
 @effect("grant_temporary_might")

@@ -508,58 +508,60 @@
         {
           "A": [],
           "B": [
-            "Yasuo Remorseful"
+            "Adaptatron"
           ],
           "controller": "B",
           "last_controller": "B"
         },
         {
-          "A": [],
+          "A": [
+            "Tideturner"
+          ],
           "B": [],
-          "controller": null,
-          "last_controller": null
+          "controller": "A",
+          "last_controller": "A"
         }
       ],
-      "final_active": "B",
+      "final_active": "A",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
+          "Traveling Merchant",
           "Thousand-Tailed Watcher"
         ],
-        "deck": 24,
-        "energy": 12,
-        "hand": 4,
+        "deck": 27,
+        "energy": 11,
+        "hand": 2,
         "power_pool": {
           "CHAOS": 7,
-          "MIND": 5
+          "MIND": 4
         },
-        "runes_in_play": 12,
-        "trash": 11
+        "runes_in_play": 11,
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 4,
+        "base_gear": 1,
         "base_units": [
-          "Adaptatron",
           "Scuttle Crab"
         ],
-        "deck": 24,
-        "energy": 12,
-        "hand": 3,
+        "deck": 25,
+        "energy": 0,
+        "hand": 5,
         "power_pool": {
-          "CALM": 6,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 12,
-        "trash": 6
+        "runes_in_play": 10,
+        "trash": 7
       },
-      "points_A": 5,
-      "points_B": 8,
+      "points_A": 8,
+      "points_B": 3,
       "spells_cast": 11,
-      "turns": 15,
+      "turns": 12,
       "units_played": 10,
-      "winner": "B",
+      "winner": "A",
       "xp_A": 0,
       "xp_B": 1
     },

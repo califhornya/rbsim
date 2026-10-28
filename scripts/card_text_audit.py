@@ -63,10 +63,14 @@ _TRIGGER_PHRASES: list[tuple[re.Pattern, set[str]]] = [
     (re.compile(r"^when you play a card\b"), {"on_card_played"}),
 ]
 _ACTIVATED = re.compile(r"^(action |reaction )?[^.:]*\]\s*:|^(action|reaction)\b.*:|^\[tap\]")
+# The triggers the engine fires for a battlefield's own card (GameLoop: turn
+# triggers, scoring, _open_combat, hide / play / move-from here); any other one
+# on a battlefield never fires unless that trigger's dispatch was taught to.
+_BATTLEFIELD_FIRED = {"on_start_of_turn", "on_end_of_turn", "on_conquer", "on_hold",
+                      "on_hide_here", "on_unit_played_here", "on_unit_moves_from_here",
+                      "on_combat_start_here", "on_attack", "on_defend", "passive",
+                      "granted_to_legend"}
 _TYPE_DEAD_TRIGGERS: dict[str, set[str]] = {
-    # battlefields are never played: their play effects can't fire
-    "battlefield": {"on_play", "on_cast", "on_attack", "on_defend", "on_move",
-                    "on_death"},
     "spell": {"on_attack", "on_defend", "on_conquer", "on_hold", "on_move",
               "on_death", "on_start_of_turn", "on_end_of_turn"},
     "legend": {"on_play", "on_cast", "on_attack", "on_defend", "on_move",
@@ -164,8 +168,9 @@ def check(card: dict) -> tuple[list[str], list[str]]:
                 flags.append(f"trigger: no activated entry for '{s[:60]}'")
     for e in entries:
         tr = e.get("trigger") or "on_play"
-        if tr in _TYPE_DEAD_TRIGGERS.get(cat, ()):
-            flags.append(f"dead: {e.get('effect')} on {tr} can't fire on a {cat}")
+        if tr in _TYPE_DEAD_TRIGGERS.get(cat, ()) or (cat == "battlefield" and tr not in _BATTLEFIELD_FIRED):
+            flags.append(f"dead: {e.get('effect')} on {tr} can't fire on a {cat}"
+                         + (" (unless its dispatch reads battlefields)" if cat == "battlefield" else ""))
     if not entries:
         flags.append("count: no entries")
     text = " ".join(sents).lower()

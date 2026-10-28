@@ -310,6 +310,8 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
             text, src = f"Gioca {e['card'].name} dalle carte bandite", f"banished:{rel}"
         elif e.get("type") == "gear_ability":
             text, src = f"Usa {e['gear'].name}", _card_ref(gs, viewer, e["gear"])
+        elif e.get("type") == "bf_ability":
+            text, src = f"Usa l'abilità del campo {e['bf'].card.name}", f"bf:{e['bf_idx']}"
         else:
             text = "Usa un'abilità"
     else:

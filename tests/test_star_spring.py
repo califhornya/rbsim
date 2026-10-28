@@ -1,7 +1,7 @@
 """Star Spring battlefield: 'The first time a player plays a non-token unit here
-each turn, they may move another unit they control here to its base.' Fires once
-per side per turn from the base→battlefield MOVE path; optional via decide_optional.
-"""
+each turn, they may move another unit they control here to its base.' Fires on
+plays (a unit card played to the battlefield), not moves, once per player per
+turn; optional via decide_optional."""
 
 from __future__ import annotations
 
@@ -23,53 +23,44 @@ def _loop_with_star_spring(lane=0):
     return GameLoop(gs)
 
 
-def test_star_spring_retreats_lowest_might_ally_on_first_unit():
+def _play_here(loop, name, might, bf):
+    return loop._play_unit(UnitCard(name=name, might=might), "A", bf=bf)
+
+
+def test_star_spring_moves_the_lowest_might_ally_to_base_on_the_first_play():
     loop = _loop_with_star_spring(0)
     bf = loop.gs.battlefields[0]
-    # An ally already here; a fresh non-token unit is then played here.
     weak = UnitInPlay(UnitCard(name="Weak", might=1), ready=True)
-    bf.units_A.append(weak)
-    newcomer = UnitInPlay(UnitCard(name="Newcomer", might=4), ready=False)
-    total_before = len(bf.units_A) + len(loop.gs.A.base_units)
-
-    loop._fire_first_unit_here("A", bf, newcomer)  # newcomer just entered
-
+    bf.add_unit("A", weak)
+    newcomer = _play_here(loop, "Newcomer", 4, bf)
     assert bf.first_unit_here_A is True
-    assert weak not in bf.units_A                 # lowest-might ally retreated
-    assert weak in loop.gs.A.base_units
-    # Conservation: nothing created or lost.
-    assert len(bf.units_A) + len(loop.gs.A.base_units) == total_before
+    assert weak in loop.gs.A.base_units and newcomer in bf.units_A
 
 
 def test_star_spring_fires_once_per_turn():
     loop = _loop_with_star_spring(0)
     bf = loop.gs.battlefields[0]
     ally = UnitInPlay(UnitCard(name="Ally", might=2), ready=True)
-    bf.units_A.append(ally)
-    n1 = UnitInPlay(UnitCard(name="N1", might=3), ready=False)
-    loop._fire_first_unit_here("A", bf, n1)
+    bf.add_unit("A", ally)
+    _play_here(loop, "N1", 3, bf)
     assert ally in loop.gs.A.base_units           # first fired
-    # A second unit the same turn does not fire again.
-    ally2 = UnitInPlay(UnitCard(name="Ally2", might=2), ready=True)
-    bf.units_A.append(ally2)
-    n2 = UnitInPlay(UnitCard(name="N2", might=3), ready=False)
-    loop._fire_first_unit_here("A", bf, n2)
-    assert ally2 in bf.units_A                     # NOT retreated
-    # Reset at begin-turn re-arms it.
+    ally2 = UnitInPlay(UnitCard(name="Ally2", might=1), ready=True)
+    bf.add_unit("A", ally2)
+    _play_here(loop, "N2", 3, bf)
+    assert ally2 in bf.units_A                     # not again this turn
     bf.begin_turn_reset()
     assert bf.first_unit_here_A is False
 
 
-def test_star_spring_via_move_action_end_to_end():
-    """The trigger fires through the real base→BF MOVE path and conserves cards."""
+def test_star_spring_ignores_moves_and_tokens():
     loop = _loop_with_star_spring(0)
     bf = loop.gs.battlefields[0]
     resident = UnitInPlay(UnitCard(name="Resident", might=1), ready=True)
-    bf.units_A.append(resident)
+    bf.add_unit("A", resident)
     mover = UnitInPlay(UnitCard(name="Mover", might=5), ready=True)
     loop.gs.A.base_units.append(mover)
-    base_index = len(loop.gs.battlefields)
-    loop._apply_action(loop.gs.A, ("MOVE", None, base_index, 0))
-    # Mover entered BF0; Resident (lower might) retreated to base.
-    assert any(u.card.name == "Mover" for u in bf.units_A)
-    assert any(u.card.name == "Resident" for u in loop.gs.A.base_units)
+    loop._apply_action(loop.gs.A, ("MOVE", None, len(loop.gs.battlefields), 0))
+    loop._flush_pending_move()
+    assert resident in bf.units_A                  # a move isn't a play
+    loop._play_token("Recruit", "A", bf=bf)
+    assert resident in bf.units_A and bf.first_unit_here_A is False

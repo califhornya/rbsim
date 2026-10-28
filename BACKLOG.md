@@ -168,6 +168,36 @@ Fixed:
       every "battlefield you control": unit and token plays, REACTION units,
       hide, conditions, Ahri). The showdown / combat machinery still runs on
       controller() (None while contested).
+- [x] Every battlefield (71) read and played in a test. Dead before:
+      Abandoned Hall, Altar of Blood, Black Market (a battlefield ability any
+      player uses once on their turn: entry type bf_ability), Black Rose
+      Sanctum (on_unit_dies_here), Forgotten Library, Gardens of Becoming
+      (granted_to_units_here), the four cost rules (Ornn's Forge, Hunters'
+      Circle, Piltovan Forge, Marai Spire), Vaults of Helia. Wrong before:
+      Star Spring fired on moves (now plays; Rakelstake too, gear included),
+      Sigil of the Storm recycled a hand card (now a rune), The Papertree
+      channelled for one player, The Candlelit Sanctum put a card in hand
+      (new `look_recycle`), Veiled Temple couldn't detach (ready_gear now
+      chooses, deployed gear included), Amateur Recital / Ruined Monastery
+      weren't optional, Dusk Rose Lab only killed tokens, The Academy, Hallowed
+      Tomb had no text (read from the card image).
+- [x] "When you play a spell" fired as the spell resolved (and never if
+      countered); now as it is played (`_fire_spell_played`), battlefields
+      included. "If you spent [4] or more" was never true (no record of what
+      was spent): the Energy paid (cost + kicker / REPEAT) is kept per spell
+      and per turn (Revna, Forgotten Library, Prepared Neophyte, Jhin
+      Virtuoso).
+- [x] A unit returned to hand took its Equipment to hand; it stays in base
+      (§436.4.b).
+
+Open, found on the way:
+- Jhin Meticulous Killer: "you may play me for [mind]" (an alternative cost
+  in a domain the play path can't charge yet).
+- The "look at the top cards" family (`dig`): Reinforce and Rek'Sai Swarm
+  Queen play a card from among them, Lightning Rush trashes the rest, Decree
+  of Strength reveals the opponent's hand, Trifarian Captain's unit-or-gear
+  and [rune] limits, Encore's last mode, Ornn Blacksmith / Ivern Nurturer
+  "or when I hold", Ivern's buff.
 
 Named in the old notes and still open:
 Detonation Amplifier (DEATHKNELL twice here), Jarvan IV Martial Paragon (DEPLOY gear have ACTION), The Academy and

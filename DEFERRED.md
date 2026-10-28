@@ -533,6 +533,12 @@ listed here.
   battlefield controls it at once (rules: after its showdown ends), and a
   holder whose units all die mid-showdown loses control at once (rules: at
   the end of the combat steps).
+- Hunters' Circle's discount applies to units played from hand with the
+  UNIT action and DEPLOY gear; not to AMBUSH / REACTION units played in a
+  showdown. Piltovan Forge counts Equip as a gear activated ability.
+- Abandoned Hall / Forgotten Library fire as the spell is played; what a
+  spell "spent" is the Energy paid from the pool (Diana's showdown Energy
+  included), Power not counted.
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.

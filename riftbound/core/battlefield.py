@@ -45,6 +45,9 @@ class Battlefield:
     # "First non-token unit played here this turn" per side (Star Spring trigger).
     first_unit_here_A: bool = False
     first_unit_here_B: bool = False
+    # side -> (turn, unit or gear cards it played here that turn): "the first
+    # unit or gear they play here on their turn" (Hunters' Circle).
+    plays_here: dict = field(default_factory=dict)
 
     last_controller: Optional[str] = None
     held_by: Optional[str] = None      # control(): who controls it by the rules

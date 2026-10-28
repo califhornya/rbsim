@@ -6,11 +6,11 @@ from __future__ import annotations
 import random
 
 from riftbound.core.battlefield import Battlefield, DeployedGear
-from riftbound.core.cards import SpellCard, UnitCard
+from riftbound.core.cards import GearCard, SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.enums import Domain
 from riftbound.core.loop import GameLoop
-from riftbound.core.player import Deck, Player, RuneDeck
+from riftbound.core.player import Deck, Player, Rune, RuneDeck
 from riftbound.core.state import GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec
 
@@ -330,3 +330,560 @@ def test_sunken_temple_pays_one_to_draw_with_a_mighty_unit_here():
     unit.might_counters = 1                                  # buffed to 5: Mighty
     loop._fire_scoring_trigger("on_conquer", bf, "A")
     assert len(a.hand) == 1 and a.energy == 19
+
+
+# -- Battlefields, batch 2, and "when you play a spell" ------------------------------
+
+def _spec(name, **raw):
+    spec = CardSpec.from_dict({"name": name, **raw})
+    CARD_REGISTRY[name] = spec
+    return spec
+
+
+def _spell(cost, name=None):
+    name = name or f"Test Spell {cost}"
+    _spec(name, category="Spell", cost_energy=cost,
+          effects=[{"effect": "draw_cards", "trigger": "on_cast", "count": 0}])
+    return name
+
+
+def _play_spell(loop, p, name, lane=0):
+    p.hand.append(CARD_REGISTRY[name].instantiate())
+    loop._apply_action(p, ("SPELL", len(p.hand) - 1, lane))
+    loop._recompute_passives()
+
+
+def _always(answer):
+    """A chooser answering every "you may" with `answer`."""
+    return lambda _l, kind, side, options, default, source: (
+        options.index(answer) if kind.startswith("optional:") else None)
+
+
+class _Predictor:
+    def __init__(self):
+        self.seen = []
+
+    def decide_predict_recycle(self, card):
+        self.seen.append(card.name)
+        return False
+
+
+def test_rakelstake_predicts_on_the_first_unit_or_gear_played_here():
+    """'For each player, the first time they play a unit or a gear here each turn,
+    they PREDICT.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Rakelstake")
+    bf = loop.gs.battlefields[0]
+    a.agent = _Predictor()
+    a.deck.cards = [UnitCard(name="Top", might=1)]
+    loop._play_unit(UnitCard(name="First", might=1), "A", bf=bf)
+    loop._play_unit(UnitCard(name="Second", might=1), "A", bf=bf)
+    assert a.agent.seen == ["Top"]                        # once this turn
+
+
+def test_hunters_circle_takes_one_off_the_first_unit_played_here_on_your_turn():
+    """'For each player, the first unit or gear they play here on their turn costs
+    [1] less.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Hunters' Circle")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))   # A may play units here
+    for i in range(2):
+        a.hand.append(UnitCard(name=f"U{i}", might=1, cost_energy=3))
+    loop._apply_action(a, ("UNIT", 0, 0, 0))
+    assert a.energy == 18
+    loop._apply_action(a, ("UNIT", 0, 0, 0))
+    assert a.energy == 15                                 # the second pays in full
+
+
+def test_ornns_forge_discounts_your_first_gear_each_turn_while_you_control_it():
+    """'When you control this battlefield, the first friendly non-token gear
+    played each turn costs [1] less.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Ornn's Forge")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    for i in range(2):
+        a.hand.append(GearCard(name=f"G{i}", cost_energy=2))
+    loop._apply_action(a, ("GEAR", 0, 0))
+    assert a.energy == 19
+    loop._apply_action(a, ("GEAR", 0, 0))
+    assert a.energy == 17
+
+
+def test_ornns_forge_needs_control():
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Ornn's Forge")
+    a.hand.append(GearCard(name="G", cost_energy=2))
+    loop._apply_action(a, ("GEAR", 0, 0))
+    assert a.energy == 18
+
+
+def test_piltovan_forge_discounts_the_first_gear_ability_each_turn():
+    """'While you control this battlefield, the first friendly gear activated
+    ability played each turn costs [1] less.'"""
+    loop, a, b = _setup()
+    _spec("Test Gadget", category="Gear",
+          effects=[{"effect": "draw_cards", "trigger": "activated", "count": 0, "cost": {"energy": 2}}])
+    _battlefield(loop, 0, "Piltovan Forge")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    a.base_gear.append(CARD_REGISTRY["Test Gadget"].instantiate())
+    idx = next(i for i, e in enumerate(loop.activatable_abilities("A")) if e["type"] == "gear_ability")
+    loop._apply_activated_ability(a, b, idx)
+    assert a.energy == 19
+    loop._apply_activated_ability(a, b, idx)
+    assert a.energy == 17
+
+
+def test_marai_spire_takes_one_off_repeat_costs():
+    """'While you control this battlefield, friendly REPEAT costs cost [1] less.'"""
+    loop, a, b = _setup()
+    _spec("Test Repeater", category="Spell", cost_energy=2, keywords=["REPEAT"],
+          effect="REPEAT (You may pay the additional cost to repeat this spell's effect.) Draw 1.",
+          effects=[{"effect": "draw_cards", "trigger": "on_cast", "count": 1}])
+    _battlefield(loop, 0, "Marai Spire")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(3)]
+    _play_spell(loop, a, "Test Repeater")
+    assert a.energy == 17 and len(a.hand) == 2            # [2] + REPEAT [2] - [1]
+
+
+def test_abandoned_hall_lets_a_spell_player_pump_a_unit_there():
+    """'When a player plays a spell, they may give a unit they control here +1
+    [might] this turn.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Abandoned Hall")
+    mine, theirs = _unit("Mine", 2), _unit("Theirs", 2)
+    loop.gs.battlefields[0].add_unit("A", mine)
+    loop.gs.battlefields[1].add_unit("B", theirs)
+    _play_spell(loop, a, _spell(1))
+    assert mine.might == 3 and theirs.might == 2
+
+
+def test_forgotten_library_predicts_on_a_spell_you_spent_four_on(monkeypatch):
+    """'While you control this battlefield, when you play a spell, if you spent
+    [4] or more, PREDICT.'"""
+    from riftbound.core.effects import REGISTRY
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Forgotten Library")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    predicted = []
+    monkeypatch.setitem(REGISTRY, "predict", lambda ctx, spec: predicted.append(ctx.actor.name))
+    _play_spell(loop, a, _spell(3))
+    assert predicted == []
+    _play_spell(loop, a, _spell(4))
+    assert predicted == ["A"]
+
+
+def test_revna_readies_when_you_spend_four_on_a_spell():
+    """'When you play a spell, if you spent [4] or more, ready me.'"""
+    loop, a, b = _setup()
+    revna = _unit("Revna the Lorekeeper")
+    revna.ready = False
+    a.base_units.append(revna)
+    _play_spell(loop, a, _spell(3))
+    assert not revna.ready
+    _play_spell(loop, a, _spell(4))
+    assert revna.ready
+
+
+def test_ravenbloom_student_grows_as_the_spell_is_played():
+    """'When you play a spell, give me +1 [might] this turn.' On the play, before
+    the spell resolves."""
+    loop, a, b = _setup()
+    student = _unit("Ravenbloom Student")
+    a.base_units.append(student)
+    base = student.might
+    card = CARD_REGISTRY[_spell(1)].instantiate()
+    loop._spell_played(card, a)                            # played, not resolved yet
+    assert student.might == base + 1
+
+
+def test_prepared_neophyte_has_four_more_after_a_four_spell_this_turn():
+    """'If you've spent [4] or more to play a spell this turn, I have +4 [might].'"""
+    loop, a, b = _setup()
+    neo = _unit("Prepared Neophyte")
+    a.base_units.append(neo)
+    loop._recompute_passives()
+    base = neo.might
+    _play_spell(loop, a, _spell(4))
+    assert neo.might == base + 4
+
+
+def test_altar_of_blood_saves_a_unit_dying_in_combat_for_three_power():
+    """'If a unit here would die during combat, its controller may pay
+    [rune][rune][rune] to heal it, exhaust it, and recall it instead.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Altar of Blood")
+    bf = loop.gs.battlefields[0]
+    atk, dfn = _unit("Atk", 5), _unit("Def", 2)
+    bf.add_unit("A", atk)
+    bf.add_unit("B", dfn)
+    power = sum(b.power_pool.values())
+    _fight(loop)
+    assert dfn in b.base_units and dfn.damage == 0 and not dfn.ready
+    assert sum(b.power_pool.values()) == power - 3
+
+
+def test_gardens_of_becoming_units_there_tap_for_xp():
+    """'Units here have "[tap]: Gain 1 XP."'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Gardens of Becoming")
+    unit = _unit("Student", 1)
+    loop.gs.battlefields[0].add_unit("A", unit)
+    a.base_units.append(_unit("Elsewhere", 1))
+    entries = [i for i, e in enumerate(loop.activatable_abilities("A"))
+               if e["type"] == "ability" and e["eff"].effect == "gain_xp"]
+    assert len(entries) == 1                              # only the unit there
+    loop._apply_activated_ability(a, b, entries[0])
+    assert loop.gs.get_xp("A") == 1 and not unit.ready
+
+
+def test_black_market_draws_for_two_power_once_per_turn_for_anyone():
+    """'[rune] [rune]: Draw 1. Each player may use this ability once on their turn
+    (even if they don't control this battlefield.)'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Black Market")
+    loop.gs.battlefields[0].add_unit("B", _unit("Owner", 1))   # B controls it
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(3)]
+    idx = next(i for i, e in enumerate(loop.activatable_abilities("A")) if e["type"] == "bf_ability")
+    assert loop._ability_usable(a, loop.activatable_abilities("A")[idx])
+    loop._apply_activated_ability(a, b, idx)
+    assert len(a.hand) == 1
+    assert not loop._ability_usable(a, loop.activatable_abilities("A")[idx])
+
+
+def test_black_rose_sanctum_makes_a_recruit_on_the_first_death_each_turn():
+    """'For each player, the first time each turn a non-token unit they control
+    dies here, they play a 1 [might] Recruit unit token to their base.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Black Rose Sanctum")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Atk", 9))
+    bf.add_unit("B", _unit("D1", 1))
+    bf.add_unit("B", _unit("D2", 1))
+    _fight(loop)
+    assert [u.card.name for u in b.base_units] == ["Recruit"]
+
+
+def test_sigil_of_the_storm_recycles_a_rune_not_a_card():
+    """'When you conquer here, you must recycle one of your runes.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Sigil of the Storm")
+    a.rune_pool = {Domain.FURY: [Rune(Domain.FURY), Rune(Domain.FURY)]}
+    a.hand = [UnitCard(name="Keep", might=1)]
+    loop.gs.battlefields[0].add_unit("A", _unit("Conqueror", 1))
+    loop._fire_scoring_trigger("on_conquer", loop.gs.battlefields[0], "A")
+    assert len(a.rune_pool[Domain.FURY]) == 1 and len(a.rune_deck.runes) == 1
+    assert [c.name for c in a.hand] == ["Keep"]
+
+
+def test_the_papertree_makes_each_player_channel():
+    """'When you hold here, each player channels 1 rune exhausted.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "The Papertree")
+    a.rune_deck, b.rune_deck = RuneDeck([Rune(Domain.FURY)]), RuneDeck([Rune(Domain.CALM)])
+    before = a.total_runes_in_play(), b.total_runes_in_play()
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    assert (a.total_runes_in_play(), b.total_runes_in_play()) == (before[0] + 1, before[1] + 1)
+
+
+def test_veiled_temple_readies_a_chosen_gear_and_may_detach_it():
+    """'When you conquer here, you may ready a friendly gear. If it's an
+    equipment, you may detach it.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Veiled Temple")
+    holder = _unit("Holder", 1)
+    blade = GearCard(name="Blade")
+    blade.tapped = True
+    holder.gear.append(blade)
+    loop.gs.battlefields[0].add_unit("A", holder)
+    loop.chooser = _always(True)
+    loop._fire_scoring_trigger("on_conquer", loop.gs.battlefields[0], "A")
+    assert not blade.tapped and blade in a.base_gear and not holder.gear
+
+
+def test_dusk_rose_lab_may_kill_any_unit_you_control_there_to_draw():
+    """'At the start of your Beginning Phase, you may kill a unit you control here
+    to draw 1.' Baseline: only with a token there."""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Dusk Rose Lab")
+    bf = loop.gs.battlefields[0]
+    unit = _unit("Unit", 3)
+    bf.add_unit("A", unit)
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    loop._fire_turn_trigger("on_start_of_turn", "A")
+    assert unit in bf.units_A and not a.hand               # baseline declines
+    loop.chooser = _always(True)
+    loop._fire_turn_trigger("on_start_of_turn", "A")
+    assert unit not in bf.units_A and len(a.hand) == 1
+
+
+def test_hallowed_tomb_returns_your_champion_from_the_trash():
+    """'When you hold here, you may return your Chosen Champion from your trash to
+    your Champion Zone if it is empty.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Hallowed Tomb")
+    champ = UnitCard(name="Champ", might=3)
+    loop.gs.champion_A, loop.gs.champion_A_deployed = champ, True
+    a.trash.append(champ)
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    assert champ not in a.trash and not loop.gs.champion_A_deployed
+
+
+def test_the_academy_gives_your_next_spell_repeat():
+    """'When you hold here, give your next spell this turn REPEAT equal to its base
+    cost.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "The Academy")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    _spec("Test Drawer", category="Spell", cost_energy=2,
+          effects=[{"effect": "draw_cards", "trigger": "on_cast", "count": 1}])
+    a.deck.cards = [UnitCard(name=f"D{i}", might=1) for i in range(3)]
+    _play_spell(loop, a, "Test Drawer")
+    assert a.energy == 16 and len(a.hand) == 2
+
+
+def test_vaults_of_helia_makes_your_units_cost_one_more_this_turn():
+    """'When you hold here, your non-token units cost [1] more to play this turn.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Vaults of Helia")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    a.hand.append(UnitCard(name="U", might=1, cost_energy=2))
+    loop._apply_action(a, ("UNIT", 0, 0))
+    assert a.energy == 17
+    loop.gs.turn += 1
+    a.hand.append(UnitCard(name="U2", might=1, cost_energy=2))
+    loop._apply_action(a, ("UNIT", 0, 0))
+    assert a.energy == 15
+
+
+def test_ruined_monastery_may_discard_and_channel():
+    """'When you conquer here, you may discard 1 and channel 1 rune exhausted.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Ruined Monastery")
+    a.hand = [UnitCard(name="Spare", might=1)]
+    a.rune_deck = RuneDeck([Rune(Domain.FURY)])
+    loop.gs.battlefields[0].add_unit("A", _unit("Conqueror", 1))
+    loop.chooser = _always(False)
+    loop._fire_scoring_trigger("on_conquer", loop.gs.battlefields[0], "A")
+    assert len(a.hand) == 1                                # declined
+    loop.chooser = None
+    runes = a.total_runes_in_play()
+    loop._fire_scoring_trigger("on_conquer", loop.gs.battlefields[0], "A")
+    assert not a.hand and a.total_runes_in_play() == runes + 1
+
+
+def test_a_unit_returned_to_hand_leaves_its_equipment_in_base():
+    """§436.4.b: an attached card detaches where its unit was."""
+    from riftbound.core.effects import _unit_leaves_to
+    from riftbound.core.loop import EffectContext
+    loop, a, b = _setup()
+    unit = _unit("Bounced", 2)
+    blade = GearCard(name="Blade")
+    unit.gear.append(blade)
+    loop.gs.battlefields[0].add_unit("B", unit)
+    ctx = EffectContext(loop, SpellCard(name="Bounce"), a, b, loop.gs.battlefields[0], {})
+    _unit_leaves_to(ctx, unit, "B", "hand")
+    assert unit.card in b.hand and blade in b.base_gear and blade not in b.hand
+
+
+# -- The other battlefields, each sentence played once --------------------------
+
+def _hold(loop, name, side="A", unit=None):
+    _battlefield(loop, 0, name)
+    bf = loop.gs.battlefields[0]
+    bf.add_unit(side, unit or _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", bf, side)
+    return bf
+
+
+def _conquer(loop, name, side="A", unit=None):
+    _battlefield(loop, 0, name)
+    bf = loop.gs.battlefields[0]
+    bf.add_unit(side, unit or _unit("Conqueror", 1))
+    loop._fire_scoring_trigger("on_conquer", bf, side)
+    return bf
+
+
+def test_altar_to_unity_makes_a_recruit_in_base_when_you_hold():
+    """'When you hold here, play a 1 [might] Recruit unit token in your base.'"""
+    loop, a, b = _setup()
+    _hold(loop, "Altar to Unity")
+    assert [(u.card.name, u.might) for u in a.base_units] == [("Recruit", 1)]
+
+
+def test_back_alley_bar_gives_a_unit_leaving_it_one():
+    """'When a unit moves from here, give it +1 [might] this turn.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Back-Alley Bar")
+    unit = _unit("Leaver", 2)
+    loop.gs.battlefields[0].add_unit("A", unit)
+    loop._apply_action(a, ("MOVE", 0, 0, 2))               # bf0 -> base
+    assert unit in a.base_units and unit.might == 3
+
+
+def test_monastery_of_hirana_spends_a_buff_to_draw():
+    """'When you conquer here, you may spend a buff to draw 1.'"""
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    buffed = _unit("Buffed", 2)
+    buffed.might_counters = 1
+    _conquer(loop, "Monastery of Hirana", unit=buffed)
+    assert len(a.hand) == 1 and buffed.might_counters == 0
+
+
+def test_navori_fighting_pit_buffs_a_unit_there_when_you_hold():
+    """'When you hold here, buff a unit here.'"""
+    loop, a, b = _setup()
+    unit = _unit("Fighter", 2)
+    _hold(loop, "Navori Fighting Pit", unit=unit)
+    assert unit.might_counters == 1
+
+
+def test_reckoners_arena_runs_the_conquer_effects_of_units_there_when_you_hold():
+    """'When you hold here, activate the conquer effects of units here.'"""
+    _spec("Test Conqueror", category="Unit", might=1,
+          effects=[{"effect": "draw_cards", "trigger": "on_conquer", "count": 1}])
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    _hold(loop, "Reckoner's Arena", unit=_unit("Test Conqueror"))
+    assert len(a.hand) == 1
+
+
+def test_startipped_peak_may_channel_when_you_hold():
+    """'When you hold here, you may channel 1 rune exhausted.'"""
+    loop, a, b = _setup()
+    a.rune_deck = RuneDeck([Rune(Domain.FURY)])
+    runes = a.total_runes_in_play()
+    _hold(loop, "Startipped Peak")
+    assert a.total_runes_in_play() == runes + 1
+    assert not a.rune_pool[Domain.FURY][-1].ready
+
+
+def test_the_arenas_greatest_gives_a_point_at_each_players_first_beginning_phase():
+    """'At the start of each player's first Beginning Phase, that player gains 1
+    point.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "The Arena's Greatest")
+    loop.gs.turn = 1
+    loop._fire_turn_trigger("on_start_of_turn", "A")
+    loop.gs.turn = 2
+    loop._fire_turn_trigger("on_start_of_turn", "B")
+    loop.gs.turn = 3
+    loop._fire_turn_trigger("on_start_of_turn", "A")
+    assert (loop.gs.points_A, loop.gs.points_B) == (1, 1)
+
+
+def test_the_candlelit_sanctum_recycles_what_you_pick_and_keeps_the_rest():
+    """'When you conquer here, look at the top two cards of your Main Deck. You may
+    recycle one or both of them. Put those you don't back in any order.' No card
+    goes to the hand."""
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name=n, might=1) for n in ("Bottom", "Second", "Top")]
+    loop.chooser = lambda _l, kind, side, options, default, source: (
+        options.index(True) if kind == "optional:recycle" and source.name == "Top" else None)
+    _conquer(loop, "The Candlelit Sanctum")
+    assert not a.hand and [c.name for c in a.deck.cards] == ["Top", "Bottom", "Second"]
+
+
+def test_treasure_hoard_pays_one_for_an_exhausted_gold():
+    """'When you conquer here, you may pay [1] to play a Gold gear token
+    exhausted.'"""
+    loop, a, b = _setup()
+    _conquer(loop, "Treasure Hoard")
+    gold = [g for g in a.base_gear if g.name == "Gold"]
+    assert len(gold) == 1 and gold[0].tapped and a.energy == 19
+
+
+def test_black_flame_altar_gives_temporary_units_there_shield():
+    """'Units here with TEMPORARY have SHIELD.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Black Flame Altar")
+    temp = UnitInPlay(card=UnitCard(name="Temp", might=1, keywords=["TEMPORARY"]))
+    plain = _unit("Plain", 1)
+    loop.gs.battlefields[0].add_unit("A", temp)
+    loop.gs.battlefields[0].add_unit("A", plain)
+    loop._recompute_passives()
+    assert temp.has_keyword("SHIELD") and not plain.has_keyword("SHIELD")
+
+
+def test_trapping_grounds_makes_a_bird_after_three_excess_damage():
+    """'When you conquer here, if you assigned 3 or more excess damage, play a 1
+    power Bird unit token with DEFLECT.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Trapping Grounds")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Big", 5))
+    bf.add_unit("B", _unit("Small", 2))
+    _fight(loop)                                            # 5 into 2: 3 excess
+    birds = [u for u in a.base_units + bf.units_A if u.card.name == "Bird"]
+    assert len(birds) == 1 and birds[0].has_keyword("DEFLECT") and birds[0].might == 1
+
+
+def test_protective_sands_pays_one_to_draw_with_four_or_fewer_runes():
+    """'When you conquer here, if you control 4 or fewer runes, you may pay [1] to
+    draw 1.'"""
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name="D", might=1)]
+    _conquer(loop, "Protective Sands")
+    assert len(a.hand) == 1 and a.energy == 19
+
+
+def test_bandle_scouts_academy_makes_a_gold_when_you_hide_there():
+    """'When you hide a card here, play a Gold gear token exhausted.'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Bandle Scouts' Academy")
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    a.hand = [CARD_REGISTRY["Pakaa Cub"].instantiate()]
+    assert loop._hide_card("A", 0, 0)
+    gold = [g for g in a.base_gear if g.name == "Gold"]
+    assert len(gold) == 1 and gold[0].tapped
+
+
+def test_cosmic_vista_scores_when_you_hold_with_an_empty_rune_deck():
+    """'When you hold here, if your Rune Deck is empty, you score 1 point.'"""
+    loop, a, b = _setup()
+    _hold(loop, "Cosmic Vista")
+    assert loop.gs.points_A == 1
+    loop, a, b = _setup()
+    a.rune_deck = RuneDeck([Rune(Domain.FURY)])
+    _hold(loop, "Cosmic Vista")
+    assert loop.gs.points_A == 0
+
+
+def test_packed_amphitheater_gives_champions_there_one():
+    """'Champion units here have +1 [might].'"""
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Packed Amphitheater")
+    champ, plain = _unit("Fiora Peerless"), _unit("Plain", 1)
+    loop.gs.battlefields[0].add_unit("A", champ)
+    loop.gs.battlefields[0].add_unit("A", plain)
+    loop._recompute_passives()
+    assert champ.might == champ.card.might + 1 and plain.might == 1
+
+
+def test_emperors_dais_trades_a_unit_there_for_a_sand_soldier():
+    """'When you conquer here, you may pay [1] and return a unit you control here
+    to its owner's hand. If you do, play a 2 [might] Sand Soldier unit token
+    here.'"""
+    loop, a, b = _setup()
+    unit = _unit("Returner", 1)
+    bf = _conquer(loop, "Emperor's Dais", unit=unit)
+    assert unit.card in a.hand and a.energy == 19
+    assert [(u.card.name, u.might) for u in bf.units_A] == [("Sand Soldier", 2)]
+
+
+def test_amateur_recital_may_move_a_unit_at_a_battlefield_to_its_base():
+    """'When you hold here, you may move a unit at a battlefield to its base.'"""
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 3)
+    loop.gs.battlefields[1].add_unit("B", enemy)
+    loop.chooser = _always(False)
+    _hold(loop, "Amateur Recital")
+    assert enemy in loop.gs.battlefields[1].units_B
+    loop.chooser = None
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    assert enemy in b.base_units

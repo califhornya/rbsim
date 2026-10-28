@@ -51,9 +51,11 @@ def legal_actions(
     raise ValueError(f"unknown decision point: {point!r}")
 
 
-def _affordable(loop: "GameLoop", ap, card, lane: Optional[int] = None) -> bool:
-    """Whether `ap` can pay `card`'s cost now (aimed at `lane` for a spell)."""
+def _affordable(loop: "GameLoop", ap, card, lane: Optional[int] = None, dst=None) -> bool:
+    """Whether `ap` can pay `card`'s cost now (aimed at `lane` for a spell;
+    a unit or DEPLOY gear played to battlefield `dst`: Hunters' Circle)."""
     energy, power = loop._effective_cost(card, ap, lane)
+    energy = max(0, energy - loop._destination_discount(card, dst, ap.name))
     return loop._can_pay_card(ap, card, energy, power)
 
 
@@ -68,8 +70,8 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     # --- plays from hand (same cost the engine charges: GameLoop._effective_cost) ---
     for idx, card in enumerate(ap.hand):
         if isinstance(card, (UnitCard, LegendCard)):
-            if _affordable(loop, ap, card):
-                for dst in loop._unit_play_destinations(card, side):
+            for dst in loop._unit_play_destinations(card, side):
+                if _affordable(loop, ap, card, dst=dst):
                     surcharge = loop._destination_surcharge(card, dst, side)
                     if surcharge and not loop._can_pay_generic_power(
                             ap, surcharge + int(loop._effective_cost(card, ap)[1] or 0)):
@@ -83,8 +85,8 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, side, lane):
                     actions.append(GameAction.play("SPELL", idx, lane, f"Cast {card.name} @BF{lane}"))
         elif isinstance(card, GearCard):
-            if _affordable(loop, ap, card):
-                for lane in range(n_bf):
+            for lane in range(n_bf):
+                if _affordable(loop, ap, card, dst=lane if card.has_keyword("DEPLOY") else None):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Play gear {card.name} @BF{lane}"))
 
     # --- deploy champion ---
@@ -167,6 +169,8 @@ def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:
             label = f"Play {entry['card'].name} from banishment"
         elif entry["type"] == "gear_ability":
             label = f"Gear {entry['eff'].effect} ({entry['gear'].name})"
+        elif entry["type"] == "bf_ability":
+            label = f"Battlefield {entry['eff'].effect} ({entry['bf'].card.name})"
         else:
             label = f"Activate {entry['eff'].effect} ({entry['unit'].card.name})"
         out.append(GameAction.ability("ACTIVATED", i, label))

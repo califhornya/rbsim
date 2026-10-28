@@ -126,6 +126,13 @@ class GameState:
     move_group: Optional[tuple] = None
     # Jhin Virtuoso: side -> spells "banished with me".
     jhin_pile: dict = field(default_factory=dict)
+    # "If you've spent [4] or more to play a spell this turn" (Prepared
+    # Neophyte, Jhin Meticulous Killer): side -> (turn, most Energy spent on one
+    # spell that turn).
+    spell_spent: dict = field(default_factory=dict)
+    # "Your non-token units cost [1] more to play this turn" (Vaults of Helia):
+    # (side, turn, card filter, Energy more).
+    turn_cost_changes: list = field(default_factory=list)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
     # True while the active player's Ending Phase runs (Runeblade Anvil).
