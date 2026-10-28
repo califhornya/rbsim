@@ -219,3 +219,21 @@ def test_when_you_choose_me_fires_as_the_spell_is_played():
     loop._apply_action(a, ("SPELL", 0, 0))
     assert hands_seen and hands_seen[0] == ["Drawn"]               # drawn before resolution
     assert [c.name for c in a.hand] == ["Drawn"] and jae.might == jae.card.might + 2   # once, +2 resolved
+
+
+def test_a_spell_needs_a_gear_or_trash_card_to_choose():
+    """§355.8 for gear and trash targets: Detonate 'Kill a gear' with no gear,
+    Morbid Return 'Return a unit from your trash' with none, can't be played;
+    by FLOW neither (Brittle Steel)."""
+    from riftbound.core.cards import GearCard
+    from riftbound.core.enums import Domain
+    loop, a, b = _setup()
+    a.energy = 9
+    for d in Domain:
+        a.add_power(d, 3)
+    assert not loop._spell_has_targets(CARD_REGISTRY["Detonate"].instantiate(), "A", 0)
+    b.base_gear.append(GearCard(name="Junk"))
+    assert loop._spell_has_targets(CARD_REGISTRY["Detonate"].instantiate(), "A", 0)
+    assert not loop._spell_has_targets(CARD_REGISTRY["Morbid Return"].instantiate(), "A", 0)
+    a.trash.append(UnitCard(name="Fallen", might=2))
+    assert loop._spell_has_targets(CARD_REGISTRY["Morbid Return"].instantiate(), "A", 0)

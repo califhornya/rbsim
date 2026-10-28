@@ -940,18 +940,18 @@
         {
           "A": [],
           "B": [
-            "Scuttle Crab"
+            "Adaptatron"
           ],
           "controller": "B",
-          "last_controller": null
+          "last_controller": "A"
         },
         {
           "A": [],
           "B": [
-            "Lonely Poro"
+            "Stellacorn Herder"
           ],
           "controller": "B",
-          "last_controller": "A"
+          "last_controller": null
         }
       ],
       "final_active": "B",
@@ -959,39 +959,41 @@
         "banished": 0,
         "base_gear": 3,
         "base_units": [
-          "Fizz Trickster"
+          "Noxus Hopeful"
         ],
         "deck": 23,
         "energy": 0,
-        "hand": 3,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 3,
-          "FURY": 5
+          "CHAOS": 2,
+          "FURY": 4
         },
-        "runes_in_play": 8,
-        "trash": 10
+        "runes_in_play": 6,
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 4,
+        "base_gear": 3,
         "base_units": [
-          "Lonely Poro"
+          "Lonely Poro",
+          "Adaptatron",
+          "Scuttle Crab"
         ],
-        "deck": 16,
-        "energy": 5,
-        "hand": 1,
+        "deck": 8,
+        "energy": 0,
+        "hand": 5,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 15
+        "runes_in_play": 12,
+        "trash": 19
       },
       "points_A": 7,
       "points_B": 8,
-      "spells_cast": 14,
-      "turns": 27,
-      "units_played": 20,
+      "spells_cast": 20,
+      "turns": 29,
+      "units_played": 27,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1031,14 +1033,14 @@
           "Tideturner"
         ],
         "deck": 25,
-        "energy": 10,
-        "hand": 2,
+        "energy": 9,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 6,
-          "FURY": 6
+          "FURY": 5
         },
-        "runes_in_play": 12,
-        "trash": 10
+        "runes_in_play": 11,
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
@@ -1046,19 +1048,19 @@
         "base_units": [
           "Scuttle Crab"
         ],
-        "deck": 22,
+        "deck": 20,
         "energy": 12,
-        "hand": 3,
+        "hand": 5,
         "power_pool": {
           "CALM": 6,
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 9
+        "trash": 10
       },
       "points_A": 5,
       "points_B": 8,
-      "spells_cast": 8,
+      "spells_cast": 9,
       "turns": 21,
       "units_played": 13,
       "winner": "B",

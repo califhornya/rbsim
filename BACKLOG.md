@@ -94,8 +94,11 @@ Section A is done: both precon decks are checked card by card.
 - [x] "When you choose me" triggers fired as the spell resolved: a spell's
       declared choices now take effect as it goes on the chain (on_chosen,
       DEFLECT, enemy-choice counts), not again at resolution.
-- [ ] §355.8 check: gear, battlefield and trash targets; spells played
-      facedown, by FLOW or from banishment.
+- [x] §355.8 check: gear targets (Detonate, Factory Recall, Turn to Dust,
+      Salvage's enemy gear) and trash targets (Morbid Return, Heedless
+      Resurrection) need something to choose; spells played by FLOW or from
+      banishment are checked too (facedown: see HIDDEN). Battlefields always
+      exist.
 - [x] A unit an effect moves into a battlefield contests it (§452) and its
       showdown runs as soon as no chain or showdown is going on (§462): it
       waited for the end of the turn, so Twilight Step + a Standard Move back

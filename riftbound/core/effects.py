@@ -2474,6 +2474,19 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()
+    single = str(spec.get("scope", "single")).lower() == "single"
+    # A gear to choose (Detonate "Kill a gear", Factory Recall, Turn to Dust).
+    if single and (effect in ("return_gear_to_hand", "give_gear_temporary") or
+                   (effect == "kill_gear" and target in ("", "none", "chosen_unit", "gear", "enemy_gear"))):
+        entries = _gear_entries(ctx, enemy_first=True)
+        if target == "enemy_gear":
+            entries = [e for e in entries if e[0] == ctx.opponent_side]
+        return bool(entries)
+    # A card in your trash to choose (Morbid Return "Return a unit from your
+    # trash"; Heedless Resurrection "Play a unit from your trash").
+    if single and effect in ("return_from_trash", "play_from_trash") and target in ("", "none", "friendly_unit"):
+        tf = spec.get("target_filter") or ({"is_unit": True} if target == "friendly_unit" else {})
+        return any(_zone_card_matches(c, tf) for c in ctx.actor.trash)
     if str(spec.get("scope", "single")).lower() != "single" or target not in _SINGLE_UNIT_TARGETS:
         return None
     if effect in ("move_unit", "move_units_to_base"):

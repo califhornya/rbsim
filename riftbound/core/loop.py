@@ -3958,13 +3958,18 @@ class GameLoop:
         elif isinstance(card, GearCard):
             self._play_gear(card, side, 0, from_zone=zone)
         elif isinstance(card, SpellCard):
-            lane = self.gs.showdown_bf_idx if self.gs.showdown_active and \
-                self.gs.showdown_bf_idx is not None else 0
+            lane = self._zone_play_lane()
             if self.gs.chain:
                 self._spell_played(card, ap, from_zone=zone)
                 self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
             else:
                 self._cast_spell_now(card, side, lane, from_zone=zone)
+
+    def _zone_play_lane(self) -> int:
+        """The battlefield a spell played from a zone other than the hand is
+        aimed at: the showdown's, else the first."""
+        return self.gs.showdown_bf_idx if self.gs.showdown_active and \
+            self.gs.showdown_bf_idx is not None else 0
 
     def _flow_cost(self, card: Card, side: str):
         """(Energy, Power, domain or None) to play `card` from the trash with
@@ -4056,11 +4061,14 @@ class GameLoop:
             return (gear in ap.base_gear and cost is not None and self._can_pay_equip(ap, cost)
                     and self._first_friendly_unit_on_board(side) is not None)
         if entry["type"] == "flow":
-            return self._can_pay_flow(ap, entry["card"], side)
+            return self._can_pay_flow(ap, entry["card"], side) and \
+                self._spell_has_targets(entry["card"], side, self._zone_play_lane())
         if entry["type"] == "banished_play":
             card = entry["card"]
             if card not in ap.banished or not self._banished_playable(card, side):
                 return False
+            if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
+                return False          # §355.8: no valid target, no play
             energy, power = self._effective_cost(card, ap, from_zone="banished")
             return self._can_pay_card(ap, card, energy, power)
         eff = entry["eff"]
