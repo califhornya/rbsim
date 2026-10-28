@@ -133,6 +133,13 @@ class GameState:
     # "Your non-token units cost [1] more to play this turn" (Vaults of Helia):
     # (side, turn, card filter, Energy more).
     turn_cost_changes: list = field(default_factory=list)
+    # "Take a turn after this one" (Time Warp): who takes the extra turns.
+    extra_turns: list = field(default_factory=list)
+    # "You can hide ignoring costs this turn" (Guerilla Warfare): side -> turn.
+    free_hide: dict = field(default_factory=dict)
+    # "Buffs give an additional +1 [might] to friendly units this turn" (Stand
+    # United): side -> turn.
+    buff_bonus_turn: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
     # True while the active player's Ending Phase runs (Runeblade Anvil).

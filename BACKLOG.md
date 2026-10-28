@@ -220,7 +220,27 @@ Open, found on the way:
 - Open: Atakhan's additional cost ("kill a friendly unit ... I cost [1] less
   for each Energy it costs and [order] less for each Power"), Jhin
   Meticulous Killer's alternative cost.
-Then every other card, set by set.
+- [x] Origins (293 cards) read; 50 fixed, each tested (tests/test_corpus_origins.py).
+  Never worked before: Time Warp's extra turn, Zhonya's Hourglass (gear in
+  base), Sett The Boss's save, Unlicensed Armory, Bullet Time (X Power),
+  Stormbringer, Dragon's Rage / Last Breath second halves, Noxian Guillotine
+  without LEGION, Warwick Hunter's attack, Disintegrate's draw, Get Excited!'s
+  damage, Super Mega Death Rocket! back from the trash, Forge of the Future's
+  ability, Stand United's +1, Leona Zealot's -8, Lee Sin Ascetic's buffs,
+  Spirit's Refuge's DEFLECT, Brazen Buccaneer's discount, Wallop / Call to
+  Glory free for a buff, Guerilla Warfare's free hiding, Solari Chief's kill.
+  Wrong before: Dr. Mundo / Ekko Recurrent recycled hand cards, Invert
+  Timelines discarded one card, Meditation drew 3, Spoils of War read your
+  own deaths, Garbage Grabber / Miss Fortune Bounty Hunter had unreadable
+  costs (free, unlimited), Mindsplitter's discard picked by its owner,
+  Sabotage, Cull the Weak / Acceptable Losses (each player picks their own),
+  Hidden Blade only hit enemies, Gemcraft Seer, Unchecked Power, Overt
+  Operation, Adaptatron, Cruel Patron's cost, Caitlyn Patrolling / Soraka
+  Wanderer ("assigned combat damage last" = BACKLINE), Blind Fury's card
+  stays its owner's, Wielder of Water only while fighting. Single-gear kills
+  now chosen (they took the first one).
+Then every other set: Spiritforged, Unleashed, Vendetta, Radiance, Proving
+Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of

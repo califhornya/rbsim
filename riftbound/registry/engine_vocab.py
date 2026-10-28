@@ -81,6 +81,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_unit_dies_here",                         # battlefield: a non-token unit dies here (Black Rose Sanctum)
     "granted_to_units_here",                     # battlefield: units here have this ability (Gardens of Becoming)
     "on_recycle_rune",                           # you recycle a rune (Sivir Battle Mistress)
+    "trash_on_conquer",                          # in the trash, you conquer (Super Mega Death Rocket!)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -173,6 +174,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "friendly_mighty_unit_here",         # "When you conquer here with one or more MIGHTY units" (Sunken Temple)
     "spell_spent_this_turn_at_least",    # n: "If you've spent [4] or more to play a spell this turn"
     "none_played_this_turn",             # filter: "the first friendly gear played each turn" (Ornn's Forge)
+    "enemy_unit_died_this_turn",         # "If an enemy unit has died this turn" (Spoils of War)
+    "any_gear_in_play",                  # "you may kill a gear. If you do, ..." (Adaptatron)
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -194,6 +197,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
     "at_battlefield",                    # "a unit at a battlefield" (not in a base)
+    "is_damaged",                        # "all damaged enemy units here" (Warwick Hunter)
 })
 
 # amount_source values understood by effects._amount.
@@ -210,6 +214,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "battlefields_conquered_this_turn", "hold_points_this_turn",
     "cards_with_my_name_in_trash",
     "other_battlefields_controlled",     # Seat of Power
+    "discarded_energy", "it_might",      # Get Excited!, Last Breath
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -220,7 +225,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # engine would silently drop; the parser flags such costs to suggested_vocab
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
-    "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
+    "energy", "power", "tap", "recycle", "sacrifice_self", "spend_xp",
     "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
     "kill_other_token", "kill_other_friendly",
 })
@@ -268,6 +273,11 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     # _extra_might_reduction, _recompute_passives)
     "double_deathknell_here", "deploy_gear_action", "uncounterable", "extra_might_reduction",
     "empower_at_might", "repeat_costs",
+    # Origins: GameLoop._try_replace_death (Sett The Boss), _combat_mods (Wielder
+    # of Water), _recompute_passives (Leona Zealot), buff_unit (Lee Sin Ascetic),
+    # _cost_extras (Wallop, Call to Glory)
+    "sett_save", "lone_fighter_bonus", "stunned_enemies_here_minus", "unlimited_buffs",
+    "spend_buff_free", "discard_for_energy",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

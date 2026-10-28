@@ -539,6 +539,16 @@ listed here.
 - Abandoned Hall / Forgotten Library fire as the spell is played; what a
   spell "spent" is the Energy paid from the pool (Diana's showdown Energy
   included), Power not counted.
+- Origins approximations: Fading Memories can't choose a gear; Pack of
+  Wonders returns units only (not gear or facedown cards); Facebreaker doesn't
+  require the two units to share a battlefield; Miss Fortune Captain readies
+  units only ("something else"); Malzahar Fanatic's ability needs a token to
+  be usable (it then lets you kill any unit or gear); Commander Ledros kills
+  tokens only; a spell's "spend a buff to ignore its cost" (Wallop, Call to
+  Glory) is always taken when possible; Sivir Battle Mistress's trigger
+  fires at the next state refresh after the Power payment. Custom handlers
+  checked only by reading: Twisted Fate Gambler, Teemo Strategist, Promising
+  Future, Dazzling Aurora, Divine Judgment, Party Favors, Baited Hook.
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.

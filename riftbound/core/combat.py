@@ -45,6 +45,8 @@ class UnitInPlay:
     # cleared when the combat ends (§468.7).
     combat_keywords: list = field(default_factory=list)
     combat_might: int = 0
+    doomed_turn: int = -1            # Noxian Guillotine: dies when it takes damage that turn
+    ward_turn: int = -1              # Unlicensed Armory: may be saved the next time it would die
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
