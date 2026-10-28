@@ -188,6 +188,10 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "unit_died_this_turn",               # "If a unit died this turn" (Towering Pairofant)
     "friendly_died_in_beginning_phase",  # Shadow Watcher
     "played_from_hand",                  # "If you played this from your hand" (Back Off)
+    "undamaged_this_turn",               # "if I haven't been dealt damage this turn" (Affectionate Poro)
+    "this_in_combat",                    # "unless I'm in combat" (Akali Silent)
+    "you_control_empowered",             # "if you control something that's EMPOWERED" (Shock Blast)
+    "first_of_kind_this_turn",           # filter: "the first time you play a non-token gear each turn"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -213,6 +217,7 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "is_attacking",                      # "Stun an attacking unit" (Thwonk!)
     "not_it",                            # "another unit" than the one just chosen (Piercing Light)
     "has_named_tag",                     # "a unit with the named tag" (The List)
+    "domain", "is_empowered", "not_subtype", "fury_threatened",   # the Decrees, Aurok General, Ocean Drake
 })
 
 # amount_source values understood by effects._amount.
@@ -232,6 +237,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "discarded_energy", "it_might",      # Get Excited!, Last Breath
     "countered_energy", "killed_might", "self_assault",   # Riposte, Deathgrip, Lucian Gunslinger
     "battlefields_controlled", "friendly_units", "friendly_temporary_here",
+    "friendly_tokens", "same_name_here_others",   # Illaoi, Spiderling
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -301,6 +307,8 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "protect_weaker_here", "cheaper_optional_costs", "equipment_quick_draw", "gold_bonus",
     # Unleashed: Red Brambleback, Blue Sentinel, Vilemaw, Elder Dragon
     "double_conquer_here", "double_hold_here", "weaker_enemies_no_damage", "lethal_damage",
+    # Vendetta: Ambessa The Wolf, Gangplank Naval, Jagged Cutlass, Decree of Rage
+    "no_damage_outside_combat", "gangplank_redirect", "unmovable_by_enemies", "cant_be_countered",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax

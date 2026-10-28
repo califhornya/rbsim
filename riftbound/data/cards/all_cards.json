@@ -21456,8 +21456,13 @@
         "where": "anywhere"
       },
       {
-        "effect": "gold_when_it_dies",
-        "trigger": "on_cast"
+        "effect": "when_it_dies_this_turn",
+        "trigger": "on_cast",
+        "then": {
+          "effect": "play_token",
+          "token_name": "Gold",
+          "exhausted": true
+        }
       }
     ]
   },
@@ -27034,6 +27039,10 @@
         "trigger": "activated",
         "cost": {
           "energy": 5
+        },
+        "less_if_runes_at_most": {
+          "n": 4,
+          "amount": 3
         }
       },
       {
@@ -27386,7 +27395,8 @@
         "timing": "action",
         "amount": 2,
         "target": "chosen_unit",
-        "where": "battlefield"
+        "where": "battlefield",
+        "bonus_source": "cards_with_my_name_in_trash"
       }
     ],
     "variants": [
@@ -27560,13 +27570,17 @@
     ],
     "effects": [
       {
+        "effect": "cant_be_countered",
+        "trigger": "passive"
+      },
+      {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "timing": "action",
         "amount": 4,
         "target": "enemy_unit",
         "target_filter": {
-          "subtype": "Calm"
+          "domain": "CALM"
         },
         "where": "anywhere"
       }
@@ -27670,6 +27684,31 @@
           "energy": 6,
           "power": 1,
           "domain": "FURY"
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 1,
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_is_empowered"
+            }
+          }
+        }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 2,
+        "condition": {
+          "type": "this_is_empowered"
         }
       }
     ],
@@ -27904,8 +27943,11 @@
     "effects": [
       {
         "effect": "draw_cards",
-        "trigger": "on_win_combat",
-        "count": 1
+        "trigger": "on_combat_end",
+        "count": 1,
+        "condition": {
+          "type": "undamaged_this_turn"
+        }
       }
     ],
     "variants": [
@@ -28191,7 +28233,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 12
-        }
+        },
+        "less_per_rune": true
       },
       {
         "effect": "grant_might",
@@ -28374,12 +28417,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_gear",
+        "effect": "disempower_or_kill_gear",
         "trigger": "on_play",
-        "target": "enemy_unit",
-        "target_filter": {
-          "is_gear": true
-        },
         "condition": {
           "type": "you_have_n_or_more_runes",
           "params": {
@@ -28410,6 +28449,19 @@
     "set": "Vendetta",
     "keywords": [],
     "effects": [
+      {
+        "effect": "cant_be_chosen",
+        "trigger": "passive",
+        "target": "self",
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "this_in_combat"
+            }
+          }
+        }
+      },
       {
         "effect": "grant_temporary_might",
         "trigger": "on_move",
@@ -28493,7 +28545,12 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "friendly_unit",
-        "amount": 4
+        "where": "anywhere",
+        "amount": 4,
+        "duration": "this_turn",
+        "target_filter": {
+          "fury_threatened": true
+        }
       }
     ],
     "variants": [
@@ -28865,7 +28922,8 @@
         "trigger": "activated",
         "cost": {
           "energy": 12
-        }
+        },
+        "less_per_rune": true
       },
       {
         "effect": "give_keyword",
@@ -29198,6 +29256,14 @@
     ],
     "effects": [
       {
+        "effect": "reduce_cost",
+        "trigger": "cost_modifier",
+        "amount": 2,
+        "condition": {
+          "type": "you_control_empowered"
+        }
+      },
+      {
         "effect": "deal_damage",
         "trigger": "on_cast",
         "timing": "action",
@@ -29231,7 +29297,7 @@
       {
         "effect": "deal_damage",
         "trigger": "activated",
-        "target": "enemy_unit",
+        "target": "chosen_unit",
         "amount": 4,
         "cost": {
           "discard": 1,
@@ -29272,7 +29338,7 @@
         "timing": "reaction",
         "target": "enemy_unit",
         "target_filter": {
-          "subtype": "Body"
+          "domain": "BODY"
         },
         "amount": -5,
         "duration": "this_turn",
@@ -29383,8 +29449,8 @@
       {
         "effect": "reduce_cost",
         "trigger": "cost_modifier",
-        "amount_source": "n_friendly_with_tag",
-        "tag": "gear"
+        "amount": 1,
+        "amount_source": "gear_you_control"
       }
     ],
     "variants": [
@@ -29511,7 +29577,27 @@
           "exclude_self": true,
           "is_exhausted": true
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "optional": true
+      },
+      {
+        "effect": "ready_unit",
+        "trigger": "on_card_played",
+        "target": "chosen_unit",
+        "target_filter": {
+          "exclude_self": true,
+          "is_exhausted": true
+        },
+        "where": "anywhere",
+        "optional": true,
+        "condition": {
+          "type": "first_of_kind_this_turn",
+          "params": {
+            "filter": {
+              "is_gear": true
+            }
+          }
+        }
       }
     ],
     "variants": [
@@ -29675,8 +29761,10 @@
         "trigger": "on_cast",
         "timing": "action",
         "amount": 2,
+        "amount_if_empowered": 4,
         "target": "chosen_unit",
-        "where": "anywhere"
+        "where": "anywhere",
+        "duration": "this_turn"
       }
     ],
     "variants": [
@@ -29704,10 +29792,8 @@
     ],
     "effects": [
       {
-        "effect": "give_keyword",
-        "trigger": "passive",
-        "keyword": "TANK",
-        "target": "self"
+        "effect": "unmovable_by_enemies",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -30002,6 +30088,20 @@
           "power": 1,
           "domain": "BODY"
         }
+      },
+      {
+        "effect": "match_might_plus_one",
+        "trigger": "on_attack",
+        "condition": {
+          "type": "this_is_empowered"
+        }
+      },
+      {
+        "effect": "match_might_plus_one",
+        "trigger": "on_defend",
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -30029,10 +30129,9 @@
       {
         "effect": "kill_gear",
         "trigger": "on_conquer",
-        "target": "enemy_gear",
-        "target_filter": {
-          "energy_at_most": 1
-        }
+        "target": "chosen_gear",
+        "max_energy_self_might": true,
+        "optional": true
       }
     ],
     "variants": [
@@ -30130,6 +30229,11 @@
           "domain": "BODY"
         },
         "where": "anywhere"
+      },
+      {
+        "effect": "fight",
+        "trigger": "on_cast",
+        "first": "it"
       }
     ],
     "variants": [
@@ -30174,6 +30278,10 @@
         "condition": {
           "type": "this_is_empowered"
         }
+      },
+      {
+        "effect": "no_damage_outside_combat",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -30240,6 +30348,10 @@
           "power": 2,
           "domain": "BODY"
         }
+      },
+      {
+        "effect": "gangplank_redirect",
+        "trigger": "passive"
       }
     ],
     "variants": [
@@ -30363,7 +30475,8 @@
         "filter": "unit_or_gear",
         "pay": "reduce",
         "reduce": 5,
-        "empower": true
+        "empower": true,
+        "may": true
       }
     ],
     "variants": [
@@ -30415,6 +30528,23 @@
     "set": "Vendetta",
     "keywords": [],
     "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_play",
+        "target": "self",
+        "condition": {
+          "type": "not",
+          "params": {
+            "condition": {
+              "type": "score_within_n_of_victory",
+              "params": {
+                "n": 3,
+                "who": "self"
+              }
+            }
+          }
+        }
+      },
       {
         "effect": "move_unit",
         "trigger": "on_attack",
@@ -30670,12 +30800,8 @@
       {
         "effect": "grant_might",
         "trigger": "passive",
-        "amount_source": "n_friendly_with_tag",
-        "tag": "Spiderling",
         "target": "self",
-        "target_filter": {
-          "exclude_self": true
-        }
+        "amount_source": "same_name_here_others"
       }
     ],
     "variants": [
@@ -30924,7 +31050,8 @@
         "target_filter": {
           "energy_at_most": 3,
           "power_at_most": 1
-        }
+        },
+        "optional": true
       }
     ],
     "variants": [
@@ -31015,12 +31142,10 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "recall_unit",
+        "effect": "recall_enemies_total_might",
         "trigger": "on_cast",
-        "target": "all_enemy_units_here",
-        "target_filter": {
-          "subtype": "Order"
-        }
+        "domain": "ORDER",
+        "total": 5
       }
     ],
     "variants": [
@@ -31091,6 +31216,18 @@
         "trigger": "on_conquer",
         "token_name": "Tentacle",
         "location": "choose"
+      },
+      {
+        "effect": "play_token",
+        "trigger": "on_hold",
+        "token_name": "Tentacle",
+        "location": "choose"
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount_source": "friendly_tokens"
       }
     ],
     "variants": [
@@ -31350,9 +31487,10 @@
         "trigger": "on_play",
         "target": "chosen_unit",
         "target_filter": {
-          "subtype": "Dragon"
+          "not_subtype": "Dragon"
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "optional": true
       }
     ],
     "variants": [
@@ -31897,6 +32035,19 @@
           "power": 1,
           "domain": "ORDER"
         }
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 2,
+        "target_filter": {
+          "is_empowered": true
+        },
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -31922,13 +32073,11 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_unit",
+        "effect": "kill_unit_or_gear",
         "trigger": "on_cast",
-        "target": "enemy_unit",
         "target_filter": {
-          "subtype": "Chaos"
-        },
-        "where": "anywhere"
+          "domain": "CHAOS"
+        }
       }
     ],
     "variants": [
@@ -32322,6 +32471,14 @@
           "energy": 3,
           "power": 1
         }
+      },
+      {
+        "effect": "akali_retreat",
+        "trigger": "activated",
+        "timing": "action",
+        "cost": {
+          "tap": true
+        }
       }
     ],
     "variants": [
@@ -32426,6 +32583,11 @@
         "target": "chosen_unit",
         "duration": "this_turn",
         "where": "anywhere"
+      },
+      {
+        "effect": "grant_ready_ability",
+        "trigger": "on_cast",
+        "timing": "action"
       }
     ],
     "variants": [
@@ -32536,7 +32698,7 @@
     "effects": [
       {
         "effect": "ready_runes",
-        "trigger": "on_friendly_unit_played",
+        "trigger": "on_card_played",
         "amount": 2,
         "optional": true,
         "cost": {
@@ -32546,7 +32708,8 @@
           "type": "triggering_card_matches",
           "params": {
             "filter": {
-              "energy_at_least": 7
+              "energy_at_least": 7,
+              "not_spell": true
             }
           }
         }
@@ -32604,6 +32767,15 @@
           }
         },
         "where": "battlefield"
+      },
+      {
+        "effect": "when_it_dies_this_turn",
+        "trigger": "on_cast",
+        "then": {
+          "effect": "channel_rune",
+          "amount": 1,
+          "exhausted": true
+        }
       }
     ],
     "variants": [
@@ -32800,13 +32972,14 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "target": "enemy_unit",
+        "target": "chosen_unit",
         "amount": -2,
         "cost": {
           "disempower_self": true,
           "tap": true
         },
-        "where": "battlefield"
+        "where": "battlefield",
+        "duration": "this_turn"
       }
     ],
     "variants": [
@@ -32897,13 +33070,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "kill_unit",
-        "trigger": "on_cast",
-        "target": "enemy_unit",
-        "target_filter": {
-          "might_less_than_self": true
-        },
-        "where": "anywhere"
+        "effect": "public_execution",
+        "trigger": "on_cast"
       }
     ],
     "variants": [

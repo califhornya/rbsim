@@ -83,7 +83,8 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "friendly_mighty_unit_here", "spell_spent_this_turn_at_least", "none_played_this_turn",
     "enemy_unit_died_this_turn", "any_gear_in_play", "attached_this_turn", "died_in_combat",
     "gear_with_cost_at_most_in_play", "this_unattached", "unit_died_this_turn",
-    "friendly_died_in_beginning_phase", "played_from_hand",
+    "friendly_died_in_beginning_phase", "played_from_hand", "undamaged_this_turn", "this_in_combat",
+    "you_control_empowered", "first_of_kind_this_turn",
     "holder_didnt_conquer_this_turn", "conquered_uncontrolled", "your_legend_exhausted",
     # safe-False branch (loop.py:612-614)
     "target_was_stunned",
@@ -1472,6 +1473,8 @@ class GameLoop:
             u.no_combat_damage = False
             u.equip_bonus_mult = 1
             u.unchoosable = u.no_move_to_base = u.cant_ready = u.spell_immune = False
+            # "I can't be moved by enemy spells and abilities" (Jagged Cutlass, on its unit)
+            u.unmovable_by_enemies = any(self._has_effect(g, "unmovable_by_enemies") for g in u.gear)
 
         for bf in self.gs.battlefields:
             for side in ("A", "B"):
@@ -1839,6 +1842,24 @@ class GameLoop:
             return bool(getattr(card, "_kicker_paid", False))
         if ctype == "showed_off":
             return bool(getattr(card, "_showed_off", False))
+        if ctype == "undamaged_this_turn":
+            # "if I haven't been dealt damage this turn" (Affectionate Poro)
+            unit = self._find_unit_by_card(card)
+            return unit is not None and unit.damaged_turn != self.gs.turn
+        if ctype == "this_in_combat":
+            # "unless I'm in combat" (Akali Silent)
+            unit = self._find_unit_by_card(card)
+            return unit is not None and self._in_combat(unit)
+        if ctype == "you_control_empowered":
+            # "if you control something that's EMPOWERED" (Shock Blast)
+            return any(self._is_empowered(src) for src, _bf in self._sources_in_play(side))
+        if ctype == "first_of_kind_this_turn":
+            # "the first time you play a non-token gear each turn" (Jayce Brilliant Inventor)
+            from .effects import _zone_effect_card_ok
+            tf = {"target_filter": params.get("filter") or {}}
+            trig = extra.get("triggering_card")
+            return trig is not None and _zone_effect_card_ok(trig, tf) and sum(
+                1 for c in self.gs.played_cards_this_turn.get(side, ()) if _zone_effect_card_ok(c, tf)) == 1
         if ctype == "unit_died_this_turn":
             # "If a unit died this turn" (Towering Pairofant): either side's.
             return any(self.gs.friendly_unit_died_this_turn.get(x, False) for x in ("A", "B"))
@@ -3073,6 +3094,14 @@ class GameLoop:
         if eff.params.get("less_per_temporary"):
             n = sum(1 for u in self._friendly_units_of(side) if u.has_keyword("TEMPORARY"))
             parsed = dict(parsed, energy=max(0, parsed["energy"] - n))
+        runes = self.gs.get_player(side).total_runes_in_play()
+        if eff.params.get("less_per_rune"):
+            # "This ability costs [1] less for each rune you control" (Frostcoat Mother)
+            parsed = dict(parsed, energy=max(0, parsed["energy"] - runes))
+        few = eff.params.get("less_if_runes_at_most")
+        if few and runes <= int(few["n"]):
+            # "This ability costs [3] less if you control 4 or fewer runes" (Baccai Sandspinner)
+            parsed = dict(parsed, energy=max(0, parsed["energy"] - int(few["amount"])))
         if eff.effect != "empower_self" or unit is None:
             return parsed
         where = self._locate_unit(unit)
@@ -4231,6 +4260,9 @@ class GameLoop:
                 yield eff
 
         def _add_unit_abilities(unit, bf_idx):
+            for turn, eff in unit.turn_abilities:
+                if turn == self.gs.turn and ((eff.timing or "").lower() or None) in allowed:
+                    out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
             for eff in _abilities(unit.card):
                 # EMPOWER can only be activated while NOT already empowered
                 # (unless it stacks: `max_times`, §827.1.c.5).
@@ -5113,9 +5145,14 @@ class GameLoop:
                                        "died_card": dead_unit.card},
                     )
             dead_unit.gear = []
-            if dead_unit.gold_on_death is not None and dead_unit.gold_on_death[1] == self.gs.turn:
-                # "When it dies this turn, play a Gold gear token exhausted" (Deadly Flourish)
-                self._play_token("Gold", dead_unit.gold_on_death[0])
+            bonus = dead_unit.death_bonus
+            if bonus is not None and bonus[1] == self.gs.turn:
+                # "When it dies this turn, play a Gold gear token exhausted" (Deadly
+                # Flourish), "... channel 1 rune exhausted" (Siphoning Strike).
+                who = self.gs.get_player(bonus[0])
+                EFFECT_REGISTRY[bonus[2]["effect"]](
+                    EffectContext(self, dead_unit.card, who, self.gs.get_player(self.gs.other(bonus[0])), bf, {}),
+                    bonus[2])
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
@@ -5170,6 +5207,9 @@ class GameLoop:
         if unit.prevent_next_turn == gs.turn:
             unit.prevent_next_turn = -1          # Counter Strike: this one is prevented
             return 0
+        if kind != "combat" and unit.empowered and self._has_effect(unit.card, "no_damage_outside_combat") \
+                and not self._in_combat(unit):
+            return 0                             # Ambessa The Wolf: "unless I'm in combat"
         if unit.double_damage_turn == gs.turn:
             amount *= 2
         if unit.damage_shield:
@@ -5178,6 +5218,8 @@ class GameLoop:
             amount -= absorbed
         if kind == "combat" and source_side is None and owner is not None:
             source_side = gs.other(owner)
+        if amount > 0:
+            unit.damaged_turn = gs.turn      # "if I haven't been dealt damage this turn"
         if amount > 0 and source_side is not None and owner is not None and owner != source_side \
                 and self._side_has_passive(source_side, "lethal_damage"):
             unit.doomed_turn = gs.turn          # Elder Dragon: any damage kills
@@ -5370,6 +5412,24 @@ class GameLoop:
         if where is None:
             return True
         return not self._readying_blocked(where[0])
+
+    def _gangplank_redirect(self, unit: UnitInPlay, spec) -> bool:
+        """ "EMPOWERED: If a spell or ability that chooses me would stun me, give
+        me -[might], or return me to hand, give me +3 [might] this turn instead"
+        (Gangplank Naval): True when it happened instead."""
+        target = str(spec.get("target", "")).lower()
+        if target.startswith("all") or target in ("self", "it", "triggering_unit"):
+            return False
+        if unit.empowered and self._has_effect(unit.card, "gangplank_redirect"):
+            unit.temporary_might += 3
+            return True
+        return False
+
+    def _in_combat(self, unit: UnitInPlay) -> bool:
+        """`unit` has the Attacker or Defender designation at a battlefield."""
+        where = self._locate_unit(unit)
+        return (where is not None and where[1] is not None and where[1].combat_started
+                and id(unit) in where[1].combat_designated)
 
     def _is_attacking(self, unit: UnitInPlay) -> bool:
         """`unit` has the Attacker designation: it is in the combat at a

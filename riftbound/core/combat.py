@@ -51,7 +51,10 @@ class UnitInPlay:
     was_mighty: bool = False         # "When a unit you control becomes MIGHTY" (Fiora Worthy)
     ward_free: bool = False          # Tactical Retreat: the ward needs no payment
     banish_if_dies_turn: int = -1    # Smite: "If it would die this turn, banish it instead"
-    gold_on_death: object = None     # Deadly Flourish: (side, turn) that plays a Gold when it dies
+    death_bonus: object = None       # "When it dies this turn, ..." (Deadly Flourish): (side, turn, effect)
+    damaged_turn: int = -1           # last turn it was dealt damage (Affectionate Poro)
+    unmovable_by_enemies: bool = False   # Jagged Cutlass (recomputed passive)
+    turn_abilities: list = field(default_factory=list)   # Dominus: [(turn, EffectSpec)]
     win_xp_turn: int = -1            # Grim Resolve: "When it wins a combat this turn, gain 2 XP"
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)

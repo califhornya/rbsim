@@ -277,7 +277,18 @@ Open, found on the way:
   Monster Harpoon, Back Off, Spectral Centaur (+2 per death), Sprite Burst
   (ready), Crescent Strike, Yuumi, Heroic Charge, Towering Pairofant, Shadow
   Watcher, Vi Hotheaded's [fury], Leblanc Fragmented, Concentrate, Repulse.
-Then every other set: Vendetta, Radiance, Proving Grounds.
+- [ ] Vendetta, part 1: 38 cards fixed, each tested (tests/test_corpus_vendetta.py):
+  the EMPOWER family (Baccai Sandspinner, Frostcoat Mother, Grumpy Rockbear
+  costs; Rage Amplifier, Aurok General, Dame the Despoiler, Ambessa The Wolf,
+  Gangplank Naval, Tail-Cloaked Matriarch, Mel Soul's Reflection, Akali Rogue
+  Assassin), the Decrees (domain filters; Unity kills a unit or gear), "when
+  it dies this turn" (Deadly Flourish, Siphoning Strike: also when the damage
+  itself kills), Affectionate Poro, Tomb-Raider Barbara, Akali Silent, Shock
+  Blast, Sky Cruiser, Plaza Guardian, Jayce Brilliant Inventor, Guttural
+  Roar, Jagged Cutlass, Noxian Demolitionist, Rampage, Wild Claw, Corrupted
+  Dragon, Spiderling, Illaoi, Ocean Drake, Dominus, Nasus Curator, Public
+  Execution, Consuming Curse. Rest of Vendetta: next batches.
+Then: Radiance, Proving Grounds.
 
 ## E. Not modeled at all
 Bandle Tree, Bushwhack Trap (a second facedown card), Orianna Lady of

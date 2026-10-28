@@ -569,6 +569,11 @@ listed here.
   Checked by a probe only: Heedless Resurrection, Stalking Wolf, Conscription,
   Insightful Investigator, Bone Skewer, Tricksy Tentacles, Stare Down,
   Keeper's Verdict, Alpha Strike, Leblanc Deceiver.
+- Vendetta approximations: Nasus Curator of the Sands triggers on units and
+  gear only (not on activated abilities with Energy cost [7]+); Tail-Cloaked
+  Matriarch's "choose a unit ... play it" reads the unit from your trash;
+  Decree of Focus's "being chosen by an enemy Fury spell" reads declared
+  choices of spells on the chain (not abilities).
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
   Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
   (like SHIELD), not to "MIGHTY" checks during the combat.
