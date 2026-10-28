@@ -734,3 +734,136 @@ def test_shen_eye_of_twilight_gives_a_friendly_unit_tank():
     b.base_units.append(_unit("Theirs", 2))
     assert _use(loop, a, "Shen Eye of Twilight")
     assert mine.has_keyword("TANK") and not loop.gs.legend_unit_A.ready
+
+
+def test_resonating_strike_moves_your_unit_to_a_battlefield_you_control_with_two_more():
+    """'Choose a battlefield you control and a unit you control at a different
+    location. Move that unit to that battlefield and give it +2 [might] this turn.'"""
+    loop, a, b = _setup()
+    loop.gs.battlefields[1].add_unit("A", _unit("Holder", 1))
+    mover = _unit("Mover", 2)
+    a.base_units.append(mover)
+    seen = _chooser(loop, {})
+    _cast(loop, a, "Resonating Strike", lane=0)
+    assert mover in loop.gs.battlefields[1].units_A and mover.might == 4
+    dests = [names for kind, names in seen if kind.startswith("destination")]
+    assert all(len(d) == 1 for d in dests)                 # only the one you control
+    assert CARD_REGISTRY["Resonating Strike"].instantiate().has_keyword("HIDDEN")
+
+
+def test_twilight_shroud_gives_one_and_shields_the_unit_from_enemy_choices():
+    """'Give a friendly unit +1 [might] this turn. It can't be chosen by enemy
+    spells and abilities this turn. FLOW 2'"""
+    loop, a, b = _setup()
+    mine = _unit("Mine", 2)
+    a.base_units.append(mine)
+    _cast(loop, a, "Twilight Shroud")
+    assert mine.might == 3
+    assert not loop._can_choose(mine, "B") and loop._can_choose(mine, "A")
+    flow = CARD_REGISTRY["Twilight Shroud"].instantiate().flow_cost
+    assert flow["energy"] == 2 and not flow["power"]
+
+
+def test_serene_ascetic_empowered_has_deflect_and_shield_three():
+    """'EMPOWER [3]. EMPOWERED I have DEFLECT and SHIELD 3.'"""
+    loop, a, b = _setup()
+    ascetic = _unit("Serene Ascetic")
+    a.base_units.append(ascetic)
+    assert not ascetic.has_keyword("DEFLECT")
+    energy = a.energy
+    assert _use(loop, a, "Serene Ascetic")
+    assert energy - a.energy == 3
+    assert ascetic.keyword_value("DEFLECT") == 1 and ascetic.keyword_value("SHIELD") == 3
+
+
+def test_mournful_witness_empowers_when_a_combat_it_was_in_ends():
+    """'When a combat that I was in ends, empower me. EMPOWERED I have +2.'
+    Win, lose by recall, or survive a tie: it was in the combat."""
+    loop, a, b = _setup()
+    witness = _unit("Mournful Witness")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", witness)
+    wall = _unit("Wall", 9)
+    wall.stunned = True                                    # both survive: recalled
+    bf.add_unit("B", wall)
+    _fight(loop, 0, "A")
+    loop._recompute_passives()
+    assert witness.empowered and witness.might == 4
+
+
+def test_mournful_witness_dying_in_the_combat_doesnt_empower():
+    loop, a, b = _setup()
+    witness = _unit("Mournful Witness")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", witness)
+    bf.add_unit("B", _unit("Big", 9))
+    _fight(loop, 0, "B")
+    assert not _on_board(loop, witness)
+
+
+def test_hand_hammer_equips_for_calm_and_gives_two_beside_exactly_one_other_unit():
+    """'EQUIP [calm]. I have +2 [might] while I'm at a battlefield with exactly
+    one other unit you control.' (and the Equipment's printed +1)"""
+    loop, a, b = _setup()
+    hammer = CARD_REGISTRY["Hand Hammer"].instantiate()
+    assert loop._equip_cost(hammer)["domain_power"] == {"calm": 1}
+    holder = _unit("Holder", 2)
+    holder.gear = [hammer]
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", holder)
+    loop._recompute_passives()
+    assert holder.might == 3
+    bf.add_unit("A", _unit("Pal", 1))
+    loop._recompute_passives()
+    assert holder.might == 5
+
+
+def test_field_musicians_gives_any_unit_three():
+    """'When you play me, give a unit +3 [might] this turn.'"""
+    loop, a, b = _setup()
+    target = _unit("Target", 2)
+    loop.gs.battlefields[1].add_unit("A", target)
+    a.hand = [CARD_REGISTRY["Field Musicians"].instantiate()]
+    _choose(loop, "Target")
+    loop._apply_action(a, ("UNIT", 0, 0))
+    assert target.might == 5
+
+
+def test_loyal_poro_draws_only_if_it_didnt_die_alone():
+    """'DEATHKNELL If I didn't die alone, draw 1.'"""
+    for pals, drawn in ((0, 0), (1, 1)):
+        loop, a, b = _setup()
+        a.deck.cards = [UnitCard(name="Top", might=1)]
+        bf = loop.gs.battlefields[0]
+        bf.add_unit("A", _unit("Loyal Poro"))
+        for i in range(pals):
+            pal = _unit(f"Pal{i}", 9)
+            pal.stunned = True                             # Poro takes the hit
+            bf.add_unit("A", pal)
+        bf.add_unit("B", _unit("Killer", 3))
+        _fight(loop, 0, "B")
+        assert not any(u.card.name == "Loyal Poro" for u in bf.units_A)
+        assert len(a.hand) == drawn
+
+
+def test_discipline_is_a_reaction_giving_two_and_drawing():
+    """'REACTION. Give a unit +2 [might] this turn. Draw 1.'"""
+    from riftbound.core.legality import _reaction_actions
+    loop, a, b = _setup()
+    a.deck.cards = [UnitCard(name="Top", might=1)]
+    target = _unit("Target", 2)
+    a.base_units.append(target)
+    a.hand = [CARD_REGISTRY["Discipline"].instantiate()]
+    assert any(ga.kind == "SPELL" for ga in _reaction_actions(loop, a))
+    a.hand = []
+    _cast(loop, a, "Discipline")
+    assert target.might == 4 and [c.name for c in a.hand] == ["Top"]
+
+
+def test_grove_of_the_god_willow_draws_when_you_hold_it():
+    loop, a, b = _setup()
+    _battlefield(loop, 0, "Grove of the God-Willow")
+    a.deck.cards = [UnitCard(name="Top", might=1)]
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
+    loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
+    assert [c.name for c in a.hand] == ["Top"]

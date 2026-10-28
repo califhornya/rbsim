@@ -37,17 +37,11 @@ Fixed (2026-10-27, tests/test_precon_cards.py):
 - [x] The whole Zed deck and its battlefields (2026-10-28): every sentence of
       every card has a test (tests/test_precon_cards.py,
       tests/test_card_fixes_coach.py).
-- [x] Shen deck, checked: Shen Eye of Twilight, Shen Leader of the Kinkou
-      Order, Shen Scourge of Shadows, Shen Kinkou, Kennen Keeper of Balance,
-      Steel Paws (DEFLECT, see C), Sacred Protector, Noxian Emissary (its
-      EMPOWERED DEATHKNELL never fired: the unit was off the board when the
-      condition was read), Soulspinner, Keeper of Law, Disciple of Shen,
-      Kinkou Temple.
+- [x] The whole Shen deck and its battlefields (2026-10-28): every sentence
+      tested. Noxian Emissary's EMPOWERED DEATHKNELL never fired (the unit was
+      off the board when the condition was read); Steel Paws' DEFLECT (see C).
 
-To check (each [ ] until a test covers every sentence):
-- Shen deck: Resonating Strike, Twilight Shroud, Serene Ascetic, Mournful
-  Witness, Hand Hammer, Field Musicians, Loyal Poro, Discipline, Charm;
-  battlefield Grove of the God-Willow.
+Section A is done: both precon decks are checked card by card.
 
 ## B. Engine bugs that reach many cards
 - [ ] `all_units_here` damage hits only the effect's controller's units
