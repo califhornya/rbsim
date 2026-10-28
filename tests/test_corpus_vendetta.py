@@ -3,6 +3,7 @@ found wrong or missing, each played through the engine."""
 
 from __future__ import annotations
 
+from riftbound.core.battlefield import FacedownCard
 from riftbound.core.cards import GearCard, SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.effects import REGISTRY
@@ -12,7 +13,7 @@ from riftbound.core.player import Rune, RuneDeck
 from riftbound.core.state import ChainItem
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
-from test_corpus_cards import (_always, _cast_now, _deck, _pick, _setup, _unit)
+from test_corpus_cards import (_always, _cast_now, _deck, _fight, _pick, _setup, _unit)
 
 
 def _ctx(loop, p, card=None):
@@ -1052,3 +1053,742 @@ def test_eclipse_dragon_draws_on_move_with_four_runes():
         a.base_units.append(dragon)
         loop._move_unit_by_effect(dragon, loop.gs.battlefields[0])
         assert len(a.hand) == drawn
+
+
+# -- Part 3 (BACKLOG.md D, Vendetta VEN-078..156) --------------------------------
+
+def test_baccai_witherclaw_grows_and_channels_two_on_death_when_empowered():
+    """'EMPOWER [1] [rune] [rune]. EMPOWERED: +2 [might]. EMPOWERED DEATHKNELL:
+    Channel 2 runes exhausted.'"""
+    loop, a, b = _setup()
+    a.rune_deck = RuneDeck([Rune(Domain.BODY) for _ in range(3)])
+    claw = _unit("Baccai Witherclaw")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", claw)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+    loop._recompute_passives()
+    assert claw.empowered and claw.might == 6 and a.energy == 19
+    bf.remove_unit("A", claw)
+    loop._route_deaths([(claw, "A")], bf)
+    runes = [r for rs in a.rune_pool.values() for r in rs]
+    assert len(runes) == 2 and not any(r.ready for r in runes)
+
+
+def test_onslaught_gives_six_and_has_flow_four():
+    """'Give a unit +6 [might] this turn. FLOW [4]'"""
+    loop, a, b = _setup()
+    unit = _unit("Unit", 2)
+    a.base_units.append(unit)
+    _cast_now(loop, a, "Onslaught")
+    assert unit.might == 8
+    assert CARD_REGISTRY["Onslaught"].instantiate().flow_cost["energy"] == 4
+
+
+def test_profiteer_moves_empowerment_to_a_card_that_uses_it():
+    """'When you play me, you may disempower something you control to empower a
+    legend, unit, or gear.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    idle, user = _unit("Idle", 2), _unit("Kinkou Lifeblade")
+    idle.empowered = True
+    a.base_units.extend([idle, user])
+    loop._play_unit(CARD_REGISTRY["Profiteer"].instantiate(), "A")
+    assert not idle.empowered and user.empowered
+
+
+def test_hextech_disc_spends_its_empowerment_on_a_mech():
+    """'EMPOWER - [tap]. Disempower this, [1], [tap]: Play a 3 [might] Mech unit
+    token to your base.'"""
+    loop, a, b = _setup()
+    disc = CARD_REGISTRY["Hextech Disc"].instantiate()
+    a.base_gear.append(disc)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+    assert disc.empowered and disc.tapped
+    disc.tapped = False
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "play_token"))
+    assert [(u.card.name, u.might) for u in a.base_units] == [("Mech", 3)]
+    assert not disc.empowered and disc.tapped and a.energy == 19
+
+
+def test_jayce_hammer_in_hand_picks_a_keyword_when_readied():
+    """'When I become ready, choose one to give me this turn - ASSAULT 2 /
+    DEFLECT 2 / GANKING.'"""
+    loop, a, b = _setup()
+    jayce = _unit("Jayce Hammer in Hand")
+    jayce.ready = False
+    a.base_units.append(jayce)
+    loop.chooser = lambda _l, kind, side, options, default, source: 2 if kind.startswith("mode") else None
+    _start_turn(loop)
+    assert jayce.ready and jayce.has_keyword("GANKING")
+
+
+def test_cataclysmic_duel_leaves_each_player_one_unit():
+    """'Each player chooses a unit they control. Kill the rest.'"""
+    loop, a, b = _setup()
+    a.base_units.extend([_unit("A1", 1), _unit("A2", 5)])
+    loop.gs.battlefields[0].add_unit("B", _unit("B1", 3))
+    loop.gs.battlefields[1].add_unit("B", _unit("B2", 4))
+    _cast_now(loop, a, "Cataclysmic Duel")
+    left = a.base_units + b.base_units + [u for bf in loop.gs.battlefields for u in bf.units_A + bf.units_B]
+    assert sorted(u.card.name for u in left) == ["A2", "B2"]
+
+
+def test_renekton_brute_pumps_and_empowers_at_ten():
+    """'[1]: Give me +1 [might] this turn. When my Might becomes 10 or more,
+    empower me. EMPOWERED: DEFLECT and GANKING.'"""
+    loop, a, b = _setup()
+    brute = _unit("Renekton Brute")
+    loop.gs.battlefields[0].add_unit("A", brute)
+    for _ in range(5):
+        loop._apply_activated_ability(a, b, _ability(loop, "A", "grant_temporary_might"))
+        loop._recompute_passives()
+    assert brute.might == 9 and not brute.empowered
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "grant_temporary_might"))
+    loop._recompute_passives()
+    assert brute.empowered and brute.has_keyword("GANKING") and brute.has_keyword("DEFLECT")
+
+
+def test_kinkou_lifeblade_and_solari_sunhawk_when_empowered():
+    """'EMPOWERED: +1 [might] and GANKING' / '+1 [might] and DEFLECT 2'."""
+    for name, kw in (("Kinkou Lifeblade", "GANKING"), ("Solari Sunhawk", "DEFLECT")):
+        loop, a, b = _setup()
+        unit = _unit(name)
+        a.base_units.append(unit)
+        printed = unit.might
+        loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+        loop._recompute_passives()
+        assert unit.might == printed + 1 and unit.has_keyword(kw) and a.energy == 18, name
+
+
+def test_mask_mother_pumps_a_friend_when_discarded():
+    """'When you discard me, you may pay [1] to give a friendly unit +2 [might]
+    this turn.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    friend = _unit("Friend", 2)
+    a.base_units.append(friend)
+    mother = CARD_REGISTRY["Mask Mother"].instantiate()
+    a.hand.append(mother)
+    loop._discard(a, mother)
+    assert friend.might == 4 and a.energy == 19
+
+
+def test_shadow_order_disciple_may_burn_one_to_grow_when_it_moves():
+    """'When I move, you may BURN 1 to give me +1 [might] this turn.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    disciple = _unit("Shadow Order Disciple")
+    a.base_units.append(disciple)
+    _deck(a, SpellCard(name="S1"), SpellCard(name="S2"))
+    loop._move_unit_by_effect(disciple, loop.gs.battlefields[0])
+    assert disciple.might == 3 and [c.name for c in a.trash] == ["S1"]
+
+
+def test_shadowblade_lurker_costs_two_less_per_copy_in_trash():
+    """'I cost [2] less for each card with my name in your trash.'"""
+    loop, a, b = _setup()
+    card = CARD_REGISTRY["Shadowblade Lurker"].instantiate()
+    full = loop._effective_cost(card, a)[0]
+    a.trash.extend(CARD_REGISTRY["Shadowblade Lurker"].instantiate() for _ in range(2))
+    assert loop._effective_cost(card, a)[0] == full - 4
+
+
+def test_stargazer_discounts_flow_from_the_trash_to_one():
+    """'Spells with FLOW you play from your trash cost [2] less, to a minimum of [1].'"""
+    loop, a, b = _setup()
+    a.base_units.append(_unit("Stargazer"))
+    onslaught, step = (CARD_REGISTRY[n].instantiate() for n in ("Onslaught", "Up from the Deep"))
+    assert loop._flow_cost(onslaught, "A")[0] == 2 and loop._flow_cost(step, "A")[0] == 1
+    assert loop._effective_cost(onslaught, a)[0] == onslaught.cost_energy
+
+
+def test_up_from_the_deep_plays_two_tentacles():
+    """'Play two 1 [might] Tentacle unit tokens. FLOW [3]'"""
+    loop, a, b = _setup()
+    _cast_now(loop, a, "Up from the Deep")
+    units = a.base_units + [u for bf in loop.gs.battlefields for u in bf.units_A]
+    assert [(u.card.name, u.might) for u in units] == [("Tentacle", 1)] * 2
+
+
+def test_gust_monk_banishes_from_a_trash_for_assault_two():
+    """'You may pay [1] as an additional cost to play me. When you play me, if you
+    paid the additional cost, banish a card from any trash to give a unit
+    ASSAULT 2 this turn.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    b.trash.append(SpellCard(name="Theirs"))
+    friend = _unit("Friend", 2)
+    a.base_units.append(friend)
+    a.hand.append(CARD_REGISTRY["Gust Monk"].instantiate())
+    loop._apply_action(a, ("UNIT", 0, None))
+    assert not b.trash and [c.name for c in b.banished] == ["Theirs"]
+    assert any(u.keyword_value("ASSAULT") == 2 for u in a.base_units)
+
+
+def test_ravenbloom_prefect_banishes_itself_and_an_enemy_gear():
+    """'When an opponent plays a gear, you may banish me to banish it.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    prefect = _unit("Ravenbloom Prefect")
+    b.base_units.append(prefect)
+    gear = GearCard(name="Gear", cost_energy=2)
+    loop._play_gear(gear, "A")
+    assert gear not in a.base_gear and gear in a.banished
+    assert prefect not in b.base_units and prefect.card in b.banished
+
+
+def test_shadows_of_the_past_returns_two_units_from_trashes():
+    """'Return up to 2 units from trashes to their owners' hands.'"""
+    loop, a, b = _setup()
+    mine, theirs, spell = UnitCard(name="Mine", might=1), UnitCard(name="Theirs", might=1), SpellCard(name="S")
+    a.trash.extend([mine, spell])
+    b.trash.append(theirs)
+    loop.chooser = lambda _l, kind, side, options, default, source: (
+        next(i for i, o in enumerate(options) if o in (mine, theirs)) if kind.startswith("card") else None)
+    _cast_now(loop, a, "Shadows of the Past")
+    assert mine in a.hand and theirs in b.hand and spell in a.trash
+
+
+def test_twilight_step_moves_a_small_unit():
+    """'Move a unit with 3 [might] or less.'"""
+    loop, a, b = _setup()
+    small, big = _unit("Small", 3), _unit("Big", 4)
+    a.base_units.extend([big, small])
+    _cast_now(loop, a, "Twilight Step")
+    assert big in a.base_units and small not in a.base_units
+
+
+def test_wind_and_ghosts_banishes_small_returns_big():
+    """'Choose a unit at a battlefield. If it has 3 [might] or less, banish it.
+    Otherwise, return it to its owner's hand.'"""
+    for might, zone in ((3, "banished"), (4, "hand")):
+        loop, a, b = _setup()
+        enemy = _unit("Enemy", might)
+        loop.gs.battlefields[0].add_unit("B", enemy)
+        _cast_now(loop, a, "Wind and Ghosts")
+        assert enemy.card in getattr(b, zone), might
+
+
+def test_forgotten_relic_buffs_by_a_burned_units_might():
+    """'When you play this or at the start of your Beginning Phase, BURN 1. When
+    you burn a unit this way, give a friendly unit +[might] equal to the burned
+    card's Might this turn.'"""
+    loop, a, b = _setup()
+    friend = _unit("Friend", 1)
+    a.base_units.append(friend)
+    _deck(a, UnitCard(name="Burned", might=4), SpellCard(name="Spell"))
+    loop._play_gear(CARD_REGISTRY["Forgotten Relic"].instantiate(), "A")
+    assert friend.might == 5
+    loop.gs.turn = 3
+    _start_turn(loop)
+    assert [c.name for c in a.trash] == ["Burned", "Spell"] and friend.might == 5
+
+
+def test_mel_defiant_soul_discards_a_spell_and_banishes_a_small_enemy():
+    """'EMPOWER - Discard a spell. When I become EMPOWERED, banish an enemy unit
+    at a battlefield with 3 [might] or less.'"""
+    loop, a, b = _setup()
+    mel = _unit("Mel Defiant Soul")
+    a.base_units.append(mel)
+    a.hand.extend([UnitCard(name="Unit", might=1), SpellCard(name="Spell")])
+    small, big = _unit("Small", 3), _unit("Big", 4)
+    loop.gs.battlefields[0].add_unit("B", small)
+    loop.gs.battlefields[0].add_unit("B", big)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+    assert mel.empowered and [c.name for c in a.trash] == ["Spell"]
+    assert small.card in b.banished and big in loop.gs.battlefields[0].units_B
+
+
+def test_minah_swiftfoot_draws_or_discards_for_each_player_at_a_battlefield():
+    """'When I move to a battlefield, choose one - Each player discards 1. / Each
+    player draws 1.'"""
+    loop, a, b = _setup()
+    minah = _unit("Minah Swiftfoot")
+    a.base_units.append(minah)
+    _deck(a, SpellCard(name="A1"))
+    _deck(b, SpellCard(name="B1"))
+    loop.chooser = lambda _l, kind, side, options, default, source: 1 if kind.startswith("mode") else None
+    loop._move_unit_by_effect(minah, loop.gs.battlefields[0])
+    assert len(a.hand) == 1 and len(b.hand) == 1
+    loop.chooser = lambda _l, kind, side, options, default, source: 0 if kind.startswith("mode") else None
+    loop._move_unit_by_effect(minah, None)
+    assert len(a.hand) == 1                       # to base: nothing
+    loop._move_unit_by_effect(minah, loop.gs.battlefields[1])
+    assert not a.hand and not b.hand
+
+
+def test_zed_without_a_sound_makes_a_clone_and_swaps_with_it():
+    """'When I conquer, play a 0 [might] Shadow Clone unit token to your base.
+    ACTION [1] [Chaos]: Move me and a Shadow Clone you control to each other's
+    locations.'"""
+    loop, a, b = _setup()
+    zed = _unit("Zed Without a Sound")
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", zed)
+    loop._fire_scoring_trigger("on_conquer", bf, "A")
+    clone = next(u for u in a.base_units if u.card.name == "Shadow Clone")
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "swap_position"))
+    assert zed in a.base_units and clone in bf.units_A and a.energy == 19
+
+
+def test_kennen_storm_of_shuriken_burns_two_and_gives_flow_on_conquer():
+    """'When you play me, BURN 2. When I conquer, give a spell in your trash FLOW
+    equal to its cost this turn.'"""
+    loop, a, b = _setup()
+    spell = CARD_REGISTRY["Wind and Ghosts"].instantiate()
+    _deck(a, spell, SpellCard(name="S2"), SpellCard(name="S3"))
+    kennen = loop._play_unit(CARD_REGISTRY["Kennen Storm of Shuriken"].instantiate(), "A")
+    assert len(a.trash) == 2 and loop._flow_cost(spell, "A") is None
+    a.base_units.remove(kennen)
+    loop.gs.battlefields[0].add_unit("A", kennen)
+    loop._fire_scoring_trigger("on_conquer", loop.gs.battlefields[0], "A")
+    assert loop._flow_cost(spell, "A")[:2] == (3, 1)
+
+
+def test_kharox_burns_three_and_plays_a_unit_from_their_trash():
+    """'When I become EMPOWERED, choose an opponent. They BURN 3. Then you may
+    choose a unit in their trash and play it, ignoring its cost.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    kharox = _unit("Kharox")
+    a.base_units.append(kharox)
+    _deck(b, SpellCard(name="S1"), UnitCard(name="Theirs", might=3), SpellCard(name="S3"))
+    loop._empower(kharox.card, "A")
+    assert len(b.trash) == 2 and any(u.card.name == "Theirs" for u in a.base_units)
+
+
+def test_tornado_warrior_empowers_something_here_until_end_of_turn():
+    """'HIDDEN. When you play me from face down, you may empower something here.
+    Disempower it at end of turn.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    loop.gs.turn = 3
+    bf = loop.gs.battlefields[0]
+    friend = _unit("Kinkou Lifeblade")
+    bf.add_unit("A", friend)
+    bf.facedown = FacedownCard(card=CARD_REGISTRY["Tornado Warrior"].instantiate(), owner="A", turn_hidden=1)
+    assert loop._play_from_hidden("A", 0)
+    assert friend.empowered
+    loop._end_turn()
+    assert not friend.empowered
+
+
+def test_dragon_form_sets_base_might_to_five():
+    """'Choose a unit. Its base Might becomes 5 this turn. FLOW [3]'"""
+    loop, a, b = _setup()
+    unit = _unit("Unit", 2)
+    a.base_units.append(unit)
+    _cast_now(loop, a, "Dragon Form")
+    loop._recompute_passives()
+    assert unit.might == 5
+
+
+def test_disciple_of_shen_has_shield_three_with_exactly_one_friend():
+    """'I have SHIELD 3 while I'm at a battlefield with exactly one other unit you
+    control.'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    disciple = _unit("Disciple of Shen")
+    bf.add_unit("A", disciple)
+    loop._recompute_passives()
+    assert disciple.keyword_value("SHIELD") == 0
+    bf.add_unit("A", _unit("F1", 1))
+    loop._recompute_passives()
+    assert disciple.keyword_value("SHIELD") == 3
+    bf.add_unit("A", _unit("F2", 1))
+    loop._recompute_passives()
+    assert disciple.keyword_value("SHIELD") == 0
+
+
+def test_horns_of_the_dragon_tank_and_soulspinner_ambush():
+    assert _unit("Horns of the Dragon").has_keyword("TANK")
+    assert _unit("Soulspinner").has_keyword("AMBUSH")
+
+
+def test_keeper_of_law_discounted_with_a_two_unit_battlefield():
+    """'I cost [2] [order] less if you control a battlefield with exactly two
+    units there.'"""
+    loop, a, b = _setup()
+    card = CARD_REGISTRY["Keeper of Law"].instantiate()
+    assert loop._effective_cost(card, a)[:2] == (5, 1)
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("F1", 1))
+    bf.add_unit("A", _unit("F2", 1))
+    assert loop._effective_cost(card, a)[:2] == (3, 0)
+
+
+def test_masa_crashing_thunder_stuns_with_the_additional_cost():
+    """'You may pay [order] as an additional cost to play me. When you play me, if
+    you paid the additional cost, STUN an enemy unit at a battlefield.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    enemy = _unit("Enemy", 3)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    a.hand.append(CARD_REGISTRY["Masa Crashing Thunder"].instantiate())
+    loop._apply_action(a, ("UNIT", 0, None))
+    assert enemy.stunned and a.power_pool[Domain.ORDER] == 4
+
+
+def test_reluctant_leader_grows_when_you_play_another_unit():
+    """'When you play another unit, give me +2 [might] this turn.'"""
+    loop, a, b = _setup()
+    leader = loop._play_unit(CARD_REGISTRY["Reluctant Leader"].instantiate(), "A")
+    assert leader.might == 3
+    loop._play_unit(UnitCard(name="Other", might=1), "A")
+    assert leader.might == 5
+
+
+def test_escaped_grayback_kills_a_friend_to_empower():
+    """'EMPOWER - Kill a friendly unit. EMPOWERED: +2 [might].'"""
+    loop, a, b = _setup()
+    grayback, friend = _unit("Escaped Grayback"), _unit("Friend", 1)
+    a.base_units.extend([grayback, friend])
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+    loop._recompute_passives()
+    assert grayback.empowered and grayback.might == 5 and friend not in a.base_units
+
+
+def test_hungry_wolf_readies_once_after_choosing_an_enemy():
+    """'[order]: Ready me and give me +1 [might] this turn. Use only if you've
+    chosen an enemy unit this turn and only once each turn.'"""
+    loop, a, b = _setup()
+    wolf = _unit("Hungry Wolf")
+    wolf.ready = False
+    a.base_units.append(wolf)
+    enemy = _unit("Enemy", 1)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    assert not any(loop._ability_usable(a, e) for e in loop.activatable_abilities("A")
+                   if e.get("eff") is not None and e["eff"].effect == "sequence")
+    loop._note_chosen(SpellCard(name="Spell"), "A", [enemy])
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "sequence"))
+    assert wolf.ready and wolf.might == 5
+    wolf.ready = False
+    assert not any(loop._ability_usable(a, e) for e in loop.activatable_abilities("A")
+                   if e.get("eff") is not None and e["eff"].effect == "sequence")
+
+
+def test_ki_barrier_prevents_the_next_seven():
+    """'Choose a unit. Prevent the next 7 damage that would be dealt to it this turn.'"""
+    loop, a, b = _setup()
+    unit = _unit("Unit", 9)
+    loop.gs.battlefields[0].add_unit("A", unit)
+    _cast_now(loop, a, "Ki Barrier")
+    REGISTRY["deal_damage"](_ctx(loop, b), {"target": "enemy_unit", "amount": 8, "where": "anywhere"})
+    assert unit.damage == 1
+
+
+def test_lacerate_disempowers_then_kills_a_small_unit():
+    """'Choose a unit. If it's EMPOWERED, disempower it. Then kill it if it has 3
+    [might] or less.' Sunhawk is 4 empowered, 3 without."""
+    loop, a, b = _setup()
+    hawk = _unit("Solari Sunhawk")
+    hawk.empowered = True
+    loop.gs.battlefields[0].add_unit("B", hawk)
+    loop._recompute_passives()
+    assert hawk.might == 4
+    _cast_now(loop, a, "Lacerate")
+    assert hawk.card in b.trash
+    assert CARD_REGISTRY["Lacerate"].instantiate().flow_cost == {"energy": 4, "power": 2, "domain": "ORDER"}
+
+
+def test_noxian_emissary_leaves_two_recruits_when_it_dies_empowered():
+    """'EMPOWERED DEATHKNELL: Play two 1 [might] Recruit unit tokens to your base.'"""
+    for empowered, recruits in ((False, 0), (True, 2)):
+        loop, a, b = _setup()
+        bf = loop.gs.battlefields[0]
+        emissary = _unit("Noxian Emissary")
+        emissary.empowered = empowered
+        bf.add_unit("A", emissary)
+        bf.remove_unit("A", emissary)
+        loop._route_deaths([(emissary, "A")], bf)
+        assert [u.card.name for u in a.base_units] == ["Recruit"] * recruits
+
+
+def test_sacred_protector_deals_combat_damage_only_with_exactly_one_friend():
+    """'I don't deal combat damage unless I'm at a battlefield with exactly one
+    other unit you control.'"""
+    for friends, killed in ((0, False), (1, True)):
+        loop, a, b = _setup()
+        bf = loop.gs.battlefields[0]
+        bf.add_unit("A", _unit("Sacred Protector"))
+        for i in range(friends):
+            bf.add_unit("A", _unit(f"F{i}", 0))
+        enemy = _unit("Enemy", 5)
+        bf.add_unit("B", enemy)
+        _fight(loop)
+        assert (enemy not in bf.units_B) == killed, friends
+
+
+def test_fallen_feline_forbids_the_named_spell_while_at_a_battlefield():
+    """'When you play me, name a spell. While I'm at a battlefield, opponents
+    can't play spells with that name.'"""
+    loop, a, b = _setup()
+    b.trash.append(CARD_REGISTRY["Onslaught"].instantiate())
+    feline = loop._play_unit(CARD_REGISTRY["Fallen Feline"].instantiate(), "A")
+    onslaught = CARD_REGISTRY["Onslaught"].instantiate()
+    assert not loop._play_forbidden(b, onslaught)
+    a.base_units.remove(feline)
+    loop.gs.battlefields[0].add_unit("A", feline)
+    assert loop._play_forbidden(b, onslaught)
+    assert not loop._play_forbidden(a, onslaught)
+
+
+def test_glowstone_burns_its_controllers_units_at_the_end_of_their_turn():
+    """'EMPOWER [rune] [rune]. Disempower this, [tap]: Choose a player. They gain
+    control of this and recall it. At the end of your turn, kill this and deal 5
+    to all units you control.'"""
+    loop, a, b = _setup()
+    stone = CARD_REGISTRY["Glowstone"].instantiate()
+    a.base_gear.append(stone)
+    mine, theirs = _unit("Mine", 9), _unit("Theirs", 9)
+    loop.gs.battlefields[0].add_unit("A", mine)
+    loop.gs.battlefields[1].add_unit("B", theirs)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "empower_self"))
+    assert stone.empowered
+    stone.tapped = False
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "give_this_to_opponent"))
+    assert stone in b.base_gear and not stone.empowered
+    loop._fire_turn_trigger("on_end_of_turn", "A")
+    assert mine.damage == 0 and stone in b.base_gear
+    loop._fire_turn_trigger("on_end_of_turn", "B")
+    assert theirs.damage == 5 and stone in b.trash
+
+
+def test_kayle_justified_empowers_three_times():
+    """'EMPOWER [3]. I can be EMPOWERED up to three times. +2 [might] for each
+    time. While EMPOWERED three times, DEFLECT 3 and GANKING.'"""
+    loop, a, b = _setup()
+    kayle = _unit("Kayle Justified")
+    a.base_units.append(kayle)
+    for times in (1, 2, 3):
+        loop._apply_activated_ability(a, b, _usable(loop, "A", "empower_self"))
+        loop._recompute_passives()
+        assert kayle.might == 3 + 2 * times, times
+    assert kayle.keyword_value("DEFLECT") == 3 and kayle.has_keyword("GANKING")
+    assert not any(loop._ability_usable(a, e) for e in loop.activatable_abilities("A")
+                   if e.get("eff") is not None and e["eff"].effect == "empower_self")
+
+
+def test_kennen_keeper_of_balance_stuns_and_grows_next_to_a_stunned_enemy():
+    """'When you play me or I attack, you may pay [2] to STUN a unit. While
+    there's a stunned enemy unit here, I have +2 [might].'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    bf = loop.gs.battlefields[0]
+    enemy = _unit("Enemy", 3)
+    bf.add_unit("B", enemy)
+    kennen = loop._play_unit(CARD_REGISTRY["Kennen Keeper of Balance"].instantiate(), "A")
+    assert enemy.stunned and a.energy == 18 and kennen.might == 2
+    a.base_units.remove(kennen)
+    bf.add_unit("A", kennen)
+    loop._recompute_passives()
+    assert kennen.might == 4
+
+
+def test_ambessa_respected_kills_a_weaker_enemy_when_attacking_empowered():
+    """'EMPOWERED: [Assault 2]. EMPOWERED: When I attack, kill an enemy unit here
+    with less Might than me.'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    ambessa = _unit("Ambessa Respected and Feared")
+    ambessa.empowered = True
+    bf.add_unit("A", ambessa)
+    weak, strong = _unit("Weak", 6), _unit("Strong", 8)
+    bf.add_unit("B", weak)
+    bf.add_unit("B", strong)
+    loop._recompute_passives()
+    _attack_at(loop)
+    assert ambessa.keyword_value("ASSAULT") == 2
+    assert weak not in bf.units_B and strong in bf.units_B
+
+
+def test_shen_leader_scores_holding_with_exactly_one_friend():
+    """'When I hold, if there is exactly one other unit you control here, you
+    score 1 point.'"""
+    for friends, points in ((0, 0), (1, 1), (2, 0)):
+        loop, a, b = _setup()
+        bf = loop.gs.battlefields[0]
+        bf.add_unit("A", _unit("Shen Leader of the Kinkou Order"))
+        for i in range(friends):
+            bf.add_unit("A", _unit(f"F{i}", 1))
+        before = loop.gs.points_A
+        loop._fire_scoring_trigger("on_hold", bf, "A")
+        assert loop.gs.points_A - before == points, friends
+
+
+def test_assault_and_shield_hold_for_the_whole_combat_only():
+    """ASSAULT: 'While I'm an attacker, I have +X [might]' (§807.1.c-d), from the
+    designation until the combat ends; SHIELD the same for a defender."""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[0]
+    atk, dfn = _unit("Atk", 5, turn_keywords=["ASSAULT 2"]), _unit("Def", 1, turn_keywords=["SHIELD 3"])
+    bf.add_unit("A", atk)
+    bf.add_unit("B", dfn)
+    loop._recompute_passives()
+    assert (atk.might, dfn.might) == (5, 1)
+    _attack_at(loop)
+    assert (atk.might, dfn.might) == (7, 4)
+    _fight(loop)
+    loop._recompute_passives()
+    assert atk.might == 5
+
+
+def test_shuriken_flip_deals_two_then_moves_a_friend():
+    """'Deal 2 to up to one enemy unit at a battlefield, then move a friendly
+    unit. FLOW [3] [rune]'"""
+    loop, a, b = _setup()
+    enemy = _unit("Enemy", 5)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    friend = _unit("Friend", 2)
+    a.base_units.append(friend)
+    _cast_now(loop, a, "Shuriken Flip")
+    assert enemy.damage == 2 and friend not in a.base_units
+    assert CARD_REGISTRY["Shuriken Flip"].instantiate().flow_cost == {"energy": 3, "power": 1, "domain": None}
+
+
+def test_renekton_butcher_energy_only_for_units_and_their_abilities():
+    """'REACTION [rune] [rune], [tap]: ADD [2]. Spend this Energy only to play units
+    or activated abilities of units.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Renekton Butcher of the Sands")
+    a.energy = 0
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "gain_energy"))
+    assert a.energy == 0 and a.earmarked_energy_unit == 2
+    spell = SpellCard(name="Spell", cost_energy=2)
+    assert not loop._can_pay_card(a, spell, 2, 0)
+    brute = _unit("Renekton Brute")
+    a.base_units.append(brute)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "grant_temporary_might"))
+    assert a.earmarked_energy_unit == 1 and brute.might == 5
+    unit = UnitCard(name="Unit", might=1, cost_energy=1)
+    assert loop._pay_card(a, unit, 1, 0) and a.earmarked_energy_unit == 0
+
+
+def test_death_mark_clone_banishes_for_assault_four_and_empowers_zed():
+    """Death Mark: 'BURN 3. Play a 0 [might] Shadow Clone unit token.' The clone:
+    'When I attack, you may banish a unit from your trash. If you do, give me
+    ASSAULT 4 this turn.' Zed Master of Shadows: 'When you banish a card you
+    own, empower me. ACTION Disempower me, [tap]: Discard 1, then draw 1.'"""
+    loop, a, b = _setup()
+    loop.chooser = _always(True)
+    zed = _unit("Zed Master of Shadows")
+    loop.gs.legend_unit_A = zed
+    _deck(a, UnitCard(name="U1", might=1), SpellCard(name="S2"), SpellCard(name="S3"), SpellCard(name="Draw"))
+    _cast_now(loop, a, "Death Mark")
+    assert len(a.trash) == 3
+    clone = next(u for u in a.base_units + loop.gs.battlefields[0].units_A if u.card.name == "Shadow Clone")
+    assert clone.might == 0
+    if clone in a.base_units:
+        a.base_units.remove(clone)
+        loop.gs.battlefields[0].add_unit("A", clone)
+    clone.ready = True
+    loop.gs.battlefields[0].add_unit("B", _unit("Enemy", 1))
+    _attack_at(loop)
+    assert clone.keyword_value("ASSAULT") == 4 and [c.name for c in a.banished] == ["U1"]
+    assert zed.empowered
+    a.hand.append(SpellCard(name="Junk"))
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "sequence"))
+    assert [c.name for c in a.hand] == ["Draw"] and not zed.empowered
+
+
+def test_shen_eye_of_twilight_gives_a_friend_tank():
+    """'ACTION [tap]: Give a friendly unit TANK this turn.'"""
+    loop, a, b = _setup()
+    loop.gs.legend_unit_A = _unit("Shen Eye of Twilight")
+    friend = _unit("Friend", 2)
+    a.base_units.append(friend)
+    loop._apply_activated_ability(a, b, _ability(loop, "A", "give_keyword"))
+    assert friend.has_keyword("TANK") and not loop.gs.legend_unit_A.ready
+
+
+def test_shadow_dash_pulls_an_enemy_and_pumps_a_pair():
+    """'Move an enemy unit to a battlefield where you have units. If you have
+    exactly two units there, they each get +1 [might] this turn.'"""
+    loop, a, b = _setup()
+    bf = loop.gs.battlefields[1]
+    f1, f2 = _unit("F1", 1), _unit("F2", 1)
+    bf.add_unit("A", f1)
+    bf.add_unit("A", f2)
+    enemy = _unit("Enemy", 3)
+    b.base_units.append(enemy)
+    _cast_now(loop, a, "Shadow Dash")
+    assert enemy in bf.units_B and (f1.might, f2.might, enemy.might) == (2, 2, 3)
+
+
+def test_jayce_defender_readies_one_gear_or_two_empowered():
+    """'[1], [tap]: Ready a gear. EMPOWERED: [1], [tap]: Ready 2 gear.'"""
+    for empowered, readied in ((False, 1), (True, 2)):
+        loop, a, b = _setup()
+        jayce = _unit("Jayce Defender of Tomorrow", empowered=empowered)
+        loop.gs.legend_unit_A = jayce
+        gear = [GearCard(name=f"G{i}", cost_energy=2) for i in range(3)]
+        for g in gear:
+            g.tapped = True
+        a.base_gear.extend(gear)
+        loop._apply_activated_ability(a, b, _usable(loop, "A", "ready_gear"))
+        assert sum(not g.tapped for g in gear) == readied and a.energy == 19, empowered
+
+
+def test_acceleration_gate_readies_units_gear_and_runes():
+    """'Ready up to 4 units, gear, and/or runes.'"""
+    loop, a, b = _setup()
+    unit = _unit("Unit", 2)
+    unit.ready = False
+    a.base_units.append(unit)
+    gear = GearCard(name="Gear", cost_energy=2)
+    gear.tapped = True
+    a.base_gear.append(gear)
+    _runes(a, 4)
+    for r in a.rune_pool[Domain.FURY]:
+        r.ready = False
+    a.energy = 0
+    loop.chooser = lambda _l, kind, side, options, default, source: (
+        next(i for o in (gear, unit, None) for i, x in enumerate(options) if x is o or (o is None and isinstance(x, Rune)))
+        if kind.startswith("target") else None)
+    _cast_now(loop, a, "Acceleration Gate")
+    assert unit.ready and not gear.tapped and a.energy == 2
+
+
+def test_ambessa_matriarch_empowers_with_you_and_readies_a_unit():
+    """'When you empower something else, empower me. Disempower me, [rune], [tap]:
+    Ready a unit.'"""
+    loop, a, b = _setup()
+    ambessa = _unit("Ambessa Matriarch of War")
+    loop.gs.legend_unit_A = ambessa
+    hawk = _unit("Solari Sunhawk")
+    hawk.ready = False
+    a.base_units.append(hawk)
+    loop._empower(hawk.card, "A")
+    assert ambessa.empowered
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "ready_unit"))
+    assert hawk.ready and not ambessa.empowered and not ambessa.ready
+
+
+def test_kennen_heart_empowers_on_a_card_played_from_elsewhere():
+    """'When you play a card from anywhere other than your hand, empower me.
+    ACTION Disempower me, [tap]: Give a unit ASSAULT 2 this turn.'"""
+    loop, a, b = _setup()
+    kennen = _unit("Kennen Heart of the Tempest")
+    loop.gs.legend_unit_A = kennen
+    a.hand.append(UnitCard(name="From Hand", might=1, cost_energy=1))
+    loop._apply_action(a, ("UNIT", 0, None))
+    assert not kennen.empowered
+    loop.gs.turn = 3
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", _unit("Holder", 1))
+    bf.facedown = FacedownCard(card=CARD_REGISTRY["Tornado Warrior"].instantiate(), owner="A", turn_hidden=1)
+    loop._play_from_hidden("A", 0)
+    assert kennen.empowered
+    loop._apply_activated_ability(a, b, _usable(loop, "A", "give_temporary_assault"))
+    assert not kennen.empowered
+    assert any(u.keyword_value("ASSAULT") == 2 for u in a.base_units + bf.units_A)
+
+
+def test_lightning_rush_draws_one_of_three_and_trashes_the_rest():
+    """'Look at the top 3 cards of your Main Deck. You may choose a card from among
+    them and draw it. Put the rest into your trash. FLOW [2] [rune]'"""
+    loop, a, b = _setup()
+    _deck(a, SpellCard(name="S1"), SpellCard(name="S2"), SpellCard(name="S3"), SpellCard(name="S4"))
+    _cast_now(loop, a, "Lightning Rush")
+    assert len(a.hand) == 1 and len(a.trash) == 2 and [c.name for c in a.deck.cards] == ["S4"]
+    assert CARD_REGISTRY["Lightning Rush"].instantiate().flow_cost["energy"] == 2

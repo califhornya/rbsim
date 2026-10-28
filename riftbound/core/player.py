@@ -68,6 +68,7 @@ class Player:
     earmarked_power_spell: int = 0      # Kai'Sa: generic power spendable only for spells
     earmarked_power_permanent: int = 0  # Mordekaiser: generic power only for units or gear
     earmarked_energy_spell: int = 0     # Lux Crownguard: energy spendable only for spells
+    earmarked_energy_unit: int = 0      # Renekton Butcher: only for units or units' abilities
 
     rune_deck: RuneDeck = field(default_factory=lambda: RuneDeck([]))
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)

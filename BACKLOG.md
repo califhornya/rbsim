@@ -291,8 +291,15 @@ Open, found on the way:
 - [ ] Vendetta, part 2: VEN-002..077 read (59 cards), 36 tested, 5 fixed:
   Forsaken Baccai / Oasis Raider count runes before the channel, Mesmerize
   (a friendly unit in base too), Clairvoyance (PREDICT 5), Iterative Design
-  ("[Flow] [2] [Mind]" cost parsed). Open: Brutal Hunter has no printed
-  Might in the card data. Rest of Vendetta (VEN-078..): next batch.
+  ("[Flow] [2] [Mind]" cost parsed); Brutal Hunter's Might 4 (from the user).
+- [ ] Vendetta, part 3: VEN-078..156 read (58 cards past part 1), 56 tested
+  (Shady Spectacles already was), 4 fixed: ASSAULT / SHIELD were only added for
+  the damage, now from the Attacker / Defender designation to the end of the
+  combat (§807.1.d: Ambessa Respected and Feared's "less Might than me"),
+  and no longer linger after it; Shadows of the Past read only your trash;
+  Renekton Butcher of the Sands' Energy was free (now only units and units'
+  abilities); Acceleration Gate readied only units (now gear and runes too).
+  Open: Rebuttal (VEN-152) has only "REACTION" in the card data.
 Then: Radiance, Proving Grounds.
 
 ## E. Not modeled at all

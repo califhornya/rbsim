@@ -141,6 +141,11 @@ def _gain_energy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "Use only to play spells": earmarked, spent first on spells.
         ctx._player_for_target(target).earmarked_energy_spell += amount
         return
+    if spec.get("restriction") == "units_only":
+        # "Spend this Energy only to play units or activated abilities of units"
+        # (Renekton Butcher of the Sands).
+        ctx._player_for_target(target).earmarked_energy_unit += amount
+        return
     ctx.gain_energy(amount, target=target)
 
 
@@ -3050,11 +3055,25 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "Ready up to 4 units": the controller's exhausted units, mightiest first.
         exhausted = sorted((u for u in _friendly_units(ctx) if not u.ready and ctx.loop._can_ready(u)),
                            key=lambda u: u.might, reverse=True)
+        if spec.get("gear_and_runes"):
+            # "... units, gear, and/or runes" (Acceleration Gate): then runes (a
+            # readied rune is its Energy back, see ready_runes), then gear.
+            exhausted += [r for rs in ctx.actor.rune_pool.values() for r in rs if not r.ready]
+            if not ctx.loop._readying_blocked(ctx.actor_side):
+                exhausted += [getattr(g, "card", g) for side, _h, g in _gear_entries(ctx, enemy_first=False)
+                              if side == ctx.actor_side and getattr(getattr(g, "card", g), "tapped", False)]
+        from .cards import Card
+        from .player import Rune
         picks = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, exhausted,
                                      exhausted[:int(spec["amount"])], ctx.card)
-        for unit in picks:
-            unit.ready = True
-            ctx.loop._fire_readied(unit, ctx.actor_side)
+        for pick in picks:
+            if isinstance(pick, Rune):
+                ctx.actor.energy += 1
+            elif isinstance(pick, Card):
+                pick.tapped = False
+            else:
+                pick.ready = True
+                ctx.loop._fire_readied(pick, ctx.actor_side)
         return
     if target in ("all_friendly_units_anywhere", "your_units"):
         # "Ready your units" (On the Hunt, Shurelya's Requiem): wherever they are.
@@ -4411,13 +4430,18 @@ def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "actor"))
     player = ctx._player_for_target(target)
     count = int(spec.get("count", spec.get("amount", 1)))
-    cands = sorted((c for c in player.trash if _zone_effect_card_ok(c, spec)),
-                   key=_zone_value, reverse=True)
+    # `scope: all`: "from trashes to their owners' hands" (Shadows of the Past);
+    # baseline: your own cards.
+    owners = [player, ctx.opponent] if spec.get("scope") == "all" else [player]
+    cands = [c for p in owners
+             for c in sorted((c for c in p.trash if _zone_effect_card_ok(c, spec)),
+                             key=_zone_value, reverse=True)]
     picks = ctx.loop.choose_many(_kind("card", spec), ctx._side_for_player(player), cands,
                                  cands[:count], ctx.card)
     for card in picks:
-        player.trash.remove(card)
-        player.hand.append(card)
+        owner = next(p for p in owners if card in p.trash)
+        owner.trash.remove(card)
+        owner.hand.append(card)
 
 
 @effect("discard_card")

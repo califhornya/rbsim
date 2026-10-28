@@ -577,9 +577,13 @@ listed here.
   Part 2: Bottled Constellation fires with the start-of-turn triggers (after
   the channel, before the draw), not at the Main Phase; Sanction empowers a
   friendly unit or disempowers an enemy one (the text allows any unit).
+  Part 3: Acceleration Gate's baseline readies units, then runes (a readied
+  rune is its Energy back), then gear; Shadows of the Past's baseline returns
+  your own units first.
 - "This combat" bonuses end with the combat at that battlefield; Master Yi
-  Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only
-  (like SHIELD), not to "MIGHTY" checks during the combat.
+  Wuju Bladesman's +2 and Forbidding Waste's -2 apply to combat damage only,
+  not to "MIGHTY" checks during the combat. ASSAULT / SHIELD count from the
+  designation until the combat ends (§807.1.d).
 
 ## Radiance Rules FAQ (playriftbound.com, 2026-10-26) — rulings vs engine
 Official FAQ; it overrides the Core Rules where they differ. Audit of each ruling:

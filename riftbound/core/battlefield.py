@@ -64,6 +64,7 @@ class Battlefield:
     # of combat effects happened. Cleared when the combat ends.
     combat_designated: set = field(default_factory=set)
     combat_started: bool = False
+    combat_attacker: Optional[str] = None
     # Gear deployed here (DEPLOY §830), per controlling side.
     gear_A: List[DeployedGear] = field(default_factory=list)
     gear_B: List[DeployedGear] = field(default_factory=list)

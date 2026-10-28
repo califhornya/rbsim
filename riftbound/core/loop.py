@@ -672,6 +672,7 @@ class GameLoop:
         active_player.earmarked_power_spell = 0
         active_player.earmarked_power_permanent = 0
         active_player.earmarked_energy_spell = 0
+        active_player.earmarked_energy_unit = 0
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
@@ -1529,6 +1530,7 @@ class GameLoop:
                     for e in bf._units_for(self.gs.other(side)):
                         if e.stunned:
                             e.passive_might -= min(n, max(0, e.might - 1))
+        self._refresh_combat_keywords()
         # "When my Might becomes 10 or more, empower me" (Renekton Brute); its
         # EMPOWERED abilities then apply (one more pass).
         empowered = False
@@ -3305,6 +3307,8 @@ class GameLoop:
         if isinstance(card, SpellCard):
             power = max(0, (power or 0) - actor.earmarked_power_spell) if power else power
             energy = max(0, energy - actor.earmarked_energy_spell)
+        if isinstance(card, UnitCard):
+            energy = max(0, energy - actor.earmarked_energy_unit)
         if self.gs.showdown_active:
             return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
@@ -3326,6 +3330,10 @@ class GameLoop:
                 power -= from_earmark
             from_earmark = min(energy, actor.earmarked_energy_spell)
             actor.earmarked_energy_spell -= from_earmark
+            energy -= from_earmark
+        if isinstance(card, UnitCard):
+            from_earmark = min(energy, actor.earmarked_energy_unit)
+            actor.earmarked_energy_unit -= from_earmark
             energy -= from_earmark
         if self.gs.showdown_active:
             return self._pay_showdown(actor, energy, power, card.cost_power_domain)
@@ -4584,7 +4592,7 @@ class GameLoop:
         else:
             source = entry["unit"].card
             parsed = self._adjust_ability_cost(entry["unit"], eff, parsed, side)
-            if not self._activated_affordable(ap, entry["unit"], parsed):
+            if not self._activated_affordable(ap, entry["unit"], self._unit_ability_cost(ap, entry["unit"], parsed)):
                 return False
         bf = self.gs.battlefields[entry["bf_idx"]] if entry.get("bf_idx") is not None             else self.gs.battlefields[0]
         return self._check_condition(eff.condition, source, ap,
@@ -4781,6 +4789,14 @@ class GameLoop:
             ap.banished.append(card)
             self._note_banished("A" if ap is self.gs.A else "B")
 
+    @staticmethod
+    def _unit_ability_cost(ap: Player, unit, parsed: dict) -> dict:
+        """A unit's activated ability may also spend Renekton Butcher of the
+        Sands' Energy ("only to play units or activated abilities of units")."""
+        if not isinstance(getattr(unit, "card", None), UnitCard) or not ap.earmarked_energy_unit:
+            return parsed
+        return dict(parsed, energy=max(0, parsed["energy"] - ap.earmarked_energy_unit))
+
     def _activated_affordable(self, ap: Player, unit, parsed: dict) -> bool:
         side = "A" if ap is self.gs.A else "B"
         if parsed["tap"] and unit is not None and not unit.ready:
@@ -4904,6 +4920,13 @@ class GameLoop:
             self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
         parsed = self._adjust_ability_cost(unit, eff, self._parse_activated_cost(eff.cost), side)
         # Pay.
+        if not self._can_pay_energy_and_generic(ap, self._unit_ability_cost(ap, unit, parsed)["energy"],
+                                                parsed["power"], parsed["domain"]):
+            return
+        if isinstance(getattr(unit, "card", None), UnitCard):
+            from_earmark = min(parsed["energy"], ap.earmarked_energy_unit)
+            ap.earmarked_energy_unit -= from_earmark
+            parsed = dict(parsed, energy=parsed["energy"] - from_earmark)
         if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
             return
         if parsed["tap"] and unit is not None:
@@ -5437,6 +5460,22 @@ class GameLoop:
         return (where is not None and where[1] is not None and where[1].combat_started
                 and id(unit) in where[1].combat_designated)
 
+    def _refresh_combat_keywords(self) -> None:
+        """ASSAULT is "+X [might] while I'm an attacker", SHIELD "while I'm a
+        defender" (§807.1.c-d): from the designation on, not only for the
+        damage ("kill an enemy unit here with less Might than me", Ambessa
+        Respected and Feared). Gone once the combat ends."""
+        for bf in self.gs.battlefields:
+            for side in ("A", "B"):
+                for u in bf._units_for(side):
+                    if bf.combat_started and id(u) in bf.combat_designated:
+                        u.bonus_might = u.keyword_value("ASSAULT" if side == bf.combat_attacker else "SHIELD")
+                    else:
+                        u.bonus_might = 0
+        for side in ("A", "B"):
+            for u in self.gs.get_player(side).base_units:
+                u.bonus_might = 0
+
     def _is_attacking(self, unit: UnitInPlay) -> bool:
         """`unit` has the Attacker designation: it is in the combat at a
         battlefield, on the side that attacks there."""
@@ -5902,6 +5941,8 @@ class GameLoop:
                for side in (attacker, defender)}
         for side in new:
             bf.combat_designated.update(id(u) for u in new[side])
+        bf.combat_attacker = attacker
+        self._refresh_combat_keywords()
         for unit in new[attacker]:
             for card in [unit.card] + list(unit.gear):
                 self._resolve_triggered_effects(card, "on_attack", bf, atk_actor, atk_opp,

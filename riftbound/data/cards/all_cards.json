@@ -29672,7 +29672,7 @@
     "domain": "Body",
     "category": "Unit",
     "sub_type": "Noxus",
-    "might": null,
+    "might": 4,
     "cost_energy": 3,
     "cost_power": 1,
     "cost_power_domain": "Body",
@@ -32554,6 +32554,7 @@
         "trigger": "activated",
         "timing": "reaction",
         "amount": 2,
+        "restriction": "units_only",
         "cost": {
           "power": 2,
           "tap": true
@@ -32948,7 +32949,8 @@
         "effect": "ready_units",
         "trigger": "on_cast",
         "amount": 4,
-        "target": "chosen_unit"
+        "target": "chosen_unit",
+        "gear_and_runes": true
       }
     ],
     "variants": [
