@@ -2328,11 +2328,33 @@ def _play_unit_to_controlled_battlefield(ctx: "EffectContext", spec: Mapping[str
 
 @effect("ready_legend")
 def _ready_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Ready your legend" (Hall of Legends, Heartening Soul)."""
-    legend = ctx.loop._legend_unit(ctx.actor_side)
-    if legend is not None and not legend.ready:
+    """ "Ready your legend" (Hall of Legends, Heartening Soul). With several
+    (Neeko Blending In), its player picks an exhausted one (§355.10.g; baseline:
+    the Champion Legend first)."""
+    loop, side = ctx.loop, ctx.actor_side
+    tired = [lu for lu in loop._legend_units(side) if not lu.ready]
+    if tired:
+        legend = loop.choose(_kind("target", spec), side, tired, tired[0], ctx.card)
         legend.ready = True
-        ctx.loop._fire_readied(legend, ctx.actor_side)
+        loop._fire_readied(legend, side)
+
+
+@effect("add_extra_legend")
+def _add_extra_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When you play me, choose one of those Legends and add it to your Legend
+    Zone while I'm on the board" (Neeko Blending In): one of the legends her
+    player chose while building the deck, not in the zone already. Theirs, also
+    for an opponent's Neeko played from the trash (Kharox FAQ). Baseline: the
+    first the deck lists."""
+    loop, side = ctx.loop, ctx.actor_side
+    neeko = loop._find_unit_by_card(ctx.card)
+    if neeko is None:
+        return                      # she left the board before this resolved
+    there = {lu.card.name for lu in loop._legend_units(side)}
+    options = [c for c in loop.gs.extra_legends[side] if c.name not in there]
+    if options:
+        pick = loop.choose(_kind("target", spec), side, options, options[0], ctx.card)
+        loop._add_legend(side, pick, neeko)
 
 
 @effect("return_gear_to_hand")
@@ -2447,8 +2469,7 @@ def _move_empowerment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     loop = ctx.loop
     side = ctx.actor_side
     mine = _units_at(ctx, side, "anywhere")
-    legend = loop._legend_unit(side)
-    holders = [u.card for u in mine + ([legend] if legend else [])] + \
+    holders = [u.card for u in mine + loop._legend_units(side)] + \
         list(ctx.actor.base_gear) + loop._controlled_attached_gear(side)
     src = next((c for c in holders if loop._is_empowered(c) and not _uses_empowered(c)), None)
     dst = next((c for c in holders if not loop._is_empowered(c) and _uses_empowered(c)), None)
@@ -2695,13 +2716,15 @@ def _move_self_to_weaker_enemy_battlefield(ctx: "EffectContext", spec: Mapping[s
 @effect("ready_or_exhaust_legend")
 def _ready_or_exhaust_legend(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Ready or exhaust a legend" (Royal Entourage): ready yours if it is
-    exhausted, else exhaust the opponent's."""
+    exhausted, else exhaust the opponent's (with several legends, the first
+    that qualifies)."""
     loop = ctx.loop
-    mine, theirs = loop._legend_unit(ctx.actor_side), loop._legend_unit(ctx.opponent_side)
-    if mine is not None and not mine.ready:
+    mine = next((lu for lu in loop._legend_units(ctx.actor_side) if not lu.ready), None)
+    theirs = next((lu for lu in loop._legend_units(ctx.opponent_side) if lu.ready), None)
+    if mine is not None:
         mine.ready = True
         loop._fire_readied(mine, ctx.actor_side)
-    elif theirs is not None and theirs.ready:
+    elif theirs is not None:
         loop._exhaust(theirs)
 
 
@@ -4246,7 +4269,7 @@ def _green_father_brush(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     when the Brush gives a friendly unit there +1 [might]; never a Brush with a
     Brush."""
     loop, bf, side = ctx.loop, ctx.battlefield, ctx.actor_side
-    legend = loop._legend_unit(side)
+    legend = loop._find_unit_by_card(ctx.card)       # Ivern, maybe one Neeko added
     if bf is None or legend is None or not legend.ready:
         return
     if bf.card is not None and bf.card.name == "Brush":

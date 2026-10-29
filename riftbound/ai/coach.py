@@ -130,6 +130,9 @@ def _unit_ref(gs, viewer: str, unit) -> Optional[str]:
                 return f"unit:{rel}:base:{j}"
         if (gs.legend_unit_A if side == "A" else gs.legend_unit_B) is unit:
             return f"legend:{rel}"
+        for k, (lu, _neeko) in enumerate(gs.added_legends[side]):
+            if lu is unit:
+                return f"legend:{rel}:{k + 1}"
     return None
 
 
@@ -535,6 +538,8 @@ def _card_texts(obs: Optional[dict], extras: Optional[dict] = None) -> dict:
     for key in ("my_legend", "opp_legend", "my_champion", "opp_champion"):
         if obs.get(key):
             names.add(obs[key])
+    for key in ("my_added_legends", "opp_added_legends"):
+        names |= {name for name, _ready in obs.get(key) or []}
     units = list(obs.get("my_base_units") or []) + list(obs.get("opp_base_units") or [])
     for bf in obs.get("battlefields") or []:
         units += list(bf.get("A") or []) + list(bf.get("B") or [])

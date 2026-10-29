@@ -652,6 +652,39 @@ def load_sideboard_json(path: Path) -> tuple[dict[str, int], dict[str, dict]]:
         return _parse_sideboard(json.load(fh), path)
 
 
+EXTRA_LEGENDS_MAX = 3
+
+
+def load_extra_legends_json(path: Path) -> list[CardSpec]:
+    """The legends a deck chose "in addition to your starting legend" (Neeko
+    Blending In: "If Neeko is in your deck, choose up to 3 different legends",
+    a deckbuilding choice, §103.1): the deck's "extra_legends" list of names.
+    Up to 3, legends, no two (nor the starting legend) with the same name, and
+    only with a card that allows it in the deck (main, sideboard or champion)."""
+    with path.open("r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    names = [str(n).strip() for n in data.get("extra_legends") or []]
+    if not names:
+        return []
+    if len(names) > EXTRA_LEGENDS_MAX:
+        raise ValueError(f"Deck '{path.name}' has {len(names)} extra legends — maximum is {EXTRA_LEGENDS_MAX}.")
+    if len(set(names) | {str(data.get("legend") or "").strip()}) != len(names) + 1:
+        raise ValueError(f"Deck '{path.name}' extra legends must have different names "
+                         f"(from each other and the starting legend)")
+    deck = set(_name_counts(data.get("cards", []), "cards", path)) | \
+        set(_name_counts(data.get("sideboard", []), "sideboard", path)) | {str(data.get("champion") or "")}
+    if not any(n in CARD_REGISTRY and any(es.effect == "add_extra_legend" for es in CARD_REGISTRY[n].effects)
+               for n in deck):
+        raise ValueError(f"Deck '{path.name}' has extra legends but no card that lets it choose them")
+    specs = []
+    for name in names:
+        spec = CARD_REGISTRY.get(name)
+        if spec is None or spec.category != CardType.LEGEND:
+            raise ValueError(f"Deck '{path.name}' extra legend '{name}' is not a legend")
+        specs.append(spec)
+    return specs
+
+
 def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:
     """Load a deck JSON file.
 

@@ -200,17 +200,38 @@ class Player:
     def can_pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if self.energy < cost_energy:
             return False
-        if cost_power is None or cost_power_domain is None:
+        if not cost_power:
             return True
-        if self.power_pool.get(cost_power_domain, 0) < cost_power:
-            return False
-        runes = self.rune_pool.get(cost_power_domain, [])
-        return len(runes) + self.floating_power.get(cost_power_domain, 0) >= cost_power
+        if cost_power_domain is None:
+            # A card with no single power domain: [A], power of any domain
+            # (§135.2.e.6.b; the loop narrows a multi-domain card to its own).
+            return self.can_pay_power_of(cost_power, list(Domain))
+        return self._power_left(cost_power_domain) >= cost_power
+
+    def _power_left(self, domain: Domain) -> int:
+        """Power of `domain` this player can pay now."""
+        return min(self.power_pool.get(domain, 0),
+                   len(self.rune_pool.get(domain, [])) + self.floating_power.get(domain, 0))
+
+    def can_pay_power_of(self, n: int, domains) -> bool:
+        """Whether n power can be paid from any mix of `domains`."""
+        return sum(self._power_left(d) for d in domains) >= n
+
+    def pay_power_of(self, n: int, domains) -> bool:
+        """Pay n power from any mix of `domains`, each from the one with the most left."""
+        domains = list(domains)
+        for _ in range(n):
+            d = max(domains, key=self._power_left)
+            if not self._power_left(d) or not self.pay_cost(0, 1, d):
+                return False
+        return True
 
     def pay_cost(self, cost_energy: int = 0, cost_power: Optional[int] = None, cost_power_domain: Optional[Domain] = None) -> bool:
         if not self.can_pay_cost(cost_energy, cost_power, cost_power_domain):
             return False
         self.energy -= cost_energy
+        if cost_power and cost_power_domain is None:
+            return self.pay_power_of(cost_power, list(Domain))
         if cost_power and cost_power_domain:
             self.power_spent_this_turn += cost_power
             current = self.power_pool.get(cost_power_domain, 0) - cost_power

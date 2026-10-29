@@ -378,7 +378,9 @@ function band(o, b, who) {
     <div class="row">${units.map((u, j) => unitSlot(u, `unit:${who}:base:${j}`, who)).join("")}${gear.map((g, j) => cardSlot(g, `gear:${who}:base:${j}`)).join("")}${units.length || gear.length ? "" : '<span class="muted" style="font-size:12px">vuota</span>'}</div></div>`;
   const legend = p("legend") ? cardSlot(p("legend"), `legend:${who}`, { exhausted: !p("legend_ready"), data: { legend: true, ready: p("legend_ready") } }) : emptySlot("Leggenda");
   const champ = p("champion") ? cardSlot(p("champion"), `champion:${who}`) : emptySlot("Campione già in gioco");
-  const lz = `<div class="zone ${who}"><span class="zl">Leggenda · Campione</span>${legend}${champ}</div>`;
+  const added = (p("added_legends") || []).map(([n, r], k) =>
+    cardSlot(n, `legend:${who}:${k + 1}`, { exhausted: !r, data: { legend: true, ready: r } })).join("");
+  const lz = `<div class="zone ${who}"><span class="zl">Leggenda · Campione</span>${legend}${added}${champ}</div>`;
   const trash = p("trash") || [], banished = p("banished") || [];
   REF[`trash:${who}`] = { name: null, pile: "trash" };
   const piles = `<div class="zone ${who}"><span class="zl">Mazzo · Cimitero${banished.length ? " · Bandite" : ""}</span>

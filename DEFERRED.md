@@ -107,10 +107,10 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   - Keyword extraction now ignores parenthesized reminder text (34 cards lost a
     keyword that was only named in a reminder, e.g. Weaponmaster units' EQUIP).
   - Data: RAD-142 Hexplosive Minefield text supplied by the user. RAD-167 Neeko Blending In
-    ("Neutral") stored as domainless with 1 power pip = [A]; the main card-play path
-    doesn't charge [A] for a domainless card (power pip free) — small undercharge,
-    Neeko is the only such card. Neeko's "choose up to 3 legends at deckbuilding" is a
-    deck-construction choice (§103.1) the match layer doesn't model yet.
+    ("Neutral") stored as domainless with 1 power pip = [A]. [FIXED 2026-10-29] the
+    card-play path charged no power for a card with no single power domain (Neeko and
+    48 multi-domain cards): now [A] / any power of its domains. Neeko's deckbuilding
+    legends: deck JSON "extra_legends" (BACKLOG E).
   - Also new in the rules: copy effects get their own first layer (§479.1), "pick" vs
     "choose" (non-targeting, §355.7), ignored vs negated instructions (§359.3.e.6),
     mandatory requirements vs restrictions (§355.17).
@@ -452,7 +452,7 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   baseline that converts would throw them away); Irelia Graceful (a spell's
   cost depending on what it will choose; modeled 2026-10-29, BACKLOG E); Endless Riches (playing from the
   trash and banishing instead of trashing); Neeko Blending In (a deckbuilding
-  rule: extra legends).
+  rule: extra legends; modeled 2026-10-29, BACKLOG E).
 
 ## Engine choices (branch `engine-choices`, 2026-10-26)
 The choices the rules give players inside effects, costs and combat are made by
@@ -614,9 +614,9 @@ Divergences to fix:
 Already consistent: Standard Move fires exhaust triggers before move triggers (§203).
 
 Rulings on card text not yet implemented (apply when implementing):
-- **Kharox + Neeko, Blending In**: opponent playing your Neeko from your trash adds
-  one of *their own* deckbuilding legends (only if their deck/sideboard has a Neeko).
-  Kharox's "play a unit from their trash" and Neeko's effects are missing.
+- [DONE 2026-10-29] **Kharox + Neeko, Blending In**: opponent playing your Neeko from
+  your trash adds one of *their own* deckbuilding legends (only if their deck/sideboard
+  has a Neeko). Tests in tests/test_neeko_blending_in.py.
 - **Mobilize / Catalyst of Aeons + Seraphic Wyvern**: "if you couldn't channel"
   refers only to the spell's own channel; Wyvern's extra rune failing doesn't make
   you draw (§359.3.e.14.c). Missing: the draw clause; Wyvern applies only to the

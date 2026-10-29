@@ -212,6 +212,9 @@ class Observation:
     opp_legend: Optional[str] = None
     my_legend_ready: bool = False
     opp_legend_ready: bool = False
+    # Legends Neeko Blending In added: (name, ready).
+    my_added_legends: tuple = ()
+    opp_added_legends: tuple = ()
     my_champion: Optional[str] = None
     opp_champion: Optional[str] = None
     my_base_gear: tuple[str, ...] = ()
@@ -262,6 +265,9 @@ class Observation:
             name = unit.card.name if unit is not None else getattr(card, "name", None)
             return name, bool(unit.ready) if unit is not None else False
 
+        def added_legends(side):
+            return tuple((lu.card.name, bool(lu.ready)) for lu, _neeko in gs.added_legends[side])
+
         def champion(side):
             card = gs.champion_A if side == "A" else gs.champion_B
             deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
@@ -309,6 +315,7 @@ class Observation:
             opp_banished=tuple(c.name for c in opp.banished),
             my_legend=my_leg[0], opp_legend=opp_leg[0],
             my_legend_ready=my_leg[1], opp_legend_ready=opp_leg[1],
+            my_added_legends=added_legends(viewer), opp_added_legends=added_legends(other),
             my_champion=champion(viewer), opp_champion=champion(other),
             my_base_gear=tuple(g.name for g in me.base_gear),
             opp_base_gear=tuple(g.name for g in opp.base_gear),
@@ -351,6 +358,8 @@ class Observation:
             "opp_banished": list(self.opp_banished),
             "my_legend": self.my_legend, "opp_legend": self.opp_legend,
             "my_legend_ready": self.my_legend_ready, "opp_legend_ready": self.opp_legend_ready,
+            "my_added_legends": [list(x) for x in self.my_added_legends],
+            "opp_added_legends": [list(x) for x in self.opp_added_legends],
             "my_champion": self.my_champion, "opp_champion": self.opp_champion,
             "my_base_gear": list(self.my_base_gear), "opp_base_gear": list(self.opp_base_gear),
             "my_runes_ready": self.my_runes_ready, "opp_runes_ready": self.opp_runes_ready,

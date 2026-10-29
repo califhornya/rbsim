@@ -599,8 +599,7 @@ class GameLoop:
                 unit.ready = False       # "I can't be readied" (Maduli)
                 continue
             self._fire_readied(unit, active)
-        legend_unit = self._legend_unit(active)
-        if legend_unit is not None:
+        for legend_unit in self._legend_units(active):
             legend_unit.ready = True
         # Untap the player's gear (base + attached) so its [tap] abilities recharge.
         for g in player.base_gear:
@@ -742,9 +741,8 @@ class GameLoop:
         for unit in list(actor.base_units):
             self._resolve_triggered_effects(unit.card, trigger, anchor, actor, opponent,
                                             context_extra={"battlefield": anchor})
-        # The player's Legend (e.g. Jinx Loose Cannon: draw at the start of turn).
-        legend_unit = self._legend_unit(side)
-        if legend_unit is not None:
+        # The player's legends (e.g. Jinx Loose Cannon: draw at the start of turn).
+        for legend_unit in self._legend_units(side):
             self._resolve_triggered_effects(legend_unit.card, trigger, anchor, actor, opponent,
                                             context_extra={"battlefield": anchor})
         # Unattached gear ("At the end of your turn, ...": Dazzling Aurora).
@@ -824,9 +822,8 @@ class GameLoop:
                 if c in actor.banished:
                     actor.banished.remove(c)
                     actor.hand.append(c)
-        # The scoring player's Legend ("When you conquer, ready me": Sett).
-        legend_unit = self._legend_unit(side)
-        if legend_unit is not None:
+        # The scoring player's legends ("When you conquer, ready me": Sett).
+        for legend_unit in self._legend_units(side):
             self._resolve_triggered_effects(legend_unit.card, trigger, bf, actor, opponent,
                                             context_extra={"battlefield": bf})
         # "When an opponent scores, ..." (Sumpworks Map).
@@ -852,7 +849,8 @@ class GameLoop:
             actor = self.gs.get_player(side)
             bf = next((b for b in self.gs.battlefields
                        if unit in (b.units_A if side == "A" else b.units_B)), None)
-            if bf is None and unit not in actor.base_units and unit is not self._legend_unit(side):
+            if bf is None and unit not in actor.base_units and \
+                    not any(unit is lu for lu in self._legend_units(side)):
                 continue
             bf = bf or self.gs.battlefields[0]
             self._resolve_triggered_effects(unit.card, "on_exhaust", bf, actor,
@@ -1379,9 +1377,8 @@ class GameLoop:
                                                            "triggering_card": trig,
                                                            **(extra or {})})
         # Unattached gear ("When you play a unit, ...": Blood Rose, Fresh Beans)
-        # and the Legend ("When you win a combat, draw 1": Draven).
-        legend_unit = self._legend_unit(side)
-        listeners = list(actor.base_gear) + ([legend_unit.card] if legend_unit is not None else [])
+        # and the legends ("When you win a combat, draw 1": Draven).
+        listeners = list(actor.base_gear) + [lu.card for lu in self._legend_units(side)]
         for g in listeners:
             if g is exclude_card:
                 continue
@@ -1479,8 +1476,38 @@ class GameLoop:
             handler(ctx, sub)
 
     def _legend_unit(self, side: str):
-        """The in-play UnitInPlay for a side's Legend, or None."""
+        """The in-play UnitInPlay for a side's Champion Legend, or None."""
         return self.gs.legend_unit_A if side == "A" else self.gs.legend_unit_B
+
+    def _legend_units(self, side: str) -> list:
+        """Every legend in `side`'s Legend Zone: the Champion Legend, then the
+        ones Neeko Blending In added."""
+        lu = self._legend_unit(side)
+        return ([lu] if lu is not None else []) + [leg for leg, _neeko in self.gs.added_legends[side]]
+
+    def _legend_with(self, side: str, verb: str, ready: bool = False):
+        """`side`'s legend whose card has the effect `verb` (a ready one with
+        `ready`), or None."""
+        return next((lu for lu in self._legend_units(side)
+                     if self._has_effect(lu.card, verb) and (lu.ready or not ready)), None)
+
+    def _add_legend(self, side: str, card: Card, neeko: UnitInPlay) -> None:
+        """Add a legend to `side`'s Legend Zone while `neeko` is on the board
+        (Neeko Blending In): a new object, created ready (§174.2.b)."""
+        legend = UnitInPlay(card=CARD_REGISTRY[card.name].instantiate(), ready=True)
+        self.gs.added_legends[side].append((legend, neeko))
+        if self.verbose:
+            print(f"  {self.gs.get_player(side).name} adds {card.name} to the Legend Zone")
+        self._recompute_passives()
+
+    def _drop_added_legends(self) -> None:
+        """A legend Neeko added leaves the Legend Zone (to Banishment, §107.4.d.2)
+        once she isn't on the board."""
+        for side in ("A", "B"):
+            kept = [(leg, neeko) for leg, neeko in self.gs.added_legends[side]
+                    if self._locate_unit(neeko) is not None]
+            if len(kept) != len(self.gs.added_legends[side]):
+                self.gs.added_legends[side] = kept
 
     def _all_units_in_play(self):
         """Every UnitInPlay across battlefields and both bases, plus legends."""
@@ -1490,9 +1517,8 @@ class GameLoop:
             units.extend(bf.units_B)
         units.extend(self.gs.A.base_units)
         units.extend(self.gs.B.base_units)
-        for lu in (self.gs.legend_unit_A, self.gs.legend_unit_B):
-            if lu is not None:
-                units.append(lu)
+        units.extend(self._legend_units("A"))
+        units.extend(self._legend_units("B"))
         return units
 
     def _spend_buff(self, unit: UnitInPlay, side: Optional[str] = None) -> None:
@@ -1572,6 +1598,7 @@ class GameLoop:
         grants into the passive_might / passive_keywords overlays. Called whenever
         board state changes so `UnitInPlay.might` stays correct (Round 4 Tier 2)."""
         self._drain_rune_recycles()
+        self._drop_added_legends()
         for u in self._all_units_in_play():
             if u.copied_from is not None and not any(self._has_effect(g, "copy_friendly_unit") for g in u.gear):
                 u.card, u.copied_from = u.copied_from, None     # Shady Spectacles came off
@@ -1598,8 +1625,7 @@ class GameLoop:
             opponent = self.gs.get_player(self.gs.other(side))
             for unit in list(actor.base_units):
                 self._apply_unit_passives(unit, side, anchor, actor, opponent)
-            legend_unit = self._legend_unit(side)
-            if legend_unit is not None:
+            for legend_unit in self._legend_units(side):
                 self._apply_unit_passives(legend_unit, side, anchor, actor, opponent)
             # Unattached non-Equipment gear ("Your units have +2 [might]":
             # Ephemeral Ward). An Equipment's passives are for its unit.
@@ -1910,9 +1936,7 @@ class GameLoop:
             for bf in self.gs.battlefields:
                 us.extend(bf.units_A if side == "A" else bf.units_B)
             us.extend(actor.base_units)
-            lu = self.gs.legend_unit_A if side == "A" else self.gs.legend_unit_B
-            if lu is not None:
-                us.append(lu)
+            us.extend(self._legend_units(side))
             return us
 
         if ctype == "you_have_n_or_more_runes":
@@ -2029,8 +2053,8 @@ class GameLoop:
         if ctype == "you_played_n_spells_this_turn":
             return self.gs.spells_played_this_turn.get(side, 0) >= _threshold()
         if ctype == "your_legend_exhausted":
-            legend = self._legend_unit(side)
-            return legend is not None and not legend.ready
+            # "ready your legend": one of them is exhausted (§355.10.g).
+            return any(not lu.ready for lu in self._legend_units(side))
         if ctype == "holder_didnt_conquer_this_turn":
             unit = extra.get("triggering_unit")
             return unit is not None and unit.conquered_turn != self.gs.turn
@@ -2207,7 +2231,7 @@ class GameLoop:
             return any(bf.control() == other for bf in self.gs.battlefields)
         if ctype == "you_control_no_other_units":
             return not [u for u in _friendly_units()
-                        if u.card is not card and u is not self._legend_unit(side)]
+                        if u.card is not card and not any(u is lu for lu in self._legend_units(side))]
         if ctype == "card_with_my_name_in_trash":
             return any(c.name == card.name and c is not card for c in actor.trash)
         if ctype == "cards_in_hand_at_most":
@@ -2900,8 +2924,7 @@ class GameLoop:
         return champ if champ is not None and not deployed and champ.has_keyword("HIDDEN") else None
 
     def _can_hide_pay(self, ap: Player, side: str) -> bool:
-        legend = self._legend_unit(side)
-        teemo = legend is not None and self._has_effect(legend.card, "hide_for_energy")
+        teemo = self._legend_with(side, "hide_for_energy") is not None
         return (self.gs.free_hide.get(side) == self.gs.turn or self._can_pay_generic_power(ap, 1)
                 or (teemo and ap.energy >= 1))
 
@@ -2996,8 +3019,8 @@ class GameLoop:
         elif ac.get("exhaust_friendly_unit"):
             verb, objs = "exhaust", [u for u in units if u.ready]
         elif ac.get("exhaust_legend"):
-            legend = self._legend_unit(side)
-            verb, objs = "exhaust", [legend] if legend is not None and legend.ready else []
+            # "Exhaust your legend": with several, any one (§355.10.g).
+            verb, objs = "exhaust", [lu for lu in self._legend_units(side) if lu.ready]
         elif ac.get("return_friendly_unit"):
             verb, objs = "return", units
         else:
@@ -3135,8 +3158,8 @@ class GameLoop:
             for u in p.base_units:
                 if u.card is card:
                     return u
-        for lu in (self.gs.legend_unit_A, self.gs.legend_unit_B):
-            if lu is not None and lu.card is card:
+        for lu in self._legend_units("A") + self._legend_units("B"):
+            if lu.card is card:
                 return lu
         return None
 
@@ -3148,7 +3171,6 @@ class GameLoop:
 
         def player_sig(p: Player):
             side = "A" if p is gs.A else "B"
-            legend = self._legend_unit(side)
             return (
                 len(p.hand), len(p.deck.cards), len(p.trash), len(p.banished),
                 len(p.base_units), len(p.base_gear), p.energy,
@@ -3157,7 +3179,7 @@ class GameLoop:
                 tuple(sorted(u.card.name for u in p.base_units if u.ready)),
                 sum(u.might for u in p.base_units),
                 sum(1 for g in p.base_gear if getattr(g, "tapped", False)),
-                legend is not None and legend.ready,
+                tuple(lu.ready for lu in self._legend_units(side)),
                 p.earmarked_energy_showdown, p.earmarked_power_gear,
             )
 
@@ -3505,9 +3527,7 @@ class GameLoop:
             out.append((u.card, anchor))
             out.extend((g, anchor) for g in u.gear)
         out.extend((g, anchor) for g in ap.base_gear)
-        legend = self._legend_unit(side)
-        if legend is not None:
-            out.append((legend.card, anchor))
+        out.extend((lu.card, anchor) for lu in self._legend_units(side))
         return out
 
     def _next_card_discount(self, card: Card, side: str):
@@ -3518,6 +3538,17 @@ class GameLoop:
             if _zone_effect_card_ok(card, {"target_filter": d.get("filter") or {}}):
                 return d
         return None
+
+    @staticmethod
+    def _power_domains(card: Card) -> list:
+        """The domains that pay the power of a card with no single power domain:
+        a multi-domain card's ("Mind/Chaos": any power of its domains,
+        §135.2.e.6.c), any for a domainless one ([A], Neeko Blending In,
+        §135.2.e.6.b)."""
+        spec = CARD_REGISTRY.get(card.name)
+        raw = str((spec.raw.get("cost_power_domain") if spec is not None else None) or "")
+        names = [p.strip().upper() for p in raw.split("/")]
+        return [Domain[n] for n in names if n in Domain.__members__] or list(Domain)
 
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
@@ -3535,6 +3566,11 @@ class GameLoop:
             energy = max(0, energy - actor.earmarked_energy_spell)
         if isinstance(card, UnitCard):
             energy = max(0, energy - actor.earmarked_energy_unit)
+        if power and card.cost_power_domain is None:
+            # Its power from the card's domains, or any (_power_domains).
+            if not actor.can_pay_power_of(power, self._power_domains(card)):
+                return False
+            power = None
         if self.gs.showdown_active:
             return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
@@ -3562,6 +3598,10 @@ class GameLoop:
             from_earmark = min(energy, actor.earmarked_energy_unit)
             actor.earmarked_energy_unit -= from_earmark
             energy -= from_earmark
+        if power and card.cost_power_domain is None:
+            if not actor.pay_power_of(power, self._power_domains(card)):
+                return False
+            power = None
         if self.gs.showdown_active:
             return self._pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.pay_cost(energy, power, card.cost_power_domain)
@@ -3601,9 +3641,7 @@ class GameLoop:
             sources.append((u.card, anchor))
             sources.extend((g, anchor) for g in u.gear)
         sources.extend((g, anchor) for g in actor.base_gear)
-        legend_unit = self._legend_unit(side)
-        if legend_unit is not None:
-            sources.append((legend_unit.card, anchor))
+        sources.extend((lu.card, anchor) for lu in self._legend_units(side))
         # Its own "When you play me from face down" (Tornado Warrior).
         own = self._find_unit_by_card(card)
         own_bf = (self._locate_unit(own)[1] if own is not None else None) or anchor
@@ -4601,8 +4639,7 @@ class GameLoop:
                     out.append({"type": "bf_ability", "bf": bf, "bf_idx": bf_idx, "eff": eff})
         for unit in ap.base_units:
             _add_unit_abilities(unit, None)
-        legend_unit = self._legend_unit(side)
-        if legend_unit is not None:
+        for legend_unit in self._legend_units(side):
             _add_unit_abilities(legend_unit, None)
             # "While you control this battlefield, friendly legends have '[tap]:
             # Attach an Equipment ...'" (Forge of the Fluft); "Friendly legends
@@ -4796,13 +4833,12 @@ class GameLoop:
         """A spell that resolved or was countered goes to the trash, or is
         banished if it was played with FLOW."""
         side = "A" if owner is self.gs.A else "B"
-        legend = self._legend_unit(side)
+        legend = self._legend_with(side, "jhin_pile")
         if getattr(card, "_flow_banish", False):
             card._flow_banish = False
             owner.banished.append(card)
             self._note_banished(side)
-        elif legend is not None and self._has_effect(legend.card, "jhin_pile") \
-                and getattr(card, "_spent", 0) >= 4:
+        elif legend is not None and getattr(card, "_spent", 0) >= 4:
             # "if you spent [4] or more, you may banish it. Then, if there are four
             # spells banished with me, put each in its trash, channel 4 runes, and
             # draw 1." (Jhin Virtuoso)
@@ -5478,9 +5514,9 @@ class GameLoop:
             dead_unit.ward_turn = -1
             owner.pay_cost(0, 1, Domain.FURY)
             return saved()
-        legend = self._legend_unit(owner_side)
-        if repl is None and legend is not None and legend.ready and dead_unit.might_counters > 0 \
-                and self._has_effect(legend.card, "sett_save") and self._can_pay_generic_power(owner, 1) \
+        legend = self._legend_with(owner_side, "sett_save", ready=True)
+        if repl is None and legend is not None and dead_unit.might_counters > 0 \
+                and self._can_pay_generic_power(owner, 1) \
                 and self.choose("optional:sett_save", owner_side, [True, False], True, legend.card):
             # "If a buffed unit you control would die, you may pay [rune],
             # exhaust me, and spend its buff to heal it, exhaust it, and recall
@@ -5923,9 +5959,8 @@ class GameLoop:
     def _gold_bonus(self, side: str) -> bool:
         """ "While your score is within 3 points of the Victory Score, your Gold
         ADD an additional [1]" (Renata Glasc Chem-Baroness)."""
-        legend = self._legend_unit(side)
         points = self.gs.points_A if side == "A" else self.gs.points_B
-        return (legend is not None and self._has_effect(legend.card, "gold_bonus")
+        return (self._legend_with(side, "gold_bonus") is not None
                 and points >= self.gs.victory_score - 3)
 
     def _readying_blocked(self, side: str) -> bool:
@@ -6524,8 +6559,7 @@ class GameLoop:
             mods[id(bf._units_for(defender)[0])] = -2
         # "While a friendly unit defends alone, it gets +2 [might]" (Master Yi
         # Wuju Bladesman, the defender's legend).
-        legend = self._legend_unit(defender)
-        if legend is not None and self._has_effect(legend.card, "lone_defender_bonus") \
+        if self._legend_with(defender, "lone_defender_bonus") is not None \
                 and len(bf._units_for(defender)) == 1:
             lone = id(bf._units_for(defender)[0])
             mods[lone] = mods.get(lone, 0) + 2

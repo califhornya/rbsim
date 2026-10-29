@@ -19,7 +19,8 @@ from riftbound.core.cards import Card
 from riftbound.core.player import Player, Deck, RuneDeck, Rune
 from riftbound.core.state import GameState
 from riftbound.core.battlefield import Battlefield
-from riftbound.registry.cards_registry import CARD_REGISTRY, load_deck_json, load_sideboard_json
+from riftbound.registry.cards_registry import (CARD_REGISTRY, load_deck_json, load_extra_legends_json,
+                                               load_sideboard_json)
 
 # Agents. Imported here (not in the CLI) so every entry point builds games the
 # same way. Agents only depend on Player, so there is no import cycle with core.
@@ -210,5 +211,8 @@ def build_game(
         champion_B=champion_b,
         legend_A=legend_a,
         legend_B=legend_b,
+        # Neeko Blending In's deckbuilding legends: from the file, like the legend.
+        extra_legends={"A": [s.instantiate() for s in load_extra_legends_json(deck_a_path)],
+                       "B": [s.instantiate() for s in load_extra_legends_json(deck_b_path)]},
         battlefields=battlefields,
     )

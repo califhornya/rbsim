@@ -96,6 +96,8 @@ def test_search_makes_the_choices_inside_an_action():
     gs.battlefields[0].add_unit("B", big)
     a.hand.append(CARD_REGISTRY["Death from Below"].instantiate())
     a.energy = 10
+    from riftbound.core.enums import Domain
+    a.add_power(Domain.CHAOS, 1)                # its [fury] or [chaos]
     torch.manual_seed(0)
     a.agent = BoardValue(a, RiftboundNet(), iterations=60, rng=random.Random(0))
     loop = GameLoop(gs)

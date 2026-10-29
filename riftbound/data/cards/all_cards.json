@@ -39608,7 +39608,12 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "add_extra_legend",
+        "trigger": "on_play"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-167",

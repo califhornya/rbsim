@@ -53,6 +53,12 @@ class GameState:
     legend_B: Optional[Card] = None
     legend_unit_A: Optional["UnitInPlay"] = None
     legend_unit_B: Optional["UnitInPlay"] = None
+    # Neeko Blending In: the legends each player chose while building the deck
+    # (§103.1; side -> cards, outside the game), and the ones she added to the
+    # Legend Zone (side -> [(legend UnitInPlay, the Neeko UnitInPlay)]): not
+    # Champion Legends, removed when their Neeko leaves the board (§107.4.d.2).
+    extra_legends: dict = field(default_factory=lambda: {"A": [], "B": []})
+    added_legends: dict = field(default_factory=lambda: {"A": [], "B": []})
 
     # Victory points via Hold/Conquer
     points_A: int = 0

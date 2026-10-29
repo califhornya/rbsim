@@ -464,9 +464,31 @@ tests/test_corpus_vendetta.py.
   controller's cards. The heuristic agent now plays `trash_play` entries
   (Undying Legion too). Tests in tests/test_endless_riches.py.
 
-Neeko Blending In, Seraphine Starry-Eyed Songstress
+- [DONE] Neeko Blending In: "If Neeko is in your deck, choose up to 3
+  different legends in addition to your starting legend. When you play me,
+  choose one of those Legends and add it to your Legend Zone while I'm on the
+  board." Deckbuilding (§103.1): the deck JSON's "extra_legends" (up to 3,
+  legends, no name twice nor the starting legend's, only with a Neeko in the
+  main deck, sideboard or champion: `load_extra_legends_json`), in
+  `GameState.extra_legends`. Playing her (effect `add_extra_legend`) adds one
+  not in the zone yet, a new legend created ready (§174.2.b), in
+  `GameState.added_legends` with her unit; it leaves when she is off the board
+  (§107.4.d.2; `_drop_added_legends` in `_recompute_passives`). Every legend
+  now works from the zone (`GameLoop._legend_units`, `_legend_with`): abilities,
+  triggers, passives, "friendly legends have", Awaken readying; "ready / exhaust
+  your legend" takes one of them (§355.10.g). The legends are her player's,
+  also for an opponent's Neeko played with Kharox (FAQ). Baseline: the first
+  the deck lists. Coach shows them next to the legend (not visually checked).
+  Found on the way: a card's power with no single domain was free. Neeko's is
+  [A] (any domain, §135.2.e.6.b); the 48 multi-domain cards ("Mind/Chaos":
+  Moonfall, Death from Below, Icathian Rain, Tibbers ...) now pay any power of
+  their domains, mixed (§135.2.e.6.c; `GameLoop._power_domains`,
+  `Player.pay_power_of`); `Player.can_pay_cost` with no domain is [A] (agents'
+  checks). Golden regenerated. Tests in tests/test_neeko_blending_in.py.
+
+Left: Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
-units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
+units for [2] less; the cost path has no hook for it); FAQ rulings for
 Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
@@ -478,4 +500,7 @@ can only play the first (the search and heuristic agents see both). The net
 sees two battlefields (encoding N_BF = 2): with the Baron Pit (a third) it
 doesn't see the Pit, and since the base's move index becomes 3, its moves to
 or from the base or Pit map to wrong slots (the search and heuristic agents
-see all three).
+see all three). The net sees one legend per player: not the ones Neeko Blending
+In adds (their abilities are still in its action space). The heuristic agents
+check a multi-domain card's power as any domain's (the engine pays it from its
+domains: an agent may try a card it can't pay, a no-op that ends its turn).
