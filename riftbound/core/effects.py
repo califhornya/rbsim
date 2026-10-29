@@ -3087,20 +3087,44 @@ def _cant_move_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("give_gear_temporary")
 def _give_gear_temporary(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Give a gear TEMPORARY" (Turn to Dust): it dies at the start of its
-    controller's next Beginning Phase. Baseline pick: the opponent's most
-    expensive gear (attached, in base or deployed), else none."""
-    entries = [(side, holder, g) for side, holder, g in _gear_entries(ctx, enemy_first=True)
-               if side == ctx.opponent_side]
-    if not entries:
+    """ "Give a gear TEMPORARY" (Turn to Dust); `or_unit`: "Give a unit at a
+    battlefield or a gear TEMPORARY" (Fading Memories). Either player's gear,
+    where it is (attached, in base or deployed), or unit at a battlefield: it
+    dies at the start of its controller's next Beginning Phase. A gear's
+    DEFLECT is paid as it is chosen. Baseline: the opponent's mightiest unit,
+    else their costliest gear, else your cheapest gear (a token first), else
+    your weakest unit."""
+    from .combat import UnitInPlay
+    loop = ctx.loop
+
+    def cost(e):
+        return int(getattr(getattr(e[2], "card", e[2]), "cost_energy", 0) or 0)
+    entries = [e for e in _gear_entries(ctx, enemy_first=True)
+               if loop._can_pay_generic_power(ctx.actor, loop._gear_deflect_tax(e[0], ctx.actor_side, e[2]))]
+    units = _choosable(ctx, [u for bf in loop.gs.battlefields for u in bf.units_A + bf.units_B])         if spec.get("or_unit") else []
+    theirs = [u for u in units if loop._locate_unit(u)[0] == ctx.opponent_side]
+    their_gear = [e for e in entries if e[0] == ctx.opponent_side]
+    my_gear = [e for e in entries if e[0] == ctx.actor_side]
+    if theirs:
+        pick = max(theirs, key=lambda u: u.might)
+    elif their_gear:
+        pick = max(their_gear, key=cost)
+    elif my_gear:
+        pick = min(my_gear, key=lambda e: (not getattr(getattr(e[2], "card", e[2]), "is_token", False), cost(e)))
+    elif units:
+        pick = min(units, key=lambda u: (not u.is_token, u.might))
+    else:
         return
-    side, holder, gear = max(entries, key=lambda e: int(getattr(getattr(e[2], "card", e[2]),
-                                                                 "cost_energy", 0) or 0))
-    if isinstance(holder, Battlefield):
-        holder.gear_for(side).remove(gear)        # a deployed gear: give it base status
-        ctx.loop.gs.get_player(side).base_gear.append(gear.card)
-        gear = gear.card
-    gear._temporary = True
+    pick = loop.choose(_kind("target", spec), ctx.actor_side, units + entries, pick, ctx.card)
+    if isinstance(pick, UnitInPlay):
+        loop._note_chosen(ctx.card, ctx.actor_side, [pick])
+        pick.granted_keywords.append("TEMPORARY")
+        return
+    side, _holder, gear = pick
+    tax = loop._gear_deflect_tax(side, ctx.actor_side, gear)
+    if tax and getattr(loop, "_declaring", None) is None:
+        loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
+    getattr(gear, "card", gear)._temporary = True
 
 
 @effect("blink_unit")
@@ -3396,6 +3420,49 @@ def _ready_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             where = ctx.loop._locate_unit(unit)
             if where is not None:
                 ctx.loop._fire_readied(unit, where[0])
+
+
+@effect("ready_something")
+def _ready_something(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Ready something else that's exhausted" (Miss Fortune Captain, Jayce
+    Brilliant Inventor): an exhausted unit, legend, gear (attached, in base or
+    deployed) or rune, yours first, then the opponent's; a rune readied is +1
+    Energy (the engine's rune model, as ready_runes). Baseline: your
+    mightiest unit, else your legend, else your costliest gear, else a rune;
+    never the opponent's."""
+    from .combat import UnitInPlay
+    from .player import Rune
+    loop, gs = ctx.loop, ctx.loop.gs
+    gear = _gear_entries(ctx, enemy_first=False)
+    owner, options = {}, []
+    for side in (ctx.actor_side, ctx.opponent_side):
+        units = sorted((u for u in _units_at(ctx, side, "anywhere")
+                        if u.card is not ctx.card and not u.ready and loop._can_ready(u)),
+                       key=lambda u: -u.might)
+        legends = [lu for lu in loop._legend_units(side) if lu.card is not ctx.card and not lu.ready]
+        tapped = sorted((g for s_, _h, g in gear if s_ == side and getattr(g, "card", g) is not ctx.card
+                         and getattr(getattr(g, "card", g), "tapped", False)),
+                        key=lambda g: -int(getattr(getattr(g, "card", g), "cost_energy", 0) or 0))
+        runes = [r for rs in gs.get_player(side).rune_pool.values() for r in rs if not r.ready]
+        for x in units + legends + tapped + runes:
+            owner[id(x)] = side
+            options.append(x)
+    mine = [x for x in options if owner[id(x)] == ctx.actor_side]
+    if not mine and loop.chooser is None:
+        return
+    pick = loop.choose(_kind("target", spec), ctx.actor_side, options, (mine or options)[0], ctx.card)         if options else None
+    if pick is None:
+        return
+    side = owner[id(pick)]
+    if isinstance(pick, UnitInPlay):
+        pick.ready = True
+        if loop._locate_unit(pick) is not None:
+            loop._note_chosen(ctx.card, ctx.actor_side, [pick])
+            loop._fire_readied(pick, side)
+    elif isinstance(pick, Rune):
+        gs.get_player(side).energy += 1             # a rune
+    else:
+        getattr(pick, "card", pick).tapped = False
 
 
 @effect("score_point")
@@ -3860,6 +3927,9 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     target = str(spec.get("target", "")).lower()
     single = str(spec.get("scope", "single")).lower() == "single"
     # A gear to choose (Detonate "Kill a gear", Factory Recall, Turn to Dust).
+    if effect == "give_gear_temporary" and spec.get("or_unit") and _choosable(
+            ctx, [u for bf in ctx.loop.gs.battlefields for u in bf.units_A + bf.units_B]):
+        return True                    # Fading Memories: a unit at a battlefield
     if single and (effect in ("return_gear_to_hand", "give_gear_temporary") or
                    (effect == "kill_gear" and target in ("", "none", "chosen_unit", "gear", "enemy_gear",
                                                          "chosen_gear"))):
@@ -4309,29 +4379,10 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     unit" (Rebuke, Gust): an enemy first. `to: deck_bottom`: recycled instead
     ("recycle me": Elnuk Herd). `then_play_smaller`: "You may play a unit with
     less Might than that unit had, ignoring its cost" (Transpositionist)."""
-    gs = ctx.loop.gs
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "actor")}, bias="enemy"):
-        if ctx.loop._gangplank_redirect(unit, spec):
-            continue
         had = unit.might
-        where = _take_off_board(ctx, unit)          # a base or any battlefield
-        if where is None:
-            continue
-        if spec.get("then_play_smaller"):
+        if _return_unit(ctx, unit, spec) and spec.get("then_play_smaller"):
             ctx.extra["recalled_might"] = had
-        side, bf = where
-        owner = gs.get_player(side)
-        owner.base_gear.extend(unit.gear)
-        unit.gear = []
-        if not getattr(unit, "is_token", False):
-            owner_of = gs.get_player(ctx.loop._owner_of(unit.card, side))
-            if spec.get("to") == "deck_bottom":
-                owner_of.deck.cards.insert(0, unit.card)
-            else:
-                owner_of.hand.append(unit.card)
-            unit.card._owner = None
-        # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
-        ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
     if spec.get("then_play_smaller") and "recalled_might" in ctx.extra:
         had = ctx.extra.pop("recalled_might")
         options = [c for c in ctx.actor.hand if _card_category_name(c) in ("UNIT", "CHAMPION")
@@ -4341,6 +4392,77 @@ def _recall_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                                    max(options, key=_zone_value), ctx.card)
             ctx.actor.hand.remove(card)
             ctx.loop._play_unit(card, ctx.actor_side, from_zone="hand")
+
+
+def _return_unit(ctx: "EffectContext", unit, spec: Mapping[str, Any]) -> bool:
+    """`unit` leaves the board (a base or any battlefield) to its owner's hand
+    (`to: deck_bottom`: recycled): a token ceases to exist, its gear goes to
+    base. False if it didn't leave."""
+    gs = ctx.loop.gs
+    if ctx.loop._gangplank_redirect(unit, spec):
+        return False
+    where = _take_off_board(ctx, unit)
+    if where is None:
+        return False
+    side, bf = where
+    owner = gs.get_player(side)
+    owner.base_gear.extend(unit.gear)
+    unit.gear = []
+    if not getattr(unit, "is_token", False):
+        owner_of = gs.get_player(ctx.loop._owner_of(unit.card, side))
+        if spec.get("to") == "deck_bottom":
+            owner_of.deck.cards.insert(0, unit.card)
+        else:
+            owner_of.hand.append(unit.card)
+        unit.card._owner = None
+    # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
+    ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
+    return True
+
+
+@effect("return_friendly_to_hand")
+def _return_friendly_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Return another friendly gear, unit, or facedown card to its owner's
+    hand" (Pack of Wonders): a unit anywhere, a gear wherever it is (attached,
+    in base or deployed), a facedown card you control. Baseline: the first
+    that isn't a token (units, then gear, then facedown cards): a token
+    ceases to exist."""
+    from .combat import UnitInPlay
+    loop, side = ctx.loop, ctx.actor_side
+    gs = loop.gs
+    units = _choosable(ctx, [u for u in _units_at(ctx, side, "anywhere") if u.card is not ctx.card])
+    gear = [e for e in _gear_entries(ctx, enemy_first=False)
+            if e[0] == side and getattr(e[2], "card", e[2]) is not ctx.card]
+    facedowns = [(bf, fd) for bf in gs.battlefields for fd in bf.facedowns if fd.owner == side]
+    options = units + gear + facedowns
+    if not options:
+        return
+
+    def token(x):
+        obj = x if isinstance(x, UnitInPlay) else x[-1]
+        return bool(getattr(obj, "is_token", False) or getattr(getattr(obj, "card", None), "is_token", False))
+    pick = loop.choose(_kind("target", spec), side, options,
+                       next((x for x in options if not token(x)), options[0]), ctx.card)
+    if isinstance(pick, UnitInPlay):
+        _return_unit(ctx, pick, spec)
+        return
+    if len(pick) == 2:
+        bf, fd = pick
+        bf.facedowns.remove(fd)
+        gs.get_player(loop._owner_of(fd.card, side)).hand.append(fd.card)
+        return
+    _s, holder, gear = pick
+    card = getattr(gear, "card", gear)
+    if holder is None:
+        ctx.actor.base_gear.remove(gear)
+    elif isinstance(holder, Battlefield):
+        holder.gear_for(side).remove(gear)
+    else:
+        holder.gear.remove(gear)
+    loop._fire_leaves_board(card, side, holder if isinstance(holder, Battlefield) else gs.battlefields[0])
+    if not getattr(card, "is_token", False):
+        card.empowered = False
+        gs.get_player(loop._owner_of(card, side)).hand.append(card)
 
 
 def _units_at(ctx: "EffectContext", side: str, where: str) -> list:

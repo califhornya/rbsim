@@ -592,12 +592,26 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   cast took no discount).
 
 ### G2. Card approximations (data unchanged since DEFERRED "Corpus pass")
-- [ ] Origins: Fading Memories (can't choose a gear), Pack of Wonders (units
+- [x] Origins: Fading Memories (can't choose a gear), Pack of Wonders (units
   only, not gear or facedown cards), Facebreaker (the two units needn't share
   a battlefield), Miss Fortune Captain (readies units only, not "something
   else"), Malzahar Fanatic (the cost kills tokens only), Commander Ledros
   (kills tokens only), Sivir Battle Mistress (fires at the next state refresh
-  after the Power payment).
+  after the Power payment). DONE B21 (tests/test_g2_origins.py): Sivir's
+  `_drain_rune_recycles` runs as a payment ends (`_pay_card`,
+  `_pay_generic_power`, `_pay_energy_and_generic`, `_spell_played`, FLOW),
+  §818.1.c.1. Malzahar: `_units_or_gear_to_kill` (any unit or gear, in base,
+  attached or deployed, himself last; simple_trade still uses him only with a
+  token). Ledros: effect `kill_units_for_power`, cost extra `kills`
+  (baseline: tokens, real units only if he can't be paid otherwise;
+  `cost_unit:kill` picks which). Fading Memories: `give_gear_temporary` with
+  `or_unit`; Turn to Dust now chooses any gear and a deployed one stays
+  deployed (killed at its controller's Beginning Phase). Pack of Wonders:
+  effect `return_friendly_to_hand` (no ACTION: main phase only), helper
+  `_return_unit` shared with recall_unit. Miss Fortune Captain and Jayce
+  Brilliant Inventor: effect `ready_something` (unit, legend, gear or rune;
+  rune = +1 Energy). Facebreaker was already right (both units "here" = the
+  battlefield it is aimed at): checked by a test.
 - [ ] Spiritforged: Emperor's Divide (moves all, not "any number"), Assembly
   Rig (recycles any card, not a unit from the trash), Arcane Shift (comes back
   to base, no choice), The Zero Drive (to the trash, not banished), Kato the

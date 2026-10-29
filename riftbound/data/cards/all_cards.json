@@ -5643,21 +5643,15 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
+        "effect": "ready_something",
         "trigger": "on_move",
-        "target": "chosen_unit",
-        "target_filter": {
-          "exclude_self": true,
-          "is_exhausted": true
-        },
         "optional": true,
         "condition": {
           "type": "moves_this_turn_exactly",
           "params": {
             "n": 1
           }
-        },
-        "where": "anywhere"
+        }
       }
     ]
   },
@@ -6247,11 +6241,9 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "give_keyword",
+        "effect": "give_gear_temporary",
         "trigger": "on_cast",
-        "target": "chosen_unit",
-        "keyword": "TEMPORARY",
-        "where": "battlefield"
+        "or_unit": true
       }
     ]
   },
@@ -6277,17 +6269,11 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "recall_unit",
+        "effect": "return_friendly_to_hand",
         "trigger": "activated",
-        "timing": "action",
-        "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        },
         "cost": {
           "tap": true
-        },
-        "where": "anywhere"
+        }
       }
     ]
   },
@@ -7940,7 +7926,7 @@
     ],
     "effects": [
       {
-        "effect": "kill_tokens_for_power",
+        "effect": "kill_units_for_power",
         "trigger": "passive"
       }
     ]
@@ -29678,25 +29664,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
+        "effect": "ready_something",
         "trigger": "on_play",
-        "target": "chosen_unit",
-        "target_filter": {
-          "exclude_self": true,
-          "is_exhausted": true
-        },
-        "where": "anywhere",
         "optional": true
       },
       {
-        "effect": "ready_unit",
+        "effect": "ready_something",
         "trigger": "on_card_played",
-        "target": "chosen_unit",
-        "target_filter": {
-          "exclude_self": true,
-          "is_exhausted": true
-        },
-        "where": "anywhere",
         "optional": true,
         "condition": {
           "type": "first_of_kind_this_turn",

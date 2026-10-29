@@ -656,6 +656,12 @@ class GameLoop:
                   if getattr(g, "_temporary", False)]:
             g._temporary = False
             self._remove_gear(g, actor)
+        for bf in self.gs.battlefields:
+            temp = [dg for dg in bf.gear_for(active) if getattr(dg.card, "_temporary", False)]
+            for dg in temp:
+                dg.card._temporary = False
+            if temp:
+                self._kill_deployed_gear(bf, active, temp)
 
         # Clear STUN status at the start of the active player's turn
         for bf in self.gs.battlefields:
@@ -1616,7 +1622,9 @@ class GameLoop:
     def _drain_rune_recycles(self) -> None:
         """ "When you recycle a rune" (Sivir Battle Mistress): runes recycled since
         the last check (paying Power recycles runes: Player.recycle_rune), once
-        each. Approximation: it fires at the next state refresh, not mid-payment."""
+        each. Called as a payment ends (_pay_card, _pay_generic_power, ...): a
+        trigger from paying a cost resolves before the card or ability paid for
+        (§818.1.c.1); other payments wait for the next state refresh."""
         for side in ("A", "B"):
             p = self.gs.get_player(side)
             n, p.runes_recycled = getattr(p, "runes_recycled", 0), 0
@@ -2638,7 +2646,9 @@ class GameLoop:
             return False
         actor.energy -= energy or 0
         if domain is not None and power:
-            return actor.pay_cost(0, power, domain)
+            ok = actor.pay_cost(0, power, domain)
+            self._drain_rune_recycles()
+            return ok
         return self._pay_generic_power(actor, power or 0)
 
     def _pay_repeat_costs(self, card: Card, ap: Player, costs: list) -> int:
@@ -2706,7 +2716,9 @@ class GameLoop:
             return True
         for d in list(actor.power_pool):
             if actor.can_pay_cost(0, n, d):
-                return actor.pay_cost(0, n, d)
+                ok = actor.pay_cost(0, n, d)
+                self._drain_rune_recycles()
+                return ok
         return False
 
     def _offer_reveal_from_top(self, actor: Player, cards: list) -> list:
@@ -3286,9 +3298,10 @@ class GameLoop:
         return max(0, energy), power
 
     def _cost_extras(self, card: Card, side: str) -> dict:
-        """What a card lets you spend as you play it to cost less (baseline:
-        all of it): Kraken Hunter's buffs ([body] each), Commander Ledros's
-        friendly units ([order] each; tokens only), Poppy Defender's 3 XP ([3])."""
+        """What a card lets you spend as you play it to cost less, at most:
+        Kraken Hunter's buffs ([body] each), Commander Ledros's friendly units
+        ([order] each), Poppy Defender's 3 XP ([3]), ... (_choose_cost_extras
+        picks how much)."""
         spec = CARD_REGISTRY.get(card.name)
         out: dict = {}
         for es in (spec.effects if spec else ()):
@@ -3298,11 +3311,13 @@ class GameLoop:
                         sum(1 for u in self._friendly_units_of(side) if u.might_counters > 0))
                 if n:
                     out.update(power=n, buffs=n)
-            elif kind == "kill_tokens_for_power":
-                n = min(int(card.cost_power or 0),
-                        sum(1 for u in self._friendly_units_of(side) if u.is_token))
+            elif kind == "kill_units_for_power":
+                # "you may kill any number of friendly units as an additional
+                # cost. Reduce my cost by [order] for each killed this way"
+                # (Commander Ledros).
+                n = min(int(card.cost_power or 0), len(self._friendly_units_of(side)))
                 if n:
-                    out.update(power=n, tokens=n)
+                    out.update(power=n, kills=n)
             elif kind == "spend_xp_for_energy":
                 xp = int(es.params.get("xp", 3))
                 if self.gs.get_xp(side) >= xp:
@@ -3328,14 +3343,15 @@ class GameLoop:
 
     def _choose_cost_extras(self, card: Card, ap: Player, extras: dict, energy: int, power):
         """How much of `extras` the player spends (GameLoop.choose; baseline: all
-        of it). Each buff or token not spent is one Power back on the cost, unspent
-        XP its Energy; only affordable amounts are offered. Returns (extras,
-        energy, power)."""
-        if not extras or self.chooser is None:
+        of it, but Commander Ledros kills only tokens unless more must die to
+        pay him). Each buff or unit not spent is one Power back on the cost,
+        unspent XP its Energy; only affordable amounts are offered. Returns
+        (extras, energy, power)."""
+        if not extras or (self.chooser is None and "kills" not in extras):
             return extras, energy, power
         side = "A" if ap is self.gs.A else "B"
         options = [(extras, energy, power)]
-        key = "buffs" if "buffs" in extras else "tokens" if "tokens" in extras else None
+        key = "buffs" if "buffs" in extras else "kills" if "kills" in extras else None
         if key:
             for k in range(extras[key] - 1, -1, -1):
                 back = extras[key] - k
@@ -3346,7 +3362,11 @@ class GameLoop:
             less = {x: v for x, v in extras.items() if x not in ("xp", "discards", "gear_returns", "energy")}
             options.append((less, energy + extras.get("energy", 0), power))
         options = [o for o in options if o is options[0] or self._can_pay_card(ap, card, o[1], o[2])]
-        return self.choose("cost_extras", side, options, options[0], card)
+        pick = options[0]
+        if key == "kills":
+            tokens = sum(1 for u in self._friendly_units_of(side) if u.is_token)
+            pick = next((o for o in options if o[0].get("kills", 0) <= tokens), options[-1])
+        return self.choose("cost_extras", side, options, pick, card)
 
     def _spend_cost_extras(self, extras: dict, side: str, card: Optional[Card] = None) -> None:
         """Pay what _cost_extras said the play spends (`card`: the one played,
@@ -3355,10 +3375,10 @@ class GameLoop:
             holder = self._buff_to_spend(side, None, "any")
             if holder is not None:
                 self._spend_buff(holder, side)
-        for _ in range(extras.get("tokens", 0)):
-            tokens = [u for u in self._friendly_units_of(side) if u.is_token]
-            if tokens:
-                victim = min(tokens, key=lambda u: u.might)
+        if extras.get("kills"):
+            units = self._friendly_units_of(side)
+            spare = sorted(units, key=lambda u: (not u.is_token, u.might))[:extras["kills"]]
+            for victim in self.choose_many("cost_unit:kill", side, units, spare, card):
                 where = self._locate_unit(victim)
                 if where[1] is None:
                     self.gs.get_player(side).base_units.remove(victim)
@@ -3738,6 +3758,7 @@ class GameLoop:
             self._kill_for_cost(actor, card, victim)
         if extras:
             self._spend_cost_extras(extras, side, card)
+        self._drain_rune_recycles()
         return True
 
     def _pay_card_cost(self, actor: Player, card: Card, energy: int, power) -> bool:
@@ -4086,6 +4107,7 @@ class GameLoop:
         self.gs.spell_spent[side] = (self.gs.turn, max(spent, most if turn == self.gs.turn else 0))
         self._note_card_played(card, side, from_zone)
         self._fire_spell_played(card, side, spent)
+        self._drain_rune_recycles()           # its kicker / REPEAT Power
 
     def _fire_spell_played(self, card: Card, side: str, spent: int) -> None:
         """ "When you play a spell" (§ play: as it goes on the chain, before it
@@ -4985,6 +5007,7 @@ class GameLoop:
                 ap.pay_cost(0, power, domain)
             else:
                 self._pay_generic_power(ap, power)
+        self._drain_rune_recycles()
         ap.trash.remove(card)
         card._flow_banish = True
         if self.verbose:
@@ -5303,10 +5326,9 @@ class GameLoop:
         if parsed.get("kill_other_token") or parsed.get("kill_other_friendly"):
             others = [u for u in self._friendly_units_of(side) if u is not unit]
             if parsed.get("kill_other_token"):
-                victim = self._token_to_kill(side, unit)
-                if victim is not None:
-                    # "Kill a friendly unit or gear" (Malzahar Fanatic): any of them.
-                    victim = self.choose("cost_unit:kill", side, others + list(ap.base_gear), victim)
+                # "Kill a friendly unit or gear" (Malzahar Fanatic): any of them.
+                options = self._units_or_gear_to_kill(side, unit)
+                victim = self.choose("cost_unit:kill", side, options, options[0]) if options else None
             else:
                 victim = self._friendly_to_kill(side, unit)
                 if victim is not None:
@@ -5320,7 +5342,12 @@ class GameLoop:
                 self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
                                    in_base=where[1] is None)
             elif victim is not None:
-                self._remove_gear(victim, ap)
+                deployed = next((b for b in self.gs.battlefields
+                                 if any(victim is dg for dg in b.gear_for(side))), None)
+                if deployed is not None:
+                    self._kill_deployed_gear(deployed, side, [victim])
+                else:
+                    self._remove_gear(victim, ap)
 
     @staticmethod
     def _discardable(ap: Player, parsed: dict) -> list:
@@ -5383,6 +5410,23 @@ class GameLoop:
         card = getattr(gear, "card", gear)
         return int(card.has_keyword("DEFLECT") or self._side_has_passive(gear_side, "gear_deflect"))
 
+    def _units_or_gear_to_kill(self, side: str, unit) -> list:
+        """ "Kill a friendly unit or gear" as a cost (Malzahar Fanatic): every
+        friendly unit and gear (in base, attached or deployed), the source
+        last (exhausted first, then killed: costs in any order, §357.2).
+        Baseline order: tokens, then gear by cost, then units by Might."""
+        ap = self.gs.get_player(side)
+        gear = list(ap.base_gear) + self._controlled_attached_gear(side) +             [dg for b in self.gs.battlefields for dg in b.gear_for(side)]
+        others = [u for u in self._friendly_units_of(side) if u is not unit]
+
+        def key(x):
+            card = getattr(x, "card", x)
+            token = getattr(x, "is_token", False) or getattr(card, "is_token", False)
+            if isinstance(x, UnitInPlay):
+                return (not token, 2, x.might)
+            return (not token, 1, int(getattr(card, "cost_energy", 0) or 0))
+        return sorted(others + gear, key=key) + ([unit] if unit is not None else [])
+
     def _token_to_kill(self, side: str, unit):
         """ "Kill a friendly unit or gear" as a cost (Malzahar Fanatic): baseline,
         only a token (unit or gear) is given up."""
@@ -5424,7 +5468,7 @@ class GameLoop:
             return False
         if parsed["spend_buff"] and self._buff_to_spend(side, unit, parsed["spend_buff"]) is None:
             return False
-        if parsed["kill_other_token"] and self._token_to_kill(side, unit) is None:
+        if parsed["kill_other_token"] and not self._units_or_gear_to_kill(side, unit):
             return False
         if parsed["kill_other_friendly"] and self._friendly_to_kill(side, unit) is None:
             return False

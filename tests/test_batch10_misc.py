@@ -271,13 +271,13 @@ def test_friendship_counts_bird_cat_dog_poro():
     assert target.might == 3
 
 
-def test_malzahar_gives_up_only_a_token():
+def test_malzahar_gives_up_a_token_first():
     loop = _loop()
     mal = _real("Malzahar Fanatic", ready=True)
     loop.gs.battlefields[0].add_unit("A", mal)
     loop.gs.A.base_units.append(_u("Real"))
     (idx, entry), = [(i, e) for i, e in enumerate(loop.activatable_abilities("A")) if e.get("unit") is mal]
-    assert not loop._ability_usable(loop.gs.A, entry)
+    assert loop._ability_usable(loop.gs.A, entry)      # any friendly unit or gear can pay
     token = loop._play_token("Recruit", "A")
     loop._apply_action(loop.gs.A, ("ABILITY", "ACTIVATED", idx, None))
     assert token not in loop.gs.A.base_units and sum(loop.gs.A.power_pool.values()) == 2

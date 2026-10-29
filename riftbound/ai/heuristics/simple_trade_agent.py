@@ -351,6 +351,8 @@ class SimpleTradeAgent(Agent):
                 continue
             if not loop._activated_affordable(self.player, entry.get("unit"), parsed):
                 continue
+            if parsed.get("kill_other_token") and loop._token_to_kill(my_side, entry.get("unit")) is None:
+                continue        # Malzahar Fanatic: only a token is given up for it
             return ("ABILITY", "ACTIVATED", idx)
         return None
 
