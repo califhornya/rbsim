@@ -189,19 +189,22 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     actions.append(GameAction.play("SPELL", idx, lane, f"React {card.name} @BF{lane}"))
         # REACTION gear (QUICK-DRAW §745, Sumpworks Map): playable at reaction speed.
         elif isinstance(card, GearCard) and loop._play_timing(card, ap.name) == "reaction":
-            if _affordable(loop, ap, card):
-                for lane in range(n_bf):
+            for lane in range(n_bf):
+                if _affordable(loop, ap, card, dst=lane if card.has_keyword("DEPLOY") else None):
                     actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
-    # AMBUSH units in hand, to a battlefield where we have units.
+    # AMBUSH units in hand, to a battlefield where we have units (Hunters'
+    # Circle's discount there on your turn).
     for idx, card in enumerate(ap.hand):
-        if isinstance(card, UnitCard) and _affordable(loop, ap, card):
+        if isinstance(card, UnitCard):
             for lane in loop._ambush_unit_lanes(card, ap.name):
-                actions.append(GameAction("UNIT", idx, 0, lane, f"AMBUSH {card.name} @BF{lane}"))
+                if _affordable(loop, ap, card, dst=lane):
+                    actions.append(GameAction("UNIT", idx, 0, lane, f"AMBUSH {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion to a legal lane at reaction speed.
     champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
-    if champ is not None and _affordable(loop, ap, champ):
+    if champ is not None:
         for lane in loop._ambush_legal_lanes(ap.name):
-            actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
+            if _affordable(loop, ap, champ, dst=lane):
+                actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     # HIDDEN: play a facedown card for [0] at reaction speed (§737.1.b).
     actions.extend(_hidden_play_actions(loop, ap.name))
     # REACTION abilities (mana abilities like Seals and Gold among them).
@@ -224,17 +227,17 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
         # AMBUSH units into the showdown's battlefield.
         if isinstance(card, UnitCard) and lane in loop._ambush_unit_lanes(card, ap.name) \
-                and _affordable(loop, ap, card):
+                and _affordable(loop, ap, card, dst=lane):
             actions.append(GameAction("UNIT", idx, lane, lane, f"AMBUSH {card.name} @BF{lane}"))
         # ACTION / REACTION gear (QUICK-DRAW §745, Jarvan IV's DEPLOY gear):
         # playable during a showdown.
         elif isinstance(card, GearCard) and loop._play_timing(card, ap.name) in ("action", "reaction"):
-            if _affordable(loop, ap, card):
+            if _affordable(loop, ap, card, dst=lane if card.has_keyword("DEPLOY") else None):
                 actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
     # AMBUSH: deploy the champion into the showdown lane at reaction speed.
     champ = gs.champion_A if ap.name == "A" else gs.champion_B
     if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
-            and _affordable(loop, ap, champ)):
+            and _affordable(loop, ap, champ, dst=lane)):
         actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
     # HIDDEN: play a facedown card into the showdown lane for [0] (§737.1.b).
     actions.extend(_hidden_play_actions(loop, ap.name, only_lane=lane))

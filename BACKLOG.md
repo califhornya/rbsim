@@ -682,13 +682,37 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   yet empowered, disempower an enemy); `UnitInPlay.empower_at_end` (True/False,
   was a toggle `empower_flip_at_end`) applied by `_resolve_empower_at_end` at
   the end of turn; an empower there fires "When I become EMPOWERED".
-- [ ] Others: Jhin Meticulous Killer ("you may play me for [mind]": not
+- [x] Others: Jhin Meticulous Killer ("you may play me for [mind]": not
   encoded, from D), Hunters' Circle (not on AMBUSH / REACTION units played in
   a showdown), Abandoned Hall / Forgotten Library ("spent" counts Energy, not
   Power), Master Yi Wuju Bladesman / Forbidding Waste (combat damage only, not
   MIGHTY checks during the combat), Resonating Strike ("a unit at a different
   location": check), Tornado Warrior ("empower something here": a friendly
-  unit only; text: any unit or gear here, found B24).
+  unit only; text: any unit or gear here, found B24). DONE B25
+  (tests/test_g2_others.py; Jhin and Tornado texts checked on the card images):
+  Jhin: marker `play_me_for` (`cost` {power 1, domain MIND}, condition
+  `spell_spent_this_turn_at_least` 4); `GameLoop._alt_cost(ap, card, e, p)` ->
+  (Energy, Power, domain) with the base cost's Energy reductions,
+  `_choose_alt_cost` in `_pay_card` (choice `optional:alternate_cost`, baseline:
+  the alternate cost whenever payable); `_can_pay_card` tries it and takes a
+  `domain` (as `_pay_card_cost`): Jhin has no Power domain of his own (a
+  domainless Power would be any). Data text typo "you're" fixed. Hunters'
+  Circle: `_play_ambush_unit` / `_deploy_ambush_champion` take
+  `_destination_discount`; legality checks AMBUSH units / champion and
+  QUICK-DRAW DEPLOY gear per lane. "Spent [4]": right already (§163.1: Energy
+  pays numeric costs; the printed [4] is the Energy icon); Abandoned Hall has no
+  "spent" and was right (tests: the spell's player, a unit here only). Wuju
+  Bladesman / Forbidding Waste (and Wielder of Water, Crimson Pigeons):
+  `GameLoop._combat_might_mods(bf, attacker)` shared by `_combat_mods` (damage)
+  and `_refresh_combat_keywords` (Might from the designation on, like
+  ASSAULT / SHIELD). Resonating Strike: "a different location" was right (the
+  destinations skip the unit's own); from face down the battlefield is the one
+  it was hidden at (`controlled_battlefield` reads `card._hidden_bf`,
+  §811.1.d.2). Tornado Warrior: target `something_here`
+  (`effects._empower_something_here`): any unit or gear (attached, deployed) at
+  its battlefield, either side's (baseline: a friendly one with an EMPOWERED
+  ability, else the mightiest friendly unit); a gear's end-of-turn disempower
+  via `gs.disempower_gear_at_end`.
 
 ### G3. Rules systems
 - [ ] Control (§190.4): a side moving alone onto an uncontrolled battlefield

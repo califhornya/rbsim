@@ -4595,8 +4595,12 @@ def _move_destinations(ctx: "EffectContext", spec: Mapping[str, Any], to_base_ve
         # "to a battlefield where you have units" (Shadow Dash)
         return [bf for bf in others if bf._units_for(ctx.actor_side)]
     if dest == "controlled_battlefield":
-        # "to a battlefield you control" (Call to Battle)
-        return [bf for bf in others if bf.control() == ctx.actor_side]
+        # "to a battlefield you control" (Call to Battle); played from face down,
+        # the battlefield it was hidden at (§811.1.d.2, Resonating Strike: its
+        # unit "at a different location" comes from anywhere else).
+        hidden = getattr(ctx.card, "_hidden_bf", None)
+        return [bf for bf in others if bf.control() == ctx.actor_side
+                and (hidden is None or bf is gs.battlefields[hidden])]
     if dest == "enemy_occupied":
         # "to an occupied enemy battlefield" (Cataclysm)
         return [bf for bf in others if bf._units_for(ctx.opponent_side)]
@@ -5126,6 +5130,8 @@ def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 if g is not ctx.card and not getattr(g, "empowered", False)]
         if gear:
             loop._empower(max(gear, key=_zone_value), ctx.actor_side)
+    elif target == "something_here":
+        _empower_something_here(ctx, spec)
     else:
         # "Empower a unit" (Sanction): baseline, a friendly one not yet empowered.
         for unit in _resolve_targets(ctx, {**spec, "target": target}, prefer=lambda u: (u.empowered, -u.might)):
@@ -5133,6 +5139,46 @@ def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             loop._empower(unit.card, where[0] if where else ctx.actor_side)
             if spec.get("until_end_of_turn"):
                 unit.empower_at_end = False         # Sanction: "Disempower it at end of turn"
+
+
+def _empower_something_here(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "You may empower something here. Disempower it at end of turn" (Tornado
+    Warrior): any unit or gear at the source's battlefield (attached or
+    deployed), either side's, not yet empowered. Baseline: a friendly one with
+    an EMPOWERED ability, else the mightiest friendly unit."""
+    loop = ctx.loop
+    me = ctx.actor_side
+    src = _source_unit(ctx)
+    where = loop._locate_unit(src) if src is not None else None
+    bf = where[1] if where else ctx.battlefield
+    if bf not in loop.gs.battlefields:
+        return
+    owner, unit_of = {}, {}
+    things = []
+    for side in (me, ctx.opponent_side):
+        for u in bf._units_for(side):
+            things.append(u.card)
+            unit_of[id(u.card)] = u
+            things.extend(u.gear)
+        things.extend(dg.card for dg in bf.gear_for(side))
+        owner.update((id(c), side) for c in things if id(c) not in owner)
+    things = [c for c in things if not loop._is_empowered(c)]
+    if not things:
+        return
+
+    def value(card):
+        spec_ = CARD_REGISTRY.get(card.name)
+        cares = "EMPOWERED" in str((spec_.raw if spec_ else {}).get("effect") or "")
+        unit = unit_of.get(id(card))
+        return (owner[id(card)] == me, cares, unit is not None, unit.might if unit else 0)
+
+    card = loop.choose(_kind("target", spec), me, things, max(things, key=value), ctx.card)
+    loop._empower(card, owner[id(card)])
+    if spec.get("until_end_of_turn"):
+        if id(card) in unit_of:
+            unit_of[id(card)].empower_at_end = False
+        else:
+            loop.gs.disempower_gear_at_end.append(card)
 
 
 @effect("disempower")

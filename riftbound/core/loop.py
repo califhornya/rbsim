@@ -2825,6 +2825,7 @@ class GameLoop:
         ap = self.gs.get_player(side)
         champ = self.gs.champion_A if side == "A" else self.gs.champion_B
         energy, power = self._effective_cost(champ, ap)
+        energy = max(0, energy - self._destination_discount(champ, lane, side))
         if not self._pay_card(ap, champ, energy, power):
             return False
         bf = self.gs.battlefields[lane]
@@ -3714,6 +3715,39 @@ class GameLoop:
             print(f"  {ap.name} exhausts {legend.card.name} and {n} units: {card.name} costs [{amount}] less")
         return less
 
+    def _alt_cost(self, ap: Player, card: Card, energy: int, power):
+        """ "If you've spent [4] or more to play a spell this turn, you may play
+        me for [mind]" (Jhin Meticulous Killer; marker `play_me_for`, its
+        `cost` and `condition`): (Energy, Power, Power domain) of the alternate
+        cost that replaces the base one, with the Energy reductions `energy`
+        already had and the card's Power reductions; None when it isn't offered."""
+        spec = CARD_REGISTRY.get(card.name)
+        es = next((e for e in (spec.effects if spec else ()) if e.effect == "play_me_for"), None)
+        if es is None:
+            return None
+        side = "A" if ap is self.gs.A else "B"
+        if not self._check_condition(es.condition, card, ap, self.gs.get_player(self.gs.other(side)), None):
+            return None
+        alt = self._parse_activated_cost(es.cost)
+        less = int(card.cost_energy or 0) - energy
+        power_less = self._aura_power_reduction(card, ap) + self._cost_reduction(card, ap, power=True)
+        return max(0, alt["energy"] - less), max(0, alt["power"] - power_less), alt["domain"]
+
+    def _choose_alt_cost(self, ap: Player, card: Card, energy: int, power):
+        """The base cost or the alternate one (_alt_cost), chosen as the card is
+        paid (baseline: the alternate one whenever it can be paid): (Energy,
+        Power, Power domain or None for the card's own)."""
+        alt = self._alt_cost(ap, card, energy, power)
+        if alt is None or not self._can_pay_card(ap, card, alt[0], alt[1], discounts=False, domain=alt[2]):
+            return energy, power, None
+        side = "A" if ap is self.gs.A else "B"
+        if self._can_pay_card(ap, card, energy, power, discounts=False) and \
+                not self.choose("optional:alternate_cost", side, [True, False], True, card):
+            return energy, power, None
+        if self.verbose:
+            print(f"  {ap.name} plays {card.name} for its alternate cost")
+        return alt
+
     def _kill_discounts(self, ap: Player, card: Card, energy: int, power) -> list:
         """(unit, Energy, Power) for each friendly unit Atakhan's cost may kill:
         "You may kill a friendly unit as an additional cost to play me. If you
@@ -3763,13 +3797,14 @@ class GameLoop:
             print(f"  {ap.name} kills {victim.card.name} to play {card.name}")
 
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power,
-                      discounts: bool = True) -> bool:
+                      discounts: bool = True, domain=None) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
         showdown Diana's showdown energy counts. Units and gear may use
         Mordekaiser's earmarked power. A spell may cost [2] less with Seraphine
-        Starry-Eyed Songstress, Atakhan less for the friendly unit he kills
-        (`discounts`: try them)."""
+        Starry-Eyed Songstress, Atakhan less for the friendly unit he kills,
+        a card with an alternate cost for that one (`discounts`: try them).
+        `domain`: the Power's domain if not the card's (an alternate cost)."""
         if self._play_forbidden(actor, card):
             return False
         if discounts and energy > 0:
@@ -3780,23 +3815,28 @@ class GameLoop:
         if discounts and any(self._can_pay_card(actor, card, e, p, discounts=False)
                              for _, e, p in self._kill_discounts(actor, card, energy, power)):
             return True
+        alt = self._alt_cost(actor, card, energy, power) if discounts else None
+        if alt is not None and self._can_pay_card(actor, card, alt[0], alt[1], discounts=False,
+                                                  domain=alt[2]):
+            return True
+        domain = domain or card.cost_power_domain
         if isinstance(card, (UnitCard, GearCard)) and power:
             power = max(0, power - actor.earmarked_power_permanent)
         if isinstance(card, GearCard):
-            return self._can_pay_gear(actor, energy, power, card.cost_power_domain)
+            return self._can_pay_gear(actor, energy, power, domain)
         if isinstance(card, SpellCard):
             power = max(0, (power or 0) - actor.earmarked_power_spell) if power else power
             energy = max(0, energy - actor.earmarked_energy_spell)
         if isinstance(card, UnitCard):
             energy = max(0, energy - actor.earmarked_energy_unit)
-        if power and card.cost_power_domain is None:
+        if power and domain is None:
             # Its power from the card's domains, or any (_power_domains).
             if not actor.can_pay_power_of(power, self._power_domains(card)):
                 return False
             power = None
         if self.gs.showdown_active:
-            return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
-        return actor.can_pay_cost(energy, power, card.cost_power_domain)
+            return self._can_pay_showdown(actor, energy, power, domain)
+        return actor.can_pay_cost(energy, power, domain)
 
     def _pay_card(self, actor: Player, card: Card, energy: int, power, extras=True) -> bool:
         """Pay `card`'s cost (from _effective_cost). What that cost was reduced
@@ -3808,6 +3848,7 @@ class GameLoop:
             return False
         side = "A" if actor is self.gs.A else "B"
         card._chosen_card = None             # set again if a cost extra chooses it
+        energy, power, domain = self._choose_alt_cost(actor, card, energy, power)
         if extras is True:
             extras, energy, power = self._choose_cost_extras(
                 card, actor, self._cost_extras(card, side), energy, power)
@@ -3815,7 +3856,7 @@ class GameLoop:
             energy = self._songstress_discount(
                 actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, discounts=False))
         energy, power, victim = self._kill_discount(actor, card, energy, power)
-        if not self._pay_card_cost(actor, card, energy, power):
+        if not self._pay_card_cost(actor, card, energy, power, domain):
             return False
         if victim is not None:
             self._kill_for_cost(actor, card, victim)
@@ -3824,14 +3865,16 @@ class GameLoop:
         self._drain_rune_recycles()
         return True
 
-    def _pay_card_cost(self, actor: Player, card: Card, energy: int, power) -> bool:
-        """Pay `card`'s Energy and Power, from what is earmarked for its kind first."""
+    def _pay_card_cost(self, actor: Player, card: Card, energy: int, power, domain=None) -> bool:
+        """Pay `card`'s Energy and Power, from what is earmarked for its kind
+        first. `domain`: the Power's domain if not the card's (an alternate cost)."""
+        domain = domain or card.cost_power_domain
         if isinstance(card, (UnitCard, GearCard)) and power:
             from_earmark = min(power, actor.earmarked_power_permanent)
             actor.earmarked_power_permanent -= from_earmark
             power -= from_earmark
         if isinstance(card, GearCard):
-            return self._pay_gear(actor, energy, power, card.cost_power_domain)
+            return self._pay_gear(actor, energy, power, domain)
         if isinstance(card, SpellCard):
             self._spell_energy_paid = energy        # "if you spent [4] or more" (_spell_played)
             self._spell_power_paid = int(power or 0)
@@ -3846,13 +3889,13 @@ class GameLoop:
             from_earmark = min(energy, actor.earmarked_energy_unit)
             actor.earmarked_energy_unit -= from_earmark
             energy -= from_earmark
-        if power and card.cost_power_domain is None:
+        if power and domain is None:
             if not actor.pay_power_of(power, self._power_domains(card)):
                 return False
             power = None
         if self.gs.showdown_active:
-            return self._pay_showdown(actor, energy, power, card.cost_power_domain)
-        return actor.pay_cost(energy, power, card.cost_power_domain)
+            return self._pay_showdown(actor, energy, power, domain)
+        return actor.pay_cost(energy, power, domain)
 
     def _count_card_played(self, card: Card, side: str) -> None:
         """Count a played card for the "this turn" counters (LEGION, "your second
@@ -4372,6 +4415,7 @@ class GameLoop:
             return False
         card = ap.hand[idx]
         energy, power = self._effective_cost(card, ap)
+        energy = max(0, energy - self._destination_discount(card, lane, side))
         if not self._pay_card(ap, card, energy, power):
             return False
         ap.hand[:] = [c for c in ap.hand if c is not card]   # a cost's death may have changed it
@@ -6120,6 +6164,9 @@ class GameLoop:
                 self._empower(unit.card, where[0] if where else self.gs.active)
             elif then is False:
                 self._disempower(unit.card)
+        for gear in self.gs.disempower_gear_at_end:
+            gear.empowered = False
+        self.gs.disempower_gear_at_end.clear()
 
     def _locate_unit_or_gear(self, card: Card, side: str) -> bool:
         """Whether `card` is in play for `side` (a unit, or a gear in base or
@@ -6287,10 +6334,14 @@ class GameLoop:
         damage ("kill an enemy unit here with less Might than me", Ambessa
         Respected and Feared). Gone once the combat ends."""
         for bf in self.gs.battlefields:
+            # Might changes while fighting (Forbidding Waste, Master Yi Wuju
+            # Bladesman): MIGHTY checks during the combat see them too.
+            mods = self._combat_might_mods(bf, bf.combat_attacker) if bf.combat_started else {}
             for side in ("A", "B"):
                 for u in bf._units_for(side):
                     if bf.combat_started and id(u) in bf.combat_designated:
-                        u.bonus_might = u.keyword_value("ASSAULT" if side == bf.combat_attacker else "SHIELD")
+                        u.bonus_might = u.keyword_value("ASSAULT" if side == bf.combat_attacker else "SHIELD") \
+                            + mods.get(id(u), 0)
                     else:
                         u.bonus_might = 0
         for side in ("A", "B"):
@@ -6913,8 +6964,26 @@ class GameLoop:
     def _combat_mods(self, bf: Battlefield, attacker: str) -> dict:
         """Combat-only rules at `bf`: the damage hook (_take_damage), a side
         that ignores TANK while assigning damage here (Dune Surfer), and Might
-        changes while fighting (Forbidding Waste: a lone defender -2; Crimson
-        Pigeons: +2 attacking with another unit)."""
+        changes while fighting (_combat_might_mods)."""
+        mods = self._combat_might_mods(bf, attacker)
+
+        def surfer(side):
+            return any(self._has_effect(u.card, "ignore_tank_here") for u in bf._units_for(side))
+
+        def first(assigner):
+            # Which enemy unit `assigner`'s damage kills first. Baseline: the
+            # order that kills the most Might (combat.kill_order).
+            return lambda units, damage: self.choose("combat_damage_order", assigner, units,
+                                                     kill_order(units, damage)[0])
+        return {"take": lambda u, a: self._take_damage(u, a, "combat"),
+                "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
+                "might_mods": mods, "first_a": first("B"), "first_b": first("A")}
+
+    def _combat_might_mods(self, bf: Battlefield, attacker: str) -> dict:
+        """id(unit) -> Might change while fighting at `bf` (Forbidding Waste: a
+        lone defender -2; Crimson Pigeons: +2 attacking with another unit):
+        for the damage and, from the designation on, for the unit's Might
+        (_refresh_combat_keywords)."""
         defender = self.gs.other(attacker)
         mods: dict = {}
         if bf.card is not None and self._has_effect(bf.card, "lone_defender_minus") \
@@ -6936,18 +7005,7 @@ class GameLoop:
             for u in attackers:
                 if self._has_effect(u.card, "attacking_with_another_bonus"):
                     mods[id(u)] = mods.get(id(u), 0) + 2
-
-        def surfer(side):
-            return any(self._has_effect(u.card, "ignore_tank_here") for u in bf._units_for(side))
-
-        def first(assigner):
-            # Which enemy unit `assigner`'s damage kills first. Baseline: the
-            # order that kills the most Might (combat.kill_order).
-            return lambda units, damage: self.choose("combat_damage_order", assigner, units,
-                                                     kill_order(units, damage)[0])
-        return {"take": lambda u, a: self._take_damage(u, a, "combat"),
-                "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
-                "might_mods": mods, "first_a": first("B"), "first_b": first("A")}
+        return mods
 
     def _phase_showdown(self, active: str, opponent: str) -> None:
         pass  # Showdowns now trigger immediately when battlefield contested

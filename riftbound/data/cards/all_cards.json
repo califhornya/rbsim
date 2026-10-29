@@ -22064,7 +22064,7 @@
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.) If you're spent [4] or more to play a spell this turn, you may play me for [mind].",
+    "effect": "VISION (When you play me, look at the top card of your Main Deck. You may recycle it.) If you've spent [4] or more to play a spell this turn, you may play me for [mind].",
     "effect_equipped": null,
     "set": "Unleashed",
     "variants": [
@@ -22085,6 +22085,20 @@
         "effect": "predict",
         "trigger": "on_play",
         "amount": 1
+      },
+      {
+        "effect": "play_me_for",
+        "trigger": "passive",
+        "cost": {
+          "power": 1,
+          "domain": "MIND"
+        },
+        "condition": {
+          "type": "spell_spent_this_turn_at_least",
+          "params": {
+            "n": 4
+          }
+        }
       }
     ]
   },
@@ -30962,7 +30976,7 @@
       {
         "effect": "empower_self",
         "trigger": "on_self_played",
-        "target": "friendly_unit",
+        "target": "something_here",
         "until_end_of_turn": true,
         "optional": true,
         "condition": {
