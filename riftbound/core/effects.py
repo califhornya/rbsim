@@ -4912,6 +4912,18 @@ def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                 unit.temporary_might += int(card.might or 0)
 
 
+@effect("banish_hand_and_trash")
+def _banish_hand_and_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """"Banish your hand and trash" (Endless Riches)."""
+    player = ctx.actor
+    cards = list(player.hand) + list(player.trash)
+    player.hand.clear()
+    player.trash.clear()
+    player.banished.extend(cards)
+    if cards:
+        ctx.loop._note_banished(ctx.actor_side, len(cards))
+
+
 @effect("empower_self")
 def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Vendetta EMPOWER: give the source unit the empowered status. Usually an

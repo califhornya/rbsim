@@ -27953,7 +27953,29 @@
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "banish_hand_and_trash",
+        "trigger": "on_play"
+      },
+      {
+        "effect": "burn",
+        "trigger": "on_play",
+        "amount": 7
+      },
+      {
+        "effect": "skip_draw_phase",
+        "trigger": "passive"
+      },
+      {
+        "effect": "play_from_trash",
+        "trigger": "passive"
+      },
+      {
+        "effect": "trash_to_banish",
+        "trigger": "passive"
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-022",

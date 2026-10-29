@@ -451,8 +451,20 @@ tests/test_corpus_vendetta.py.
   her twice (Falling Star); Svellsongur's copy is one more; not for an
   opponent's spells. Left (KNOWN_ISSUES): a spell affordable only with her
   discount can't be played. Tests in tests/test_irelia_graceful.py.
+- [DONE] Endless Riches: "When you play this, banish your hand and trash, then
+  BURN 7. Skip your Draw Phase. You may play cards from your trash. If a card
+  would go to your trash from anywhere other than your Main Deck, banish it
+  instead." Effect `banish_hand_and_trash`, then `burn` 7 (Main Deck → trash:
+  not replaced); markers `skip_draw_phase` (`_begin_turn`), `play_from_trash`
+  (`trash_play` entries with `cost` None: the card's own cost, at its timing,
+  like a play from banishment: units to base, spells at the showdown's
+  battlefield, else the first), `trash_to_banish` (`GameLoop._put_in_trash`,
+  used by every move to the trash but the Main Deck's: deaths, discards,
+  spells, facedowns). Killed, it banishes itself (§370.4). Only its
+  controller's cards. The heuristic agent now plays `trash_play` entries
+  (Undying Legion too). Tests in tests/test_endless_riches.py.
 
-Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
+Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
 units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
 Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser.

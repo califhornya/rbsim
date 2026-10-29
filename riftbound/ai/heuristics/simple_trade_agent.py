@@ -363,7 +363,7 @@ class SimpleTradeAgent(Agent):
             return None
         best = None
         for idx, entry in enumerate(loop.activatable_abilities(my_side)):
-            if entry["type"] not in ("flow", "banished_play") or \
+            if entry["type"] not in ("flow", "banished_play", "trash_play") or \
                     not loop._ability_usable(self.player, entry):
                 continue
             card = entry["card"]

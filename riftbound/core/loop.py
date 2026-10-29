@@ -1060,7 +1060,7 @@ class GameLoop:
         for dg in dead:
             gear.remove(dg)
             if not dg.is_token:
-                owner.trash.append(dg.card)
+                self._put_in_trash(owner, dg.card, leaving=True)
             if self.verbose:
                 bf_idx = self.gs.battlefields.index(bf)
                 print(f"  [DEPLOY] {side}'s {dg.card.name} at BF{bf_idx} dies")
@@ -2843,7 +2843,7 @@ class GameLoop:
         cap = self._facedown_capacity(bf)
         while len(bf.facedowns) > cap:
             fd = bf.facedowns.pop()
-            self.gs.get_player(fd.owner).trash.append(fd.card)
+            self._put_in_trash(self.gs.get_player(fd.owner), fd.card)
             if self.verbose:
                 print(f"  {fd.owner} trashes facedown {fd.card.name} @BF{self.gs.battlefields.index(bf)}"
                       " (no room)")
@@ -2911,7 +2911,7 @@ class GameLoop:
         cleanup."""
         for bf in self.gs.battlefields:
             for fd in [fd for fd in bf.facedowns if bf.control() != fd.owner]:
-                self.gs.get_player(fd.owner).trash.append(fd.card)
+                self._put_in_trash(self.gs.get_player(fd.owner), fd.card)
                 bf.facedowns.remove(fd)
 
     def _hidden_playable(self, side: str) -> list:
@@ -4120,13 +4120,30 @@ class GameLoop:
                     return True
         return False
 
-    @staticmethod
-    def _to_trash(owner: Player, card: Card) -> None:
+    def _to_trash(self, owner: Player, card: Card) -> None:
         """Put a card that left the board into its owner's trash; a token ceases
         to exist instead (§186.1)."""
         if getattr(card, "empowered", False):
             card.empowered = False
         if not getattr(card, "is_token", False):
+            self._put_in_trash(owner, card, leaving=True)
+
+    def _trash_banishes(self, owner: Player, card: Optional[Card] = None) -> bool:
+        """"If a card would go to your trash from anywhere other than your Main
+        Deck, banish it instead" (Endless Riches): `owner` controls one, or
+        `card` is one leaving the board (§370.4: it replaces its own move)."""
+        side = "A" if owner is self.gs.A else "B"
+        return self._side_has_passive(side, "trash_to_banish") or (
+            card is not None and self._has_effect(card, "trash_to_banish"))
+
+    def _put_in_trash(self, owner: Player, card: Card, *, leaving: bool = False) -> None:
+        """A card goes to its owner's trash from anywhere but the Main Deck
+        (those moves append to the trash directly): banished instead under
+        Endless Riches. `leaving`: it leaves the board (its own Riches counts)."""
+        if self._trash_banishes(owner, card if leaving else None):
+            owner.banished.append(card)
+            self._note_banished("A" if owner is self.gs.A else "B")
+        else:
             owner.trash.append(card)
 
     def _standard_move(self, unit: UnitInPlay, side: str, src: int, dst: int) -> None:
@@ -4621,6 +4638,12 @@ class GameLoop:
             for cost, cond in self._trash_plays(card):
                 if self._card_timing(card) in allowed:
                     out.append({"type": "trash_play", "card": card, "cost": cost, "cond": cond})
+        # "You may play cards from your trash" (Endless Riches): for their cost
+        # (`cost` None), at their timing.
+        if self._side_has_passive(side, "play_from_trash"):
+            for card in ap.trash:
+                if self._play_timing(card, side) in allowed:
+                    out.append({"type": "trash_play", "card": card, "cost": None, "cond": None})
         # "Banish the top card of your Main Deck. Until your next Ending Phase,
         # you may play that card." (Runeblade Anvil, Akali Brash)
         for card in ap.banished:
@@ -4789,7 +4812,7 @@ class GameLoop:
             pile.append(card)
             if len(pile) >= 4:
                 for c in pile:
-                    if c in owner.banished:
+                    if c in owner.banished and not self._trash_banishes(owner):
                         owner.banished.remove(c)
                         owner.trash.append(c)
                 self.gs.jhin_pile[side] = []
@@ -4797,7 +4820,7 @@ class GameLoop:
                 self._extra_channel(side)
                 self._draw_one(owner)
         else:
-            owner.trash.append(card)
+            self._put_in_trash(owner, card)
 
     def _ability_usable(self, ap: Player, entry: dict) -> bool:
         """Whether `ap` can use this activatable_abilities entry now: it can pay
@@ -4817,9 +4840,14 @@ class GameLoop:
                 self._spell_has_targets(entry["card"], side, self._zone_play_lane())
         if entry["type"] == "trash_play":
             card = entry["card"]
-            parsed = self._parse_activated_cost(entry["cost"])
             if not any(c is card for c in ap.trash) or self._play_forbidden(ap, card):
                 return False
+            if entry["cost"] is None:             # Endless Riches: its own cost
+                if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
+                    return False
+                energy, power = self._effective_cost(card, ap, from_zone="trash")
+                return self._can_pay_card(ap, card, energy, power)
+            parsed = self._parse_activated_cost(entry["cost"])
             if not self._check_condition(entry["cond"], card, ap, self.gs.get_player(self.gs.other(side)), {}):
                 return False
             if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
@@ -5247,6 +5275,15 @@ class GameLoop:
             return
         if entry["type"] == "trash_play":
             card = entry["card"]
+            if entry["cost"] is None:             # Endless Riches: its own cost
+                energy, power = self._effective_cost(card, ap, from_zone="trash")
+                if card not in ap.trash or not self._pay_card(ap, card, energy, power):
+                    return
+                ap.trash.remove(card)
+                if self.verbose:
+                    print(f"  {ap.name} plays {card.name} from the trash")
+                self._play_from_zone_now(ap, card, side, "trash")
+                return
             parsed = self._parse_activated_cost(entry["cost"])
             if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
@@ -6028,7 +6065,7 @@ class GameLoop:
         if card not in player.hand:
             return
         player.hand.remove(card)
-        player.trash.append(card)
+        self._put_in_trash(player, card)
         side = "A" if player is self.gs.A else "B"
         self.gs.discarded_this_turn[side] = True
         anchor = self.gs.battlefields[0]
@@ -6646,7 +6683,8 @@ class GameLoop:
 
         self._fire_turn_trigger("on_start_of_turn", gs.active)
         self._recompute_passives()
-        self._phase_draw(gs.get_player(gs.active))
+        if not self._side_has_passive(gs.active, "skip_draw_phase"):     # Endless Riches
+            self._phase_draw(gs.get_player(gs.active))
         # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
         # it makes at a battlefield has its showdown before any action.
         self._fire_turn_trigger("on_start_of_main", gs.active)
