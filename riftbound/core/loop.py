@@ -1481,6 +1481,48 @@ class GameLoop:
             self._resolve_triggered_effects(card, "on_revealed", self.gs.battlefields[0], actor, opponent,
                                             context_extra={"battlefield": self.gs.battlefields[0]})
 
+    def _before_deck_reveal(self, side: str, owner_side: Optional[str] = None, *, value=None,
+                            mine: bool = True, rune: bool = False) -> None:
+        """`side` is about to reveal cards from the top of `owner_side`'s Main
+        Deck (its own by default; its rune deck with `rune`): "If you would
+        reveal cards from a deck, look at the top card first. You may recycle
+        it. Then reveal those cards" (Void Hatchling), once per Hatchling
+        `side` controls (a replacement applies once to an event, §370.2;
+        Svellsongur's copy is one more). Looking at the top of your own deck
+        offers Nocturne. Baseline: recycle the top card when `value(card)` is
+        below the average of the cards under it (above it when not `mine`: the
+        reveal serves the opponent, Blind Fury); never without `value`."""
+        owner_side = owner_side or side
+        n = sum(1 for u in self._friendly_units_of(side) for es in self._card_effects(u.card)
+                if es.effect == "look_before_reveal")
+        owner = self.gs.get_player(owner_side)
+        for _ in range(n):
+            if rune:
+                deck = owner.rune_deck.runes            # top = first
+                top = deck[0] if deck else None
+            else:
+                deck = owner.deck.cards                 # top = last
+                if deck and owner_side == side:
+                    self._offer_reveal_from_top(owner, [deck[-1]])
+                top = deck[-1] if deck else None
+            if top is None:
+                return
+            rest = deck[1:] if rune else deck[:-1]
+            recycle = False
+            if value is not None and rest:
+                avg = sum(value(c) for c in rest) / len(rest)
+                recycle = value(top) < avg if mine else value(top) > avg
+            if not self.choose("optional:recycle", side, [True, False], recycle, top):
+                continue
+            if rune:
+                deck.append(deck.pop(0))
+            else:
+                deck.insert(0, deck.pop())
+                if owner_side == side:
+                    self._note_recycled(side)
+            if self.verbose:
+                print(f"  {self.gs.get_player(side).name} looks at the top card first and recycles it")
+
     def _drain_rune_recycles(self) -> None:
         """ "When you recycle a rune" (Sivir Battle Mistress): runes recycled since
         the last check (paying Power recycles runes: Player.recycle_rune), once

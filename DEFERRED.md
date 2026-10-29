@@ -446,7 +446,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   (replacing a battlefield with a Brush token; modeled 2026-10-29, BACKLOG E)
   and Baron Pit (a token battlefield Baron Nashor adds; modeled 2026-10-29,
   BACKLOG E); Svellsongur (an Equipment copying its
-  unit's text; modeled 2026-10-29, BACKLOG E); Void Hatchling (a replacement on every reveal); Hextech
+  unit's text; modeled 2026-10-29, BACKLOG E); Void Hatchling (a replacement on every reveal;
+  modeled 2026-10-29, BACKLOG E); Hextech
   Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
   baseline that converts would throw them away); Irelia Graceful (a spell's
   cost depending on what it will choose); Endless Riches (playing from the
@@ -555,8 +556,9 @@ listed here.
 - Spiritforged approximations: Emperor's Divide moves every friendly unit at
   the spell's battlefield ("any number" not chosen); Assembly Rig's "recycle a
   unit from your trash" takes any card; Arcane Shift's unit comes back to its
-  base (the text names no place); Undertitan's ADD fires when reveal_top /
-  reveal_play_top reveal it, not on every reveal; The Zero Drive goes to the
+  base (the text names no place); Undertitan's ADD fires when a handler
+  reveals it from the top of a Main Deck (not when "you may reveal a unit
+  from among them" picks it); The Zero Drive goes to the
   trash, not banishment, when used; Kato the Arm also lends keywords given
   for the turn; a counter that "chooses" reads the spell's declared choices
   (spells only, not abilities). Checked by a probe only: Card Sharp, Jayce

@@ -911,9 +911,11 @@ def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     Main Deck. If it has that type, recycle it. Otherwise, draw it."
     (Scrutinizing Scope): they guess unit."""
     from .cards import UnitCard
+    ctx.loop._before_deck_reveal(ctx.actor_side, value=lambda c: not isinstance(c, UnitCard))
     deck = ctx.actor.deck.cards
     if not deck:
         return
+    ctx.loop._note_revealed(ctx.actor_side, [deck[-1]])
     top = deck.pop()
     if isinstance(top, UnitCard):
         deck.insert(0, top)
@@ -2173,12 +2175,14 @@ def _twisted_fate_reveal(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     to an enemy unit here and 1 to all other enemy units here. [mind] - Draw
     1. [order] - Stun an enemy unit." (Twisted Fate Gambler)"""
     from .enums import Domain
+    enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
+    useful = {Domain.MIND} | ({Domain.FURY, Domain.ORDER} if enemies else set())
+    ctx.loop._before_deck_reveal(ctx.actor_side, value=lambda r: r.domain in useful, rune=True)
     runes = ctx.actor.rune_deck.runes
     if not runes:
         return
     rune = runes.pop(0)
     runes.append(rune)
-    enemies = _choosable(ctx, list(ctx.battlefield._units_for(ctx.opponent_side)))
     if rune.domain is Domain.FURY and enemies:
         first = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
                                 max(enemies, key=lambda u: (2 >= u.might - u.damage, u.might)), ctx.card)
@@ -2202,7 +2206,9 @@ def _teemo_reveal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     unit = ctx.loop.choose(_kind("target", spec), ctx.actor_side, enemies,
                            max(enemies, key=lambda u: u.might), ctx.card)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, [unit])
+    ctx.loop._before_deck_reveal(ctx.actor_side, value=lambda c: c.has_keyword("HIDDEN"))
     deck = ctx.actor.deck.cards
+    ctx.loop._note_revealed(ctx.actor_side, deck[-5:])
     revealed = [deck.pop() for _ in range(min(5, len(deck)))]
     n = sum(1 for c in revealed if c.has_keyword("HIDDEN"))
     for c in revealed:
@@ -2251,11 +2257,14 @@ def _kill_total_might_at_battlefield(ctx: "EffectContext", spec: Mapping[str, An
 def _mechanical_bandit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Each player reveals the top card of their Main Deck. If you revealed a
     card with the lowest Energy cost, draw it. Recycle the rest." (Mechanical
-    Bandit)"""
+    Bandit). With a Void Hatchling, each player wants a cheap card on top."""
+    for side in (ctx.actor_side, ctx.opponent_side):
+        ctx.loop._before_deck_reveal(side, value=lambda c: -int(c.cost_energy or 0))
     mine, theirs = ctx.actor.deck.cards, ctx.opponent.deck.cards
     my_top = mine[-1] if mine else None
     their_top = theirs[-1] if theirs else None
-    ctx.loop._note_revealed(ctx.actor_side, [c for c in (my_top, their_top) if c is not None])
+    ctx.loop._note_revealed(ctx.actor_side, [my_top] if my_top is not None else [])
+    ctx.loop._note_revealed(ctx.opponent_side, [their_top] if their_top is not None else [])
     if their_top is not None:
         theirs.insert(0, theirs.pop())
     if my_top is None:
@@ -2910,7 +2919,8 @@ def _reveal_play_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     - `source`: "own" (default) or "opponent" (their deck; you play it).
       `each_player`: every player does it with their own deck, the opponent
       first ("Starting with the next player").
-    - `look` (default 1) cards, or `until` a card of that type ("unit").
+    - `look` (default 1) cards, or `until` a card of that type ("unit");
+      `reveal`: they are revealed, not looked at (true: by you; "owner").
     - which can be played: `filter` / `target_filter`; `kill_friendly`: first
       kill your weakest unit, then only cards with Might up to `might_margin`
       more than it (Baited Hook).
@@ -2951,23 +2961,13 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
         else:
             where[1].remove_unit(chooser_side, victim)
         loop._route_deaths([(victim, chooser_side)], where[1] or gs.battlefields[0])
-    deck = owner.deck.cards
-    revealed = []
     until = spec.get("until")
-    if until:
-        while deck:
-            revealed.append(deck.pop())
-            if _zone_effect_card_ok(revealed[-1], {"filter": until}):
-                break
-    else:
-        for _ in range(min(int(spec.get("look", 1)), len(deck))):
-            revealed.append(deck.pop())
-    loop._note_revealed(owner_side, revealed)
     match = {"filter": spec.get("filter") or until, "target_filter": spec.get("target_filter") or {}}
-    cands = [c for c in revealed if _zone_effect_card_ok(c, match)]
-    if might_cap is not None:
-        cands = [c for c in cands if int(getattr(c, "might", 0) or 0) <= might_cap]
     mode = str(spec.get("pay", "ignore")).lower()
+
+    def candidate(card):
+        return _zone_effect_card_ok(card, match) and (
+            might_cap is None or int(getattr(card, "might", 0) or 0) <= might_cap)
 
     def price(card):
         """(Energy, Power) to pay for `card` under this effect, or None if the
@@ -2984,6 +2984,25 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
             energy = max(0, energy - int(spec.get("reduce", 0)))
         return (energy, power) if loop._can_pay_card(chooser, card, energy, power) else None
 
+    # `reveal`: a reveal, not a look (Void Hatchling): by the chooser, or
+    # "owner": the deck's owner (Blind Fury: "Each opponent reveals").
+    if spec.get("reveal"):
+        revealer = owner_side if spec["reveal"] == "owner" else chooser_side
+        loop._before_deck_reveal(revealer, owner_side, mine=revealer == chooser_side,
+                                 value=lambda c: _zone_value(c)[0] + 1
+                                 if candidate(c) and price(c) is not None else 0)
+    deck = owner.deck.cards
+    revealed = []
+    if until:
+        while deck:
+            revealed.append(deck.pop())
+            if _zone_effect_card_ok(revealed[-1], {"filter": until}):
+                break
+    else:
+        for _ in range(min(int(spec.get("look", 1)), len(deck))):
+            revealed.append(deck.pop())
+    loop._note_revealed(owner_side, revealed)
+    cands = [c for c in revealed if candidate(c)]
     playable = [c for c in cands if price(c) is not None]
     pick = max(playable, key=_zone_value) if playable else None
     if pick is not None and spec.get("may") and not loop.choose(
@@ -3129,11 +3148,13 @@ def _reveal_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     (to the bottom: Ravenbloom Conservatory) or "top" (stays on top, the
     default); `else`: effects run when it isn't drawn."""
     player = ctx.actor
+    tf = spec.get("target_filter") or {}
+    ctx.loop._before_deck_reveal(ctx.actor_side, value=lambda c: _zone_card_matches(c, tf))
     if not player.deck.cards:
         return
     top = player.deck.cards[-1]
     ctx.loop._note_revealed(ctx.actor_side, [top])
-    if _zone_card_matches(top, spec.get("target_filter") or {}):
+    if _zone_card_matches(top, tf):
         if spec.get("to_hand"):
             # "put it in your hand": not a draw (Ravenbloom Conservatory)
             player.hand.append(player.deck.cards.pop())

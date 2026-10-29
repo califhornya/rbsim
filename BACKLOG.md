@@ -427,8 +427,24 @@ tests/test_corpus_vendetta.py.
   needed a non-token unit at a battlefield; it now attaches to any unit you
   control, base too (§818.1.c.2; golden regenerated). Tests in
   tests/test_svellsongur.py.
+- [DONE] Void Hatchling: "If you would reveal cards from a deck, look at the
+  top card first. You may recycle it. Then reveal those cards." A replacement
+  on every reveal from the top of a deck its controller makes
+  (`GameLoop._before_deck_reveal`, called by every reveal handler), once per
+  Hatchling (§370.2; Svellsongur's copy is one more). Any deck: the rune deck
+  (Twisted Fate Gambler), an opponent's (Drakehound Packmaster: you reveal);
+  Blind Fury is revealed by its owner ("Each opponent reveals", `reveal:
+  "owner"`), so their Hatchling. Its look offers Nocturne. Looks ("look at the
+  top 3 ... you may reveal a unit from among them") aren't reveals of the top:
+  `reveal_play_top` reveals only with `reveal`. Baseline: recycle the top card
+  when it is worse for the reveal than the average card under it (better,
+  when the reveal serves the opponent). Found on the way: Apprentice Smith
+  now reveals (it was a look that put the gear in hand without a draw);
+  Undertitan's ADD fires on Teemo Strategist's and Scrutinizing Scope's
+  reveals too, and Mechanical Bandit's goes to the Undertitan's owner (it gave
+  the opponent's to the Bandit's player). Tests in tests/test_void_hatchling.py.
 
-Void Hatchling, Irelia
+Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
 units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,

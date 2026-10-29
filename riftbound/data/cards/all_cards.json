@@ -899,7 +899,8 @@
         "effect": "reveal_play_top",
         "trigger": "on_cast",
         "source": "opponent",
-        "look": 1
+        "look": 1,
+        "reveal": "owner"
       }
     ]
   },
@@ -5578,7 +5579,8 @@
       {
         "effect": "reveal_play_top",
         "trigger": "on_end_of_turn",
-        "until": "unit"
+        "until": "unit",
+        "reveal": true
       }
     ]
   },
@@ -11605,7 +11607,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "look_before_reveal",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-019",
@@ -12327,13 +12334,12 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "dig",
+        "effect": "reveal_top",
         "trigger": "on_move",
-        "amount": 1,
         "target_filter": {
-          "card_type": "GEAR"
+          "is_gear": true
         },
-        "must": true
+        "otherwise": "recycle"
       }
     ]
   },
@@ -16774,7 +16780,8 @@
         "pay": "cost",
         "here": true,
         "may": true,
-        "optional": true
+        "optional": true,
+        "reveal": true
       }
     ]
   },
@@ -17365,7 +17372,8 @@
           "tap": true
         },
         "look": 2,
-        "pay": "cost"
+        "pay": "cost",
+        "reveal": true
       }
     ]
   },
@@ -17397,7 +17405,8 @@
         "pay": "reduce",
         "reduce": 2,
         "rest": "draw",
-        "may": true
+        "may": true,
+        "reveal": true
       }
     ]
   },
@@ -34237,7 +34246,8 @@
         "effect": "reveal_play_top",
         "trigger": "on_play",
         "source": "opponent",
-        "look": 1
+        "look": 1,
+        "reveal": true
       }
     ],
     "variants": [
