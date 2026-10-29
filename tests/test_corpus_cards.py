@@ -493,7 +493,10 @@ def test_ravenbloom_student_grows_as_the_spell_is_played():
     a.base_units.append(student)
     base = student.might
     card = CARD_REGISTRY[_spell(1)].instantiate()
-    loop._spell_played(card, a)                            # played, not resolved yet
+    from riftbound.core.state import ChainItem
+    loop._spell_played(card, a)
+    assert student.might == base                           # its choices aren't made yet
+    loop._put_on_chain(ChainItem(player="A", card=card, bf_idx=0))   # played, not resolved yet
     assert student.might == base + 1
 
 

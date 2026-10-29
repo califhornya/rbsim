@@ -56,7 +56,8 @@ def _affordable(loop: "GameLoop", ap, card, lane: Optional[int] = None, dst=None
     a unit or DEPLOY gear played to battlefield `dst`: Hunters' Circle)."""
     energy, power = loop._effective_cost(card, ap, lane)
     energy = max(0, energy - loop._destination_discount(card, dst, ap.name))
-    return loop._can_pay_card(ap, card, energy, power)
+    return loop._can_pay_card(ap, card, energy, power,
+                              lane=lane if isinstance(card, SpellCard) else None)
 
 
 def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:

@@ -553,6 +553,7 @@ class GameLoop:
             if units:
                 self._note_chosen(item.card, item.player, units)
             item.choices_noted = True
+        self._spell_finalized(item.card)
 
     def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
         """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
@@ -598,14 +599,28 @@ class GameLoop:
         loop2 = GameLoop(gs2)
         loop2._dry_run = True
         real = self.chooser
+        # The Irelia Graceful it was paid for with must be chosen (§355.16:
+        # no choice that makes the play illegal): a unit target offering her
+        # offers only her (as card uuids: the same on every copy).
+        owed = {u.card.uuid for u in getattr(item.card, "_graceful_owed", None) or []}
 
         def chooser(_loop, kind, side, options, default, source):
             # Only the declared choices are the player's now; the rest are
             # asked again as the spell resolves. (`_loop` may be a copy of
             # loop2: _choices_on_board_as_played.)
             spell = (_loop._declaring or {}).get("card")
-            if real is None or source is None or source is not spell \
-                    or not kind.startswith(_DECLARED_CHOICES):
+            if source is None or source is not spell or not kind.startswith(_DECLARED_CHOICES):
+                return None
+            must = [i for i, o in enumerate(options) if owed and kind.startswith("target")
+                    and getattr(getattr(o[-1] if isinstance(o, tuple) and o else o, "card", None),
+                                "uuid", None) in owed]
+            if must:
+                only = [options[i] for i in must]
+                j = real(_loop, kind, side, only, 0, source) if real is not None else None
+                i = must[j or 0]
+                owed.discard((options[i][-1] if isinstance(options[i], tuple) else options[i]).card.uuid)
+                return i
+            if real is None:
                 return None
             return real(_loop, kind, side, options, default, source)
         loop2.chooser = chooser
@@ -1655,7 +1670,8 @@ class GameLoop:
         (and each Svellsongur copy). The spell's cost was paid before its
         choices, so the discount is taken as it chooses, when DEFLECT's [rune]
         is paid: off that [rune] first, else the Energy paid comes back, else
-        the Power paid. Returns the DEFLECT [rune] left to pay."""
+        the Power paid; one it could be paid only with was taken as it was
+        paid (_graceful_credit). Returns the DEFLECT [rune] left to pay."""
         if not isinstance(source, SpellCard):
             return tax
         side = "A" if chooser is self.gs.A else "B"
@@ -1666,10 +1682,15 @@ class GameLoop:
         for u, w in located:
             if w is None or w[0] != side or id(u) in seen:
                 continue                 # once a spell, though it chooses her twice
-            k = sum(1 for es in self._card_effects(u.card) if es.effect == "cheaper_spells_choosing_me")
+            k = self._graceful_count(u)
             if k:
                 seen.add(id(u))
-                n += k
+                owed = getattr(source, "_graceful_owed", None) or []
+                if any(u is o for o in owed):
+                    source._graceful_owed = [o for o in owed if o is not u]
+                    source._graceful_prepaid -= k
+                else:
+                    n += k
         for _ in range(n):
             if tax:
                 tax -= 1
@@ -1680,6 +1701,50 @@ class GameLoop:
                 source._power_paid -= 1
                 chooser.add_power(source.cost_power_domain, 1)
         return tax
+
+    def _graceful_count(self, unit: UnitInPlay) -> int:
+        """How many "your spells that choose me cost [1] or [rune] less" `unit`
+        has (Irelia Graceful, Svellsongur copies)."""
+        return sum(1 for es in self._card_effects(unit.card) if es.effect == "cheaper_spells_choosing_me")
+
+    def _graceful_credit(self, actor: Player, card: Card, energy: int, power,
+                         lane: int) -> Optional[tuple]:
+        """A spell `actor` can pay for only with Irelia Graceful's discount
+        (§355-356: its choices are made first, then its cost): the fewest of
+        `actor`'s units with it that the spell, aimed at battlefield `lane`,
+        may choose whose discounts make it affordable, as (units, discounts,
+        energy, power) with the discounts off the Energy first. The spell then
+        must choose them (_declare_choices). None: there are none, or this is
+        a copy declaring or looking ahead (its spells choose as they resolve)."""
+        gs = self.gs
+        spec = CARD_REGISTRY.get(card.name)
+        if spec is None or not isinstance(card, SpellCard) or not 0 <= lane < len(gs.battlefields) \
+                or getattr(self, "_dry_run", False) or getattr(self, "_lookahead", False):
+            return None
+        side = "A" if actor is gs.A else "B"
+        mine = [u for bf in gs.battlefields for u in bf._units_for(side)] + list(actor.base_units)
+        counts = {id(u): self._graceful_count(u) for u in mine}
+        if not any(counts.values()):
+            return None
+        from .effects import choosable_units
+        ctx = EffectContext(self, card, actor, gs.get_player(gs.other(side)), gs.battlefields[lane])
+        able: list = []
+        for es in spec.effects:
+            if es.trigger not in ("on_play", "on_cast") or es.condition or getattr(es, "optional", False):
+                continue
+            for u in choosable_units(ctx, {**es.merged_params(), "effect": es.effect}):
+                if counts.get(id(u)) and not any(u is x for x in able):
+                    able.append(u)
+        power = int(power or 0)
+        owed, n = [], 0
+        for u in able:
+            owed.append(u)
+            n += counts[id(u)]
+            for off in range(min(n, energy), -1, -1):
+                e, p = energy - off, max(0, power - (n - off))
+                if self._can_pay_card(actor, card, e, p):
+                    return owed, n, e, p
+        return None
 
     def _resolve_delayed_effects(self) -> None:
         """Run the "at the end of this turn, ..." effects scheduled this turn."""
@@ -3978,16 +4043,21 @@ class GameLoop:
             print(f"  {ap.name} kills {victim.card.name} to play {card.name}")
 
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power,
-                      discounts: bool = True, domain=None) -> bool:
+                      discounts: bool = True, domain=None, lane=None) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
         showdown Diana's showdown energy counts. Units and gear may use
         Mordekaiser's earmarked power. A spell may cost [2] less with Seraphine
         Starry-Eyed Songstress, Atakhan less for the friendly unit he kills,
-        a card with an alternate cost for that one (`discounts`: try them).
-        `domain`: the Power's domain if not the card's (an alternate cost)."""
+        a card with an alternate cost for that one (`discounts`: try them);
+        a spell aimed at battlefield `lane`, less for the Irelia Graceful it
+        may choose (_graceful_credit). `domain`: the Power's domain if not the
+        card's (an alternate cost)."""
         if self._play_forbidden(actor, card):
             return False
+        if discounts and lane is not None and isinstance(card, SpellCard) and \
+                not self._can_pay_card(actor, card, energy, power, domain=domain):
+            return self._graceful_credit(actor, card, energy, power, lane) is not None
         if discounts and energy > 0:
             offer = self._songstress("A" if actor is self.gs.A else "B", card)
             if offer is not None and self._can_pay_card(actor, card, max(0, energy - offer[2]),
@@ -4019,16 +4089,24 @@ class GameLoop:
             return self._can_pay_showdown(actor, energy, power, domain)
         return actor.can_pay_cost(energy, power, domain)
 
-    def _pay_card(self, actor: Player, card: Card, energy: int, power, extras=True) -> bool:
+    def _pay_card(self, actor: Player, card: Card, energy: int, power, extras=True,
+                  lane=None) -> bool:
         """Pay `card`'s cost (from _effective_cost). What that cost was reduced
         by spending (_cost_extras: Brazen Buccaneer's discard, Wallop's buff,
         ...) is chosen now (`extras` True; a dict: already chosen; False: a cost
         not from _effective_cost) and spent after the Energy and Power, as
-        Atakhan's kill (§357.1-2)."""
-        if not self._can_pay_card(actor, card, energy, power):
+        Atakhan's kill (§357.1-2). A spell aimed at battlefield `lane` that
+        only Irelia Graceful's discount makes affordable takes it now and must
+        choose her (_graceful_credit, _declare_choices)."""
+        if not self._can_pay_card(actor, card, energy, power, lane=lane):
             return False
         side = "A" if actor is self.gs.A else "B"
         card._chosen_card = None             # set again if a cost extra chooses it
+        if isinstance(card, SpellCard):
+            card._graceful_owed, card._graceful_prepaid = [], 0
+            if lane is not None and not self._can_pay_card(actor, card, energy, power):
+                card._graceful_owed, card._graceful_prepaid, energy, power = \
+                    self._graceful_credit(actor, card, energy, power, lane)
         energy, power, domain = self._choose_alt_cost(actor, card, energy, power)
         if extras is True:
             extras, energy, power = self._choose_cost_extras(
@@ -4038,6 +4116,7 @@ class GameLoop:
                 actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, discounts=False))
         energy, power, victim = self._kill_discount(actor, card, energy, power)
         if not self._pay_card_cost(actor, card, energy, power, domain):
+            card._graceful_owed, card._graceful_prepaid = [], 0
             return False
         if victim is not None:
             self._kill_for_cost(actor, card, victim)
@@ -4356,7 +4435,8 @@ class GameLoop:
     def _spell_played(self, card: Card, ap: Player, from_zone: str = "hand") -> None:
         """A spell is played from any zone, after its cost is paid and it left
         that zone, before it goes on the chain: additional costs (kicker),
-        REPEAT, SHOW OFF, the play counters, and "when you play a spell"."""
+        REPEAT, SHOW OFF, the play counters. "When you play a spell" fires once
+        it is on the chain with its choices made (_spell_finalized)."""
         energy_before = ap.energy
         self._try_pay_additional_costs(card, ap)
         # REPEAT [Cost]: optional additional cost. Pay it (once) if we can
@@ -4400,11 +4480,35 @@ class GameLoop:
         card._spent = spent
         card._power_paid, self._spell_power_paid = getattr(self, "_spell_power_paid", 0), 0
         card._graceful_from = set()                  # Irelia Graceful's discounts taken
+        self._note_card_played(card, side, from_zone)
+        card._play_pending = side                    # _spell_finalized
+        self._drain_rune_recycles()           # its kicker / REPEAT Power
+
+    def _spell_finalized(self, card: Card) -> None:
+        """A spell played (_spell_played) is on the chain with its choices made
+        and its total cost paid (§358): what Irelia Graceful's discount took
+        off for a unit it then didn't choose is paid now, as far as it can be
+        (Energy, then Power); then "when you play a spell" with the Energy
+        spent, her discounts off ("if you spent [4] or more")."""
+        prepaid = getattr(card, "_graceful_prepaid", 0)
+        card._graceful_owed, card._graceful_prepaid = [], 0
+        side = getattr(card, "_play_pending", None)
+        card._play_pending = None
+        if side is None:
+            return
+        ap = self.gs.get_player(side)
+        if prepaid > 0:
+            e = min(prepaid, ap.energy)
+            ap.energy -= e
+            card._spent += e
+            p = prepaid - e
+            if p and self._can_pay_generic_power(ap, p):
+                self._pay_generic_power(ap, p)
+        spent = card._spent
         turn, most = self.gs.spell_spent.get(side, (-1, 0))
         self.gs.spell_spent[side] = (self.gs.turn, max(spent, most if turn == self.gs.turn else 0))
-        self._note_card_played(card, side, from_zone)
         self._fire_spell_played(card, side, spent)
-        self._drain_rune_recycles()           # its kicker / REPEAT Power
+        self._drain_rune_recycles()
 
     def _fire_spell_played(self, card: Card, side: str, spent: int) -> None:
         """ "When you play a spell" (§ play: as it goes on the chain, before it
@@ -4918,7 +5022,7 @@ class GameLoop:
                 # controls DEFLECT units at the target battlefield, the spell
                 # costs that much more energy (additional cost, §809).
                 energy, power = self._effective_cost(card, ap, target_lane)
-                if not self._pay_card(ap, card, energy, power):
+                if not self._pay_card(ap, card, energy, power, lane=target_lane):
                     return
                 ap.remove_from_hand(idx)
                 self._spell_played(card, ap)
@@ -6805,7 +6909,7 @@ class GameLoop:
                 if lane is None or not (0 <= lane < len(self.gs.battlefields)):
                     lane = 0
                 energy, power = self._effective_cost(card, player, lane)
-                if self._spell_has_targets(card, side, lane) and                         self._pay_card(player, card, energy, power):
+                if self._spell_has_targets(card, side, lane) and                         self._pay_card(player, card, energy, power, lane=lane):
                     player.remove_from_hand(idx)
                     self._spell_played(card, player)
                     self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
@@ -6954,7 +7058,7 @@ class GameLoop:
             if isinstance(card, SpellCard):
                 has_action_or_reaction = card.has_keyword("ACTION") or self._has_reaction(card, side)
                 energy, power = self._effective_cost(card, player, bf_idx)
-                if has_action_or_reaction and self._spell_has_targets(card, side, bf_idx) and                         self._pay_card(player, card, energy, power):
+                if has_action_or_reaction and self._spell_has_targets(card, side, bf_idx) and                         self._pay_card(player, card, energy, power, lane=bf_idx):
                     player.remove_from_hand(idx)
                     self._spell_played(card, player)
                     if self.verbose:

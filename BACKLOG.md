@@ -448,8 +448,8 @@ tests/test_corpus_vendetta.py.
   where DEFLECT's [rune] is paid): off that [rune] first, else the Energy paid
   comes back, else the Power paid. Once a spell per Irelia, though it chooses
   her twice (Falling Star); Svellsongur's copy is one more; not for an
-  opponent's spells. Left (KNOWN_ISSUES): a spell affordable only with her
-  discount can't be played. Tests in tests/test_irelia_graceful.py.
+  opponent's spells. A spell affordable only with her discount: G3 "Costs
+  before choices" (done B30). Tests in tests/test_irelia_graceful.py.
 - [DONE] Endless Riches: "When you play this, banish your hand and trash, then
   BURN 7. Skip your Draw Phase. You may play cards from your trash. If a card
   would go to your trash from anywhere other than your Main Deck, banish it
@@ -780,9 +780,23 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   Fallen "up to": no fallback card stands in. Coach: "Nessun altro". Left:
   "ready up to N runes" never offers fewer (never better), Arise! readies the
   first two.
-- [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
+- [x] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
   Graceful's discount can't be played; "if you spent [N]" sees the Energy
-  before her discount.
+  before her discount. DONE B30 (tests/test_g3_costs_before_choices.py): the
+  cost is still paid before the choices are declared, but a spell aimed at a
+  battlefield (`_can_pay_card` / `_pay_card` `lane=`: hand plays, reactions,
+  showdowns, legality) that only her discount makes affordable takes it as
+  it is paid (`GameLoop._graceful_credit`: the fewest friendly units with it
+  the spell's unconditional unit targets may choose, `effects.choosable_units`;
+  Energy off first) and records them (`card._graceful_owed` / `_prepaid`);
+  declaring, a target choice offering one offers only her (§355.16); her
+  discount as she is chosen then takes off nothing more (`_graceful_discount`).
+  One not chosen after all is paid at `_spell_finalized` as far as it can be.
+  "When you play a spell" + `gs.spell_spent` moved from `_spell_played` to
+  `GameLoop._spell_finalized` (end of `_put_on_chain`: after the choices,
+  DEFLECT and her refunds, §358 then triggers), so "spent" has her discount
+  off. Copies (declaring, lookahead) give no credit. Golden regenerated (Ride
+  the Wind now declares before Ravenbloom Student's +1); smoke 900 games clean.
 - [ ] Abilities on the chain (§328, §337.2, from G2 Spiritforged): activated
   and triggered abilities resolve at once (`_apply_activated_ability`,
   `_resolve_triggered_effects`; `_reaction_step` "kept"), so nobody can respond

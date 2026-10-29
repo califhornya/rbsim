@@ -63,8 +63,10 @@ convention). Each entry: what, where, why deferred.
   (`_add_battlefield_token`): the Baron Pit token is added and he enters there,
   once. `tests/test_invariants.py` now asserts "one card, one zone".
 
-### (DEFERRED) A spell's cost is paid before its choices (Irelia Graceful, DEFLECT)
-- **Tracked in BACKLOG.md G3.**
+### (CLOSED B30) A spell's cost is paid before its choices (Irelia Graceful, DEFLECT)
+- **Closed:** BACKLOG.md G3 "Costs before choices" (her discount taken as the
+  spell is paid when it needs it, the spell then must choose her; "when you
+  play a spell" fires after the choices: `GameLoop._spell_finalized`).
 - Rules (§355-357): choices first, then the total cost, then pay. The engine pays
   the cost, then the spell chooses (on the chain, or as it resolves in a
   lookahead); target-dependent costs are settled then: DEFLECT's [rune] paid,

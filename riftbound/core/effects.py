@@ -4009,6 +4009,18 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     return bool(_choosable(ctx, _resolve_targets(ctx, {**spec, "scope": "all"})))
 
 
+def choosable_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
+    """The units one instruction of a spell about to be played may choose (a
+    unit target's valid choices; none for any other instruction): Irelia
+    Graceful's discount (GameLoop._graceful_credit)."""
+    if str(spec.get("scope", "single")).lower() != "single" or \
+            str(spec.get("target", "")).lower() not in _SINGLE_UNIT_TARGETS:
+        return []
+    if spec.get("effect") in ("move_unit", "move_units_to_base"):
+        return [u for _s, u in _move_candidates(ctx, spec, spec.get("effect") == "move_units_to_base")]
+    return _choosable(ctx, _resolve_targets(ctx, {**spec, "scope": "all"}))
+
+
 def _units_where(ctx: "EffectContext", side: str, where: str) -> list:
     """`side`'s units a target may pick: here only (no `where`), or every
     battlefield ("battlefield") and the base too ("anywhere"); here first, so
