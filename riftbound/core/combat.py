@@ -81,6 +81,9 @@ class UnitInPlay:
     extra_tags: list = field(default_factory=list)   # Ivern Friend to All: "I gain that tag"
     # Shady Spectacles: the unit's own card while it "becomes a copy" of another.
     copied_from: Optional[object] = None
+    # A gear that became a unit gear (Orianna Lady of Clockwork): its Might is
+    # its Energy cost; it is still a gear for "a friendly gear".
+    gear_unit: bool = False
 
     def reset_damage(self) -> None:
         self.damage = 0
@@ -112,9 +115,17 @@ class UnitInPlay:
         )
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
-        base = self.base_might_override if self.base_might_override is not None else int(self.card.might or 0)
+        base = self.base_might
         return max(0, base + self.bonus_might + self.temporary_might + self.combat_might
                    + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+
+    @property
+    def base_might(self) -> int:
+        """Its base Might: the card's (a unit gear's Energy cost), or what an
+        effect made it this turn."""
+        if self.base_might_override is not None:
+            return self.base_might_override
+        return int(self.card.cost_energy or 0) if self.gear_unit else int(self.card.might or 0)
 
     @property
     def tags(self) -> list:

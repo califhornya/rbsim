@@ -29,7 +29,7 @@ from riftbound.registry.engine_vocab import (
 _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_play", "on_cast", "on_conquer", "on_hold", "on_attack", "on_defend",
     "on_death", "leaves_board", "on_move", "on_start_of_turn", "on_end_of_turn",
-    "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
+    "on_start_of_main", "on_friendly_unit_played", "on_friendly_unit_death", "on_play_spell",
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
     "on_card_played", "on_unit_moves_from_here", "on_enemy_unit_played",
@@ -723,8 +723,8 @@ class GameLoop:
         return vps
 
     def _fire_turn_trigger(self, trigger: str, side: str) -> None:
-        """Fire on_start_of_turn / on_end_of_turn for all of a player's units on
-        board (across battlefields and base)."""
+        """Fire on_start_of_turn / on_end_of_turn / on_start_of_main for all of a
+        player's units on board (across battlefields and base)."""
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
         for bf in self.gs.battlefields:
@@ -1965,7 +1965,7 @@ class GameLoop:
             where = self._locate_unit(unit) if unit is not None else None
             here = where[1] if where else None
             return here is not None and (bool(here.gear_for(side)) or
-                                         any(u.gear for u in here._units_for(side)))
+                                         any(u.gear or u.gear_unit for u in here._units_for(side)))
         if ctype == "cards_in_hand_exactly":
             return len(actor.hand) == _threshold()
         if ctype == "units_at_battlefields_exactly":
@@ -2118,7 +2118,7 @@ class GameLoop:
             # Gear the actor controls: attached to their units + loose in base,
             # e.g. Patched Porobot "if you control 3 or more other gear, draw 1".
             # The source is a unit, not gear, so nothing to exclude.
-            count = (sum(len(u.gear) for u in _friendly_units()) + len(actor.base_gear)
+            count = (sum(len(u.gear) + u.gear_unit for u in _friendly_units()) + len(actor.base_gear)
                      + sum(len(bf.gear_for(side)) for bf in self.gs.battlefields))
             return count >= _threshold()
         if ctype == "opponent_controls_a_battlefield":
@@ -4773,6 +4773,67 @@ class GameLoop:
         side = "A" if ap is self.gs.A else "B"
         return gear in ap.base_gear or gear in self._controlled_attached_gear(side)
 
+    # Unit gear (Orianna Lady of Clockwork): "It becomes a unit gear with Might
+    # equal to its Energy cost until you choose another gear with me". It is a
+    # unit (it moves, fights, holds, dies as one) and still a gear for "a
+    # friendly gear here", "you control N gear" and "kill a gear".
+
+    def _gear_units(self, side: str) -> list:
+        return [u for u in self._friendly_units_of(side) if u.gear_unit]
+
+    def _gear_to_unit(self, side: str, holder, gear) -> UnitInPlay:
+        """`side`'s gear becomes a unit gear where it is: `holder` is the unit
+        wearing it (it detaches, §143.5.b), the Battlefield it is deployed on
+        (`gear` is then its DeployedGear) or None in base. Ready if the gear
+        was; at a battlefield it contests like a unit an effect moved there."""
+        ap = self.gs.get_player(side)
+        card = getattr(gear, "card", gear)
+        if isinstance(holder, Battlefield):
+            holder.gear_for(side).remove(gear)
+            bf = holder
+        elif holder is not None:
+            holder.gear.remove(card)
+            where = self._locate_unit(holder)
+            bf = where[1] if where else None
+        else:
+            ap.base_gear.remove(card)
+            bf = None
+        unit = UnitInPlay(card=card, ready=not card.tapped, gear_unit=True,
+                          is_token=bool(getattr(card, "is_token", False)))
+        card.tapped = False
+        if bf is None:
+            ap.base_units.append(unit)
+        else:
+            prev_controller = bf.controller()
+            bf.add_unit(side, unit)
+            self._effect_arrival(bf, side, prev_controller)
+        if self.verbose:
+            to = "base" if bf is None else f"BF{self.gs.battlefields.index(bf)}"
+            print(f"  {card.name} ({side}) becomes a {unit.might} Might unit gear at {to}")
+        self._recompute_passives()
+        return unit
+
+    def _unit_to_gear(self, unit: UnitInPlay) -> None:
+        """A unit gear stops being a unit: a gear again where it is, exhausted
+        if the unit was; its Equipment goes to base. At a battlefield a DEPLOY
+        gear stays deployed, any other is recalled to base (§459.1: at once
+        rather than at the next cleanup)."""
+        where = self._locate_unit(unit)
+        if where is None:
+            return
+        side, bf = where
+        ap = self.gs.get_player(side)
+        self._remove_unit_from_play(unit, side)
+        ap.base_gear.extend(unit.gear)
+        unit.gear = []
+        card = unit.card
+        card.tapped = not unit.ready
+        if bf is not None and card.has_keyword("DEPLOY"):
+            bf.gear_for(side).append(DeployedGear(card=card, is_token=unit.is_token))
+        else:
+            ap.base_gear.append(card)
+        self._recompute_passives()
+
     @staticmethod
     def _parse_activated_cost(cost) -> dict:
         """Normalize the mixed string/dict/None cost forms the generator emits."""
@@ -5329,6 +5390,8 @@ class GameLoop:
             dead_unit.card._owner = None
             owner.base_gear.extend(dead_unit.gear)
             self.gs.friendly_unit_died_this_turn[owner_side] = True
+            if dead_unit.gear_unit:
+                self.gs.friendly_gear_died_this_turn[owner_side] = True
             if self.gs.in_beginning_phase and owner_side == self.gs.active:
                 self.gs.died_in_beginning[owner_side] = self.gs.turn     # Shadow Watcher
             truly_dead.append((dead_unit, owner_side))
@@ -6414,6 +6477,11 @@ class GameLoop:
         self._fire_turn_trigger("on_start_of_turn", gs.active)
         self._recompute_passives()
         self._phase_draw(gs.get_player(gs.active))
+        # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
+        # it makes at a battlefield has its showdown before any action.
+        self._fire_turn_trigger("on_start_of_main", gs.active)
+        self._recompute_passives()
+        self._run_staged_showdowns()
         return None
 
     def _run_main_actions(self) -> Optional[Result]:

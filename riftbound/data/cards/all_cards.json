@@ -38733,7 +38733,12 @@
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "clockwork_animate",
+        "trigger": "on_start_of_main"
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-145",

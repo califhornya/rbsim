@@ -403,7 +403,7 @@ def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         friends = {id(u) for u in _friendly_units(ctx)}
 
         def gain(u):
-            base = u.base_might_override if u.base_might_override is not None else int(u.card.might or 0)
+            base = u.base_might
             return amount - base if id(u) in friends else base - amount
         units = sorted(units, key=gain, reverse=True)
         if not units or (gain(units[0]) <= 0 and not isinstance(ctx.card, SpellCard)):
@@ -411,7 +411,7 @@ def _set_base_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         units = [ctx.loop.choose(_kind("target", spec), ctx.actor_side, units, units[0], ctx.card)]
         ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
     for unit in units:
-        current = unit.base_might_override if unit.base_might_override is not None else int(unit.card.might or 0)
+        current = unit.base_might
         if spec.get("only_if_higher") and amount <= current:
             continue     # "you may": only when it raises me
         unit.base_might_override = amount
@@ -3778,7 +3778,7 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     if single and (effect in ("return_gear_to_hand", "give_gear_temporary") or
                    (effect == "kill_gear" and target in ("", "none", "chosen_unit", "gear", "enemy_gear",
                                                          "chosen_gear"))):
-        entries = _gear_entries(ctx, enemy_first=True)
+        entries = _gear_entries(ctx, enemy_first=True, units=effect == "kill_gear")
         if target == "enemy_gear":
             entries = [e for e in entries if e[0] == ctx.opponent_side]
         tf = spec.get("target_filter") or {}
@@ -4036,10 +4036,12 @@ def _take_off_board(ctx: "EffectContext", unit):
     return where
 
 
-def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, object, object]]:
+def _gear_entries(ctx: "EffectContext", enemy_first: bool,
+                  units: bool = False) -> list[tuple[str, object, object]]:
     """All gear in play as (owner_side, holder_or_None, gear). holder is the
     UnitInPlay wearing it, None for unattached base gear, or the Battlefield a
-    DEPLOY gear sits on (gear is then its DeployedGear wrapper)."""
+    DEPLOY gear sits on (gear is then its DeployedGear wrapper). `units`: unit
+    gear too (Orianna Lady of Clockwork), as (side, the unit, its card)."""
     gs = ctx.loop.gs
     # enemy_first means the opponent's side comes first in the pick order.
     order = (ctx.opponent_side, ctx.actor_side) if enemy_first else (ctx.actor_side, ctx.opponent_side)
@@ -4057,6 +4059,8 @@ def _gear_entries(ctx: "EffectContext", enemy_first: bool) -> list[tuple[str, ob
         for bf in gs.battlefields:
             for dg in bf.gear_for(side):
                 entries.append((side, bf, dg))
+        if units:
+            entries.extend((side, u, u.card) for u in in_play if u.gear_unit)
     return entries
 
 
@@ -4083,7 +4087,7 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     target = str(spec.get("target", "")).lower()
     single = bool(tf) or scope == "single" or target in _CHOOSER_TARGETS or target in _ENEMY_GEAR_HINTS
 
-    entries = _gear_entries(ctx, enemy_first=True)
+    entries = _gear_entries(ctx, enemy_first=True, units=True)
     entries = [(s, h, g) for (s, h, g) in entries if _gear_matches(g, tf)]
     if spec.get("_only") is not None:
         entries = [e for e in entries if getattr(e[2], "card", e[2]) is spec["_only"]]
@@ -4125,6 +4129,13 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if isinstance(holder, Battlefield):
             ctx.loop._kill_deployed_gear(holder, side, [gear])
             continue
+        if getattr(holder, "gear_unit", False) and holder.card is gear:
+            # A unit gear dies as a unit (DEATHKNELL, "when a friendly unit dies").
+            where = _take_off_board(ctx, holder)
+            if where is not None:
+                ctx.loop._route_deaths([(holder, side)], where[1] or ctx.battlefield,
+                                       in_base=where[1] is None, killer=(ctx.actor_side, ctx.card))
+            continue
         if holder is not None:
             if gear not in holder.gear:
                 continue
@@ -4138,6 +4149,33 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 
 _ENEMY_GEAR_HINTS = {"enemy_gear", "chosen_gear", "gear"}
+
+
+@effect("clockwork_animate")
+def _clockwork_animate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "At the start of your Main Phase, you may pay [1] to choose a friendly
+    gear. It becomes a unit gear with Might equal to its Energy cost until you
+    choose another gear with me" (Orianna Lady of Clockwork). The unit gear
+    chosen before becomes a gear again. Baseline: pay when a gear would make a
+    bigger unit than the one there is, and choose the costliest."""
+    loop = ctx.loop
+    side = ctx.actor_side
+    entries = [e for e in _gear_entries(ctx, enemy_first=False) if e[0] == side]
+    if not entries or not loop._can_pay_energy_and_generic(ctx.actor, 1, 0, None):
+        return
+    current = loop._gear_units(side)
+
+    def energy(e):
+        return int(getattr(getattr(e[2], "card", e[2]), "cost_energy", 0) or 0)
+    best = max(entries, key=energy)
+    have = max((int(u.card.cost_energy or 0) for u in current), default=0)
+    if not loop.choose("optional:clockwork_animate", side, [True, False], energy(best) > have, ctx.card):
+        return
+    loop._pay_energy_and_generic(ctx.actor, 1, 0)
+    _side, holder, gear = loop.choose(_kind("target", spec), side, entries, best, ctx.card)
+    for unit in current:
+        loop._unit_to_gear(unit)
+    loop._gear_to_unit(side, holder, gear)
 
 
 @effect("heal_unit")

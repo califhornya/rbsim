@@ -21,6 +21,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "leaves_board",                             # any board exit (death/recall/bounce/banish)
     "on_move",                                  # move-into-battlefield
     "on_start_of_turn", "on_end_of_turn",       # turn boundaries
+    "on_start_of_main",                         # the start of your Main Phase (Orianna Lady of Clockwork)
     "on_friendly_unit_played",
     "on_friendly_unit_death",
     "on_play_spell",

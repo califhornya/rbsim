@@ -370,8 +370,21 @@ from the card data (only "REACTION"); needs the printed text.
   (index = slot). When the room shrinks (the Trap dies, its controller loses the
   battlefield) the excess goes to the trash (§107.3.b.2). Tests in
   tests/test_hidden.py.
+- [DONE] Orianna Lady of Clockwork and The Ball as a unit: at the start of
+  your Main Phase (new trigger `on_start_of_main`, after the draw) she may pay
+  [1] to choose a friendly gear (base, attached: it detaches §143.5.b, or
+  deployed); it becomes a unit where it is (`UnitInPlay.gear_unit`, Might =
+  its Energy cost, ready if the gear was), contesting or conquering a
+  battlefield like a unit an effect put there. Choosing another turns the first
+  back into a gear where it is (DEPLOY stays deployed, any other goes to base,
+  §459.1). It moves (The Ball ganks; its "when you move this" fires), fights,
+  dies as a unit; still a gear for "a friendly gear here" (Orianna Exquisite),
+  "you control N gear" and "kill a gear". Baseline: pay when a gear makes a
+  bigger unit than the current one, choose the costliest. Not covered: other
+  gear effects (ready/exhaust/return/banish/steal a gear) don't see a unit
+  gear. Tests in tests/test_unit_gear.py.
 
-Orianna Lady of Clockwork and The Ball as a unit (gear that becomes a unit), Ivern Green
+Ivern Green
 Father (Brush battlefield), Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
 duplicate card), Svellsongur, Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress

@@ -71,7 +71,7 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   - [PARTIAL] **DEPLOY** (§830) + Bomb token (RAD-T02, §187.12). Still missing:
     "Friendly DEATHKNELLs here trigger twice" (RAD-017 Detonation Amplifier), "when
     you win a combat here" (RAD-024), "when one or more friendly units attack here"
-    (RAD-156), Deploy gear that become units (RAD-146 The Ball), "your gear with
+    (RAD-156), Deploy gear that become units (RAD-146 The Ball: done 2026-10-29), "your gear with
     DEPLOY have ACTION" (RAD-091/155 Jarvan), Hexplosive Minefield's delayed "at end
     of turn, play that many Bombs". (The RL observation now includes deployed
     gear — 2026-10-25.)
@@ -440,7 +440,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   (the opponent's latest spell on the chain resolves as ours).
 - **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
   second facedown card at a battlefield: the Facedown Zone holds one; modeled
-  2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit); Ivern Green Father
+  2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit;
+  modeled 2026-10-29, BACKLOG E); Ivern Green Father
   (replacing a battlefield with a Brush token) and Baron Pit (a token
   battlefield nothing creates yet); Svellsongur (an Equipment copying its
   unit's text); Void Hatchling (a replacement on every reveal); Hextech
