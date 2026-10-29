@@ -700,7 +700,7 @@ def _steal_or_counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     if not items:
         return
     enemy = [it for it in items if it.player != ctx.actor_side]
-    item = loop.choose("spell:steal_or_counter_spell", ctx.actor_side, items, (enemy or items)[-1], ctx.card)
+    item = loop.choose("target:steal_or_counter_spell", ctx.actor_side, items, (enemy or items)[-1], ctx.card)
     n = int(spec.get("pay_power", 1))
     if loop._can_pay_generic_power(ctx.actor, n):
         pay = item.player != ctx.actor_side and not loop._has_effect(item.card, "counter_spell")
@@ -3523,15 +3523,27 @@ def _chose_mine(ctx: "EffectContext", item, only_one: bool = False) -> bool:
     return len(hits) == 1 if only_one else bool(hits)
 
 
+def _counter_targets(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
+    """The spells on the chain `counter_spell` may choose (§355.9.a.2: any
+    of them, not just the latest): within its cost limits, counterable, and
+    for Not So Fast / Repulse an enemy one choosing ours."""
+    loop = ctx.loop
+    return [it for it in loop.gs.chain if it.card is not ctx.card and isinstance(it.card, SpellCard)
+            and _counterable(it.card, spec) and not loop._uncounterable(it.player)
+            and not loop._has_effect(it.card, "cant_be_countered")
+            and (not spec.get("enemy_choosing_mine") or _chose_mine(ctx, it, bool(spec.get("only_one"))))]
+
+
 @effect("counter_spell")
 def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Counter a spell": one on the chain, chosen as it is played (a target,
+    §355). Baseline: the opponent's latest, else the latest."""
     chain = ctx.loop.gs.chain
-    if not chain or not _counterable(chain[-1].card, spec) or ctx.loop._uncounterable(chain[-1].player) \
-            or ctx.loop._has_effect(chain[-1].card, "cant_be_countered"):
+    items = _counter_targets(ctx, spec)
+    if not items:
         return
-    target_item = chain[-1]
-    if spec.get("enemy_choosing_mine") and not _chose_mine(ctx, target_item, bool(spec.get("only_one"))):
-        return
+    enemy = [it for it in items if it.player != ctx.actor_side]
+    target_item = ctx.loop.choose("target:counter_spell", ctx.actor_side, items, (enemy or items)[-1], ctx.card)
     ctx.extra["countered_energy"] = int(target_item.card.cost_energy or 0)   # Riposte
     target_card = target_item.card
     owner = ctx.loop.gs.get_player(target_item.owner or target_item.player)
@@ -3540,7 +3552,7 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if tax and controller.energy >= tax:
         controller.energy -= tax     # "unless its controller pays [2]": they do
         return
-    chain.pop()
+    chain.remove(target_item)
     if spec.get("silence"):
         ctx.loop.gs.cant_play_spells_turn[target_item.player] = ctx.loop.gs.turn
     if spec.get("return_to_hand"):
@@ -3948,11 +3960,7 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     instruction this check doesn't know to target anything."""
     effect = spec.get("effect")
     if effect == "counter_spell":
-        chain = ctx.loop.gs.chain
-        return (bool(chain) and _counterable(chain[-1].card, spec)
-                and not ctx.loop._uncounterable(chain[-1].player)
-                and (not spec.get("enemy_choosing_mine")
-                     or _chose_mine(ctx, chain[-1], bool(spec.get("only_one")))))
+        return bool(_counter_targets(ctx, spec))
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()

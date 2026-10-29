@@ -184,8 +184,12 @@ def option_ref(gs, viewer: str, option) -> Optional[str]:
 def option_text(gs, viewer: str, option) -> str:
     """A choice's option, as `viewer` reads it."""
     from riftbound.core.combat import UnitInPlay
+    from riftbound.core.state import ChainItem
     if isinstance(option, tuple) and option and isinstance(option[-1], UnitInPlay):
         option = option[-1]
+    if isinstance(option, ChainItem):          # a spell on the chain (a counter's target)
+        whose = "tua" if option.player == viewer else "avversaria"
+        return f"{option.card.name} (magia {whose} sulla catena)"
     if isinstance(option, UnitInPlay):
         ref = (_unit_ref(gs, viewer, option) or "unit:opp:base").split(":")
         whose = "tua" if ref[1] == "me" else "avversaria"

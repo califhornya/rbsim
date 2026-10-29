@@ -331,8 +331,8 @@ class SimpleTradeAgent(Agent):
         for idx, entry in enumerate(abilities):
             if entry["type"] in ("flow", "banished_play", "trash_play"):
                 continue        # playing a card from a zone: _find_flow_play
-            if entry["type"] == "bf_ability" and not loop._ability_usable(self.player, entry):
-                continue        # Black Market: once per turn
+            if not loop._ability_usable(self.player, entry):
+                continue        # its condition (Ezreal's "use only if"), Black Market once per turn
             if entry["type"] == "equip":
                 gear = entry["gear"]
                 if not self.player.can_pay_cost(

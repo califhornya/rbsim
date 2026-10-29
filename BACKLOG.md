@@ -531,7 +531,10 @@ check a multi-domain card's power as any domain's (the engine pays it from its
 domains: an agent may try a card it can't pay, a no-op that ends its turn).
 The heuristic agents check a card's printed cost, not what it costs now: they
 never play a spell only Seraphine Starry-Eyed Songstress's [2] less pays for
-(nor one any other reduction makes affordable).
+(nor one any other reduction makes affordable). Fixed B28: simple_trade picked
+activated abilities without the engine's `_ability_usable` (their conditions):
+Ezreal Prodigal Explorer's "use only if" was a no-op every turn, the Ezreal
+precon never played a card (0 of 100 wins, now 16; tests/test_simple_trade_legal.py).
 
 From the re-check of the old notes (2026-10-29, G):
 - Hiding the champion (§737.1.b, the engine allows it) has no slot in the
@@ -747,10 +750,17 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   still there on the same side, else the gone one: a wasted hit, not one on
   the other side). Golden regenerated (Falling Star's second hit); smoke 300
   games clean, ~8% slower.
-- [ ] Counter targets: `counter_spell` always hits the chain's top item, no
+- [x] Counter targets: `counter_spell` always hit the chain's top item, no
   choice (rules: any spell on the chain, §355.9.a.2, declared). With REPEAT
-  (Hard Bargain) the second run counters whatever is next, your own spell too
-  (checked, B27).
+  (Hard Bargain) the second run countered whatever was next, your own spell
+  too. DONE B28 (tests/test_g3_counter_targets.py): `effects._counter_targets`
+  (spells on the chain within the card's cost limits, counterable, Not So Fast /
+  Repulse's "enemy, choosing ours") is the choice `target:counter_spell`, so it
+  is declared and replayed like any target (gone -> not followed); baseline the
+  opponent's latest, else the latest; `has_valid_target` uses the same list.
+  Rebuttal's choice renamed `target:steal_or_counter_spell` (declared too).
+  Coach: `option_text` names a chain item ("... (magia avversaria sulla
+  catena)").
 - [ ] "Up to N" picks: `choose_many` asks the chooser one pick per baseline pick,
   so a player (coach, search, net) can't take fewer than the baseline does
   (e.g. Piercing Light's "up to one other unit" with only your unit left).
