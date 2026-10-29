@@ -181,7 +181,7 @@ def test_sanction_may_empower_an_enemy_unit_until_end_of_turn():
     loop.gs.battlefields[0].add_unit("B", enemy)
     _sanction(loop, 0, "Enemy")
     assert enemy.empowered
-    loop._resolve_empower_at_end()
+    loop._resolve_delayed_effects()
     assert not enemy.empowered
 
 
@@ -197,7 +197,7 @@ def test_sanction_may_disempower_a_friendly_unit_and_empower_it_at_end():
     _sanction(loop, 1, "Tail-Cloaked Matriarch")
     assert not matriarch.empowered
     loop.chooser = _always(True)
-    loop._resolve_empower_at_end()
+    loop._resolve_delayed_effects()
     assert matriarch.empowered and any(u.card is small for u in a.base_units)
 
 
@@ -209,7 +209,7 @@ def test_sanction_end_of_turn_sets_the_status_not_a_toggle():
     a.base_units.append(mine)
     _sanction(loop, 0, "Mine")
     loop._disempower(mine.card)
-    loop._resolve_empower_at_end()
+    loop._resolve_delayed_effects()
     assert not mine.empowered
 
 

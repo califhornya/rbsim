@@ -2625,7 +2625,10 @@
         "effect": "give_keyword",
         "trigger": "passive",
         "target": "all_friendly_units_here",
-        "keyword": "SHIELD 1"
+        "keyword": "SHIELD 1",
+        "target_filter": {
+          "exclude_self": true
+        }
       }
     ]
   },
@@ -4597,7 +4600,8 @@
         "amount": 2,
         "condition": {
           "type": "ready_enemy_here"
-        }
+        },
+        "effect_condition": true
       }
     ]
   },
@@ -8698,7 +8702,8 @@
           "params": {
             "n": 1
           }
-        }
+        },
+        "effect_condition": true
       }
     ]
   },
@@ -8988,7 +8993,8 @@
       },
       {
         "effect": "fight_it_with_another",
-        "trigger": "on_cast"
+        "trigger": "on_cast",
+        "reflexive": true
       }
     ]
   },
@@ -20178,7 +20184,13 @@
         "effect": "give_keyword",
         "trigger": "passive",
         "target": "all_friendly_units_here",
-        "keyword": "DEFLECT"
+        "keyword": "DEFLECT",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "condition": {
+          "type": "this_is_at_battlefield"
+        }
       }
     ]
   },
@@ -20398,8 +20410,7 @@
     ],
     "keywords": [
       "HUNT 2",
-      "LEVEL 3",
-      "DEFLECT"
+      "LEVEL 3"
     ],
     "effects": [
       {
@@ -21097,8 +21108,7 @@
       }
     ],
     "keywords": [
-      "DEATHKNELL",
-      "PREDICT 2"
+      "DEATHKNELL"
     ],
     "effects": [
       {
@@ -21758,7 +21768,8 @@
       },
       {
         "effect": "hwei_discard_bonus",
-        "trigger": "on_move"
+        "trigger": "on_move",
+        "reflexive": true
       }
     ]
   },
@@ -22415,7 +22426,8 @@
           "params": {
             "n": 5
           }
-        }
+        },
+        "effect_condition": true
       }
     ]
   },
@@ -25160,21 +25172,11 @@
         "effect": "draw_cards",
         "trigger": "on_death",
         "count": 1,
-        "condition": {
-          "type": "not",
-          "params": {
-            "condition": {
-              "type": "in_beginning_phase"
-            }
-          }
-        }
-      },
-      {
-        "effect": "draw_cards",
-        "trigger": "on_death",
-        "count": 2,
-        "condition": {
-          "type": "in_beginning_phase"
+        "instead": {
+          "condition": {
+            "type": "in_beginning_phase"
+          },
+          "count": 2
         }
       }
     ]
@@ -25367,7 +25369,8 @@
         "amount": 1,
         "condition": {
           "type": "has_all_pet_tags"
-        }
+        },
+        "effect_condition": true
       },
       {
         "effect": "score_point",
@@ -25375,7 +25378,8 @@
         "amount": 1,
         "condition": {
           "type": "has_all_pet_tags"
-        }
+        },
+        "effect_condition": true
       }
     ]
   },
@@ -27910,24 +27914,11 @@
         "target": "chosen_unit",
         "where": "moved_bfs",
         "optional": true,
-        "condition": {
-          "type": "not",
-          "params": {
-            "condition": {
-              "type": "this_is_empowered"
-            }
-          }
-        }
-      },
-      {
-        "effect": "deal_damage",
-        "trigger": "on_move",
-        "amount": 2,
-        "target": "chosen_unit",
-        "where": "moved_bfs",
-        "optional": true,
-        "condition": {
-          "type": "this_is_empowered"
+        "instead": {
+          "condition": {
+            "type": "this_is_empowered"
+          },
+          "amount": 2
         }
       },
       {
@@ -29034,9 +29025,7 @@
     "set": "Vendetta",
     "keywords": [
       "EMPOWER",
-      "EMPOWERED",
-      "DEFLECT",
-      "SHIELD 3"
+      "EMPOWERED"
     ],
     "effects": [
       {
@@ -29791,8 +29780,7 @@
     "set": "Vendetta",
     "keywords": [
       "EMPOWER",
-      "EMPOWERED",
-      "GANKING"
+      "EMPOWERED"
     ],
     "effects": [
       {
@@ -31576,7 +31564,8 @@
       {
         "effect": "play_from_opponent_trash",
         "trigger": "on_become_empowered",
-        "optional": true
+        "optional": true,
+        "reflexive": true
       }
     ],
     "variants": [
@@ -31828,8 +31817,7 @@
     "set": "Vendetta",
     "keywords": [
       "EMPOWER",
-      "EMPOWERED",
-      "DEFLECT"
+      "EMPOWERED"
     ],
     "effects": [
       {

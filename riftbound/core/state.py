@@ -134,15 +134,12 @@ class GameState:
     # "The next card / spell you play this turn costs ... less" (Astral Heron,
     # Raging Firebrand): per player, a list of {filter, energy, power}.
     next_card_discounts: dict = field(default_factory=lambda: {"A": [], "B": []})
-    # "At the end of this turn, ..." effects waiting: (side, source card,
-    # battlefield index, effect dict).
+    # "At the end of this turn, ..." delayed abilities waiting (GameLoop.
+    # _delay_to_end): (side, source card, battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
     # "At the start of your next Main Phase, ..." (Iascylla): the same tuples,
     # run at the start of that side's next Main Phase.
     delayed_main: list = field(default_factory=list)
-    # Gear to disempower at end of turn (Tornado Warrior; a unit's is
-    # UnitInPlay.empower_at_end).
-    disempower_gear_at_end: list = field(default_factory=list)
     # "Once each turn" / "The first time ... each turn" abilities used:
     # (id of the source card, effect index) -> turn number.
     once_per_turn_used: dict = field(default_factory=dict)

@@ -107,7 +107,7 @@ def test_sanction_empowers_until_end_of_turn():
     loop.gs.battlefields[0].add_unit("A", unit)
     loop._resolve_card_effects(_card("Sanction"), loop.gs.battlefields[0], loop.gs.A, loop.gs.B)
     assert unit.empowered
-    loop._resolve_empower_at_end()
+    loop._resolve_delayed_effects()
     assert not unit.empowered
 
 

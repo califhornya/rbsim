@@ -307,7 +307,7 @@ def test_tornado_warrior_may_empower_an_enemy_unit_here():
     bf.add_unit("B", foe)
     assert loop._play_from_hidden("A", 0)
     assert foe.empowered
-    loop._resolve_empower_at_end()                        # (the end of turn's combat kills it)
+    loop._resolve_delayed_effects()                        # (the end of turn's combat kills it)
     assert not foe.empowered
 
 

@@ -858,17 +858,84 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   keywords / effects (copies ~2x cheaper; tests 80s -> 52s). Coach: "ha
   innescato abilità di X", trigger_order question. Golden regenerated; smoke
   90 games clean (17 triggers on the chain per game, 116 reactions).
-- [ ] Triggered leftovers (B32): delayed triggers resolve at once, not on
+- [x] Triggered leftovers (B32): delayed triggers resolve at once, not on
   the chain (`death_bonus` "when it dies this turn": Deadly Flourish,
   Siphoning Strike; `_resolve_delayed_effects`; `gs.delayed_main`); a
   reflexive "do this" inside a spell or ability resolves in it (Disintegrate,
   Arise!; as played); a trigger's later conditions are checked as it
   resolves, the first one only as it triggers (an "if" that is really
-  part of the effect, Loose Cannon's, isn't checked again).
-- [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
+  part of the effect, Loose Cannon's, isn't checked again). DONE B33
+  (tests/test_g3_triggered_leftovers.py). Delayed (§391.2, §393): one helper
+  `GameLoop._delayed_trigger` makes a PendingTrigger of the effect dict (its
+  source, the battlefield noted as it was made), so it goes on the chain;
+  "at end of turn" ones via `_delay_to_end` (not made once the Ending Step
+  began, §359.3.e.16): Targon's Peak, Hexplosive Minefield, Ekko's "Kill me
+  at end of the turn", and now also Sanction / Tornado Warrior (effect
+  `empower_at_end`; `UnitInPlay.empower_at_end`, `gs.disempower_gear_at_end`
+  removed) and Hostile Takeover (effect `recall_borrowed`,
+  `_return_borrowed`). `_ending_step` (on_end_of_turn + the delayed ones,
+  one batch) and `_start_of_main` (on_start_of_main + Iascylla) are steps.
+  `death_bonus` = (side, turn, effect, source). Reflexive (§388, §389):
+  `GameLoop._reflexive(ctx, then, extra)` (its "you may" as it is finalized,
+  §388.4; not declared with the spell, §355.5.b); spec flag `reflexive`
+  makes that instruction and the rest one (Dragon's Rage, Kharox, Hwei);
+  handlers split: Disintegrate, Twisted Fate Gambler (`twisted_fate_domain`),
+  Rell Magnetic (`attach_it_to_me`), Arise! (`ready_them`), Forgotten Relic
+  (`might_to_a_friendly_unit`), Ivern Nurturer, Wild Claw (`empower_it`).
+  Effect conditions: spec flag `effect_condition` (Jinx Loose Cannon, Dune
+  Drake, Kinkou Initiate, Ivern Friend to All): triggers, checked as it
+  resolves; "X. If C, Y instead" as one instruction, param `instead`
+  ({condition, changed params}, `GameLoop._params_now`): Akali Deadly Weapon
+  (its "you may" asked once), Leblanc Fragmented. Smoke: 90 verbose games, no
+  effect error, 68 end-of-turn and 11 reflexive triggers on the chain.
+- [x] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
   don't see a unit gear); Svellsongur (copied activated abilities aren't
   listed twice, a passive keyword grant stays one instance, Karthus-style
-  "additional time" doesn't stack).
+  "additional time" doesn't stack). DONE B33: a unit gear is a gear for
+  every "a gear" effect (§143 example; `effects._unit_gear_of(entry)` on
+  `_gear_entries(..., units=True)`): Factory Recall / The Good Stuff and the
+  "return a friendly gear" costs (it leaves as a unit, `_return_unit`), Jayce
+  / Veiled Temple ready it, Turn to Dust / Fading Memories (TEMPORARY as a
+  unit), Akshan steals it (to his base as a unit, back with
+  `_return_stolen_gear`), Tomb-Raider Barbara, Burn Away / `_banish_gear`,
+  Improvised Projectile, Command: Attack (a DEPLOY one moves as a unit),
+  Pickpocket / Adaptatron conditions. No card exhausts "a gear". Found on the
+  way: Divine Judgment kept every attached and deployed gear (only base gear
+  was chosen): now all gear. Svellsongur: a copied "use only once each turn"
+  ability is listed again with its own use (entry `copy`,
+  `GameLoop._once_key`: Riven Deserter, Hungry Wolf, Azir Ascendant);
+  "trigger an additional time" counts each instance (`_passive_count`:
+  Karthus copied or two Karthus, Red Brambleback / Blue Sentinel copied).
+  Keyword values now add up from every source (§807.2, §809.2, §814.2,
+  §823.2, §831.2): `UnitInPlay.passive_keywords` a list, `keyword_value` =
+  printed + passive + given (was max(printed, passive): a printed ASSAULT 2
+  beside Captain Farron was 2, two "have DEFLECT" grants 1). Data fixed on
+  the way: conditional keywords listed as printed (always on) on Grumpy
+  Rockbear, Brutal Hunter, Solari Sunhawk, Mosstomper; Dramatic Visionary's
+  PREDICT 2 keyword (it predicted when played too); Taric Protector and
+  Allay Eager Admirer gave their "other units" keyword to themselves (Allay
+  only while at a battlefield).
+- [ ] Enter ready (B33 found): "I enter ready" / "If X, I enter ready" is a
+  conditional passive replacing how the unit enters (§364.3.a example,
+  Master Yi Honed's example), but 25 cards encode it as a "when you play me"
+  `ready_unit` self (Vayne Hunter, Leona Zealot, Warwick Hunter, Master Yi
+  Honed, Vanguard Attendant, Eager Drakehound, Dunebreaker, Breakneck Mech,
+  Arena Kingpin, Towering Pairofant, Scorchclaw, Shadow Watcher, Crescent
+  Guardian, Bandle Soldier, Shadow, Daisy!, Shadow Assassin, Corrupted
+  Dragon, Lingering Animus, Antagonistic Apparatus, Incorrigible Construct,
+  Firebrand Raider, Ekko Revolutionary, Wrath of the Freljord, Disposal
+  Expert): since B32 it enters exhausted and a trigger on the chain readies
+  it. Should go through `_enters_ready` (condition as it enters).
+- [ ] Rune Pool empties (B33 found): §167 / §316.3 / §317.2.d: every player's
+  pool empties at the start of each Main Phase and at the end of each turn.
+  The engine taps every rune for Energy as the turn begins (ready_runes =
+  +1 Energy per exhausted rune) and clears only the turn player's pool then,
+  so its Energy also stands for untapped runes (left over, usable on the
+  opponent's turn: right). What an ADD gave (Gold, Seals, Blue Sentinel) is
+  never lost at end of turn, and Blue Sentinel's "When I hold, ADD [rune] at
+  the start of your next Main Phase" is given at the hold (same result only
+  because nothing empties at the Main Phase). The fix must keep the two
+  apart (rune Energy vs. added Energy / Power).
 
 Closed in KNOWN_ISSUES / DEFERRED (fixed earlier, now marked): EQUIP's own
 cost (`_equip_cost`); resolved spells to the trash (#19a); 0b malformed specs;

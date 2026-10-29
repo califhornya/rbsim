@@ -86,7 +86,7 @@ def test_hostile_takeover_borrows_a_unit_until_end_of_turn():
     bf0.add_unit("B", enemy)
     _cast(loop, "Hostile Takeover")
     assert enemy in bf0.units_A and enemy.ready
-    loop._return_borrowed_units()
+    loop._resolve_delayed_effects()
     assert enemy in loop.gs.B.base_units
 
 

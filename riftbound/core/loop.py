@@ -1056,7 +1056,8 @@ class GameLoop:
         elif trigger == "on_hold":
             self.gs.hold_points_this_turn[side] = self.gs.hold_points_this_turn.get(side, 0) + 1
         marker = "double_conquer_here" if trigger == "on_conquer" else "double_hold_here"
-        times = 1 + sum(1 for u in bf._units_for(side) if self._has_effect(u.card, marker))
+        times = 1 + sum(1 for u in bf._units_for(side) for es in self._card_effects(u.card, u.gear)
+                        if es.effect == marker)      # each instance (Svellsongur copies one)
         here = bf.card       # its abilities triggered now, even if it is replaced first
         for _ in range(times):
             self._scoring_effects(trigger, bf, side, actor, opponent, here)
@@ -1156,20 +1157,9 @@ class GameLoop:
 
     @staticmethod
     def _disarm_value(unit) -> int:
-        """Total DISARM X on a unit (§831): a bare keyword counts 1 and every
-        instance adds up (printed + granted). Granted copies live in a set, so two
-        identical grants ("Your Mechs have DISARM" twice) still count once."""
-        total = unit.card.keyword_value("DISARM")
-        for k in unit.passive_keywords:
-            ku = k.upper()
-            if ku == "DISARM":
-                total += 1
-            elif ku.startswith("DISARM "):
-                try:
-                    total += int(ku[len("DISARM"):].strip())
-                except ValueError:
-                    total += 1
-        return total
+        """Total DISARM X on a unit (§831.2): a bare keyword counts 1 and every
+        instance adds up (printed, granted, two identical grants)."""
+        return unit.keyword_value("DISARM")
 
     def _apply_disarm(self, unit, bf: Battlefield, defender: str) -> None:
         """DISARM X (§831): when this unit attacks, give an enemy unit here -X Might
@@ -1185,21 +1175,22 @@ class GameLoop:
         if self.verbose:
             print(f"  [DISARM] {unit.card.name} gives {target.card.name} -{x} might")
 
-    def _return_borrowed_units(self) -> None:
+    def _return_borrowed(self, unit: UnitInPlay) -> None:
         """Hostile Takeover: "Lose control of that unit and recall it at end of
-        turn" — to its owner's base."""
-        for side in ("A", "B"):
-            for unit in self._friendly_units_of(side):
-                if unit.borrowed is None or unit.borrowed[1] != self.gs.turn:
-                    continue
-                owner = unit.borrowed[0]
-                unit.borrowed = None
-                where = self._locate_unit(unit)
-                if where[1] is None:
-                    self.gs.get_player(side).base_units.remove(unit)
-                else:
-                    where[1].remove_unit(side, unit)
-                self.gs.get_player(owner).base_units.append(unit)
+        turn" — to its owner's base, if it is still borrowed."""
+        where = self._locate_unit(unit)
+        if where is None or unit.borrowed is None:
+            return
+        side, bf = where
+        owner = unit.borrowed[0]
+        unit.borrowed = None
+        if side == owner:
+            return
+        if bf is None:
+            self.gs.get_player(side).base_units.remove(unit)
+        else:
+            bf.remove_unit(side, unit)
+        self.gs.get_player(owner).base_units.append(unit)
 
     def _take_control(self, unit: UnitInPlay, new_side: str) -> Optional[Battlefield]:
         """`new_side` takes control of `unit` where it is; returns its battlefield.
@@ -1345,7 +1336,7 @@ class GameLoop:
                 print(f"  [DEPLOY] {side}'s {dg.card.name} at BF{bf_idx} dies")
         # "Your DEATHKNELL effects trigger an additional time" (Karthus), and
         # "Friendly DEATHKNELL effects here ..." (Detonation Amplifier, here).
-        times = (2 if self._side_has_passive(side, "double_deathknell") else 1) + \
+        times = 1 + self._passive_count(side, "double_deathknell") + \
             sum(1 for g in gear if self._has_effect(g.card, "double_deathknell_here"))
         for dg in dead:
             for _ in range(times):
@@ -1470,6 +1461,11 @@ class GameLoop:
         try:
             for run in range(runs):
                 for i, effect_spec in enumerate(play_specs):
+                    if effect_spec.params.get("reflexive"):
+                        # "Then do this: ..." (Dragon's Rage): the rest is a
+                        # reflexive trigger, on the chain once this is done.
+                        self._reflexive(context, play_specs[i:])
+                        break
                     # Asked once the condition holds: a "you may" that can't
                     # happen is no choice.
                     if not self._check_condition(effect_spec.condition, card, actor, opponent, None):
@@ -1497,7 +1493,7 @@ class GameLoop:
                     # whole match. Skip + log instead. See KNOWN_ISSUES for the
                     # known offenders to fix at the spec/handler level.
                     try:
-                        handler(context, effect_spec.merged_params())
+                        handler(context, self._params_now(effect_spec, card, actor, opponent, None))
                     except _Ignored:
                         # Its target is no longer legal: not followed, nor is
                         # an instruction about "it" (§359.3.e.14.a).
@@ -1589,8 +1585,11 @@ class GameLoop:
             for n, (i, es) in enumerate(specs):
                 if once and self._once_used(card, i, es):
                     continue
-                if self._kicker_gate(es, additional) or self._check_condition(
-                        es.condition, card, actor, opponent, extra):
+                # An "if" that is part of the effect, not right after the
+                # trigger ("draw 1 if you have one or fewer cards", Jinx Loose
+                # Cannon, §383.2.a.1): checked as it resolves.
+                if es.params.get("effect_condition") or self._kicker_gate(es, additional) or \
+                        self._check_condition(es.condition, card, actor, opponent, extra):
                     lead = n
                     break
         if lead is None:
@@ -1628,6 +1627,17 @@ class GameLoop:
             for k in flags:
                 flags[k] = getattr(card, k, None)
             put(saved)
+
+    def _params_now(self, es: EffectSpec, card: Card, actor: Player, opponent: Player,
+                    extra: Optional[dict]) -> dict:
+        """An instruction's parameters as it resolves: "If C, <x> instead"
+        (`instead`: a condition and the parameters it changes) applied when C
+        holds now (Akali Deadly Weapon, Leblanc Fragmented)."""
+        params = es.merged_params()
+        instead = params.pop("instead", None)
+        if instead and self._check_condition(instead.get("condition"), card, actor, opponent, extra):
+            params.update({k: v for k, v in instead.items() if k != "condition"})
+        return params
 
     def _instruction_runs(self, card: Card, i, es: EffectSpec, actor: Player, opponent: Player,
                           extra: Optional[dict], additional: bool, once: bool,
@@ -1735,9 +1745,18 @@ class GameLoop:
         outer_slot = self._slot
         with self._card_flags(card, ab["flags"]):
             try:
-                for n, (i, es) in enumerate([(None, ab["eff"])] + list(ab["rest"])):
+                instructions = [(None, ab["eff"])] + list(ab["rest"])
+                for n, (i, es) in enumerate(instructions):
+                    if n and es.params.get("reflexive"):
+                        # "Then you may do this: ..." (Kharox, Hwei): a reflexive
+                        # trigger, on the chain once this resolved.
+                        self._reflexive(context, [s for _i, s in instructions[n:]])
+                        break
                     if n and not self._instruction_runs(card, i, es, actor, opponent,
                                                         ab["cond_extra"], ab["additional"], ab["once"]):
+                        continue
+                    if not n and es.params.get("effect_condition") and not self._check_condition(
+                            es.condition, card, actor, opponent, ab["cond_extra"]):
                         continue
                     self._slot = [0, n, 0]       # this instruction's declared choices
                     early = self._choices_on_board_as_played(context, es, 0, n)
@@ -1746,7 +1765,8 @@ class GameLoop:
                     # Resilience: a single malformed spec must not abort the
                     # whole match. Skip + log.
                     try:
-                        EFFECT_REGISTRY[es.effect](context, es.merged_params())
+                        EFFECT_REGISTRY[es.effect](context, self._params_now(es, card, actor, opponent,
+                                                                          ab["cond_extra"]))
                     except _Ignored:
                         context.extra["it"] = []
                         if self.verbose:
@@ -2009,32 +2029,72 @@ class GameLoop:
                     return owed, n, e, p
         return None
 
+    def _delayed_trigger(self, side: str, card: Card, bf: Battlefield, sub: dict,
+                         name: str) -> None:
+        """A delayed triggered ability (§391.2) whose time came: `sub` (an
+        effect dict) triggers like any other, `card` its source, `bf` the
+        battlefield noted as it was made (§359.3.f.3.a), and goes on the chain
+        whether or not its source is still there (§393); a "you may" is asked
+        as it is finalized."""
+        if EFFECT_REGISTRY.get(sub.get("effect")) is None:
+            return
+        es = EffectSpec.from_dict({**sub, "trigger": name})
+        self._trigger(card, name, [(None, es)], bf, side, {"battlefield": bf}, once=False)
+
+    def _reflexive(self, ctx: EffectContext, then, extra: Optional[dict] = None) -> None:
+        """A reflexive trigger of the resolving spell or ability ("do this:",
+        "do one of the following", §388): `then` (an effect dict, an EffectSpec
+        or a list of them, the instructions after "do this") goes on the chain
+        once that is done (§389), its "you may" decided as it is finalized
+        (§388.4), sharing the resolving one's information ("it", `extra`)."""
+        if not isinstance(then, list):
+            then = [then]
+        specs = [(None, es if isinstance(es, EffectSpec) else
+                  EffectSpec.from_dict({**es, "trigger": "reflexive"})) for es in then]
+        self._trigger(ctx.card, "reflexive", specs, ctx.battlefield, ctx.actor_side,
+                      {**ctx.extra, **(extra or {})}, once=False,
+                      flags={"_kicker_paid": getattr(ctx.card, "_kicker_paid", False)})
+
+    def _delay_to_end(self, side: str, card: Card, bf: Optional[Battlefield], sub: dict) -> None:
+        """Make an "at end of turn, <sub>" delayed ability (Targon's Peak,
+        Sanction, Hostile Takeover, Hexplosive Minefield, Ekko's "Kill me at end
+        of the turn"); once the Ending Step began it isn't made (§359.3.e.16)."""
+        if self.gs.in_ending_phase:
+            return
+        bf_idx = next((i for i, b in enumerate(self.gs.battlefields) if b is bf), 0)
+        self.gs.delayed_effects.append((side, card, bf_idx, dict(sub)))
+
     def _resolve_delayed_effects(self) -> None:
-        """Run the "at the end of this turn, ..." effects scheduled this turn."""
+        """This turn's "at the end of this turn, ..." abilities trigger (§317.1.a)."""
         waiting, self.gs.delayed_effects = self.gs.delayed_effects, []
         for side, card, bf_idx, sub in waiting:
-            handler = EFFECT_REGISTRY.get(sub.get("effect"))
-            if handler is None:
-                continue
-            ctx = EffectContext(self, card, self.gs.get_player(side),
-                                self.gs.get_player(self.gs.other(side)),
-                                self.gs.battlefields[bf_idx])
-            handler(ctx, sub)
+            bf = self.gs.battlefields[min(bf_idx, len(self.gs.battlefields) - 1)]
+            self._delayed_trigger(side, card, bf, sub, "at_end_of_turn")
 
     def _resolve_delayed_main(self, side: str) -> None:
-        """Run `side`'s "at the start of your next Main Phase, ..." effects
-        (Iascylla); a "you may" one is asked now."""
+        """`side`'s "at the start of your next Main Phase, ..." abilities
+        trigger (Iascylla); one whose battlefield is gone doesn't."""
         waiting = [d for d in self.gs.delayed_main if d[0] == side]
         self.gs.delayed_main = [d for d in self.gs.delayed_main if d[0] != side]
         for _side, card, bf_idx, sub in waiting:
-            handler = EFFECT_REGISTRY.get(sub.get("effect"))
-            actor = self.gs.get_player(side)
-            if handler is None or bf_idx >= len(self.gs.battlefields) or (
-                    sub.get("optional") and not self._wants_optional_keyword(actor, card, sub["effect"])):
-                continue
-            ctx = EffectContext(self, card, actor, self.gs.get_player(self.gs.other(side)),
-                                self.gs.battlefields[bf_idx])
-            handler(ctx, sub)
+            if bf_idx < len(self.gs.battlefields):
+                self._delayed_trigger(side, card, self.gs.battlefields[bf_idx], sub,
+                                      "at_start_of_main")
+
+    @_as_step
+    def _start_of_main(self, side: str) -> None:
+        """At the start of the Main Phase (§316.4): "at the start of your Main
+        Phase" abilities (Orianna Lady of Clockwork) and the delayed ones
+        (Iascylla) trigger together, then resolve."""
+        self._fire_turn_trigger("on_start_of_main", side)
+        self._resolve_delayed_main(side)
+
+    @_as_step
+    def _ending_step(self, side: str) -> None:
+        """The Ending Step (§317.1): "at the end of your turn" abilities and this
+        turn's delayed "at end of turn" ones trigger together, then resolve."""
+        self._fire_turn_trigger("on_end_of_turn", side)
+        self._resolve_delayed_effects()
 
     def _legend_unit(self, side: str):
         """The in-play UnitInPlay for a side's Champion Legend, or None."""
@@ -2166,7 +2226,7 @@ class GameLoop:
             if u.copied_from is not None and not any(self._has_effect(g, "copy_friendly_unit") for g in u.gear):
                 u.card, u.copied_from = u.copied_from, None     # Shady Spectacles came off
             u.passive_might = 0
-            u.passive_keywords = set()
+            u.passive_keywords = []
             u.no_combat_damage = False
             u.equip_bonus_mult = 1
             u.unchoosable = u.no_move_to_base = u.cant_ready = u.spell_immune = False
@@ -2299,7 +2359,7 @@ class GameLoop:
             for es in (gspec.effects if gspec else ()):
                 if es.effect == "give_keyword" and es.trigger == "passive" and not es.condition \
                         and str(es.params.get("keyword", "")).strip():
-                    unit.passive_keywords.add(str(es.params["keyword"]).strip())
+                    unit.passive_keywords.append(str(es.params["keyword"]).strip())
                 if es.effect == "equip_conditional_might" and self._check_condition(
                         es.condition, unit.card, actor, opponent, {"battlefield": bf, "gear": g}):
                     unit.passive_might += int(es.params.get("amount", 0))
@@ -2408,10 +2468,10 @@ class GameLoop:
                     # "I have ASSAULT equal to the number of ..." (Ancient Warmonger).
                     n = _effect_amount(context, params)
                 else:
-                    u.passive_keywords.add(keyword)
+                    u.passive_keywords.append(keyword)
                     continue
                 if n > 0:
-                    u.passive_keywords.add(f"{keyword.split()[0]} {n}")
+                    u.passive_keywords.append(f"{keyword.split()[0]} {n}")
             return
 
         # Might-granting passives (anthems, "while" buffs). buff_unit tagged as a
@@ -2605,11 +2665,11 @@ class GameLoop:
             from .effects import _gear_entries
             ctx = EffectContext(self, card, actor, opponent, self.gs.battlefields[0])
             return any(int(getattr(getattr(g, "card", g), "cost_energy", 0) or 0) <= _threshold(1)
-                       for _s, _h, g in _gear_entries(ctx, True))
+                       for _s, _h, g in _gear_entries(ctx, True, units=True))
         if ctype == "any_gear_in_play":
             # "you may kill a gear. If you do, ..." (Adaptatron): there is one.
             return any(p.base_gear for p in (self.gs.A, self.gs.B)) or any(
-                u.gear for u in self._all_units_in_play()) or any(
+                u.gear or u.gear_unit for u in self._all_units_in_play()) or any(
                 bf.gear_A or bf.gear_B for bf in self.gs.battlefields)
         if ctype == "enemy_unit_died_this_turn":
             # "If an enemy unit has died this turn" (Spoils of War)
@@ -4428,7 +4488,7 @@ class GameLoop:
         if discount is not None:
             gs.next_card_discounts[side].remove(discount)   # "the next card": used up
             if discount.get("then"):
-                gs.delayed_effects.append((side, card, 0, dict(discount["then"])))
+                self._delay_to_end(side, card, None, discount["then"])
         gs.played_cards_this_turn[side].append(card)
         gs.cards_played_this_turn[side] = gs.cards_played_this_turn.get(side, 0) + 1
         if isinstance(card, SpellCard):
@@ -5446,6 +5506,13 @@ class GameLoop:
             return "showdown"
         return "main" if side == self.gs.active else "reaction"
 
+    @staticmethod
+    def _once_key(src: Card, eff: EffectSpec, entry: dict) -> tuple:
+        """The "use only once each turn" record of an activated ability entry:
+        one per instance (Svellsongur's copy is entry `copy` N)."""
+        key = (id(src), "activated", eff.effect)
+        return key + (entry["copy"],) if entry.get("copy") else key
+
     def activatable_abilities(self, side: str) -> list:
         """Deterministic list of activated abilities `side` may use in the current
         window (_ability_window): unit/legend/gear abilities tagged `trigger:
@@ -5477,6 +5544,7 @@ class GameLoop:
             for turn, eff in unit.turn_abilities:
                 if turn == self.gs.turn and ((eff.timing or "").lower() or None) in allowed:
                     out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
+            copies = sum(1 for g in unit.gear if self._has_effect(g, "copy_unit_text"))
             for eff in _abilities(unit.card):
                 # EMPOWER can only be activated while NOT already empowered
                 # (unless it stacks: `max_times`, §827.1.c.5).
@@ -5484,6 +5552,11 @@ class GameLoop:
                         max(unit.empower_times, 1) >= int(eff.params.get("max_times", 1)):
                     continue
                 out.append({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff})
+                if eff.params.get("once_per_turn"):
+                    # Svellsongur's copy of a "use only once each turn" ability
+                    # has its own use (any other copy is the same button).
+                    out.extend({"type": "ability", "unit": unit, "bf_idx": bf_idx, "eff": eff,
+                                "copy": c} for c in range(1, copies + 1))
             if self._has_effect(unit.card, "copy_tap_abilities"):
                 # "I have all [tap] abilities of all friendly legends, units, and
                 # gears" (Heimerdinger Inventor): used by me, tapping me.
@@ -5828,7 +5901,7 @@ class GameLoop:
                                                     parsed["domain"])
         if eff.params.get("once_per_turn"):
             src = entry["gear"] if entry["type"] == "gear_ability" else entry["unit"].card
-            if self.gs.once_per_turn_used.get((id(src), "activated", eff.effect)) == self.gs.turn:
+            if self.gs.once_per_turn_used.get(self._once_key(src, eff, entry)) == self.gs.turn:
                 return False        # "Use only once each turn"
         parsed = self._parse_activated_cost(eff.cost)
         if entry["type"] == "gear_ability":
@@ -6332,7 +6405,7 @@ class GameLoop:
         unit = entry["unit"]
         eff = entry["eff"]
         if eff.params.get("once_per_turn"):
-            self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
+            self.gs.once_per_turn_used[self._once_key(unit.card, eff, entry)] = self.gs.turn
         base_energy = self._parse_activated_cost(eff.cost)["energy"]
         parsed = self._adjust_ability_cost(unit, eff, self._parse_activated_cost(eff.cost), side)
         # Pay.
@@ -6637,7 +6710,7 @@ class GameLoop:
             # The unit's DEATHKNELL, then its Equipment's ("When I die" on gear;
             # the gear itself is back in base by now).
             # "Your DEATHKNELL effects trigger an additional time" (Karthus).
-            times = 2 if self._side_has_passive(owner_side, "double_deathknell") else 1
+            times = 1 + self._passive_count(owner_side, "double_deathknell")
             if not in_base:
                 # "Friendly DEATHKNELL effects here trigger an additional time"
                 # (Detonation Amplifier, deployed here).
@@ -6658,11 +6731,9 @@ class GameLoop:
             bonus = dead_unit.death_bonus
             if bonus is not None and bonus[1] == self.gs.turn:
                 # "When it dies this turn, play a Gold gear token exhausted" (Deadly
-                # Flourish), "... channel 1 rune exhausted" (Siphoning Strike).
-                who = self.gs.get_player(bonus[0])
-                EFFECT_REGISTRY[bonus[2]["effect"]](
-                    EffectContext(self, dead_unit.card, who, self.gs.get_player(self.gs.other(bonus[0])), bf, {}),
-                    bonus[2])
+                # Flourish), "... channel 1 rune exhausted" (Siphoning Strike): a
+                # delayed trigger of the spell.
+                self._delayed_trigger(bonus[0], bonus[3], bf, bonus[2], "when_it_dies")
             # "When this leaves the board" fires on death too (KNOWN_ISSUES #9).
             self._fire_leaves_board(dead_unit.card, owner_side, bf)
             self._fire_units_trigger("on_friendly_unit_death", owner_side,
@@ -6785,21 +6856,6 @@ class GameLoop:
             unit.empower_times = 0
         else:
             card.empowered = False
-
-    def _resolve_empower_at_end(self) -> None:
-        """Sanction's "Disempower it at end of turn" / "Empower it at end of
-        turn": whatever happened to it meanwhile; an empower fires its "When I
-        become EMPOWERED"."""
-        for unit in self._all_units_in_play():
-            then, unit.empower_at_end = unit.empower_at_end, None
-            if then is True:
-                where = self._locate_unit(unit)
-                self._empower(unit.card, where[0] if where else self.gs.active)
-            elif then is False:
-                self._disempower(unit.card)
-        for gear in self.gs.disempower_gear_at_end:
-            gear.empowered = False
-        self.gs.disempower_gear_at_end.clear()
 
     def _locate_unit_or_gear(self, card: Card, side: str) -> bool:
         """Whether `card` is in play for `side` (a unit, or a gear in base or
@@ -7120,6 +7176,13 @@ class GameLoop:
         chooses, it gives an additional -1 [might]" (Mel Newly Awakened)."""
         return 1 if self._empowered_with(side, "extra_might_reduction") else 0
 
+    def _passive_count(self, side: str, verb: str) -> int:
+        """How many instances of a passive `verb` `side` has in play: each
+        source's, once more per Svellsongur copying its text (Karthus Eternal's
+        "Your DEATHKNELL effects trigger an additional time": each one more)."""
+        return sum(1 for src, _bf in self._sources_in_play(side)
+                   for es in self._card_effects(src) if es.trigger == "passive" and es.effect == verb)
+
     def _side_has_passive(self, side: str, verb: str) -> bool:
         """Whether something `side` has in play has a passive `verb` effect
         (Karthus Eternal's double_deathknell)."""
@@ -7181,6 +7244,12 @@ class GameLoop:
         """ "You control it until I leave the board" (Akshan Mischievous): the gear
         `card` took goes back to its owner's base, detached."""
         for side in ("A", "B"):
+            for u in self._gear_units(side):        # a stolen unit gear (Orianna)
+                if getattr(u.card, "_stolen_by", None) is card:
+                    owner = self._owner_of(u.card, side)
+                    u.card._stolen_by, u.card._owner = None, None
+                    self._remove_unit_from_play(u, side)
+                    self.gs.get_player(owner).base_units.append(u)
             holders = [(None, g) for g in self.gs.get_player(side).base_gear]
             holders += [(u, g) for u in self._friendly_units_of(side) for g in u.gear]
             for holder, g in holders:
@@ -7817,8 +7886,7 @@ class GameLoop:
             self._phase_draw(gs.get_player(gs.active))
         # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
         # it makes at a battlefield has its showdown before any action.
-        self._fire_turn_trigger("on_start_of_main", gs.active)
-        self._resolve_delayed_main(gs.active)                  # Iascylla
+        self._start_of_main(gs.active)
         self._recompute_passives()
         self._run_staged_showdowns()
         return None
@@ -7892,10 +7960,7 @@ class GameLoop:
             return Result("B", gs.turn, self.units_played, self.spells_cast)
 
         gs.in_ending_phase = True
-        self._fire_turn_trigger("on_end_of_turn", gs.active)
-        self._resolve_delayed_effects()
-        self._resolve_empower_at_end()
-        self._return_borrowed_units()
+        self._ending_step(gs.active)
 
         # Expiration step (§317.2): heal all units, and "this turn" Might bonuses
         # (REACTION spells like Discipline) end, wherever the unit is.

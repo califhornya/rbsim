@@ -116,8 +116,10 @@ def test_a_second_run_of_repeat_may_name_the_first_runs_target():
 
 
 def test_a_later_choice_still_sees_where_an_earlier_move_went():
-    """Dragon's Rage: "choose another enemy unit at its destination" is
-    chosen at the destination the move declared."""
+    """Dragon's Rage: "Then do this: choose another enemy unit at its
+    destination" is a reflexive trigger (§388): not declared with the spell
+    (§355.5.b), chosen as it goes on the chain, at the destination the move
+    declared."""
     loop, a, b = _setup()
     mover, there = _unit("Mover", 4), _unit("There", 3)
     loop.gs.battlefields[0].add_unit("B", mover)
@@ -129,10 +131,10 @@ def test_a_later_choice_still_sees_where_an_earlier_move_went():
         return None
     loop.chooser = chooser
     item = _cast(loop, "Dragon's Rage")
-    assert [t for t in _targets(item) if t is there or t == [there]]
+    assert not [t for t in _targets(item) if t is there or t == [there]]
     loop.chooser = None
     loop._resolve_chain()
-    assert not _on_board(loop, there)
+    assert not _on_board(loop, there) and loop.gs.chain == []
 
 
 def test_a_unit_the_spell_itself_kills_first_is_not_hit_twice():

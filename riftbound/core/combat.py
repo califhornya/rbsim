@@ -31,7 +31,7 @@ class UnitInPlay:
     might_counters: int = 0  # BUFF counters — persistent, max 1 per unit per application
     aura_might: int = 0  # external Might bonus put on the unit (grant_might)
     passive_might: int = 0  # overlay recomputed each cycle by passive (continuous) abilities
-    passive_keywords: set = field(default_factory=set)  # keywords granted by passive abilities
+    passive_keywords: list = field(default_factory=list)  # keywords granted by passive abilities, one per instance
     hidden: bool = False  # reserved for future HIDDEN keyword
     empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
     # How many times it is EMPOWERED, for what may be empowered more than once
@@ -54,7 +54,7 @@ class UnitInPlay:
     was_mighty: bool = False         # "When a unit you control becomes MIGHTY" (Fiora Worthy)
     ward_free: bool = False          # Tactical Retreat: the ward needs no payment
     banish_if_dies_turn: int = -1    # Smite: "If it would die this turn, banish it instead"
-    death_bonus: object = None       # "When it dies this turn, ..." (Deadly Flourish): (side, turn, effect)
+    death_bonus: object = None       # "When it dies this turn, ..." (Deadly Flourish): (side, turn, effect, source)
     damaged_turn: int = -1           # last turn it was dealt damage (Affectionate Poro)
     unmovable_by_enemies: bool = False   # Jagged Cutlass (recomputed passive)
     turn_abilities: list = field(default_factory=list)   # Dominus: [(turn, EffectSpec)]
@@ -73,9 +73,6 @@ class UnitInPlay:
     double_damage_turn: int = -1     # Lotus Trap: "Double all damage dealt to it this turn"
     damage_shield: int = 0           # Ki Barrier: "Prevent the next 7 damage ... this turn"
     conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
-    # Sanction: "Empower a unit. Disempower it at end of turn" (False) and the
-    # reverse (True); applied by GameLoop._end_turn.
-    empower_at_end: Optional[bool] = None
     # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
     # end of that turn.
     borrowed: Optional[tuple] = None
@@ -155,19 +152,20 @@ class UnitInPlay:
         return 0
 
     def keyword_value(self, keyword: str) -> int:
-        """Printed or passive value, plus every instance effects gave it (two
-        "give it ASSAULT 2" add up, §807). Each Svellsongur on it copies the
-        printed keywords too (a second ASSAULT 2 from another source: §807.2)."""
+        """Printed value plus every instance passives and effects gave it: they
+        add up (two "give it ASSAULT 2", a printed SHIELD and "units here have
+        SHIELD": §807.2, §809.2, §814.2, §823.2, §831.2). Each Svellsongur on it
+        copies the printed keywords too (another source)."""
         copies = sum(1 for g in self.gear for e in getattr(g, "effects", []) or []
                      if isinstance(e, dict) and e.get("effect") == "copy_unit_text")
         base = self.card.keyword_value(keyword) * (1 + copies)
         kw = keyword.upper()
-        passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
+        passive = sum(self._kw_amount(k, kw) for k in self.passive_keywords)
         given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords,
                                                       *self.combat_keywords) if k != ASSAULT_EQUALS_SHIELD)
         if kw == "ASSAULT" and ASSAULT_EQUALS_SHIELD in self.turn_keywords:
             given += self.keyword_value("SHIELD")      # K'Sante Pride of Nazumah
-        return max(base, passive) + given
+        return base + passive + given
 
 
 @dataclass
