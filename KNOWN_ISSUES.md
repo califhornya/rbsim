@@ -521,3 +521,17 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   stopped. 1 of 3000 corpus self-play games hung (scripts/choice_audit.py).
 - **Fix:** a failed action counts as a pass, plus a 200-round cap per showdown / chain.
   Regression test: `test_no_hang.py::test_unpayable_spells_in_a_showdown_count_as_passes`.
+
+## 27. (OPEN, found 2026-10-29) Cost extras: hand plays only, and some paths never spend them
+- **What:** what a card lets you spend as you play it to cost less (`GameLoop._cost_extras`:
+  Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's buffs, Commander
+  Ledros's tokens, Poppy's XP, Wallop's buff) only applies from the hand
+  (`_effective_cost` with `from_zone == "hand"`), but the rules apply additional costs from
+  any zone (§356.2). Worse, a play through an effect (Here to Help from the hand:
+  `play_unit_to_controlled_battlefield`; from the deck `_reveal_play_for` mode "reduce";
+  from the trash or banishment `_play_from_zone` with `pay_cost`) calls
+  `_effective_cost(card, ap)` with the default `from_zone` "hand", so it takes the discount,
+  but never calls `_choose_cost_extras` / `_spend_cost_extras`: the discard, buffs, tokens or
+  XP are not spent. Only the UNIT action and spells (`_spell_played`) spend them.
+- **Fix (future):** move the choice and the spending into `_pay_card`, as Atakhan's kill
+  discount does (`_kill_discount`, B18), so every paid play from every zone handles them.

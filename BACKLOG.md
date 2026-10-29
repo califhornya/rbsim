@@ -217,9 +217,8 @@ Open, found on the way:
   of Aeons, Atakhan's attack (the defender picks), Diana Lunari (PREDICT
   first), Jinx Rebel (once per discard: GameLoop._discard_event). Neeko
   Blending In is in E.
-- Open: Atakhan's additional cost ("kill a friendly unit ... I cost [1] less
-  for each Energy it costs and [order] less for each Power"), Jhin
-  Meticulous Killer's alternative cost.
+- Open: Jhin Meticulous Killer's alternative cost. (Atakhan's additional
+  cost: done, see E.)
 - [x] Origins (293 cards) read; 50 fixed, each tested (tests/test_corpus_origins.py).
   Never worked before: Time Warp's extra turn, Zhonya's Hourglass (gear in
   base), Sett The Boss's save, Unlicensed Armory, Bullet Time (X Power),
@@ -498,12 +497,28 @@ tests/test_corpus_vendetta.py.
   "when I become exhausted" fires (Seraphine Not Alone). Tests in
   tests/test_seraphine_songstress.py.
 
-Left: FAQ rulings for Atakhan + Mordekaiser, Meticulous Restorationist +
-Mordekaiser.
+- [x] Atakhan: "You may kill a friendly unit as an additional cost to play
+  me. If you do, I cost [1] less for each Energy it costs and [order] less for
+  each Power it costs." Every payment of him, from any zone, may take it
+  (`GameLoop._kill_discounts`, `_kill_discount`, `_kill_for_cost`; marker
+  `kill_unit_for_discount`): `_can_pay_card` also tries each friendly unit's
+  cost off (printed or copied, §206: a Reflection of Noxus Hopeful is [4]),
+  `_pay_card` pays. The player chooses (`optional:additional_cost`; baseline:
+  only when he can't be paid without it) and which unit (`cost_unit:kill`,
+  only those that make him affordable; baseline: a token, then the weakest).
+  FAQ with Mordekaiser, Iron Revenant: the unit dies after the Energy and
+  Power are paid (§357.1-2), so it isn't in the trash for Mordekaiser.
+- [x] FAQ Meticulous Restorationist + Mordekaiser, Iron Revenant: "play me
+  for [order]" is an alternate cost of a unit, so Mordekaiser's unit/gear-only
+  Power pays it. Every "play me for [cost]" (`play_self_from_trash` trigger
+  costs, `trash_play` entries: Undying Legion, Death from Below) now uses what
+  is earmarked for that kind of card, as `_pay_card` does
+  (`GameLoop._less_play_earmarks`). Tests in tests/test_atakhan_mordekaiser.py.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
 Equip's unit, discards, effect-move targets, "you may" additional costs always
-paid; the observation doesn't show a held move. A facedown card trashed for
+paid (Atakhan's kill and Seraphine Songstress's only when the card can't be
+paid without them); the observation doesn't show a held move. A facedown card trashed for
 lack of room is the newest (the player should choose). The net's action space
 has one HIDDEN_PLAY per battlefield: with two facedown cards at Bandle Tree it
 can only play the first (the search and heuristic agents see both). The net

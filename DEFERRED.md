@@ -621,9 +621,10 @@ Rulings on card text not yet implemented (apply when implementing):
   refers only to the spell's own channel; Wyvern's extra rune failing doesn't make
   you draw (§359.3.e.14.c). Missing: the draw clause; Wyvern applies only to the
   Beginning-Phase channel, not to spell channels.
-- **Atakhan**: Energy/Power are paid *before* non-standard costs (kill a friendly
-  unit), so that unit isn't in the trash yet for Mordekaiser, Iron Revenant
-  (§357.1-2). The additional cost itself is not implemented.
+- [DONE 2026-10-29] **Atakhan**: Energy/Power are paid *before* non-standard costs
+  (kill a friendly unit), so that unit isn't in the trash yet for Mordekaiser, Iron
+  Revenant (§357.1-2). Additional cost implemented (BACKLOG E); tests in
+  tests/test_atakhan_mordekaiser.py.
 - **Gravity Field**: tax not implemented. Paid by whoever is instructed to move, if
   they're an opponent of the Field's controller (Charm: the caster pays if the
   Field is the opponent's; Angler Wyrm: the moving opponent pays). Standard Move:
@@ -633,8 +634,9 @@ Rulings on card text not yet implemented (apply when implementing):
   banish-and-replay ability and you control him when he returns (§378, §191.2).
 
 Not verified (check when touching these cards):
-- **Meticulous Restorationist + Mordekaiser, Iron Revenant**: "play me for [order]"
-  is an alternate cost of a unit, so Mordekaiser's unit/gear-only Power may pay it.
+- [DONE 2026-10-29] **Meticulous Restorationist + Mordekaiser, Iron Revenant**: "play
+  me for [order]" is an alternate cost of a unit, so Mordekaiser's unit/gear-only Power
+  may pay it (`GameLoop._less_play_earmarks`). Tests in tests/test_atakhan_mordekaiser.py.
 - [DONE 2026-10-29] **Hunters' Circle + Baron Nashor**: the reduction applies
   (location/cost fixed at finalization; Baron's Pit move is a later replacement)
   → [9][C][C][C]. Test in tests/test_baron_nashor.py.

@@ -1300,7 +1300,32 @@ class GameLoop:
     def _triggered_cost_affordable(self, card: Card, actor: Player, es: EffectSpec) -> bool:
         """Whether an effect's `cost` (activated-style) can be paid now."""
         parsed = self._parse_activated_cost(es.cost)
+        if es.effect == "play_self_from_trash":
+            parsed = self._less_play_earmarks(actor, card, parsed)
         return self._activated_affordable(actor, self._find_unit_by_card(card), parsed)
+
+    def _less_play_earmarks(self, actor: Player, card: Card, parsed: dict,
+                            spend: bool = False) -> dict:
+        """A "play me for [cost]" cost (an alternate cost: it replaces the card's,
+        §356.1.a) less what is earmarked for playing that kind of card, as in
+        _pay_card_cost: units' Energy, units' and gear's Power (Mordekaiser Iron
+        Revenant; FAQ: Meticulous Restorationist), gear's Power (Ornn), spells'
+        Energy and Power (Kai'Sa). `spend`: use them up."""
+        if isinstance(card, UnitCard):
+            pools = [("earmarked_energy_unit", "energy"), ("earmarked_power_permanent", "power")]
+        elif isinstance(card, GearCard):
+            pools = [("earmarked_power_permanent", "power"), ("earmarked_power_gear", "power")]
+        elif isinstance(card, SpellCard):
+            pools = [("earmarked_energy_spell", "energy"), ("earmarked_power_spell", "power")]
+        else:
+            pools = []
+        parsed = dict(parsed)
+        for pool, key in pools:
+            use = min(parsed[key], getattr(actor, pool))
+            parsed[key] -= use
+            if spend:
+                setattr(actor, pool, getattr(actor, pool) - use)
+        return parsed
 
     def _pay_triggered_cost(self, card: Card, actor: Player, es: EffectSpec,
                             additional: bool = True) -> bool:
@@ -1326,11 +1351,16 @@ class GameLoop:
 
         if cost:
             parsed = self._parse_activated_cost(cost)
+            playing = es.effect == "play_self_from_trash"     # "play me for [order]"
+            if playing:
+                parsed = self._less_play_earmarks(actor, card, parsed)
             if not self._activated_affordable(actor, unit, parsed):
                 return False
             gear = card if unit is None and isinstance(card, GearCard) else None
             if parsed["tap"] and gear is not None and getattr(gear, "tapped", False):
                 return False      # "exhaust this" on an exhausted gear
+            if playing:
+                self._less_play_earmarks(actor, card, self._parse_activated_cost(cost), spend=True)
             if not self._pay_energy_and_generic(actor, parsed["energy"], parsed["power"], parsed["domain"]):
                 return False
             if parsed["tap"] and unit is not None:
@@ -3596,20 +3626,72 @@ class GameLoop:
             print(f"  {ap.name} exhausts {legend.card.name} and {n} units: {card.name} costs [{amount}] less")
         return less
 
+    def _kill_discounts(self, ap: Player, card: Card, energy: int, power) -> list:
+        """(unit, Energy, Power) for each friendly unit Atakhan's cost may kill:
+        "You may kill a friendly unit as an additional cost to play me. If you
+        do, I cost [1] less for each Energy it costs and [order] less for each
+        Power it costs" — its printed or copied cost (§206)."""
+        if not (isinstance(card, UnitCard) and self._has_effect(card, "kill_unit_for_discount")):
+            return []
+        side = "A" if ap is self.gs.A else "B"
+        return [(u, max(0, energy - int(u.card.cost_energy or 0)),
+                 max(0, power - int(u.card.cost_power or 0)) if power else power)
+                for u in self._friendly_units_of(side) if u.card is not card]
+
+    def _kill_discount(self, ap: Player, card: Card, energy: int, power):
+        """Atakhan's optional additional cost (_kill_discounts): the player
+        chooses whether to pay it (baseline: only when he can't be paid without
+        it) and which unit (baseline: among those that make him affordable, a
+        token, then the weakest). Returns (Energy, Power, the unit to kill once
+        they are paid, or None)."""
+        side = "A" if ap is self.gs.A else "B"
+        options = [o for o in self._kill_discounts(ap, card, energy, power)
+                   if self._can_pay_card(ap, card, o[1], o[2], discounts=False)]
+        if not options:
+            return energy, power, None
+        if self._can_pay_card(ap, card, energy, power, discounts=False) and \
+                not self.choose("optional:additional_cost", side, [True, False], False, card):
+            return energy, power, None
+        spare = min(options, key=lambda o: (not o[0].is_token, o[0].might))
+        victim = self.choose("cost_unit:kill", side, [o[0] for o in options], spare[0], card)
+        return next((o[1], o[2], o[0]) for o in options if o[0] is victim)
+
+    def _kill_for_cost(self, ap: Player, card: Card, victim: UnitInPlay) -> None:
+        """Kill a friendly unit as a play's non-standard cost. It is paid after
+        the Energy and Power (§357.1-2), so it isn't in the trash for them (FAQ:
+        Atakhan, Mordekaiser Iron Revenant). It dies (DEATHKNELL, "when a
+        friendly unit dies"); a token ceases to exist."""
+        side = "A" if ap is self.gs.A else "B"
+        where = self._locate_unit(victim)
+        if where is None:
+            return
+        if where[1] is None:
+            ap.base_units.remove(victim)
+        else:
+            where[1].remove_unit(side, victim)
+        self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
+                           in_base=where[1] is None)
+        if self.verbose:
+            print(f"  {ap.name} kills {victim.card.name} to play {card.name}")
+
     def _can_pay_card(self, actor: Player, card: Card, energy: int, power,
-                      songstress: bool = True) -> bool:
+                      discounts: bool = True) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
         showdown Diana's showdown energy counts. Units and gear may use
         Mordekaiser's earmarked power. A spell may cost [2] less with Seraphine
-        Starry-Eyed Songstress (`songstress`: try it)."""
+        Starry-Eyed Songstress, Atakhan less for the friendly unit he kills
+        (`discounts`: try them)."""
         if self._play_forbidden(actor, card):
             return False
-        if songstress and energy > 0:
+        if discounts and energy > 0:
             offer = self._songstress("A" if actor is self.gs.A else "B", card)
             if offer is not None and self._can_pay_card(actor, card, max(0, energy - offer[2]),
-                                                        power, songstress=False):
+                                                        power, discounts=False):
                 return True
+        if discounts and any(self._can_pay_card(actor, card, e, p, discounts=False)
+                             for _, e, p in self._kill_discounts(actor, card, energy, power)):
+            return True
         if isinstance(card, (UnitCard, GearCard)) and power:
             power = max(0, power - actor.earmarked_power_permanent)
         if isinstance(card, GearCard):
@@ -3633,7 +3715,16 @@ class GameLoop:
             return False
         if isinstance(card, SpellCard):
             energy = self._songstress_discount(
-                actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, songstress=False))
+                actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, discounts=False))
+        energy, power, victim = self._kill_discount(actor, card, energy, power)
+        if not self._pay_card_cost(actor, card, energy, power):
+            return False
+        if victim is not None:
+            self._kill_for_cost(actor, card, victim)
+        return True
+
+    def _pay_card_cost(self, actor: Player, card: Card, energy: int, power) -> bool:
+        """Pay `card`'s Energy and Power, from what is earmarked for its kind first."""
         if isinstance(card, (UnitCard, GearCard)) and power:
             from_earmark = min(power, actor.earmarked_power_permanent)
             actor.earmarked_power_permanent -= from_earmark
@@ -4176,7 +4267,7 @@ class GameLoop:
         energy, power = self._effective_cost(card, ap)
         if not self._pay_card(ap, card, energy, power):
             return False
-        ap.remove_from_hand(idx)
+        ap.hand[:] = [c for c in ap.hand if c is not card]   # a cost's death may have changed it
         bf = self.gs.battlefields[lane]
         if self.verbose:
             print(f"  {side} AMBUSH-plays {card.name} @BF{lane}")
@@ -4443,7 +4534,7 @@ class GameLoop:
                 self._spend_cost_extras(extras, ap.name, card)
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}" + (f" to BF{dst}" if bf else ""))
-                ap.remove_from_hand(idx)
+                ap.hand[:] = [c for c in ap.hand if c is not card]   # a cost's death may have changed it
                 unit = self._play_unit(card, ap.name, bf=bf)
                 if bf is not None:
                     self._arrive_at(bf, ap.name, prev_controller)
@@ -4941,7 +5032,7 @@ class GameLoop:
                     return False
                 energy, power = self._effective_cost(card, ap, from_zone="trash")
                 return self._can_pay_card(ap, card, energy, power)
-            parsed = self._parse_activated_cost(entry["cost"])
+            parsed = self._less_play_earmarks(ap, card, self._parse_activated_cost(entry["cost"]))
             if not self._check_condition(entry["cond"], card, ap, self.gs.get_player(self.gs.other(side)), {}):
                 return False
             if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
@@ -5378,9 +5469,12 @@ class GameLoop:
                     print(f"  {ap.name} plays {card.name} from the trash")
                 self._play_from_zone_now(ap, card, side, "trash")
                 return
-            parsed = self._parse_activated_cost(entry["cost"])
-            if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
+            cost = self._parse_activated_cost(entry["cost"])
+            parsed = self._less_play_earmarks(ap, card, cost)
+            if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
+            self._less_play_earmarks(ap, card, cost, spend=True)
+            self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
             ap.trash.remove(card)
             card._trash_replay = None
             self._play_from_zone_now(ap, card, side, "trash")

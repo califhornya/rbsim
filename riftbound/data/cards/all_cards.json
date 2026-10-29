@@ -25075,6 +25075,10 @@
     ],
     "effects": [
       {
+        "effect": "kill_unit_for_discount",
+        "trigger": "passive"
+      },
+      {
         "effect": "opponent_kills_own_here",
         "trigger": "on_attack"
       }
