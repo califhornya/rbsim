@@ -809,7 +809,8 @@ def test_apprentice_mage_predicts_when_empowered_not_when_played(monkeypatch):
     """'When I become EMPOWERED, PREDICT 2.' Played: nothing."""
     loop, a, b = _setup()
     seen = []
-    monkeypatch.setitem(REGISTRY, "predict", lambda ctx, spec: seen.append(spec.get("amount")))
+    monkeypatch.setitem(REGISTRY, "predict",
+                        lambda ctx, spec: ctx.loop is loop and seen.append(spec.get("amount")))
     a.hand.append(CARD_REGISTRY["Apprentice Mage"].instantiate())
     loop._apply_action(a, ("UNIT", 0, None))
     assert seen == []

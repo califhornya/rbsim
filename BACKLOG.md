@@ -546,6 +546,11 @@ From the re-check of the old notes (2026-10-29, G):
   isn't visually checked.
 - Stepwise engine for deep MCTS trees (KNOWN_ISSUES): only if the search needs
   it.
+- Speed (B32): every spell, ability and triggered ability on the chain
+  declares its choices on a deep copy of the game (`_declare_choices`); with
+  triggers on the chain a round robin is ~1.3x slower than B31 (75% of the
+  triggers' declarations choose nothing). Ideas: a pickle copy with an id
+  map, skipping verbs that never choose.
 - Match: learned sideboarding; the battlefield chooser sees only its own
   battlefields (not the opponent's left, not the match history); a stronger
   battlefield signal; the mulligan and the battlefield in the learned decision
@@ -820,14 +825,46 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   `_resolve_triggered_effects`). Coach: "abilità di X" on the chain, the
   notice "L'avversario ha usato abilità di X". Golden regenerated; smoke 60
   games: 674 chained, 332 Adds, 37 reactions over an ability.
-- [ ] Abilities on the chain, part 2: triggered abilities (§383.3, §388).
-  They resolve at once (`_resolve_triggered_effects`), so nobody can respond
-  and Not So Fast / Repulse can't counter one that chooses ours. Rules: each
-  goes on the chain (controller orders simultaneous ones, §383.3.d; a leading
-  "you may" decided as it is finalized, §383.3.a), choices declared, priority
-  after the current task (HOT FEPR §334). Also Death from Below's reflexive
-  "you may play this from your trash" (§388.4: on the chain; here
-  `_offer_play_from_trash` at once, B23).
+- [x] Abilities on the chain, part 2: triggered abilities (§383.3, §388).
+  They resolved at once (`_resolve_triggered_effects`), so nobody could
+  respond and Not So Fast / Repulse couldn't counter one choosing ours. DONE
+  B32 (tests/test_g3_triggered_on_chain.py): a card's instructions for a
+  trigger are one ability; `GameLoop._trigger` checks the first one's
+  condition as it triggers (§383.2.a.1; "once each turn" used up: no
+  trigger) and queues a `state.PendingTrigger`. A task (`_as_task`:
+  `_apply_action`, `_route_deaths`, the `_fire_*_trigger` fan-outs; a chain
+  item's resolution) holds them till it ends; a step (`_as_step`:
+  `_open_combat`, `_finish_showdown`, `_phase_combat_and_conquer_single`)
+  and `_put_on_chain` / a reaction put them on the chain at once; with no task
+  running they go at once (old callers, tests). `_flush_triggers`: the turn
+  player's first (§383.3.d.1), each player ordering theirs (choice
+  `trigger_order`, the first picked resolves first; baseline: as triggered),
+  each finalized by `_finalize_trigger` (`_instruction_runs`: its leading "you
+  may" and cost now, §383.3.a-b; declined: the next instruction leads, as
+  before) into a ChainItem with ability kind "triggered" ({eff, rest, bf,
+  flags, ...}); one that only Adds resolves at once (§337.2); choices
+  declared; an empty chain then runs. `_resolve_trigger`: the lead, then the
+  rest as before (their "you may", costs and conditions on resolution,
+  §383.3.a.3), one shared context, whether or not the source is still there.
+  A unit's / gear's "when you play me" (Play Effect, §383.4.a) too: the play's
+  kicker and SHOW OFF (`_kicker_paid`, `_showed_off`, `_shown`) kept in the
+  item's flags (`_card_flags`). §340.4: `_resolve_chain` resolves one item,
+  then players get priority again (`_run_chain`); a search settles with
+  `_resolve_chain_passing`. Death from Below's reflexive "play this again":
+  kind "reflexive", its "you may" as finalized, played as it resolves
+  (`_replay_from_trash`). Declaration copies ask a test agent's
+  `decide_mode` (`_ModeAsker`; not asked again on replay,
+  `GameLoop._replaying`). `Card.__deepcopy__` shares the printed tags /
+  keywords / effects (copies ~2x cheaper; tests 80s -> 52s). Coach: "ha
+  innescato abilità di X", trigger_order question. Golden regenerated; smoke
+  90 games clean (17 triggers on the chain per game, 116 reactions).
+- [ ] Triggered leftovers (B32): delayed triggers resolve at once, not on
+  the chain (`death_bonus` "when it dies this turn": Deadly Flourish,
+  Siphoning Strike; `_resolve_delayed_effects`; `gs.delayed_main`); a
+  reflexive "do this" inside a spell or ability resolves in it (Disintegrate,
+  Arise!; as played); a trigger's later conditions are checked as it
+  resolves, the first one only as it triggers (an "if" that is really
+  part of the effect, Loose Cannon's, isn't checked again).
 - [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
   don't see a unit gear); Svellsongur (copied activated abilities aren't
   listed twice, a passive keyword grant stays one instance, Karthus-style

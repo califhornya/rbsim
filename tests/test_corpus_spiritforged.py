@@ -280,7 +280,7 @@ def test_forecaster_gives_mechs_you_play_vision(monkeypatch):
     loop, a, b = _setup()
     a.base_units.append(_unit("Forecaster"))
     seen = []
-    monkeypatch.setitem(REGISTRY, "predict", lambda ctx, spec: seen.append(1))
+    monkeypatch.setitem(REGISTRY, "predict", lambda ctx, spec: ctx.loop is loop and seen.append(1))
     loop._play_unit(UnitCard(name="Plain", might=1), "A")
     loop._play_token("Mech", "A")
     assert seen == [1]

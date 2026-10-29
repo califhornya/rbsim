@@ -84,6 +84,7 @@ _QUESTIONS = {
     "domain": "Di quale dominio prendere il Power?", "keep": "Quale carta tenere?",
     "predict_recycle": "Mandare in fondo al mazzo questa carta?", "card": "Quale carta?",
     "predict_order": "Quale carta rimettere in cima (la prima scelta si pesca per prima)?",
+    "trigger_order": "Quale abilità innescata risolvere per prima (le altre dopo, nell'ordine scelto)?",
     "show_off": "Cosa mostrare (SHOW OFF)?", "disarm": "Quale nemico indebolire (DISARM)?",
     "spend_buff": "Quale buff spendere?", "cost_banish": "Quale carta del cimitero bandire?",
     "cost_extras": "Quanto spendere per ridurre il costo?",
@@ -96,7 +97,8 @@ _QUESTIONS = {
 _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damage_order":
           "in combattimento colpisce prima", "cost_unit": "paga con", "discard": "scarta",
           "destination": "verso", "deploy": "schiera su", "domain": "Power",
-          "keep": "tiene", "card": "carta", "predict_order": "in cima", "show_off": "mostra", "disarm": "indebolisce",
+          "keep": "tiene", "card": "carta", "predict_order": "in cima", "trigger_order": "prima",
+          "show_off": "mostra", "disarm": "indebolisce",
           "spend_buff": "spende il buff di", "cost_banish": "bandisce",
           "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in",
           "battlefield": "campo", "tag": "tag"}
@@ -185,7 +187,9 @@ def option_ref(gs, viewer: str, option) -> Optional[str]:
 def option_text(gs, viewer: str, option) -> str:
     """A choice's option, as `viewer` reads it."""
     from riftbound.core.combat import UnitInPlay
-    from riftbound.core.state import ChainItem
+    from riftbound.core.state import ChainItem, PendingTrigger
+    if isinstance(option, PendingTrigger):     # a triggered ability to order
+        return f"abilità di {option.card.name}"
     if isinstance(option, tuple) and option and isinstance(option[-1], UnitInPlay):
         option = option[-1]
     if isinstance(option, ChainItem):          # on the chain (a counter's target)
@@ -652,6 +656,9 @@ class CoachAgent(NetGuidedMCTSAgent):
             who = "L'avversario ha lanciato" if top.player != self.player.name else "Hai lanciato"
             if top.ability is not None:
                 who = "L'avversario ha usato" if top.player != self.player.name else "Hai usato"
+                if top.ability["kind"] in ("triggered", "reflexive"):
+                    who = "Si è innescata per l'avversario" if top.player != self.player.name \
+                        else "Si è innescata per te"
             chose = declared_text(gs, self.player.name, top)
             return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
         if gs.pending_move is not None and gs.pending_move[1] == self.player.name:
@@ -920,6 +927,8 @@ class CoachSession:
         below = [chain_name(i) for i in gs.chain[:-1]]
         chose = declared_text(gs, self.side, top)
         verb = "ha usato" if top.ability is not None else "ha lanciato"
+        if top.ability is not None and top.ability["kind"] in ("triggered", "reflexive"):
+            verb = "ha innescato"
         context = f"L'avversario {verb} {chain_name(top)}" + (f" ({chose})" if chose else "") + (
             f", sopra {', '.join(reversed(below))}" if below else "") + \
             ". Non hai reazioni da giocare: adesso si risolve."

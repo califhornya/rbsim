@@ -108,7 +108,9 @@ def test_vision_looks_at_the_top_card_when_played():
     seen = []
     from riftbound.core import effects
     orig = effects.REGISTRY["predict"]
-    effects.REGISTRY["predict"] = lambda ctx, spec: seen.append(spec.get("amount"))
+    # Counted in this game only: Mystic Poro's is a triggered ability, its
+    # choices declared on a copy of the game (§355).
+    effects.REGISTRY["predict"] = lambda ctx, spec: ctx.loop is loop and seen.append(spec.get("amount"))
     try:
         loop._play_unit(_card("Jeweled Colossus"), "A")
         loop._play_unit(_card("Mystic Poro"), "A")          # its spec already predicts

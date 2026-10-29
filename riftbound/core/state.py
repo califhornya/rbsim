@@ -32,8 +32,33 @@ class ChainItem:
     # An activated ability on the chain (§377.3), `card` its source:
     # {"eff": its EffectSpec (None: EQUIP), "kind": the activatable_abilities
     # entry type, "energy": its base Energy cost, "extra": context extra,
-    # "target": EQUIP's unit}. None for a played card.
+    # "target": EQUIP's unit}. A triggered ability (§383.3): kind "triggered",
+    # "eff" the instruction it was finalized with, "rest" the later ones,
+    # "bf" its battlefield, "flags" the card's play flags; a reflexive trigger
+    # (§388): kind "reflexive". None for a played card.
     ability: Optional[dict] = None
+
+
+@dataclass
+class PendingTrigger:
+    """A triggered ability whose condition was met, waiting for the current
+    task to end to be finalized onto the chain (HOT FEPR, §334):
+    GameLoop._flush_triggers. `specs` are (index, EffectSpec) of the card's
+    instructions for `trigger`, the first one's condition checked as it
+    triggered (§383.2.a.1); `additional`: its additional costs may be paid
+    (not a play effect's: paid as the card was played); `flags`: the card's
+    play flags (kicker paid, SHOW OFF) as it triggered; `once`: honour "once
+    each turn"; `replay`: Death from Below's reflexive play (its cost)."""
+    card: Card
+    trigger: str
+    side: str
+    bf: Battlefield
+    specs: list
+    extra: Optional[dict] = None
+    additional: bool = True
+    flags: Optional[dict] = None
+    once: bool = True
+    replay: Optional[dict] = None
 
 
 @dataclass

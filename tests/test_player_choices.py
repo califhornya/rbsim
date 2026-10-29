@@ -219,7 +219,9 @@ def test_when_you_choose_me_fires_as_the_spell_is_played():
             return ("PASS", None, None)
     b.agent = Watcher(b)
     loop._apply_action(a, ("SPELL", 0, 0))
-    assert hands_seen and hands_seen[0] == ["Drawn"]               # drawn before resolution
+    # Jae's ability went on the chain above the spell (§383.4.b.2): B could
+    # answer it, then the spell once it had drawn (§340.4).
+    assert hands_seen == [[], ["Drawn"]]
     assert [c.name for c in a.hand] == ["Drawn"] and jae.might == jae.card.might + 2   # once, +2 resolved
 
 

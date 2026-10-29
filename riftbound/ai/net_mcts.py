@@ -521,7 +521,7 @@ class NetGuidedMCTSAgent(Agent):
         both players passed from here."""
         gs = loop.gs
         if gs.chain:
-            loop._resolve_chain()
+            loop._resolve_chain_passing()
         if gs.showdown_active and gs.showdown_bf_idx is not None:
             loop._finish_showdown(gs.showdown_bf_idx, gs.showdown_attacker)
 

@@ -58,7 +58,8 @@ def test_a_coached_game_saves_its_decisions(tmp_path):
             # An opponent's spell or ability the coach can't answer: shown
             # before it resolves.
             assert pending["context"].startswith((f"L'avversario ha lanciato {pending['card']}",
-                                                  f"L'avversario ha usato abilità di {pending['card']}"))
+                                                  f"L'avversario ha usato abilità di {pending['card']}",
+                                                  f"L'avversario ha innescato abilità di {pending['card']}"))
             return {"ok": True}
         # Every move is described in Italian, the net's ideas point at moves,
         # each idea once (two copies of a card are one idea).

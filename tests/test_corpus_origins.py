@@ -204,7 +204,7 @@ def test_gemcraft_seer_gives_other_units_you_play_vision():
     seen = []
     REGISTRY_predict = REGISTRY["predict"]
     try:
-        REGISTRY["predict"] = lambda ctx, spec: seen.append(ctx.actor.name)
+        REGISTRY["predict"] = lambda ctx, spec: ctx.loop is loop and seen.append(ctx.actor.name)
         loop._play_unit(UnitCard(name="New", might=1), "A")
     finally:
         REGISTRY["predict"] = REGISTRY_predict

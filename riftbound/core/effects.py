@@ -188,14 +188,15 @@ def _choose_one_mode(ctx: "EffectContext", spec: Mapping[str, Any], modes: list,
         return False
     agent = getattr(ctx.actor, "agent", None)
     i = None
-    if agent is not None and hasattr(agent, "decide_mode"):
+    replaying = ctx.loop._replaying("mode", ctx.card)     # chosen as it was declared
+    if agent is not None and hasattr(agent, "decide_mode") and not replaying:
         try:
             i = agent.decide_mode(ctx.card, len(modes))
             i = None if i is None else max(0, min(int(i), len(modes) - 1))
         except Exception:  # noqa: BLE001
             i = None
     if i is None:
-        i = _best_mode(ctx, modes, free)
+        i = free[0] if replaying else _best_mode(ctx, modes, free)
     i = i if i in free else free[0]
     i = ctx.loop.choose("mode", ctx.actor_side, free, free[free.index(i)], ctx.card)
     if used is not None:

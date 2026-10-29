@@ -241,7 +241,9 @@ def test_nasus_curator_hears_an_ability_as_it_resolves():
     seen = []
     b.agent.decide_reaction = lambda _o, chain: seen.append(nasus.ready) or ("PASS", None, None)
     _use(loop, a, "empower_self")
-    assert seen == [True] and paws.empowered and not nasus.ready
+    # B answered the ability, then Nasus's own (exhausted as it was
+    # finalized, §383.3.b).
+    assert seen == [True, False] and paws.empowered and not nasus.ready
 
 
 def test_coach_names_an_ability_on_the_chain():

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import functools
 import re
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
-from .state import GameState, ChainItem
+from .state import GameState, ChainItem, PendingTrigger
 from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
 from .combat import UnitInPlay, kill_order
 from .player import Player
@@ -364,6 +365,47 @@ _ADD_VERBS = frozenset({"gain_energy", "add_power", "gain_power_any_domain",
                         "add_earmarked_energy", "add_earmarked_power", "convert_x"})
 
 
+class _ModeAsker:
+    """A player's agent on the copy of the game a chain item's choices are
+    declared on (GameLoop._declare_choices): it only answers "choose one"."""
+
+    def __init__(self, agent):
+        self.decide_mode = agent.decide_mode
+
+
+def _as_task(method):
+    """The method is a task (§333): the abilities it triggers wait till the
+    outermost task is done, then go on the chain together (HOT FEPR, §334:
+    GameLoop._flush_triggers)."""
+    @functools.wraps(method)
+    def task(self, *args, **kwargs):
+        self._task_depth += 1
+        try:
+            out = method(self, *args, **kwargs)
+        finally:
+            self._task_depth -= 1
+        if self._task_depth == 0:
+            self._flush_triggers()
+        return out
+    return task
+
+
+def _as_step(method):
+    """The method is a step of the turn (a showdown's opening, combat): the
+    abilities it triggered go on the chain and resolve before the game
+    moves on, even inside a task."""
+    @functools.wraps(method)
+    def step(self, *args, **kwargs):
+        self._task_depth += 1
+        try:
+            out = method(self, *args, **kwargs)
+        finally:
+            self._task_depth -= 1
+        self._flush_triggers()
+        return out
+    return step
+
+
 class _Ignored(Exception):
     """An instruction whose declared target is no longer legal as the spell
     resolves: it isn't followed (§359.3.e.5-6)."""
@@ -444,6 +486,15 @@ class GameLoop:
         # Activated abilities put on the chain so far (_activate): a showdown
         # step tells one from an Add, which keeps focus.
         self._chained_abilities = 0
+        # Triggered abilities waiting for the current task to end (HOT FEPR,
+        # §334): PendingTrigger, finalized onto the chain by _flush_triggers.
+        # `_task_depth`: how many tasks are running (_as_task); 0 = none, a
+        # trigger then goes on the chain at once.
+        self._pending_triggers: list = []
+        self._task_depth = 0
+        self._flushing = False
+        # Resolving as if every player passed each time (_resolve_chain_passing).
+        self._all_pass = False
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -537,6 +588,13 @@ class GameLoop:
         self._slot[2] += 1
         return key
 
+    def _replaying(self, kind: str, source) -> bool:
+        """Whether the next `kind` choice of `source` replays a declared one
+        (so nobody is asked again)."""
+        return self._slot is not None and not self._in_many and self._replay is not None \
+            and kind.startswith(_DECLARED_CHOICES) and source is self._replay.get("card") \
+            and tuple(self._slot) in self._replay["choices"]
+
     def _chose(self, slot, kind: str, side: str, options: list, got, source) -> None:
         if self._in_many:
             return
@@ -564,6 +622,9 @@ class GameLoop:
             item.choices_noted = True
         if item.ability is None:
             self._spell_finalized(item.card)
+        # What that triggered ("when you play a spell", "when you choose me")
+        # goes on the chain above it (§334.2.a).
+        self._flush_triggers(run=False)
 
     def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
         """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
@@ -603,7 +664,8 @@ class GameLoop:
         if item.ability is not None and item.ability["kind"] == "equip":
             return {(0, 0, 0): ("equip", 1, item.ability["target"])}
         if getattr(self, "_dry_run", False) or getattr(self, "_lookahead", False) \
-                or (item.ability is None and not isinstance(item.card, SpellCard)):
+                or (item.ability is None and not isinstance(item.card, SpellCard)) \
+                or (item.ability is not None and item.ability["kind"] == "reflexive"):
             return None
         import copy
         gs = self.gs
@@ -612,6 +674,10 @@ class GameLoop:
         back = {id(memo[id(o)]): o for o in memo.get(id(memo), []) if id(o) in memo}
         loop2 = GameLoop(gs2)
         loop2._dry_run = True
+        # A player's "choose one" preference (decide_mode) is theirs there too.
+        for p, p2 in ((gs.A, gs2.A), (gs.B, gs2.B)):
+            if hasattr(p.agent, "decide_mode"):
+                p2.agent = _ModeAsker(p.agent)
         real = self.chooser
         # The Irelia Graceful it was paid for with must be chosen (§355.16:
         # no choice that makes the play illegal): a unit target offering her
@@ -640,6 +706,7 @@ class GameLoop:
             return real(_loop, kind, side, options, default, source)
         loop2.chooser = chooser
         loop2._declaring = {"card": card2, "choices": {}}
+        loop2._task_depth = 1        # what it triggers there never goes on a chain
         item2 = gs2.chain.pop()
         loop2._declare_board = [(key, list(lst)) for key, lst in loop2._presence_lists()]
         try:
@@ -931,6 +998,7 @@ class GameLoop:
                 self._fire_scoring_trigger("on_hold", bf, active)
         return vps
 
+    @_as_task
     def _fire_turn_trigger(self, trigger: str, side: str) -> None:
         """Fire on_start_of_turn / on_end_of_turn / on_start_of_main for all of a
         player's units on board (across battlefields and base)."""
@@ -971,6 +1039,7 @@ class GameLoop:
                 self._resolve_triggered_effects(bf.card, trigger, bf, actor, opponent,
                                                 context_extra={"battlefield": bf})
 
+    @_as_task
     def _fire_scoring_trigger(self, trigger: str, bf: Battlefield, side: str) -> None:
         """Fire on_conquer / on_hold for the scoring player's units at this BF
         (plus their deployed champion). Also grants HUNT XP."""
@@ -1286,6 +1355,7 @@ class GameLoop:
                 self._fire_units_trigger("on_friendly_gear_died_at_bf", side, triggering_card=dg.card)
         self._recompute_passives()
 
+    @_as_task
     def _fire_deployed_gear_trigger(self, trigger: str, bf: Battlefield, side: str) -> None:
         """Fire a trigger for `side`'s deployed gear at `bf`."""
         actor = self.gs.get_player(side)
@@ -1365,6 +1435,23 @@ class GameLoop:
         # on_play / on_cast effects only (other triggers fire via
         # _resolve_triggered_effects). Old flat effects default trigger=on_play.
         play_specs = [es for es in effect_specs if es.trigger in ("on_play", "on_cast")]
+
+        if not isinstance(card, SpellCard):
+            # A unit's or gear's "when you play me" is a triggered ability, a
+            # Play Effect, put on the chain once it has entered (§383.4.a.2),
+            # with what its play paid for (kicker, SHOW OFF).
+            if play_specs:
+                side = "A" if actor is self.gs.A else "B"
+                self._trigger(card, "on_play", [(i, es) for i, es in enumerate(effect_specs)
+                                                if es.trigger in ("on_play", "on_cast")],
+                              battlefield, side, None, additional=False, once=False,
+                              flags={"_kicker_paid": getattr(card, "_kicker_paid", False),
+                                     "_showed_off": getattr(card, "_showed_off", False),
+                                     "_shown": getattr(card, "_shown", None)})
+                card._kicker_paid = False
+                card._showed_off = False
+                card._shown = None
+            return
 
         if not play_specs:
             # Fallback: an effect-less spell deals its printed damage to opponent.
@@ -1469,56 +1556,209 @@ class GameLoop:
         opponent: Player,
         context_extra: Optional[dict] = None,
     ) -> None:
-        """Fire a card's effects whose `trigger` matches (e.g. on_conquer,
-        on_hold, on_attack, on_defend, on_death, on_start_of_turn, on_end_of_turn)."""
+        """A card's ability whose `trigger` matches (e.g. on_conquer, on_hold,
+        on_attack, on_defend, on_death, on_start_of_turn, on_end_of_turn)
+        triggers: it goes on the chain once the current task is done (_trigger)."""
         dead = (context_extra or {}).get("died_card") is card
         effect_specs: list[EffectSpec] = self._card_effects(
             card, (context_extra or {}).get("died_gear") if dead else None)
-        if not effect_specs:
+        specs = [(i, es) for i, es in enumerate(effect_specs) if es.trigger == trigger]
+        if specs:
+            self._trigger(card, trigger, specs, battlefield,
+                          "A" if actor is self.gs.A else "B", context_extra)
+
+    @staticmethod
+    def _kicker_gate(es: EffectSpec, additional: bool) -> bool:
+        """A "kicker_paid" condition checked once the ability's own cost is paid
+        (so it sees the payment); a play effect's reads its card's play."""
+        return additional and (es.condition or {}).get("type") == "kicker_paid"
+
+    def _trigger(self, card: Card, trigger: str, specs: list, bf: Battlefield, side: str,
+                 extra: Optional[dict], additional: bool = True, once: bool = True,
+                 flags: Optional[dict] = None) -> None:
+        """`card`'s instructions for `trigger`, (index, EffectSpec), one
+        triggered ability, trigger: the first one whose condition holds now
+        leads (§383.2.a.1: the trigger's condition; a "once each turn" used up
+        doesn't trigger, §383.3.e.1). It waits for the current task to end
+        (_flush_triggers); with no task running it goes on the chain at once."""
+        actor = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        flags = dict(flags) if flags is not None else {"_kicker_paid": False}
+        lead = None
+        with self._card_flags(card, flags):
+            for n, (i, es) in enumerate(specs):
+                if once and self._once_used(card, i, es):
+                    continue
+                if self._kicker_gate(es, additional) or self._check_condition(
+                        es.condition, card, actor, opponent, extra):
+                    lead = n
+                    break
+        if lead is None:
             return
-        context = EffectContext(self, card, actor, opponent, battlefield, dict(context_extra or {}))
-        for es_index, es in enumerate(effect_specs):
-            if es.trigger != trigger:
-                continue
-            once_key = (id(card), es_index)
-            if es.params.get("once_per_turn") and self.gs.once_per_turn_used.get(once_key) == self.gs.turn:
-                continue    # "Once each turn" / "The first time ... each turn": used
-            # A condition that doesn't depend on the payment is checked first, so
-            # a failed "if ..." never wastes the cost ("if you control 4 or fewer
-            # runes, you may pay [1] to draw 1").
-            kicker_gate = (es.condition or {}).get("type") == "kicker_paid"
-            if not kicker_gate and not self._check_condition(
-                    es.condition, card, actor, opponent, context_extra):
-                continue
-            # Optional ("you may ...") effects: let the actor decline BEFORE paying
-            # any cost (asked only when it can be paid). Default: yes.
-            if es.cost and not self._triggered_cost_affordable(card, actor, es):
-                continue
-            if not self._wants_optional(actor, card, es):
-                continue
-            # Pay any cost / additional_cost the triggered ability carries BEFORE
-            # a kicker_paid check (so the gate sees the payment). If a cost exists
-            # but is unaffordable, the ability simply doesn't fire (KNOWN_ISSUES #12).
-            if not self._pay_triggered_cost(card, actor, es):
-                continue
-            if kicker_gate and not self._check_condition(
-                    es.condition, card, actor, opponent, context_extra):
-                continue
-            handler = EFFECT_REGISTRY.get(es.effect)
-            if not handler:
-                continue
-            if es.params.get("once_per_turn"):
-                self.gs.once_per_turn_used[once_key] = self.gs.turn
-            # Resilience: mirror the guard in _resolve_card_effects — a single
-            # malformed triggered spec must not abort the whole match. Skip + log.
-            # Its choices aren't those of an ability of the same card resolving.
-            outer_slot, self._slot = self._slot, None
+        self._pending_triggers.append(PendingTrigger(
+            card=card, trigger=trigger, side=side, bf=bf, specs=specs[lead:], extra=extra,
+            additional=additional, flags=flags, once=once))
+        if self._task_depth == 0:
+            self._flush_triggers()
+
+    def _once_used(self, card: Card, i, es: EffectSpec) -> bool:
+        """ "Once each turn" / "The first time ... each turn": used this turn."""
+        return bool(es.params.get("once_per_turn")) and \
+            self.gs.once_per_turn_used.get((id(card), i)) == self.gs.turn
+
+    @contextmanager
+    def _card_flags(self, card: Card, flags: Optional[dict]):
+        """`card`'s play flags (kicker paid, SHOW OFF) as `flags` while an
+        ability of it is finalized or resolves; what it set then is kept in
+        `flags`, the card's own put back."""
+        def put(values):
+            for k, v in values.items():
+                try:
+                    setattr(card, k, v)
+                except AttributeError:      # a frozen spec standing in for a card
+                    pass
+        if not flags:
+            yield
+            return
+        saved = {k: getattr(card, k, None) for k in flags}
+        put(flags)
+        try:
+            yield
+        finally:
+            for k in flags:
+                flags[k] = getattr(card, k, None)
+            put(saved)
+
+    def _instruction_runs(self, card: Card, i, es: EffectSpec, actor: Player, opponent: Player,
+                          extra: Optional[dict], additional: bool, once: bool,
+                          checked: bool = False) -> bool:
+        """Whether an instruction of a triggered ability is done: once each turn
+        not used, its condition (unless `checked` as it triggered), its cost
+        affordable, its "you may" taken (asked only when it can be paid), its
+        cost paid; a cost that can't be paid: not done (KNOWN_ISSUES #12)."""
+        if once and self._once_used(card, i, es):
+            return False
+        # A condition that doesn't depend on the payment is checked first, so
+        # a failed "if ..." never wastes the cost ("if you control 4 or fewer
+        # runes, you may pay [1] to draw 1").
+        gate = self._kicker_gate(es, additional)
+        if not checked and not gate and not self._check_condition(
+                es.condition, card, actor, opponent, extra):
+            return False
+        if es.cost and not self._triggered_cost_affordable(card, actor, es):
+            return False
+        if not self._wants_optional(actor, card, es):
+            return False
+        if not self._pay_triggered_cost(card, actor, es, additional=additional):
+            return False
+        if gate and not self._check_condition(es.condition, card, actor, opponent, extra):
+            return False
+        if EFFECT_REGISTRY.get(es.effect) is None:
+            return False
+        if once and es.params.get("once_per_turn"):
+            self.gs.once_per_turn_used[(id(card), i)] = self.gs.turn
+        return True
+
+    def _flush_triggers(self, run: bool = True) -> None:
+        """The pending triggered abilities are finalized onto the chain
+        (§337.1, §383.3): the turn player's first, then the other's (§383.3.d.1),
+        each player ordering theirs (choice trigger_order: the one picked first
+        resolves first; baseline: as they triggered). One that Adds resources
+        resolves at once (§337.2). With no chain before and `run`, the chain
+        then runs: players may respond, then it resolves. While a chain item
+        resolves, its own resolution runs it after (_resolve_chain)."""
+        if self._flushing or not self._pending_triggers:
+            return
+        opened = not self.gs.chain
+        self._flushing = True
+        try:
+            while self._pending_triggers:
+                batch, self._pending_triggers = self._pending_triggers, []
+                for side in (self.gs.active, self.gs.other(self.gs.active)):
+                    mine = [p for p in batch if p.side == side]
+                    if len(mine) > 1:
+                        mine = self.choose_many("trigger_order", side, mine, list(mine))
+                    for p in reversed(mine):
+                        item = self._finalize_trigger(p)
+                        if item is None:
+                            continue
+                        ab = item.ability
+                        if ab["kind"] == "triggered" and ab["eff"].effect in _ADD_VERBS and \
+                                all(es.effect in _ADD_VERBS for _i, es in ab["rest"]):
+                            self._resolve_ability(item)
+                            continue
+                        self._put_on_chain(item)
+                        if self.verbose:
+                            print(f"  {side} TRIGGER on the chain: {item.card.name} ({p.trigger})")
+        finally:
+            self._flushing = False
+        if run and opened and self.gs.chain and getattr(self, "_resolving_item", None) is None:
+            self._run_chain(self.gs.chain[-1].player)
+
+    def _finalize_trigger(self, p: PendingTrigger) -> Optional[ChainItem]:
+        """A pending triggered ability is finalized (§383.3.a-b): its leading
+        instruction's "you may" is decided and its cost paid now; declined,
+        unpaid or used up, the next one leads, as if that one wasn't there.
+        None: none of it is done (it never triggered, §383.3.a.2)."""
+        card, side = p.card, p.side
+        bf_idx = next((j for j, b in enumerate(self.gs.battlefields) if b is p.bf), 0)
+        if p.replay is not None:
+            if not self._can_replay(side, card, p.replay):
+                return None
+            foe = any(bf._units_for(self.gs.other(side)) for bf in self.gs.battlefields)
+            if not self.choose("optional:replay", side, [True, False], foe, card):
+                return None
+            return ChainItem(player=side, card=card, bf_idx=bf_idx,
+                             ability={"eff": None, "kind": "reflexive", "energy": 0, "extra": {},
+                                      "target": None, "cost": p.replay})
+        actor, opponent = self.gs.get_player(side), self.gs.get_player(self.gs.other(side))
+        with self._card_flags(card, p.flags):
+            for n, (i, es) in enumerate(p.specs):
+                if self._instruction_runs(card, i, es, actor, opponent, p.extra, p.additional,
+                                          p.once, checked=n == 0):
+                    return ChainItem(player=side, card=card, bf_idx=bf_idx, ability={
+                        "eff": es, "kind": "triggered", "energy": 0, "extra": dict(p.extra or {}),
+                        "target": None, "bf": p.bf, "rest": p.specs[n + 1:], "flags": p.flags,
+                        "trigger": p.trigger, "additional": p.additional, "once": p.once,
+                        "cond_extra": p.extra})
+        return None
+
+    def _resolve_trigger(self, item: ChainItem) -> None:
+        """A triggered ability resolves, whether or not its source is still
+        there: its leading instruction (finalized), then the others in turn,
+        each done as before ("you may", costs and conditions decided now,
+        §383.3.a.3), all sharing one context ("it"), choosing as declared."""
+        ab, card = item.ability, item.card
+        actor = self.gs.get_player(item.player)
+        opponent = self.gs.get_player(self.gs.other(item.player))
+        context = EffectContext(self, card, actor, opponent, ab["bf"], dict(ab["extra"]))
+        outer_slot = self._slot
+        with self._card_flags(card, ab["flags"]):
             try:
-                handler(context, es.merged_params())
-            except Exception as exc:  # noqa: BLE001
-                if self.verbose:
-                    print(f"  [EFFECT-SKIP] {card.name}: "
-                          f"{es.effect} ({trigger}) failed: {exc}")
+                for n, (i, es) in enumerate([(None, ab["eff"])] + list(ab["rest"])):
+                    if n and not self._instruction_runs(card, i, es, actor, opponent,
+                                                        ab["cond_extra"], ab["additional"], ab["once"]):
+                        continue
+                    self._slot = [0, n, 0]       # this instruction's declared choices
+                    early = self._choices_on_board_as_played(context, es, 0, n)
+                    if early:
+                        self._replay = {"card": card, "choices": early}
+                    # Resilience: a single malformed spec must not abort the
+                    # whole match. Skip + log.
+                    try:
+                        EFFECT_REGISTRY[es.effect](context, es.merged_params())
+                    except _Ignored:
+                        context.extra["it"] = []
+                        if self.verbose:
+                            print(f"  [TARGET-ILLEGAL] {card.name}: {es.effect} ignored")
+                    except Exception as exc:  # noqa: BLE001
+                        if self.verbose:
+                            print(f"  [EFFECT-SKIP] {card.name}: "
+                                  f"{es.effect} ({ab['trigger']}) failed: {exc}")
+                    finally:
+                        if early:
+                            self._replay = None
+                            self._declaring["choices"].update(early)
             finally:
                 self._slot = outer_slot
 
@@ -1603,6 +1843,7 @@ class GameLoop:
 
         return True
 
+    @_as_task
     def _fire_units_trigger(self, trigger: str, side: str, exclude_card=None,
                             triggering_card=None, extra: Optional[dict] = None) -> None:
         """Fire a trigger for every unit a side controls on board + base (and skip
@@ -4966,6 +5207,7 @@ class GameLoop:
             return
         self._run_showdown(dst, attacker=side)
 
+    @_as_task
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
         if len(action) == 3:  # type: ignore[arg-type]
             kind, idx, lane = action  # type: ignore[misc]
@@ -5164,6 +5406,8 @@ class GameLoop:
             if ability_id == "ACTIVATED":
                 self._apply_activated_ability(ap, opponent, arg)
 
+        # What the action triggered resolves first ("when you play me").
+        self._flush_triggers()
         # A unit played to a battlefield it contests: its showdown starts as
         # soon as the play is done (§323.11); nothing joins it.
         if kind != "MOVE" and self.gs.pending_move is not None:
@@ -5384,17 +5628,27 @@ class GameLoop:
     def _offer_play_from_trash(self, side: str, card: Card, cost: dict) -> None:
         """ "Then, if it had 3 [might] or less, you may play this from your trash
         for [rune]" (Death from Below): a reflexive trigger of the resolving
-        spell, done once it is in its controller's trash (§388.4; abilities
-        don't use the chain here, so nobody responds to it). The player chooses
-        (baseline: when it can kill an enemy unit at a battlefield)."""
+        spell, once it is in its controller's trash (§388.4): it goes on the
+        chain if its player takes the "you may" as it is finalized (baseline:
+        when it can kill an enemy unit at a battlefield), and they play it
+        as it resolves (_replay_from_trash)."""
+        self._pending_triggers.append(PendingTrigger(
+            card=card, trigger="reflexive", side=side, bf=self.gs.battlefields[0], specs=[],
+            replay=cost))
+        if self._task_depth == 0:
+            self._flush_triggers()
+
+    def _can_replay(self, side: str, card: Card, cost: dict) -> bool:
         ap = self.gs.get_player(side)
-        lane = self._zone_play_lane()
-        if not any(c is card for c in ap.trash) or self._play_forbidden(ap, card) or \
-                not self._spell_has_targets(card, side, lane) or not self._can_pay_play_for(ap, card, cost):
-            return
-        foe = any(bf._units_for(self.gs.other(side)) for bf in self.gs.battlefields)
-        if not self.choose("optional:replay", side, [True, False], foe, card) or \
-                not self._pay_play_for(ap, card, cost):
+        return any(c is card for c in ap.trash) and not self._play_forbidden(ap, card) and \
+            self._spell_has_targets(card, side, self._zone_play_lane()) and \
+            self._can_pay_play_for(ap, card, cost)
+
+    def _replay_from_trash(self, side: str, card: Card, cost: dict) -> None:
+        """Death from Below's reflexive trigger resolves: it is played from the
+        trash for `cost`, if it still can be."""
+        ap = self.gs.get_player(side)
+        if not self._can_replay(side, card, cost) or not self._pay_play_for(ap, card, cost):
             return
         ap.trash.remove(card)
         if self.verbose:
@@ -6135,8 +6389,16 @@ class GameLoop:
     def _resolve_ability(self, item: ChainItem) -> None:
         """An activated ability resolves (§377.3.b.3), whether or not its source
         is still on the board, choosing as it declared (§355). Then "when you
-        use / play an ability" (§377.2.a: as it resolves)."""
+        use / play an ability" (§377.2.a: as it resolves). A triggered
+        ability: _resolve_trigger; a reflexive "play this from your trash":
+        _replay_from_trash."""
         ab, side = item.ability, item.player
+        if ab["kind"] == "triggered":
+            self._resolve_trigger(item)
+            return
+        if ab["kind"] == "reflexive":
+            self._replay_from_trash(side, item.card, ab["cost"])
+            return
         ap, opponent = self.gs.get_player(side), self.gs.get_player(self.gs.other(side))
         if ab["kind"] == "equip":
             # EQUIP (§818): its gear still at our base, its unit still ours.
@@ -6327,6 +6589,7 @@ class GameLoop:
         self._route_deaths([(u, "A") for u in stats.dead_A] + [(u, "B") for u in stats.dead_B], bf,
                            in_combat=True)
 
+    @_as_task
     def _route_deaths(self, ordered, bf, in_base: bool = False, killer=None,
                       in_combat: bool = False) -> None:
         """Units that just died (already off the board), as (unit, owner side)
@@ -6934,16 +7197,20 @@ class GameLoop:
         passes = 0
         rounds = 0
 
-        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP:
+        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP and not self._all_pass:
             rounds += 1
             player = self.gs.get_player(active)
-            if player.agent is None:
+            if player.agent is None or not hasattr(player.agent, "decide_reaction"):
                 passes += 1
                 active = self.gs.other(active)
                 continue
 
             action = player.agent.decide_reaction(self.gs.get_player(self.gs.other(active)), self.gs.chain)
+            depth = len(self.gs.chain)
             step = "pass" if action[0] == "PASS" else self._reaction_step(player, active, action)
+            self._flush_triggers(run=False)       # what it triggered goes on the chain
+            if step != "pass" and len(self.gs.chain) > depth:
+                step = "acted"
             if step == "kept":
                 continue          # an Add ability resolved: its player keeps priority
             # An action that does nothing (a spell it can't pay for once taxes
@@ -7003,51 +7270,72 @@ class GameLoop:
     def _resolve_chain(self) -> None:
         """Resolve the chain LIFO, each spell to its caster's trash. A spell that
         put a play on the chain as it resolved (Dancing Grenade's replay, Death
-        from Below's) opens priority again before that one resolves (§420.3)."""
-        while self.gs.chain:
-            item = self.gs.chain.pop()
-            depth = len(self.gs.chain)
-            actor = self.gs.get_player(item.player)
-            opponent = self.gs.get_player(self.gs.other(item.player))
-            battlefield = self.gs.battlefields[item.bf_idx]
-            outer, outer_noted = self._replay, getattr(self, "_choices_noted", False)
-            outer_item, self._resolving_item = getattr(self, "_resolving_item", None), item
-            self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
-            self._choices_noted = item.choices_noted
-            try:
-                if item.ability is not None:
-                    self._resolve_ability(item)
-                else:
-                    self._resolve_card_effects(item.card, battlefield, actor, opponent)
-            finally:
-                self._replay, self._choices_noted = outer, outer_noted
-                self._resolving_item = outer_item
+        from Below's) opens priority again before that one resolves (§420.3).
+        Its resolution is a task: what it triggered goes on the chain after it
+        (HOT FEPR, §334). Then, the chain not empty, players get priority again
+        before the next one resolves (§340.4)."""
+        if not self.gs.chain:
+            return
+        item = self.gs.chain.pop()
+        self._task_depth += 1
+        try:
+            self._resolve_item(item)
+        finally:
+            self._task_depth -= 1
+        self._flush_triggers(run=False)
+        if self.gs.chain:
+            self._run_chain(self.gs.chain[-1].player)
+
+    def _resolve_chain_passing(self) -> None:
+        """Resolve the whole chain as if every player passed each time (a
+        search settling a line)."""
+        outer, self._all_pass = self._all_pass, True
+        try:
+            while self.gs.chain:
+                self._resolve_chain()
+        finally:
+            self._all_pass = outer
+
+    def _resolve_item(self, item: ChainItem) -> None:
+        """One chain item resolves (_resolve_chain): a spell's effects, then
+        it goes to its caster's trash; an ability's effects."""
+        actor = self.gs.get_player(item.player)
+        opponent = self.gs.get_player(self.gs.other(item.player))
+        battlefield = self.gs.battlefields[item.bf_idx]
+        outer, outer_noted = self._replay, getattr(self, "_choices_noted", False)
+        outer_item, self._resolving_item = getattr(self, "_resolving_item", None), item
+        self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
+        self._choices_noted = item.choices_noted
+        try:
             if item.ability is not None:
-                if len(self.gs.chain) > depth:
-                    self._run_chain(self.gs.chain[-1].player)
-                continue
+                self._resolve_ability(item)
+            else:
+                self._resolve_card_effects(item.card, battlefield, actor, opponent)
+        finally:
+            self._replay, self._choices_noted = outer, outer_noted
+            self._resolving_item = outer_item
+        if item.ability is not None:
+            return
 
-            if self.recorder:
-                before_a = list(battlefield.units_A)
-                before_b = list(battlefield.units_B)
-                self._record_spell_deaths(battlefield, before_a, before_b)
+        if self.recorder:
+            before_a = list(battlefield.units_A)
+            before_b = list(battlefield.units_B)
+            self._record_spell_deaths(battlefield, before_a, before_b)
 
-            self.spells_cast += 1
-            if isinstance(item.card, SpellCard) and not any(it.card is item.card for it in self.gs.chain):
-                # A resolved spell goes to its caster's trash (KNOWN_ISSUES #19a).
-                # Previously cast spells vanished, starving trash-based mechanics
-                # (FLOW / recycle / return-from-trash) of any targets. Countered
-                # spells are popped + trashed by counter_spell before this loop, so
-                # they never reach here — no double-trash. A spell another
-                # player took over goes to its owner's (Mystic Reversal). One
-                # played again as it resolved stays on the chain (Dancing Grenade).
-                self._spell_to_trash(self.gs.get_player(item.owner) if item.owner else actor, item.card)
-                offer = getattr(item.card, "_replay_offer", None)
-                if offer is not None:
-                    item.card._replay_offer = None
-                    self._offer_play_from_trash(item.player, item.card, offer)
-            if len(self.gs.chain) > depth:
-                self._run_chain(self.gs.chain[-1].player)
+        self.spells_cast += 1
+        if isinstance(item.card, SpellCard) and not any(it.card is item.card for it in self.gs.chain):
+            # A resolved spell goes to its caster's trash (KNOWN_ISSUES #19a).
+            # Previously cast spells vanished, starving trash-based mechanics
+            # (FLOW / recycle / return-from-trash) of any targets. Countered
+            # spells are popped + trashed by counter_spell before this loop, so
+            # they never reach here — no double-trash. A spell another
+            # player took over goes to its owner's (Mystic Reversal). One
+            # played again as it resolved stays on the chain (Dancing Grenade).
+            self._spell_to_trash(self.gs.get_player(item.owner) if item.owner else actor, item.card)
+            offer = getattr(item.card, "_replay_offer", None)
+            if offer is not None:
+                item.card._replay_offer = None
+                self._offer_play_from_trash(item.player, item.card, offer)
 
     def _run_showdown(self, bf_idx: int, attacker: str) -> None:
         """Execute a showdown at the given battlefield (§337–345)."""
@@ -7166,6 +7454,7 @@ class GameLoop:
                 return "acted" if (self._chained_abilities, self.spells_cast) != chained else "kept"
         return "noop"
 
+    @_as_step
     def _finish_showdown(self, bf_idx: int, attacker: str) -> None:
         """Both players passed: the showdown ends, then combat if the battlefield
         is contested, else a conquer."""
@@ -7199,6 +7488,7 @@ class GameLoop:
                     print(f"  [CONQUER] B conquers BF{bf_idx} (uncontested showdown) -> +1 VP")
                 self._fire_scoring_trigger("on_conquer", bf, "B")
 
+    @_as_step
     def _open_combat(self, bf: Battlefield, attacker: str) -> None:
         """The combat at `bf` opens (§466.2): start of combat effects, then the
         units there become Attackers / Defenders and their attack / defend
@@ -7262,6 +7552,7 @@ class GameLoop:
             self._fire_units_trigger("on_you_defend", defender,
                                      extra={"defended_at": bf})
 
+    @_as_step
     def _phase_combat_and_conquer_single(self, bf_idx: int, attacker: str) -> None:
         """Resolve combat for a single battlefield."""
         self._recompute_passives()

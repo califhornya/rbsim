@@ -466,7 +466,9 @@ def test_forgotten_library_predicts_on_a_spell_you_spent_four_on(monkeypatch):
     _battlefield(loop, 0, "Forgotten Library")
     loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1))
     predicted = []
-    monkeypatch.setitem(REGISTRY, "predict", lambda ctx, spec: predicted.append(ctx.actor.name))
+    # Counted in this game only (not on the copy its choices are declared on).
+    monkeypatch.setitem(REGISTRY, "predict",
+                        lambda ctx, spec: ctx.loop is loop and predicted.append(ctx.actor.name))
     _play_spell(loop, a, _spell(3))
     assert predicted == []
     _play_spell(loop, a, _spell(4))
@@ -497,6 +499,10 @@ def test_ravenbloom_student_grows_as_the_spell_is_played():
     loop._spell_played(card, a)
     assert student.might == base                           # its choices aren't made yet
     loop._put_on_chain(ChainItem(player="A", card=card, bf_idx=0))   # played, not resolved yet
+    # Its ability went on the chain above the spell (§383.3) and resolves first.
+    assert [it.card.name for it in loop.gs.chain] == [card.name, "Ravenbloom Student"]
+    loop.gs.chain.pop(0)
+    loop._resolve_chain()
     assert student.might == base + 1
 
 
