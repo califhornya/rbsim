@@ -526,22 +526,28 @@ sees two battlefields (encoding N_BF = 2): with the Baron Pit (a third) it
 doesn't see the Pit, and since the base's move index becomes 3, its moves to
 or from the base or Pit map to wrong slots (the search and heuristic agents
 see all three). The net sees one legend per player: not the ones Neeko Blending
-In adds (their abilities are still in its action space). The heuristic agents
-check a multi-domain card's power as any domain's (the engine pays it from its
-domains: an agent may try a card it can't pay, a no-op that ends its turn).
-The heuristic agents check a card's printed cost, not what it costs now: they
-never play a spell only Seraphine Starry-Eyed Songstress's [2] less pays for
-(nor one any other reduction makes affordable). Fixed B28: simple_trade picked
+In adds (their abilities are still in its action space). Fixed B36: the
+heuristic agents (simple_trade, Diana, Pyke) checked a card's printed cost,
+a multi-domain card's power as any domain's; they now ask the engine
+(`Agent._card_check` = legality `_affordable` + `_spell_has_targets`: what it
+costs now, its own domains, Songstress / Atakhan / alternate-cost / Irelia
+discounts; EQUIP and zone plays `_ability_usable`), and pick the best-scored
+card that can be paid (`Agent._best_payable`). Fixed B28: simple_trade picked
 activated abilities without the engine's `_ability_usable` (their conditions):
 Ezreal Prodigal Explorer's "use only if" was a no-op every turn, the Ezreal
 precon never played a card (0 of 100 wins, now 16; tests/test_simple_trade_legal.py).
 
 From the re-check of the old notes (2026-10-29, G):
-- simple_trade uses any affordable ability that taps or pays, ADDs too
-  (`_find_activated_ability`): Seals, Gold (killing itself), Lux / Diana /
-  Ornn / Kai'Sa's earmarked ADDs with nothing to pay; since B35 that is lost
-  as the turn ends (90 smoke games: 37 Energy, 199 Power, 162 earmarked). An
-  ADD should be used only while paying.
+- Fixed B36: simple_trade used any affordable ability that taps or pays,
+  ADDs too (`_find_activated_ability`): Seals, Gold (killing itself), Lux /
+  Diana / Ornn / Kai'Sa's earmarked ADDs with nothing to pay, lost as the turn
+  ends (90 smoke games: 37 Energy, 199 Power, 162 earmarked). Now an ADD is
+  used only right before the play it pays for (`Agent._paying`: shortest ADD
+  sequence tried on game copies; tap-only first, Gold last); 90 smoke games
+  now lose 0 Power, 0 earmarked (15 Energy: a ready rune recycled for Power
+  is exhausted first, its Energy left unspent, as in real play).
+  tests/test_heuristic_paying.py. Round robin 10 decks `--games 3`: 19.6s
+  -> 21.1s.
 - Hiding the champion (§737.1.b, the engine allows it) has no slot in the
   net's action space.
 - The net-guided search decides only the first choice of an action, none while

@@ -5,6 +5,7 @@ from typing import Optional
 from riftbound.ai.heuristics.base_agent import Agent
 from riftbound.core.cards import GearCard, LegendCard, SpellCard, UnitCard
 from riftbound.core.combat import UnitInPlay
+from riftbound.core.loop import _ADD_VERBS
 from riftbound.core.player import Player
 
 
@@ -27,6 +28,9 @@ class SimpleTradeAgent(Agent):
     agent restricts itself to spells whose printed timing (ACTION / REACTION) allows
     them — the engine enforces this, the agent just avoids burning energy on illegal
     plays.
+
+    A card is played for what it costs now (Agent._card_check); an Add ability
+    only right before the play it pays for (Agent._paying).
     """
 
     name = "SimpleTrade"
@@ -35,6 +39,7 @@ class SimpleTradeAgent(Agent):
     # Main-phase decision
 
     def decide_action(self, opponent: Player, cards_played: int = 0) -> tuple:
+        self._begin_decision()
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
         base_idx = len(bfs)
@@ -106,30 +111,25 @@ class SimpleTradeAgent(Agent):
 
     def decide_showdown_action(self, opponent: Player, bf_idx: int) -> tuple:
         """During a Showdown only [ACTION] / [REACTION] spells are legal."""
+        self._begin_decision()
         bfs = self.player.battlefields
         my_side = "A" if self.player.name == "A" else "B"
 
-        candidates: list[tuple[int, int]] = []
+        candidates: list = []
         for idx, card in enumerate(self.player.hand):
             if not isinstance(card, SpellCard):
                 continue
             if not (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
                 continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
             score = self._score_combat_spell(card, my_side, bfs, bf_idx)
             if score <= 0:
                 continue
-            candidates.append((score, idx))
-
-        if not candidates:
-            return ("PASS", None, None)
-
-        candidates.sort(key=lambda p: -p[0])
-        return ("SPELL", candidates[0][1], bf_idx)
+            candidates.append((score, ("SPELL", idx, bf_idx), self._card_check(card, lane=bf_idx)))
+        return self._best_payable(candidates) or ("PASS", None, None)
 
     def decide_reaction(self, opponent: Player, chain: list) -> tuple:
         """Closed State — only [REACTION] spells are legal."""
+        self._begin_decision()
         bfs = self.player.battlefields
         my_side = "A" if self.player.name == "A" else "B"
 
@@ -141,25 +141,18 @@ class SimpleTradeAgent(Agent):
             if 0 <= bf_idx < len(bfs):
                 target_bf = bf_idx
 
-        candidates: list[tuple[int, int]] = []
+        candidates: list = []
         for idx, card in enumerate(self.player.hand):
             if not isinstance(card, SpellCard):
                 continue
             if not card.has_keyword("REACTION"):
                 continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
             score = self._score_combat_spell(card, my_side, bfs, target_bf)
             # Only spend a reaction if the spell genuinely helps a friendly unit there
             if score < 3:
                 continue
-            candidates.append((score, idx))
-
-        if not candidates:
-            return ("PASS", None, None)
-
-        candidates.sort(key=lambda p: -p[0])
-        return ("SPELL", candidates[0][1], target_bf)
+            candidates.append((score, ("SPELL", idx, target_bf), self._card_check(card, lane=target_bf)))
+        return self._best_payable(candidates) or ("PASS", None, None)
 
     # ------------------------------------------------------------------
     # Helpers
@@ -186,9 +179,7 @@ class SimpleTradeAgent(Agent):
         already = gs.champion_A_deployed if is_A else gs.champion_B_deployed
         if already:
             return None
-        if not self.player.can_pay_cost(champion.cost_energy, champion.cost_power, champion.cost_power_domain):
-            return None
-        return ("CHAMPION", None, 0)
+        return self._paying(("CHAMPION", None, 0), self._card_check(champion))
 
     def _find_trade_move(self, my_side: str, bfs: list, base_idx: int) -> Optional[tuple]:
         """Attack a contested/enemy BF when our units can win the trade (our total
@@ -233,18 +224,6 @@ class SimpleTradeAgent(Agent):
     def _find_gear_play(self, my_side: str, bfs: list) -> Optional[tuple]:
         """Play a gear targeting a lane that has friendly units (auto-attach).
         Fall back to playing it (it will land in base_gear) if nothing's on a BF."""
-        # Find a gear in hand we can afford
-        gear_idx: Optional[int] = None
-        for idx, card in enumerate(self.player.hand):
-            if not isinstance(card, GearCard):
-                continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
-            gear_idx = idx
-            break
-        if gear_idx is None:
-            return None
-
         # Target the BF with our strongest unit (best beneficiary of the gear).
         best_lane: Optional[int] = None
         best_might = -1
@@ -261,7 +240,18 @@ class SimpleTradeAgent(Agent):
             # No friendly units on any BF; only worth playing the gear if it's cheap,
             # otherwise we'd rather develop a body first.
             return None
-        return ("GEAR", gear_idx, best_lane)
+        return self._first_gear(best_lane)
+
+    def _first_gear(self, lane: int) -> Optional[tuple]:
+        """Play the first gear in hand we can pay for, at `lane`."""
+        for idx, card in enumerate(self.player.hand):
+            if not isinstance(card, GearCard):
+                continue
+            action = self._paying(("GEAR", idx, lane),
+                                  self._card_check(card, dst=lane if card.has_keyword("DEPLOY") else None))
+            if action is not None:
+                return action
+        return None
 
     def _find_combat_spell(self, my_side: str, bfs: list) -> Optional[tuple]:
         """Cast a might-buff spell on a friendly unit at a contested BF."""
@@ -279,21 +269,15 @@ class SimpleTradeAgent(Agent):
         if target_bf is None:
             return None
 
-        candidates: list[tuple[int, int]] = []
+        candidates: list = []
         for idx, card in enumerate(self.player.hand):
             if not isinstance(card, SpellCard):
-                continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
                 continue
             score = self._score_combat_spell(card, my_side, bfs, target_bf)
             if score <= 0:
                 continue
-            candidates.append((score, idx))
-
-        if not candidates:
-            return None
-        candidates.sort(key=lambda p: -p[0])
-        return ("SPELL", candidates[0][1], target_bf)
+            candidates.append((score, ("SPELL", idx, target_bf), self._card_check(card, lane=target_bf)))
+        return self._best_payable(candidates)
 
     def _score_combat_spell(self, card: SpellCard, my_side: str, bfs: list, bf_idx: int) -> int:
         """Score a spell for a contested-BF context. Generic, name-free."""
@@ -320,10 +304,11 @@ class SimpleTradeAgent(Agent):
         return score
 
     def _find_activated_ability(self, my_side: str) -> Optional[tuple]:
-        """Pick the first affordable activated ability whose cost actually consumes
+        """Pick the first usable activated ability whose cost actually consumes
         a resource (taps the source or spends energy/power) — this guards against
         re-triggering a free ability forever in the multi-action loop. EQUIP entries
-        (re-attaching base gear) are always finite and included."""
+        (re-attaching base gear) are always finite and included. Not an Add
+        ability: what it adds is used while paying (Agent._paying)."""
         loop = getattr(self, "loop", None)
         if loop is None:
             return None
@@ -331,29 +316,23 @@ class SimpleTradeAgent(Agent):
         for idx, entry in enumerate(abilities):
             if entry["type"] in ("flow", "banished_play", "trash_play"):
                 continue        # playing a card from a zone: _find_flow_play
-            if not loop._ability_usable(self.player, entry):
-                continue        # its condition (Ezreal's "use only if"), Black Market once per turn
             if entry["type"] == "equip":
-                gear = entry["gear"]
-                if not self.player.can_pay_cost(
-                    gear.cost_energy, gear.cost_power, gear.cost_power_domain
-                ):
-                    continue
                 if not loop._friendly_units_of(my_side):
                     continue
-                return ("ABILITY", "ACTIVATED", idx)
-            parsed = loop._parse_activated_cost(entry["eff"].cost)
-            # Only resource-consuming abilities — never spin on a free/no-op one.
-            if not (parsed["tap"] or parsed["energy"] or parsed["power"]):
-                continue
-            # Gear abilities have no "unit"; their [tap] is the gear's own state.
-            if entry["type"] == "gear_ability" and parsed["tap"] and getattr(entry["gear"], "tapped", False):
-                continue
-            if not loop._activated_affordable(self.player, entry.get("unit"), parsed):
-                continue
-            if parsed.get("kill_other_token") and loop._token_to_kill(my_side, entry.get("unit")) is None:
-                continue        # Malzahar Fanatic: only a token is given up for it
-            return ("ABILITY", "ACTIVATED", idx)
+            else:
+                if entry["eff"].effect in _ADD_VERBS:
+                    continue
+                parsed = loop._parse_activated_cost(entry["eff"].cost)
+                # Only resource-consuming abilities — never spin on a free/no-op one.
+                if not (parsed["tap"] or parsed["energy"] or parsed["power"]):
+                    continue
+                if parsed.get("kill_other_token") and loop._token_to_kill(my_side, entry.get("unit")) is None:
+                    continue        # Malzahar Fanatic: only a token is given up for it
+            # Its cost (EQUIP's own), its condition (Ezreal's "use only if"),
+            # Black Market once per turn.
+            action = self._paying(("ABILITY", "ACTIVATED", idx), self._entry_check(entry))
+            if action is not None:
+                return action
         return None
 
     def _find_flow_play(self, my_side: str, bfs: list) -> Optional[tuple]:
@@ -363,59 +342,46 @@ class SimpleTradeAgent(Agent):
         loop = getattr(self, "loop", None)
         if loop is None:
             return None
-        best = None
+        candidates: list = []
         for idx, entry in enumerate(loop.activatable_abilities(my_side)):
-            if entry["type"] not in ("flow", "banished_play", "trash_play") or \
-                    not loop._ability_usable(self.player, entry):
+            if entry["type"] not in ("flow", "banished_play", "trash_play"):
                 continue
             card = entry["card"]
             score = 5 if not isinstance(card, SpellCard) else \
                 self._score_combat_spell(card, my_side, bfs, 0)
-            if score > 0 and (best is None or score > best[0]):
-                best = (score, idx)
-        return ("ABILITY", "ACTIVATED", best[1]) if best else None
+            if score > 0:
+                candidates.append((score, ("ABILITY", "ACTIVATED", idx), self._entry_check(entry)))
+        return self._best_payable(candidates)
 
     def _find_gear_to_stage(self) -> Optional[tuple]:
         """Last-resort tempo play: deploy an affordable gear when no better action
         exists. With no friendly unit at the lane the engine routes it to base_gear,
         where it waits to be EQUIPped later — strictly better than passing and
         wasting the energy. Energy-bounded, so it can't dump the whole hand at once."""
-        for idx, card in enumerate(self.player.hand):
-            if not isinstance(card, GearCard):
-                continue
-            if not self.player.can_pay_cost(
-                card.cost_energy, card.cost_power, card.cost_power_domain
-            ):
-                continue
-            return ("GEAR", idx, 0)
-        return None
+        return self._first_gear(0)
 
     def _find_unit_to_develop(self, cards_played: int) -> Optional[tuple]:
-        """Play the highest-Might unit we can afford. UNIT plays always go to base."""
-        best: Optional[tuple[int, int]] = None  # (score, hand_idx)
+        """Play the highest-Might unit we can afford: to base, unless it can
+        only go to a battlefield (Perched Grimwyrm)."""
+        loop = getattr(self, "loop", None)
+        candidates: list = []
         for idx, card in enumerate(self.player.hand):
             if not isinstance(card, (UnitCard, LegendCard)):
                 continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
+            dests = loop._unit_play_destinations(card, "A" if self.player.name == "A" else "B") \
+                if loop is not None else [None]
+            if not dests:
                 continue
+            dst = None if None in dests else dests[0]
             might = card.might or 0
             score = might
             # Light keyword bonus (Tank / Shield X / Assault X) without going name-specific.
             for kw in ("TANK", "SHIELD", "ASSAULT"):
                 if card.has_keyword(kw):
                     score += 1
-            if best is None or score > best[0]:
-                best = (score, idx)
-        if best is None:
-            return None
-        # Base, unless the card can only go to a battlefield (Perched Grimwyrm).
-        loop = getattr(self, "loop", None)
-        if loop is not None:
-            card = self.player.hand[best[1]]
-            dests = loop._unit_play_destinations(card, "A" if self.player.name == "A" else "B")
-            if None not in dests:
-                return ("UNIT", best[1], 0, dests[0]) if dests else None
-        return ("UNIT", best[1], 0)
+            candidates.append((score, ("UNIT", idx, 0) if dst is None else ("UNIT", idx, 0, dst),
+                               self._card_check(card, dst=dst)))
+        return self._best_payable(candidates)
 
     def _find_empty_bf_move(self, my_side: str, bfs: list, base_idx: int) -> Optional[tuple]:
         """Walk a ready base unit onto an uncontrolled BF to Conquer it."""
