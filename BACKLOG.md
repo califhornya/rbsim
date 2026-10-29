@@ -612,12 +612,27 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   Brilliant Inventor: effect `ready_something` (unit, legend, gear or rune;
   rune = +1 Energy). Facebreaker was already right (both units "here" = the
   battlefield it is aimed at): checked by a test.
-- [ ] Spiritforged: Emperor's Divide (moves all, not "any number"), Assembly
+- [x] Spiritforged: Emperor's Divide (moves all, not "any number"), Assembly
   Rig (recycles any card, not a unit from the trash), Arcane Shift (comes back
   to base, no choice), The Zero Drive (to the trash, not banished), Kato the
   Arm (also lends keywords given for the turn), counters that "choose" read
   spells' declared choices only (not abilities'), Undertitan's ADD on "you may
-  reveal a unit from among them".
+  reveal a unit from among them". DONE B22 (tests/test_g2_spiritforged.py):
+  Emperor's Divide: `move_units_to_base` with `any_number`, one
+  `optional:move_units_to_base` choice per unit (baseline: all). Assembly Rig:
+  cost key `recycle_type` ("unit"), `GameLoop._recyclable(player, kind)` used
+  by the usability checks and `_recycle_from_trash(player, n, kind)`. Arcane
+  Shift: `blink_unit` destination `play_location` = base or a battlefield the
+  owner controls (§355.2.a; one it was alone at still counts, §190.4.c),
+  choice `destination:blink_unit` (baseline: back where it was unless losing
+  its fight there, else base). The Zero Drive: cost key `banish_self`,
+  `_remove_gear(..., banish=True)` (to banishment, Zed's "banish a card you
+  own" fires). Kato: the old note was wrong by the rules (§801.3: granted
+  keywords are his), now also this-combat ones and Svellsongur's copies.
+  Undertitan: `dig` / `reveal_and_choose` call `_note_revealed` for the kept
+  card unless `must` or `reveal: false` (Lightning Rush "choose a card",
+  Stacked Deck "Put 1"). Not So Fast / Repulse vs abilities: abilities never
+  go on the chain in this engine, so moved to G3 "Abilities on the chain".
 - [ ] Unleashed: Iascylla (moves at once, not at the start of your next Main
   Phase), Undying Loyalty ([2] less for a Bird / Cat / Dog / Poro: missing),
   Hextech Gauntlets (Equip cost not reduced by the unit's Might), Dancing
@@ -646,6 +661,14 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
 - [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
   Graceful's discount can't be played; "if you spent [N]" sees the Energy
   before her discount.
+- [ ] Abilities on the chain (§328, §337.2, from G2 Spiritforged): activated
+  and triggered abilities resolve at once (`_apply_activated_ability`,
+  `_resolve_triggered_effects`; `_reaction_step` "kept"), so nobody can respond
+  to one. Rules: every ability but an Add goes on the chain, its choices
+  declared, and can be reacted to. Cards hit: Not So Fast / Repulse ("counter
+  an enemy spell or ability that chooses ..." reads `ChainItem.declared` of
+  spells only: `effects._chose_mine`), Decree of Focus (`_fury_threatened`,
+  G2 Vendetta), any REACTION played in answer to an ability.
 - [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
   don't see a unit gear); Svellsongur (copied activated abilities aren't
   listed twice, a passive keyword grant stays one instance, Karthus-style

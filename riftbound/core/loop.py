@@ -1373,7 +1373,7 @@ class GameLoop:
                 self._exhaust(unit)
             if parsed["tap"] and gear is not None:
                 self._exhaust_gear(gear, actor)
-            self._recycle_from_trash(actor, parsed["recycle"])
+            self._recycle_from_trash(actor, parsed["recycle"], parsed["recycle_type"])
             self._pay_discard_and_banish(actor, parsed, unit)
             if parsed["spend_xp"]:
                 self.gs.add_xp(side, -parsed["spend_xp"])
@@ -5111,7 +5111,7 @@ class GameLoop:
             # Gear ability power is generic; Ornn's earmarked gear-power may cover it.
             if not self._can_pay_gear(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return False
-            if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
+            if parsed["recycle"] and len(self._recyclable(ap, parsed["recycle_type"])) < parsed["recycle"]:
                 return False
             if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
                 return False
@@ -5149,9 +5149,10 @@ class GameLoop:
                                         context_extra={"battlefield": bf})
         self._fire_leaves_board(card, side, bf)
 
-    def _remove_gear(self, gear, ap: Player) -> None:
+    def _remove_gear(self, gear, ap: Player, banish: bool = False) -> None:
         """A gear `ap` controls (in base or attached) is killed: it goes to the
-        trash, or ceases to exist if it is a token."""
+        trash, or ceases to exist if it is a token. `banish`: it is banished
+        instead ("Banish this": The Zero Drive's cost)."""
         if gear in ap.base_gear:
             ap.base_gear.remove(gear)
         else:
@@ -5160,7 +5161,11 @@ class GameLoop:
                 if gear in u.gear:
                     u.gear.remove(gear)
                     break
-        self._to_trash(ap, gear)
+        if banish and not getattr(gear, "is_token", False):
+            ap.banished.append(gear)
+            self._note_banished("A" if ap is self.gs.A else "B")
+        else:
+            self._to_trash(ap, gear)
         self._gear_left_board(gear, "A" if ap is self.gs.A else "B")
 
     def _controlled_attached_gear(self, side: str) -> list:
@@ -5241,6 +5246,7 @@ class GameLoop:
         """Normalize the mixed string/dict/None cost forms the generator emits."""
         import re
         parsed = {"energy": 0, "power": 0, "domain": None, "tap": False, "recycle": 0,
+                  "recycle_type": None, "banish_self": False,
                   "sacrifice": False, "spend_xp": 0, "disempower": False,
                   "banish_from_trash": None, "banish_any_trash": False, "discard": 0, "discard_type": None,
                   "spend_buff": None, "kill_other_token": False, "kill_other_friendly": False,
@@ -5256,6 +5262,8 @@ class GameLoop:
                                  or cost.get("exhaust"))
             parsed["recycle"] = int(cost.get("recycle_from_trash",
                                              cost.get("recycle", 0)) or 0)
+            parsed["recycle_type"] = cost.get("recycle_type")   # "Recycle a unit from your trash"
+            parsed["banish_self"] = bool(cost.get("banish_self"))  # "Banish this" (The Zero Drive)
             parsed["sacrifice"] = bool(cost.get("sacrifice_self")
                                        or cost.get("kill_friendly"))
             parsed["spend_xp"] = int(cost.get("spend_xp", 0) or 0)
@@ -5460,7 +5468,7 @@ class GameLoop:
             return False
         if parsed["exhaust_friendly_unit"] and self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"]) is None:
             return False   # "Exhaust a friendly unit: ..." (Riven Deserter)
-        if parsed["recycle"] and len(ap.trash) < parsed["recycle"]:
+        if parsed["recycle"] and len(self._recyclable(ap, parsed["recycle_type"])) < parsed["recycle"]:
             return False
         if parsed["banish_from_trash"] and self._trash_card_to_banish(ap, parsed) is None:
             return False
@@ -5561,7 +5569,7 @@ class GameLoop:
                 self._exhaust_gear(gear, ap)
             if parsed["disempower"]:
                 gear.empowered = False
-            self._recycle_from_trash(ap, parsed["recycle"])
+            self._recycle_from_trash(ap, parsed["recycle"], parsed["recycle_type"])
             self._pay_discard_and_banish(ap, parsed)
             if parsed["kill_friendly_gear"]:
                 victim = self._gear_to_kill(side, gear)
@@ -5576,6 +5584,8 @@ class GameLoop:
             if parsed["sacrifice"]:
                 # "Kill this" (a Gold token): off the board before the effect.
                 self._remove_gear(gear, ap)
+            if parsed["banish_self"]:
+                self._remove_gear(gear, ap, banish=True)      # "Banish this" (The Zero Drive)
             handler = EFFECT_REGISTRY.get(eff.effect)
             if handler is None:
                 return
@@ -5610,7 +5620,7 @@ class GameLoop:
             other = self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"])
             if other is not None:
                 self._exhaust(other)
-        self._recycle_from_trash(ap, parsed["recycle"])
+        self._recycle_from_trash(ap, parsed["recycle"], parsed["recycle_type"])
         self._pay_discard_and_banish(ap, parsed, unit)
         if parsed["spend_xp"]:
             self.gs.add_xp(side, -parsed["spend_xp"])
@@ -5993,13 +6003,19 @@ class GameLoop:
         ap = self.gs.get_player(side)
         return card in ap.base_gear or card in self._controlled_attached_gear(side)
 
-    def _recycle_from_trash(self, player: Player, n: int) -> None:
-        """Recycle n cards from the trash: to the bottom of the Main Deck."""
+    def _recyclable(self, player: Player, kind: Optional[str] = None) -> list:
+        """The trash cards a "Recycle N from your trash" cost may take, oldest
+        first; `kind` "unit": "Recycle a unit from your trash" (Assembly Rig)."""
+        from .effects import _zone_effect_card_ok
+        return [c for c in player.trash if kind is None or _zone_effect_card_ok(c, {"filter": kind})]
+
+    def _recycle_from_trash(self, player: Player, n: int, kind: Optional[str] = None) -> None:
+        """Recycle n cards (of `kind`) from the trash: to the bottom of the Main Deck."""
         moved = 0
-        for _ in range(n):
-            if player.trash:
-                player.deck.cards.insert(0, player.trash.pop(0))
-                moved += 1
+        for card in self._recyclable(player, kind)[:n]:
+            player.trash.pop(next(i for i, c in enumerate(player.trash) if c is card))
+            player.deck.cards.insert(0, card)
+            moved += 1
         if moved:
             self._note_recycled("A" if player is self.gs.A else "B")
 

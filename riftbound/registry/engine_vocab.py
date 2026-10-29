@@ -256,7 +256,7 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
     "energy", "power", "tap", "recycle", "sacrifice_self", "spend_xp",
     "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
-    "kill_other_token", "kill_other_friendly",
+    "kill_other_token", "kill_other_friendly", "recycle_type", "banish_self",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs

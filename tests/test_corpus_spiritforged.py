@@ -641,7 +641,9 @@ def test_arcane_shift_blinks_a_friend_hits_an_enemy_and_is_banished():
     enemy = _unit("Enemy", 9)
     loop.gs.battlefields[0].add_unit("B", enemy)
     _play_spell(loop, a, "Arcane Shift")
-    assert friend not in loop.gs.battlefields[1].units_A and any(u.card is friend.card for u in a.base_units)
+    # Played back where it was (a battlefield A controls): tests/test_g2_spiritforged.py.
+    back = loop.gs.battlefields[1].units_A
+    assert friend not in back and len(back) == 1 and back[0].card is friend.card and back[0].damage == 0
     assert enemy.damage == 3 and any(c.name == "Arcane Shift" for c in a.banished)
 
 

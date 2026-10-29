@@ -1469,7 +1469,12 @@ def _give_my_keywords(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     me = _source_unit(ctx)
     if me is None:
         return
-    keywords = list(me.card.keywords or []) + sorted(me.passive_keywords) + me.turn_keywords + me.granted_keywords
+    # Every keyword I have now, the granted ones too (§801.3: for the turn or
+    # this combat); each Svellsongur on me copies the printed ones.
+    copies = sum(1 for g in me.gear for e in getattr(g, "effects", []) or []
+                 if isinstance(e, dict) and e.get("effect") == "copy_unit_text")
+    keywords = list(me.card.keywords or []) * (1 + copies) + sorted(me.passive_keywords) + \
+        me.turn_keywords + me.granted_keywords + me.combat_keywords
     for unit in ctx.extra.get("it") or []:
         for kw in keywords:
             if kw.split()[0].upper() not in ("UNIQUE",):
@@ -3153,17 +3158,18 @@ def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         where = loop._locate_unit(unit)
         if dest == "same_location":
             return where[1] if where else None
-        if dest == "base":
+        if dest in ("base", "play_location"):
             return None
         return max(gs.battlefields, key=lambda bf: _attack_value(ctx, me, unit, bf))
 
-    if dest == "base":
+    def losing(u):
+        where = loop._locate_unit(u)
+        bf = where[1] if where else None
+        return bf is not None and sum(x.might for x in bf._units_for(ctx.opponent_side)) > \
+            sum(x.might for x in bf._units_for(me))
+
+    if dest in ("base", "play_location"):
         # "plays it to their base": save the unit losing its fight, else the mightiest.
-        def losing(u):
-            where = loop._locate_unit(u)
-            bf = where[1] if where else None
-            return bf is not None and sum(x.might for x in bf._units_for(ctx.opponent_side)) > \
-                sum(x.might for x in bf._units_for(me))
         unit = max(units, key=lambda u: (losing(u), u.might))
     else:
         unit = max(units, key=lambda u: (_attack_value(ctx, me, u, place(u)) if place(u) else 0, u.might))
@@ -3173,6 +3179,14 @@ def _blink_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if where is None:
         return
     side, src_bf = where
+    if dest == "play_location":
+        # "then its owner plays it", no place named (Arcane Shift): its base or
+        # a battlefield they control (§355.2.a), chosen; one it was alone at is
+        # still theirs (control is lost in the next cleanup, §190.4.c).
+        # Baseline: back where it was, unless it was losing its fight there.
+        options = [None] + [b for b in gs.battlefields if b.control() == side]
+        keep = src_bf if any(src_bf is o for o in options) and not losing(unit) else None
+        bf = loop.choose(_kind("destination", spec), side, options, keep, ctx.card)
     owner = gs.get_player(side)
     if src_bf is None:
         owner.base_units.remove(unit)
@@ -4655,6 +4669,12 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
     # Who moves (and chooses): the effect's controller, or "Choose an opponent.
     # They must move a unit they control" (Angler Wyrm: `mover` opponent).
     mover = them if str(spec.get("mover", "")) == "opponent" else me
+    if spec.get("any_number"):
+        # "Move any number of friendly units at a battlefield to their base"
+        # (Emperor's Divide): one choice per unit (baseline: all of them).
+        order = [(s, u) for s, u in order
+                 if loop.choose(_kind("optional", spec), mover, [True, False], True, u.card)]
+        loop._note_chosen(ctx.card, mover, [u for _s, u in order])
     if not scope_all:
         # Which unit(s): the baseline's priority order, one choice per unit.
         order = loop.choose_many(_kind("target", spec), mover, order, order[:count], ctx.card)
@@ -5232,6 +5252,10 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         best = max(keepable, key=lambda c: int(getattr(c, "might", 0) or 0))
         kept = ctx.loop.choose(_kind("keep", spec), ctx.actor_side, keepable, best, ctx.card)
         top.remove(kept)
+        if spec.get("reveal", not spec.get("must")):
+            # "You may reveal a unit from among them and draw it": it is revealed
+            # (Undertitan's ADD); "Put 1 into your hand" / "choose a card" isn't.
+            ctx.loop._note_revealed(ctx.actor_side, [kept])
         ctx.actor.hand.append(kept)
     if spec.get("rest") == "trash":
         ctx.actor.trash.extend(top)

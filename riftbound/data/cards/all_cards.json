@@ -11630,7 +11630,8 @@
           "power": 1,
           "recycle": 1,
           "tap": true,
-          "domain": "FURY"
+          "domain": "FURY",
+          "recycle_type": "unit"
         },
         "token_name": "Mech",
         "location": "base"
@@ -12386,7 +12387,8 @@
         "effect": "move_units_to_base",
         "trigger": "on_cast",
         "target": "friendly_unit",
-        "scope": "all"
+        "scope": "all",
+        "any_number": true
       }
     ]
   },
@@ -14093,7 +14095,7 @@
           "energy": 3,
           "power": 1,
           "domain": "MIND",
-          "sacrifice_self": true
+          "banish_self": true
         },
         "condition": {
           "type": "this_unattached"
@@ -17865,7 +17867,7 @@
         "effect": "blink_unit",
         "trigger": "on_cast",
         "timing": "action",
-        "destination": "base"
+        "destination": "play_location"
       },
       {
         "effect": "deal_damage",
@@ -33236,7 +33238,8 @@
         "effect": "dig",
         "trigger": "on_cast",
         "amount": 3,
-        "rest": "trash"
+        "rest": "trash",
+        "reveal": false
       }
     ],
     "variants": [
