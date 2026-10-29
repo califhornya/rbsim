@@ -298,7 +298,7 @@
         {
           "A": [],
           "B": [
-            "Yasuo Remorseful"
+            "Adaptatron"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -323,24 +323,23 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Adaptatron",
-          "Scuttle Crab"
+          "Yasuo Remorseful"
         ],
-        "deck": 23,
-        "energy": 11,
+        "deck": 24,
+        "energy": 8,
         "hand": 8,
         "power_pool": {
-          "CALM": 5,
+          "CALM": 2,
           "CHAOS": 6
         },
-        "runes_in_play": 11,
+        "runes_in_play": 8,
         "trash": 5
       },
       "points_A": 6,
       "points_B": 9,
       "spells_cast": 14,
       "turns": 18,
-      "units_played": 17,
+      "units_played": 16,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -431,13 +430,12 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful",
-            "Lonely Poro"
+          "A": [
+            "Traveling Merchant"
           ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": "A",
+          "last_controller": null
         },
         {
           "A": [
@@ -454,43 +452,44 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Ravenbloom Student"
+          "Ravenbloom Student",
+          "Vex Apathetic"
         ],
-        "deck": 19,
-        "energy": 12,
+        "deck": 18,
+        "energy": 2,
         "hand": 0,
         "power_pool": {
           "CHAOS": 7,
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 18
+        "trash": 17
       },
       "player_B": {
         "banished": 0,
         "base_gear": 2,
         "base_units": [
-          "Adaptatron",
-          "Stellacorn Herder"
+          "Yasuo Remorseful",
+          "Adaptatron"
         ],
-        "deck": 24,
+        "deck": 27,
         "energy": 0,
-        "hand": 5,
+        "hand": 6,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 1,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
-        "trash": 4
+        "runes_in_play": 7,
+        "trash": 2
       },
       "points_A": 8,
-      "points_B": 7,
+      "points_B": 6,
       "spells_cast": 14,
-      "turns": 17,
-      "units_played": 16,
+      "turns": 15,
+      "units_played": 14,
       "winner": "A",
       "xp_A": 0,
-      "xp_B": 1
+      "xp_B": 0
     },
     "spec": {
       "ai_a": "diana",
@@ -1361,7 +1360,7 @@
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "A"
+          "last_controller": null
         },
         {
           "A": [
@@ -1369,29 +1368,28 @@
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "A"
+          "last_controller": null
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 2,
+        "base_gear": 3,
         "base_units": [
           "Stellacorn Herder",
           "Lonely Poro",
-          "Stellacorn Herder",
           "Adaptatron",
           "Lonely Poro"
         ],
-        "deck": 20,
-        "energy": 12,
+        "deck": 19,
+        "energy": 3,
         "hand": 1,
         "power_pool": {
           "CALM": 6,
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 10
+        "trash": 11
       },
       "player_B": {
         "banished": 0,
@@ -1409,9 +1407,9 @@
         "runes_in_play": 7,
         "trash": 9
       },
-      "points_A": 9,
-      "points_B": 2,
-      "spells_cast": 15,
+      "points_A": 8,
+      "points_B": 4,
+      "spells_cast": 16,
       "turns": 21,
       "units_played": 20,
       "winner": "A",

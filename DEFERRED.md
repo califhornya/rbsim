@@ -344,7 +344,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   ("a battlefield that was uncontrolled": `Battlefield.prev_controller` set
   by Standard Moves), Riven Shattered, Jax Grandmaster at Arms, Arise!, Azir
   Sovereign. Left: Hextech Gauntlets (excess damage), Shady Spectacles and
-  Svellsongur (copies), Forge of the Fluft.
+  Svellsongur (copies; Svellsongur modeled 2026-10-29, BACKLOG E), Forge of
+  the Fluft.
 - [DONE] **Batch 8 (122 → 116): EMPOWER everywhere, and target filters.**
   **Bug: `target_filter` never reached the effect handlers** (it is a
   top-level spec field and `EffectSpec.merged_params()` left it out), so all
@@ -445,7 +446,7 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   (replacing a battlefield with a Brush token; modeled 2026-10-29, BACKLOG E)
   and Baron Pit (a token battlefield Baron Nashor adds; modeled 2026-10-29,
   BACKLOG E); Svellsongur (an Equipment copying its
-  unit's text); Void Hatchling (a replacement on every reveal); Hextech
+  unit's text; modeled 2026-10-29, BACKLOG E); Void Hatchling (a replacement on every reveal); Hextech
   Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
   baseline that converts would throw them away); Irelia Graceful (a spell's
   cost depending on what it will choose); Endless Riches (playing from the

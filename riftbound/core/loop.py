@@ -1252,8 +1252,9 @@ class GameLoop:
     ) -> None:
         """Fire a card's effects whose `trigger` matches (e.g. on_conquer,
         on_hold, on_attack, on_defend, on_death, on_start_of_turn, on_end_of_turn)."""
-        spec = CARD_REGISTRY.get(card.name)
-        effect_specs: list[EffectSpec] = list(spec.effects) if spec and spec.effects else []
+        dead = (context_extra or {}).get("died_card") is card
+        effect_specs: list[EffectSpec] = self._card_effects(
+            card, (context_extra or {}).get("died_gear") if dead else None)
         if not effect_specs:
             return
         context = EffectContext(self, card, actor, opponent, battlefield, dict(context_extra or {}))
@@ -1552,7 +1553,7 @@ class GameLoop:
             # [might]" (Leona Zealot), after every other Might change.
             for side in ("A", "B"):
                 n = sum(int(es.params.get("amount", 8)) for u in bf._units_for(side)
-                        for es in (CARD_REGISTRY[u.card.name].effects if u.card.name in CARD_REGISTRY else ())
+                        for es in self._card_effects(u.card, u.gear)
                         if es.effect == "stunned_enemies_here_minus")
                 if n:
                     for e in bf._units_for(self.gs.other(side)):
@@ -1609,12 +1610,12 @@ class GameLoop:
             self._apply_passive_grant(None, EffectContext(self, bf.card, actor, opponent, bf), es)
 
     def _apply_unit_passives(self, unit, side, bf, actor, opponent) -> None:
-        spec = CARD_REGISTRY.get(unit.card.name)
-        if not (spec and spec.effects):
+        effects = self._card_effects(unit.card, unit.gear)
+        if not effects:
             self._apply_equipment_conditions(unit, actor, opponent, bf)
             return
         context = EffectContext(self, unit.card, actor, opponent, bf)
-        for es in spec.effects:
+        for es in effects:
             if es.trigger != "passive":
                 continue
             if not self._check_condition(es.condition, unit.card, actor, opponent,
@@ -3361,8 +3362,7 @@ class GameLoop:
         cost extra ([rune] paid as Energy, as DEFLECT's surcharge is)."""
         total = 0
         for src, _bf in self._sources_in_play(self.gs.other(side)):
-            spec = CARD_REGISTRY.get(src.name)
-            for es in (spec.effects if spec else ()):
+            for es in self._card_effects(src):
                 if es.effect == "enemy_spell_tax":
                     total += int(es.params.get("amount", 1))
                     if self._is_empowered(src):
@@ -3384,8 +3384,7 @@ class GameLoop:
         for src, bf in self._sources_in_play(side) + self._battlefield_sources():
             if src is card:
                 continue
-            spec = CARD_REGISTRY.get(src.name)
-            for es in (spec.effects if spec else ()):
+            for es in self._card_effects(src):
                 if es.trigger != "cost_aura" or es.effect != "reduce_cost":
                     continue
                 if es.params.get("flow_only") and not flow:
@@ -3406,8 +3405,7 @@ class GameLoop:
         opponent = self.gs.get_player(self.gs.other(side))
         total = 0
         for src, bf in self._sources_in_play(side) + self._battlefield_sources():
-            spec = CARD_REGISTRY.get(src.name) if src is not card else None
-            for es in (spec.effects if spec else ()):
+            for es in (self._card_effects(src) if src is not card else ()):
                 if es.trigger == "cost_aura" and es.effect == "reduce_cost" and es.params.get("power") \
                         and _zone_effect_card_ok(card, {"target_filter": es.params.get("filter") or {}}) \
                         and self._check_condition(es.condition, src, actor, opponent,
@@ -4732,8 +4730,9 @@ class GameLoop:
             cost = self._equip_cost(gear)
             if cost is not None:
                 cost = dict(cost, energy=max(0, cost["energy"] - self._gear_ability_discount(side)))
+            # "Attach this gear to a unit you control" (§818.1.c.2): in base too.
             return (gear in ap.base_gear and cost is not None and self._can_pay_equip(ap, cost)
-                    and self._first_friendly_unit_on_board(side) is not None)
+                    and bool(self._friendly_units_of(side)))
         if entry["type"] == "flow":
             return self._can_pay_flow(ap, entry["card"], side) and \
                 self._spell_has_targets(entry["card"], side, self._zone_play_lane())
@@ -5145,17 +5144,15 @@ class GameLoop:
             gear = entry["gear"]
             cost = self._equip_cost(gear)              # the EQUIP-ability cost (§744)
             cost = dict(cost, energy=max(0, cost["energy"] - self._gear_ability_discount(side)))
-            target_unit = self._first_friendly_unit_on_board(side)
             if not self._pay_equip(ap, cost):
                 return
             self._note_gear_ability(side)
-            # A cost that kills a friendly unit may have taken that one.
-            if self._locate_unit(target_unit) is None:
-                target_unit = self._first_friendly_unit_on_board(side)
-                if target_unit is None:
-                    return
-            target_unit = self.choose("equip", side, self._friendly_units_of(side),
-                                      target_unit, gear)
+            # A cost that kills a friendly unit may have taken one.
+            units = self._friendly_units_of(side)
+            if not units:
+                return
+            target_unit = self.choose("equip", side, units,
+                                      self._first_friendly_unit_on_board(side) or units[0], gear)
             ap.base_gear.remove(gear)
             target_unit.gear.append(gear)
             if self.verbose:
@@ -5492,7 +5489,8 @@ class GameLoop:
                                        "died_might": dead_unit.might,
                                        "died_empowered": dead_unit.empowered,
                                        "died_in_combat": in_combat,
-                                       "died_card": dead_unit.card},
+                                       "died_card": dead_unit.card,
+                                       "died_gear": list(dead_unit.gear)},
                     )
             dead_unit.gear = []
             bonus = dead_unit.death_bonus
@@ -5588,8 +5586,7 @@ class GameLoop:
         for src, _bf in self._sources_in_play(side):
             if src in ap.base_gear and self._equip_cost(src) is not None:
                 continue
-            spec = CARD_REGISTRY.get(src.name)
-            total += sum(int(es.params.get("amount", 1)) for es in (spec.effects if spec else ())
+            total += sum(int(es.params.get("amount", 1)) for es in self._card_effects(src)
                          if es.trigger == "passive" and es.effect == "spell_bonus_damage")
         return total
 
@@ -5821,6 +5818,24 @@ class GameLoop:
         other = self.gs.other(side)
         return any(self._has_effect(u.card, "warden_no_ready")
                    for bf in self.gs.battlefields for u in bf._units_for(other))
+
+    def _card_effects(self, card: Card, worn=None) -> list:
+        """A card's abilities: its spec's effects, repeated once more for each
+        Svellsongur on the unit that is this card ("As this is attached to a
+        unit, copy that unit's text to this Equipment's effect text": a copy
+        effect, §479.1; effect text is appended to the unit's, §136.2.c, so the
+        unit has each ability twice: triggers fire twice, passives and auras
+        count twice). `worn`: the gear of a unit that just died (off the board;
+        its DEATHKNELL uses what it had, §808.1.d.3)."""
+        spec = CARD_REGISTRY.get(card.name)
+        effects = list(spec.effects) if spec and spec.effects else []
+        if not effects:
+            return effects
+        if worn is None:
+            unit = self._find_unit_by_card(card)
+            worn = unit.gear if unit is not None else ()
+        copies = sum(1 for g in worn if self._has_effect(g, "copy_unit_text"))
+        return effects * (1 + copies)
 
     @staticmethod
     def _has_effect(card: Card, verb: str) -> bool:

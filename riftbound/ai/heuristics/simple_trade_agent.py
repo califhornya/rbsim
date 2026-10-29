@@ -339,7 +339,7 @@ class SimpleTradeAgent(Agent):
                     gear.cost_energy, gear.cost_power, gear.cost_power_domain
                 ):
                     continue
-                if loop._first_friendly_unit_on_board(my_side) is None:
+                if not loop._friendly_units_of(my_side):
                     continue
                 return ("ABILITY", "ACTIVATED", idx)
             parsed = loop._parse_activated_cost(entry["eff"].cost)

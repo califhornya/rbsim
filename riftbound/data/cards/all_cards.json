@@ -12972,7 +12972,12 @@
     "keywords": [
       "EQUIP 1"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "copy_unit_text",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-060",

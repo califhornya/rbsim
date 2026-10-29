@@ -317,6 +317,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "no_damage_outside_combat", "gangplank_redirect", "unmovable_by_enemies", "cant_be_countered",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
+    "copy_unit_text",           # Svellsongur: GameLoop._card_effects, UnitInPlay.keyword_value
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)
     "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",

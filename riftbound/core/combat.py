@@ -158,8 +158,11 @@ class UnitInPlay:
 
     def keyword_value(self, keyword: str) -> int:
         """Printed or passive value, plus every instance effects gave it (two
-        "give it ASSAULT 2" add up, §807)."""
-        base = self.card.keyword_value(keyword)
+        "give it ASSAULT 2" add up, §807). Each Svellsongur on it copies the
+        printed keywords too (a second ASSAULT 2 from another source: §807.2)."""
+        copies = sum(1 for g in self.gear for e in getattr(g, "effects", []) or []
+                     if isinstance(e, dict) and e.get("effect") == "copy_unit_text")
+        base = self.card.keyword_value(keyword) * (1 + copies)
         kw = keyword.upper()
         passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
         given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords,

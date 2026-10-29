@@ -413,8 +413,22 @@ tests/test_corpus_vendetta.py.
   GANKING needed (`_can_move_bf_to_bf`); the Pit stays when Baron leaves. His
   card is in one zone (KNOWN_ISSUES fixed; the invariants test asserts it).
   Tests in tests/test_baron_nashor.py.
+- [DONE] Svellsongur: "copy that unit's text to this Equipment's effect
+  text" (a copy effect, §479.1; effect text is appended to the unit,
+  §136.2.c), so while attached its unit has each of its own abilities once
+  more per Svellsongur (`GameLoop._card_effects`; two copy the printed text
+  twice, not each other). Triggers fire twice (DEATHKNELL too: the dying
+  unit's gear is passed as `died_gear`), passives and auras count twice
+  (cost auras, spell bonus damage, enemy spell tax), printed ASSAULT /
+  SHIELD / DEFLECT add up (`UnitInPlay.keyword_value`). Not covered: copied
+  activated abilities are not listed twice (only a "once per turn" one would
+  give a second use), a passive keyword grant stays one instance, "trigger an
+  additional time" passives (Karthus) don't stack. Found on the way: EQUIP
+  needed a non-token unit at a battlefield; it now attaches to any unit you
+  control, base too (§818.1.c.2; golden regenerated). Tests in
+  tests/test_svellsongur.py.
 
-Svellsongur, Void Hatchling, Irelia
+Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
 units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
