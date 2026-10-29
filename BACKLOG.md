@@ -192,7 +192,7 @@ Fixed:
 
 Open, found on the way:
 - Jhin Meticulous Killer: "you may play me for [mind]" (an alternative cost
-  in a domain the play path can't charge yet).
+  in a domain the play path can't charge yet). Moved to G2.
 - [x] The "look at the top cards" family (`dig`): the kept card is a "you
   may" now (`must` for Stacked Deck, Apprentice Smith, Encore); Reinforce and
   Rek'Sai Swarm Queen play a card from among them (new `look_play`: paid,
@@ -217,8 +217,8 @@ Open, found on the way:
   of Aeons, Atakhan's attack (the defender picks), Diana Lunari (PREDICT
   first), Jinx Rebel (once per discard: GameLoop._discard_event). Neeko
   Blending In is in E.
-- Open: Jhin Meticulous Killer's alternative cost. (Atakhan's additional
-  cost: done, see E.)
+- Open: Jhin Meticulous Killer's alternative cost: moved to G2. (Atakhan's
+  additional cost: done, see E.)
 - [x] Origins (293 cards) read; 50 fixed, each tested (tests/test_corpus_origins.py).
   Never worked before: Time Warp's extra turn, Zhonya's Hourglass (gear in
   base), Sett The Boss's save, Unlicensed Armory, Bullet Time (X Power),
@@ -532,3 +532,106 @@ domains: an agent may try a card it can't pay, a no-op that ends its turn).
 The heuristic agents check a card's printed cost, not what it costs now: they
 never play a spell only Seraphine Starry-Eyed Songstress's [2] less pays for
 (nor one any other reduction makes affordable).
+
+From the re-check of the old notes (2026-10-29, G):
+- Hiding the champion (§737.1.b, the engine allows it) has no slot in the
+  net's action space.
+- The net-guided search decides only the first choice of an action, none while
+  defending, none of the hidden ones (dig, predict).
+- Coach: the mulligan and the choices made during the opponent's moves aren't
+  coached; the coach page for two facedown cards (B8) and Neeko's legends (B16)
+  isn't visually checked.
+- Stepwise engine for deep MCTS trees (KNOWN_ISSUES): only if the search needs
+  it.
+- Match: learned sideboarding; the battlefield chooser sees only its own
+  battlefields (not the opponent's left, not the match history); a stronger
+  battlefield signal; the mulligan and the battlefield in the learned decision
+  space; `MINUTES_PER_TURN` (core/match.py) needs real turn times (from the
+  user).
+
+## G. Old notes re-checked (2026-10-29): what is still open
+Every OPEN / DEFERRED / "Left" / approximation entry in KNOWN_ISSUES.md and
+DEFERRED.md, checked against the code and the card data. Those already fixed
+(mostly by A-D) are marked CLOSED there (list at the end). Order: G before F
+(the engine first, then the AI's choices).
+
+### G1. Engine bugs (seen in the code)
+- [ ] Units dying in base count as dying at battlefield 0: `_route_deaths` is
+  called without `in_base` for TEMPORARY in base (loop.py), Bottled
+  Constellation's sacrifice (effects.py `sacrifice_for_points`) and
+  `kill_friendly` (effects.py); the Storm Raptor check (`if
+  dead_unit.stunned` in `_route_deaths`) isn't gated by `in_base`. "Here"
+  death triggers (Black Rose Sanctum, Storm Raptor, Detonation Amplifier's
+  doubled DEATHKNELL here) can fire for a death in base.
+- [ ] Base units' passives use battlefield 0 as "here" (`anchor` in the unit
+  passives pass, loop.py): "your units here ..." from a unit in base (Alpha
+  Wildclaw) reaches battlefield 0's units instead of the base. Confirm with a
+  test first.
+- [ ] PREDICT 2+ (effects.py `_predict`): never recycles, no choice; it sorts
+  the top cards by Might. Rules: look at N, recycle any of them, put the rest
+  back in any order.
+- [ ] Cost extras (KNOWN_ISSUES #27): what a card lets you spend to cost less
+  (Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's
+  buffs, Commander Ledros's tokens, Poppy's XP, Wallop's buff) applies from
+  the hand only (rules: any zone, §356.2), and a play through an effect (Here
+  to Help, `_reveal_play_for` mode "reduce", `_play_from_zone` with
+  `pay_cost`) takes the discount without spending them. Fix: choose and spend
+  them in `_pay_card`, as Atakhan's kill does.
+
+### G2. Card approximations (data unchanged since DEFERRED "Corpus pass")
+- [ ] Origins: Fading Memories (can't choose a gear), Pack of Wonders (units
+  only, not gear or facedown cards), Facebreaker (the two units needn't share
+  a battlefield), Miss Fortune Captain (readies units only, not "something
+  else"), Malzahar Fanatic (the cost kills tokens only), Commander Ledros
+  (kills tokens only), Sivir Battle Mistress (fires at the next state refresh
+  after the Power payment).
+- [ ] Spiritforged: Emperor's Divide (moves all, not "any number"), Assembly
+  Rig (recycles any card, not a unit from the trash), Arcane Shift (comes back
+  to base, no choice), The Zero Drive (to the trash, not banished), Kato the
+  Arm (also lends keywords given for the turn), counters that "choose" read
+  spells' declared choices only (not abilities'), Undertitan's ADD on "you may
+  reveal a unit from among them".
+- [ ] Unleashed: Iascylla (moves at once, not at the start of your next Main
+  Phase), Undying Loyalty ([2] less for a Bird / Cat / Dog / Poro: missing),
+  Hextech Gauntlets (Equip cost not reduced by the unit's Might), Dancing
+  Grenade (replays inside the first cast, no responses between), Crescent
+  Guardian ([chaos] payable with no spell played), Death from Below
+  (replayable later in the turn, not only right after).
+- [ ] Vendetta: Nasus Curator of the Sands (not on activated abilities costing
+  [7]+), Tail-Cloaked Matriarch (reads the unit from your trash), Decree of
+  Focus (spells' choices only, not abilities'), Bottled Constellation (start of
+  turn, not the Main Phase: `on_start_of_main` exists now), Sanction (empowers
+  a friendly / disempowers an enemy unit only; text: any unit).
+- [ ] Others: Jhin Meticulous Killer ("you may play me for [mind]": not
+  encoded, from D), Hunters' Circle (not on AMBUSH / REACTION units played in
+  a showdown), Abandoned Hall / Forgotten Library ("spent" counts Energy, not
+  Power), Master Yi Wuju Bladesman / Forbidding Waste (combat damage only, not
+  MIGHTY checks during the combat), Resonating Strike ("a unit at a different
+  location": check).
+
+### G3. Rules systems
+- [ ] Control (§190.4): a side moving alone onto an uncontrolled battlefield
+  controls it at once (rules: after its showdown); a holder whose units all
+  die mid-showdown loses control at once (rules: at the end of the combat
+  steps).
+- [ ] Declared choices: a later instruction's choice is made after the earlier
+  ones resolved on the copy (it can't name a unit the first one kills).
+- [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
+  Graceful's discount can't be played; "if you spent [N]" sees the Energy
+  before her discount.
+- [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
+  don't see a unit gear); Svellsongur (copied activated abilities aren't
+  listed twice, a passive keyword grant stays one instance, Karthus-style
+  "additional time" doesn't stack).
+
+Closed in KNOWN_ISSUES / DEFERRED (fixed earlier, now marked): EQUIP's own
+cost (`_equip_cost`); resolved spells to the trash (#19a); 0b malformed specs;
+0c parser notes; #1 cost keys; #2 multiple kickers (C); #3 discard semantics;
+#4 / #10 cost auras; #5 buff vs modifier; #6 location filters; #7 gear
+triggers and keywords; #8 recall (B); #11 all_units_here (B); #13 Cursed
+Sarcophagus; #17 kill_gear; #19b FLOW; #20 EMPOWERED "instead", on-burn,
+stacking EMPOWER; #22, #23 HIDDEN (C); Gem Jammer this turn; activated costs'
+Power domain; Diana Lunari; the Radiance DEPLOY list; Hextech Anomaly; batches
+1-12 "Left" items (D); FAQ Angler Wyrm, Gravity Field, Mobilize, Kharox,
+Hunters' Circle + Baron; Bo1 setup and the single-game turn guard (C);
+targeting baseline (effects ask the player).

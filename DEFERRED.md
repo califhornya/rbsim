@@ -4,6 +4,11 @@ Snapshot of everything intentionally left behind as of the Stage 0.5 + RL-env-
 skeleton milestone. Grouped by area; engine items cross-reference `KNOWN_ISSUES.md`.
 Nothing here is a blocker for what's already shipped — these are the next chunks.
 
+**Status 2026-10-29:** every open entry below was re-checked against the code.
+What is still open is in BACKLOG.md section G (engine, cards, rules) or F (AI,
+net, coach) and is marked here; the rest is marked [CLOSED 2026-10-29]. This file is
+history now: new work goes in BACKLOG.md.
+
 ## Meta-deck cards still INERT — NONE (all done)
 - [DONE] **Diana Scorn of the Moon** & **Ornn Fire Below the Mountain** (legends) —
   the earmarked-resource subsystem is implemented: `Player.earmarked_energy_showdown`
@@ -14,6 +19,7 @@ Nothing here is a blocker for what's already shipped — these are the next chun
   `_run_showdown`; optional pay [1] → `reveal_top_draw_if_spell`. Golden regenerated
   (diana deck); conservation/invariants intact. `tests/test_diana_lunari.py`.
   Simplification: the PREDICT-recycle half is not modeled (the reveal-draw is).
+  [CLOSED 2026-10-29] PREDICT first now (BACKLOG D).
 - **Result: 0 meta INERT cards remain.** Every meta deck is fully modeled.
 
 ## Mechanics gate — remaining backlog (see MECHANICS.md for the full burn-down)
@@ -51,7 +57,7 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
 (non-meta empty-effects cards), which needs an API key; it does not gate the meta.
 
 ## Engine mechanics (KNOWN_ISSUES)
-- **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`
+- [CLOSED 2026-10-29] **`aura:reduce_cost` primitive** — the engine applies `reduce_cost`/`cost_modifier`
   only to the card being played (self-cost, `loop.py:878`); it has no AURA form that
   reduces the cost of *other* cards while a source is in play. So cards like Eager
   Apprentice ("spells you play cost [1] less"), Herald of Scales, Vex, Marai Spire,
@@ -60,15 +66,15 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   Eager Apprentice sits in the golden Diana deck, so this is a fidelity gap there.
   Fix = an aura pass at cost-computation time that scans in-play sources; then re-parse
   these cards to the aura form. Also enables `aura:reduce_cost` from suggested_vocab.
-- **FLOW play-from-trash + banish** (#19b) — trash is now populated; still needs the
+- [CLOSED 2026-10-29] **FLOW play-from-trash + banish** (#19b) — trash is now populated; still needs the
   from-trash play action + banish-after-resolve.
-- **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
+- [CLOSED 2026-10-29] **EMPOWERED-modifier / on-become-empowered / on_burn** (#20) — mostly non-meta
   corpus cards; value-swap in `_amount`, a trigger after `player.burn`.
-  Radiance adds stacking EMPOWER (§442.1.c.1 / §827.1.c.5) — currently binary.
+  Radiance adds stacking EMPOWER (§442.1.c.1 / §827.1.c.5) — now `empower_times`.
 - **Radiance keywords (2026-10-24, CORE_RULES.md)** — engine support added
   2026-10-24 (see MECHANICS 830–832); Radiance effects[] still to be parsed:
   - [DONE] **DISARM X** (§831), **SHOW OFF** (§832).
-  - [PARTIAL] **DEPLOY** (§830) + Bomb token (RAD-T02, §187.12). Still missing:
+  - [CLOSED 2026-10-29] **DEPLOY** (§830) + Bomb token (RAD-T02, §187.12). Still missing:
     "Friendly DEATHKNELLs here trigger twice" (RAD-017 Detonation Amplifier), "when
     you win a combat here" (RAD-024), "when one or more friendly units attack here"
     (RAD-156), Deploy gear that become units (RAD-146 The Ball: done 2026-10-29), "your gear with
@@ -117,9 +123,9 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
 - [DONE] **`enters_exhausted`** (#21) — units already enter exhausted per §142.4
   (UnitInPlay.ready defaults False, all deploy paths use it); and "This enters
   exhausted" gear now enters tapped. KNOWN_ISSUES #21 marked RESOLVED.
-- **AMBUSH nested showdown** (#22) — an AMBUSH deploy into a contested lane sets the
+- [CLOSED 2026-10-29] **AMBUSH nested showdown** (#22) — an AMBUSH deploy into a contested lane sets the
   contested flags but doesn't itself spawn a nested showdown.
-- **HIDDEN nuances** (#23) — champion-zone hiding (Pyke); from-Hidden targeting
+- [CLOSED 2026-10-29] **HIDDEN nuances** (#23) — champion-zone hiding (Pyke); from-Hidden targeting
   restriction (on-play effects lane-restricted).
 - [DONE] **`grant_*` verb misparses** — fixed the 5 cards: Blood Rush → LIVE
   (`give_temporary_assault`), Gem Jammer → LIVE (`give_keyword` GANKING; permanent
@@ -159,7 +165,7 @@ MECHANICS.md is DONE.** The only remaining corpus work is the long-tail parse be
   little — reserve Opus (if ever) for a small, curated set of cards you have a
   specific reason to believe are model-misses rather than vocab gaps. Prioritize
   any card that enters a meta deck.
-- **Meta INERT (2 left, need subsystems):** Diana Scorn / Ornn legends (earmarked-
+- [CLOSED 2026-10-29] **Meta INERT (2 left, need subsystems):** Diana Scorn / Ornn legends (earmarked-
   resource: energy only in showdowns / power only for gear) and Diana Lunari
   (showdown-begin predict/draw on the golden champion → golden regen).
 
@@ -173,20 +179,20 @@ converted to 45 turns at an estimated 1⅓ minutes per turn. When it runs out, +
 turns, then a 2-point lead wins the game or it's a draw, and the match ends.
 Riftbound has no turn limit; the per-game `max_turns` is a stall guard that counts
 as the time running out. Left:
-- **Recalibrate the clock** (`MINUTES_PER_TURN` in `core/match.py`) when real turn
+- [→ BACKLOG F] **Recalibrate the clock** (`MINUTES_PER_TURN` in `core/match.py`) when real turn
   counts or game durations are known. With it, `simple_trade` mirrors over all repo
   decks (280 matches): 11 of 44 game-3s go to time; 71 matches end by time, most
   of them from AI stalls hitting the 40-turn guard.
 - [DONE 2026-10-25] **AI stalls.** Were 53 of 420 `simple_trade` mirror games
   (12.6%) at the 40-turn guard; 0 of 420 after token units could move and fight
   and the duplicate movement handlers were removed.
-- **Learned sideboarding.** Today's policies are "keep the registered list" and
+- [→ BACKLOG F] **Learned sideboarding.** Today's policies are "keep the registered list" and
   "follow the deck's fixed plans"; a net-guided policy (like the battlefield
   chooser in `ai/pregame.py`) is future work.
-- **Richer battlefield chooser input.** The chooser sees its own available
+- [→ BACKLOG F] **Richer battlefield chooser input.** The chooser sees its own available
   battlefields only, not the opponent's remaining ones or the match history.
-- **Best-of-1 setup variant** (TR 406.1.h): not modeled.
-- **Single games** (CLI, self-play, RL env) still score the 40-turn guard as "any
+- [CLOSED 2026-10-29] **Best-of-1 setup variant** (TR 406.1.h): not modeled.
+- [CLOSED 2026-10-29] **Single games** (CLI, self-play, RL env) still score the 40-turn guard as "any
   lead wins"; only matches apply the time-limit rule.
 
 ## Engine audit (2026-10-25) — found while starting the inert-card pass
@@ -207,7 +213,7 @@ Seals added energy or crashed; floating Power. Still open, in this order:
   turn. Still approximate: Showstopper/Resonating Strike buff a unit other
   than the one moved, Call to Battle's opponent half, Akshan's gear move,
   Loyal Pup (on_defend from base), Possession (bounces instead of stealing).
-- **Targeting baseline.** Effects pick the first unit at the effect's
+- [CLOSED 2026-10-29] (effects ask the player; see Engine choices) **Targeting baseline.** Effects pick the first unit at the effect's
   battlefield (never base or other battlefields) instead of a real choice.
 - [DONE] **Spell damage stays** until a combat ends or the turn ends
   (§468.1.a.1 / §317.2.b). Also: attackers are recalled when defenders survive
@@ -439,7 +445,7 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   Reflection, Ancient Henge (1 Energy → 1 Power per use), Chronobreak (one
   generic Power per damaged unit or unit with a play effect), Mystic Reversal
   (the opponent's latest spell on the chain resolves as ours).
-- **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
+- [CLOSED 2026-10-29] (all modeled, BACKLOG E) **Not modeled (11 INERT), and why:** Bandle Tree and Bushwhack Trap (a
   second facedown card at a battlefield: the Facedown Zone holds one; modeled
   2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit;
   modeled 2026-10-29, BACKLOG E); Ivern Green Father
@@ -484,7 +490,7 @@ and replays sampled choices with each alternative forced to measure the baseline
   value-equality (#25), effect-made Bomb tokens were the registry spec (a "return
   all" put it in a hand: crash), EQUIP with a kill cost could attach to the
   killed unit; optional effects are asked only once their condition holds.
-- **Still weak:** `equip` (first non-token unit on a battlefield; about as good
+- [→ BACKLOG F] **Still weak:** `equip` (first non-token unit on a battlefield; about as good
   as a random pick, the only clearly positive gain left, +1.5 points per game),
   effect-move targets (Yasuo Unforgiven, Ride the Wind), discards (first card in
   hand / cheapest), the "you may" additional cost is always paid. The audit's
@@ -531,7 +537,8 @@ tests/test_declared_targets.py):
 
 ## Corpus pass (BACKLOG D, 2026-10-28)
 Progress and fixes are in BACKLOG.md section D; the approximations left are
-listed here.
+listed here. [2026-10-29: the ones still open are in BACKLOG.md G2 / G3; the
+baselines ("always taken when possible") in F.]
 - Control (§190.4): `Battlefield.control()` keeps the holder in control while
   both sides have units. A side that moves alone onto an uncontrolled
   battlefield controls it at once (rules: after its showdown ends), and a
@@ -602,7 +609,7 @@ Fixed (2026-10-27, tests/test_radiance_faq.py):
   keeps the card playable through your next turn.
 
 Divergences to fix:
-2. **Angler Wyrm**: encoded as *you* moving an enemy unit. FAQ: the chosen
+2. [CLOSED 2026-10-29] (fixed) **Angler Wyrm**: encoded as *you* moving an enemy unit. FAQ: the chosen
    opponent picks and moves one of *their* units that can actually move (can't pick
    a Hunker Down'd one if another can move; no movable unit → instruction negated);
    they pay any move tax (Gravity Field) themselves, and if they won't, no move.
@@ -617,7 +624,7 @@ Rulings on card text not yet implemented (apply when implementing):
 - [DONE 2026-10-29] **Kharox + Neeko, Blending In**: opponent playing your Neeko from
   your trash adds one of *their own* deckbuilding legends (only if their deck/sideboard
   has a Neeko). Tests in tests/test_neeko_blending_in.py.
-- **Mobilize / Catalyst of Aeons + Seraphic Wyvern**: "if you couldn't channel"
+- [CLOSED 2026-10-29] (fixed) **Mobilize / Catalyst of Aeons + Seraphic Wyvern**: "if you couldn't channel"
   refers only to the spell's own channel; Wyvern's extra rune failing doesn't make
   you draw (§359.3.e.14.c). Missing: the draw clause; Wyvern applies only to the
   Beginning-Phase channel, not to spell channels.
@@ -625,12 +632,12 @@ Rulings on card text not yet implemented (apply when implementing):
   (kill a friendly unit), so that unit isn't in the trash yet for Mordekaiser, Iron
   Revenant (§357.1-2). Additional cost implemented (BACKLOG E); tests in
   tests/test_atakhan_mordekaiser.py.
-- **Gravity Field**: tax not implemented. Paid by whoever is instructed to move, if
+- [CLOSED 2026-10-29] (fixed) **Gravity Field**: tax not implemented. Paid by whoever is instructed to move, if
   they're an opponent of the Field's controller (Charm: the caster pays if the
   Field is the opponent's; Angler Wyrm: the moving opponent pays). Standard Move:
   can't be attempted if the move/cost is impossible; declining the cost undoes it
   (unit not exhausted).
-- **Ekko, Revolutionary + Possession**: not in the corpus. Ruling: you can use his
+- [N/A: not in the corpus] **Ekko, Revolutionary + Possession**: not in the corpus. Ruling: you can use his
   banish-and-replay ability and you control him when he returns (§378, §191.2).
 
 Not verified (check when touching these cards):

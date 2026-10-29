@@ -1,5 +1,9 @@
 # Known Issues
 
+Status 2026-10-29: every entry was re-checked against the code. What is still
+open is in BACKLOG.md section G (or F for the AI); the rest is marked CLOSED,
+FIXED or RESOLVED.
+
 Out-of-scope findings logged here instead of being fixed inline (per brief v3
 convention). Each entry: what, where, why deferred.
 
@@ -20,7 +24,8 @@ convention). Each entry: what, where, why deferred.
   use that helper so they don't propose impossible moves. Regression: `tests/test_no_hang.py`.
 - After the fix: 100 seeded games in 0.2s, 0 hangs, avg 14.3 turns.
 
-### (DEFERRED) Gear collapses play-cost and equip-cost
+### (CLOSED 2026-10-29) Gear collapses play-cost and equip-cost
+- **Closed:** EQUIP has its own cost (`GameLoop._equip_cost`), separate from the play cost.
 - The engine pays EQUIP from the gear card's `cost_energy`/`cost_power` fields
   (`loop.py` equip branch), the SAME fields used to play the gear from hand — so
   a gear's printed EQUIP cost (e.g. `EQUIP [1][fury]` = 2) is not modeled
@@ -36,7 +41,8 @@ convention). Each entry: what, where, why deferred.
 
 ## Step 2 findings (surfaced by the parity-oracle / invariant work)
 
-### (DEFERRED) Resolved spells are never put into the trash
+### (CLOSED 2026-10-29) Resolved spells are never put into the trash
+- **Closed:** fixed, see #19 (a).
 - **Where:** `loop.py` `_run_chain` resolution loop (~:1407-1422) and the main-phase
   SPELL branch (`_apply_action`, ~:914-919). A cast spell is removed from hand and
   placed on the chain; after its effects resolve, the card is dropped — it is never
@@ -58,6 +64,7 @@ convention). Each entry: what, where, why deferred.
   once. `tests/test_invariants.py` now asserts "one card, one zone".
 
 ### (DEFERRED) A spell's cost is paid before its choices (Irelia Graceful, DEFLECT)
+- **Tracked in BACKLOG.md G3.**
 - Rules (§355-357): choices first, then the total cost, then pay. The engine pays
   the cost, then the spell chooses (on the chain, or as it resolves in a
   lookahead); target-dependent costs are settled then: DEFLECT's [rune] paid,
@@ -66,6 +73,7 @@ convention). Each entry: what, where, why deferred.
   "when you play a spell, if you spent [N]" sees the Energy before it.
 
 ### (DEFERRED) No stepwise engine → MCTS can't expand arbitrary mid-game nodes
+- **Tracked in BACKLOG.md F** (only if the search needs it).
 - **What:** the pausable-engine work (Step 2) delivered `GameState.clone()`,
   `legal_actions()`, `determinize()`, and a thread-backed `SessionDriver`. Those
   cover MCTS **1-ply / full-rollout** search (clone → `_apply_action` → evaluate)
@@ -95,7 +103,8 @@ convention). Each entry: what, where, why deferred.
   `_resolve_card_effects` is wrapped in try/except (`[EFFECT-SKIP]` verbose log)
   so one malformed spec can't abort a match.
 
-## 0b. Six cards have malformed on_play/on_cast specs (now skipped, not crashing)
+## 0b. (CLOSED 2026-10-29) Six cards have malformed on_play/on_cast specs (now skipped, not crashing)
+**Closed:** re-checked against the code and data, the six specs resolve.
 The corpus crash-check surfaced 6 cards whose effects raise during resolution —
 now caught by the resilience guard above, but the underlying spec/handler
 mismatch should be fixed (good spot-check / Phase-C candidates):
@@ -107,7 +116,8 @@ mismatch should be fixed (good spot-check / Phase-C candidates):
 Fix path: either teach the handler/`_player_for_target` to accept these targets
 (engine) or correct the parsed spec (re-parse with a sharper prompt).
 
-## 0c. Spot-check findings (round 1, 28/30 reviewed, 75% OK+MINOR)
+## 0c. (CLOSED 2026-10-29) Spot-check findings (round 1, 28/30 reviewed, 75% OK+MINOR)
+**Closed:** parser notes; the corpus was then read and fixed by hand (BACKLOG D).
 Recurring parser errors identified from the human verdicts in
 `scripts/spot_check_results.md`. Each is being addressed by a few-shot example in
 `build_system_prompt` for the next re-parse:
@@ -136,7 +146,8 @@ Recurring parser errors identified from the human verdicts in
   fixed might/keywords — `play_token` spec should just name the token, not
   duplicate its stats (Viktor Herald of the Arcane, Sprite Queen, Sprite Fountain).
 
-## 1. Activated-cost keys: engine parses 6, brief claimed 10
+## 1. (CLOSED 2026-10-29) Activated-cost keys: engine parses 6, brief claimed 10
+**Closed:** the cost keys are the ones the engine parses (`engine_vocab`).
 - **Where:** `riftbound/core/loop.py` `_parse_activated_cost` (~:1019-1047).
 - **What:** the v3 brief's "Stato attuale" lists 10 accepted cost keys
   (`energy, power, tap, exhaust, exhaust_self, recycle, recycle_from_trash,
@@ -149,7 +160,8 @@ Recurring parser errors identified from the human verdicts in
   `cost:exhaust_self`, `cost:recycle_from_trash`). Extend the engine + the
   frozenset together if these cross a frequency threshold at re-parse.
 
-## 2. Multiple kickers per card — rules unclear (brief open Q2)
+## 2. (CLOSED 2026-10-29) Multiple kickers per card — rules unclear (brief open Q2)
+**Closed:** multiple additional costs done (BACKLOG C).
 - **What:** the planned B1 `_try_pay_additional_costs` pays only the first
   affordable `additional_cost` (one kicker per card). Do the Riftbound rules
   allow multiple kickers on one card?
@@ -157,7 +169,8 @@ Recurring parser errors identified from the human verdicts in
   ships the PDF, not the markdown the brief references.
 - **Status:** unresolved; resolve before implementing B1.
 
-## 3. `you_discarded_card_this_turn` semantics — active vs passive (brief open Q3)
+## 3. (CLOSED 2026-10-29) `you_discarded_card_this_turn` semantics — active vs passive (brief open Q3)
+**Closed:** any discard of yours counts, consistently across the cards.
 - **Where:** `loop.py` `_check_condition` (`you_discarded_card_this_turn`, ~:610)
   reads `gs.discarded_this_turn`.
 - **What:** unclear whether this should fire only on a discard the player chose
@@ -166,7 +179,8 @@ Recurring parser errors identified from the human verdicts in
 - **Status:** flag for rules clarification; revisit if a card depends on the
   distinction.
 
-## 4. `reduce_cost` auras on other cards not dispatched
+## 4. (CLOSED 2026-10-29) `reduce_cost` auras on other cards not dispatched
+**Closed:** cost auras on other cards are applied (`GameLoop._aura_reduction`).
 - **Where:** `loop.py` `_cost_reduction` (:617-634) applies `reduce_cost` only as
   a flat discount to the card that owns the effect.
 - **What:** "Spells you play cost [1] less" style auras affecting OTHER cards are
@@ -174,7 +188,8 @@ Recurring parser errors identified from the human verdicts in
   `aura:reduce_cost` in suggested_vocab so we can measure coverage before
   building the general dispatch (out of scope for v3 phase A).
 
-## 5. BUFF (object) vs raw might modifier — engine conflates them (found in spot-check R2)
+## 5. (CLOSED 2026-10-29) BUFF (object) vs raw might modifier — engine conflates them (found in spot-check R2)
+**Closed:** buff and might modifier are separate verbs; no card removes a buff as an effect.
 - **What:** English "buff" collapses two DIFFERENT Riftbound concepts:
   1. A **Buff** = a specific object placed on a unit, **max 1 per unit, non-stacking**,
      spendable, checkable (`is_buffed`). Example: **Arena Bar**.
@@ -214,7 +229,8 @@ Recurring parser errors identified from the human verdicts in
   - Tests: raw grant_might +/- must NOT set is_buffed; buff_unit must; debuff_unit
     removes a buff from an enemy unit without being a cost.
 
-## 6. No location filter on targets — "at a battlefield" vs "in base" indistinguishable
+## 6. (CLOSED 2026-10-29) No location filter on targets — "at a battlefield" vs "in base" indistinguishable
+**Closed:** location filters done (here / base / battlefield / anywhere).
 - **What:** target resolution (`effects.py` `_resolve_targets` ~:299 +
   `target_filter` via `_passes_filter`) selects by SIDE and by unit PROPERTIES
   (is_buffed, is_mighty, subtype, etc.) but has no concept of unit LOCATION.
@@ -240,7 +256,8 @@ Recurring parser errors identified from the human verdicts in
   (`location: "battlefield" | "base"`). Register in engine_vocab, document in
   parser prompt, add tests, re-parse affected cards.
 
-## 7. Equipped gear does not fire its own triggered abilities (systemic)
+## 7. (CLOSED 2026-10-29) Equipped gear does not fire its own triggered abilities (systemic)
+**Closed:** gear triggers and keywords act through the wearer (both facets).
 - **What:** the combat trigger loop (`loop.py` ~:1516-1521) fires
   on_attack/on_defend on `unit.card` only — it iterates units at the battlefield
   and resolves THEIR card triggers. It never iterates a unit's attached `gear`
@@ -281,7 +298,8 @@ Recurring parser errors identified from the human verdicts in
   give_keyword is its unit's (`GameLoop._apply_equipment_conditions`). Test:
   test_nazuman_ntofo_gives_shield_two.
 
-## 8. Recall always heals+exhausts; per rules a generic recall must NOT (found spot-check rescued)
+## 8. (CLOSED 2026-10-29) Recall always heals+exhausts; per rules a generic recall must NOT (found spot-check rescued)
+**Closed:** fixed (BACKLOG B).
 - **Rule (user):** "Recalls do not affect the state of the Permanent being recalled.
   Unless otherwise stated by the source, Damage, Exhausted Status, Buffed Status,
   and applied Layer alterations remain UNAFFECTED by a Recall."
@@ -307,7 +325,8 @@ Recurring parser errors identified from the human verdicts in
 - **Fix (Step 3):** add a `leaves_board` (a.k.a. on_leave) trigger that fires on any
   board-exit (death, recall, return-to-hand, banish), and re-parse affected cards.
 
-## 10. `reduce_cost` verb missing but referenced by populated parses
+## 10. (CLOSED 2026-10-29) `reduce_cost` verb missing but referenced by populated parses
+**Closed:** see #4.
 - Ornn's Forge parsed with effect `reduce_cost` (trigger cost_modifier) — but NO
   `reduce_cost` handler exists in effects.py. Populated-but-inert. aura:reduce_cost
   is in the Step 3 queue (x6). Build the verb + a cost-modifier application path;
@@ -321,7 +340,8 @@ Fail bucket = 6 MISSING_EFFECT + 1 WRONG_CONDITION + 1 FLAGGED_WRONG, dominated 
 parser dropping whole abilities on MULTI-CLAUSE cards (Nami, Cursed Sarcophagus, Treasure
 Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 
-## 11. (OPEN) `all_units_here` mis-resolves to opponent-only on the deal_damage path
+## 11. (CLOSED 2026-10-29) `all_units_here` mis-resolves to opponent-only on the deal_damage path
+**Closed:** fixed (BACKLOG B).
 - **Where:** `effects.py` `_deal_damage` (:24-28) -> `loop.py` `ctx.deal_damage`
   (:108-119), which maps only {actor,ally,self} to the friendly side; everything else
   (incl. `all_units_here`, `battlefield`, `both`) falls through to opponent_side.
@@ -427,7 +447,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix (Step 3):** apply target_filter inside the passive path (reuse `_passes_filter`),
   and support a board-wide scope for anthems that read "your <X> units" with no "here".
 
-## 19. (PARTIAL) cast spells now routed to trash (a, FIXED); FLOW play-from-trash still deferred (b)
+## 19. (CLOSED 2026-10-29) cast spells now routed to trash (a, FIXED); FLOW play-from-trash still deferred (b)
+**Closed:** (b) FLOW done (`trash_play` entries, play from the trash then banish).
 - **(a) FIXED:** `_run_chain`'s LIFO resolve loop (`loop.py`, after the `on_play_spell`
   trigger) now appends each resolved `SpellCard` to its caster's `trash` — spells no
   longer vanish. Countered spells are popped + trashed by `counter_spell` before the
@@ -445,7 +466,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   Complex FLOW costs (Kennen "FLOW equal to its cost", Stargazer FLOW discount) need
   per-card handling.
 
-## 20. (OPEN) EMPOWERED-modifier clauses and on-burn triggers deferred
+## 20. (CLOSED 2026-10-29) EMPOWERED-modifier clauses and on-burn triggers deferred
+**Closed:** EMPOWERED "instead" clauses and on-burn triggers done (Vendetta tests, BACKLOG D); stacking EMPOWER is `UnitInPlay.empower_times`.
 - **What:** EMPOWER/EMPOWERED and BURN are implemented (empower_self / this_is_empowered
   passive bonuses / disempower; burn + cards_burned_this_turn). Two dependent sub-mechanics
   remain flagged by the parser rather than emitted:
@@ -474,7 +496,8 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   current lane's combat (resolved at end of turn via `contested_this_turn`).
 - **Test:** `tests/test_nested_ambush.py` (spawns on contest; no nesting mid-showdown).
 
-## 23. (PARTIAL) HIDDEN keyword — core loop done; two faithful nuances deferred
+## 23. (CLOSED 2026-10-29) HIDDEN keyword — core loop done; two faithful nuances deferred
+**Closed:** both nuances done (BACKLOG C). The net's action space has no slot to hide the champion: BACKLOG F.
 - **Done (§737/§408/§106.4):** Hide (main phase, Open State, pay 1 power, place facedown at
   a controlled battlefield with an empty Facedown Zone), play-from-hidden for [0] from the
   next turn at reaction speed (units enter that lane; spells open a chain), and cleanup
@@ -523,6 +546,7 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   Regression test: `test_no_hang.py::test_unpayable_spells_in_a_showdown_count_as_passes`.
 
 ## 27. (OPEN, found 2026-10-29) Cost extras: hand plays only, and some paths never spend them
+- **Tracked in BACKLOG.md G1.**
 - **What:** what a card lets you spend as you play it to cost less (`GameLoop._cost_extras`:
   Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's buffs, Commander
   Ledros's tokens, Poppy's XP, Wallop's buff) only applies from the hand
