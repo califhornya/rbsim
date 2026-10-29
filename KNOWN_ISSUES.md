@@ -57,6 +57,14 @@ convention). Each entry: what, where, why deferred.
   (`_add_battlefield_token`): the Baron Pit token is added and he enters there,
   once. `tests/test_invariants.py` now asserts "one card, one zone".
 
+### (DEFERRED) A spell's cost is paid before its choices (Irelia Graceful, DEFLECT)
+- Rules (§355-357): choices first, then the total cost, then pay. The engine pays
+  the cost, then the spell chooses (on the chain, or as it resolves in a
+  lookahead); target-dependent costs are settled then: DEFLECT's [rune] paid,
+  Irelia Graceful's "[1] or [rune] less" given back (`_graceful_discount`).
+- **Gap:** a spell you can afford only with her discount can't be played, and
+  "when you play a spell, if you spent [N]" sees the Energy before it.
+
 ### (DEFERRED) No stepwise engine → MCTS can't expand arbitrary mid-game nodes
 - **What:** the pausable-engine work (Step 2) delivered `GameState.clone()`,
   `legal_actions()`, `determinize()`, and a thread-backed `SessionDriver`. Those

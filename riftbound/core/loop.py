@@ -1416,6 +1416,7 @@ class GameLoop:
         located = [(u, self._locate_unit(u)) for u in units]
         # DEFLECT (§809): paid as the choice is made.
         tax = sum(self._deflect_tax(u, chooser, source) for u in units)
+        tax = self._graceful_discount(source, gs.get_player(chooser), located, tax)
         if tax:
             self._pay_generic_power(gs.get_player(chooser), tax)
         from_spell_or_unit = isinstance(source, (SpellCard, UnitCard))
@@ -1431,6 +1432,39 @@ class GameLoop:
                                             gs.get_player(enemy),
                                             context_extra={"battlefield": bf,
                                                            "triggering_card": source})
+
+    def _graceful_discount(self, source: Optional[Card], chooser: Player, located: list,
+                           tax: int) -> int:
+        """ "Your spells that choose me cost [1] or [rune] less" (Irelia
+        Graceful): once for each chooser's unit with it the spell `source` chose
+        (and each Svellsongur copy). The spell's cost was paid before its
+        choices, so the discount is taken as it chooses, when DEFLECT's [rune]
+        is paid: off that [rune] first, else the Energy paid comes back, else
+        the Power paid. Returns the DEFLECT [rune] left to pay."""
+        if not isinstance(source, SpellCard):
+            return tax
+        side = "A" if chooser is self.gs.A else "B"
+        seen = getattr(source, "_graceful_from", None)
+        if seen is None:
+            seen = source._graceful_from = set()
+        n = 0
+        for u, w in located:
+            if w is None or w[0] != side or id(u) in seen:
+                continue                 # once a spell, though it chooses her twice
+            k = sum(1 for es in self._card_effects(u.card) if es.effect == "cheaper_spells_choosing_me")
+            if k:
+                seen.add(id(u))
+                n += k
+        for _ in range(n):
+            if tax:
+                tax -= 1
+            elif getattr(source, "_spent", 0) > 0:
+                source._spent -= 1
+                chooser.energy += 1
+            elif getattr(source, "_power_paid", 0) > 0 and source.cost_power_domain is not None:
+                source._power_paid -= 1
+                chooser.add_power(source.cost_power_domain, 1)
+        return tax
 
     def _resolve_delayed_effects(self) -> None:
         """Run the "at the end of this turn, ..." effects scheduled this turn."""
@@ -3516,6 +3550,7 @@ class GameLoop:
             return self._pay_gear(actor, energy, power, card.cost_power_domain)
         if isinstance(card, SpellCard):
             self._spell_energy_paid = energy        # "if you spent [4] or more" (_spell_played)
+            self._spell_power_paid = int(power or 0)
             if power:
                 from_earmark = min(power, actor.earmarked_power_spell)
                 actor.earmarked_power_spell -= from_earmark
@@ -3846,6 +3881,8 @@ class GameLoop:
         spent = getattr(self, "_spell_energy_paid", 0) + max(0, energy_before - ap.energy)
         self._spell_energy_paid = 0
         card._spent = spent
+        card._power_paid, self._spell_power_paid = getattr(self, "_spell_power_paid", 0), 0
+        card._graceful_from = set()                  # Irelia Graceful's discounts taken
         turn, most = self.gs.spell_spent.get(side, (-1, 0))
         self.gs.spell_spent[side] = (self.gs.turn, max(spent, most if turn == self.gs.turn else 0))
         self._note_card_played(card, side, from_zone)

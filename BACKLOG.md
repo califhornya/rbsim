@@ -443,9 +443,16 @@ tests/test_corpus_vendetta.py.
   Undertitan's ADD fires on Teemo Strategist's and Scrutinizing Scope's
   reveals too, and Mechanical Bandit's goes to the Undertitan's owner (it gave
   the opponent's to the Bandit's player). Tests in tests/test_void_hatchling.py.
+- [DONE] Irelia Graceful: "Your spells that choose me cost [1] or [rune] less."
+  The engine pays a spell's cost before its choices, so the discount is taken
+  as the spell chooses her (`GameLoop._graceful_discount`, from `_note_chosen`,
+  where DEFLECT's [rune] is paid): off that [rune] first, else the Energy paid
+  comes back, else the Power paid. Once a spell per Irelia, though it chooses
+  her twice (Falling Star); Svellsongur's copy is one more; not for an
+  opponent's spells. Left (KNOWN_ISSUES): a spell affordable only with her
+  discount can't be played. Tests in tests/test_irelia_graceful.py.
 
-Irelia
-Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
+Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
 units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
 Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser.

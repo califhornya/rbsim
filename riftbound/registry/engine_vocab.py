@@ -320,6 +320,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "copy_unit_text",           # Svellsongur: GameLoop._card_effects, UnitInPlay.keyword_value
     "look_before_reveal",       # Void Hatchling: GameLoop._before_deck_reveal
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
+    "cheaper_spells_choosing_me",   # Irelia Graceful: GameLoop._graceful_discount
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)
     "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
     "accelerate_non_hand",

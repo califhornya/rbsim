@@ -15760,7 +15760,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "cheaper_spells_choosing_me",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "SFD-142",

@@ -450,7 +450,7 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   modeled 2026-10-29, BACKLOG E); Hextech
   Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
   baseline that converts would throw them away); Irelia Graceful (a spell's
-  cost depending on what it will choose); Endless Riches (playing from the
+  cost depending on what it will choose; modeled 2026-10-29, BACKLOG E); Endless Riches (playing from the
   trash and banishing instead of trashing); Neeko Blending In (a deckbuilding
   rule: extra legends).
 
