@@ -33064,13 +33064,21 @@
     "cost_energy": 1,
     "cost_power": 1,
     "cost_power_domain": "Mind/Chaos",
-    "effect": "REACTION (Play any time, even before spells and abilities resolve.)",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nChoose a spell with Energy cost no more than [4].\nYou may pay [rune]. If you do, gain control of it and you may make new choices for it. Otherwise, counter it.",
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
       "REACTION"
     ],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "steal_or_counter_spell",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "max_energy": 4,
+        "pay_power": 1
+      }
+    ],
     "variants": [
       {
         "variant_id": "VEN-152",

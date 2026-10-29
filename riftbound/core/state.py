@@ -26,6 +26,9 @@ class ChainItem:
     # Its choices took effect as it was put on the chain (DEFLECT paid, "when
     # you choose me" fired: GameLoop._put_on_chain); its resolution doesn't redo them.
     choices_noted: bool = False
+    # Its owner while another player controls it (Mystic Reversal, Rebuttal):
+    # the card still goes to the owner's trash.
+    owner: Optional[str] = None
 
 
 @dataclass

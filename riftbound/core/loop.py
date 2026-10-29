@@ -6088,8 +6088,9 @@ class GameLoop:
                 # Previously cast spells vanished, starving trash-based mechanics
                 # (FLOW / recycle / return-from-trash) of any targets. Countered
                 # spells are popped + trashed by counter_spell before this loop, so
-                # they never reach here — no double-trash.
-                self._spell_to_trash(actor, item.card)
+                # they never reach here — no double-trash. A spell another
+                # player took over goes to its owner's (Mystic Reversal).
+                self._spell_to_trash(self.gs.get_player(item.owner) if item.owner else actor, item.card)
 
     def _run_showdown(self, bf_idx: int, attacker: str) -> None:
         """Execute a showdown at the given battlefield (§337–345)."""

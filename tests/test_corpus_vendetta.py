@@ -1792,3 +1792,71 @@ def test_lightning_rush_draws_one_of_three_and_trashes_the_rest():
     _cast_now(loop, a, "Lightning Rush")
     assert len(a.hand) == 1 and len(a.trash) == 2 and [c.name for c in a.deck.cards] == ["S4"]
     assert CARD_REGISTRY["Lightning Rush"].instantiate().flow_cost["energy"] == 2
+
+
+def _rebuttal_over(loop, *items):
+    """`items` (side, card name) on the chain, oldest first, then A's Rebuttal;
+    the chain resolves."""
+    cards = []
+    for side, name in items:
+        cards.append(CARD_REGISTRY[name].instantiate())
+        loop._put_on_chain(ChainItem(player=side, card=cards[-1], bf_idx=0))
+    loop._put_on_chain(ChainItem(player="A", card=CARD_REGISTRY["Rebuttal"].instantiate(), bf_idx=0))
+    loop._resolve_chain()
+    return cards
+
+
+def test_rebuttal_pays_a_rune_to_take_over_a_spell_with_new_choices():
+    """'Choose a spell with Energy cost no more than [4]. You may pay [rune]. If
+    you do, gain control of it and you may make new choices for it.'"""
+    loop, a, b = _setup()
+    mine, theirs = _unit("Mine", 4), _unit("Theirs", 4)
+    loop.gs.battlefields[0].add_unit("A", mine)
+    loop.gs.battlefields[0].add_unit("B", theirs)
+    _pick(loop, "Mine")                                # B aims Hextech Ray at our unit
+    loop.gs.chain.clear()
+    ray = CARD_REGISTRY["Hextech Ray"].instantiate()
+    loop._put_on_chain(ChainItem(player="B", card=ray, bf_idx=0))
+    loop.chooser = None
+    power = sum(a.power_pool.values())
+    loop._put_on_chain(ChainItem(player="A", card=CARD_REGISTRY["Rebuttal"].instantiate(), bf_idx=0))
+    loop._resolve_chain()
+    assert sum(a.power_pool.values()) == power - 1
+    assert mine.damage == 0 and theirs.damage == 3     # ours now, aimed anew
+    assert ray in b.trash and ray not in a.trash       # still B's card
+
+
+def test_rebuttal_draws_for_us_and_trashes_to_the_owner():
+    loop, a, b = _setup()
+    _deck(a, SpellCard(name="S1"), SpellCard(name="S2"))
+    (consult,) = _rebuttal_over(loop, ("B", "Consult the Past"))
+    assert [c.name for c in a.hand] == ["S1", "S2"] and not b.hand
+    assert consult in b.trash
+
+
+def test_rebuttal_counters_it_without_a_rune():
+    """'Otherwise, counter it.'"""
+    loop, a, b = _setup()
+    a.power_pool = {}
+    _deck(b, SpellCard(name="S1"), SpellCard(name="S2"))
+    (consult,) = _rebuttal_over(loop, ("B", "Consult the Past"))
+    assert not b.hand and consult in b.trash
+
+
+def test_rebuttal_ignores_spells_costing_over_four():
+    loop, a, b = _setup()
+    a.power_pool = {}
+    big = SpellCard(name="Big", cost_energy=5)
+    loop.gs.chain.append(ChainItem(player="B", card=big, bf_idx=0))
+    REGISTRY["steal_or_counter_spell"](_ctx(loop, a, CARD_REGISTRY["Rebuttal"].instantiate()),
+                                       {"max_energy": 4, "pay_power": 1})
+    assert [it.card for it in loop.gs.chain] == [big] and loop.gs.chain[0].player == "B"
+
+
+def test_rebuttal_counters_an_enemy_counter_rather_than_taking_it():
+    """Baseline: taking over Defy would counter our own spell."""
+    loop, a, b = _setup()
+    _deck(a, SpellCard(name="S1"), SpellCard(name="S2"))
+    consult, defy = _rebuttal_over(loop, ("A", "Consult the Past"), ("B", "Defy"))
+    assert [c.name for c in a.hand] == ["S1", "S2"]    # our spell resolved
+    assert defy in b.trash and consult in a.trash

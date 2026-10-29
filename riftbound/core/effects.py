@@ -658,8 +658,45 @@ def _steal_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     Reversal): the opponent's latest spell on the chain resolves as ours."""
     for item in reversed(ctx.loop.gs.chain):
         if item.player == ctx.opponent_side and item.card is not ctx.card:
-            item.player = ctx.actor_side
+            _take_over_spell(ctx, item)
             return
+
+
+def _take_over_spell(ctx: "EffectContext", item) -> None:
+    """We gain control of a spell on the chain and "may make new choices for
+    it": it resolves as ours, every choice made again (by us, as it resolves);
+    its card still goes to its owner's trash."""
+    if item.owner is None:
+        item.owner = item.player
+    item.player = ctx.actor_side
+    item.declared = None
+    item.choices_noted = False
+
+
+@effect("steal_or_counter_spell")
+def _steal_or_counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Choose a spell with Energy cost no more than [4]. You may pay [rune].
+    If you do, gain control of it and you may make new choices for it.
+    Otherwise, counter it." (Rebuttal). Baseline: the opponent's latest such
+    spell; pay unless it is a counter (ours would then counter our own spell)."""
+    loop = ctx.loop
+    items = [it for it in loop.gs.chain if it.card is not ctx.card
+             and isinstance(it.card, SpellCard) and _counterable(it.card, spec)]
+    if not items:
+        return
+    enemy = [it for it in items if it.player != ctx.actor_side]
+    item = loop.choose("spell:steal_or_counter_spell", ctx.actor_side, items, (enemy or items)[-1], ctx.card)
+    n = int(spec.get("pay_power", 1))
+    if loop._can_pay_generic_power(ctx.actor, n):
+        pay = item.player != ctx.actor_side and not loop._has_effect(item.card, "counter_spell")
+        if loop.choose("optional:steal_or_counter_spell", ctx.actor_side, [True, False], pay, ctx.card) \
+                and loop._pay_generic_power(ctx.actor, n):
+            _take_over_spell(ctx, item)
+            return
+    if loop._uncounterable(item.player) or loop._has_effect(item.card, "cant_be_countered"):
+        return
+    loop.gs.chain.remove(item)
+    loop._spell_to_trash(loop.gs.get_player(item.owner or item.player), item.card)
 
 
 @effect("bounce_enemy_at_crowded_battlefield")
@@ -3362,10 +3399,11 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     ctx.extra["countered_energy"] = int(target_item.card.cost_energy or 0)   # Riposte
     target_card = target_item.card
-    owner = ctx.loop.gs.get_player(target_item.player)
+    owner = ctx.loop.gs.get_player(target_item.owner or target_item.player)
+    controller = ctx.loop.gs.get_player(target_item.player)
     tax = int(spec.get("unless_pays", 0) or 0)
-    if tax and owner.energy >= tax:
-        owner.energy -= tax          # "unless its controller pays [2]": they do
+    if tax and controller.energy >= tax:
+        controller.energy -= tax     # "unless its controller pays [2]": they do
         return
     chain.pop()
     if spec.get("silence"):

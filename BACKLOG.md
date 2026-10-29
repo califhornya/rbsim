@@ -299,7 +299,8 @@ Open, found on the way:
   and no longer linger after it; Shadows of the Past read only your trash;
   Renekton Butcher of the Sands' Energy was free (now only units and units'
   abilities); Acceleration Gate readied only units (now gear and runes too).
-  Open: Rebuttal (VEN-152) has only "REACTION" in the card data.
+  Rebuttal (VEN-152) had only "REACTION" in the card data: done later from the
+  printed text (see the end of D).
 - [x] Radiance, part 1: RAD-001..055 read (55 cards), 54 tested
   (tests/test_corpus_radiance.py; Trinket Peddler's DISARM via Ahri /
   Chronomancer), 15 fixed: Brawl (ASSAULT = the unit's Might, was 1),
@@ -359,8 +360,13 @@ Open, found on the way:
   as the spell's (Annie Fiery's Bonus Damage, spell immunity): now dealt by the
   units (Core Rules, Challenge example).
 
-D is done: every set read. Open only: Rebuttal (VEN-152), its text is missing
-from the card data (only "REACTION"); needs the printed text.
+D is done: every set read. Rebuttal (VEN-152) done 2026-10-29 from the printed
+text (the card data had only "REACTION"): choose a spell costing no more than
+[4]; pay [rune] to take it over with new choices, else counter it. Baseline:
+the opponent's latest such spell, counter it if it is a counter. A spell taken
+over (Mystic Reversal too) now gets its choices made again by its new
+controller and goes to its owner's trash (`ChainItem.owner`). Tests in
+tests/test_corpus_vendetta.py.
 
 ## E. Not modeled at all
 - [DONE] Bandle Tree and Bushwhack Trap: a Facedown Zone holds more than one
