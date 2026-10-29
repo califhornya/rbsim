@@ -933,6 +933,7 @@ def _recycle_runes_channel(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
         for rune in p.rune_pool.pop(dom):
             rune.ready = True
             p.rune_deck.runes.append(rune)
+    p.runes_left_play()
     p.unlock_runes(int(spec.get("amount", 4)), exhausted=True)
     ctx.loop._extra_channel(ctx.actor_side)
 
@@ -1498,7 +1499,7 @@ def _convert_x(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     if spec.get("from") == "power":
         loop._pay_generic_power(me, x)
-        me.energy += x
+        me.add_energy(x)
     else:
         me.energy -= x
         _gain_power_any_domain(ctx, {"amount": x})
@@ -2055,6 +2056,7 @@ def _recycle_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not player.rune_pool[rune.domain]:
         del player.rune_pool[rune.domain]
     player.rune_deck.recycle(rune)
+    player.runes_left_play()
     player.runes_recycled = getattr(player, "runes_recycled", 0) + 1
 
 
@@ -2243,6 +2245,7 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             p.rune_pool[r.domain].remove(r)
             r.ready = True
             p.rune_deck.runes.append(r)
+        p.runes_left_play()
         hand = sorted(p.hand, key=_zone_value, reverse=True)
         kept = loop.choose_many("keep:hand", side, hand, hand[:keep], ctx.card)
         for c in [c for c in hand if not any(c is k for k in kept)]:
@@ -3366,7 +3369,7 @@ def _gain_power_any_domain(ctx: "EffectContext", spec: Mapping[str, Any]) -> Non
                              list(Domain), domain, ctx.card)
     player.add_power(domain, amount)
     if ctx.card.name == "Gold" and ctx.loop._gold_bonus(ctx._side_for_player(player)):
-        player.energy += 1     # "your Gold ADD an additional [1]" (Renata Glasc Chem-Baroness)
+        player.add_energy(1)   # "your Gold ADD an additional [1]" (Renata Glasc Chem-Baroness)
 
 
 @effect("add_power")
@@ -3410,7 +3413,7 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                                      up_to=_up_to(spec, spec["amount"]))
         for pick in picks:
             if isinstance(pick, Rune):
-                ctx.actor.energy += 1
+                ctx.actor.ready_runes(1)
             elif isinstance(pick, Card):
                 pick.tapped = False
             else:
@@ -3581,7 +3584,7 @@ def _ready_something(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             loop._note_chosen(ctx.card, ctx.actor_side, [pick])
             loop._fire_readied(pick, side)
     elif isinstance(pick, Rune):
-        gs.get_player(side).energy += 1             # a rune
+        gs.get_player(side).ready_runes(1)          # a rune
     else:
         getattr(pick, "card", pick).tapped = False
 
@@ -5423,18 +5426,13 @@ def _ready_runes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Ready exhausted runes: "ready up to N runes" honors `amount`; without one
     ("ready your runes") every rune is readied. The engine exhausts every rune
     for its Energy as the turn begins, so a readied rune is that Energy back:
-    the rune is used again at once (it stays exhausted) for +1 Energy."""
+    the rune is used again at once (it stays exhausted) for +1 Energy, a ready
+    rune's while its Energy is unused, else ADDed (Player.ready_runes)."""
     player = ctx._player_for_target(str(spec.get("target", "actor")))
-    left = spec.get("amount")
-    left = None if left is None else int(left)
-    for runes in player.rune_pool.values():
-        for rune in runes:
-            if left is not None and left <= 0:
-                return
-            if not rune.ready:
-                player.energy += 1
-                if left is not None:
-                    left -= 1
+    n = sum(1 for runes in player.rune_pool.values() for rune in runes if not rune.ready)
+    if spec.get("amount") is not None:
+        n = min(n, int(spec["amount"]))
+    player.ready_runes(n)
 
 
 @effect("gain_xp")

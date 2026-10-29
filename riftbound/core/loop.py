@@ -278,7 +278,7 @@ class EffectContext:
             return
 
         player = self._player_for_target(target)
-        player.energy += amount
+        player.add_energy(amount)
 
     def reveal_top_draw_if_spell(self, *, target: str = "actor") -> None:
         """Reveal the top card of the target's Main Deck; if it's a Spell, draw it
@@ -950,16 +950,12 @@ class GameLoop:
         self._ready_active_units(active)
 
         active_player = self.gs.get_player(active)
-        # Clear leftover resources from last turn before channeling
+        # Awaken: the runes ready, so their Energy and Power are counted again
+        # (what an ADD gave was lost as the last turn ended).
+        active_player.empty_rune_pool()
         active_player.energy = 0
         active_player.power_pool.clear()
-        active_player.floating_power.clear()
-        active_player.earmarked_energy_showdown = 0
-        active_player.earmarked_power_gear = 0
-        active_player.earmarked_power_spell = 0
-        active_player.earmarked_power_permanent = 0
-        active_player.earmarked_energy_spell = 0
-        active_player.earmarked_energy_unit = 0
+        active_player.awaken_runes()
 
         # Channel Phase (§430): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
@@ -2083,9 +2079,12 @@ class GameLoop:
 
     @_as_step
     def _start_of_main(self, side: str) -> None:
-        """At the start of the Main Phase (§316.4): "at the start of your Main
-        Phase" abilities (Orianna Lady of Clockwork) and the delayed ones
-        (Iascylla) trigger together, then resolve."""
+        """At the start of the Main Phase: every Rune Pool empties (§316.3), then
+        "at the start of your Main Phase" abilities (Orianna Lady of Clockwork)
+        and the delayed ones (Iascylla, Blue Sentinel's ADD) trigger together,
+        then resolve (§316.4)."""
+        self.gs.A.empty_rune_pool()
+        self.gs.B.empty_rune_pool()
         self._fire_turn_trigger("on_start_of_main", side)
         self._resolve_delayed_main(side)
 
@@ -7998,6 +7997,10 @@ class GameLoop:
         for unit in self._all_units_in_play():
             unit.damage = 0
             unit.clear_turn_end_bonuses()
+        # Each player's Rune Pool empties (§317.2.d): ADDed Energy and Power are
+        # lost; ready runes keep theirs for the next turn's reactions.
+        gs.A.empty_rune_pool()
+        gs.B.empty_rune_pool()
 
         # Cleanup: a facedown card whose owner no longer controls its battlefield is
         # removed to its owner's trash (§106.4.d / §322.8).

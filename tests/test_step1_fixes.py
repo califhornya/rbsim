@@ -30,9 +30,11 @@ def _ctx(loop: GameLoop, card=None) -> EffectContext:
 def test_channel_rune_ready():
     loop = _make_loop()
     loop.gs.A.rune_deck = RuneDeck([Rune(domain=Domain.FURY), Rune(domain=Domain.CHAOS)])
+    before = loop.gs.A.energy
     REGISTRY["channel_rune"](_ctx(loop), {"target": "actor", "amount": 2})
     assert loop.gs.A.total_runes_in_play() == 2
-    assert all(r.ready for runes in loop.gs.A.rune_pool.values() for r in runes)
+    # A ready rune is exhausted for its Energy at once (the engine's rune model).
+    assert loop.gs.A.energy - before == 2 and loop.gs.A.pool_energy == 0
 
 
 def test_channel_rune_exhausted():

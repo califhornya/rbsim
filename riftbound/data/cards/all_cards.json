@@ -21996,9 +21996,12 @@
         "trigger": "passive"
       },
       {
-        "effect": "gain_power_any_domain",
+        "effect": "at_start_of_next_main",
         "trigger": "on_hold",
-        "amount": 1
+        "then": {
+          "effect": "gain_power_any_domain",
+          "amount": 1
+        }
       }
     ]
   },

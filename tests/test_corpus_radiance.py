@@ -1231,9 +1231,11 @@ def test_seraphic_wyvern_channels_one_more_exhausted():
     loop, a, b = _setup()
     _rune_deck(a)
     a.base_units.append(_unit("Seraphic Wyvern"))
+    before = a.energy
     REGISTRY["channel_rune"](_ctx(loop, a), {"amount": 1})
     runes = [r for v in a.rune_pool.values() for r in v]
-    assert len(runes) == 2 and sorted(r.ready for r in runes) == [False, True]
+    # The ready one is exhausted for its Energy at once; the extra one gives none.
+    assert len(runes) == 2 and a.energy - before == 1
 
 
 def test_disposal_expert_enters_ready_alone():

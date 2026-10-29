@@ -537,6 +537,11 @@ Ezreal Prodigal Explorer's "use only if" was a no-op every turn, the Ezreal
 precon never played a card (0 of 100 wins, now 16; tests/test_simple_trade_legal.py).
 
 From the re-check of the old notes (2026-10-29, G):
+- simple_trade uses any affordable ability that taps or pays, ADDs too
+  (`_find_activated_ability`): Seals, Gold (killing itself), Lux / Diana /
+  Ornn / Kai'Sa's earmarked ADDs with nothing to pay; since B35 that is lost
+  as the turn ends (90 smoke games: 37 Energy, 199 Power, 162 earmarked). An
+  ADD should be used only while paying.
 - Hiding the champion (§737.1.b, the engine allows it) has no slot in the
   net's action space.
 - The net-guided search decides only the first choice of an action, none while
@@ -585,7 +590,7 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   card, top first (source = that card; baseline: the agent's
   decide_predict_recycle, else keep), then `predict_order` (choose_many, top
   first; baseline: the mightiest drawn first). Cards Nocturne took are out.
-- [ ] Cost extras (KNOWN_ISSUES #27): what a card lets you spend to cost less
+- [x] Cost extras (KNOWN_ISSUES #27): what a card lets you spend to cost less
   (Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's
   buffs, Commander Ledros's tokens, Poppy's XP, Wallop's buff) applies from
   the hand only (rules: any zone, §356.2), and a play through an effect (Here
@@ -934,7 +939,7 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   (`optional`, its "can't move this turn" as `then`; choice
   `optional:enter_ready`, coach label). "When you play me, ready me" cards
   (Darius Executioner, Dropboarder, Pyke, Poppy Paragon) stay triggers.
-- [ ] Rune Pool empties (B33 found): §167 / §316.3 / §317.2.d: every player's
+- [x] Rune Pool empties (B33 found): §167 / §316.3 / §317.2.d: every player's
   pool empties at the start of each Main Phase and at the end of each turn.
   The engine taps every rune for Energy as the turn begins (ready_runes =
   +1 Energy per exhausted rune) and clears only the turn player's pool then,
@@ -943,7 +948,32 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   never lost at end of turn, and Blue Sentinel's "When I hold, ADD [rune] at
   the start of your next Main Phase" is given at the hold (same result only
   because nothing empties at the Main Phase). The fix must keep the two
-  apart (rune Energy vs. added Energy / Power).
+  apart (rune Energy vs. added Energy / Power). DONE B35
+  (tests/test_g3_rune_pool.py): `Player.energy` is now a property:
+  `rune_energy` (runes still ready) + `pool_energy` (ADDed); its setter
+  spends the pool first, a gain set through it (Irelia's refund, tests) is a
+  rune's; an ADD is `Player.add_energy` (gain_energy, Hextech Anomaly's
+  convert, Renata's Gold bonus). `Player.empty_rune_pool()` (pool Energy,
+  `floating_power`, the six earmarked) at the start of every Main Phase
+  (`_start_of_main`, both players, before its triggers) and in the
+  Expiration Step (`_end_turn`, after "this turn" effects end). Readying runes
+  (`Player.ready_runes(n)`: ready_runes, Acceleration Gate / Jayce's rune):
+  a rune's Energy while exhausted ones are left, else the pool's (the player
+  exhausts a ready one first), so Sona Harmonious / Annie Dark Child /
+  Targon's Peak's end-of-turn ready lasts through the opponent's turn. A ready
+  rune leaving play while none is exhausted (`Player.runes_left_play`:
+  recycling for Power, Sigil of the Storm, Coalesced Energy, the "keep N"
+  reset) puts its Energy in the pool. Blue Sentinel re-encoded
+  (`at_start_of_next_main` then the ADD; doubled by its own "hold effects
+  trigger an additional time"). Found on the way: the turn's channel
+  readied every rune first, so Seraphic Wyvern's extra exhausted rune gave
+  Energy (now `Player.awaken_runes` before the Channel Phase, `channel` taps
+  only ready ones); a rune channeled mid-turn gave nothing till the next
+  turn (K'Sante Courageous's hold, Jhin Virtuoso's 4): `unlock_runes` now
+  adds each one's Power (recyclable at once, §164.2.b) and a ready one's
+  Energy. Constructor kwarg `energy=` -> `rune_energy=`. Golden unchanged;
+  smoke 450 + 90 verbose games clean (90 games lost 37 ADDed Energy, 199
+  Power, 162 earmarked: see F).
 
 Closed in KNOWN_ISSUES / DEFERRED (fixed earlier, now marked): EQUIP's own
 cost (`_equip_cost`); resolved spells to the trash (#19a); 0b malformed specs;

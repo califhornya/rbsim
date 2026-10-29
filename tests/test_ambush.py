@@ -24,7 +24,7 @@ def _loop_with_rengar(power: int = 5) -> GameLoop:
     from riftbound.core.enums import Domain
     from riftbound.core.player import Rune
 
-    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]), energy=10)
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]), rune_energy=10)
     b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
     a.power_pool[Domain.BODY] = power
     a.rune_pool[Domain.BODY] = [Rune(domain=Domain.BODY) for _ in range(power)]

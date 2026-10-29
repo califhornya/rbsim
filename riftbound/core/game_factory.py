@@ -176,8 +176,8 @@ def build_game(
     main_a.shuffle(rng)
     main_b.shuffle(rng)
 
-    A = Player(name="A", hp=10, deck=main_a, energy=starting_energy, rune_deck=rune_deck_a)
-    B = Player(name="B", hp=10, deck=main_b, energy=starting_energy, rune_deck=rune_deck_b)
+    A = Player(name="A", hp=10, deck=main_a, rune_energy=starting_energy, rune_deck=rune_deck_a)
+    B = Player(name="B", hp=10, deck=main_b, rune_energy=starting_energy, rune_deck=rune_deck_b)
 
     if ai_a is not None:
         A.agent = make_agent(ai_a, A)

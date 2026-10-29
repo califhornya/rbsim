@@ -61,8 +61,13 @@ class Player:
     banished: List[Card] = field(default_factory=list)
     base_gear: List[Card] = field(default_factory=list)
 
-    energy: int = 0
-    # Earmarked resources (§ restricted-use). Cleared each turn with energy/power.
+    # Energy (`energy` = the two). The engine exhausts every rune for its Energy
+    # as the turn begins, so `rune_energy` stands for runes still ready (kept
+    # through the opponent's turn); `pool_energy` is what an ADD put in the Rune
+    # Pool: spent first, lost when the pool empties (§167).
+    rune_energy: int = 0
+    pool_energy: int = 0
+    # Earmarked resources (§ restricted-use): in the pool, lost when it empties.
     earmarked_energy_showdown: int = 0  # Diana Scorn: energy spendable only in showdowns
     earmarked_power_gear: int = 0       # Ornn: generic power spendable only for gear
     earmarked_power_spell: int = 0      # Kai'Sa: generic power spendable only for spells
@@ -74,8 +79,8 @@ class Player:
     rune_pool: Dict[Domain, List[Rune]] = field(default_factory=dict)
     power_pool: Dict[Domain, int] = field(default_factory=dict)
     # The part of power_pool added by effects ("ADD [fury]": Seals, Gold) rather
-    # than backed by a rune: spent first, without recycling a rune; cleared with
-    # the pool each turn.
+    # than backed by a rune: spent first, without recycling a rune; lost when
+    # the pool empties.
     floating_power: Dict[Domain, int] = field(default_factory=dict)
     # Power paid this turn ("If you've spent at least [rune] [rune] this turn").
     power_spent_this_turn: int = 0
@@ -130,6 +135,61 @@ class Player:
 
         return player
 
+    @property
+    def energy(self) -> int:
+        return self.rune_energy + self.pool_energy
+
+    @energy.setter
+    def energy(self, value: int) -> None:
+        """Spending takes the pool's Energy first (it would be lost anyway); a
+        gain set this way (a refund) is a rune's. An ADD is `add_energy`."""
+        delta = value - self.energy
+        if delta < 0:
+            from_pool = min(-delta, max(self.pool_energy, 0))
+            self.pool_energy -= from_pool
+            self.rune_energy += delta + from_pool
+        else:
+            self.rune_energy += delta
+
+    def add_energy(self, amount: int) -> None:
+        """ADD Energy (§430): into the Rune Pool, lost when it empties."""
+        self.pool_energy += amount
+
+    def ready_runes(self, n: int) -> None:
+        """Ready n runes, each exhausted again at once for its Energy. With
+        fewer exhausted runes (their Energy unused), the player exhausts a ready
+        one first (its Energy to the pool), then readies it."""
+        exhausted = max(0, self.total_runes_in_play() - self.rune_energy)
+        k = min(n, exhausted)
+        self.rune_energy += k
+        self.pool_energy += n - k
+
+    def runes_left_play(self) -> None:
+        """Runes left play: a ready one goes only when none is exhausted, and
+        the player exhausts it first (its Energy to the pool)."""
+        over = self.rune_energy - self.total_runes_in_play()
+        if over > 0:
+            self.rune_energy -= over
+            self.pool_energy += over
+
+    def empty_rune_pool(self) -> None:
+        """The Rune Pool empties (§167): unspent Energy and Power an ADD put
+        there are lost; ready runes keep theirs."""
+        self.pool_energy = 0
+        for domain, n in self.floating_power.items():
+            left = self.power_pool.get(domain, 0) - n
+            if left > 0:
+                self.power_pool[domain] = left
+            else:
+                self.power_pool.pop(domain, None)
+        self.floating_power.clear()
+        self.earmarked_energy_showdown = 0
+        self.earmarked_power_gear = 0
+        self.earmarked_power_spell = 0
+        self.earmarked_power_permanent = 0
+        self.earmarked_energy_spell = 0
+        self.earmarked_energy_unit = 0
+
     def add_rune(self, domain: Domain, *, ready: bool = True) -> Rune:
         rune = Rune(domain=domain, ready=ready)
         self.rune_pool.setdefault(domain, []).append(rune)
@@ -139,7 +199,9 @@ class Player:
         return sum(len(runes) for runes in self.rune_pool.values())
 
     def unlock_runes(self, n: int = 2, *, exhausted: bool = False) -> None:
-        """Bring n runes from the deck into play (max 12 total)."""
+        """Bring n runes from the deck into play (max 12 total). Each can be
+        recycled for its Power at once (§164.2.b); a ready one is exhausted for
+        its Energy at once, as `channel` does."""
 
         for _ in range(n):
             if self.total_runes_in_play() >= 12:
@@ -147,8 +209,11 @@ class Player:
             rune = self.rune_deck.draw()
             if rune is None:
                 break
-            rune.ready = not exhausted
+            rune.ready = False
             self.rune_pool.setdefault(rune.domain, []).append(rune)
+            self.power_pool[rune.domain] = self.power_pool.get(rune.domain, 0) + 1
+            if not exhausted:
+                self.rune_energy += 1
 
     def recycle_rune(self, domain: Domain) -> bool:
         """Recycle one rune of the given domain (move from play to bottom of deck)."""
@@ -160,27 +225,35 @@ class Player:
         if not runes:
             self.rune_pool.pop(domain, None)
         self.rune_deck.recycle(rune)
+        self.runes_left_play()
         # "When you recycle a rune" (Sivir Battle Mistress): GameLoop drains it.
         self.runes_recycled = getattr(self, "runes_recycled", 0) + 1
         return True
 
-    def channel(self) -> None:
-        """Tap every ready rune in the pool: each yields +1 energy and +1 power of
-        its domain. Per Riftbound RAW each rune has [E]: Add [1] available every
-        turn, so every player effectively channels their entire pool each turn."""
-
-        # Refresh all runes at the beginning of the channel step
+    def awaken_runes(self) -> None:
+        """Awaken (§315.1): every rune readies."""
         for runes in self.rune_pool.values():
             for rune in runes:
                 rune.refresh()
+
+    def channel(self) -> None:
+        """Tap every ready rune in the pool: each yields +1 energy and +1 power of
+        its domain. Per Riftbound RAW each rune has [E]: Add [1] available every
+        turn, so every player effectively channels their entire pool each turn
+        (the turn's own channeled runes were tapped as they came, an exhausted
+        one gives no Energy)."""
 
         for domain in sorted(self.rune_pool, key=lambda d: d.name):
             for rune in self.rune_pool[domain]:
                 if rune.ready:
                     result = rune.activate()
                     if result is not None:
-                        self.energy += 1
+                        self.rune_energy += 1
                         self.power_pool[result] = self.power_pool.get(result, 0) + 1
+        # Generic Power is paid in this dict's order: by domain name.
+        order = sorted(self.power_pool.items(), key=lambda kv: kv[0].name)
+        self.power_pool.clear()
+        self.power_pool.update(order)
 
     def ready_base_units(self) -> None:
         for unit in self.base_units:

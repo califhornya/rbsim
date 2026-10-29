@@ -24,7 +24,7 @@ from riftbound.registry.cards_registry import CARD_REGISTRY
 
 
 def _loop(power: int = 2, turn: int = 1) -> GameLoop:
-    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]), energy=5)
+    a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]), rune_energy=5)
     b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
     a.power_pool[Domain.FURY] = power
     a.rune_pool[Domain.FURY] = [Rune(domain=Domain.FURY) for _ in range(power)]
