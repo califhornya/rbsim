@@ -942,8 +942,10 @@ class GameLoop:
             self.gs.get_player(old).base_units.remove(unit)
             self.gs.get_player(new_side).base_units.append(unit)
         else:
+            before = bf.controller()
             bf.remove_unit(old, unit)
             bf.add_unit(new_side, unit)
+            self._contest(bf, new_side, before)     # §190.3.a.2
         return bf
 
     @staticmethod
@@ -4021,7 +4023,9 @@ class GameLoop:
         if enter is None:
             ap.base_units.append(unit)
         else:
+            before = enter.controller()
             enter.add_unit(side, unit)
+            self._contest(enter, side, before)
         self.units_played += 1
         # B1: optional additional cost (kicker), paid before resolution.
         self._try_pay_additional_costs(card, ap)
@@ -4286,7 +4290,9 @@ class GameLoop:
         if bf is None:
             ap.base_units.append(unit)
         else:
+            before = bf.controller()
             bf.add_unit(side, unit)
+            self._contest(bf, side, before)
         self._fire_units_trigger("on_friendly_unit_played", side, exclude_card=card)
         self._rally(unit, side)
         self._fire_enemy_unit_played(unit, side)
@@ -4380,15 +4386,32 @@ class GameLoop:
         return out
 
     def _arrive_at(self, bf: Battlefield, side: str, prev_controller) -> None:
-        """A unit was played to `bf`: it contests the battlefield if `side`
-        didn't control it (§190.3.a.1); the showdown follows like a move's."""
-        dst = self.gs.battlefields.index(bf)
+        """A unit was played to `bf` (or taken control of there), `prev_controller`
+        the side alone there before: "a battlefield that was uncontrolled" reads
+        it. The contest and its showdown were staged as the unit entered
+        (_contest)."""
         bf.prev_controller = prev_controller
         gained = prev_controller != side and bf.controller() == side
         if gained or (bf.units_A and bf.units_B):
             bf.contested_this_turn = True
-            if self.gs.pending_move is None and not self.gs.showdown_active and not self.gs.chain:
-                self.gs.pending_move = (dst, side)
+
+    def _contest(self, bf: Battlefield, side: str, before) -> None:
+        """`side`'s unit just entered `bf` (played there, or taken control of
+        there), `before` the side alone there until then: if that contests it
+        (Battlefield.contest, §190.3.a), its showdown is staged (§344.2)."""
+        if bf.contest(side, before):
+            bf.contested_this_turn = True
+            self._stage_showdown(self.gs.battlefields.index(bf), side)
+
+    def _stage_showdown(self, dst: int, side: str) -> None:
+        """A showdown at battlefield `dst`, `side` having contested it, once no
+        chain or showdown is going on (_run_staged_showdowns); one going on
+        there already takes the unit in."""
+        gs = self.gs
+        if (gs.showdown_active and gs.showdown_bf_idx == dst) or gs.pending_move == (dst, side):
+            return
+        if (dst, side) not in gs.staged_showdowns:
+            gs.staged_showdowns.append((dst, side))
 
     def _ambush_unit_lanes(self, card: Card, side: str) -> list:
         """The battlefields a unit card in hand may be played to at reaction
@@ -4509,6 +4532,7 @@ class GameLoop:
             ap.base_units.append(unit)
         else:
             dst_bf.add_unit(side, unit)
+            dst_bf.contest(side, prev_controller)     # its showdown: pending_move below
         self._fire_move_triggers(unit, side, src_bf, dst_bf)
         if dst_bf is None:
             return
@@ -4597,37 +4621,44 @@ class GameLoop:
     def _effect_arrival(self, bf: Battlefield, side: str, prev_controller) -> None:
         """A unit an effect moved to `bf` contests it like any move (§452): its
         showdown is staged; one going on there already takes it in."""
+        bf.contest(side, prev_controller)
         gained = prev_controller != side and bf.controller() == side
         if not (gained or (bf.units_A and bf.units_B)):
             return
         bf.contested_this_turn = True
         bf.prev_controller = prev_controller
-        dst = self.gs.battlefields.index(bf)
-        if self.gs.showdown_active and self.gs.showdown_bf_idx == dst:
-            return
-        if (dst, side) not in self.gs.staged_showdowns:
-            self.gs.staged_showdowns.append((dst, side))
+        self._stage_showdown(self.gs.battlefields.index(bf), side)
 
     def _run_staged_showdowns(self) -> None:
-        """The showdowns effect moves staged, once no chain or showdown is going
-        on (§462), each where the battlefield is still contested."""
+        """The showdowns staged by units entering battlefields (effect moves,
+        plays), once no chain or showdown is going on (§462), each where `side`
+        still contests it. Its units gone, the contest just ends (§190.3.b.1)."""
         gs = self.gs
         while gs.staged_showdowns and not gs.showdown_active and not gs.chain \
                 and gs.pending_move is None:
             dst, side = gs.staged_showdowns.pop(0)
             bf = gs.battlefields[dst]
-            if bf.units_A or bf.units_B:
+            if bf.contested_by != side:
+                continue          # established already, or the other side's contest
+            if bf._units_for(side):
                 self._run_showdown(dst, attacker=side)
+            else:
+                bf.establish_control()
 
     def _flush_pending_move(self) -> None:
         """Start the showdown a held Standard Move owes (see GameState.pending_move):
         called before any action other than another move to the same battlefield,
-        and when the player's actions end."""
+        and when the player's actions end. The movers gone (a move trigger killed
+        them), the contest just ends (§190.3.b.1)."""
         pending = self.gs.pending_move
         if pending is None:
             return
         self.gs.pending_move = None
         dst, side = pending
+        bf = self.gs.battlefields[dst]
+        if not bf._units_for(side) and bf.contested_by == side:
+            bf.establish_control()
+            return
         self._run_showdown(dst, attacker=side)
 
     def _apply_action(self, ap: Player, action: Action, cards_played_this_turn: int = 0) -> None:
@@ -6688,6 +6719,7 @@ class GameLoop:
         # on_showdown_begin (§Diana Lunari): fire for units at the showdown lane,
         # each routed to its controller (attacker first, mirroring focus order).
         sd_bf = self.gs.battlefields[bf_idx]
+        sd_bf.contest(attacker, sd_bf.control())    # contested till it's over (§190.3.b)
         for side in (attacker, self.gs.other(attacker)):
             actor = self.gs.get_player(side)
             opponent = self.gs.get_player(self.gs.other(side))
@@ -6800,6 +6832,7 @@ class GameLoop:
             self._phase_combat_and_conquer_single(bf_idx, attacker)
             return
         bf.combat_designated, bf.combat_started = set(), False   # no combat after all
+        bf.establish_control()                                   # §348.2.a
         if bf.units_A and not bf.units_B:
             # A controls
             if bf.can_score_conquer("A"):
@@ -6954,6 +6987,7 @@ class GameLoop:
                     if u.win_xp_turn == self.gs.turn:
                         self.gs.add_xp(winner, 2)       # Grim Resolve
 
+        bf.establish_control()                          # §468.5
         if bf.can_score_conquer(attacker):
             self._gain_points(attacker, 1, "conquer", bf)
             bf.mark_scored(attacker)
@@ -7014,6 +7048,7 @@ class GameLoop:
         self._recompute_passives()
 
         for bf_idx, bf in enumerate(self.gs.battlefields):
+            bf.establish_control()      # a contest left with no showdown (both sides: the combat's)
             if not bf.contested_this_turn:
                 continue
             if bf.units_A and bf.units_B:

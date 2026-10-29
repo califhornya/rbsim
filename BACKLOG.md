@@ -715,10 +715,23 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   via `gs.disempower_gear_at_end`.
 
 ### G3. Rules systems
-- [ ] Control (§190.4): a side moving alone onto an uncontrolled battlefield
+- [x] Control (§190.4): a side moving alone onto an uncontrolled battlefield
   controls it at once (rules: after its showdown); a holder whose units all
   die mid-showdown loses control at once (rules: at the end of the combat
-  steps).
+  steps). DONE B26 (tests/test_g3_control.py): `Battlefield.contested_by` = the
+  Contested status (§190.3.a); `contest(who, before)` sets it when a unit of a
+  side that didn't hold it arrives (`before` = the side alone there before),
+  and `control()` stays frozen until `establish_control()` (end of a
+  non-combat showdown §348.2.a, end of a combat before its conquer §468.5,
+  end-of-turn `_phase_combat_and_conquer` for one left over). Arrivals call it:
+  `_play_unit` / `_play_token` / `_take_control` via `GameLoop._contest` (it
+  also stages the showdown: `_stage_showdown`, so a unit or token an effect
+  plays to an empty battlefield, Bone Skewer's, Hostile Takeover's get theirs
+  after the chain, §344.2; `_arrive_at` no longer sets `pending_move`), the
+  Standard Move and `_effect_arrival`; `_run_showdown` freezes it at its start
+  too. A staged / pending showdown whose units are gone just ends the contest
+  (§190.3.b.1); one whose contest is already settled is skipped. The swap
+  effect (`place`) doesn't contest (old behaviour).
 - [ ] Declared choices: a later instruction's choice is made after the earlier
   ones resolved on the copy (it can't name a unit the first one kills).
 - [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia

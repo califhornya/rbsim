@@ -543,7 +543,7 @@ baselines ("always taken when possible") in F.]
   both sides have units. A side that moves alone onto an uncontrolled
   battlefield controls it at once (rules: after its showdown ends), and a
   holder whose units all die mid-showdown loses control at once (rules: at
-  the end of the combat steps).
+  the end of the combat steps). [CLOSED B26: BACKLOG G3 Control.]
 - Hunters' Circle's discount applies to units played from hand with the
   UNIT action and DEPLOY gear; not to AMBUSH / REACTION units played in a
   showdown. Piltovan Forge counts Equip as a gear activated ability.

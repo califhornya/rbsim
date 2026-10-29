@@ -102,6 +102,7 @@ def test_last_caress_sends_the_next_unit_anywhere_buffed():
     assert loop._unit_play_destinations(card, "A") == [None, 0, 1]
     unit = loop._play_unit(card, "A", bf=loop.gs.battlefields[1])
     assert unit.might_counters == 1
+    loop._run_staged_showdowns()            # BF1 is ours once its showdown is over (§190.4)
     assert loop._unit_play_destinations(UnitCard(name="After"), "A") == [None, 1]   # used up; BF1 is ours
 
 

@@ -52,6 +52,9 @@ class Battlefield:
 
     last_controller: Optional[str] = None
     held_by: Optional[str] = None      # control(): who controls it by the rules
+    # The side whose unit made it Contested (§190.3.a), until a showdown or
+    # combat here establishes control (establish_control); control is frozen meanwhile.
+    contested_by: Optional[str] = None
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
     # The card a battlefield token here replaced (§439: Ivern Green Father's
@@ -110,18 +113,45 @@ class Battlefield:
         return None
 
     def _note_control(self) -> None:
+        if self.contested_by is not None:
+            return              # §190.4.b: it changes when the contest is over
         sole = self.controller()
         if sole is not None or not (self.units_A or self.units_B):
             self.held_by = sole
 
     def control(self) -> Optional[str]:
         """Who controls this battlefield by the rules (§190.4): the side with
-        units here; while both sides have units (a showdown or combat), the side
-        that held it before, since control can't change mid-contest (§190.4.b).
-        Approximation: a side moving alone onto an uncontrolled battlefield
-        controls it at once, not after its showdown."""
+        units here; while it is Contested (a unit of a side that didn't control
+        it arrived, until its showdown or combat ends), the side that held it
+        before: a side moving alone onto an uncontrolled battlefield controls
+        it after its showdown, a holder whose units all die mid-combat still
+        controls it until the combat's end (§190.4.b, §468.5)."""
         self._note_control()
         return self.held_by
+
+    def contest(self, who: str, before: Optional[str]) -> bool:
+        """`who`'s unit just arrived here (played, moved, or taken control of)
+        when `before` was the side alone here (None: nobody, or both sides).
+        Unless `who` controlled it, it is Contested now (§190.3.a): control stays
+        with its holder until establish_control. Returns whether it became so."""
+        if self.contested_by is not None or not self._units_for(who):
+            return False
+        both_before = before is None and self.units_A and self.units_B
+        held = self.held_by if both_before else before
+        if who == held:
+            return False
+        self.contested_by = who
+        self.held_by = held
+        return True
+
+    def establish_control(self) -> None:
+        """A showdown or combat here is over (§348.2.a, §468.5): the side alone
+        here controls it, nobody if no units are left (§468.5.b). Both sides
+        still here: still Contested (a combat follows)."""
+        if self.units_A and self.units_B:
+            return
+        self.contested_by = None
+        self._note_control()
 
     def begin_turn_reset(self) -> None:
         
