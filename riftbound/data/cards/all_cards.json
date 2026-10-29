@@ -24233,7 +24233,24 @@
     ],
     "effects": [
       {
-        "effect": "add_battlefield"
+        "effect": "add_battlefield",
+        "trigger": "passive",
+        "token_name": "Baron Pit"
+      },
+      {
+        "effect": "cant_be_chosen",
+        "trigger": "passive",
+        "target": "self"
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "friendly_unit",
+        "scope": "board",
+        "amount": 2,
+        "target_filter": {
+          "exclude_self": true
+        }
       }
     ]
   },
@@ -26925,7 +26942,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "move_here_from_anywhere",
+        "trigger": "passive"
+      }
+    ]
   },
   {
     "card_id": "UNL-T02",

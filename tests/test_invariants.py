@@ -11,12 +11,9 @@ Checked:
   * No negative resources — energy / power / points / xp stay >= 0 after every
     action.
   * Chain empty between turn actions.
-
-Not asserted here: strict "one card, one zone" (no aliasing). Baron Nashor's
-add_battlefield already duplicates its played card across hand + battlefield
-(KNOWN_ISSUES) — a pre-existing card-mechanic bug, not a refactor concern. The
-golden fixture pins exact end-states, so any *new* duplication a refactor
-introduces is caught there instead.
+  * One card, one zone — no card object sits in two places at once at game end
+    (Baron Nashor's old add_battlefield left his card in hand too; fixed
+    2026-10-29).
 """
 
 from __future__ import annotations
@@ -128,3 +125,10 @@ def test_card_conservation_and_no_aliasing(ai_a, deck_a, ai_b, deck_b, seed):
     vanished = start_ids - end_ids
     lost = [t[1:] for t in start if t[0] in vanished]
     assert not lost, f"cards vanished: {lost}"
+
+    # One card, one zone.
+    seen: dict = {}
+    for t in end:
+        seen.setdefault(t[0], []).append(t[3])
+    aliased = {i: z for i, z in seen.items() if len(z) > 1}
+    assert not aliased, f"cards in two zones: {[(t[2], aliased[t[0]]) for t in end if t[0] in aliased]}"

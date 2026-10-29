@@ -395,18 +395,32 @@ from the card data (only "REACTION"); needs the printed text.
   you may swap it back (§439.7). Baseline: replace when the Brush helps a
   friendly unit there, swap back when it helps none. Brush and Baron Pit are
   battlefield cards in the registry. Tests in tests/test_green_father.py.
+- [DONE] Baron Nashor and the Baron Pit, rewritten. As he is played, the Pit
+  is added to the board (a third battlefield, if not there already) and he
+  enters there (`GameLoop._add_battlefield_token`, a replacement of where he
+  enters, §369.3), exhausted, contesting it (his player conquers it if nobody
+  is there). He was still played where he was played: Hunters' Circle's [1]
+  off and Riven The Exile's "enter ready" go by that place (FAQ). A second
+  Baron enters where he was played. Other friendly units have +2 [might]
+  everywhere (a passive, it ends when he leaves); enemy spells and abilities
+  can't choose him. Pit: any unit may move there from a battlefield, no
+  GANKING needed (`_can_move_bf_to_bf`); the Pit stays when Baron leaves. His
+  card is in one zone (KNOWN_ISSUES fixed; the invariants test asserts it).
+  Tests in tests/test_baron_nashor.py.
 
-Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
-duplicate card), Svellsongur, Void Hatchling, Irelia
+Svellsongur, Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly
 units for [2] less; the cost path has no hook for it); FAQ rulings for Kharox + Neeko,
-Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser, Hunters'
-Circle + Baron.
+Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
 Equip's unit, discards, effect-move targets, "you may" additional costs always
 paid; the observation doesn't show a held move. A facedown card trashed for
 lack of room is the newest (the player should choose). The net's action space
 has one HIDDEN_PLAY per battlefield: with two facedown cards at Bandle Tree it
-can only play the first (the search and heuristic agents see both).
+can only play the first (the search and heuristic agents see both). The net
+sees two battlefields (encoding N_BF = 2): with the Baron Pit (a third) it
+doesn't see the Pit, and since the base's move index becomes 3, its moves to
+or from the base or Pit map to wrong slots (the search and heuristic agents
+see all three).

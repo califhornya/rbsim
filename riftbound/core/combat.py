@@ -29,7 +29,7 @@ class UnitInPlay:
     gear: list = field(default_factory=list)  # List[GearCard] attached to this unit
     stunned: bool = False
     might_counters: int = 0  # BUFF counters — persistent, max 1 per unit per application
-    aura_might: int = 0  # external aura bonus (e.g. Baron Nashor)
+    aura_might: int = 0  # external Might bonus put on the unit (grant_might)
     passive_might: int = 0  # overlay recomputed each cycle by passive (continuous) abilities
     passive_keywords: set = field(default_factory=set)  # keywords granted by passive abilities
     hidden: bool = False  # reserved for future HIDDEN keyword

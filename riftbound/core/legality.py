@@ -108,8 +108,9 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 for dst in range(n_bf + 1):
                     if dst == src:
                         continue
-                    # bf→bf needs GANKING (§144.4.c).
-                    if src != base_index and dst != base_index and not u.has_keyword("GANKING"):
+                    # bf→bf needs GANKING (§144.4.c), or the Baron Pit.
+                    if src != base_index and dst != base_index and \
+                            not loop._can_move_bf_to_bf(u, gs.battlefields[dst]):
                         continue
                     if dst == base_index and not loop._can_move_to_base(
                             u, None if src == base_index else gs.battlefields[src]):

@@ -5167,24 +5167,10 @@ def _replace_death_with_recall(ctx: "EffectContext", spec: Mapping[str, Any]) ->
 
 @effect("add_battlefield")
 def _add_battlefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    from .battlefield import Battlefield
-    already_exists = any(
-        getattr(bf, "card", None) and getattr(bf.card, "name", "") == "Baron Nashor"
-        for bf in ctx.loop.gs.battlefields
-    )
-    if already_exists:
-        return
-    bf = Battlefield()
-    bf.card = ctx.card
-    ctx.loop.gs.battlefields.append(bf)
-    actor_side = ctx.actor_side
-    for existing_bf in ctx.loop.gs.battlefields[:-1]:
-        units = existing_bf.units_A if actor_side == "A" else existing_bf.units_B
-        for unit in units:
-            unit.aura_might += 2
-    from .combat import UnitInPlay
-    baron_unit = UnitInPlay(card=ctx.card, ready=False)
-    bf.add_unit(actor_side, baron_unit)
+    # "As you play me, add the Baron Pit battlefield token to the board ... If
+    # you do, I enter there" (Baron Nashor) changes where he enters: applied by
+    # GameLoop._play_unit (_add_battlefield_token). A no-op if dispatched.
+    return
 
 
 def _coerce_bool(value: Any) -> bool:

@@ -113,12 +113,11 @@
         "banished": 0,
         "base_gear": 1,
         "base_units": [
-          "Sharkling",
-          "Baron Nashor"
+          "Sharkling"
         ],
-        "deck": 25,
+        "deck": 24,
         "energy": 1,
-        "hand": 4,
+        "hand": 5,
         "power_pool": {
           "CHAOS": 3,
           "FURY": 5

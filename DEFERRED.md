@@ -443,8 +443,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit;
   modeled 2026-10-29, BACKLOG E); Ivern Green Father
   (replacing a battlefield with a Brush token; modeled 2026-10-29, BACKLOG E)
-  and Baron Pit (a token
-  battlefield nothing creates yet); Svellsongur (an Equipment copying its
+  and Baron Pit (a token battlefield Baron Nashor adds; modeled 2026-10-29,
+  BACKLOG E); Svellsongur (an Equipment copying its
   unit's text); Void Hatchling (a replacement on every reveal); Hextech
   Anomaly ("pay any amount of [rune]": paying Power recycles runes, a
   baseline that converts would throw them away); Irelia Graceful (a spell's
@@ -603,14 +603,10 @@ Divergences to fix:
    opponent picks and moves one of *their* units that can actually move (can't pick
    a Hunker Down'd one if another can move; no movable unit → instruction negated);
    they pay any move tax (Gravity Field) themselves, and if they won't, no move.
-3. **Baron Nashor + Riven, the Exile**: `add_battlefield` creates Baron with
-   `ready=False`. FAQ: played to a battlefield you control under Riven, he enters
-   ready at the Baron Pit (both replacement effects apply, §355.2). Baron himself
-   needs rewriting first: `_add_battlefield` gives a one-off permanent +2 to the
-   units on the board then (not a "+2 while I'm here" aura), the Pit's
-   "move here from anywhere" isn't modeled, a second Baron doesn't enter the
-   existing Pit, and the card sits in two zones (KNOWN_ISSUES). Not in the precon
-   decks.
+3. [FIXED 2026-10-29] **Baron Nashor + Riven, the Exile**: FAQ: played to a
+   battlefield you control under Riven, he enters ready at the Baron Pit (both
+   replacement effects apply, §355.2). Baron rewritten (BACKLOG E); test in
+   tests/test_baron_nashor.py.
 
 Already consistent: Standard Move fires exhaust triggers before move triggers (§203).
 
@@ -636,8 +632,9 @@ Rulings on card text not yet implemented (apply when implementing):
 Not verified (check when touching these cards):
 - **Meticulous Restorationist + Mordekaiser, Iron Revenant**: "play me for [order]"
   is an alternate cost of a unit, so Mordekaiser's unit/gear-only Power may pay it.
-- **Hunters' Circle + Baron Nashor**: the reduction applies (location/cost fixed at
-  finalization; Baron's Pit move is a later replacement) → [9][C][C][C].
+- [DONE 2026-10-29] **Hunters' Circle + Baron Nashor**: the reduction applies
+  (location/cost fixed at finalization; Baron's Pit move is a later replacement)
+  → [9][C][C][C]. Test in tests/test_baron_nashor.py.
 
 ## Stage 1+ (the RL environment → self-play)
 `riftbound/ai/env.py` (`RiftboundEnv`) is a working gym-style single-agent env over

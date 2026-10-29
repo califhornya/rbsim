@@ -3597,19 +3597,26 @@ class GameLoop:
         if self.gs.next_units_enter_ready.get(side, 0) > 0:
             self.gs.next_units_enter_ready[side] -= 1    # "the next unit": used up
             ready = True
+        # "As you play me, add the Baron Pit battlefield token to the board if
+        # it's not there already. If you do, I enter there" (Baron Nashor): a
+        # replacement of where he enters (§369.3). He is still played where he
+        # was played: his cost (Hunters' Circle) and "enter ready" (Riven The
+        # Exile) are decided there.
+        pit = self._add_battlefield_token(card)
+        enter = pit or bf
         unit = UnitInPlay(card=card, ready=ready)
         if last_caress:
             unit.might_counters = max(unit.might_counters, 1)   # "When you play it, BUFF it"
-        if bf is None:
+        if enter is None:
             ap.base_units.append(unit)
         else:
-            bf.add_unit(side, unit)
+            enter.add_unit(side, unit)
         self.units_played += 1
         # B1: optional additional cost (kicker), paid before resolution.
         self._try_pay_additional_costs(card, ap)
         self._show_off(card, ap)
         self._count_card_played(card, side)
-        self._resolve_card_effects(card, bf or self.gs.battlefields[0], ap, opponent)
+        self._resolve_card_effects(card, enter or self.gs.battlefields[0], ap, opponent)
 
         # WEAPONMASTER (§747): choose an Equipment you control, pay its real
         # Equip cost reduced by [A] (1 Power of any domain), and attach it to
@@ -3636,7 +3643,32 @@ class GameLoop:
             self._unit_played_here(bf, side, unit)
         self._unit_play_draw(side)
         self._vision(card, side)
+        if pit is not None:
+            self._arrive_at(pit, side, None)     # he contests the new battlefield
         return unit
+
+    def _add_battlefield_token(self, card: Card) -> Optional[Battlefield]:
+        """ "As you play me, add the Baron Pit battlefield token to the board if
+        it's not there already" (Baron Nashor): the battlefield added, or None."""
+        spec = CARD_REGISTRY.get(card.name)
+        for es in (spec.effects if spec else ()):
+            if es.effect != "add_battlefield":
+                continue
+            name = str(es.params.get("token_name", "Baron Pit"))
+            if any(b.card is not None and b.card.name == name for b in self.gs.battlefields):
+                return None
+            bf = Battlefield(card=CARD_REGISTRY.get(name).instantiate())
+            self.gs.battlefields.append(bf)
+            if self.verbose:
+                print(f"  {card.name} adds BF{len(self.gs.battlefields) - 1} {name}")
+            return bf
+        return None
+
+    def _can_move_bf_to_bf(self, unit: UnitInPlay, dst: Battlefield) -> bool:
+        """A unit moves from a battlefield to another with GANKING (§144.4.c), or
+        to one that says "Units can move here from anywhere" (Baron Pit)."""
+        return unit.has_keyword("GANKING") or (
+            dst.card is not None and self._has_effect(dst.card, "move_here_from_anywhere"))
 
     def _vision(self, card: Card, side: str) -> None:
         """VISION (migrated to PREDICT 1): "When you play me, look at the top card
@@ -4341,7 +4373,8 @@ class GameLoop:
                 unit = units[idx] if isinstance(idx, int) and 0 <= idx < len(units) else None
             if unit is None or not unit.ready or unit.cant_move_turn == self.gs.turn:
                 return
-            if src_bf is not None and dst != base_index and not unit.has_keyword("GANKING"):
+            if src_bf is not None and dst != base_index and \
+                    not self._can_move_bf_to_bf(unit, self.gs.battlefields[dst]):
                 return    # bf -> bf needs GANKING (§144.4.c)
             if dst == base_index and not self._can_move_to_base(unit, src_bf):
                 return

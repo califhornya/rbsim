@@ -50,18 +50,12 @@ convention). Each entry: what, where, why deferred.
   a regression that starts leaking *non-spell* cards fires immediately. Fix later by
   appending the spell card to `owner.trash` after resolution in `_run_chain`.
 
-### (DEFERRED) Baron Nashor's add_battlefield duplicates the played card
-- **Where:** `effects.py` `_add_battlefield` (~:675-694). Baron Nashor's on-play
-  effect creates a new `Battlefield`, sets `bf.card = ctx.card`, and spawns a
-  `UnitInPlay(card=ctx.card)` on it — but the same played card object also remains
-  reachable from the player's hand, so one `Card` occupies two zones (hand +
-  battlefield) at once (observed at `tests/test_invariants.py` seed 1, pyke vs diana).
-- **Impact:** card aliasing / duplication for this one card mechanic. Deterministic,
-  so the golden fixture pins the (buggy) end-state; the invariant test therefore does
-  NOT assert global "one card, one zone" — it would fail on this pre-existing bug.
-- **Deferred:** card-mechanic fix, out of scope for Step 2. Revisit with the Step 3
-  card-completion work; likely the UNIT play path's hand-removal and the on-play
-  battlefield spawn need reconciling (remove the played card from hand exactly once).
+### (FIXED 2026-10-29) Baron Nashor's add_battlefield duplicated the played card
+- **Was:** his on-play effect made a new `Battlefield` with `bf.card` = Baron and a
+  second `UnitInPlay` of him on it, so one `Card` sat in two zones.
+- **Now:** "As you play me" is applied by `GameLoop._play_unit`
+  (`_add_battlefield_token`): the Baron Pit token is added and he enters there,
+  once. `tests/test_invariants.py` now asserts "one card, one zone".
 
 ### (DEFERRED) No stepwise engine → MCTS can't expand arbitrary mid-game nodes
 - **What:** the pausable-engine work (Step 2) delivered `GameState.clone()`,
