@@ -73,8 +73,9 @@ class UnitInPlay:
     double_damage_turn: int = -1     # Lotus Trap: "Double all damage dealt to it this turn"
     damage_shield: int = 0           # Ki Barrier: "Prevent the next 7 damage ... this turn"
     conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
-    # Sanction: "Empower a unit. Disempower it at end of turn" (and the reverse).
-    empower_flip_at_end: bool = False
+    # Sanction: "Empower a unit. Disempower it at end of turn" (False) and the
+    # reverse (True); applied by GameLoop._end_turn.
+    empower_at_end: Optional[bool] = None
     # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
     # end of that turn.
     borrowed: Optional[tuple] = None
@@ -101,9 +102,6 @@ class UnitInPlay:
         self.base_might_override = None
         self.moves_this_turn = 0
         self.damage_shield = 0
-        if self.empower_flip_at_end:
-            self.empowered = not self.empowered
-            self.empower_flip_at_end = False
 
     @property
     def might(self) -> int:

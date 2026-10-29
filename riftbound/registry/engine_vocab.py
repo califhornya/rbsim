@@ -88,6 +88,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_revealed",                               # revealed from your deck (Undertitan)
     "on_you_move_enemy",                         # you move an enemy unit (Blast Cone)
     "from_trash",                                # may be played from your trash (Undying Legion)
+    "on_ability_played",                         # you play an activated ability (Nasus Curator of the Sands)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -144,7 +145,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "opponent_played_n_spells_this_turn",  # n: "if an opponent has played another spell this turn"
     "triggering_card_matches",           # filter: "when you play a spell / a card with Energy cost [7]+"
     "triggering_card_not_from_hand",     # "when you play a card from anywhere other than your hand"
-    "moved_to_battlefield",              # on_move: "when I move to a battlefield"
+    "ability_energy_at_least",           # n: "an activated ability with Energy cost [7] or more" (base cost)
+    "moved_to_battlefield",             # on_move: "when I move to a battlefield"
     "moved_from_battlefield",            # on_move: "when I move from a battlefield"
     "all_of",                            # conditions: [...] all hold
     "died_alone",                        # DEATHKNELL "if I died alone"

@@ -28453,12 +28453,17 @@
         "modes": [
           {
             "effect": "empower_self",
-            "target": "friendly_unit",
+            "target": "unit",
+            "where": "anywhere",
             "until_end_of_turn": true
           },
           {
             "effect": "disempower",
-            "target": "enemy_unit",
+            "target": "unit",
+            "where": "anywhere",
+            "target_filter": {
+              "is_empowered": true
+            },
             "until_end_of_turn": true
           }
         ]
@@ -29646,7 +29651,7 @@
     "effects": [
       {
         "effect": "sacrifice_for_points",
-        "trigger": "on_start_of_turn",
+        "trigger": "on_start_of_main",
         "count": 3,
         "amount": 1,
         "optional": true
@@ -31118,7 +31123,7 @@
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "EMPOWER [2] [chaos] ([2] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, you may choose a unit with Energy cost no more than [3] and Power cost no more than [rune]. Play it to your base, ignoring its cost.",
+    "effect": "EMPOWER [2] [chaos] ([2] [chaos]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, you may choose a unit in your trash with Energy cost no more than [3] and Power cost no more than [rune]. Play it to your base, ignoring its cost.",
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
@@ -32805,6 +32810,21 @@
               "energy_at_least": 7,
               "not_spell": true
             }
+          }
+        }
+      },
+      {
+        "effect": "ready_runes",
+        "trigger": "on_ability_played",
+        "amount": 2,
+        "optional": true,
+        "cost": {
+          "tap": true
+        },
+        "condition": {
+          "type": "ability_energy_at_least",
+          "params": {
+            "n": 7
           }
         }
       }

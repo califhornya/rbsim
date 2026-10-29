@@ -925,7 +925,7 @@ def test_bottled_constellation_kills_three_others_for_a_point():
     a.base_gear.append(bottle)
     a.base_units.extend([_unit("U1", 1), _unit("U2", 1)])
     a.base_gear.append(GearCard(name="G1"))
-    loop._fire_turn_trigger("on_start_of_turn", "A")
+    loop._fire_turn_trigger("on_start_of_main", "A")
     assert loop.gs.points_A == 1 and a.base_gear == [bottle] and not a.base_units
 
 

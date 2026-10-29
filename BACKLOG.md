@@ -660,17 +660,35 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   baseline: an enemy at a battlefield); the per-turn `_trash_replay` grant is
   gone. Shared alternate-cost payment `_can_pay_play_for` / `_pay_play_for`
   (trash_play entries too).
-- [ ] Vendetta: Nasus Curator of the Sands (not on activated abilities costing
+- [x] Vendetta: Nasus Curator of the Sands (not on activated abilities costing
   [7]+), Tail-Cloaked Matriarch (reads the unit from your trash), Decree of
   Focus (spells' choices only, not abilities'), Bottled Constellation (start of
   turn, not the Main Phase: `on_start_of_main` exists now), Sanction (empowers
-  a friendly / disempowers an enemy unit only; text: any unit).
+  a friendly / disempowers an enemy unit only; text: any unit). DONE B24
+  (tests/test_g2_vendetta.py; texts checked on the card images): Nasus: trigger
+  `on_ability_played`, condition `ability_energy_at_least`, fired by
+  `GameLoop._note_ability_played(side, source, energy)` once an ability's costs
+  are paid (equip, gear, battlefield, unit/legend abilities) with its base Energy
+  cost (§206.1: Frostcoat Mother's EMPOWER [12] counts at any discount).
+  Matriarch: the printed card says "a unit in your trash": the engine was right,
+  the data text is fixed. Decree of Focus: the card says "an enemy Fury spell",
+  no abilities: right already; but a domain check read only a card's first
+  domain: `effects._card_domains(card)` (all of them; Tibbers is Fury and
+  Chaos), used by Decree of Focus, the `domain` unit filter and `_gear_matches`
+  (Decree of Unity / Rage / Insight). Bottled Constellation: `on_start_of_main`;
+  any friendly unit or gear (`_units_or_gear_to_kill`, attached and deployed
+  too), killed by the shared `GameLoop._kill_unit_or_gear(side, x)`. Sanction:
+  any unit, mode 2 only an EMPOWERED one (baseline: empower a friendly one not
+  yet empowered, disempower an enemy); `UnitInPlay.empower_at_end` (True/False,
+  was a toggle `empower_flip_at_end`) applied by `_resolve_empower_at_end` at
+  the end of turn; an empower there fires "When I become EMPOWERED".
 - [ ] Others: Jhin Meticulous Killer ("you may play me for [mind]": not
   encoded, from D), Hunters' Circle (not on AMBUSH / REACTION units played in
   a showdown), Abandoned Hall / Forgotten Library ("spent" counts Energy, not
   Power), Master Yi Wuju Bladesman / Forbidding Waste (combat damage only, not
   MIGHTY checks during the combat), Resonating Strike ("a unit at a different
-  location": check).
+  location": check), Tornado Warrior ("empower something here": a friendly
+  unit only; text: any unit or gear here, found B24).
 
 ### G3. Rules systems
 - [ ] Control (§190.4): a side moving alone onto an uncontrolled battlefield
@@ -688,8 +706,8 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   to one. Rules: every ability but an Add goes on the chain, its choices
   declared, and can be reacted to. Cards hit: Not So Fast / Repulse ("counter
   an enemy spell or ability that chooses ..." reads `ChainItem.declared` of
-  spells only: `effects._chose_mine`), Decree of Focus (`_fury_threatened`,
-  G2 Vendetta), any REACTION played in answer to an ability, Death from
+  spells only: `effects._chose_mine`), any REACTION played in answer to an
+  ability (Decree of Focus is not hit: its card says spells), Death from
   Below's reflexive "you may play this from your trash" (§388.4: on the chain;
   here `_offer_play_from_trash` at once, B23).
 - [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear

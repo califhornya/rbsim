@@ -45,7 +45,7 @@ def test_bottled_constellations_kills_in_base_arent_here():
     _battlefield(loop, 0, "Black Rose Sanctum")
     a.base_gear.append(CARD_REGISTRY["Bottled Constellation"].instantiate())
     a.base_units.extend([_unit("U1", 1), _unit("U2", 1), _unit("U3", 1)])
-    loop._fire_turn_trigger("on_start_of_turn", "A")
+    loop._fire_turn_trigger("on_start_of_main", "A")
     assert loop.gs.points_A == 1 and not a.base_units
 
 

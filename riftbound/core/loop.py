@@ -46,6 +46,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_friendly_moves_from_here", "on_attached", "on_enemy_attack", "on_you_defend",
     "on_unit_dies_here", "granted_to_units_here", "on_recycle_rune", "trash_on_conquer",
     "on_buff_spent", "on_friendly_becomes_mighty", "on_revealed", "on_you_move_enemy", "from_trash",
+    "on_ability_played",
 })
 _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes", "you_have_n_or_more_units_here",
@@ -69,7 +70,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
     "fewer_runes_than_opponent",
     "cards_played_this_turn_exactly", "opponent_played_n_spells_this_turn",
-    "triggering_card_matches", "triggering_card_not_from_hand",
+    "triggering_card_matches", "triggering_card_not_from_hand", "ability_energy_at_least",
     "moved_to_battlefield", "moved_from_battlefield",
     "all_of", "died_alone", "enemy_choices_this_turn_at_least",
     "not_your_turn", "triggering_card_from_zone", "played_to_controlled_battlefield",
@@ -2231,6 +2232,9 @@ class GameLoop:
             from .effects import _zone_effect_card_ok
             trig = extra.get("triggering_card")
             return trig is not None and _zone_effect_card_ok(trig, {"target_filter": params.get("filter") or {}})
+        if ctype == "ability_energy_at_least":
+            # "When you play an activated ability with Energy cost [7] or more".
+            return int(extra.get("ability_energy", 0) or 0) >= _threshold(0)
         if ctype == "triggering_card_not_from_hand":
             # "When you play a card from anywhere other than your hand".
             return extra.get("triggering_card") is not None and extra.get("from_zone", "hand") != "hand"
@@ -3864,6 +3868,13 @@ class GameLoop:
         if isinstance(card, SpellCard):
             gs.spells_played_this_turn[side] = gs.spells_played_this_turn.get(side, 0) + 1
 
+    def _note_ability_played(self, side: str, source, energy: int) -> None:
+        """ "When you play an activated ability with Energy cost [7] or more"
+        (Nasus Curator of the Sands): after its costs are paid, before it
+        resolves; `energy` is its base cost, discounts aside (§206.1)."""
+        self._fire_units_trigger("on_ability_played", side, triggering_card=source,
+                                 extra={"ability_energy": energy})
+
     def _note_card_played(self, card: Card, side: str, from_zone: str = "hand") -> None:
         """Count a played card and fire its owner's "when you play a card" abilities."""
         self._count_card_played(card, side)
@@ -5429,21 +5440,27 @@ class GameLoop:
                 victim = self._friendly_to_kill(side, unit)
                 if victim is not None:
                     victim = self.choose("cost_unit:kill", side, others, victim)
-            if isinstance(victim, UnitInPlay):
-                where = self._locate_unit(victim)
-                if where[1] is None:
-                    ap.base_units.remove(victim)
-                else:
-                    where[1].remove_unit(side, victim)
-                self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
-                                   in_base=where[1] is None)
-            elif victim is not None:
-                deployed = next((b for b in self.gs.battlefields
-                                 if any(victim is dg for dg in b.gear_for(side))), None)
-                if deployed is not None:
-                    self._kill_deployed_gear(deployed, side, [victim])
-                else:
-                    self._remove_gear(victim, ap)
+            if victim is not None:
+                self._kill_unit_or_gear(side, victim)
+
+    def _kill_unit_or_gear(self, side: str, victim) -> None:
+        """Kill one of `side`'s units or gear (in base, at a battlefield,
+        attached or deployed), as a cost or an effect."""
+        if isinstance(victim, UnitInPlay):
+            where = self._locate_unit(victim)
+            if where[1] is None:
+                self.gs.get_player(side).base_units.remove(victim)
+            else:
+                where[1].remove_unit(side, victim)
+            self._route_deaths([(victim, side)], where[1] or self.gs.battlefields[0],
+                               in_base=where[1] is None)
+            return
+        deployed = next((b for b in self.gs.battlefields
+                         if any(victim is dg for dg in b.gear_for(side))), None)
+        if deployed is not None:
+            self._kill_deployed_gear(deployed, side, [victim])
+        else:
+            self._remove_gear(victim, self.gs.get_player(side))
 
     @staticmethod
     def _discardable(ap: Player, parsed: dict) -> list:
@@ -5588,6 +5605,7 @@ class GameLoop:
         if entry["type"] == "equip":
             gear = entry["gear"]
             cost = self._equip_cost(gear)              # the EQUIP-ability cost (§744)
+            base_energy = cost["energy"]
             cost = dict(cost, energy=max(0, cost["energy"] - self._gear_ability_discount(side)))
             target_unit = None
             if self._has_effect(gear, "equip_less_by_might"):
@@ -5599,6 +5617,7 @@ class GameLoop:
             if not self._pay_equip(ap, cost):
                 return
             self._note_gear_ability(side)
+            self._note_ability_played(side, gear, base_energy)
             # A cost that kills a friendly unit may have taken one.
             units = self._friendly_units_of(side)
             if not units:
@@ -5642,6 +5661,7 @@ class GameLoop:
             if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
             self.gs.once_per_turn_used[(id(bf.card), side, "bf_ability")] = self.gs.turn
+            self._note_ability_played(side, bf.card, parsed["energy"])
             EFFECT_REGISTRY[eff.effect](EffectContext(self, bf.card, ap, opponent, bf,
                                                       {"battlefield": bf}), eff.merged_params())
             if self.verbose:
@@ -5677,6 +5697,7 @@ class GameLoop:
                 self._remove_gear(gear, ap)
             if parsed["banish_self"]:
                 self._remove_gear(gear, ap, banish=True)      # "Banish this" (The Zero Drive)
+            self._note_ability_played(side, gear, parsed["energy"])
             handler = EFFECT_REGISTRY.get(eff.effect)
             if handler is None:
                 return
@@ -5692,6 +5713,7 @@ class GameLoop:
         eff = entry["eff"]
         if eff.params.get("once_per_turn"):
             self.gs.once_per_turn_used[(id(unit.card), "activated", eff.effect)] = self.gs.turn
+        base_energy = self._parse_activated_cost(eff.cost)["energy"]
         parsed = self._adjust_ability_cost(unit, eff, self._parse_activated_cost(eff.cost), side)
         # Pay.
         if not self._can_pay_energy_and_generic(ap, self._unit_ability_cost(ap, unit, parsed)["energy"],
@@ -5718,6 +5740,7 @@ class GameLoop:
         if parsed["sacrifice"] and unit is not None:
             self._remove_unit_from_play(unit, side)
             self._to_trash(ap, unit.card)
+        self._note_ability_played(side, unit.card if unit else None, base_energy)
 
         bf = self.gs.battlefields[entry["bf_idx"]] if entry["bf_idx"] is not None \
             else self.gs.battlefields[0]
@@ -6085,6 +6108,18 @@ class GameLoop:
             unit.empower_times = 0
         else:
             card.empowered = False
+
+    def _resolve_empower_at_end(self) -> None:
+        """Sanction's "Disempower it at end of turn" / "Empower it at end of
+        turn": whatever happened to it meanwhile; an empower fires its "When I
+        become EMPOWERED"."""
+        for unit in self._all_units_in_play():
+            then, unit.empower_at_end = unit.empower_at_end, None
+            if then is True:
+                where = self._locate_unit(unit)
+                self._empower(unit.card, where[0] if where else self.gs.active)
+            elif then is False:
+                self._disempower(unit.card)
 
     def _locate_unit_or_gear(self, card: Card, side: str) -> bool:
         """Whether `card` is in play for `side` (a unit, or a gear in base or
@@ -7126,6 +7161,7 @@ class GameLoop:
         gs.in_ending_phase = True
         self._fire_turn_trigger("on_end_of_turn", gs.active)
         self._resolve_delayed_effects()
+        self._resolve_empower_at_end()
         self._return_borrowed_units()
 
         # Expiration step (§317.2): heal all units, and "this turn" Might bonuses

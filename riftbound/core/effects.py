@@ -2908,34 +2908,22 @@ def _play_self_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
 @effect("sacrifice_for_points")
 def _sacrifice_for_points(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "You may kill 3 other friendly units and/or gear to score 1 point"
-    (Bottled Constellation). Baseline: only when `count` tokens (units or gear)
-    can pay it, so no real card is thrown away."""
+    (Bottled Constellation): any of them, in base, at a battlefield, attached
+    or deployed. Baseline: only when `count` tokens (units or gear) can pay it,
+    so no real card is thrown away."""
     loop = ctx.loop
-    me, side = ctx.actor, ctx.actor_side
+    side = ctx.actor_side
     count = int(spec.get("count", 3))
-    all_units = [u for u in _units_at(ctx, side, "anywhere") if u.card is not ctx.card]
-    all_gear = [g for g in me.base_gear if g is not ctx.card]
-    if len(all_units) + len(all_gear) < count:
+    order = [x for x in loop._units_or_gear_to_kill(side, None) if getattr(x, "card", x) is not ctx.card]
+    if len(order) < count:
         return
-    units = [u for u in all_units if u.is_token]
-    gear = [g for g in all_gear if getattr(g, "is_token", False)]
-    if not loop.choose(_kind("optional", spec), side, [True, False],
-                       len(units) + len(gear) >= count, ctx.card):
+    tokens = [x for x in order if getattr(x, "is_token", False) or getattr(getattr(x, "card", x), "is_token", False)]
+    if not loop.choose(_kind("optional", spec), side, [True, False], len(tokens) >= count, ctx.card):
         return
-    # Which ones (baseline: tokens first, then the weakest units).
-    from .combat import UnitInPlay
-    order = gear + units + sorted([u for u in all_units if not u.is_token], key=lambda u: u.might) + \
-        [g for g in all_gear if not getattr(g, "is_token", False)]
+    # Which ones (baseline: tokens first, then gear by cost, units by Might).
     picked = loop.choose_many("cost_unit:" + str(spec.get("effect")), side, order, order[:count], ctx.card)
-    for g in [x for x in picked if not isinstance(x, UnitInPlay)]:
-        loop._remove_gear(g, me)
-    for u in [x for x in picked if isinstance(x, UnitInPlay)]:
-        where = loop._locate_unit(u)
-        if where[1] is None:
-            me.base_units.remove(u)
-        else:
-            where[1].remove_unit(side, u)
-        loop._route_deaths([(u, side)], where[1] or loop.gs.battlefields[0], in_base=where[1] is None)
+    for x in picked[:count]:
+        loop._kill_unit_or_gear(side, x)
     _score_point(ctx, {"amount": int(spec.get("amount", 1))})
 
 
@@ -3725,13 +3713,22 @@ def _zone_card_matches(card, tf: Mapping[str, Any]) -> bool:
     return True
 
 
+def _card_domains(card) -> set:
+    """Every domain of a card, not only its first one (`card.domain`): "Fury
+    Chaos" Tibbers is a Fury unit and a Chaos unit."""
+    spec = CARD_REGISTRY.get(getattr(card, "name", ""))
+    raw = str((spec.raw.get("domain") if spec is not None else None) or "")
+    first = getattr(getattr(card, "domain", None), "name", None)
+    return {p.upper() for p in raw.split()} | ({first} if first else set())
+
+
 def _fury_threatened(ctx: "EffectContext", unit) -> bool:
     """ "a friendly unit that's in combat with an enemy Fury unit or that's being
     chosen by an enemy Fury spell" (Decree of Focus)."""
     loop = ctx.loop
 
     def fury(card):
-        return getattr(getattr(card, "domain", None), "name", "") == "FURY"
+        return "FURY" in _card_domains(card)
     where = loop._locate_unit(unit)
     if where is not None and where[1] is not None and loop._in_combat(unit) and any(
             fury(e.card) for e in where[1]._units_for(loop.gs.other(where[0]))):
@@ -3788,9 +3785,8 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     if tf.get("is_attacking") and not ctx.loop._is_attacking(unit):
         return False                     # "Stun an attacking unit" (Thwonk!)
     if tf.get("domain"):
-        # "an enemy Calm unit" (the Decrees): the card's domain, not a tag.
-        dom = getattr(card, "domain", None)
-        if getattr(dom, "name", str(dom)).upper() != str(tf["domain"]).upper():
+        # "an enemy Calm unit" (the Decrees): the card's domains, not a tag.
+        if str(tf["domain"]).upper() not in _card_domains(card):
             return False
     if tf.get("is_empowered") and not unit.empowered:
         return False                     # "Your units that are EMPOWERED" (Aurok General)
@@ -4261,8 +4257,7 @@ def _gear_matches(gear_card, tf: Mapping[str, Any]) -> bool:
     if "energy_at_least" in tf and int(getattr(gear_card, "cost_energy", 0) or 0) < int(tf["energy_at_least"]):
         return False
     if tf.get("domain"):                # "an enemy Chaos unit or gear" (Decree of Unity)
-        dom = getattr(gear_card, "domain", None)
-        return getattr(dom, "name", str(dom)).upper() == str(tf["domain"]).upper()
+        return str(tf["domain"]).upper() in _card_domains(gear_card)
     return True
 
 
@@ -5132,27 +5127,29 @@ def _empower_self(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if gear:
             loop._empower(max(gear, key=_zone_value), ctx.actor_side)
     else:
-        for unit in _resolve_targets(ctx, {**spec, "target": target}):
+        # "Empower a unit" (Sanction): baseline, a friendly one not yet empowered.
+        for unit in _resolve_targets(ctx, {**spec, "target": target}, prefer=lambda u: (u.empowered, -u.might)):
             where = loop._locate_unit(unit)
             loop._empower(unit.card, where[0] if where else ctx.actor_side)
-            if spec.get("until_end_of_turn") and not unit.empower_flip_at_end:
-                unit.empower_flip_at_end = True     # Sanction: "Disempower it at end of turn"
+            if spec.get("until_end_of_turn"):
+                unit.empower_at_end = False         # Sanction: "Disempower it at end of turn"
 
 
 @effect("disempower")
 def _disempower(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """Remove the empowered status from the resolved target(s). Used as an
-    instruction or a cost ("disempower a unit that's EMPOWERED")."""
+    """Remove the empowered status from the resolved target(s): "Disempower a
+    unit that's EMPOWERED" (Sanction; baseline: an enemy one)."""
     target = str(spec.get("target", "enemy_unit"))
     if target in ("self", "this"):
         ctx.loop._disempower(ctx.card)
         return
-    cands = _resolve_targets(ctx, {**spec, "target": target, "scope": "all"})
-    cands = [u for u in _choosable(ctx, cands) if u.empowered] if spec.get("only_empowered", True) else cands
-    for u in cands[:1] if str(spec.get("scope", "single")) == "single" else cands:
-        u.empowered, u.empower_times = False, 0
+    tf = dict(spec.get("target_filter") or {})
+    if spec.get("only_empowered", True):
+        tf["is_empowered"] = True
+    for u in _resolve_targets(ctx, {**spec, "target": target, "target_filter": tf}, bias="enemy"):
+        ctx.loop._disempower(u.card)
         if spec.get("until_end_of_turn"):
-            u.empower_flip_at_end = True             # "Empower it at end of turn"
+            u.empower_at_end = True                  # "Empower it at end of turn"
 
 
 @effect("attach_gear")
