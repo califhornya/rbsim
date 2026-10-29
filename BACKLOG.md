@@ -797,16 +797,37 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   DEFLECT and her refunds, §358 then triggers), so "spent" has her discount
   off. Copies (declaring, lookahead) give no credit. Golden regenerated (Ride
   the Wind now declares before Ravenbloom Student's +1); smoke 900 games clean.
-- [ ] Abilities on the chain (§328, §337.2, from G2 Spiritforged): activated
-  and triggered abilities resolve at once (`_apply_activated_ability`,
-  `_resolve_triggered_effects`; `_reaction_step` "kept"), so nobody can respond
-  to one. Rules: every ability but an Add goes on the chain, its choices
-  declared, and can be reacted to. Cards hit: Not So Fast / Repulse ("counter
-  an enemy spell or ability that chooses ..." reads `ChainItem.declared` of
-  spells only: `effects._chose_mine`), any REACTION played in answer to an
-  ability (Decree of Focus is not hit: its card says spells), Death from
-  Below's reflexive "you may play this from your trash" (§388.4: on the chain;
-  here `_offer_play_from_trash` at once, B23).
+- [x] Abilities on the chain, part 1: activated abilities (§377.3, §337.2).
+  They resolved at once, so nobody could respond to one. DONE B31
+  (tests/test_g3_abilities_on_chain.py): `_apply_activated_ability` pays the
+  cost, then `GameLoop._activate` makes a `ChainItem` with `ability` (its
+  EffectSpec, entry kind, base Energy, context extra, EQUIP's unit; `card` =
+  its source) and puts it on the chain, choices declared like a spell's
+  (`_declare_choices` runs `_resolve_ability` on the copy; EQUIP's unit, a
+  target §818.1.b.1, declared as chosen); on an empty chain (main phase,
+  showdown) it runs the chain, so the opponent may react. An Add (`_ADD_VERBS`:
+  gain_energy, add_power, gain_power_any_domain, add_earmarked_*, convert_x)
+  resolves at once and keeps priority / focus. `_resolve_ability` (also from
+  `_resolve_chain`, no trash, not counted as a spell) resolves it whether or
+  not its source is still there; a declared target gone -> not followed; EQUIP
+  needs its gear at base and its unit still ours. "When you play / use an
+  ability" (Nasus Curator, Prize of Progress, EQUIP included) fires as it
+  resolves (§377.2.a). Showdown: an ability's chain passes focus (§346), an Add
+  keeps it. Not So Fast / Repulse counter an enemy ability choosing ours
+  (`_counter_targets`; Mel's uncounterable covers abilities); Mystic Reversal
+  and Decree of Focus see spells only. A triggered effect's choices no longer
+  take an ability's (or spell's) declared slots (`_slot` None inside
+  `_resolve_triggered_effects`). Coach: "abilità di X" on the chain, the
+  notice "L'avversario ha usato abilità di X". Golden regenerated; smoke 60
+  games: 674 chained, 332 Adds, 37 reactions over an ability.
+- [ ] Abilities on the chain, part 2: triggered abilities (§383.3, §388).
+  They resolve at once (`_resolve_triggered_effects`), so nobody can respond
+  and Not So Fast / Repulse can't counter one that chooses ours. Rules: each
+  goes on the chain (controller orders simultaneous ones, §383.3.d; a leading
+  "you may" decided as it is finalized, §383.3.a), choices declared, priority
+  after the current task (HOT FEPR §334). Also Death from Below's reflexive
+  "you may play this from your trash" (§388.4: on the chain; here
+  `_offer_play_from_trash` at once, B23).
 - [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
   don't see a unit gear); Svellsongur (copied activated abilities aren't
   listed twice, a passive keyword grant stays one instance, Karthus-style

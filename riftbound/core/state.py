@@ -29,6 +29,11 @@ class ChainItem:
     # Its owner while another player controls it (Mystic Reversal, Rebuttal):
     # the card still goes to the owner's trash.
     owner: Optional[str] = None
+    # An activated ability on the chain (§377.3), `card` its source:
+    # {"eff": its EffectSpec (None: EQUIP), "kind": the activatable_abilities
+    # entry type, "energy": its base Energy cost, "extra": context extra,
+    # "target": EQUIP's unit}. None for a played card.
+    ability: Optional[dict] = None
 
 
 @dataclass

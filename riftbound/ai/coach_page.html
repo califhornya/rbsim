@@ -487,7 +487,7 @@ function renderSide() {
   $("#chain").innerHTML = chain.slice().reverse().map((c) => {
     REF[`chain:${c.name}`] = { name: c.name };
     return `<div class="it"><div class="slot small" data-ref="chain:${esc(c.name)}">${face(c.name)}</div>
-    <div><b>${esc(c.name)}</b><div class="hint">${c.owner === "me" ? "tua" : "dell'avversario"}</div>${c.chose ? `<div class="hint">${esc(c.chose)}</div>` : ""}</div></div>`; }).join("");
+    <div><b>${c.ability ? "Abilità di " : ""}${esc(c.name)}</b><div class="hint">${c.owner === "me" ? "tua" : "dell'avversario"}</div>${c.chose ? `<div class="hint">${esc(c.chose)}</div>` : ""}</div></div>`; }).join("");
   // log
   let html = "";
   (S.events || []).forEach((e) => {

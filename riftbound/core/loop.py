@@ -358,6 +358,11 @@ _PRIORITY_ROUNDS_CAP = 200
 # looked at in the deck, a "you may") are made as it resolves.
 _DECLARED_CHOICES = ("target", "mode", "destination", "player", "battlefield", "tag")
 
+# Activated abilities that Add resources: they resolve at once, nobody can
+# react to them (§337.2, §430.2.a). Every other one goes on the chain.
+_ADD_VERBS = frozenset({"gain_energy", "add_power", "gain_power_any_domain",
+                        "add_earmarked_energy", "add_earmarked_power", "convert_x"})
+
 
 class _Ignored(Exception):
     """An instruction whose declared target is no longer legal as the spell
@@ -436,6 +441,9 @@ class GameLoop:
         # on, the ids of what was put back there (_restore_declared_board).
         self._declare_board: Optional[list] = None
         self._ghost_ids: Optional[set] = None
+        # Activated abilities put on the chain so far (_activate): a showdown
+        # step tells one from an Add, which keeps focus.
+        self._chained_abilities = 0
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -538,7 +546,8 @@ class GameLoop:
             self.on_choice(kind, side, len(options), got, source)
 
     def _put_on_chain(self, item: ChainItem) -> None:
-        """A spell goes on the chain with its choices made (§355)."""
+        """A spell or an activated ability goes on the chain with its choices
+        made (§355)."""
         self.gs.chain.append(item)
         item.declared = self._declare_choices(item)
         if item.declared is not None:
@@ -553,7 +562,8 @@ class GameLoop:
             if units:
                 self._note_chosen(item.card, item.player, units)
             item.choices_noted = True
-        self._spell_finalized(item.card)
+        if item.ability is None:
+            self._spell_finalized(item.card)
 
     def _spell_has_targets(self, card: Card, side: str, lane: int) -> bool:
         """§355.8: a spell can be put on the chain (aimed at battlefield `lane`)
@@ -587,9 +597,13 @@ class GameLoop:
         there), its player choosing as usual (the chooser: the coach, the
         search) and the choices that are targets, modes, move destinations or
         players are kept, mapped back to this game's objects. A copy can't
-        declare (its spells resolve choosing then), and a lookahead doesn't."""
+        declare (its spells resolve choosing then), and a lookahead doesn't.
+        An ability declares the same way; EQUIP's unit was chosen as it was
+        paid for (§818.1.b.1: a target)."""
+        if item.ability is not None and item.ability["kind"] == "equip":
+            return {(0, 0, 0): ("equip", 1, item.ability["target"])}
         if getattr(self, "_dry_run", False) or getattr(self, "_lookahead", False) \
-                or not isinstance(item.card, SpellCard):
+                or (item.ability is None and not isinstance(item.card, SpellCard)):
             return None
         import copy
         gs = self.gs
@@ -609,7 +623,8 @@ class GameLoop:
             # asked again as the spell resolves. (`_loop` may be a copy of
             # loop2: _choices_on_board_as_played.)
             spell = (_loop._declaring or {}).get("card")
-            if source is None or source is not spell or not kind.startswith(_DECLARED_CHOICES):
+            if source is None or source is not spell or not kind.startswith(_DECLARED_CHOICES) \
+                    or _loop._slot is None:
                 return None
             must = [i for i, o in enumerate(options) if owed and kind.startswith("target")
                     and getattr(getattr(o[-1] if isinstance(o, tuple) and o else o, "card", None),
@@ -628,9 +643,12 @@ class GameLoop:
         item2 = gs2.chain.pop()
         loop2._declare_board = [(key, list(lst)) for key, lst in loop2._presence_lists()]
         try:
-            loop2._resolve_card_effects(card2, gs2.battlefields[item2.bf_idx],
-                                        gs2.get_player(item2.player),
-                                        gs2.get_player(gs2.other(item2.player)))
+            if item2.ability is not None:
+                loop2._resolve_ability(item2)
+            else:
+                loop2._resolve_card_effects(card2, gs2.battlefields[item2.bf_idx],
+                                            gs2.get_player(item2.player),
+                                            gs2.get_player(gs2.other(item2.player)))
         except Exception:  # noqa: BLE001 — a declaration never stops the game
             pass
         declared = {slot: (kind, n, _mapped(got, back))
@@ -1493,12 +1511,16 @@ class GameLoop:
                 self.gs.once_per_turn_used[once_key] = self.gs.turn
             # Resilience: mirror the guard in _resolve_card_effects — a single
             # malformed triggered spec must not abort the whole match. Skip + log.
+            # Its choices aren't those of an ability of the same card resolving.
+            outer_slot, self._slot = self._slot, None
             try:
                 handler(context, es.merged_params())
             except Exception as exc:  # noqa: BLE001
                 if self.verbose:
                     print(f"  [EFFECT-SKIP] {card.name}: "
                           f"{es.effect} ({trigger}) failed: {exc}")
+            finally:
+                self._slot = outer_slot
 
     def _triggered_cost_affordable(self, card: Card, actor: Player, es: EffectSpec) -> bool:
         """Whether an effect's `cost` (activated-style) can be paid now."""
@@ -4173,8 +4195,8 @@ class GameLoop:
 
     def _note_ability_played(self, side: str, source, energy: int) -> None:
         """ "When you play an activated ability with Energy cost [7] or more"
-        (Nasus Curator of the Sands): after its costs are paid, before it
-        resolves; `energy` is its base cost, discounts aside (§206.1)."""
+        (Nasus Curator of the Sands): as it resolves (§377.2.a; countered, it
+        never was); `energy` is its base cost, discounts aside (§206.1)."""
         self._fire_units_trigger("on_ability_played", side, triggering_card=source,
                                  extra={"ability_energy": energy})
 
@@ -5975,7 +5997,6 @@ class GameLoop:
             if not self._pay_equip(ap, cost):
                 return
             self._note_gear_ability(side)
-            self._note_ability_played(side, gear, base_energy)
             # A cost that kills a friendly unit may have taken one.
             units = self._friendly_units_of(side)
             if not units:
@@ -5983,11 +6004,7 @@ class GameLoop:
             if target_unit is None:
                 target_unit = self.choose("equip", side, units,
                                           self._first_friendly_unit_on_board(side) or units[0], gear)
-            ap.base_gear.remove(gear)
-            target_unit.gear.append(gear)
-            if self.verbose:
-                print(f"  {ap.name} EQUIP: {gear.name} -> {target_unit.card.name}")
-            self._fire_attached(target_unit, side)
+            self._activate(side, gear, None, 0, "equip", base_energy, target=target_unit)
             return
 
         if entry["type"] == "flow":
@@ -6019,11 +6036,8 @@ class GameLoop:
             if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
             self.gs.once_per_turn_used[(id(bf.card), side, "bf_ability")] = self.gs.turn
-            self._note_ability_played(side, bf.card, parsed["energy"])
-            EFFECT_REGISTRY[eff.effect](EffectContext(self, bf.card, ap, opponent, bf,
-                                                      {"battlefield": bf}), eff.merged_params())
-            if self.verbose:
-                print(f"  {ap.name} BATTLEFIELD ABILITY: {eff.effect} ({bf.card.name})")
+            self._activate(side, bf.card, eff, entry["bf_idx"], "bf_ability", parsed["energy"],
+                           extra={"battlefield": bf})
             return
 
         if entry["type"] == "gear_ability":
@@ -6055,15 +6069,9 @@ class GameLoop:
                 self._remove_gear(gear, ap)
             if parsed["banish_self"]:
                 self._remove_gear(gear, ap, banish=True)      # "Banish this" (The Zero Drive)
-            self._note_ability_played(side, gear, parsed["energy"])
-            handler = EFFECT_REGISTRY.get(eff.effect)
-            if handler is None:
+            if EFFECT_REGISTRY.get(eff.effect) is None:
                 return
-            context = EffectContext(self, gear, ap, opponent, self.gs.battlefields[0])
-            handler(context, eff.merged_params())
-            if self.verbose:
-                print(f"  {ap.name} GEAR ABILITY: {eff.effect} ({gear.name})")
-            self._fire_units_trigger("on_gear_ability_used", side, triggering_card=gear)
+            self._activate(side, gear, eff, 0, "gear_ability", parsed["energy"])
             return
 
         # Unit/legend activated ability.
@@ -6098,18 +6106,66 @@ class GameLoop:
         if parsed["sacrifice"] and unit is not None:
             self._remove_unit_from_play(unit, side)
             self._to_trash(ap, unit.card)
-        self._note_ability_played(side, unit.card if unit else None, base_energy)
-
-        bf = self.gs.battlefields[entry["bf_idx"]] if entry["bf_idx"] is not None \
-            else self.gs.battlefields[0]
-        handler = EFFECT_REGISTRY.get(eff.effect)
-        if handler is None:
+        if EFFECT_REGISTRY.get(eff.effect) is None:
             return
-        context = EffectContext(self, unit.card if unit else ap.base_units[0].card,
-                                ap, opponent, bf)
-        handler(context, eff.merged_params())
+        self._activate(side, unit.card if unit else ap.base_units[0].card, eff,
+                       entry["bf_idx"] or 0, "ability", base_energy)
+
+    def _activate(self, side: str, source: Card, eff: Optional[EffectSpec], bf_idx: int,
+                  kind: str, energy: int, extra: Optional[dict] = None, target=None) -> None:
+        """An activated ability of `source`, its cost paid, is played (§377.3):
+        one that Adds resources resolves at once (§337.2); any other goes on the
+        chain with its choices declared, so players can react to it (Not So
+        Fast can counter it), and resolves once they pass. Played on an empty
+        chain (the main phase, a showdown), that chain is run now."""
+        item = ChainItem(player=side, card=source, bf_idx=bf_idx,
+                         ability={"eff": eff, "kind": kind, "energy": energy,
+                                  "extra": dict(extra or {}), "target": target})
+        if eff is not None and eff.effect in _ADD_VERBS:
+            self._resolve_ability(item)
+            return
+        opened = not self.gs.chain
+        self._chained_abilities += 1
+        self._put_on_chain(item)
         if self.verbose:
-            print(f"  {ap.name} ACTIVATED: {eff.effect}")
+            print(f"  {side} ABILITY on the chain: {source.name} ({eff.effect if eff else 'EQUIP'})")
+        if opened:
+            self._run_chain(side)
+
+    def _resolve_ability(self, item: ChainItem) -> None:
+        """An activated ability resolves (§377.3.b.3), whether or not its source
+        is still on the board, choosing as it declared (§355). Then "when you
+        use / play an ability" (§377.2.a: as it resolves)."""
+        ab, side = item.ability, item.player
+        ap, opponent = self.gs.get_player(side), self.gs.get_player(self.gs.other(side))
+        if ab["kind"] == "equip":
+            # EQUIP (§818): its gear still at our base, its unit still ours.
+            gear, unit = item.card, ab["target"]
+            where = self._locate_unit(unit)
+            if where is None or where[0] != side or not any(g is gear for g in ap.base_gear):
+                return
+            ap.base_gear.remove(gear)
+            unit.gear.append(gear)
+            if self.verbose:
+                print(f"  {ap.name} EQUIP: {gear.name} -> {unit.card.name}")
+            self._fire_attached(unit, side)
+        else:
+            eff = ab["eff"]
+            context = EffectContext(self, item.card, ap, opponent,
+                                    self.gs.battlefields[item.bf_idx], dict(ab["extra"]))
+            outer_slot, self._slot = self._slot, [0, 0, 0]      # its declared choices
+            try:
+                EFFECT_REGISTRY[eff.effect](context, eff.merged_params())
+            except _Ignored:
+                if self.verbose:
+                    print(f"  [TARGET-ILLEGAL] {item.card.name}: {eff.effect} ignored")
+            finally:
+                self._slot = outer_slot
+            if self.verbose:
+                print(f"  {ap.name} ABILITY: {eff.effect} ({item.card.name})")
+        self._note_ability_played(side, item.card, ab["energy"])
+        if ab["kind"] in ("gear_ability", "equip"):
+            self._fire_units_trigger("on_gear_ability_used", side, triggering_card=item.card)
 
     def _use_ability_now(self, player: Player, ability_id, arg) -> bool:
         """Use an activated ability inside a chain or showdown window. Returns
@@ -6889,7 +6945,7 @@ class GameLoop:
             action = player.agent.decide_reaction(self.gs.get_player(self.gs.other(active)), self.gs.chain)
             step = "pass" if action[0] == "PASS" else self._reaction_step(player, active, action)
             if step == "kept":
-                continue          # a resolved ability: its player keeps priority
+                continue          # an Add ability resolved: its player keeps priority
             # An action that does nothing (a spell it can't pay for once taxes
             # are added) counts as a pass: two players proposing one each never
             # stopped.
@@ -6900,8 +6956,8 @@ class GameLoop:
 
     def _reaction_step(self, player: Player, side: str, action) -> str:
         """`side` takes `action` with priority on an open chain: "acted" (it put
-        something on the chain or into play; priority passes), "kept" (a
-        REACTION ability resolved; its player keeps priority) or "noop"."""
+        something on the chain or into play; priority passes), "kept" (an
+        Add ability resolved; its player keeps priority) or "noop"."""
         kind, idx, lane = action[0], action[1], action[2] if len(action) > 2 else None
         if kind == "SPELL" and idx is not None and 0 <= idx < len(player.hand):
             card = player.hand[idx]
@@ -6936,9 +6992,9 @@ class GameLoop:
             if self._play_from_hidden(side, lane if lane is not None else 0, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
-            # A REACTION ability resolves at once (resource abilities can't be
-            # reacted to) and its player keeps priority. One that put a spell on
-            # the chain (FLOW) passes priority like a played spell.
+            # A REACTION ability goes on the chain and priority passes, as for a
+            # spell (so does a spell played with FLOW); one that Adds resources
+            # resolves at once and its player keeps priority (§337.2).
             depth = len(self.gs.chain)
             if self._use_ability_now(player, idx, lane):
                 return "kept" if len(self.gs.chain) == depth else "acted"
@@ -6959,10 +7015,17 @@ class GameLoop:
             self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
             self._choices_noted = item.choices_noted
             try:
-                self._resolve_card_effects(item.card, battlefield, actor, opponent)
+                if item.ability is not None:
+                    self._resolve_ability(item)
+                else:
+                    self._resolve_card_effects(item.card, battlefield, actor, opponent)
             finally:
                 self._replay, self._choices_noted = outer, outer_noted
                 self._resolving_item = outer_item
+            if item.ability is not None:
+                if len(self.gs.chain) > depth:
+                    self._run_chain(self.gs.chain[-1].player)
+                continue
 
             if self.recorder:
                 before_a = list(battlefield.units_A)
@@ -7095,9 +7158,12 @@ class GameLoop:
             if self._play_from_hidden(side, bf_idx, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
-            # ACTION / REACTION ability: resolves at once, focus stays.
+            # ACTION / REACTION ability: on a chain run now, then focus passes
+            # (§346; so does a spell played with FLOW); one that Adds resources
+            # resolves at once, focus stays (§346.1).
+            chained = (self._chained_abilities, self.spells_cast)
             if self._use_ability_now(player, idx, lane):
-                return "kept"
+                return "acted" if (self._chained_abilities, self.spells_cast) != chained else "kept"
         return "noop"
 
     def _finish_showdown(self, bf_idx: int, attacker: str) -> None:

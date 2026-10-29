@@ -260,7 +260,8 @@ def _best_mode(ctx: "EffectContext", modes: list, free: list) -> int:
         value = _position_value(gs2, ctx.actor_side)
         for item in chain_before:
             if not any(item is x for x in gs2.chain):     # countered
-                worth = 1 + 1.5 * (int(item.card.cost_energy or 0) + int(item.card.cost_power or 0))
+                cost = item.ability["energy"] if item.ability is not None else                     int(item.card.cost_energy or 0) + int(item.card.cost_power or 0)
+                worth = 1 + 1.5 * cost
                 value += worth if item.player != ctx.actor_side else -worth
         if best_value is None or value > best_value:
             best, best_value = j, value
@@ -677,7 +678,7 @@ def _steal_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Gain control of a spell. You may make new choices for it." (Mystic
     Reversal): the opponent's latest spell on the chain resolves as ours."""
     for item in reversed(ctx.loop.gs.chain):
-        if item.player == ctx.opponent_side and item.card is not ctx.card:
+        if item.player == ctx.opponent_side and item.card is not ctx.card and item.ability is None:
             _take_over_spell(ctx, item)
             return
 
@@ -3539,12 +3540,16 @@ def _chose_mine(ctx: "EffectContext", item, only_one: bool = False) -> bool:
 def _counter_targets(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
     """The spells on the chain `counter_spell` may choose (§355.9.a.2: any
     of them, not just the latest): within its cost limits, counterable, and
-    for Not So Fast / Repulse an enemy one choosing ours."""
+    for Not So Fast / Repulse an enemy one choosing ours, or an enemy
+    ability that does ("spell or ability")."""
     loop = ctx.loop
-    return [it for it in loop.gs.chain if it.card is not ctx.card and isinstance(it.card, SpellCard)
-            and _counterable(it.card, spec) and not loop._uncounterable(it.player)
-            and not loop._has_effect(it.card, "cant_be_countered")
-            and (not spec.get("enemy_choosing_mine") or _chose_mine(ctx, it, bool(spec.get("only_one"))))]
+    mine = spec.get("enemy_choosing_mine")
+    return [it for it in loop.gs.chain if it.card is not ctx.card
+            and (isinstance(it.card, SpellCard) and it.ability is None
+                 and _counterable(it.card, spec) and not loop._has_effect(it.card, "cant_be_countered")
+                 or mine and it.ability is not None)
+            and not loop._uncounterable(it.player)
+            and (not mine or _chose_mine(ctx, it, bool(spec.get("only_one"))))]
 
 
 @effect("counter_spell")
@@ -3557,6 +3562,9 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     enemy = [it for it in items if it.player != ctx.actor_side]
     target_item = ctx.loop.choose("target:counter_spell", ctx.actor_side, items, (enemy or items)[-1], ctx.card)
+    if target_item.ability is not None:
+        chain.remove(target_item)          # an ability: no card to put anywhere
+        return
     ctx.extra["countered_energy"] = int(target_item.card.cost_energy or 0)   # Riposte
     target_card = target_item.card
     owner = ctx.loop.gs.get_player(target_item.owner or target_item.player)
@@ -3759,7 +3767,7 @@ def _fury_threatened(ctx: "EffectContext", unit) -> bool:
             fury(e.card) for e in where[1]._units_for(loop.gs.other(where[0]))):
         return True
     for item in loop.gs.chain:
-        if item.player != ctx.actor_side and fury(item.card):
+        if item.player != ctx.actor_side and item.ability is None and fury(item.card):
             for _k, _n, got in (item.declared or {}).values():
                 for x in (got if isinstance(got, list) else [got]):
                     if (x[-1] if isinstance(x, tuple) and x else x) is unit:

@@ -188,9 +188,10 @@ def option_text(gs, viewer: str, option) -> str:
     from riftbound.core.state import ChainItem
     if isinstance(option, tuple) and option and isinstance(option[-1], UnitInPlay):
         option = option[-1]
-    if isinstance(option, ChainItem):          # a spell on the chain (a counter's target)
+    if isinstance(option, ChainItem):          # on the chain (a counter's target)
         whose = "tua" if option.player == viewer else "avversaria"
-        return f"{option.card.name} (magia {whose} sulla catena)"
+        what = "abilità" if option.ability is not None else "magia"
+        return f"{option.card.name} ({what} {whose} sulla catena)"
     if isinstance(option, UnitInPlay):
         ref = (_unit_ref(gs, viewer, option) or "unit:opp:base").split(":")
         whose = "tua" if ref[1] == "me" else "avversaria"
@@ -223,6 +224,11 @@ def _chosen_text(gs, viewer: str, got) -> str:
     if isinstance(got, list):
         return ", ".join(option_text(gs, viewer, o) for o in got) or "nessuno"
     return option_text(gs, viewer, got)
+
+
+def chain_name(item) -> str:
+    """A chain item's name: its card's, an ability's with its source's."""
+    return f"abilità di {item.card.name}" if item.ability is not None else item.card.name
 
 
 def declared_text(gs, viewer: str, item) -> str:
@@ -398,7 +404,8 @@ def _board_extras(gs, viewer: str) -> dict:
         "fight": {str(i): fight(i, bf) for i, bf in enumerate(gs.battlefields)
                   if bf.units_A and bf.units_B},
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
-        "chain": [{"name": i.card.name, "owner": _rel(i.player, viewer), "bf": i.bf_idx,
+        "chain": [{"name": i.card.name, "ability": i.ability is not None,
+                   "owner": _rel(i.player, viewer), "bf": i.bf_idx,
                    "chose": declared_text(gs, viewer, i)} for i in gs.chain],
         "facedown_mine": {f"{i}:{j}": fd.card.name for i, bf in enumerate(gs.battlefields)
                           for j, fd in enumerate(bf.facedowns) if fd.owner == viewer},
@@ -643,8 +650,10 @@ class CoachAgent(NetGuidedMCTSAgent):
         if point == DecisionPoint.REACTION and gs.chain:
             top = gs.chain[-1]
             who = "L'avversario ha lanciato" if top.player != self.player.name else "Hai lanciato"
+            if top.ability is not None:
+                who = "L'avversario ha usato" if top.player != self.player.name else "Hai usato"
             chose = declared_text(gs, self.player.name, top)
-            return f"{who} {top.card.name}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
+            return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
         if gs.pending_move is not None and gs.pending_move[1] == self.player.name:
             where = _bf_name(gs, gs.pending_move[0])
             return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
@@ -908,9 +917,10 @@ class CoachSession:
         if not gs.chain or gs.chain[-1].player == self.side or not self.stop_on_opp_chain:
             return
         top = gs.chain[-1]
-        below = [i.card.name for i in gs.chain[:-1]]
+        below = [chain_name(i) for i in gs.chain[:-1]]
         chose = declared_text(gs, self.side, top)
-        context = f"L'avversario ha lanciato {top.card.name}" + (f" ({chose})" if chose else "") + (
+        verb = "ha usato" if top.ability is not None else "ha lanciato"
+        context = f"L'avversario {verb} {chain_name(top)}" + (f" ({chose})" if chose else "") + (
             f", sopra {', '.join(reversed(below))}" if below else "") + \
             ". Non hai reazioni da giocare: adesso si risolve."
         answer = self._wait({"type": "notice", "context": context, "card": top.card.name})
