@@ -103,7 +103,8 @@ _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damag
           "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in",
           "battlefield": "campo", "tag": "tag"}
 _OPTIONAL = {"accelerate": "Pagare ACCELERATE? (l'unità entra pronta)",
-             "additional_cost": "Pagare il costo aggiuntivo?", "SHOW OFF": "Usare SHOW OFF?"}
+             "additional_cost": "Pagare il costo aggiuntivo?", "SHOW OFF": "Usare SHOW OFF?",
+             "enter_ready": "Far entrare l'unità pronta?"}
 
 
 def question(kind: str) -> str:

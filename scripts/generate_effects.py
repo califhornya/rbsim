@@ -513,8 +513,9 @@ STEP 4 — Vendetta mechanics:
     "When another friendly unit becomes exhausted" is not supported → flag
     (suggested_vocab "trigger:on_friendly_exhaust").
 
-24. "I enter ready if <condition>" → {{"effect":"ready_unit","trigger":"on_play",
-    "target":"self","condition":{{...}}}}. Conditions available for this pattern
+24. "I enter ready if <condition>" → {{"effect":"enter_ready","trigger":"self_enter_ready",
+    "condition":{{...}}}} (a replacement of how it enters, not a "when you play me"
+    trigger; "When you play me, ready me" stays an on_play ready_unit). Conditions available for this pattern
     include opponent_controls_a_battlefield, you_control_no_other_units,
     card_with_my_name_in_trash, opponent_controls_stunned_unit,
     you_control_this_battlefield ("if you control this battlefield", for DEPLOY

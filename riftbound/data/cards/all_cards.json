@@ -1208,9 +1208,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "opponent_controls_a_battlefield"
         }
@@ -2809,9 +2808,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "score_within_n_of_victory",
           "params": {
@@ -5546,9 +5544,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "kill_unit",
@@ -10531,9 +10528,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       }
     ]
   },
@@ -10772,9 +10768,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       }
     ]
   },
@@ -11230,9 +11225,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       }
     ]
   },
@@ -11883,9 +11877,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "cards_in_hand_at_most",
           "params": {
@@ -13391,9 +13384,8 @@
         "keyword": "GANKING"
       },
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "you_control_subtype",
           "params": {
@@ -14222,8 +14214,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "you_control_subtype",
           "params": {
@@ -16985,8 +16977,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "units_in_base_at_least",
           "params": {
@@ -18704,9 +18696,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "grant_temporary_might",
@@ -18936,9 +18927,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "unit_died_this_turn"
         }
@@ -19249,9 +19239,8 @@
         }
       },
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
@@ -19966,9 +19955,8 @@
         }
       },
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "opponent_controls_stunned_unit"
         }
@@ -20026,9 +20014,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "friendly_died_in_beginning_phase"
         }
@@ -23308,9 +23295,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "additional_cost": {
           "power": 1,
           "domain": "CHAOS"
@@ -24437,9 +24423,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "controller_has_xp_at_least",
           "params": {
@@ -26068,9 +26053,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "this_is_at_battlefield"
         }
@@ -26152,9 +26136,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "reduce_cost",
@@ -27592,9 +27575,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "card_with_my_name_in_trash"
         }
@@ -30635,9 +30617,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "not",
           "params": {
@@ -33798,9 +33779,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "friendly_unit_or_gear_died_this_turn"
         }
@@ -33924,9 +33904,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "play_token",
@@ -34016,9 +33995,8 @@
         }
       },
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "showed_off"
         }
@@ -34322,9 +34300,8 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "ready_units",
@@ -34399,9 +34376,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       },
       {
         "effect": "replay_self_to_base",
@@ -34603,18 +34579,13 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "sequence",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "optional": true,
-        "steps": [
-          {
-            "effect": "ready_unit",
-            "target": "self"
-          },
-          {
-            "effect": "cant_move_this_turn",
-            "target": "self"
-          }
-        ]
+        "then": {
+          "effect": "cant_move_this_turn",
+          "target": "self"
+        }
       }
     ],
     "variants": [
@@ -36408,9 +36379,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self"
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready"
       }
     ],
     "variants": [
@@ -36983,9 +36953,8 @@
     ],
     "effects": [
       {
-        "effect": "ready_unit",
-        "trigger": "on_play",
-        "target": "self",
+        "effect": "enter_ready",
+        "trigger": "self_enter_ready",
         "condition": {
           "type": "you_control_no_other_units"
         }

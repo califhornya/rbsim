@@ -34,7 +34,7 @@ _DISPATCHED_TRIGGERS: frozenset[str] = frozenset({
     "on_win_combat", "passive", "activated", "cost_modifier", "death_replacement",
     "on_exhaust", "on_friendly_exhaust", "on_hide_here", "on_stun_enemy",
     "on_card_played", "on_unit_moves_from_here", "on_enemy_unit_played",
-    "on_chosen", "on_readied", "cost_aura", "enter_ready_aura", "on_hide",
+    "on_chosen", "on_readied", "cost_aura", "enter_ready_aura", "self_enter_ready", "on_hide",
     "on_buffed", "on_enemy_unit_moves", "on_stunned_enemy_dies_here",
     "on_friendly_unit_readied", "on_friendly_unit_buffed", "on_friendly_attack",
     "on_friendly_defend", "on_second_draw", "on_opponent_scores",
@@ -4611,6 +4611,7 @@ class GameLoop:
         # B1: optional additional cost (kicker), paid before resolution.
         self._try_pay_additional_costs(card, ap)
         self._show_off(card, ap)
+        self._enter_ready_self(card, side, unit, bf)
         self._count_card_played(card, side)
         self._resolve_card_effects(card, enter or self.gs.battlefields[0], ap, opponent)
 
@@ -5084,6 +5085,36 @@ class GameLoop:
                                           "played_to": bf}):
                     return True
         return False
+
+    def _enter_ready_self(self, card: Card, side: str, unit: UnitInPlay,
+                          bf: Optional[Battlefield]) -> None:
+        """ "I enter ready" / "If C, I enter ready" (`self_enter_ready`): a
+        replacement of how the unit enters (§364.3.a, §369.3), not a trigger: it
+        never enters exhausted then readies (§805.6), so nothing "readies" it.
+        Checked as it enters, once its additional costs and SHOW OFF are done
+        ("If you do, I enter ready": Crescent Guardian; "if you showed off":
+        Incorrigible Construct); `bf` is where it was played (Shadow).
+        "You may have me enter ready. If you do, <then>" (Entrenched Boar):
+        `optional`, `then` done at once."""
+        if unit.ready:
+            return
+        spec = CARD_REGISTRY.get(card.name)
+        actor = self.gs.get_player(side)
+        opponent = self.gs.get_player(self.gs.other(side))
+        for es in (spec.effects if spec else ()):
+            if es.trigger != "self_enter_ready" or not self._check_condition(
+                    es.condition, card, actor, opponent, {"battlefield": bf, "played_to": bf}):
+                continue
+            if not self._wants_optional(actor, card, es):
+                continue
+            unit.ready = True
+            if self.verbose:
+                print(f"  {card.name} enters ready")
+            then = es.params.get("then")
+            if isinstance(then, dict) and then.get("effect") in EFFECT_REGISTRY:
+                ctx = EffectContext(self, card, actor, opponent, bf or self.gs.battlefields[0])
+                EFFECT_REGISTRY[then["effect"]](ctx, then)
+            return
 
     def _to_trash(self, owner: Player, card: Card) -> None:
         """Put a card that left the board into its owner's trash; a token ceases

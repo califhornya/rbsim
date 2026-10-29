@@ -915,7 +915,7 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   PREDICT 2 keyword (it predicted when played too); Taric Protector and
   Allay Eager Admirer gave their "other units" keyword to themselves (Allay
   only while at a battlefield).
-- [ ] Enter ready (B33 found): "I enter ready" / "If X, I enter ready" is a
+- [x] Enter ready (B33 found): "I enter ready" / "If X, I enter ready" is a
   conditional passive replacing how the unit enters (§364.3.a example,
   Master Yi Honed's example), but 25 cards encode it as a "when you play me"
   `ready_unit` self (Vayne Hunter, Leona Zealot, Warwick Hunter, Master Yi
@@ -925,7 +925,15 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   Dragon, Lingering Animus, Antagonistic Apparatus, Incorrigible Construct,
   Firebrand Raider, Ekko Revolutionary, Wrath of the Freljord, Disposal
   Expert): since B32 it enters exhausted and a trigger on the chain readies
-  it. Should go through `_enters_ready` (condition as it enters).
+  it. Should go through `_enters_ready` (condition as it enters). DONE B34:
+  trigger `self_enter_ready` (effect `enter_ready`, NON_HANDLER), read by
+  `GameLoop._enter_ready_self` in `_play_unit` after the additional costs and
+  SHOW OFF (kicker / showed-off conditions), before any trigger: no chain
+  item, no "when you ready" (§805.6). The 25 above plus Monch, Direwing, Xin
+  Zhao Vigilant (theirs had no trigger: default on_play) and Entrenched Boar
+  (`optional`, its "can't move this turn" as `then`; choice
+  `optional:enter_ready`, coach label). "When you play me, ready me" cards
+  (Darius Executioner, Dropboarder, Pyke, Poppy Paragon) stay triggers.
 - [ ] Rune Pool empties (B33 found): §167 / §316.3 / §317.2.d: every player's
   pool empties at the start of each Main Phase and at the end of each turn.
   The engine taps every rune for Energy as the turn begins (ready_runes =

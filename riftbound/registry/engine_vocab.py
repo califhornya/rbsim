@@ -45,6 +45,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_readied",                                # I go from exhausted to ready (Irelia Fervent)
     "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
     "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
+    "self_enter_ready",                          # "I enter ready" / "If X, I enter ready" (Master Yi Honed)
     "on_hide",                                   # you hide a card (Katarina Reckless)
     "on_buffed",                                 # I get a buff (Simian Ancestor)
     "on_enemy_unit_moves",                       # an opponent's unit moves (Volibear Imposing)
@@ -280,7 +281,8 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 # - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 # - no_combat_damage       passive marker ("I don't deal combat damage") folded by Loop._apply_passive_grant
-# - enter_ready            enter_ready_aura marker read by Loop._enters_ready
+# - enter_ready            enter_ready_aura marker read by Loop._enters_ready,
+#                          self_enter_ready marker read by Loop._enter_ready_self
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "ignore_deflect", "reduce_cost_here",
     "move_tax_here",
