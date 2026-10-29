@@ -3550,13 +3550,66 @@ class GameLoop:
         names = [p.strip().upper() for p in raw.split("/")]
         return [Domain[n] for n in names if n in Domain.__members__] or list(Domain)
 
-    def _can_pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
+    def _songstress(self, side: str, card: Card):
+        """(Seraphine Starry-Eyed Songstress's legend, the ready friendly units
+        her cost may exhaust, the Energy it takes off, how many units it
+        exhausts) when `side` can pay it to play `card` (a spell), else None."""
+        if not isinstance(card, SpellCard):
+            return None
+        legend = self._legend_with(side, "songstress_discount", ready=True)
+        if legend is None:
+            return None
+        es = next(es for es in self._card_effects(legend.card) if es.effect == "songstress_discount")
+        units = [u for u in self._friendly_units_of(side) if u.ready]
+        n = int(es.params.get("units", 3))
+        if len(units) < n:
+            return None
+        return legend, units, int(es.params.get("amount", 2)), n
+
+    def _songstress_discount(self, ap: Player, card: Card, energy: int, can_pay) -> int:
+        """ "As an additional cost to play a spell, you may exhaust me and three
+        friendly units to reduce the cost of that spell by [2]" (Seraphine
+        Starry-Eyed Songstress): pays it if the player chooses (baseline: only
+        when the spell can't be paid without it) and returns the Energy left to
+        pay. `can_pay(energy)`: whether the cost with that much Energy can be
+        paid. Three units exhausted at once fire on_three_exhausted (Seraphine
+        Inspiring)."""
+        side = "A" if ap is self.gs.A else "B"
+        offer = self._songstress(side, card) if energy > 0 else None
+        if offer is None:
+            return energy
+        legend, units, amount, n = offer
+        less = max(0, energy - amount)
+        if not can_pay(less):
+            return energy
+        if can_pay(energy) and not self.choose("optional:songstress", side, [True, False], False, card):
+            return energy
+        # Baseline: units that already moved (at a battlefield), tokens, the weakest.
+        spare = sorted(units, key=lambda u: (self._locate_unit(u)[1] is None, not u.is_token, u.might))
+        picks = self.choose_many("cost_unit:exhaust", side, units, spare[:n], card)
+        picks = (list(picks) + [u for u in spare if not any(u is p for p in picks)])[:n]
+        self._exhaust(legend)
+        for u in picks:
+            self._exhaust(u)
+        self._fire_units_trigger("on_three_exhausted", side)
+        if self.verbose:
+            print(f"  {ap.name} exhausts {legend.card.name} and {n} units: {card.name} costs [{amount}] less")
+        return less
+
+    def _can_pay_card(self, actor: Player, card: Card, energy: int, power,
+                      songstress: bool = True) -> bool:
         """Whether `actor` can pay this cost for `card` now. Gear may use Ornn's
         earmarked gear power, spells Kai'Sa's earmarked spell power; during a
         showdown Diana's showdown energy counts. Units and gear may use
-        Mordekaiser's earmarked power."""
+        Mordekaiser's earmarked power. A spell may cost [2] less with Seraphine
+        Starry-Eyed Songstress (`songstress`: try it)."""
         if self._play_forbidden(actor, card):
             return False
+        if songstress and energy > 0:
+            offer = self._songstress("A" if actor is self.gs.A else "B", card)
+            if offer is not None and self._can_pay_card(actor, card, max(0, energy - offer[2]),
+                                                        power, songstress=False):
+                return True
         if isinstance(card, (UnitCard, GearCard)) and power:
             power = max(0, power - actor.earmarked_power_permanent)
         if isinstance(card, GearCard):
@@ -3578,6 +3631,9 @@ class GameLoop:
     def _pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
         if not self._can_pay_card(actor, card, energy, power):
             return False
+        if isinstance(card, SpellCard):
+            energy = self._songstress_discount(
+                actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, songstress=False))
         if isinstance(card, (UnitCard, GearCard)) and power:
             from_earmark = min(power, actor.earmarked_power_permanent)
             actor.earmarked_power_permanent -= from_earmark
@@ -4802,7 +4858,8 @@ class GameLoop:
         if cost is None or card not in ap.trash or self._play_forbidden(ap, card):
             return False
         energy, power, domain = cost
-        if ap.energy < energy:
+        offer = self._songstress(side, card) if energy > 0 else None
+        if ap.energy < (energy if offer is None else max(0, energy - offer[2])):
             return False
         if not power:
             return True
@@ -4816,6 +4873,7 @@ class GameLoop:
         if not self._can_pay_flow(ap, card, side):
             return
         energy, power, domain = self._flow_cost(card, side)
+        energy = self._songstress_discount(ap, card, energy, lambda e: ap.energy >= e)
         ap.energy -= energy
         self._spell_energy_paid = energy
         if power:

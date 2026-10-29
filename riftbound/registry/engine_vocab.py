@@ -321,6 +321,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "look_before_reveal",       # Void Hatchling: GameLoop._before_deck_reveal
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
     "cheaper_spells_choosing_me",   # Irelia Graceful: GameLoop._graceful_discount
+    "songstress_discount",      # Seraphine Starry-Eyed Songstress: GameLoop._songstress_discount
     # Endless Riches: GameLoop._begin_turn, activatable_abilities, _trash_banishes
     "skip_draw_phase", "play_from_trash", "trash_to_banish",
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)

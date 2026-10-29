@@ -39053,15 +39053,10 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "reduce_cost",
-        "trigger": "cost_modifier",
+        "effect": "songstress_discount",
+        "trigger": "passive",
         "amount": 2,
-        "target_filter": {
-          "is_spell": true
-        },
-        "additional_cost": {
-          "exhaust_friendly_unit": true
-        }
+        "units": 3
       }
     ],
     "variants": [

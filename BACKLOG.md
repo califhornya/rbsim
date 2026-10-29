@@ -486,10 +486,20 @@ tests/test_corpus_vendetta.py.
   `Player.pay_power_of`); `Player.can_pay_cost` with no domain is [A] (agents'
   checks). Golden regenerated. Tests in tests/test_neeko_blending_in.py.
 
-Left: Seraphine Starry-Eyed Songstress
-(a legend's optional extra cost on every spell: exhaust her and three friendly
-units for [2] less; the cost path has no hook for it); FAQ rulings for
-Atakhan + Mordekaiser, Meticulous Restorationist + Mordekaiser.
+- [x] Seraphine Starry-Eyed Songstress: "As an additional cost to play a
+  spell, you may exhaust me and three friendly units to reduce the cost of that
+  spell by [2]." Every spell payment may take it (`GameLoop._songstress`,
+  `_songstress_discount`; marker `songstress_discount`): `_can_pay_card` also
+  tries the cost [2] less (so a spell short [2] is legal), `_pay_card` and FLOW
+  pay it. The player chooses (`optional:songstress`; baseline: only when the
+  spell can't be paid without it) and which three ready units
+  (`cost_unit:exhaust`; baseline: units at battlefields, then tokens, then the
+  weakest). Three units exhausted at once fire Seraphine Inspiring; each one's
+  "when I become exhausted" fires (Seraphine Not Alone). Tests in
+  tests/test_seraphine_songstress.py.
+
+Left: FAQ rulings for Atakhan + Mordekaiser, Meticulous Restorationist +
+Mordekaiser.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
 Equip's unit, discards, effect-move targets, "you may" additional costs always
@@ -504,3 +514,6 @@ see all three). The net sees one legend per player: not the ones Neeko Blending
 In adds (their abilities are still in its action space). The heuristic agents
 check a multi-domain card's power as any domain's (the engine pays it from its
 domains: an agent may try a card it can't pay, a no-op that ends its turn).
+The heuristic agents check a card's printed cost, not what it costs now: they
+never play a spell only Seraphine Starry-Eyed Songstress's [2] less pays for
+(nor one any other reduction makes affordable).
