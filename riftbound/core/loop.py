@@ -364,6 +364,27 @@ class _Ignored(Exception):
     resolves: it isn't followed (§359.3.e.5-6)."""
 
 
+class _NoMore:
+    """The option that ends an "up to N" pick (GameLoop.choose_many `up_to`):
+    one object for every game, copies included."""
+    name = "no more"
+
+    def __repr__(self) -> str:
+        return "NO_MORE"
+
+    def __copy__(self):
+        return self
+
+    def __deepcopy__(self, memo):
+        return self
+
+    def __reduce__(self):
+        return "NO_MORE"
+
+
+NO_MORE = _NoMore()
+
+
 def _same_option(option, chosen) -> bool:
     """Whether a choice's option is the declared one: the same object (a unit,
     a battlefield, a player), or the same number for a mode."""
@@ -454,9 +475,13 @@ class GameLoop:
         self._chose(slot, kind, side, options, got, source)
         return got
 
-    def choose_many(self, kind: str, side: str, options: list, picks: list, source=None) -> list:
-        """`choose` for "up to N" picks: one choice per pick, in the baseline's
-        order, each among the options not taken yet. Replayed (see `choose`),
+    def choose_many(self, kind: str, side: str, options: list, picks: list, source=None,
+                    up_to: Optional[int] = None) -> list:
+        """`choose` for several picks: one choice per pick, in the baseline's
+        order, each among the options not taken yet. `up_to` ("up to N", "any
+        number", §355.13): the player may stop before the baseline's last pick
+        (none at all too) or go on to N; each pick then offers NO_MORE too, the
+        baseline's answer once its picks are taken. Replayed (see `choose`),
         the declared options still legal are kept (§359.3.e.8)."""
         slot = self._choice_slot(kind, source)
         if slot is not None and self._replay is not None and slot in self._replay["choices"]:
@@ -474,11 +499,19 @@ class GameLoop:
         if self.chooser is not None:
             order = list(picks) + [o for o in options if not any(o is p for p in picks)]
             out = []
+            most = len(picks) if up_to is None else min(int(up_to), len(order))
             self._in_many = True
             try:
-                for _ in picks:
+                while len(out) < most:
                     left = [o for o in order if not any(o is t for t in out)]
-                    out.append(self.choose(kind, side, left, left[0], source))
+                    if up_to is None:
+                        out.append(self.choose(kind, side, left, left[0], source))
+                        continue
+                    got = self.choose(kind, side, left + [NO_MORE],
+                                      left[0] if len(out) < len(picks) else NO_MORE, source)
+                    if got is NO_MORE:
+                        break
+                    out.append(got)
             finally:
                 self._in_many = False
         self._chose(slot, kind, side, options, out, source)

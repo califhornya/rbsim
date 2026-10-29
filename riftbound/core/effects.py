@@ -87,8 +87,13 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             return (id(u) in enemy_ids and dealt > 0, kills, u.might)
 
         cands = sorted(_choosable(ctx, cands), key=value, reverse=True)
-        units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands,
-                                     cands[:int(spec.get("count", 1))], ctx.card)
+        count = int(spec.get("count", 1))
+        picks = cands[:count]
+        if spec.get("up_to"):
+            # "Deal 6 to each of up to two units": baseline, enemies only.
+            picks = [u for u in picks if value(u)[0]]
+        units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands, picks,
+                                     ctx.card, up_to=_up_to(spec, count))
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
         ctx.extra["it"] = units
@@ -767,15 +772,21 @@ def _signpost_move(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("minefield")
 def _minefield(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Kill any number of friendly Bomb tokens. At end of turn, play that many
-    Bomb tokens to a single battlefield." (Hexplosive Minefield): all of them."""
+    Bomb tokens to a single battlefield." (Hexplosive Minefield): baseline
+    all of them."""
     loop = ctx.loop
     side = ctx.actor_side
+    at = {id(dg.card): (bf, dg) for bf in loop.gs.battlefields for dg in bf.gear_for(side)
+          if dg.card.name == "Bomb"}
+    bombs = [dg.card for _bf, dg in at.values()]
+    picked = {id(c) for c in loop.choose_many(_kind("target", spec), side, bombs, bombs, ctx.card,
+                                              up_to=len(bombs))}
     n = 0
     for bf in loop.gs.battlefields:
-        bombs = [dg for dg in bf.gear_for(side) if dg.card.name == "Bomb"]
-        if bombs:
-            n += len(bombs)
-            loop._kill_deployed_gear(bf, side, bombs)
+        killed = [dg for i, (b, dg) in at.items() if b is bf and i in picked]
+        if killed:
+            n += len(killed)
+            loop._kill_deployed_gear(bf, side, killed)
     if n:
         loop.gs.delayed_effects.append((side, ctx.card, 0, {"effect": "play_token", "token_name": "Bomb", "count": n}))
 
@@ -1248,7 +1259,7 @@ def _recycle_from_trashes(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     picks = ctx.loop.choose_many("recycle:" + str(spec.get("effect")), ctx.actor_side, pool,
                                  sorted(pool, key=lambda e: (e[0] != ctx.opponent_side,
                                                              [-v for v in _zone_value(e[1])]))[:n],
-                                 ctx.card)
+                                 ctx.card, up_to=n)
     for side, card in picks:
         owner = gs.get_player(side)
         if any(c is card for c in owner.trash):
@@ -1720,8 +1731,8 @@ def _deal_one_each_location(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     for g in groups:
         g = _choosable(ctx, g)
         if g:
-            picked.append(loop.choose(_kind("target", spec), ctx.actor_side, g,
-                                      max(g, key=lambda u: u.might), ctx.card))
+            picked += loop.choose_many(_kind("target", spec), ctx.actor_side, g,
+                                       [max(g, key=lambda u: u.might)], ctx.card, up_to=1)
     if picked:
         loop._note_chosen(ctx.card, ctx.actor_side, picked)
         ctx.damage_units(picked, int(spec.get("amount", 1)))
@@ -1850,7 +1861,8 @@ def _recall_enemies_total_might(ctx: "EffectContext", spec: Mapping[str, Any]) -
         if u.might <= room:
             picks.append(u)
             room -= u.might
-    picks = loop.choose_many(_kind("target", spec), ctx.actor_side, cands, picks, ctx.card)
+    picks = loop.choose_many(_kind("target", spec), ctx.actor_side, cands, picks, ctx.card,
+                             up_to=len(cands))
     if sum(u.might for u in picks) > int(spec.get("total", 5)):
         return
     for u in picks:
@@ -3309,7 +3321,8 @@ def _ready_units(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         from .cards import Card
         from .player import Rune
         picks = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, exhausted,
-                                     exhausted[:int(spec["amount"])], ctx.card)
+                                     exhausted[:int(spec["amount"])], ctx.card,
+                                     up_to=_up_to(spec, spec["amount"]))
         for pick in picks:
             if isinstance(pick, Rune):
                 ctx.actor.energy += 1
@@ -3935,16 +3948,23 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
         return list(units)
     # Units picked one by one ("a unit", "up to two units" = count): that's a
     # choice, for "when you choose me" and "you've chosen enemy units twice".
-    # Baseline: list order (the bias side first), `prefer` within that side.
+    # Baseline: list order (the bias side first), `prefer` within that side;
+    # "up to N" (`up_to`) takes only units of the bias side.
     units = _choosable(ctx, units)
+
+    def side(u):
+        where = ctx.loop._locate_unit(u)
+        return where[0] if where else None
     if prefer is not None and units:
-        def side(u):
-            where = ctx.loop._locate_unit(u)
-            return where[0] if where else None
         lead = side(units[0])
         units = sorted(units, key=lambda u: (side(u) != lead, prefer(u)))
-    picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units,
-                                  units[:max(1, int(spec.get("count", 1) or 1))], ctx.card)
+    count = max(1, int(spec.get("count", 1) or 1))
+    picks = units[:count]
+    if spec.get("up_to") and bias != "none":
+        want = ctx.opponent_side if bias == "enemy" else ctx.actor_side
+        picks = [u for u in picks if side(u) == want]
+    picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units, picks,
+                                  ctx.card, up_to=_up_to(spec, count))
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     ctx.extra["it"] = picked
     return picked
@@ -4019,6 +4039,13 @@ def _units_where(ctx: "EffectContext", side: str, where: str) -> list:
 def _kind(what: str, spec: Mapping[str, Any]) -> str:
     """The name of a choice an effect makes ("target:kill_unit"), for GameLoop.choose."""
     return f"{what}:{spec.get('effect', '?')}"
+
+
+def _up_to(spec: Mapping[str, Any], n: int) -> Optional[int]:
+    """ "Up to N" / "any number" (`up_to`, §355.13): the most the player may
+    pick, fewer or none too (GameLoop.choose_many); None: as many as the
+    baseline picks."""
+    return int(n) if spec.get("up_to") else None
 
 
 def _choosable(ctx: "EffectContext", units: list) -> list:
@@ -4699,13 +4726,14 @@ def _move_units(ctx: "EffectContext", spec: Mapping[str, Any], *, to_base_verb: 
     mover = them if str(spec.get("mover", "")) == "opponent" else me
     if spec.get("any_number"):
         # "Move any number of friendly units at a battlefield to their base"
-        # (Emperor's Divide): one choice per unit (baseline: all of them).
-        order = [(s, u) for s, u in order
-                 if loop.choose(_kind("optional", spec), mover, [True, False], True, u.card)]
+        # (Emperor's Divide): chosen as for "up to N" (baseline: all of them).
+        order = loop.choose_many(_kind("target", spec), mover, order, order, ctx.card,
+                                 up_to=len(order))
         loop._note_chosen(ctx.card, mover, [u for _s, u in order])
     if not scope_all:
         # Which unit(s): the baseline's priority order, one choice per unit.
-        order = loop.choose_many(_kind("target", spec), mover, order, order[:count], ctx.card)
+        order = loop.choose_many(_kind("target", spec), mover, order, order[:count], ctx.card,
+                                 up_to=_up_to(spec, min(count, len(order))))
     moved_units, taxed = [], []
     for side, unit in order:
         dst = destination_for(side, unit)
@@ -4931,7 +4959,7 @@ def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
              for c in sorted((c for c in p.trash if _zone_effect_card_ok(c, spec)),
                              key=_zone_value, reverse=True)]
     picks = ctx.loop.choose_many(_kind("card", spec), ctx._side_for_player(player), cands,
-                                 cands[:count], ctx.card)
+                                 cands[:count], ctx.card, up_to=_up_to(spec, count))
     for card in picks:
         owner = next(p for p in owners if card in p.trash)
         owner.trash.remove(card)
@@ -5396,8 +5424,12 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
         ctx.card._chosen_card = None
         picks = [c for c in picks if c is chosen]
     elif picks:
-        chosen = loop.choose_many(_kind("card", spec), side, picks, picks[:count], ctx.card)
-        picks = chosen + [c for c in picks if not any(c is x for x in chosen)]
+        chosen = loop.choose_many(_kind("card", spec), side, picks, picks[:count], ctx.card,
+                                  up_to=_up_to(spec, count))
+        # The others stand in for a chosen one that can't be paid; "up to N":
+        # only the chosen ones.
+        picks = chosen if spec.get("up_to") else \
+            chosen + [c for c in picks if not any(c is x for x in chosen)]
     played = 0
     for card in picks:
         if played >= count:

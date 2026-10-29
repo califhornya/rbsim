@@ -102,9 +102,8 @@ def test_the_chooser_is_offered_the_unit_the_first_instruction_kills():
 def test_a_second_run_of_repeat_may_name_the_first_runs_target():
     """Piercing Light with REPEAT paid, one enemy of 2 Might at a battlefield
     and my unit there too: the second run's "deal 2 to a unit at a
-    battlefield" names the dead enemy again, not my unit (it's hit once, by
-    the first run's "up to one other unit": the baseline takes an "up to",
-    BACKLOG F; before, the second run hit it too)."""
+    battlefield" names the dead enemy again, not my unit (before, the second
+    run hit it; the "up to one other unit" baseline takes no unit of mine)."""
     loop, a, b = _setup()
     enemy, mine = _unit("Enemy", 2), _unit("Mine", 5)
     loop.gs.battlefields[0].add_unit("B", enemy)
@@ -113,7 +112,7 @@ def test_a_second_run_of_repeat_may_name_the_first_runs_target():
     firsts = [got for (run, i, _n), (kind, _c, got) in item.declared.items() if i == 0]
     assert firsts == [[enemy], [enemy]]
     loop._resolve_chain()
-    assert not _on_board(loop, enemy) and mine.damage == 2
+    assert not _on_board(loop, enemy) and mine.damage == 0
 
 
 def test_a_later_choice_still_sees_where_an_earlier_move_went():

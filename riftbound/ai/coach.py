@@ -37,6 +37,7 @@ from riftbound.ai.encoding import ACTION_DIM, action_to_index, encode_observatio
 from riftbound.ai.net_mcts import _PASS, NetGuidedMCTSAgent, _ForcedChoice, _split_key
 from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
+from riftbound.core.loop import NO_MORE
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 CARDS_JSON = Path(__file__).resolve().parents[1] / "data" / "cards" / "all_cards.json"
@@ -201,6 +202,8 @@ def option_text(gs, viewer: str, option) -> str:
         return _bf_name(gs, i)
     if option is None:                     # a place choice: None is the base
         return "Base"
+    if option is NO_MORE:                  # "up to N": stop picking
+        return "Nessun altro"
     if isinstance(option, bool):
         return "Sì" if option else "No"
     if option is gs.A or option is gs.B:

@@ -761,9 +761,25 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   Rebuttal's choice renamed `target:steal_or_counter_spell` (declared too).
   Coach: `option_text` names a chain item ("... (magia avversaria sulla
   catena)").
-- [ ] "Up to N" picks: `choose_many` asks the chooser one pick per baseline pick,
+- [x] "Up to N" picks: `choose_many` asks the chooser one pick per baseline pick,
   so a player (coach, search, net) can't take fewer than the baseline does
   (e.g. Piercing Light's "up to one other unit" with only your unit left).
+  DONE B29 (tests/test_g3_up_to.py): `choose_many(..., up_to=N)` (§355.13):
+  each pick also offers `loop.NO_MORE` (baseline's answer once its picks are
+  taken), so fewer, none, or more up to N; spec flag `up_to` via
+  `effects._up_to(spec, n)` (deal_damage, the unit picker `_resolve_targets`,
+  move, return/play from trash, Acceleration Gate); fixed `up_to=` in the
+  one-card handlers (recycle_from_trashes, Decree of Discord, Elder Dragon per
+  location, Hexplosive Minefield now chooses its Bombs); `any_number` moves
+  (Emperor's Divide, now Corrupted Dragon, Bard Mercurial) pick the same way,
+  no per-unit "you may". Baseline of a harmful "up to" takes no unit of mine
+  (deal_damage enemies only; picker: the bias side only). Data: 16 cards
+  flagged, "optional" dropped where the "up to" covers it (Fae Dragon, Azir,
+  Piercing Light, Janna Savior, Moonfall); Encore's "up to two units +1" hit
+  every unit here (scope all) -> chosen, its damage mode anywhere. Remember the
+  Fallen "up to": no fallback card stands in. Coach: "Nessun altro". Left:
+  "ready up to N runes" never offers fewer (never better), Arise! readies the
+  first two.
 - [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
   Graceful's discount can't be played; "if you spent [N]" sees the Energy
   before her discount.

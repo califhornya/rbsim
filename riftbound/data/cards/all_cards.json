@@ -3685,7 +3685,8 @@
         "scope": "single",
         "amount": 6,
         "count": 2,
-        "where": "anywhere"
+        "where": "anywhere",
+        "up_to": true
       }
     ]
   },
@@ -4916,7 +4917,8 @@
         "target_filter": {
           "exclude_self": true
         },
-        "where": "anywhere"
+        "where": "anywhere",
+        "up_to": true
       }
     ]
   },
@@ -9234,7 +9236,8 @@
         "target_filter": {
           "has_keyword": "HIDDEN"
         },
-        "count": 2
+        "count": 2,
+        "up_to": true
       },
       {
         "effect": "free_hide_this_turn",
@@ -10597,7 +10600,8 @@
         "timing": "reaction",
         "target": "friendly_unit",
         "count": 2,
-        "from": "battlefield"
+        "from": "battlefield",
+        "up_to": true
       }
     ]
   },
@@ -11741,10 +11745,10 @@
         "target": "chosen_unit",
         "where": "anywhere",
         "amount": 2,
-        "optional": true,
         "target_filter": {
           "not_it": true
-        }
+        },
+        "up_to": true
       }
     ]
   },
@@ -12751,8 +12755,8 @@
         "target": "enemy_unit",
         "scope": "single",
         "from": "here",
-        "optional": true,
-        "destination": "base"
+        "destination": "base",
+        "up_to": true
       }
     ]
   },
@@ -13693,7 +13697,8 @@
         "additional_cost": {
           "exhaust_legend": true
         },
-        "destination": "open"
+        "destination": "open",
+        "any_number": true
       }
     ]
   },
@@ -13724,7 +13729,8 @@
         "target": "chosen_unit",
         "where": "anywhere",
         "amount": 1,
-        "count": 3
+        "count": 3,
+        "up_to": true
       }
     ]
   },
@@ -14432,7 +14438,7 @@
         "target": "friendly_unit",
         "where": "anywhere",
         "count": 4,
-        "optional": true
+        "up_to": true
       },
       {
         "effect": "play_token",
@@ -17017,7 +17023,7 @@
         },
         "destination": "here",
         "count": 99,
-        "optional": true
+        "up_to": true
       }
     ]
   },
@@ -26240,7 +26246,7 @@
         "target": "enemy_unit",
         "scope": "single",
         "destination": "here",
-        "optional": true
+        "up_to": true
       },
       {
         "effect": "grant_temporary_might",
@@ -30667,7 +30673,7 @@
         "scope": "all",
         "from": "here",
         "destination": "base",
-        "optional": true
+        "any_number": true
       }
     ],
     "variants": [
@@ -31117,7 +31123,8 @@
         "count": 2,
         "target_filter": {
           "is_unit": true
-        }
+        },
+        "up_to": true
       }
     ],
     "variants": [
@@ -32620,7 +32627,8 @@
         "trigger": "on_cast",
         "target": "enemy_unit",
         "amount": 2,
-        "where": "battlefield"
+        "where": "battlefield",
+        "up_to": true
       },
       {
         "effect": "move_unit",
@@ -33069,7 +33077,8 @@
         "trigger": "on_cast",
         "amount": 4,
         "target": "chosen_unit",
-        "gear_and_runes": true
+        "gear_and_runes": true,
+        "up_to": true
       }
     ],
     "variants": [
@@ -33740,7 +33749,8 @@
         "target": "chosen_unit",
         "amount": 1,
         "count": 2,
-        "where": "anywhere"
+        "where": "anywhere",
+        "up_to": true
       }
     ],
     "variants": [
@@ -38497,7 +38507,8 @@
         "target_filter": {
           "energy_at_most": 3,
           "power_at_most": 1
-        }
+        },
+        "up_to": true
       }
     ],
     "variants": [
@@ -39113,7 +39124,8 @@
           {
             "effect": "deal_damage",
             "target": "chosen_unit",
-            "amount": 2
+            "amount": 2,
+            "where": "anywhere"
           },
           [
             {
@@ -39130,10 +39142,12 @@
           {
             "effect": "grant_temporary_might",
             "target": "chosen_unit",
-            "scope": "all",
+            "scope": "single",
             "count": 2,
             "amount": 1,
-            "duration": "this_turn"
+            "duration": "this_turn",
+            "where": "anywhere",
+            "up_to": true
           },
           {
             "effect": "dig",

@@ -1,5 +1,5 @@
 """BACKLOG G2, Spiritforged approximations. Emperor's Divide moves any number
-of friendly units (one choice each); Assembly Rig's cost recycles a unit from
+of friendly units (chosen, any number of them); Assembly Rig's cost recycles a unit from
 the trash; Arcane Shift's unit is played to its owner's base or a battlefield
 they control (§355.2.a), chosen; The Zero Drive is banished to pay its
 ability; Kato the Arm lends every keyword he has (§801.3: granted ones too);
@@ -9,6 +9,7 @@ among them")."""
 from __future__ import annotations
 
 from riftbound.core.cards import SpellCard, UnitCard
+from riftbound.core.loop import NO_MORE
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 from test_corpus_cards import _cast_now, _deck, _play_spell, _setup, _unit
@@ -27,8 +28,8 @@ def test_emperors_divide_moves_any_number_of_friendly_units():
     bf.add_unit("A", stay)
     bf.add_unit("A", go)
     bf.add_unit("B", _unit("Enemy", 9))
-    loop.chooser = lambda _l, kind, side, options, default, source: (
-        options.index(source is not stay.card) if kind.startswith("optional:") else None)
+    loop.chooser = lambda _l, kind, side, options, default, source: next(
+        i for i, o in enumerate(options) if o is NO_MORE or o[1].card.name == "Go")
     _play_spell(loop, a, "Emperor's Divide")
     assert stay in bf.units_A and go in a.base_units
     loop, a, b = _setup()
