@@ -633,12 +633,33 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   card unless `must` or `reveal: false` (Lightning Rush "choose a card",
   Stacked Deck "Put 1"). Not So Fast / Repulse vs abilities: abilities never
   go on the chain in this engine, so moved to G3 "Abilities on the chain".
-- [ ] Unleashed: Iascylla (moves at once, not at the start of your next Main
+- [x] Unleashed: Iascylla (moves at once, not at the start of your next Main
   Phase), Undying Loyalty ([2] less for a Bird / Cat / Dog / Poro: missing),
   Hextech Gauntlets (Equip cost not reduced by the unit's Might), Dancing
   Grenade (replays inside the first cast, no responses between), Crescent
   Guardian ([chaos] payable with no spell played), Death from Below
-  (replayable later in the turn, not only right after).
+  (replayable later in the turn, not only right after). DONE B23
+  (tests/test_g2_unleashed.py): Iascylla: effect `at_start_of_next_main`
+  (`then`) -> `gs.delayed_main`, run by `GameLoop._resolve_delayed_main(side)`
+  in `_begin_turn` after on_start_of_main; "this battlefield" = the one held
+  (§359.3.f.3.a), "you may" asked then. Undying Loyalty: param
+  `less_if_chosen` {tags, amount} -> cost extra `picks` (`_discount_picks`);
+  the pet is chosen as it's paid (`_spend_cost_extras` sets
+  `card._chosen_card`, read by effects._play_from_zone; reset in `_pay_card`);
+  baseline takes the discount, "cost_extras" can decline it. Hextech
+  Gauntlets: marker `equip_less_by_might`, `_equip_cost_for(gear, unit, cost)`,
+  `_equip_targets` (the unit is chosen before paying; WEAPONMASTER counts its
+  unit, §821.1.c.2). Dancing Grenade: one hit per resolution; the replay is a
+  new play by the unit's controller (`_spell_played` + `_put_on_chain`, owner
+  kept); `_resolve_chain` doesn't trash a card still on the chain and reopens
+  priority (`_run_chain`) when a resolution put something on it (§420.3);
+  bonus only on a replay (`card._grenade_again`), hits per turn
+  `card._grenade_hits`. Crescent Guardian: param `additional_cost_if` checked
+  in `_try_pay_additional_costs`. Death from Below: `card._replay_offer`, offered
+  once in the trash (`_offer_play_from_trash`, choice `optional:replay`,
+  baseline: an enemy at a battlefield); the per-turn `_trash_replay` grant is
+  gone. Shared alternate-cost payment `_can_pay_play_for` / `_pay_play_for`
+  (trash_play entries too).
 - [ ] Vendetta: Nasus Curator of the Sands (not on activated abilities costing
   [7]+), Tail-Cloaked Matriarch (reads the unit from your trash), Decree of
   Focus (spells' choices only, not abilities'), Bottled Constellation (start of
@@ -668,7 +689,9 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   declared, and can be reacted to. Cards hit: Not So Fast / Repulse ("counter
   an enemy spell or ability that chooses ..." reads `ChainItem.declared` of
   spells only: `effects._chose_mine`), Decree of Focus (`_fury_threatened`,
-  G2 Vendetta), any REACTION played in answer to an ability.
+  G2 Vendetta), any REACTION played in answer to an ability, Death from
+  Below's reflexive "you may play this from your trash" (§388.4: on the chain;
+  here `_offer_play_from_trash` at once, B23).
 - [ ] Leftovers of E: Orianna (ready / exhaust / return / banish / steal a gear
   don't see a unit gear); Svellsongur (copied activated abilities aren't
   listed twice, a passive keyword grant stays one instance, Karthus-style

@@ -107,6 +107,9 @@ class GameState:
     # "At the end of this turn, ..." effects waiting: (side, source card,
     # battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
+    # "At the start of your next Main Phase, ..." (Iascylla): the same tuples,
+    # run at the start of that side's next Main Phase.
+    delayed_main: list = field(default_factory=list)
     # "Once each turn" / "The first time ... each turn" abilities used:
     # (id of the source card, effect index) -> turn number.
     once_per_turn_used: dict = field(default_factory=dict)

@@ -1511,6 +1511,21 @@ class GameLoop:
                                 self.gs.battlefields[bf_idx])
             handler(ctx, sub)
 
+    def _resolve_delayed_main(self, side: str) -> None:
+        """Run `side`'s "at the start of your next Main Phase, ..." effects
+        (Iascylla); a "you may" one is asked now."""
+        waiting = [d for d in self.gs.delayed_main if d[0] == side]
+        self.gs.delayed_main = [d for d in self.gs.delayed_main if d[0] != side]
+        for _side, card, bf_idx, sub in waiting:
+            handler = EFFECT_REGISTRY.get(sub.get("effect"))
+            actor = self.gs.get_player(side)
+            if handler is None or bf_idx >= len(self.gs.battlefields) or (
+                    sub.get("optional") and not self._wants_optional_keyword(actor, card, sub["effect"])):
+                continue
+            ctx = EffectContext(self, card, actor, self.gs.get_player(self.gs.other(side)),
+                                self.gs.battlefields[bf_idx])
+            handler(ctx, sub)
+
     def _legend_unit(self, side: str):
         """The in-play UnitInPlay for a side's Champion Legend, or None."""
         return self.gs.legend_unit_A if side == "A" else self.gs.legend_unit_B
@@ -2458,6 +2473,21 @@ class GameLoop:
                 "recycle": recycle, "kill_friendly": kill_friendly,
                 "spend_xp": spend_xp, "or_exhaust": or_exhaust, "complex": False}
 
+    def _equip_cost_for(self, gear: Card, unit, cost: dict) -> dict:
+        """An Equip cost choosing `unit`: "This ability's Energy cost is reduced
+        by the Might of the unit you choose" (Hextech Gauntlets, §818.1.c.4)."""
+        if not self._has_effect(gear, "equip_less_by_might"):
+            return cost
+        return dict(cost, energy=max(0, cost["energy"] - max(0, unit.might)))
+
+    def _equip_targets(self, ap: Player, gear: Card, cost: dict) -> list:
+        """The friendly units `gear` can be equipped to for `cost` (chosen before
+        paying when the unit changes the cost: _equip_cost_for)."""
+        units = self._friendly_units_of("A" if ap is self.gs.A else "B")
+        if not self._has_effect(gear, "equip_less_by_might"):
+            return units if self._can_pay_equip(ap, cost) else []
+        return [u for u in units if self._can_pay_equip(ap, self._equip_cost_for(gear, u, cost))]
+
     @staticmethod
     def _equip_cost_minus_A(cost: dict) -> dict:
         """An Equip cost reduced by [A] (1 Power of any domain) — Weaponmaster's
@@ -3099,16 +3129,22 @@ class GameLoop:
         choice and payment, in any order (§356.2; one card can repeat the same
         cost on several instructions: Pyke). A "you may" one is the player's
         choice (baseline: pay). Sets `card._kicker_paid = True` when one is
-        paid. Returns whether anything was paid."""
+        paid. Returns whether anything was paid. `additional_cost_if`: the
+        condition that permits paying it ("If you've played a spell this turn,
+        you may pay [chaos] as an additional cost": Crescent Guardian)."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return False
         side = "A" if ap is self.gs.A else "B"
+        opponent = self.gs.get_player(self.gs.other(side))
         seen: list = []
         paid = False
         for es in spec.effects:
             ac = getattr(es, "additional_cost", None)
             if not ac or ac in seen:
+                continue
+            if es.params.get("additional_cost_if") and not self._check_condition(
+                    es.params["additional_cost_if"], card, ap, opponent, {}):
                 continue
             seen.append(ac)
             if self._additional_cost_optional(card) and \
@@ -3339,7 +3375,20 @@ class GameLoop:
                 if any(u.might_counters > 0 for u in self._friendly_units_of(side)):
                     out.update(energy=int(card.cost_energy or 0), power=int(card.cost_power or 0),
                                buffs=1)
+            if es.params.get("less_if_chosen") and self._discount_picks(card, side, es):
+                # "This costs [2] less if you choose a Bird, Cat, Dog, or Poro"
+                # (Undying Loyalty): the card it will play, chosen as it's paid.
+                out.update(energy=int(es.params["less_if_chosen"].get("amount", 2)), picks=1)
         return out
+
+    def _discount_picks(self, card: Card, side: str, es) -> list:
+        """The cards in `side`'s trash a `less_if_chosen` effect may play that
+        make `card` cheaper (their tags)."""
+        from .effects import _zone_effect_card_ok
+        tags = es.params["less_if_chosen"].get("tags") or []
+        params = es.merged_params()
+        return [c for c in self.gs.get_player(side).trash
+                if _zone_effect_card_ok(c, params) and any(t in (getattr(c, "tags", None) or ()) for t in tags)]
 
     def _choose_cost_extras(self, card: Card, ap: Player, extras: dict, energy: int, power):
         """How much of `extras` the player spends (GameLoop.choose; baseline: all
@@ -3358,8 +3407,9 @@ class GameLoop:
                 less = {**extras, key: k, "power": k} if k else {x: v for x, v in extras.items()
                                                                 if x not in (key, "power")}
                 options.append((less, energy, (power or 0) + back))
-        if "xp" in extras or "discards" in extras or "gear_returns" in extras:
-            less = {x: v for x, v in extras.items() if x not in ("xp", "discards", "gear_returns", "energy")}
+        if "xp" in extras or "discards" in extras or "gear_returns" in extras or "picks" in extras:
+            less = {x: v for x, v in extras.items()
+                    if x not in ("xp", "discards", "gear_returns", "picks", "energy")}
             options.append((less, energy + extras.get("energy", 0), power))
         options = [o for o in options if o is options[0] or self._can_pay_card(ap, card, o[1], o[2])]
         pick = options[0]
@@ -3389,6 +3439,14 @@ class GameLoop:
         if extras.get("xp"):
             self.gs.add_xp(side, -extras["xp"])
         ap = self.gs.get_player(side)
+        spec = CARD_REGISTRY.get(card.name) if card is not None and extras.get("picks") else None
+        es = next((es for es in (spec.effects if spec else ()) if es.params.get("less_if_chosen")), None)
+        picks = self._discount_picks(card, side, es) if es is not None else []
+        if picks:
+            # Undying Loyalty: what it plays is chosen now, among the cheaper
+            # ones (effects._play_from_zone reads card._chosen_card).
+            from .effects import _zone_value
+            card._chosen_card = self.choose(f"card:{es.effect}", side, picks, max(picks, key=_zone_value), card)
         if extras.get("gear_returns"):
             from .effects import _return_gear     # a token or the cheapest, base first
             ctx = EffectContext(self, card or ap.hand[0], ap, self.gs.get_player(self.gs.other(side)),
@@ -3745,6 +3803,7 @@ class GameLoop:
         if not self._can_pay_card(actor, card, energy, power):
             return False
         side = "A" if actor is self.gs.A else "B"
+        card._chosen_card = None             # set again if a cost extra chooses it
         if extras is True:
             extras, energy, power = self._choose_cost_extras(
                 card, actor, self._cost_extras(card, side), energy, power)
@@ -3924,7 +3983,8 @@ class GameLoop:
                 base_cost = self._equip_cost(gear_card)
                 if base_cost is None:
                     continue
-                reduced = self._equip_cost_minus_A(base_cost)
+                # As though it chose this unit (§821.1.c.2): Hextech Gauntlets.
+                reduced = self._equip_cost_minus_A(self._equip_cost_for(gear_card, unit, base_cost))
                 if self._can_pay_equip(ap, reduced) and self._pay_equip(ap, reduced):
                     ap.base_gear.remove(gear_card)
                     unit.gear.append(gear_card)
@@ -4910,15 +4970,45 @@ class GameLoop:
             self._equip_cost(card) is not None and self._side_has_passive(side, "equipment_quick_draw")))
 
     def _trash_plays(self, card: Card) -> list:
-        """(cost, condition) for each way `card` may be played from its owner's
-        trash: a `from_trash` entry, or a grant this turn (card._trash_replay)."""
+        """(cost, condition) for each `from_trash` way `card` may be played from
+        its owner's trash."""
         spec = CARD_REGISTRY.get(card.name)
-        out = [(es.cost or {}, es.condition) for es in (spec.effects if spec else ())
-               if es.trigger == "from_trash"]
-        grant = getattr(card, "_trash_replay", None)
-        if grant is not None and grant[0] == self.gs.turn:
-            out.append((grant[1], None))
-        return out
+        return [(es.cost or {}, es.condition) for es in (spec.effects if spec else ())
+                if es.trigger == "from_trash"]
+
+    def _can_pay_play_for(self, ap: Player, card: Card, cost: dict) -> bool:
+        """Whether `ap` can play `card` for `cost` (an alternate cost: "play me
+        from your trash for [3] [fury]", "play this spell again for [rune]"),
+        with what is earmarked for that kind of card (_less_play_earmarks)."""
+        parsed = self._less_play_earmarks(ap, card, self._parse_activated_cost(cost))
+        return self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
+
+    def _pay_play_for(self, ap: Player, card: Card, cost: dict) -> bool:
+        """Pay `cost` to play `card` (_can_pay_play_for)."""
+        if not self._can_pay_play_for(ap, card, cost):
+            return False
+        parsed = self._less_play_earmarks(ap, card, self._parse_activated_cost(cost), spend=True)
+        return self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
+
+    def _offer_play_from_trash(self, side: str, card: Card, cost: dict) -> None:
+        """ "Then, if it had 3 [might] or less, you may play this from your trash
+        for [rune]" (Death from Below): a reflexive trigger of the resolving
+        spell, done once it is in its controller's trash (§388.4; abilities
+        don't use the chain here, so nobody responds to it). The player chooses
+        (baseline: when it can kill an enemy unit at a battlefield)."""
+        ap = self.gs.get_player(side)
+        lane = self._zone_play_lane()
+        if not any(c is card for c in ap.trash) or self._play_forbidden(ap, card) or \
+                not self._spell_has_targets(card, side, lane) or not self._can_pay_play_for(ap, card, cost):
+            return
+        foe = any(bf._units_for(self.gs.other(side)) for bf in self.gs.battlefields)
+        if not self.choose("optional:replay", side, [True, False], foe, card) or \
+                not self._pay_play_for(ap, card, cost):
+            return
+        ap.trash.remove(card)
+        if self.verbose:
+            print(f"  {side} plays {card.name} again from the trash")
+        self._play_from_zone_now(ap, card, side, "trash")
 
     def _banished_playable(self, card: Card, side: str) -> bool:
         return (getattr(card, "_banish_play_side", None) == side
@@ -5054,8 +5144,7 @@ class GameLoop:
             if cost is not None:
                 cost = dict(cost, energy=max(0, cost["energy"] - self._gear_ability_discount(side)))
             # "Attach this gear to a unit you control" (§818.1.c.2): in base too.
-            return (gear in ap.base_gear and cost is not None and self._can_pay_equip(ap, cost)
-                    and bool(self._friendly_units_of(side)))
+            return gear in ap.base_gear and cost is not None and bool(self._equip_targets(ap, gear, cost))
         if entry["type"] == "flow":
             return self._can_pay_flow(ap, entry["card"], side) and \
                 self._spell_has_targets(entry["card"], side, self._zone_play_lane())
@@ -5068,12 +5157,11 @@ class GameLoop:
                     return False
                 energy, power = self._effective_cost(card, ap, from_zone="trash")
                 return self._can_pay_card(ap, card, energy, power)
-            parsed = self._less_play_earmarks(ap, card, self._parse_activated_cost(entry["cost"]))
             if not self._check_condition(entry["cond"], card, ap, self.gs.get_player(self.gs.other(side)), {}):
                 return False
             if isinstance(card, SpellCard) and not self._spell_has_targets(card, side, self._zone_play_lane()):
                 return False
-            return self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
+            return self._can_pay_play_for(ap, card, entry["cost"])
         if entry["type"] == "banished_play":
             card = entry["card"]
             if card not in ap.banished or not self._banished_playable(card, side):
@@ -5501,6 +5589,13 @@ class GameLoop:
             gear = entry["gear"]
             cost = self._equip_cost(gear)              # the EQUIP-ability cost (§744)
             cost = dict(cost, energy=max(0, cost["energy"] - self._gear_ability_discount(side)))
+            target_unit = None
+            if self._has_effect(gear, "equip_less_by_might"):
+                # Its cost depends on the unit: chosen first (baseline: the
+                # mightiest, the cheapest), then paid.
+                units = self._equip_targets(ap, gear, cost)
+                target_unit = self.choose("equip", side, units, max(units, key=lambda u: u.might), gear)
+                cost = self._equip_cost_for(gear, target_unit, cost)
             if not self._pay_equip(ap, cost):
                 return
             self._note_gear_ability(side)
@@ -5508,8 +5603,9 @@ class GameLoop:
             units = self._friendly_units_of(side)
             if not units:
                 return
-            target_unit = self.choose("equip", side, units,
-                                      self._first_friendly_unit_on_board(side) or units[0], gear)
+            if target_unit is None:
+                target_unit = self.choose("equip", side, units,
+                                          self._first_friendly_unit_on_board(side) or units[0], gear)
             ap.base_gear.remove(gear)
             target_unit.gear.append(gear)
             if self.verbose:
@@ -5534,14 +5630,9 @@ class GameLoop:
                     print(f"  {ap.name} plays {card.name} from the trash")
                 self._play_from_zone_now(ap, card, side, "trash")
                 return
-            cost = self._parse_activated_cost(entry["cost"])
-            parsed = self._less_play_earmarks(ap, card, cost)
-            if not self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
+            if not self._pay_play_for(ap, card, entry["cost"]):
                 return
-            self._less_play_earmarks(ap, card, cost, spend=True)
-            self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"])
             ap.trash.remove(card)
-            card._trash_replay = None
             self._play_from_zone_now(ap, card, side, "trash")
             return
 
@@ -6454,19 +6545,24 @@ class GameLoop:
         return "noop"
 
     def _resolve_chain(self) -> None:
-        """Resolve the chain LIFO, each spell to its caster's trash."""
+        """Resolve the chain LIFO, each spell to its caster's trash. A spell that
+        put a play on the chain as it resolved (Dancing Grenade's replay, Death
+        from Below's) opens priority again before that one resolves (§420.3)."""
         while self.gs.chain:
             item = self.gs.chain.pop()
+            depth = len(self.gs.chain)
             actor = self.gs.get_player(item.player)
             opponent = self.gs.get_player(self.gs.other(item.player))
             battlefield = self.gs.battlefields[item.bf_idx]
             outer, outer_noted = self._replay, getattr(self, "_choices_noted", False)
+            outer_item, self._resolving_item = getattr(self, "_resolving_item", None), item
             self._replay = {"card": item.card, "choices": item.declared} if item.declared else None
             self._choices_noted = item.choices_noted
             try:
                 self._resolve_card_effects(item.card, battlefield, actor, opponent)
             finally:
                 self._replay, self._choices_noted = outer, outer_noted
+                self._resolving_item = outer_item
 
             if self.recorder:
                 before_a = list(battlefield.units_A)
@@ -6474,14 +6570,21 @@ class GameLoop:
                 self._record_spell_deaths(battlefield, before_a, before_b)
 
             self.spells_cast += 1
-            if isinstance(item.card, SpellCard):
+            if isinstance(item.card, SpellCard) and not any(it.card is item.card for it in self.gs.chain):
                 # A resolved spell goes to its caster's trash (KNOWN_ISSUES #19a).
                 # Previously cast spells vanished, starving trash-based mechanics
                 # (FLOW / recycle / return-from-trash) of any targets. Countered
                 # spells are popped + trashed by counter_spell before this loop, so
                 # they never reach here — no double-trash. A spell another
-                # player took over goes to its owner's (Mystic Reversal).
+                # player took over goes to its owner's (Mystic Reversal). One
+                # played again as it resolved stays on the chain (Dancing Grenade).
                 self._spell_to_trash(self.gs.get_player(item.owner) if item.owner else actor, item.card)
+                offer = getattr(item.card, "_replay_offer", None)
+                if offer is not None:
+                    item.card._replay_offer = None
+                    self._offer_play_from_trash(item.player, item.card, offer)
+            if len(self.gs.chain) > depth:
+                self._run_chain(self.gs.chain[-1].player)
 
     def _run_showdown(self, bf_idx: int, attacker: str) -> None:
         """Execute a showdown at the given battlefield (§337–345)."""
@@ -6947,6 +7050,7 @@ class GameLoop:
         # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
         # it makes at a battlefield has its showdown before any action.
         self._fire_turn_trigger("on_start_of_main", gs.active)
+        self._resolve_delayed_main(gs.active)                  # Iascylla
         self._recompute_passives()
         self._run_staged_showdowns()
         return None

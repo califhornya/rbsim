@@ -86,21 +86,6 @@ def test_right_of_conquest_draws_one_plus_one_per_battlefield():
     assert len(a.hand) == 3
 
 
-def test_dancing_grenade_bounces_back_with_more_damage():
-    """'Deal 2 to a unit. Its controller may play this spell again for [rune]. If
-    they do, this deals 1 additional Bonus Damage for each time this spell has
-    dealt damage this turn.'"""
-    loop, a, b = _setup()
-    mine, theirs = _unit("Mine", 9), _unit("Theirs", 9)
-    a.base_units.append(mine)
-    b.base_units.append(theirs)
-    loop.chooser = lambda _l, kind, side, options, default, source: (
-        options.index(True) if kind == "optional:replay" and side == "B" else
-        options.index(False) if kind == "optional:replay" else None)
-    _cast_now(loop, a, "Dancing Grenade")
-    assert theirs.damage == 2 and mine.damage == 3
-
-
 def test_red_brambleback_doubles_conquer_effects_here():
     """'Your conquer effects for conquering here trigger an additional time.'"""
     loop, a, b = _setup()
@@ -505,17 +490,6 @@ def test_rift_herald_plays_a_unit_from_hand_when_it_dies():
     herald = _unit("Rift Herald")
     loop._route_deaths([(herald, "A")], loop.gs.battlefields[0], in_base=True)
     assert any(u.card is big for u in a.base_units) and a.energy == 20
-
-
-def test_death_from_below_may_come_back_from_the_trash_after_a_small_kill():
-    """'Kill a unit at a battlefield. Then, if it had 3 [might] or less, you may
-    play this from your trash for [rune].'"""
-    loop, a, b = _setup()
-    loop.gs.battlefields[0].add_unit("B", _unit("Small", 2))
-    loop.gs.battlefields[1].add_unit("B", _unit("Next", 9))
-    _play_spell(loop, a, "Death from Below")
-    entries = [e for e in loop.activatable_abilities("A") if e["type"] == "trash_play"]
-    assert entries and loop._ability_usable(a, entries[0])
 
 
 def test_undying_legion_plays_from_the_trash_with_legion():

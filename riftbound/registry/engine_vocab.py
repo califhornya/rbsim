@@ -323,6 +323,7 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "cheaper_spells_choosing_me",   # Irelia Graceful: GameLoop._graceful_discount
     "songstress_discount",      # Seraphine Starry-Eyed Songstress: GameLoop._songstress_discount
     "kill_unit_for_discount",   # Atakhan: GameLoop._kill_discounts
+    "equip_less_by_might",      # Hextech Gauntlets: GameLoop._equip_cost_for
     # Endless Riches: GameLoop._begin_turn, activatable_abilities, _trash_banishes
     "skip_draw_phase", "play_from_trash", "trash_to_banish",
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)

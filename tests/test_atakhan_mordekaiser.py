@@ -272,7 +272,4 @@ def test_mordekaisers_power_doesnt_pay_a_spells_play_from_the_trash():
     a.trash.extend([spell, UnitCard(name="Old", might=1)])
     a.power_pool = {}
     _add_with_mordekaiser(loop, a)
-    spell._trash_replay = (loop.gs.turn, {"power": 1})
-    entries = [e for e in loop.activatable_abilities("A")
-               if e["type"] == "trash_play" and e["card"] is spell]
-    assert entries and not loop._ability_usable(a, entries[0])
+    assert not loop._can_pay_play_for(a, spell, {"power": 1})      # Death from Below's [rune]

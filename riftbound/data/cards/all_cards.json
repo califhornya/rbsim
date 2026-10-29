@@ -20529,11 +20529,14 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "move_unit",
+        "effect": "at_start_of_next_main",
         "trigger": "on_hold",
-        "target": "enemy_unit",
-        "destination": "here",
-        "optional": true
+        "then": {
+          "effect": "move_unit",
+          "target": "enemy_unit",
+          "destination": "here",
+          "optional": true
+        }
       }
     ]
   },
@@ -23280,21 +23283,14 @@
           "power": 1,
           "domain": "CHAOS"
         },
-        "condition": {
-          "type": "all_of",
+        "additional_cost_if": {
+          "type": "you_played_n_spells_this_turn",
           "params": {
-            "conditions": [
-              {
-                "type": "kicker_paid"
-              },
-              {
-                "type": "you_played_n_spells_this_turn",
-                "params": {
-                  "n": 1
-                }
-              }
-            ]
+            "n": 1
           }
+        },
+        "condition": {
+          "type": "kicker_paid"
         }
       }
     ]
@@ -25004,6 +25000,15 @@
           "is_unit": true,
           "energy_at_most": 2,
           "power_at_most": 1
+        },
+        "less_if_chosen": {
+          "tags": [
+            "Bird",
+            "Cat",
+            "Dog",
+            "Poro"
+          ],
+          "amount": 2
         }
       }
     ]
@@ -25795,6 +25800,10 @@
       "EQUIP 3"
     ],
     "effects": [
+      {
+        "effect": "equip_less_by_might",
+        "trigger": "passive"
+      },
       {
         "effect": "draw_cards",
         "trigger": "on_conquer",

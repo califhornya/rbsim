@@ -7,6 +7,7 @@ from riftbound.registry.cards_registry import CARD_REGISTRY
 from .battlefield import Battlefield
 from .cards import GearCard, SpellCard, UnitCard
 from .combat import UnitInPlay
+from .state import ChainItem
 
 EffectHandler = Callable[["EffectContext", Mapping[str, Any]], None]
 
@@ -301,6 +302,20 @@ def _at_end_of_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     gs = ctx.loop.gs
     bf_idx = next((i for i, b in enumerate(gs.battlefields) if b is ctx.battlefield), 0)
     gs.delayed_effects.append((ctx.actor_side, ctx.card, bf_idx, dict(sub)))
+
+
+@effect("at_start_of_next_main")
+def _at_start_of_next_main(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When I hold, at the start of your next Main Phase, you may move an enemy
+    unit to this battlefield" (Iascylla): `then` waits for this player's next
+    Main Phase (GameLoop._resolve_delayed_main); "this battlefield" is the one
+    of the trigger, noted now (§359.3.f.3.a)."""
+    sub = spec.get("then")
+    if not isinstance(sub, Mapping):
+        return
+    gs = ctx.loop.gs
+    bf_idx = next((i for i, b in enumerate(gs.battlefields) if b is ctx.battlefield), 0)
+    gs.delayed_main.append((ctx.actor_side, ctx.card, bf_idx, dict(sub)))
 
 
 @effect("discount_next_card")
@@ -1566,32 +1581,37 @@ def _next_unit_ready_buff(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
 def _dancing_grenade(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Deal 2 to a unit. Its controller may play this spell again for [rune].
     If they do, this deals 1 additional Bonus Damage for each time this spell
-    has dealt damage this turn" (Dancing Grenade): the replays resolve here,
-    one after the other (no responses between them); each is chosen by the
-    controller of the unit hit last."""
+    has dealt damage this turn" (Dancing Grenade): a replay is a new play by
+    the unit's controller (baseline: when it isn't the thrower), put on the
+    chain above (§420.3), so both players may respond before it resolves;
+    `card._grenade_hits` = (turn, times it dealt damage)."""
     loop = ctx.loop
+    card = ctx.card
     caster = ctx.actor_side
-    hits = 0
-    while True:
-        enemy = loop.gs.other(caster)
-        cands = [u for s in (enemy, caster) for u in _units_at(ctx, s, "anywhere")]
-        cands = [u for u in cands if loop._can_choose(u, caster, ctx.card)]
-        if not cands:
-            return
-        foes = [u for u in cands if loop._locate_unit(u)[0] == enemy]
-        unit = loop.choose(_kind("target", spec), caster, cands, (foes or cands)[0], ctx.card)
-        loop._note_chosen(ctx.card, caster, [unit])
-        side = loop._locate_unit(unit)[0]
-        thrower = loop.gs.get_player(caster)
-        type(ctx)(loop, ctx.card, thrower, loop.gs.get_player(loop.gs.other(caster)),
-                  ctx.battlefield, ctx.extra).damage_units([unit], 2 + hits)
-        hits += 1
-        holder = loop.gs.get_player(side)
-        if not (loop._can_pay_generic_power(holder, 1) and loop.choose(
-                "optional:replay", side, [True, False], side != caster, ctx.card)):
-            return
-        loop._pay_generic_power(holder, 1)
-        caster = side
+    turn = loop.gs.turn
+    again, card._grenade_again = getattr(card, "_grenade_again", None) == turn, None
+    cands = [u for s in (ctx.opponent_side, caster) for u in _units_at(ctx, s, "anywhere")]
+    cands = [u for u in cands if loop._can_choose(u, caster, card)]
+    if not cands:
+        return
+    foes = [u for u in cands if loop._locate_unit(u)[0] == ctx.opponent_side]
+    unit = loop.choose(_kind("target", spec), caster, cands, (foes or cands)[0], card)
+    loop._note_chosen(card, caster, [unit])
+    side = loop._locate_unit(unit)[0]
+    hits = card._grenade_hits[1] if getattr(card, "_grenade_hits", (None, 0))[0] == turn else 0
+    ctx.damage_units([unit], 2 + (hits if again else 0))
+    card._grenade_hits = (turn, hits + 1)
+    holder = loop.gs.get_player(side)
+    if not (loop._can_pay_play_for(holder, card, {"power": 1}) and loop.choose(
+            "optional:replay", side, [True, False], side != caster, card)):
+        return
+    loop._pay_play_for(holder, card, {"power": 1})
+    item = getattr(loop, "_resolving_item", None)
+    owner = (item.owner or item.player) if item is not None and item.card is card else caster
+    card._grenade_again = turn
+    lane = loop.gs.battlefields.index(ctx.battlefield) if ctx.battlefield in loop.gs.battlefields else 0
+    loop._spell_played(card, holder, from_zone="chain")
+    loop._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane, owner=owner if owner != side else None))
 
 
 @effect("hwei_discard_bonus")
@@ -1775,9 +1795,10 @@ def _play_unit_from_hand_free_energy(ctx: "EffectContext", spec: Mapping[str, An
 @effect("replay_from_trash_if_small")
 def _replay_from_trash_if_small(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Then, if it had 3 [might] or less, you may play this from your trash for
-    [rune]" (Death from Below): it may be played from the trash this turn."""
+    [rune]" (Death from Below): offered once it is in the trash, right after it
+    resolves (GameLoop._offer_play_from_trash)."""
     if "killed_might" in ctx.extra and ctx.extra["killed_might"] <= int(spec.get("might_at_most", 3)):
-        ctx.card._trash_replay = (ctx.loop.gs.turn, {"power": 1})
+        ctx.card._replay_offer = {"power": 1}
 
 
 @effect("disempower_or_kill_gear")
@@ -5318,7 +5339,12 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
         picks = [c for c in picks
                  if int(c.cost_energy or 0) <= int(victim.cost_energy or 0)
                  and int(c.cost_power or 0) <= int(victim.cost_power or 0)]
-    if picks:
+    chosen = getattr(ctx.card, "_chosen_card", None)
+    if chosen is not None:
+        # Chosen as it was paid, to cost less (Undying Loyalty): that one only.
+        ctx.card._chosen_card = None
+        picks = [c for c in picks if c is chosen]
+    elif picks:
         chosen = loop.choose_many(_kind("card", spec), side, picks, picks[:count], ctx.card)
         picks = chosen + [c for c in picks if not any(c is x for x in chosen)]
     played = 0
