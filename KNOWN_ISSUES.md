@@ -545,7 +545,7 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Fix:** a failed action counts as a pass, plus a 200-round cap per showdown / chain.
   Regression test: `test_no_hang.py::test_unpayable_spells_in_a_showdown_count_as_passes`.
 
-## 27. (OPEN, found 2026-10-29) Cost extras: hand plays only, and some paths never spend them
+## 27. (CLOSED 2026-10-29, B20) Cost extras: hand plays only, and some paths never spend them
 - **Tracked in BACKLOG.md G1.**
 - **What:** what a card lets you spend as you play it to cost less (`GameLoop._cost_extras`:
   Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's buffs, Commander
@@ -559,3 +559,4 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
   XP are not spent. Only the UNIT action and spells (`_spell_played`) spend them.
 - **Fix (future):** move the choice and the spending into `_pay_card`, as Atakhan's kill
   discount does (`_kill_discount`, B18), so every paid play from every zone handles them.
+- **Fixed (B20):** done as above; see BACKLOG.md G1 and tests/test_g1_engine_bugs.py.

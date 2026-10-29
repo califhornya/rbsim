@@ -203,7 +203,7 @@ def test_temporary_units_in_base_die_with_their_deathknell():
     loop.gs.A.base_units.append(sprite)
     died = []
     orig = loop._route_deaths
-    loop._route_deaths = lambda pairs, bf: (died.extend(pairs), orig(pairs, bf))
+    loop._route_deaths = lambda pairs, bf, **kw: (died.extend(pairs), orig(pairs, bf, **kw))
     loop._phase_beginning("A")
     assert sprite not in loop.gs.A.base_units and died == [(sprite, "A")]
 

@@ -641,7 +641,7 @@ class GameLoop:
         for u in dead:
             player.base_units.remove(u)
         if dead:
-            self._route_deaths([(u, active) for u in dead], self.gs.battlefields[0])
+            self._route_deaths([(u, active) for u in dead], self.gs.battlefields[0], in_base=True)
 
         # Remove unattached TEMPORARY gear at base (§742.1.b; e.g. Spinning Axe:
         # "if unattached, kill it at the start of its controller's Beginning
@@ -1654,14 +1654,14 @@ class GameLoop:
             actor = self.gs.get_player(side)
             opponent = self.gs.get_player(self.gs.other(side))
             for unit in list(actor.base_units):
-                self._apply_unit_passives(unit, side, anchor, actor, opponent)
+                self._apply_unit_passives(unit, side, anchor, actor, opponent, in_base=True)
             for legend_unit in self._legend_units(side):
-                self._apply_unit_passives(legend_unit, side, anchor, actor, opponent)
+                self._apply_unit_passives(legend_unit, side, anchor, actor, opponent, in_base=True)
             # Unattached non-Equipment gear ("Your units have +2 [might]":
             # Ephemeral Ward). An Equipment's passives are for its unit.
             for g in list(actor.base_gear):
                 if self._equip_cost(g) is None:
-                    self._apply_gear_passives(g, side, anchor, actor, opponent)
+                    self._apply_gear_passives(g, side, anchor, actor, opponent, in_base=True)
         for bf in self.gs.battlefields:
             self._apply_battlefield_passives(bf)
             self._trim_facedowns(bf)
@@ -1741,12 +1741,12 @@ class GameLoop:
                 continue
             self._apply_passive_grant(None, EffectContext(self, bf.card, actor, opponent, bf), es)
 
-    def _apply_unit_passives(self, unit, side, bf, actor, opponent) -> None:
+    def _apply_unit_passives(self, unit, side, bf, actor, opponent, in_base=False) -> None:
         effects = self._card_effects(unit.card, unit.gear)
         if not effects:
             self._apply_equipment_conditions(unit, actor, opponent, bf)
             return
-        context = EffectContext(self, unit.card, actor, opponent, bf)
+        context = EffectContext(self, unit.card, actor, opponent, bf, {"in_base": in_base})
         for es in effects:
             if es.trigger != "passive":
                 continue
@@ -1771,11 +1771,11 @@ class GameLoop:
                         es.condition, unit.card, actor, opponent, {"battlefield": bf, "gear": g}):
                     unit.passive_might += int(es.params.get("amount", 0))
 
-    def _apply_gear_passives(self, card, side, bf, actor, opponent) -> None:
+    def _apply_gear_passives(self, card, side, bf, actor, opponent, in_base=False) -> None:
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return
-        context = EffectContext(self, card, actor, opponent, bf)
+        context = EffectContext(self, card, actor, opponent, bf, {"in_base": in_base})
         for es in spec.effects:
             if es.trigger != "passive":
                 continue
@@ -1794,7 +1794,7 @@ class GameLoop:
 
     _PASSIVE_BOARD_WIDE_SCOPES = {"board", "all_battlefields", "everywhere", "global", "all"}
 
-    def _passive_targets(self, source_unit, bf, side, target, scope=None):
+    def _passive_targets(self, source_unit, bf, side, target, scope=None, in_base=False):
         """Resolve the units a passive ability applies to, honoring the corpus's
         target vocabulary. Self-targets hit only the source; group targets hit the
         relevant side(s) at the source's battlefield. A board-wide scope (anthems
@@ -1811,6 +1811,11 @@ class GameLoop:
             enemy = [u for b in self.gs.battlefields
                      for u in (b.units_B if side == "A" else b.units_A)]
             enemy += self.gs.get_player("B" if side == "A" else "A").base_units
+        elif in_base:
+            # "Here" for a source in base is that base (Alpha Wildclaw), not a
+            # battlefield; no enemy unit is ever there.
+            friendly = list(self.gs.get_player(side).base_units)
+            enemy = []
         else:
             friendly = list(bf.units_A if side == "A" else bf.units_B)
             enemy = list(bf.units_B if side == "A" else bf.units_A)
@@ -1829,7 +1834,8 @@ class GameLoop:
         params = es.merged_params()
         side = context.actor_side
         bf = context.battlefield
-        targets = self._passive_targets(source_unit, bf, side, es.target, es.scope)
+        targets = self._passive_targets(source_unit, bf, side, es.target, es.scope,
+                                        in_base=context.extra.get("in_base", False))
 
         # Anthems/"while" buffs restricted to a subset ("your TOKEN units ...")
         # must honor the target_filter, not blanket every friendly (KNOWN_ISSUES #18).
@@ -3242,7 +3248,7 @@ class GameLoop:
         side = "A" if actor is self.gs.A else "B"
         if from_zone != "hand" and self._has_effect(card, "reduce_cost_not_from_hand"):
             energy -= 2                                    # Void Drone
-        extras = self._cost_extras(card, side) if from_zone == "hand" else {}
+        extras = self._cost_extras(card, side)            # from any zone (§356.2)
         energy -= extras.get("energy", 0)
         if power:
             power = max(0, power - extras.get("power", 0))
@@ -3710,9 +3716,18 @@ class GameLoop:
             return self._can_pay_showdown(actor, energy, power, card.cost_power_domain)
         return actor.can_pay_cost(energy, power, card.cost_power_domain)
 
-    def _pay_card(self, actor: Player, card: Card, energy: int, power) -> bool:
+    def _pay_card(self, actor: Player, card: Card, energy: int, power, extras=True) -> bool:
+        """Pay `card`'s cost (from _effective_cost). What that cost was reduced
+        by spending (_cost_extras: Brazen Buccaneer's discard, Wallop's buff,
+        ...) is chosen now (`extras` True; a dict: already chosen; False: a cost
+        not from _effective_cost) and spent after the Energy and Power, as
+        Atakhan's kill (§357.1-2)."""
         if not self._can_pay_card(actor, card, energy, power):
             return False
+        side = "A" if actor is self.gs.A else "B"
+        if extras is True:
+            extras, energy, power = self._choose_cost_extras(
+                card, actor, self._cost_extras(card, side), energy, power)
         if isinstance(card, SpellCard):
             energy = self._songstress_discount(
                 actor, card, energy, lambda e: self._can_pay_card(actor, card, e, power, discounts=False))
@@ -3721,6 +3736,8 @@ class GameLoop:
             return False
         if victim is not None:
             self._kill_for_cost(actor, card, victim)
+        if extras:
+            self._spend_cost_extras(extras, side, card)
         return True
 
     def _pay_card_cost(self, actor: Player, card: Card, energy: int, power) -> bool:
@@ -4058,9 +4075,6 @@ class GameLoop:
             card._bonus_damage_turn = self.gs.turn      # Ravenborn Tome
             del self.gs.next_spell_bonus[side]
         card._played_from = from_zone
-        if from_zone == "hand":
-            # What its cost was reduced by spending (Wallop's buff): spent now.
-            self._spend_cost_extras(self._cost_extras(card, side), side, card)
         # The Energy spent to play it: its cost (_pay_card / FLOW) plus the
         # additional costs paid just now (kicker, REPEAT).
         spent = getattr(self, "_spell_energy_paid", 0) + max(0, energy_before - ap.energy)
@@ -4527,11 +4541,10 @@ class GameLoop:
                 extras, energy, power = self._choose_cost_extras(card, ap, extras, energy, power)
                 if surcharge and not self._can_pay_generic_power(ap, surcharge + int(power or 0)):
                     return
-                if not self._pay_card(ap, card, energy, power):
+                if not self._pay_card(ap, card, energy, power, extras=extras):
                     return
                 if surcharge:
                     self._pay_generic_power(ap, surcharge)
-                self._spend_cost_extras(extras, ap.name, card)
                 if self.verbose:
                     print(f"  {ap.name} plays UNIT: {card.name}" + (f" to BF{dst}" if bf else ""))
                 ap.hand[:] = [c for c in ap.hand if c is not card]   # a cost's death may have changed it
@@ -5774,8 +5787,8 @@ class GameLoop:
         for dead_unit, owner_side in truly_dead:
             actor = self.gs.get_player(owner_side)
             opponent = self.gs.get_player(self.gs.other(owner_side))
-            alone = not bf._units_for(owner_side) and \
-                sum(1 for _, s in truly_dead if s == owner_side) == 1
+            here = actor.base_units if in_base else bf._units_for(owner_side)
+            alone = not here and sum(1 for _, s in truly_dead if s == owner_side) == 1
             # The unit's DEATHKNELL, then its Equipment's ("When I die" on gear;
             # the gear itself is back in base by now).
             # "Your DEATHKNELL effects trigger an additional time" (Karthus).
@@ -5825,7 +5838,7 @@ class GameLoop:
                     self._resolve_triggered_effects(bf.card, "on_unit_dies_here", bf, actor, opponent,
                                                     context_extra={"battlefield": bf,
                                                                    "triggering_unit": dead_unit})
-            if dead_unit.stunned:
+            if dead_unit.stunned and not in_base:
                 # "When a stunned enemy unit dies here" (Storm Raptor).
                 enemy = self.gs.other(owner_side)
                 for u in list(bf._units_for(enemy)):

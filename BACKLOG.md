@@ -556,27 +556,40 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
 (the engine first, then the AI's choices).
 
 ### G1. Engine bugs (seen in the code)
-- [ ] Units dying in base count as dying at battlefield 0: `_route_deaths` is
+- [x] Units dying in base count as dying at battlefield 0: `_route_deaths` is
   called without `in_base` for TEMPORARY in base (loop.py), Bottled
   Constellation's sacrifice (effects.py `sacrifice_for_points`) and
   `kill_friendly` (effects.py); the Storm Raptor check (`if
   dead_unit.stunned` in `_route_deaths`) isn't gated by `in_base`. "Here"
   death triggers (Black Rose Sanctum, Storm Raptor, Detonation Amplifier's
-  doubled DEATHKNELL here) can fire for a death in base.
-- [ ] Base units' passives use battlefield 0 as "here" (`anchor` in the unit
+  doubled DEATHKNELL here) can fire for a death in base. DONE B20: the three
+  callers pass `in_base`, Storm Raptor is gated, and "died alone" (Lonely
+  Poro) looks at the base for a death in base (tests/test_g1_engine_bugs.py).
+- [x] Base units' passives use battlefield 0 as "here" (`anchor` in the unit
   passives pass, loop.py): "your units here ..." from a unit in base (Alpha
-  Wildclaw) reaches battlefield 0's units instead of the base. Confirm with a
-  test first.
-- [ ] PREDICT 2+ (effects.py `_predict`): never recycles, no choice; it sorts
+  Wildclaw) reaches battlefield 0's units instead of the base. Confirmed by a
+  test. DONE B20: the base pass marks its context `in_base`
+  (`_apply_unit_passives` / `_apply_gear_passives`), and `_passive_targets`
+  then takes "here" as that player's base (no enemy units).
+- [x] PREDICT 2+ (effects.py `_predict`): never recycles, no choice; it sorts
   the top cards by Might. Rules: look at N, recycle any of them, put the rest
-  back in any order.
+  back in any order. DONE B20 (§437.1.a): one `predict_recycle` choice per
+  card, top first (source = that card; baseline: the agent's
+  decide_predict_recycle, else keep), then `predict_order` (choose_many, top
+  first; baseline: the mightiest drawn first). Cards Nocturne took are out.
 - [ ] Cost extras (KNOWN_ISSUES #27): what a card lets you spend to cost less
   (Brazen Buccaneer's discard, Skystrike Squadron's gear, Kraken Hunter's
   buffs, Commander Ledros's tokens, Poppy's XP, Wallop's buff) applies from
   the hand only (rules: any zone, §356.2), and a play through an effect (Here
   to Help, `_reveal_play_for` mode "reduce", `_play_from_zone` with
   `pay_cost`) takes the discount without spending them. Fix: choose and spend
-  them in `_pay_card`, as Atakhan's kill does.
+  them in `_pay_card`, as Atakhan's kill does. DONE B20: `_effective_cost`
+  takes them off from any zone; `_pay_card(..., extras=True)` chooses them
+  (`_choose_cost_extras`; a dict = already chosen, as the UNIT action does
+  before its surcharge check; False = a cost not from `_effective_cost`: Rift
+  Herald's "ignoring its Energy cost") and spends them after the Energy,
+  Power and Atakhan's kill. `_spell_played` no longer spends them (a free
+  cast took no discount).
 
 ### G2. Card approximations (data unchanged since DEFERRED "Corpus pass")
 - [ ] Origins: Fading Memories (can't choose a gear), Pack of Wonders (units

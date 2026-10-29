@@ -1762,7 +1762,7 @@ def _play_unit_from_hand_free_energy(ctx: "EffectContext", spec: Mapping[str, An
     if not options:
         return
     card = loop.choose(_kind("card", spec), ctx.actor_side, options, max(options, key=_zone_value), ctx.card)
-    loop._pay_card(me, card, 0, int(card.cost_power or 0))
+    loop._pay_card(me, card, 0, int(card.cost_power or 0), extras=False)
     me.hand.remove(card)
     loop._play_unit(card, ctx.actor_side, from_zone="hand")
 
@@ -2909,7 +2909,7 @@ def _sacrifice_for_points(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
             me.base_units.remove(u)
         else:
             where[1].remove_unit(side, u)
-        loop._route_deaths([(u, side)], where[1] or loop.gs.battlefields[0])
+        loop._route_deaths([(u, side)], where[1] or loop.gs.battlefields[0], in_base=where[1] is None)
     _score_point(ctx, {"amount": int(spec.get("amount", 1))})
 
 
@@ -2983,7 +2983,8 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
             chooser.base_units.remove(victim)
         else:
             where[1].remove_unit(chooser_side, victim)
-        loop._route_deaths([(victim, chooser_side)], where[1] or gs.battlefields[0])
+        loop._route_deaths([(victim, chooser_side)], where[1] or gs.battlefields[0],
+                           in_base=where[1] is None)
     until = spec.get("until")
     match = {"filter": spec.get("filter") or until, "target_filter": spec.get("target_filter") or {}}
     mode = str(spec.get("pay", "ignore")).lower()
@@ -5037,9 +5038,11 @@ def _gain_xp(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("scry")
 @effect("predict")
 def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """PREDICT/SCRY X: look at the top X cards of your deck and reorder them.
-    Deterministic policy: arrange so the highest-might card is drawn next (placed
-    on top). No card leaves the deck. Top of deck = end of the cards list."""
+    """PREDICT X (§437): look at the top X cards of your deck, recycle any number
+    of them (one choice each, top first; baseline: keep, a null action, unless
+    the agent's decide_predict_recycle says otherwise), then put the rest back
+    on top in any order (baseline: the mightiest drawn first). Top of deck =
+    end of the cards list."""
     if spec.get("amount_source"):
         amount = _amount(ctx, spec)  # e.g. The Empyrean: shown_power_cost
     else:
@@ -5051,24 +5054,27 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     look = deck.cards[-n:]
     # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now.
     ctx.loop._offer_reveal_from_top(ctx.actor, look)
-    if n == 1:
-        # PREDICT 1 / VISION (§743): look at the top card; you MAY recycle it to
-        # the bottom of the deck. Deterministic default is to keep (a null action);
-        # a learning agent can override decide_predict_recycle.
-        if not deck.cards:
-            return
-        top = deck.cards[-1]
-        agent = getattr(ctx.actor, "agent", None)
-        recycle = bool(agent is not None and hasattr(agent, "decide_predict_recycle")
-                       and agent.decide_predict_recycle(top))
-        if ctx.loop.choose("predict_recycle", ctx.actor_side, [False, True], recycle, ctx.card):
-            deck.cards.pop()
-            deck.cards.insert(0, top)   # recycle to bottom (front of the list)
-            ctx.loop._note_recycled(ctx.actor_side)
+    look = [c for c in look if any(c is d for d in deck.cards)]
+    if not look:
         return
-    rest = deck.cards[:-n]
-    top_sorted = sorted(look, key=lambda c: int(getattr(c, "might", 0) or 0))
-    deck.cards[:] = rest + top_sorted  # best might ends up last == drawn next
+    agent = getattr(ctx.actor, "agent", None)
+    kept, recycled = [], []
+    for card in reversed(look):
+        recycle = bool(agent is not None and hasattr(agent, "decide_predict_recycle")
+                       and agent.decide_predict_recycle(card))
+        if ctx.loop.choose("predict_recycle", ctx.actor_side, [False, True], recycle, card):
+            recycled.append(card)
+        else:
+            kept.append(card)
+    if len(kept) > 1:
+        kept = ctx.loop.choose_many("predict_order", ctx.actor_side, kept,
+                                    sorted(kept, key=lambda c: -int(getattr(c, "might", 0) or 0)),
+                                    ctx.card)
+    rest = deck.cards[:-len(look)]
+    # Recycled ones to the bottom (front of the list), each below the one before.
+    deck.cards[:] = list(reversed(recycled)) + rest + list(reversed(kept))
+    if recycled:
+        ctx.loop._note_recycled(ctx.actor_side)
 
 
 @effect("dig")

@@ -81,7 +81,8 @@ _QUESTIONS = {
     "cost_unit": "Quale unità usare per pagare il costo?", "discard": "Quale carta scartare?",
     "destination": "Dove spostare l'unità?", "deploy": "Dove schierare l'equipaggiamento?",
     "domain": "Di quale dominio prendere il Power?", "keep": "Quale carta tenere?",
-    "predict_recycle": "Mandare in fondo al mazzo la carta in cima?", "card": "Quale carta?",
+    "predict_recycle": "Mandare in fondo al mazzo questa carta?", "card": "Quale carta?",
+    "predict_order": "Quale carta rimettere in cima (la prima scelta si pesca per prima)?",
     "show_off": "Cosa mostrare (SHOW OFF)?", "disarm": "Quale nemico indebolire (DISARM)?",
     "spend_buff": "Quale buff spendere?", "cost_banish": "Quale carta del cimitero bandire?",
     "cost_extras": "Quanto spendere per ridurre il costo?",
@@ -94,7 +95,7 @@ _QUESTIONS = {
 _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damage_order":
           "in combattimento colpisce prima", "cost_unit": "paga con", "discard": "scarta",
           "destination": "verso", "deploy": "schiera su", "domain": "Power",
-          "keep": "tiene", "card": "carta", "show_off": "mostra", "disarm": "indebolisce",
+          "keep": "tiene", "card": "carta", "predict_order": "in cima", "show_off": "mostra", "disarm": "indebolisce",
           "spend_buff": "spende il buff di", "cost_banish": "bandisce",
           "first_unit_here": "rimanda in base", "player": "giocatore", "token_location": "token in",
           "battlefield": "campo", "tag": "tag"}
