@@ -59,8 +59,10 @@ def _parse_domain(value: Optional[str]) -> Optional[Domain]:
 
 
 # Token "cards" are all filed as category "Token"; these are gear tokens
-# (Core Rules §187.5 Gold, §187.12 Bomb), the rest are unit tokens.
+# (Core Rules §187.5 Gold, §187.12 Bomb), these battlefield tokens (§187.8
+# Brush, §187.9 Baron Pit), the rest are unit tokens.
 _GEAR_TOKENS = frozenset({"Gold", "Bomb"})
+_BATTLEFIELD_TOKENS = frozenset({"Brush", "Baron Pit"})
 
 
 def _parse_card_type(value: str) -> CardType:
@@ -205,6 +207,8 @@ class CardSpec:
         category = _parse_card_type(category_str)
         if category_str.lower() == "token" and name in _GEAR_TOKENS:
             category = CardType.GEAR
+        if category_str.lower() == "token" and name in _BATTLEFIELD_TOKENS:
+            category = CardType.BATTLEFIELD
         domain_raw = data.get("domain")
         # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
         if domain_raw:

@@ -3594,6 +3594,8 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
         return False
     if "subtype" in tf and str(tf["subtype"]) not in (getattr(unit, "tags", None) or card.tags or []):
         return False
+    if "subtype_any" in tf and not set(tf["subtype_any"]) & set(getattr(unit, "tags", None) or card.tags or []):
+        return False                     # "Bird, Cat, Dog, Poro, and Ivern units here" (Brush)
     if tf.get("is_buffed") and getattr(unit, "might_counters", 0) <= 0:
         return False
     if tf.get("is_damaged") and getattr(unit, "damage", 0) <= 0:
@@ -4176,6 +4178,37 @@ def _clockwork_animate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for unit in current:
         loop._unit_to_gear(unit)
     loop._gear_to_unit(side, holder, gear)
+
+
+@effect("green_father_brush")
+def _green_father_brush(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When you conquer or hold, you may exhaust me to replace that
+    battlefield with a Brush battlefield token" (Ivern Green Father). Baseline:
+    when the Brush gives a friendly unit there +1 [might]; never a Brush with a
+    Brush."""
+    loop, bf, side = ctx.loop, ctx.battlefield, ctx.actor_side
+    legend = loop._legend_unit(side)
+    if bf is None or legend is None or not legend.ready:
+        return
+    if bf.card is not None and bf.card.name == "Brush":
+        return
+    if not loop.choose("optional:green_father_brush", side, [True, False],
+                       loop._brush_helps(bf, side), ctx.card):
+        return
+    loop._exhaust(legend)
+    loop._replace_battlefield(bf, "Brush")
+
+
+@effect("brush_swap_back")
+def _brush_swap_back(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "When you score here, you may replace this with the battlefield it
+    replaced" (Brush). Baseline: when the Brush helps no friendly unit here."""
+    loop, bf, side = ctx.loop, ctx.battlefield, ctx.actor_side
+    if bf is None or bf.replaced is None or bf.card is not ctx.card:
+        return
+    if loop.choose("optional:brush_swap_back", side, [True, False],
+                   not loop._brush_helps(bf, side), ctx.card):
+        loop._swap_back_battlefield(bf)
 
 
 @effect("heal_unit")

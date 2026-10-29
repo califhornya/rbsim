@@ -54,6 +54,9 @@ class Battlefield:
     held_by: Optional[str] = None      # control(): who controls it by the rules
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
+    # The card a battlefield token here replaced (§439: Ivern Green Father's
+    # Brush). It waits in Banishment (§439.5) until the token swaps back (§439.7).
+    replaced: Optional["Card"] = None
     # Facedown Zone occupants (Hidden keyword), oldest first. One at most unless
     # an effect raises the zone's capacity (GameLoop._facedown_capacity).
     facedowns: List[FacedownCard] = field(default_factory=list)

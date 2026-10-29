@@ -442,7 +442,8 @@ Hand-authoring the remaining INERT cards in batches grouped by mechanic
   second facedown card at a battlefield: the Facedown Zone holds one; modeled
   2026-10-29, BACKLOG E); Orianna Lady of Clockwork (a gear that becomes a unit;
   modeled 2026-10-29, BACKLOG E); Ivern Green Father
-  (replacing a battlefield with a Brush token) and Baron Pit (a token
+  (replacing a battlefield with a Brush token; modeled 2026-10-29, BACKLOG E)
+  and Baron Pit (a token
   battlefield nothing creates yet); Svellsongur (an Equipment copying its
   unit's text); Void Hatchling (a replacement on every reveal); Hextech
   Anomaly ("pay any amount of [rune]": paying Power recycles runes, a

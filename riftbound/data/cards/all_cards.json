@@ -26058,7 +26058,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "green_father_brush",
+        "trigger": "on_conquer"
+      },
+      {
+        "effect": "green_father_brush",
+        "trigger": "on_hold"
+      }
+    ]
   },
   {
     "card_id": "UNL-196",
@@ -26972,13 +26981,27 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "buff_unit",
+        "effect": "grant_might",
         "trigger": "passive",
         "target": "all_units_here",
         "target_filter": {
-          "subtype": "Bird"
+          "subtype_any": [
+            "Bird",
+            "Cat",
+            "Dog",
+            "Poro",
+            "Ivern"
+          ]
         },
         "amount": 1
+      },
+      {
+        "effect": "brush_swap_back",
+        "trigger": "on_conquer"
+      },
+      {
+        "effect": "brush_swap_back",
+        "trigger": "on_hold"
       }
     ]
   },

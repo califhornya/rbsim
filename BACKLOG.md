@@ -383,9 +383,20 @@ from the card data (only "REACTION"); needs the printed text.
   bigger unit than the current one, choose the costliest. Not covered: other
   gear effects (ready/exhaust/return/banish/steal a gear) don't see a unit
   gear. Tests in tests/test_unit_gear.py.
+- [DONE] Ivern Green Father and the Brush battlefield token (Replace §439).
+  When you conquer or hold, Ivern may exhaust to replace that battlefield
+  with a Brush: same Battlefield object (§439.1.a: units, gear, facedown
+  cards, who scored stay), its card kept in `Battlefield.replaced` (in
+  Banishment, §439.5) and the abilities change (`GameLoop._set_battlefield_card`:
+  Aspirant's Climb's +1 points to win ends, Bandle Tree's second facedown card
+  is trashed). The battlefield's own conquer / hold effect still resolves
+  (Ivern's trigger goes after it, §439.1.a example). Brush: Bird, Cat, Dog,
+  Poro and Ivern units here +1 [might] (both players); when you score there
+  you may swap it back (§439.7). Baseline: replace when the Brush helps a
+  friendly unit there, swap back when it helps none. Brush and Baron Pit are
+  battlefield cards in the registry. Tests in tests/test_green_father.py.
 
-Ivern Green
-Father (Brush battlefield), Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
+Baron Nashor + Baron Pit (rewrite; KNOWN_ISSUES
 duplicate card), Svellsongur, Void Hatchling, Irelia
 Graceful, Endless Riches, Neeko Blending In, Seraphine Starry-Eyed Songstress
 (a legend's optional extra cost on every spell: exhaust her and three friendly

@@ -780,14 +780,17 @@ class GameLoop:
             self.gs.hold_points_this_turn[side] = self.gs.hold_points_this_turn.get(side, 0) + 1
         marker = "double_conquer_here" if trigger == "on_conquer" else "double_hold_here"
         times = 1 + sum(1 for u in bf._units_for(side) if self._has_effect(u.card, marker))
+        here = bf.card       # its abilities triggered now, even if it is replaced first
         for _ in range(times):
-            self._scoring_effects(trigger, bf, side, actor, opponent)
+            self._scoring_effects(trigger, bf, side, actor, opponent, here)
 
     def _scoring_effects(self, trigger: str, bf: Battlefield, side: str, actor: Player,
-                         opponent: Player) -> None:
+                         opponent: Player, here=None) -> None:
         """The conquer / hold effects of one scoring: the units there (HUNT
         included), their gear, the hostage, the legend, deployed gear, the
-        battlefield."""
+        battlefield (`here`: the card it was as it was scored; a trigger that
+        replaces it, Ivern Green Father's, goes on the chain after its own,
+        §439.1.a example)."""
         units = list(bf.units_A if side == "A" else bf.units_B)
         for unit in units:
             # HUNT keyword grants XP on Conquer or Hold.
@@ -832,9 +835,10 @@ class GameLoop:
         self._fire_deployed_gear_trigger(trigger, bf, side)
         # The battlefield's OWN triggered ability (e.g. "when you conquer here,
         # draw 1") fires for the scoring player.
-        if bf.card is not None:
+        here = bf.card if here is None else here
+        if here is not None:
             self._resolve_triggered_effects(
-                bf.card, trigger, bf, actor, opponent,
+                here, trigger, bf, actor, opponent,
                 context_extra={"battlefield": bf},
             )
 
@@ -2716,6 +2720,44 @@ class GameLoop:
         if side is not None:
             cap += sum(1 for dg in bf.gear_for(side) if self._has_effect(dg.card, "extra_facedown_slot"))
         return cap
+
+    _BRUSH_TAGS = ("Bird", "Cat", "Dog", "Poro", "Ivern")
+
+    def _brush_helps(self, bf: Battlefield, side: str) -> bool:
+        """Baseline for Brush (Ivern Green Father): whether `side` has a unit
+        here the Brush gives +1 [might] (a Bird, Cat, Dog, Poro or Ivern)."""
+        return any(set(self._BRUSH_TAGS) & set(u.tags) for u in bf._units_for(side))
+
+    def _set_battlefield_card(self, bf: Battlefield, card) -> None:
+        """`bf` becomes `card` (§439: a token replaces it, or it swaps back). The
+        battlefield is the same game object (§439.1.a): units, gear, facedown
+        cards, who scored here stay. Only its abilities change: "Increase the
+        points needed to win" (Aspirant's Climb) ends or starts again."""
+        def plus(c):
+            spec = CARD_REGISTRY.get(c.name) if c is not None else None
+            return sum(int(es.params.get("amount", 1)) for es in (spec.effects if spec else ())
+                       if es.effect == "victory_score_plus")
+        self.gs.victory_score += plus(card) - plus(bf.card)
+        if self.verbose:
+            print(f"  BF{self.gs.battlefields.index(bf)} {getattr(bf.card, 'name', None)}"
+                  f" -> {card.name}")
+        bf.card = card
+        self._recompute_passives()
+
+    def _replace_battlefield(self, bf: Battlefield, token_name: str) -> None:
+        """Replace `bf` with a battlefield token (§439): the card goes to
+        Banishment as replaced (§439.5); a token replaced stops existing
+        (§439.6), and the card it had replaced stays the one to swap back to
+        (§439.7.b.1)."""
+        if bf.card is not None and bf.card.name not in ("Brush", "Baron Pit"):
+            bf.replaced = bf.card
+        self._set_battlefield_card(bf, CARD_REGISTRY.get(token_name).instantiate())
+
+    def _swap_back_battlefield(self, bf: Battlefield) -> None:
+        """The token at `bf` swaps back to the card it replaced (§439.7.b)."""
+        card, bf.replaced = bf.replaced, None
+        if card is not None:
+            self._set_battlefield_card(bf, card)
 
     def _trim_facedowns(self, bf: Battlefield) -> None:
         """§107.3.b.2: if the Facedown Zone's capacity drops below the cards in
