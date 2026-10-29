@@ -375,6 +375,18 @@ def _same_option(option, chosen) -> bool:
     return option is chosen
 
 
+def _mapped(x, back: dict):
+    """A choice made on a copy of the game, as the objects `back` maps the
+    copy's to (by id): tuples and lists item by item, numbers as they are."""
+    if isinstance(x, tuple):
+        return tuple(_mapped(e, back) for e in x)
+    if isinstance(x, list):
+        return [_mapped(e, back) for e in x]
+    if x is None or isinstance(x, (bool, int, str)):
+        return x
+    return back.get(id(x), x)
+
+
 class GameLoop:
     """Core turn structure, extended with Might combat, rune channeling and movement."""
 
@@ -398,6 +410,11 @@ class GameLoop:
         self._declaring: Optional[dict] = None     # {"card", "choices"}
         self._replay: Optional[dict] = None        # {"card", "choices"}
         self._in_many = False
+        # While declaring: the board as the spell was played (_presence_lists
+        # keys and what they held), and on the copy a later instruction chooses
+        # on, the ids of what was put back there (_restore_declared_board).
+        self._declare_board: Optional[list] = None
+        self._ghost_ids: Optional[set] = None
 
         if hasattr(gs.A, "agent") and gs.A.agent:
             gs.A.agent.player.battlefields = gs.battlefields
@@ -427,6 +444,8 @@ class GameLoop:
             if hit is _Ignored:
                 raise _Ignored(kind)
             return hit
+        if self._ghost_ids:
+            pick = self._live_instead(options, pick, [])
         got = pick
         if self.chooser is not None and options:
             default = next((i for i, o in enumerate(options) if o is pick), 0)
@@ -446,6 +465,11 @@ class GameLoop:
             if chosen and not hit:
                 raise _Ignored(kind)
             return hit
+        if self._ghost_ids:
+            live: list = []
+            for p in picks:
+                live.append(self._live_instead(options, p, live))
+            picks = live
         out: list = list(picks)
         if self.chooser is not None:
             order = list(picks) + [o for o in options if not any(o is p for p in picks)]
@@ -544,34 +568,147 @@ class GameLoop:
 
         def chooser(_loop, kind, side, options, default, source):
             # Only the declared choices are the player's now; the rest are
-            # asked again as the spell resolves.
-            if real is None or source is not card2 or not kind.startswith(_DECLARED_CHOICES):
+            # asked again as the spell resolves. (`_loop` may be a copy of
+            # loop2: _choices_on_board_as_played.)
+            spell = (_loop._declaring or {}).get("card")
+            if real is None or source is None or source is not spell \
+                    or not kind.startswith(_DECLARED_CHOICES):
                 return None
             return real(_loop, kind, side, options, default, source)
         loop2.chooser = chooser
         loop2._declaring = {"card": card2, "choices": {}}
         item2 = gs2.chain.pop()
+        loop2._declare_board = [(key, list(lst)) for key, lst in loop2._presence_lists()]
         try:
             loop2._resolve_card_effects(card2, gs2.battlefields[item2.bf_idx],
                                         gs2.get_player(item2.player),
                                         gs2.get_player(gs2.other(item2.player)))
         except Exception:  # noqa: BLE001 — a declaration never stops the game
             pass
-
-        def real_of(x):
-            if isinstance(x, tuple):
-                return tuple(real_of(e) for e in x)
-            if isinstance(x, list):
-                return [real_of(e) for e in x]
-            if x is None or isinstance(x, (bool, int, str)):
-                return x
-            return back.get(id(x), x)
-        declared = {slot: (kind, n, real_of(got))
+        declared = {slot: (kind, n, _mapped(got, back))
                     for slot, (kind, n, got) in loop2._declaring["choices"].items()}
         if self.on_choice is not None:
             for kind, n, got in declared.values():
                 self.on_choice(kind, item.player, n, got, item.card)
         return declared
+
+    def _presence_lists(self) -> list:
+        """What a spell may choose on the board, as (key, list): the chain,
+        units and gear at each battlefield, each base's units and gear, the gear
+        each unit wears. A key finds its list again (_presence_list)."""
+        gs = self.gs
+        out: list = [(("chain",), gs.chain)]
+        units: list = []
+        for j, bf in enumerate(gs.battlefields):
+            out += [(("units", j, "A"), bf.units_A), (("units", j, "B"), bf.units_B),
+                    (("gear", j, "A"), bf.gear_A), (("gear", j, "B"), bf.gear_B)]
+            units += bf.units_A + bf.units_B
+        for side in ("A", "B"):
+            p = gs.get_player(side)
+            out += [(("base", side), p.base_units), (("base_gear", side), p.base_gear)]
+            units += p.base_units
+        return out + [(("worn", u), u.gear) for u in units]
+
+    def _presence_list(self, key):
+        gs = self.gs
+        if key[0] == "chain":
+            return gs.chain
+        if key[0] == "worn":
+            return key[1].gear
+        if key[0] in ("base", "base_gear"):
+            p = gs.get_player(key[1])
+            return p.base_units if key[0] == "base" else p.base_gear
+        if key[1] >= len(gs.battlefields):
+            return None
+        bf = gs.battlefields[key[1]]
+        if key[0] == "units":
+            return bf.units_A if key[2] == "A" else bf.units_B
+        return bf.gear_for(key[2])
+
+    def _board_changed(self) -> bool:
+        """While declaring: whether something left the board (killed, returned,
+        countered) or came onto it since the spell was played. A unit moved
+        is still there."""
+        now = {id(x) for _k, lst in self._presence_lists() for x in lst}
+        return now != {id(x) for _k, before in self._declare_board for x in before}
+
+    def _restore_declared_board(self) -> set:
+        """The board as the declared spell was played, as far as what's on it:
+        what has left since goes back where it was (last, so a baseline picks
+        what is still there first), what came since goes; a unit moved stays
+        where it went (a later "there" is its destination). Returns the ids of
+        what went back."""
+        now = {id(x) for _k, lst in self._presence_lists() for x in lst}
+        then = {id(x) for _k, before in self._declare_board for x in before}
+        back_in: set = set()
+        for key, before in self._declare_board:
+            lst = self._presence_list(key)
+            if lst is None:
+                continue
+            for x in before:
+                if id(x) not in now and not any(x is y for y in lst):
+                    lst.append(x)
+                    back_in.add(id(x))
+        for _k, lst in self._presence_lists():
+            lst[:] = [x for x in lst if id(x) in then]
+        return back_in
+
+    def _choices_on_board_as_played(self, context: EffectContext, es: "EffectSpec",
+                                    run: int, i: int) -> Optional[dict]:
+        """§355: a spell's choices are all made as it is played, so a later
+        instruction may name a unit an earlier one kills (it's then not
+        followed, §359.3.e) and can't name one an earlier one plays. The
+        declaration resolves the instructions in turn on a copy of the game;
+        once the board has changed there, this instruction's choices are made
+        on another copy with the board restored (_restore_declared_board) and
+        returned (mapped to this copy's objects) to be replayed here."""
+        d = self._declaring
+        if d is None or self._declare_board is None or context.card is not d.get("card") \
+                or not self._board_changed():
+            return None
+        import copy
+        memo: dict = {}
+        try:
+            loop3, ctx3 = copy.deepcopy((self, context), memo)
+        except Exception:  # noqa: BLE001 — then chosen among what's left
+            return None
+        back = {id(memo[id(o)]): o for o in memo.get(id(memo), []) if id(o) in memo}
+        loop3._ghost_ids = loop3._restore_declared_board()
+        loop3._declaring = {"card": ctx3.card, "choices": {}}
+        loop3._replay = None
+        loop3._slot = [run, i, 0]
+        try:
+            EFFECT_REGISTRY[es.effect](ctx3, es.merged_params())
+        except Exception:  # noqa: BLE001 — what it chose before is kept
+            pass
+        return {slot: (kind, n, _mapped(got, back))
+                for slot, (kind, n, got) in loop3._declaring["choices"].items()}
+
+    def _is_ghost(self, x) -> bool:
+        if isinstance(x, tuple):
+            return any(self._is_ghost(e) for e in x)
+        return id(x) in self._ghost_ids
+
+    def _option_side(self, x) -> Optional[str]:
+        """Whose a choice's option is: a unit's controller, a gear entry's or
+        move pair's side, a chain item's player."""
+        if isinstance(x, tuple) and x and x[0] in ("A", "B"):
+            return x[0]
+        if isinstance(x, UnitInPlay):
+            where = self._locate_unit(x)
+            return where[0] if where else None
+        return getattr(x, "player", None) if isinstance(x, ChainItem) else None
+
+    def _live_instead(self, options: list, pick, taken: list):
+        """The baseline's pick on a restored board (_choices_on_board_as_played):
+        not something that has left it if the same side has something still
+        there (not in `taken`); else that (a wasted hit, not one on another
+        side's unit)."""
+        if not self._is_ghost(pick):
+            return pick
+        side = self._option_side(pick)
+        return next((o for o in options if not self._is_ghost(o) and side is not None
+                     and self._option_side(o) == side and not any(o is t for t in taken)), pick)
 
     # ====== PHASE HELPERS ======
 
@@ -1197,6 +1334,11 @@ class GameLoop:
                     if not handler:
                         continue
                     self._slot = [run, i, 0]       # this instruction's declared choices
+                    # Declaring, with the board changed by the earlier ones:
+                    # chosen on the board as played, replayed here.
+                    early = self._choices_on_board_as_played(context, effect_spec, run, i)
+                    if early:
+                        self._replay = {"card": card, "choices": early}
                     # Resilience: a single malformed spec (e.g. a parser-emitted
                     # target/param the handler can't satisfy) must not abort the
                     # whole match. Skip + log instead. See KNOWN_ISSUES for the
@@ -1213,6 +1355,10 @@ class GameLoop:
                         if self.verbose:
                             print(f"  [EFFECT-SKIP] {card.name}: "
                                   f"{effect_spec.effect} failed: {exc}")
+                    finally:
+                        if early:
+                            self._replay = None
+                            self._declaring["choices"].update(early)
         finally:
             self._slot = outer_slot
             # Kicker is consumed by this resolution; reset so a replayed instance

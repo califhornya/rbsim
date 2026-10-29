@@ -533,7 +533,8 @@ tests/test_declared_targets.py):
   base only (Charm can't pull an enemy in from its base, §355.4);
   Resonating Strike's "a battlefield you control" is the spell's battlefield,
   unchecked. Cost: a deep copy per spell played (heuristic games 2.4x slower,
-  net self-play ~8% per decision).
+  net self-play ~8% per decision). [2026-10-29: the later instruction's choice
+  CLOSED B27, BACKLOG G3 Declared choices.]
 
 ## Corpus pass (BACKLOG D, 2026-10-28)
 Progress and fixes are in BACKLOG.md section D; the approximations left are

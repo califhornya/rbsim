@@ -732,8 +732,28 @@ DEFERRED.md, checked against the code and the card data. Those already fixed
   too. A staged / pending showdown whose units are gone just ends the contest
   (§190.3.b.1); one whose contest is already settled is skipped. The swap
   effect (`place`) doesn't contest (old behaviour).
-- [ ] Declared choices: a later instruction's choice is made after the earlier
-  ones resolved on the copy (it can't name a unit the first one kills).
+- [x] Declared choices (§355): a later instruction's choice was made after the
+  earlier ones resolved on the copy (it couldn't name a unit the first one
+  kills: Falling Star / Icathian Rain on a lone enemy had to hit another unit,
+  yours too; a REPEAT run likewise). DONE B27 (tests/test_g3_declared_choices.py):
+  the declaring copy keeps the board as played (`GameLoop._declare_board`, keys
+  of `_presence_lists`: chain, units and gear at battlefields and bases, worn
+  gear); once it changed (`_board_changed`), an instruction's choices are made
+  on another copy with it restored (`_choices_on_board_as_played` ->
+  `_restore_declared_board`: what left goes back at the end of its list, what
+  the spell added goes, a unit moved stays moved so "its destination" works)
+  and replayed on the declaring copy (a gone one raises `_Ignored` there, as at
+  resolution). Baseline there: `_live_instead` (a gone pick -> the first one
+  still there on the same side, else the gone one: a wasted hit, not one on
+  the other side). Golden regenerated (Falling Star's second hit); smoke 300
+  games clean, ~8% slower.
+- [ ] Counter targets: `counter_spell` always hits the chain's top item, no
+  choice (rules: any spell on the chain, §355.9.a.2, declared). With REPEAT
+  (Hard Bargain) the second run counters whatever is next, your own spell too
+  (checked, B27).
+- [ ] "Up to N" picks: `choose_many` asks the chooser one pick per baseline pick,
+  so a player (coach, search, net) can't take fewer than the baseline does
+  (e.g. Piercing Light's "up to one other unit" with only your unit left).
 - [ ] Costs before choices (KNOWN_ISSUES): a spell affordable only with Irelia
   Graceful's discount can't be played; "if you spent [N]" sees the Energy
   before her discount.

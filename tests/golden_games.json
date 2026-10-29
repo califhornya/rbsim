@@ -72,18 +72,18 @@
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Fizz Trickster",
-            "Pyke Dockside Butcher"
+          "A": [
+            "Ravenbloom Student"
           ],
-          "controller": "B",
-          "last_controller": null
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
         },
         {
           "A": [],
           "B": [
-            "Bewitching Spirit"
+            "Bewitching Spirit",
+            "Noxus Hopeful"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -94,7 +94,8 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Vex Apathetic"
+          "Vex Apathetic",
+          "Hwei Brooding Painter"
         ],
         "deck": 25,
         "energy": 1,
@@ -104,26 +105,29 @@
           "MIND": 4
         },
         "runes_in_play": 10,
-        "trash": 14
+        "trash": 12
       },
       "player_B": {
         "banished": 0,
         "base_gear": 1,
-        "base_units": [],
-        "deck": 28,
-        "energy": 1,
-        "hand": 3,
+        "base_units": [
+          "Fizz Trickster"
+        ],
+        "deck": 30,
+        "energy": 7,
+        "hand": 4,
         "power_pool": {
-          "CHAOS": 4
+          "CHAOS": 4,
+          "FURY": 3
         },
-        "runes_in_play": 4,
-        "trash": 5
+        "runes_in_play": 7,
+        "trash": 2
       },
-      "points_A": 2,
+      "points_A": 3,
       "points_B": 8,
-      "spells_cast": 11,
+      "spells_cast": 9,
       "turns": 13,
-      "units_played": 13,
+      "units_played": 12,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -569,7 +573,8 @@
       "battlefields": [
         {
           "A": [
-            "Mindsplitter"
+            "Tideturner",
+            "Treasure Hunter"
           ],
           "B": [],
           "controller": "A",
@@ -577,51 +582,50 @@
         },
         {
           "A": [],
-          "B": [
-            "Tideturner"
-          ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": null,
+          "last_controller": null
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
         "base_gear": 2,
-        "base_units": [
-          "Pyke Dockside Butcher"
-        ],
-        "deck": 25,
-        "energy": 9,
-        "hand": 3,
+        "base_units": [],
+        "deck": 27,
+        "energy": 8,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 4,
-          "FURY": 5
+          "CHAOS": 6,
+          "FURY": 2
         },
-        "runes_in_play": 9,
-        "trash": 10
+        "runes_in_play": 8,
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Eager Apprentice"
+          "Fizz Trickster",
+          "Tideturner",
+          "Vex Apathetic",
+          "Diana Lunari"
         ],
-        "deck": 21,
-        "energy": 5,
-        "hand": 0,
+        "deck": 25,
+        "energy": 0,
+        "hand": 1,
         "power_pool": {
-          "CHAOS": 7,
+          "CHAOS": 6,
           "MIND": 5
         },
-        "runes_in_play": 12,
-        "trash": 17
+        "runes_in_play": 11,
+        "trash": 10
       },
       "points_A": 8,
-      "points_B": 3,
-      "spells_cast": 17,
-      "turns": 17,
-      "units_played": 16,
+      "points_B": 0,
+      "spells_cast": 15,
+      "turns": 13,
+      "units_played": 12,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -642,16 +646,14 @@
           "A": [],
           "B": [
             "Eager Apprentice",
-            "Tideturner",
-            "Vex Apathetic"
+            "Tideturner"
           ],
           "controller": "B",
           "last_controller": "B"
         },
         {
           "A": [
-            "Tideturner",
-            "Bewitching Spirit"
+            "Noxus Hopeful"
           ],
           "B": [],
           "controller": "A",
@@ -671,7 +673,7 @@
           "FURY": 5
         },
         "runes_in_play": 11,
-        "trash": 8
+        "trash": 9
       },
       "player_B": {
         "banished": 0,
@@ -687,7 +689,7 @@
           "MIND": 4
         },
         "runes_in_play": 9,
-        "trash": 13
+        "trash": 14
       },
       "points_A": 8,
       "points_B": 1,
@@ -964,7 +966,7 @@
         "base_units": [
           "Yasuo Remorseful"
         ],
-        "deck": 22,
+        "deck": 21,
         "energy": 10,
         "hand": 2,
         "power_pool": {
@@ -972,11 +974,11 @@
           "CHAOS": 6
         },
         "runes_in_play": 10,
-        "trash": 13
+        "trash": 14
       },
-      "points_A": 5,
+      "points_A": 6,
       "points_B": 8,
-      "spells_cast": 13,
+      "spells_cast": 14,
       "turns": 19,
       "units_played": 14,
       "winner": "B",
@@ -1068,6 +1070,7 @@
       "battlefields": [
         {
           "A": [
+            "Noxus Hopeful",
             "Pyke Dockside Butcher"
           ],
           "B": [],
@@ -1098,7 +1101,7 @@
           "FURY": 1
         },
         "runes_in_play": 6,
-        "trash": 4
+        "trash": 3
       },
       "player_B": {
         "banished": 0,
