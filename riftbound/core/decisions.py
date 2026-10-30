@@ -225,6 +225,11 @@ class Observation:
     opp_rune_domains: dict = field(default_factory=dict)
     my_cards_played: int = 0
     opp_cards_played: int = 0
+    # The battlefield a Standard Move being declared goes to, the viewer's or
+    # the opponent's (GameState.pending_move: more units may still join it, its
+    # showdown hasn't started, §144.3). None: no move held.
+    my_held_move: Optional[int] = None
+    opp_held_move: Optional[int] = None
 
     @staticmethod
     def _uview(u) -> "UnitView":
@@ -278,6 +283,7 @@ class Observation:
                     {d.name: len(rs) for d, rs in p.rune_pool.items() if rs})
 
         other = gs.other(viewer)
+        held = gs.pending_move
         my_leg, opp_leg = legend(viewer), legend(other)
         my_ready, my_doms = runes(me)
         opp_ready, opp_doms = runes(opp)
@@ -323,6 +329,8 @@ class Observation:
             my_rune_domains=my_doms, opp_rune_domains=opp_doms,
             my_cards_played=int(gs.cards_played_this_turn.get(viewer, 0)),
             opp_cards_played=int(gs.cards_played_this_turn.get(other, 0)),
+            my_held_move=held[0] if held is not None and held[1] == viewer else None,
+            opp_held_move=held[0] if held is not None and held[1] == other else None,
         )
 
     def to_dict(self) -> dict:
@@ -366,6 +374,7 @@ class Observation:
             "my_rune_domains": dict(self.my_rune_domains),
             "opp_rune_domains": dict(self.opp_rune_domains),
             "my_cards_played": self.my_cards_played, "opp_cards_played": self.opp_cards_played,
+            "my_held_move": self.my_held_move, "opp_held_move": self.opp_held_move,
         }
 
 

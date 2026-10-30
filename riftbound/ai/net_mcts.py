@@ -175,13 +175,14 @@ class NetGuidedMCTSAgent(Agent):
         mass on any legal slot."""
         obs = Observation.from_state(clone, side)
         vec = encode_observation(obs)
-        mask = legal_mask(legal_ga)
+        n_bf = len(clone.battlefields)
+        mask = legal_mask(legal_ga, n_bf)
         probs, value = predict(self.net, vec, mask)
         priors: dict = {}
         total = 0.0
         for a in legal_ga:
             t = a.to_engine()
-            idx = action_to_index(a)
+            idx = action_to_index(a, n_bf)
             p = float(probs[idx]) if idx is not None else 0.0
             priors[t] = p
             total += p
@@ -298,10 +299,11 @@ class NetGuidedMCTSAgent(Agent):
     def _record_example(self, side: str, root_legal: list) -> None:
         """Append (state, MCTS visit policy, legal mask, player) for training."""
         obs = Observation.from_state(self.gs, side)
+        n_bf = len(self.gs.battlefields)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
         for key, share in self.last_visits.items():
             a_tuple, _force = _split_key(key)
-            idx = action_to_index(a_tuple)
+            idx = action_to_index(a_tuple, n_bf)
             if idx is not None:
                 policy[idx] += share
         s = policy.sum()
@@ -310,7 +312,7 @@ class NetGuidedMCTSAgent(Agent):
         self.record.append({
             "state": encode_observation(obs),
             "policy": policy,
-            "mask": legal_mask(root_legal),
+            "mask": legal_mask(root_legal, n_bf),
             "player": side,
         })
 

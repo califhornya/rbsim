@@ -1064,12 +1064,13 @@ class CoachSession:
 
     def record(self, gs, side: str, legal: list, action, corrected: bool) -> None:
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
-        idx = action_to_index(action)
+        n_bf = len(gs.battlefields)
+        idx = action_to_index(action, n_bf)
         if idx is None:
             return
         policy[idx] = 1.0
         self.examples.append({"state": encode_observation(Observation.from_state(gs, side)),
-                              "policy": policy, "mask": legal_mask(legal), "player": side,
+                              "policy": policy, "mask": legal_mask(legal, n_bf), "player": side,
                               "corrected": corrected})
 
     def _save(self, winner: str) -> Optional[Path]:

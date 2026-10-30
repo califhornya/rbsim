@@ -144,6 +144,6 @@ def test_valley_of_idols_buffs_a_unit_played_there():
 
 
 def test_unit_destinations_have_their_own_action_slots():
-    base = action_to_index(GameAction.play("UNIT", 2, 0, ""))
-    there = [action_to_index(GameAction("UNIT", 2, 0, d, "")) for d in range(N_BF)]
+    base = action_to_index(GameAction.play("UNIT", 2, 0, ""), N_BF)
+    there = [action_to_index(GameAction("UNIT", 2, 0, d, ""), N_BF) for d in range(N_BF)]
     assert len({base, *there}) == N_BF + 1

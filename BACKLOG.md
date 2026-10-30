@@ -116,9 +116,8 @@ Section A is done: both precon decks are checked card by card.
 - [x] HIDDEN: a champion with HIDDEN can be hidden from the Champion Zone
       (§811.1.b); a card played from facedown chooses only among what is at
       its battlefield, and a spell with no valid target there can't be played
-      from facedown (§811.1.d). Training note: hiding the champion has no slot
-      in the net's action space yet (HIDE takes a hand index); add one when
-      the action space is next resized.
+      from facedown (§811.1.d). Hiding the champion has its own slot in the
+      net's action space since B38.
 - [x] Combat damage: the assigner orders every unit while the damage runs
       short (one choice per unit, TANK group first, BACKLINE last; it chose
       only the first); a Ki Barrier shield counts in lethal, so extra damage
@@ -540,14 +539,23 @@ games, simple_trade both seats; win-rate points per game, ± standard error):
 - Effect-move targets and destinations: their baseline (`effects._move_units`)
   measured against a random pick and "the weakest friendly unit": no
   difference measurable (moves are rare: ~0.07 per game); left as is.
-Open: the observation doesn't show a held move. The net's action space
-has one HIDDEN_PLAY per battlefield: with two facedown cards at Bandle Tree it
-can only play the first (the search and heuristic agents see both). The net
-sees two battlefields (encoding N_BF = 2): with the Baron Pit (a third) it
-doesn't see the Pit, and since the base's move index becomes 3, its moves to
-or from the base or Pit map to wrong slots (the search and heuristic agents
-see all three). The net sees one legend per player: not the ones Neeko Blending
-In adds (their abilities are still in its action space). Fixed B36: the
+Fixed B38 (the net's encoding, riftbound/ai/encoding.py; OBS_DIM 2959 -> 2979,
+ACTION_DIM 201 -> 316: nets saved before don't load, they were trained on old
+rules anyway): the net sees three battlefields (N_BF = 3: the Baron Pit's
+units, gear, facedown cards, its card); a location's slot is 0 for the base,
+1 + i for battlefield i, whatever the engine's base index (2, or 3 with the
+Pit), so `action_to_index` / `legal_mask` / `index_to_legal_action` take the
+game's number of battlefields (with the Pit, bf0 -> Pit used bf0 -> base's
+slot, base -> Pit and Pit -> base had none). Each facedown card has its own
+HIDDEN_PLAY slot (MAX_FACEDOWN 3 per battlefield; Bandle Tree's second card
+had none). Hiding the champion from the Champion Zone has its own HIDE slot
+(it raised a TypeError: Kennen's precon champion has HIDDEN). The legends
+Neeko Blending In adds are card rows of their player's legend zone (ready or
+not). The observation shows a Standard Move being declared
+(`Observation.my_held_move` / `opp_held_move`: its battlefield, from
+`GameState.pending_move`; two one-hot rows of the dense part).
+tests/test_f3_net_encoding.py. Smoke: 60 random-policy games over all 10
+decks, every legal action has a slot, no two share one. Fixed B36: the
 heuristic agents (simple_trade, Diana, Pyke) checked a card's printed cost,
 a multi-domain card's power as any domain's; they now ask the engine
 (`Agent._card_check` = legality `_affordable` + `_spell_has_targets`: what it
@@ -569,8 +577,8 @@ From the re-check of the old notes (2026-10-29, G):
   is exhausted first, its Energy left unspent, as in real play).
   tests/test_heuristic_paying.py. Round robin 10 decks `--games 3`: 19.6s
   -> 21.1s.
-- Hiding the champion (§737.1.b, the engine allows it) has no slot in the
-  net's action space.
+- Fixed B38: hiding the champion (§737.1.b, the engine allows it) had no slot
+  in the net's action space.
 - The net-guided search decides only the first choice of an action, none while
   defending, none of the hidden ones (dig, predict).
 - Coach: the mulligan and the choices made during the opponent's moves aren't

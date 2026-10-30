@@ -499,7 +499,7 @@ Trove, Death from Below, Daisy!, Blood Money). Engine findings below.
 - **Test:** `tests/test_nested_ambush.py` (spawns on contest; no nesting mid-showdown).
 
 ## 23. (CLOSED 2026-10-29) HIDDEN keyword — core loop done; two faithful nuances deferred
-**Closed:** both nuances done (BACKLOG C). The net's action space has no slot to hide the champion: BACKLOG F.
+**Closed:** both nuances done (BACKLOG C). The net's action space had no slot to hide the champion: added B38 (BACKLOG F).
 - **Done (§737/§408/§106.4):** Hide (main phase, Open State, pay 1 power, place facedown at
   a controlled battlefield with an empty Facedown Zone), play-from-hidden for [0] from the
   next turn at reaction speed (units enter that lane; spells open a chain), and cleanup

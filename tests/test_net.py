@@ -66,7 +66,7 @@ def test_predict_returns_legal_distribution_and_value():
     while info["decision_point"] == DecisionPoint.MULLIGAN.value:
         obs, _r, done, info = env.step([])
         assert not done
-    mask = legal_mask(info["legal_actions"])
+    mask = legal_mask(info["legal_actions"], len(obs.battlefields))
     probs, value = predict(net, encode_observation(obs), mask)
     assert probs.shape == (ACTION_DIM,)
     assert -1.0 <= value <= 1.0
@@ -74,7 +74,7 @@ def test_predict_returns_legal_distribution_and_value():
     # All probability sits on legal slots, and argmax maps back to a legal action.
     assert float(probs[~mask].sum()) < 1e-5
     best = int(np.argmax(probs))
-    assert index_to_legal_action(best, info["legal_actions"]) is not None
+    assert index_to_legal_action(best, info["legal_actions"], len(obs.battlefields)) is not None
 
 
 def test_checkpoint_round_trip(tmp_path):

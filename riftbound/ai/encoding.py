@@ -30,10 +30,11 @@ from riftbound.core.decisions import UNIT_KEYWORDS, GameAction, Observation
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 # --- fixed dimensions ---------------------------------------------------------
-N_BF = 2
+N_BF = 3                # two battlefields, plus the one Baron Nashor adds (Baron Pit)
 MAX_HAND = 12
 MAX_ABIL = 16
 MAX_MOVERS = 8          # unit positions per location a MOVE can name
+MAX_FACEDOWN = 3        # facedown cards per battlefield a HIDDEN_PLAY can name
 DOMAINS = ("FURY", "CALM", "MIND", "BODY", "CHAOS", "ORDER")
 N_DOM = len(DOMAINS)
 _DOM_INDEX = {d: i for i, d in enumerate(DOMAINS)}
@@ -70,9 +71,11 @@ MAX_TOKENS = 160
 # turn player, the showdown's battlefield, runes ready and by domain for both,
 # legends ready, champions available, cards played this turn, per battlefield
 # (controller x3, scored by each, facedown card of each, units and Might of each,
-# deployed gear of each) and units and Might in each base.
+# deployed gear of each), units and Might in each base, and the battlefield of a
+# Standard Move being declared, the viewer's or the opponent's (§144.3: more
+# units may still join it, its showdown hasn't started).
 _PER_BF_DENSE = 3 + 2 + 2 + 2 + 2 + 2
-DENSE_DIM = 14 + 2 * N_DOM + 1 + N_BF + 2 + 2 * N_DOM + 2 + 2 + 2 + N_BF * _PER_BF_DENSE + 4
+DENSE_DIM = 14 + 2 * N_DOM + 1 + N_BF + 2 + 2 * N_DOM + 2 + 2 + 2 + N_BF * _PER_BF_DENSE + 4 + 2 * N_BF
 
 OBS_DIM = DENSE_DIM + MAX_TOKENS * TOKEN_WIDTH
 
@@ -137,6 +140,8 @@ def _dense(obs: Observation) -> np.ndarray:
     s += [len(obs.my_base_units) / 6.0, len(obs.opp_base_units) / 6.0,
           sum(u.might for u in obs.my_base_units) / 20.0,
           sum(u.might for u in obs.opp_base_units) / 20.0]
+    s += [1.0 if obs.my_held_move == i else 0.0 for i in range(N_BF)]
+    s += [1.0 if obs.opp_held_move == i else 0.0 for i in range(N_BF)]
     vec = np.asarray(s, dtype=np.float32)
     assert vec.shape[0] == DENSE_DIM, f"dense {vec.shape[0]} != DENSE_DIM {DENSE_DIM}"
     return vec
@@ -177,6 +182,10 @@ def _tokens(obs: Observation) -> list:
     for zone, name, ready in (("my_legend", obs.my_legend, obs.my_legend_ready),
                               ("opp_legend", obs.opp_legend, obs.opp_legend_ready)):
         if name:
+            card(zone, name, [float(ready)] + [0.0] * (N_TOKEN_FEATURES - 1))
+    # The legends Neeko Blending In added: legends of that player too.
+    for zone, added in (("my_legend", obs.my_added_legends), ("opp_legend", obs.opp_added_legends)):
+        for name, ready in added:
             card(zone, name, [float(ready)] + [0.0] * (N_TOKEN_FEATURES - 1))
     for zone, name in (("my_champion", obs.my_champion), ("opp_champion", obs.opp_champion)):
         if name:
@@ -230,32 +239,46 @@ def token_rows(vec: np.ndarray) -> list:
 
 # --- action space -------------------------------------------------------------
 # Contiguous slot layout. Offsets computed once; ACTION_DIM is the total width.
+# A location (where a unit is played, moves from or to) is 0 for the base, then
+# 1 + each battlefield's index: the engine's base index is the number of
+# battlefields (2, or 3 with the Baron Pit), so each mapping takes n_bf.
 _OFF_PASS = 0
 _OFF_UNIT = _OFF_PASS + 1                          # MAX_HAND * (N_BF+1): base, then each BF
 _OFF_SPELL = _OFF_UNIT + MAX_HAND * (N_BF + 1)     # MAX_HAND * N_BF
 _OFF_GEAR = _OFF_SPELL + MAX_HAND * N_BF           # MAX_HAND * N_BF
 _OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF
 _OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2 * MAX_MOVERS
-_OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2 * MAX_MOVERS  # MAX_HAND * N_BF
-_OFF_HIDDEN = _OFF_HIDE + MAX_HAND * N_BF          # N_BF
-_OFF_ABIL = _OFF_HIDDEN + N_BF                     # ACTIVATED(MAX_ABIL)
+_OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2 * MAX_MOVERS  # (MAX_HAND + the champion) * N_BF
+_OFF_HIDDEN = _OFF_HIDE + (MAX_HAND + 1) * N_BF    # N_BF * MAX_FACEDOWN
+_OFF_ABIL = _OFF_HIDDEN + N_BF * MAX_FACEDOWN      # ACTIVATED(MAX_ABIL)
 ACTION_DIM = _OFF_ABIL + MAX_ABIL
 
 
-def action_to_index(action) -> Optional[int]:
+def _location(i, n_bf: int) -> Optional[int]:
+    """A location's slot: the base (engine index n_bf, or None) 0, battlefield i
+    i + 1; None if the action space has no room for it."""
+    if i is None or i == n_bf:
+        return 0
+    if isinstance(i, int) and 0 <= i < min(n_bf, N_BF):
+        return i + 1
+    return None
+
+
+def action_to_index(action, n_bf: int) -> Optional[int]:
     """Map a GameAction (or its raw engine tuple) to its fixed slot, or None if it
     falls outside the encodable space (e.g. a hand slot >= MAX_HAND — rare; such an
-    action stays playable via the legal list, just not policy-addressable)."""
+    action stays playable via the legal list, just not policy-addressable).
+    `n_bf`: the game's number of battlefields (the engine's base index)."""
     t = action.to_engine() if isinstance(action, GameAction) else tuple(action)
     kind = t[0]
     idx = t[1]
     lane = t[2] if len(t) > 2 else None
     dst = t[3] if len(t) > 3 else None
 
-    def hb(base, slot, nlanes=1, ln=0):  # hand-slot (+lane) bounded helper
-        if slot is None or not (0 <= slot < MAX_HAND):
+    def hb(base, slot, nlanes=1, ln=0, rows=MAX_HAND):  # hand-slot (+lane) bounded helper
+        if not isinstance(slot, int) or not (0 <= slot < rows):
             return None
-        if not (0 <= ln < nlanes):
+        if not isinstance(ln, int) or not (0 <= ln < nlanes):
             return None
         return base + slot * nlanes + ln
 
@@ -263,8 +286,7 @@ def action_to_index(action) -> Optional[int]:
         return _OFF_PASS
     if kind == "UNIT":
         # Where it is played: base (dst None) or battlefield dst.
-        loc = 0 if dst is None or dst == N_BF else dst + 1
-        return hb(_OFF_UNIT, idx, N_BF + 1, loc) if isinstance(loc, int) else None
+        return hb(_OFF_UNIT, idx, N_BF + 1, _location(dst, n_bf))
     if kind == "SPELL":
         return hb(_OFF_SPELL, idx, N_BF, lane if isinstance(lane, int) else 0)
     if kind == "GEAR":
@@ -272,19 +294,22 @@ def action_to_index(action) -> Optional[int]:
     if kind == "CHAMPION":
         return _OFF_CHAMP + lane if isinstance(lane, int) and 0 <= lane < N_BF else None
     if kind == "MOVE":
-        src = lane
-        if not (isinstance(src, int) and isinstance(dst, int)):
+        if not (isinstance(lane, int) and isinstance(dst, int)):
             return None
-        if not (0 <= src <= N_BF and 0 <= dst <= N_BF):
+        src, to = _location(lane, n_bf), _location(dst, n_bf)
+        if src is None or to is None:
             return None
         unit = 0 if idx is None else idx   # None = the first ready unit there
         if not (isinstance(unit, int) and 0 <= unit < MAX_MOVERS):
             return None
-        return _OFF_MOVE + (src * (N_BF + 1) + dst) * MAX_MOVERS + unit
+        return _OFF_MOVE + (src * (N_BF + 1) + to) * MAX_MOVERS + unit
     if kind == "HIDE":
-        return hb(_OFF_HIDE, idx, N_BF, lane if isinstance(lane, int) else 0)
+        # A hand card, or the champion from the Champion Zone (§811.1.b).
+        slot = MAX_HAND if idx == "champion" else idx
+        return hb(_OFF_HIDE, slot, N_BF, lane if isinstance(lane, int) else 0, rows=MAX_HAND + 1)
     if kind == "HIDDEN_PLAY":
-        return _OFF_HIDDEN + lane if isinstance(lane, int) and 0 <= lane < N_BF else None
+        # idx: the card's slot in that battlefield's Facedown Zone (None: the first).
+        return hb(_OFF_HIDDEN, lane, MAX_FACEDOWN, idx or 0, rows=N_BF)
     if kind == "ABILITY":
         ability_id, arg = idx, lane
         if ability_id == "ACTIVATED":
@@ -292,21 +317,21 @@ def action_to_index(action) -> Optional[int]:
     return None
 
 
-def legal_mask(legal: list) -> np.ndarray:
+def legal_mask(legal: list, n_bf: int) -> np.ndarray:
     """Boolean vector length ACTION_DIM: True at each currently-legal action's slot."""
     mask = np.zeros(ACTION_DIM, dtype=bool)
     for a in legal:
-        i = action_to_index(a)
+        i = action_to_index(a, n_bf)
         if i is not None:
             mask[i] = True
     return mask
 
 
-def index_to_legal_action(index: int, legal: list):
+def index_to_legal_action(index: int, legal: list, n_bf: int):
     """The concrete legal action occupying ``index``, or None. Use to turn a
     policy's chosen slot back into a move to play."""
     for a in legal:
-        if action_to_index(a) == index:
+        if action_to_index(a, n_bf) == index:
             return a
     return None
 
