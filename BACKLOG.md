@@ -516,10 +516,31 @@ tests/test_corpus_vendetta.py.
   (`GameLoop._less_play_earmarks`). Tests in tests/test_atakhan_mordekaiser.py.
 
 ## F. Not rules: the engine's own choices when nobody chooses (AI quality)
-Equip's unit, discards, effect-move targets, "you may" additional costs always
-paid (Atakhan's kill and Seraphine Songstress's only when the card can't be
-paid without them); the observation doesn't show a held move. A facedown card trashed for
-lack of room is the newest (the player should choose). The net's action space
+Fixed B37 (measured with scripts/baseline_ab.py: each game played twice, one
+seat answering one kind of choice with a candidate rule; 3000-4000 random-deck
+games, simple_trade both seats; win-rate points per game, ± standard error):
+- Equip's unit: was the first unit on a battlefield, no better than a random
+  pick; now the weakest, not a token, not stunned (`GameLoop._equip_baseline`:
+  EQUIP, QUICK-DRAW, Jax's attach) +0.55 ± 0.20. The mightiest, the mightiest
+  at a battlefield, the readiest did no better than +0.2.
+- Discards: each site had its own (the first card, the cheapest Energy, the
+  costliest); now one, `GameLoop._discard_choice`: a "When you discard me" card
+  first (Flame Chompers, Mask Mother), else the cheapest (Energy + Power, then
+  Might) +0.43 ± 0.24 (the costliest -0.53 ± 0.31); choosing from an opponent's
+  hand (Mindsplitter, Insightful Investigator: was no choice at all) their
+  costliest. REPEAT's "discard" cost now asks too (was the first cards).
+- "You may" additional costs: always paid; not paying at all did +0.43 ± 0.28
+  better. Now paid unless every instruction they unlock chooses something and
+  has nothing to choose (`GameLoop._kicker_worth`: Masa's STUN with no enemy at
+  a battlefield); not paying at all is then +0.07 ± 0.23 (no difference).
+  Atakhan's kill and Seraphine Songstress's stay "only when the card can't be
+  paid without them".
+- A facedown card trashed for lack of room: now the zone controller's choice
+  `facedown_trash` (baseline still the newest; coach question added).
+- Effect-move targets and destinations: their baseline (`effects._move_units`)
+  measured against a random pick and "the weakest friendly unit": no
+  difference measurable (moves are rare: ~0.07 per game); left as is.
+Open: the observation doesn't show a held move. The net's action space
 has one HIDDEN_PLAY per battlefield: with two facedown cards at Bandle Tree it
 can only play the first (the search and heuristic agents see both). The net
 sees two battlefields (encoding N_BF = 2): with the Baron Pit (a third) it

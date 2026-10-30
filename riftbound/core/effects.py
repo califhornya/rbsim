@@ -632,8 +632,8 @@ def _reflection_copy(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     there = list(bf.units_A) + list(bf.units_B)
     if not there or not ctx.actor.hand:
         return
-    loop._discard(ctx.actor, loop.choose("discard", ctx.actor_side, list(ctx.actor.hand),
-                                         min(ctx.actor.hand, key=_zone_value), ctx.card))
+    loop._discard(ctx.actor, loop._discard_choice(ctx.actor_side, ctx.actor, list(ctx.actor.hand),
+                                                  ctx.card))
     model = loop.choose(_kind("target", spec), ctx.actor_side, there,
                         max(there, key=lambda u: u.might), ctx.card)
     token = loop._play_token("Reflection", ctx.actor_side, bf=bf, ready=True)
@@ -851,7 +851,8 @@ def _force_discard_redraw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     hand = ctx.opponent.hand
     if hand and gs.get_xp(ctx.actor_side) >= xp:
         gs.add_xp(ctx.actor_side, -xp)
-        ctx.loop._discard(ctx.opponent, max(hand, key=_zone_value))
+        ctx.loop._discard(ctx.opponent, ctx.loop._discard_choice(ctx.actor_side, ctx.opponent,
+                                                                 list(hand), ctx.card))
         ctx.draw_cards(1, target="opponent")
 
 
@@ -2611,8 +2612,8 @@ def _unattach_and_damage_holder(ctx: "EffectContext", spec: Mapping[str, Any]) -
 @effect("attach_equipment")
 def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Attach a detached Equipment you control to a unit you control" (Jax
-    Grandmaster at Arms; `from: attached` moves one from a unit in base): to
-    the mightiest unit at a battlefield, else any."""
+    Grandmaster at Arms; `from: attached` moves one from a unit in base to a
+    unit at a battlefield). Baseline unit: GameLoop._equip_baseline."""
     loop = ctx.loop
     mine = _units_at(ctx, ctx.actor_side, "anywhere")
     at_bf = [u for u in mine if loop._locate_unit(u)[1] is not None]
@@ -2625,15 +2626,14 @@ def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             return
         gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
         next(u for u in holders if gear in u.gear).gear.remove(gear)
-        target = loop.choose("equip", ctx.actor_side, at_bf, max(at_bf, key=lambda u: u.might), ctx.card)
+        target = loop.choose("equip", ctx.actor_side, at_bf, loop._equip_baseline(at_bf), ctx.card)
     else:
         gears = [g for g in ctx.actor.base_gear if loop._equip_cost(g) is not None]
         if not gears:
             return
         gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
         ctx.actor.base_gear.remove(gear)
-        target = loop.choose("equip", ctx.actor_side, mine,
-                             max(at_bf or mine, key=lambda u: u.might), ctx.card)
+        target = loop.choose("equip", ctx.actor_side, mine, loop._equip_baseline(mine), ctx.card)
     target.gear.append(gear)
     loop._fire_attached(target, ctx.actor_side)
 
@@ -5089,17 +5089,15 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     # `all`: "discards their hand" (Invert Timelines).
     count = len(player.hand) if spec.get("all") else int(spec.get("count", spec.get("amount", 1)))
     side = "A" if player is ctx.loop.gs.A else "B"
-    # The discarding player picks the card (baseline: the first one); with
-    # `chosen_by: controller`, "They reveal their hand. Choose a card from it,
-    # and they discard that card" (Mindsplitter): the effect's controller,
-    # baseline the costliest.
+    # The discarding player picks the card; with `chosen_by: controller`, "They
+    # reveal their hand. Choose a card from it, and they discard that card"
+    # (Mindsplitter): the effect's controller (GameLoop._discard_choice).
     picker = ctx.actor_side if spec.get("chosen_by") == "controller" else side
     with ctx.loop._discard_event():
         for _ in range(count):
             if not player.hand:
                 break
-            default = max(player.hand, key=_zone_value) if picker != side else player.hand[0]
-            card = ctx.loop.choose("discard", picker, list(player.hand), default, ctx.card)
+            card = ctx.loop._discard_choice(picker, player, list(player.hand), ctx.card)
             ctx.loop._discard(player, card)
             ctx.extra["discarded"] = card          # "Deal its Energy cost" (Get Excited!)
 

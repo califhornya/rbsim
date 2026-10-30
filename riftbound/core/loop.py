@@ -3308,8 +3308,10 @@ class GameLoop:
                 ap.pay_cost(0, power, domain)
             else:
                 self._pay_generic_power(ap, power)
-        for victim in others[:discard]:
-            self._discard(ap, victim)
+        for _ in range(discard):
+            others = [c for c in ap.hand if c is not card]
+            if others:
+                self._discard(ap, self._discard_choice(side, ap, others, card))
         return True
 
     def _pay_generic_power(self, actor: Player, n: int) -> bool:
@@ -3514,10 +3516,14 @@ class GameLoop:
     def _trim_facedowns(self, bf: Battlefield) -> None:
         """§107.3.b.2: if the Facedown Zone's capacity drops below the cards in
         it (a Bushwhack Trap left, or its controller lost the battlefield), the
-        excess goes to the trash. Engine default: the newest go first."""
+        excess goes to the trash, the ones the zone's controller chooses
+        (choice `facedown_trash`; baseline: the newest)."""
         cap = self._facedown_capacity(bf)
         while len(bf.facedowns) > cap:
-            fd = bf.facedowns.pop()
+            side = bf.control() or bf.facedowns[-1].owner
+            card = self.choose("facedown_trash", side, [f.card for f in bf.facedowns],
+                               bf.facedowns[-1].card, bf.card)
+            fd = bf.facedowns.pop(next(i for i, f in enumerate(bf.facedowns) if f.card is card))
             self._put_in_trash(self.gs.get_player(fd.owner), fd.card)
             if self.verbose:
                 print(f"  {fd.owner} trashes facedown {fd.card.name} @BF{self.gs.battlefields.index(bf)}"
@@ -3697,14 +3703,16 @@ class GameLoop:
         sentences = [s for s in re.split(r"(?<=[.)])\s+", text) if "additional cost" in s.lower()]
         return not sentences or any("you may" in s.lower() for s in sentences)
 
-    def _try_pay_additional_costs(self, card: Card, ap: Player) -> bool:
+    def _try_pay_additional_costs(self, card: Card, ap: Player, bf: Optional[Battlefield] = None) -> bool:
         """Pay the card's additional costs (kicker): each distinct one is its own
         choice and payment, in any order (§356.2; one card can repeat the same
         cost on several instructions: Pyke). A "you may" one is the player's
-        choice (baseline: pay). Sets `card._kicker_paid = True` when one is
-        paid. Returns whether anything was paid. `additional_cost_if`: the
-        condition that permits paying it ("If you've played a spell this turn,
-        you may pay [chaos] as an additional cost": Crescent Guardian)."""
+        choice (baseline: pay, unless what it unlocks has nothing to choose:
+        _kicker_worth; `bf` is where the card is played). Sets
+        `card._kicker_paid = True` when one is paid. Returns whether anything
+        was paid. `additional_cost_if`: the condition that permits paying it
+        ("If you've played a spell this turn, you may pay [chaos] as an
+        additional cost": Crescent Guardian)."""
         spec = CARD_REGISTRY.get(card.name)
         if not (spec and spec.effects):
             return False
@@ -3722,7 +3730,8 @@ class GameLoop:
             seen.append(ac)
             if self._additional_cost_optional(card) and \
                     self._pay_one_additional_cost(card, ap, ac, check_only=True) and \
-                    not self.choose("optional:additional_cost", side, [True, False], True, card):
+                    not self.choose("optional:additional_cost", side, [True, False],
+                                    self._kicker_worth(card, ap, bf), card):
                 continue
             if self._pay_one_additional_cost(card, ap, ac):
                 card._kicker_paid = True
@@ -3730,6 +3739,21 @@ class GameLoop:
                 if self.verbose:
                     print(f"  {ap.name} pays kicker for {card.name}: {ac}")
         return paid
+
+    def _kicker_worth(self, card: Card, ap: Player, bf: Optional[Battlefield] = None) -> bool:
+        """Baseline for a "you may" additional cost: pay it, unless every
+        instruction it unlocks chooses something and has nothing to choose
+        ("if you paid the additional cost, STUN an enemy unit at a battlefield"
+        with none there: Masa Crashing Thunder; effects.has_valid_target)."""
+        from .effects import has_valid_target
+        spec = CARD_REGISTRY.get(card.name)
+        side = "A" if ap is self.gs.A else "B"
+        ctx = EffectContext(self, card, ap, self.gs.get_player(self.gs.other(side)),
+                            bf if bf is not None else self.gs.battlefields[0])
+        checks = [has_valid_target(ctx, {**es.merged_params(), "effect": es.effect})
+                  for es in (spec.effects if spec else [])
+                  if (es.condition or {}).get("type") == "kicker_paid"]
+        return not checks or any(c is not False for c in checks)
 
     def _pay_one_additional_cost(self, card: Card, ap: Player, ac: dict,
                                  check_only: bool = False) -> bool:
@@ -3773,11 +3797,10 @@ class GameLoop:
         if xp:
             self.gs.add_xp(side_, -xp)          # Safety Inspector
         for _ in range(discard_n):
-            idx = next((i for i, c in enumerate(ap.hand) if c is not card), None)
-            if idx is None:
-                return False
             hand = [c for c in ap.hand if c is not card]
-            self._discard(ap, self.choose("discard", side, hand, ap.hand[idx], card))
+            if not hand:
+                return False
+            self._discard(ap, self._discard_choice(side, ap, hand, card))
         if isinstance(target, UnitInPlay):
             where = self._locate_unit(target)
             if verb == "exhaust":
@@ -4030,8 +4053,7 @@ class GameLoop:
             for _ in range(extras.get("discards", 0)):
                 hand = [c for c in ap.hand if c is not card]
                 if hand:
-                    self._discard(ap, self.choose("discard", side, hand,
-                                                  min(hand, key=lambda c: c.cost_energy or 0), card))
+                    self._discard(ap, self._discard_choice(side, ap, hand, card))
 
     def _adjust_ability_cost(self, unit, eff, parsed: dict, side: str) -> dict:
         """ "EMPOWER costs of your units here cost [1] or [Rune] less" (Risen
@@ -4608,7 +4630,7 @@ class GameLoop:
             self._contest(enter, side, before)
         self.units_played += 1
         # B1: optional additional cost (kicker), paid before resolution.
-        self._try_pay_additional_costs(card, ap)
+        self._try_pay_additional_costs(card, ap, enter)
         self._show_off(card, ap)
         self._enter_ready_self(card, side, unit, bf)
         self._count_card_played(card, side)
@@ -4709,7 +4731,8 @@ class GameLoop:
             target_bf = self.gs.battlefields[lane]
             friendly_units = target_bf.units_A if side == "A" else target_bf.units_B
             if friendly_units:
-                attached_to = self.choose("equip", side, list(friendly_units), friendly_units[0], card)
+                attached_to = self.choose("equip", side, list(friendly_units),
+                                          self._equip_baseline(friendly_units), card)
                 attached_to.gear.append(card)
                 self._fire_attached(attached_to, side)
         if deployed_bf is not None:
@@ -4732,7 +4755,7 @@ class GameLoop:
         # its battlefield.
         play_bf = deployed_bf or self.gs.battlefields[lane]
         opponent = self.gs.get_player(self.gs.other(side))
-        self._try_pay_additional_costs(card, ap)      # Detonation Amplifier
+        self._try_pay_additional_costs(card, ap, play_bf)      # Detonation Amplifier
         self._show_off(card, ap)
         self._count_card_played(card, side)
         self._resolve_card_effects(card, play_bf, ap, opponent)
@@ -6161,8 +6184,7 @@ class GameLoop:
             for _ in range(parsed.get("discard", 0)):
                 cands = self._discardable(ap, parsed)
                 if cands:
-                    self._discard(ap, self.choose("discard", side, cands,
-                                                  min(cands, key=lambda c: c.cost_energy or 0)))
+                    self._discard(ap, self._discard_choice(side, ap, cands))
         if parsed.get("spend_buff"):
             holder = self._buff_to_spend(side, unit, parsed["spend_buff"])
             if holder is not None:
@@ -6359,8 +6381,7 @@ class GameLoop:
             if not units:
                 return
             if target_unit is None:
-                target_unit = self.choose("equip", side, units,
-                                          self._first_friendly_unit_on_board(side) or units[0], gear)
+                target_unit = self.choose("equip", side, units, self._equip_baseline(units), gear)
             self._activate(side, gear, None, 0, "equip", base_energy, target=target_unit)
             return
 
@@ -6540,6 +6561,14 @@ class GameLoop:
         self._apply_action(player, ("ABILITY", ability_id, arg, None))
         self._recompute_passives()
         return self._action_fingerprint(player, opponent) != before
+
+    @staticmethod
+    def _equip_baseline(units: list):
+        """Baseline for the unit an Equipment goes on: the weakest one, not a
+        token, not stunned (A/B in self-play, B37: +0.55 points of win rate per
+        game over the first unit on a battlefield, which did no better than a
+        random pick; the mightiest did no better either)."""
+        return min(units, key=lambda u: (u.is_token, u.stunned, u.might))
 
     def _first_friendly_unit_on_board(self, side: str):
         for bf in self.gs.battlefields:
@@ -7241,6 +7270,20 @@ class GameLoop:
             self._discard_sides.add(side)
         else:
             self._fire_units_trigger("on_you_discard", side, triggering_card=card)
+
+    def _discard_choice(self, side: str, player: Player, cands: list, source=None):
+        """The card of `cands` (in `player`'s hand) that `side` chooses for
+        `player` to discard (choice `discard`). Baseline, choosing for oneself:
+        a card that wants it ("When you discard me": Flame Chompers) first,
+        else the cheapest; choosing for an opponent (Mindsplitter), the
+        costliest, then the mightiest."""
+        if side == ("A" if player is self.gs.A else "B"):
+            pick = min(cands, key=lambda c: (not self._has_trigger(c, "on_discarded"),
+                                             int(c.cost_energy or 0) + int(c.cost_power or 0),
+                                             int(getattr(c, "might", 0) or 0)))
+        else:
+            pick = max(cands, key=lambda c: (int(c.cost_energy or 0), int(getattr(c, "might", 0) or 0)))
+        return self.choose("discard", side, list(cands), pick, source)
 
     @contextmanager
     def _discard_event(self):
