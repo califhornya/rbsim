@@ -26,7 +26,6 @@ def test_stupefy_gives_minus_one():
 
 # -- D14. Noxus Hopeful (OGN-012; fury_chaos_pyke, vendetta_rengar) --------------
 
-@pytest.mark.xfail(strict=True, reason="Noxus Hopeful OGN-012: printed Might 4, encoded 3")
 def test_noxus_hopeful_has_four_might():
     loop, a, b = setup(active="A")
     bf0 = loop.gs.battlefields[0]

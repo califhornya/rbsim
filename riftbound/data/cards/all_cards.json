@@ -413,7 +413,7 @@
     "domain": "Fury",
     "category": "Unit",
     "sub_type": "Noxus, Trifarian",
-    "might": 3,
+    "might": 4,
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,
