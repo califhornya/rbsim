@@ -37,8 +37,6 @@ def test_noxus_hopeful_has_four_might():
 
 # -- D15. Thrill of the Hunt (UNL-184; vendetta_rengar) --------------------------
 
-@pytest.mark.xfail(strict=True, reason="Thrill of the Hunt UNL-184: printed cost [2] and one Power, "
-                                       "encoded with two Power")
 def test_thrill_of_the_hunt_costs_one_power():
     loop, a, b = setup(active="A", rich=())
     a.rune_energy = 2

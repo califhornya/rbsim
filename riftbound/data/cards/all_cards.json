@@ -25633,7 +25633,7 @@
     "sub_type": "Rengar",
     "might": null,
     "cost_energy": 2,
-    "cost_power": 2,
+    "cost_power": 1,
     "cost_power_domain": "Fury/Body",
     "effect": "REACTION (Play any time, even before spells and abilities resolve.) Banish a friendly unit, then its owner plays it to any battlefield, ignoring its cost.",
     "effect_equipped": null,
