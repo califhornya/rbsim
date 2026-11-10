@@ -32,7 +32,7 @@ said.
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | **fixed** (see D7) |
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | **fixed** (see D8) |
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
-| D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | open |
+| D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | **fixed** (see D10) |
 | D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | open |
 | D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | open |
 | D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | open |
@@ -309,8 +309,11 @@ said.
   `test_a_reaction_unit_can_be_played_to_base_during_a_showdown`.
 - **Weight.** Low: a missing option, and rarely the best one (the unit enters
   exhausted in base).
-- **Fix.** Offer base as a destination for REACTION units at reaction and
-  showdown points; `_play_ambush_unit` already plays through `_play_unit`.
+- **Fixed.** On a chain a REACTION unit is also offered "to base"
+  (`("UNIT", idx, 0, base index)`, played by `_play_ambush_unit`); in a showdown
+  it is offered like an ACTION unit (to base). Third test:
+  `test_a_reaction_unit_played_to_base_on_a_chain_enters_there`. No golden game
+  changes.
 
 ### D11. REACTION plays in a showdown only at its battlefield
 

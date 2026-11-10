@@ -239,9 +239,6 @@ def test_zed_without_a_sound_needs_a_shadow_clone_somewhere_else():
 
 # -- D10. A REACTION unit may be played to base too ------------------------------
 
-@pytest.mark.xfail(strict=True, reason="§813.1.c.1 / §813.3.a: a REACTION unit can be played at "
-                                       "reaction speed only to a battlefield its player controls, "
-                                       "not to their base")
 def test_a_reaction_unit_can_be_played_to_base_in_a_closed_state():
     """Shen Kinkou: 'REACTION (Play any time, ..., including to a battlefield
     you control.)' 'It can only be played to the controlling player's base or a
@@ -256,8 +253,18 @@ def test_a_reaction_unit_can_be_played_to_base_in_a_closed_state():
     assert any("Shen Kinkou" in lbl for lbl in A.offered("reaction"))
 
 
-@pytest.mark.xfail(strict=True, reason="§813.1.b / §806.1.c.1: a REACTION unit isn't offered during a "
-                                       "showdown unless its player controls the showdown's battlefield")
+def test_a_reaction_unit_played_to_base_on_a_chain_enters_there():
+    loop, a, b = setup(active="B")
+    a.hand.append(card("Shen Kinkou"))
+    b.base_units.append(unit("Target", 1))
+    b.hand.append(card("Discipline"))
+    A, B = scripted(loop, a, b, A={"reaction": ["React Shen Kinkou to base"]},
+                    B={"main": ["Cast Discipline"]})
+    loop._run_main_actions()
+    assert [u.card.name for u in a.base_units] == ["Shen Kinkou"] and not a.base_units[0].ready
+    assert not a.hand and a.energy == 20 - 3
+
+
 def test_a_reaction_unit_can_be_played_to_base_during_a_showdown():
     loop, a, b = setup(active="B")
     a.hand.append(card("Shen Kinkou"))

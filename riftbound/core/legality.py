@@ -213,6 +213,9 @@ def _reaction_actions(loop: "GameLoop", ap) -> list[GameAction]:
             for lane in loop._ambush_unit_lanes(card, ap.name):
                 if _affordable(loop, ap, card, dst=lane):
                     actions.append(GameAction("UNIT", idx, 0, lane, f"AMBUSH {card.name} @BF{lane}"))
+            # A REACTION unit, to its player's base too (§813.1.c.1, §813.3.a).
+            if card.has_keyword("REACTION") and _affordable(loop, ap, card):
+                actions.append(GameAction("UNIT", idx, 0, n_bf, f"React {card.name} to base"))
     # AMBUSH: deploy the champion to a legal lane at reaction speed.
     champ = loop.gs.champion_A if ap.name == "A" else loop.gs.champion_B
     if champ is not None:
@@ -235,8 +238,9 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         if isinstance(card, SpellCard) and (card.has_keyword("ACTION") or loop._has_reaction(card, ap.name)):
             if _affordable(loop, ap, card, lane) and loop._spell_has_targets(card, ap.name, lane):
                 actions.append(GameAction.play("SPELL", idx, lane, f"Showdown {card.name} @BF{lane}"))
-        # ACTION units (§732.1.c.1): may be played during showdowns (to base).
-        elif isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+        # ACTION units (§806.1.c.1), and REACTION ones (§813.1.b: "all abilities
+        # and permissions of Action"): may be played during showdowns (to base).
+        elif isinstance(card, UnitCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
             if _affordable(loop, ap, card):
                 actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
         # AMBUSH units into the showdown's battlefield.

@@ -5070,11 +5070,25 @@ class GameLoop:
                                                self._has_effect(gs.battlefields[i].card, "no_unit_plays_here")))
 
     def _play_ambush_unit(self, ap: Player, idx: int, lane) -> bool:
-        """Play an AMBUSH unit from hand to `lane` at reaction speed."""
+        """Play an AMBUSH unit from hand to `lane` at reaction speed; a REACTION
+        unit also to its player's base (`lane` the base index; §813.3.a)."""
         side = "A" if ap is self.gs.A else "B"
-        if not (0 <= idx < len(ap.hand)) or lane not in self._ambush_unit_lanes(ap.hand[idx], side):
+        if not (0 <= idx < len(ap.hand)):
             return False
         card = ap.hand[idx]
+        if lane == len(self.gs.battlefields):
+            if not (isinstance(card, UnitCard) and card.has_keyword("REACTION")):
+                return False
+            energy, power = self._effective_cost(card, ap)
+            if not self._pay_card(ap, card, energy, power):
+                return False
+            ap.hand[:] = [c for c in ap.hand if c is not card]
+            if self.verbose:
+                print(f"  {side} plays UNIT at reaction speed: {card.name}")
+            self._play_unit(card, side)
+            return True
+        if lane not in self._ambush_unit_lanes(card, side):
+            return False
         energy, power = self._effective_cost(card, ap)
         energy = max(0, energy - self._destination_discount(card, lane, side))
         if not self._pay_card(ap, card, energy, power):
@@ -7658,9 +7672,10 @@ class GameLoop:
             if self._play_ambush_unit(player, idx, action[3]):
                 return "acted"
         elif kind == "UNIT" and idx is not None and 0 <= idx < len(player.hand):
-            # ACTION unit (§732.1.c.1): played during a showdown (to base).
+            # ACTION unit (§806.1.c.1), or REACTION one (§813.1.b): played during
+            # a showdown (to base).
             card = player.hand[idx]
-            if isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+            if isinstance(card, UnitCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
                 before = len(player.base_units)
                 self._apply_action(player, ("UNIT", idx, bf_idx, None))
                 if len(player.base_units) > before:
