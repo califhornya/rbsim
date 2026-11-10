@@ -39,7 +39,7 @@ said.
 | D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | **fixed** |
 | D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | **fixed** |
 | D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | **fixed** |
-| D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | open |
+| D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | **fixed** |
 | D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | open |
 
 ## Deviations, priority 1: the precons and the rules they use

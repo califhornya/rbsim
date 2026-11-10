@@ -6804,7 +6804,7 @@
     "cost_energy": 6,
     "cost_power": 2,
     "cost_power_domain": "Chaos",
-    "effect": "",
+    "effect": "Play a unit from your trash, ignoring its Energy cost. (You must still pay its Power cost.)",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -6814,7 +6814,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_cast",
+        "target_filter": {
+          "is_unit": true
+        },
+        "ignore_energy_cost": true
+      }
+    ]
   },
   {
     "card_id": "OGN-199",

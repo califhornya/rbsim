@@ -61,8 +61,6 @@ def test_pit_crew_readies_when_you_play_a_gear():
 
 # -- D17. The Harrowing (OGN-198; vendetta_kennen) -------------------------------
 
-@pytest.mark.xfail(strict=True, reason="The Harrowing OGN-198: printed 'Play a unit from your trash, "
-                                       "ignoring its Energy cost.', encoded with no text and no effect")
 def test_the_harrowing_plays_a_unit_from_your_trash():
     loop, a, b = setup(active="A", rich=())
     a.rune_energy = 6
@@ -73,6 +71,22 @@ def test_the_harrowing_plays_a_unit_from_your_trash():
     act(loop, "A", "Cast The Harrowing")
     assert [u.card for u in a.base_units + loop.gs.battlefields[0].units_A] == [back]
     assert a.energy == 0 and not any(c is back for c in a.trash)
+
+
+def test_the_harrowing_needs_a_unit_in_the_trash_and_its_power_cost():
+    """§355.8: no unit in the trash, no play. "(You must still pay its Power
+    cost.)": Zed From the Shadows ([4] and one Fury) comes back for the Fury."""
+    loop, a, b = setup(active="A", rich=())
+    a.rune_energy = 6
+    a.add_power(Domain.CHAOS, 2)
+    a.hand.append(card("The Harrowing"))
+    assert not any("The Harrowing" in lbl for lbl in labels(loop, "A"))
+    back = card("Zed From the Shadows")
+    a.trash.append(back)
+    a.add_power(Domain.FURY, 1)
+    choices(loop, {"optional:additional_cost": lambda l, o: o.index(False)})
+    act(loop, "A", "Cast The Harrowing")
+    assert [u.card for u in a.base_units] == [back] and a.power_pool.get(Domain.FURY, 0) == 0
 
 
 # -- D18. Existential Dread (UNL-134; chaos_mind_diana) --------------------------
