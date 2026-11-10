@@ -7907,9 +7907,15 @@ class GameLoop:
             # order that kills the most Might (combat.kill_order).
             return lambda units, damage: self.choose("combat_damage_order", assigner, units,
                                                      kill_order(units, damage)[0])
+        def conflict(assigner):
+            # A unit with TANK and BACKLINE: `assigner` chooses which one it
+            # applies (§467.2.c.8). Baseline: TANK.
+            return lambda unit: self.choose("combat_tank_or_backline", assigner,
+                                            ["TANK", "BACKLINE"], "TANK", unit.card)
         return {"take": lambda u, a: self._take_damage(u, a, "combat"),
                 "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
-                "might_mods": mods, "first_a": first("B"), "first_b": first("A")}
+                "might_mods": mods, "first_a": first("B"), "first_b": first("A"),
+                "conflict_a": conflict("B"), "conflict_b": conflict("A")}
 
     def _combat_might_mods(self, bf: Battlefield, attacker: str) -> dict:
         """id(unit) -> Might change while fighting at `bf` (Forbidding Waste: a

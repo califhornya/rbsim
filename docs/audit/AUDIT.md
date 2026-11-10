@@ -34,7 +34,7 @@ said.
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | **fixed** (see D10) |
 | D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | **fixed** (see D11) |
-| D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | open |
+| D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | **fixed** (see D12) |
 | D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | open |
 | D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | open |
 | D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | open |
@@ -351,8 +351,12 @@ said.
   (`tests/audit/test_audit_mechanics.py`).
 - **Weight.** None for Zed vs Shen (no BACKLINE; Shen's legend gives TANK only
   to Shen's units). Other decks: a BACKLINE unit given TANK.
-- **Fix.** One more choice (`combat_tank_or_backline`) per such unit before
-  the groups are built.
+- **Fixed.** One more choice, `combat_tank_or_backline` (the assigner's;
+  baseline TANK, as before), per such unit as the damage order is built. The
+  audit test answers that choice (it was written against the order choice,
+  which is not where the rule puts the decision); a second test checks the
+  TANK answer. No golden game changes. Like the other choices made inside an
+  action, the net-guided search doesn't make it yet (BACKLOG O3).
 
 The other rows, re-read against the code and tests:
 

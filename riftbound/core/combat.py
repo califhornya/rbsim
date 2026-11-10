@@ -189,10 +189,11 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
 
 
 def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
-                     first=None, damage: int = 0) -> List[UnitInPlay]:
+                     first=None, damage: int = 0, conflict=None) -> List[UnitInPlay]:
     """Damage-assignment order (§467.2.c): TANK units must take lethal first,
-    BACKLINE units last, everyone else in between. On a Tank+Backline conflict
-    the controller chooses — we resolve deterministically as Tank (take first).
+    BACKLINE units last, everyone else in between. A unit with both: the
+    assigning player chooses which one applies (§467.2.c.8): `conflict(unit)`
+    -> "TANK" or "BACKLINE"; without it, TANK.
     `ignore_tank`: the assigner ignores TANK here (Dune Surfer). Within each
     group the assigner orders the units while the damage left can't kill them
     all: `first(units, damage)` picks the next one to take lethal (one choice
@@ -201,7 +202,10 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
     for u in units:
-        if u.has_keyword("TANK") and not ignore_tank:
+        tank = u.has_keyword("TANK") and not ignore_tank
+        if tank and u.has_keyword("BACKLINE") and conflict is not None:
+            tank = conflict(u) != "BACKLINE"
+        if tank:
             tanks.append(u)
         elif u.has_keyword("BACKLINE"):
             backline.append(u)
@@ -274,7 +278,7 @@ def _is_dead(unit: UnitInPlay) -> bool:
 
 
 def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
-                  ignore_tank: bool = False, first=None) -> tuple[int, int]:
+                  ignore_tank: bool = False, first=None, conflict=None) -> tuple[int, int]:
     """Apply damage to the provided units; return (kills, damage_assigned).
 
     Lethal-first per §460.2.c: assign each unit its lethal amount before moving
@@ -288,7 +292,7 @@ def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
     take = take or (lambda unit, amount: amount)
     assigned = 0
     kills = 0
-    for unit in _ordered_targets(units, ignore_tank, first, damage):
+    for unit in _ordered_targets(units, ignore_tank, first, damage, conflict):
         if damage <= 0:
             break
         if _is_dead(unit):
@@ -324,13 +328,16 @@ def resolve_might_combat(
     might_mods: Optional[dict] = None,
     first_a=None,
     first_b=None,
+    conflict_a=None,
+    conflict_b=None,
 ) -> CombatStats:
     """Resolve simultaneous combat between two unit groups.
 
     attacker_side: "A" if A is attacking (Turn Player), "B" otherwise.
     Attackers gain ASSAULT bonus; defenders gain SHIELD bonus.
-    `first_a` / `first_b`: which of A's / B's units its opponent kills first
-    (see _ordered_targets).
+    `first_a` / `first_b`: which of A's / B's units its opponent kills first;
+    `conflict_a` / `conflict_b`: whether TANK or BACKLINE applies to one of
+    A's / B's units that has both (see _ordered_targets).
     """
     stats = CombatStats()
 
@@ -348,8 +355,8 @@ def resolve_might_combat(
     damage_to_a = _total_might(units_b)
     damage_to_b = _total_might(units_a)
 
-    kills_a, assigned_a = _apply_damage(units_a, damage_to_a, take, ignore_tank_a, first_a)
-    kills_b, assigned_b = _apply_damage(units_b, damage_to_b, take, ignore_tank_b, first_b)
+    kills_a, assigned_a = _apply_damage(units_a, damage_to_a, take, ignore_tank_a, first_a, conflict_a)
+    kills_b, assigned_b = _apply_damage(units_b, damage_to_b, take, ignore_tank_b, first_b, conflict_b)
 
     stats.kills_A = kills_a
     stats.kills_B = kills_b
