@@ -23754,7 +23754,7 @@
     "cost_energy": 1,
     "cost_power": 1,
     "cost_power_domain": "Chaos",
-    "effect": "ACTION (Play on your turn or in showdowns.) REPEAT[2] (You may pay the additional cost to repeat this spell's effect.) STUN an attacking unit. If it's already stunned, return it to its owner's hand instead. (A stunned unit doesn't deal combat damage this turn.)",
+    "effect": "ACTION (Play on your turn or in showdowns.) REPEAT[2] (You may pay the additional cost to repeat this spell's effect.) STUN an attacking enemy unit. If it's already stunned, return it to its owner's hand instead. (A stunned unit doesn't deal combat damage this turn.)",
     "effect_equipped": null,
     "set": "Unleashed",
     "variants": [

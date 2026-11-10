@@ -1720,13 +1720,18 @@ def _temporary_swap(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     loop._move_unit_by_effect(y, bx)
 
 
+def _attacking_enemies(ctx: "EffectContext") -> list:
+    """The attacking enemy units `ctx`'s player may choose (Existential Dread)."""
+    return _choosable(ctx, [u for u in _units_at(ctx, ctx.opponent_side, "battlefield")
+                            if ctx.loop._is_attacking(u)])
+
+
 @effect("stun_or_return_attacker")
 def _stun_or_return_attacker(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "STUN an attacking unit. If it's already stunned, return it to its
-    owner's hand instead" (Existential Dread)."""
+    """ "STUN an attacking enemy unit. If it's already stunned, return it to
+    its owner's hand instead" (Existential Dread)."""
     loop = ctx.loop
-    cands = _choosable(ctx, [u for s in ("A", "B") for u in _units_at(ctx, s, "battlefield")
-                             if loop._is_attacking(u)])
+    cands = _attacking_enemies(ctx)
     if not cands:
         return
     unit = loop.choose(_kind("target", spec), ctx.actor_side, cands,
@@ -4078,6 +4083,8 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     effect = spec.get("effect")
     if effect == "counter_spell":
         return bool(_counter_targets(ctx, spec))
+    if effect == "stun_or_return_attacker":
+        return bool(_attacking_enemies(ctx))
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()

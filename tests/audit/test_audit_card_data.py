@@ -91,8 +91,6 @@ def test_the_harrowing_needs_a_unit_in_the_trash_and_its_power_cost():
 
 # -- D18. Existential Dread (UNL-134; chaos_mind_diana) --------------------------
 
-@pytest.mark.xfail(strict=True, reason="Existential Dread UNL-134: printed '[Stun] an attacking enemy "
-                                       "unit', encoded as any attacking unit (the attacker's own too)")
 def test_existential_dread_chooses_an_attacking_enemy_unit():
     """The attacker has no attacking enemy unit to choose: it can't play it
     (§355.8); the defender can."""

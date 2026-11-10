@@ -40,7 +40,7 @@ said.
 | D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | **fixed** |
 | D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | **fixed** |
 | D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | **fixed** |
-| D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | open |
+| D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | **fixed** |
 
 ## Deviations, priority 1: the precons and the rules they use
 
