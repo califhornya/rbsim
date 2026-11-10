@@ -48,13 +48,13 @@ def test_thrill_of_the_hunt_costs_one_power():
 
 # -- D16. Pit Crew (OGN-091; vendetta_ornn) --------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="Pit Crew OGN-091: printed 'When you play a gear, ready me.', "
-                                       "encoded with no text and no effect")
 def test_pit_crew_readies_when_you_play_a_gear():
     loop, a, b = setup(active="A")
     crew = unit("Pit Crew", ready=False)
     a.base_units.append(crew)
-    a.hand.append(card("Hand Hammer"))
+    a.hand += [card("Punching Poro"), card("Hand Hammer")]
+    act(loop, "A", "Play Punching Poro")
+    assert not crew.ready                        # a unit is not a gear
     act(loop, "A", "Play gear Hand Hammer")
     assert crew.ready
 

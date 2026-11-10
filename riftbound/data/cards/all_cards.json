@@ -3204,7 +3204,7 @@
     "cost_energy": 3,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "",
+    "effect": "When you play a gear, ready me.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -3214,7 +3214,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_card_played",
+        "target": "self",
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "is_gear": true
+            }
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-092",

@@ -38,7 +38,7 @@ said.
 | D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | **fixed** |
 | D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | **fixed** |
 | D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | **fixed** |
-| D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | open |
+| D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | **fixed** |
 | D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | open |
 | D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | open |
 
