@@ -31,7 +31,7 @@ from __future__ import annotations
 import itertools
 import math
 import random
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
@@ -42,9 +42,20 @@ from riftbound.ai.encoding import (
     legal_mask,
 )
 from riftbound.ai.heuristics.base_agent import Action, Agent
-from riftbound.ai.net import RiftboundNet, predict
 from riftbound.core.decisions import DecisionPoint, Observation, describe_option
 from riftbound.core.legality import legal_actions
+
+if TYPE_CHECKING:
+    from riftbound.ai.net import RiftboundNet
+
+
+def predict(net, vec, mask):
+    """riftbound.ai.net.predict, imported when the net first runs: torch is an
+    optional extra, and the coach's text helpers (which import this module) are
+    used by engine tests that run without it."""
+    from riftbound.ai.net import predict as _predict
+    return _predict(net, vec, mask)
+
 
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
@@ -54,7 +65,8 @@ _MAX_TURN_ACTIONS = 30
 # Hidden ones (dig and predict look at the deck) and the Power domain (six
 # options, rarely mattering) keep their baseline.
 SEARCH_CHOICES = ("target:", "mode", "equip", "combat_damage_order", "cost_unit:",
-                  "destination", "optional:", "deploy", "discard")
+                  "destination", "optional:", "deploy", "discard", "player", "token_location",
+                  "battlefield:", "tag:")
 _MAX_VARIANTS = 6
 
 
@@ -131,8 +143,12 @@ class NetGuidedMCTSAgent(Agent):
                  c_puct: float = 1.5, rng: Optional[random.Random] = None,
                  mulligan_samples: int = 3, reaction_iterations: Optional[int] = None,
                  explore: bool = False, dirichlet_alpha: float = 0.3,
-                 noise_frac: float = 0.25, temperature_moves: int = 10):
+                 noise_frac: float = 0.25, temperature_moves: int = 10,
+                 pass_margin: float = 0.02):
         super().__init__(player)
+        # A move whose searched value isn't at least this much above passing's
+        # (values in [-1, 1]: 0.02 = 1 point of win chance) isn't played.
+        self.pass_margin = pass_margin
         self.net = net
         self.iterations = iterations
         # Showdown / reaction decisions search one ply: a quarter of the budget.
@@ -170,13 +186,14 @@ class NetGuidedMCTSAgent(Agent):
         mass on any legal slot."""
         obs = Observation.from_state(clone, side)
         vec = encode_observation(obs)
-        mask = legal_mask(legal_ga)
+        n_bf = len(clone.battlefields)
+        mask = legal_mask(legal_ga, n_bf)
         probs, value = predict(self.net, vec, mask)
         priors: dict = {}
         total = 0.0
         for a in legal_ga:
             t = a.to_engine()
-            idx = action_to_index(a)
+            idx = action_to_index(a, n_bf)
             p = float(probs[idx]) if idx is not None else 0.0
             priors[t] = p
             total += p
@@ -258,11 +275,26 @@ class NetGuidedMCTSAgent(Agent):
         if self.explore and self._decisions <= self.temperature_moves:
             key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
         else:
-            key = max(items, key=lambda kv: kv[1].N)[0]
+            key = self.prefer_pass(root, max(items, key=lambda kv: kv[1].N)[0])
         action, force = _split_key(key)
         if force is not None:
             self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
         return action
+
+    def prefer_pass(self, root: _Node, key):
+        """PASS instead of `key` when `key` isn't clearly better: a free-looking
+        move can spend what the opponent's turn needs (Shen's legend tapped for a
+        TANK nobody fights with, energy a reaction would want). Not while a move
+        is held: PASS then starts its showdown (it isn't "do nothing"). Only
+        abilities: a unit, spell or move the search prefers is played (the margin
+        made the net skip its 2-drop on turn 2, a noisy Q nudging it to PASS)."""
+        p = root.children.get(_PASS)
+        best = root.children.get(key)
+        if key == _PASS or p is None or best is None or not p.N or not best.N \
+                or _split_key(key)[0][0] != "ABILITY" \
+                or getattr(self.gs, "pending_move", None) is not None:
+            return key
+        return _PASS if best.W / best.N - p.W / p.N < self.pass_margin else key
 
     def _add_noise(self, node: _Node) -> None:
         """Dirichlet noise on a root's priors, so self-play also tries what the
@@ -278,10 +310,11 @@ class NetGuidedMCTSAgent(Agent):
     def _record_example(self, side: str, root_legal: list) -> None:
         """Append (state, MCTS visit policy, legal mask, player) for training."""
         obs = Observation.from_state(self.gs, side)
+        n_bf = len(self.gs.battlefields)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
         for key, share in self.last_visits.items():
             a_tuple, _force = _split_key(key)
-            idx = action_to_index(a_tuple)
+            idx = action_to_index(a_tuple, n_bf)
             if idx is not None:
                 policy[idx] += share
         s = policy.sum()
@@ -290,7 +323,7 @@ class NetGuidedMCTSAgent(Agent):
         self.record.append({
             "state": encode_observation(obs),
             "policy": policy,
-            "mask": legal_mask(root_legal),
+            "mask": legal_mask(root_legal, n_bf),
             "player": side,
         })
 
@@ -404,6 +437,15 @@ class NetGuidedMCTSAgent(Agent):
         the net's VALUE; keep the best. No hand-crafted rule — as the value net
         learns that a dead card in hand loses, it learns to mulligan it (e.g.
         Nocturne). Averaged over a few determinized draws to cut variance."""
+        best_combo, best_v = [], -1e30
+        for combo, v in self.mulligan_values():
+            if v > best_v:
+                best_v, best_combo = v, combo
+        return best_combo
+
+    def mulligan_values(self) -> list:
+        """(hand indices to send back, the net's value of the opening after it)
+        for every mulligan (§117: up to two cards), keep-all first."""
         self._ensure_rng()
         self._release_forced()
         side = self.player.name
@@ -411,9 +453,8 @@ class NetGuidedMCTSAgent(Agent):
         if n == 0:
             return []
         from riftbound.core.state import determinize
-        combos = [list(c) for r in range(3) for c in itertools.combinations(range(n), r)]
-        best_combo, best_v = [], -1e30
-        for combo in combos:
+        out = []
+        for combo in (list(c) for r in range(3) for c in itertools.combinations(range(n), r)):
             vals = []
             for _ in range(max(1, self.mulligan_samples)):
                 clone = self.gs.clone()
@@ -421,10 +462,8 @@ class NetGuidedMCTSAgent(Agent):
                 clone.get_player(side).mulligan(combo, clone.rng)
                 determinize(clone, observer=side, rng=clone.rng)
                 vals.append(self._value_only(clone, side))
-            v = sum(vals) / len(vals)
-            if v > best_v:
-                best_v, best_combo = v, combo
-        return best_combo
+            out.append((combo, sum(vals) / len(vals)))
+        return out
 
     # -- showdown / reaction decisions -----------------------------------------
 
@@ -495,7 +534,7 @@ class NetGuidedMCTSAgent(Agent):
         both players passed from here."""
         gs = loop.gs
         if gs.chain:
-            loop._resolve_chain()
+            loop._resolve_chain_passing()
         if gs.showdown_active and gs.showdown_bf_idx is not None:
             loop._finish_showdown(gs.showdown_bf_idx, gs.showdown_attacker)
 

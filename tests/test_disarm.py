@@ -26,7 +26,7 @@ def test_disarm_value_bare_valued_and_granted():
     bare = UnitInPlay(UnitCard(name="Ahri", keywords=["DISARM"]))
     two = UnitInPlay(UnitCard(name="Chronomancer", keywords=["DISARM 2"]))
     granted = UnitInPlay(UnitCard(name="Mech", keywords=["DISARM"]))
-    granted.passive_keywords.add("DISARM")
+    granted.passive_keywords.append("DISARM")
     assert GameLoop._disarm_value(bare) == 1
     assert GameLoop._disarm_value(two) == 2
     assert GameLoop._disarm_value(granted) == 2          # printed + granted add up

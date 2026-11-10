@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from typing import Optional
 from uuid import uuid4
 
 from .enums import CardType, Domain
+
+# A card's printed text, shared by its copies (Card.__deepcopy__).
+_PRINTED = frozenset({"tags", "keywords", "effects"})
 
 
 @dataclass(eq=False)
@@ -28,6 +32,16 @@ class Card:
     effects: list[dict[str, object]] = field(default_factory=list)
     uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
     tapped: bool = field(default=False, compare=False)  # gear exhausted-state for [tap] abilities
+
+    def __deepcopy__(self, memo):
+        """A copy of the card (a search's copy of the game, the one a chain
+        item's choices are declared on): its printed text (tags, keywords,
+        effects) is never changed in play, so the copy shares it."""
+        new = object.__new__(type(self))
+        memo[id(self)] = new
+        for k, v in self.__dict__.items():
+            new.__dict__[k] = v if k in _PRINTED else copy.deepcopy(v, memo)
+        return new
 
     def has_keyword(self, keyword: str) -> bool:
         kw = keyword.upper()

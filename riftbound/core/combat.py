@@ -5,6 +5,9 @@ from typing import Iterable, List, Optional
 
 from .cards import UnitCard
 
+# "I have ASSAULT equal to my SHIELD" this turn (K'Sante Pride of Nazumah).
+ASSAULT_EQUALS_SHIELD = "ASSAULT = SHIELD"
+
 
 @dataclass(eq=False)
 class UnitInPlay:
@@ -26,11 +29,14 @@ class UnitInPlay:
     gear: list = field(default_factory=list)  # List[GearCard] attached to this unit
     stunned: bool = False
     might_counters: int = 0  # BUFF counters — persistent, max 1 per unit per application
-    aura_might: int = 0  # external aura bonus (e.g. Baron Nashor)
+    aura_might: int = 0  # external Might bonus put on the unit (grant_might)
     passive_might: int = 0  # overlay recomputed each cycle by passive (continuous) abilities
-    passive_keywords: set = field(default_factory=set)  # keywords granted by passive abilities
+    passive_keywords: list = field(default_factory=list)  # keywords granted by passive abilities, one per instance
     hidden: bool = False  # reserved for future HIDDEN keyword
     empowered: bool = False  # Vendetta EMPOWERED status — persists until the unit leaves the board or is disempowered
+    # How many times it is EMPOWERED, for what may be empowered more than once
+    # (§442.1.c.1: Kayle Justified, up to three times); 1 otherwise when empowered.
+    empower_times: int = 0
     is_token: bool = False  # True for token units (Gold, Recruit, etc.) — cannot be moved to bf
     no_combat_damage: bool = False  # passive "I don't deal combat damage" (recomputed with passives)
     # Keywords effects gave this unit: until the end of the turn ("give it
@@ -38,6 +44,21 @@ class UnitInPlay:
     # keyword list is never changed (it would follow the card to every zone).
     turn_keywords: list = field(default_factory=list)
     granted_keywords: list = field(default_factory=list)
+    # "... this combat" (Fortified Position, Durand Memorial, Fiora Peerless):
+    # cleared when the combat ends (§468.7).
+    combat_keywords: list = field(default_factory=list)
+    combat_might: int = 0
+    doomed_turn: int = -1            # Noxian Guillotine: dies when it takes damage that turn
+    ward_turn: int = -1              # Unlicensed Armory: may be saved the next time it would die
+    prevent_next_turn: int = -1      # Counter Strike: the next damage to it this turn is prevented
+    was_mighty: bool = False         # "When a unit you control becomes MIGHTY" (Fiora Worthy)
+    ward_free: bool = False          # Tactical Retreat: the ward needs no payment
+    banish_if_dies_turn: int = -1    # Smite: "If it would die this turn, banish it instead"
+    death_bonus: object = None       # "When it dies this turn, ..." (Deadly Flourish): (side, turn, effect, source)
+    damaged_turn: int = -1           # last turn it was dealt damage (Affectionate Poro)
+    unmovable_by_enemies: bool = False   # Jagged Cutlass (recomputed passive)
+    turn_abilities: list = field(default_factory=list)   # Dominus: [(turn, EffectSpec)]
+    win_xp_turn: int = -1            # Grim Resolve: "When it wins a combat this turn, gain 2 XP"
     cant_move_turn: int = -1   # "They can't move it this turn" (Vex): that turn number
     equip_bonus_mult: int = 1  # Gearhead: "Each Equipment attached to me gives double" (passive)
     base_might_override: object = None  # "Its base Might becomes 5 this turn": that value, this turn
@@ -52,29 +73,32 @@ class UnitInPlay:
     double_damage_turn: int = -1     # Lotus Trap: "Double all damage dealt to it this turn"
     damage_shield: int = 0           # Ki Barrier: "Prevent the next 7 damage ... this turn"
     conquered_turn: int = -1         # Blighted Battleaxe: "if I didn't conquer this turn"
-    # Sanction: "Empower a unit. Disempower it at end of turn" (and the reverse).
-    empower_flip_at_end: bool = False
     # Hostile Takeover: (owner side, turn) — goes back to its owner's base at the
     # end of that turn.
     borrowed: Optional[tuple] = None
     extra_tags: list = field(default_factory=list)   # Ivern Friend to All: "I gain that tag"
     # Shady Spectacles: the unit's own card while it "becomes a copy" of another.
     copied_from: Optional[object] = None
+    # A gear that became a unit gear (Orianna Lady of Clockwork): its Might is
+    # its Energy cost; it is still a gear for "a friendly gear".
+    gear_unit: bool = False
 
     def reset_damage(self) -> None:
         self.damage = 0
         self.bonus_might = 0
         # gear, might_counters, aura_might, passives, hidden intentionally preserved
 
+    def clear_combat_bonuses(self) -> None:
+        self.combat_keywords = []
+        self.combat_might = 0
+
     def clear_turn_end_bonuses(self) -> None:
         self.temporary_might = 0
         self.turn_keywords = []
+        self.clear_combat_bonuses()
         self.base_might_override = None
         self.moves_this_turn = 0
         self.damage_shield = 0
-        if self.empower_flip_at_end:
-            self.empowered = not self.empowered
-            self.empower_flip_at_end = False
 
     @property
     def might(self) -> int:
@@ -82,12 +106,21 @@ class UnitInPlay:
             int(e.get("amount", 0))
             for g in self.gear
             for e in getattr(g, "effects", []) or []
-            if isinstance(e, dict) and e.get("effect") == "grant_might"
+            if isinstance(e, dict) and e.get("effect") == "grant_might" and not e.get("condition")
         )
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
-        base = self.base_might_override if self.base_might_override is not None else int(self.card.might or 0)
-        return max(0, base + self.bonus_might + self.temporary_might + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+        base = self.base_might
+        return max(0, base + self.bonus_might + self.temporary_might + self.combat_might
+                   + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+
+    @property
+    def base_might(self) -> int:
+        """Its base Might: the card's (a unit gear's Energy cost), or what an
+        effect made it this turn."""
+        if self.base_might_override is not None:
+            return self.base_might_override
+        return int(self.card.cost_energy or 0) if self.gear_unit else int(self.card.might or 0)
 
     @property
     def tags(self) -> list:
@@ -101,7 +134,8 @@ class UnitInPlay:
             return True
         kw = keyword.upper()
         return any(k.upper() == kw or k.upper().startswith(kw + " ")
-                   for k in (*self.passive_keywords, *self.turn_keywords, *self.granted_keywords))
+                   for k in (*self.passive_keywords, *self.turn_keywords, *self.granted_keywords,
+                             *self.combat_keywords))
 
     @staticmethod
     def _kw_amount(k: str, kw: str) -> int:
@@ -118,13 +152,20 @@ class UnitInPlay:
         return 0
 
     def keyword_value(self, keyword: str) -> int:
-        """Printed or passive value, plus every instance effects gave it (two
-        "give it ASSAULT 2" add up, §807)."""
-        base = self.card.keyword_value(keyword)
+        """Printed value plus every instance passives and effects gave it: they
+        add up (two "give it ASSAULT 2", a printed SHIELD and "units here have
+        SHIELD": §807.2, §809.2, §814.2, §823.2, §831.2). Each Svellsongur on it
+        copies the printed keywords too (another source)."""
+        copies = sum(1 for g in self.gear for e in getattr(g, "effects", []) or []
+                     if isinstance(e, dict) and e.get("effect") == "copy_unit_text")
+        base = self.card.keyword_value(keyword) * (1 + copies)
         kw = keyword.upper()
-        passive = max((self._kw_amount(k, kw) for k in self.passive_keywords), default=0)
-        given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords))
-        return max(base, passive) + given
+        passive = sum(self._kw_amount(k, kw) for k in self.passive_keywords)
+        given = sum(self._kw_amount(k, kw) for k in (*self.turn_keywords, *self.granted_keywords,
+                                                      *self.combat_keywords) if k != ASSAULT_EQUALS_SHIELD)
+        if kw == "ASSAULT" and ASSAULT_EQUALS_SHIELD in self.turn_keywords:
+            given += self.keyword_value("SHIELD")      # K'Sante Pride of Nazumah
+        return base + passive + given
 
 
 @dataclass
@@ -149,13 +190,13 @@ def _total_might(units: Iterable[UnitInPlay]) -> int:
 
 def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
                      first=None, damage: int = 0) -> List[UnitInPlay]:
-    """Damage-assignment order (§460.2.c): TANK units must take lethal first,
+    """Damage-assignment order (§467.2.c): TANK units must take lethal first,
     BACKLINE units last, everyone else in between. On a Tank+Backline conflict
     the controller chooses — we resolve deterministically as Tank (take first).
-    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). `first(normal,
-    damage)` picks which of the units in between takes lethal first (the
-    assigner's choice, asked only when `damage` can't kill them all; see
-    kill_order), the rest then follow kill_order; without it, list order."""
+    `ignore_tank`: the assigner ignores TANK here (Dune Surfer). Within each
+    group the assigner orders the units while the damage left can't kill them
+    all: `first(units, damage)` picks the next one to take lethal (one choice
+    per unit; see kill_order for the baseline); without it, list order."""
     tanks: List[UnitInPlay] = []
     normal: List[UnitInPlay] = []
     backline: List[UnitInPlay] = []
@@ -169,14 +210,33 @@ def _ordered_targets(units: List[UnitInPlay], ignore_tank: bool = False,
     if ignore_tank:
         # Free to choose the order: the most kills first.
         normal.sort(key=lambda u: u.might - u.damage)
-    if first is not None:
-        alive = [u for u in normal if not _is_dead(u)]
-        left = damage - sum(_lethal(u) for u in tanks if not _is_dead(u))
-        if len(alive) > 1 and 0 < left < sum(_lethal(u) for u in alive):
-            lead = first(alive, left)
-            rest = kill_order([u for u in alive if u is not lead], left - _lethal(lead))
-            normal = [lead] + rest + [u for u in normal if _is_dead(u)]
-    return tanks + normal + backline
+    if first is None:
+        return tanks + normal + backline
+    out: List[UnitInPlay] = []
+    for group in (tanks, normal, backline):
+        ordered, damage = _chosen_order(group, damage, first)
+        out += ordered
+    return out
+
+
+def _chosen_order(group: List[UnitInPlay], damage: int, first) -> tuple:
+    """`group` in the assigner's order and the damage left after it: one choice
+    per next unit while `damage` can't kill all the living ones, the rest in
+    kill_order (the dead last)."""
+    alive = [u for u in group if not _is_dead(u)]
+    dead = [u for u in group if _is_dead(u)]
+    order: List[UnitInPlay] = []
+    while len(alive) > 1 and 0 < damage < sum(_lethal(u) for u in alive):
+        pick = first(alive, damage)
+        order.append(pick)
+        alive = [u for u in alive if u is not pick]
+        damage -= _lethal(pick)
+    if damage > 0:
+        rest = kill_order(alive, damage) if alive else []
+        damage -= sum(_lethal(u) for u in alive)
+    else:
+        rest = alive
+    return order + rest + dead, max(0, damage)
 
 
 def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
@@ -198,8 +258,10 @@ def kill_order(units: List[UnitInPlay], damage: int) -> List[UnitInPlay]:
 
 
 def _lethal(unit: UnitInPlay) -> int:
-    """Damage that kills `unit` as _apply_damage assigns it (1 for a 0-might unit)."""
-    return 1 if unit.might == 0 else max(0, unit.might - unit.damage)
+    """Damage that kills `unit` as _apply_damage assigns it (1 for a 0-might
+    unit), plus what its damage shield would prevent (Ki Barrier: "Opponents
+    can assign it extra combat damage to kill it")."""
+    return (1 if unit.might == 0 else max(0, unit.might - unit.damage)) + unit.damage_shield
 
 
 def _is_dead(unit: UnitInPlay) -> bool:
@@ -232,13 +294,16 @@ def _apply_damage(units: List[UnitInPlay], damage: int, take=None,
         if _is_dead(unit):
             continue  # already dead this combat — skip
         if unit.might == 0:
-            # 0-might unit: any damage kills. Assign 1 to register the kill.
-            unit.damage += take(unit, 1)
-            damage -= 1
-            assigned += 1
-            kills += 1
+            # 0-might unit: any damage kills. Assign 1 to register the kill
+            # (more through a damage shield).
+            n = min(1 + unit.damage_shield, damage)
+            unit.damage += take(unit, n)
+            damage -= n
+            assigned += n
+            if _is_dead(unit):
+                kills += 1
             continue
-        remaining = unit.might - unit.damage
+        remaining = unit.might - unit.damage + unit.damage_shield
         to_assign = min(remaining, damage)
         unit.damage += take(unit, to_assign)
         damage -= to_assign

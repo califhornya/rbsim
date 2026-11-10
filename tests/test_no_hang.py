@@ -33,8 +33,8 @@ def _build_game(seed: int) -> GameState:
     random.Random(seed + 2).shuffle(rB.runes)
     dA.shuffle(rng)
     dB.shuffle(rng)
-    A = Player(name="A", hp=10, deck=dA, energy=0, rune_deck=rA)
-    B = Player(name="B", hp=10, deck=dB, energy=0, rune_deck=rB)
+    A = Player(name="A", hp=10, deck=dA, rune_energy=0, rune_deck=rA)
+    B = Player(name="B", hp=10, deck=dB, rune_energy=0, rune_deck=rB)
     A.agent = make_agent("pyke", A)
     B.agent = make_agent("diana", B)
     return GameState(rng=rng, A=A, B=B, turn=1, max_turns=40, active="A",

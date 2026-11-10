@@ -9,7 +9,7 @@ from __future__ import annotations
 import random
 
 from riftbound.core.battlefield import Battlefield
-from riftbound.core.cards import UnitCard
+from riftbound.core.cards import GearCard, UnitCard
 from riftbound.core.combat import UnitInPlay
 from riftbound.core.enums import Domain
 from riftbound.core.loop import GameLoop
@@ -57,6 +57,7 @@ def test_flow_power_cost_and_timing():
     steel = _card("Brittle Steel")                   # FLOW [4] [fury], no ACTION
     ap.trash = [steel]
     ap.energy = 4
+    loop.gs.B.base_gear.append(GearCard(name="Junk"))  # a gear for it to kill (§355.8)
     (_, entry), = _flow_entries(loop)
     assert not loop._ability_usable(ap, entry)
     ap.add_power(Domain.FURY, 1)

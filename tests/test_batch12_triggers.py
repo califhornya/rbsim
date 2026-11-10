@@ -189,11 +189,16 @@ def test_ivern_scores_with_all_four_tags():
 def test_jhin_banishes_big_spells_and_pays_off_at_four():
     loop = _loop()
     loop.gs.legend_unit_A = UnitInPlay(card=_card("Jhin Virtuoso"))
+
+    def spell(name, spent):
+        card = SpellCard(name=name, cost_energy=4)
+        card._spent = spent          # "if you spent [4] or more" (GameLoop._spell_played)
+        return card
     for i in range(4):
-        loop._spell_to_trash(loop.gs.A, SpellCard(name=f"Big{i}", cost_energy=4))
+        loop._spell_to_trash(loop.gs.A, spell(f"Big{i}", 4))
     assert len(loop.gs.A.trash) == 4 and not loop.gs.A.banished
     assert loop.gs.A.total_runes_in_play() == 4 and len(loop.gs.A.hand) == 1
-    loop._spell_to_trash(loop.gs.A, SpellCard(name="Small", cost_energy=1))
+    loop._spell_to_trash(loop.gs.A, spell("Discounted", 3))   # a [4] spell paid [3]
     assert len(loop.gs.A.trash) == 5
 
 

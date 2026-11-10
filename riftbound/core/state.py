@@ -18,6 +18,47 @@ class ChainItem:
     player: str    # "A" or "B"
     card: Card
     bf_idx: int
+    # The choices made as it was put on the chain (§355: targets, modes, move
+    # destinations, players), used when it resolves: GameLoop._declare_choices.
+    # {(run, instruction, n): (kind, n options, chosen)}; chosen is a list for
+    # an "up to N" choice.
+    declared: Optional[dict] = None
+    # Its choices took effect as it was put on the chain (DEFLECT paid, "when
+    # you choose me" fired: GameLoop._put_on_chain); its resolution doesn't redo them.
+    choices_noted: bool = False
+    # Its owner while another player controls it (Mystic Reversal, Rebuttal):
+    # the card still goes to the owner's trash.
+    owner: Optional[str] = None
+    # An activated ability on the chain (§377.3), `card` its source:
+    # {"eff": its EffectSpec (None: EQUIP), "kind": the activatable_abilities
+    # entry type, "energy": its base Energy cost, "extra": context extra,
+    # "target": EQUIP's unit}. A triggered ability (§383.3): kind "triggered",
+    # "eff" the instruction it was finalized with, "rest" the later ones,
+    # "bf" its battlefield, "flags" the card's play flags; a reflexive trigger
+    # (§388): kind "reflexive". None for a played card.
+    ability: Optional[dict] = None
+
+
+@dataclass
+class PendingTrigger:
+    """A triggered ability whose condition was met, waiting for the current
+    task to end to be finalized onto the chain (HOT FEPR, §334):
+    GameLoop._flush_triggers. `specs` are (index, EffectSpec) of the card's
+    instructions for `trigger`, the first one's condition checked as it
+    triggered (§383.2.a.1); `additional`: its additional costs may be paid
+    (not a play effect's: paid as the card was played); `flags`: the card's
+    play flags (kicker paid, SHOW OFF) as it triggered; `once`: honour "once
+    each turn"; `replay`: Death from Below's reflexive play (its cost)."""
+    card: Card
+    trigger: str
+    side: str
+    bf: Battlefield
+    specs: list
+    extra: Optional[dict] = None
+    additional: bool = True
+    flags: Optional[dict] = None
+    once: bool = True
+    replay: Optional[dict] = None
 
 
 @dataclass
@@ -42,6 +83,12 @@ class GameState:
     legend_B: Optional[Card] = None
     legend_unit_A: Optional["UnitInPlay"] = None
     legend_unit_B: Optional["UnitInPlay"] = None
+    # Neeko Blending In: the legends each player chose while building the deck
+    # (§103.1; side -> cards, outside the game), and the ones she added to the
+    # Legend Zone (side -> [(legend UnitInPlay, the Neeko UnitInPlay)]): not
+    # Champion Legends, removed when their Neeko leaves the board (§107.4.d.2).
+    extra_legends: dict = field(default_factory=lambda: {"A": [], "B": []})
+    added_legends: dict = field(default_factory=lambda: {"A": [], "B": []})
 
     # Victory points via Hold/Conquer
     points_A: int = 0
@@ -61,6 +108,10 @@ class GameState:
     # moving units to the same battlefield: those units moved together (Core
     # Rules §144.3) and fight together. (battlefield index, moving side).
     pending_move: Optional[tuple] = None
+    # Showdowns staged by units an effect moved into a battlefield they contest
+    # (Twilight Step): (battlefield index, moving side), run at the next
+    # cleanup with no chain or showdown going on (§462).
+    staged_showdowns: list = field(default_factory=list)
     showdown_active: bool = False
     showdown_bf_idx: Optional[int] = None
     showdown_attacker: Optional[str] = None   # who started the showdown (Rengar Pouncing)
@@ -83,9 +134,12 @@ class GameState:
     # "The next card / spell you play this turn costs ... less" (Astral Heron,
     # Raging Firebrand): per player, a list of {filter, energy, power}.
     next_card_discounts: dict = field(default_factory=lambda: {"A": [], "B": []})
-    # "At the end of this turn, ..." effects waiting: (side, source card,
-    # battlefield index, effect dict).
+    # "At the end of this turn, ..." delayed abilities waiting (GameLoop.
+    # _delay_to_end): (side, source card, battlefield index, effect dict).
     delayed_effects: list = field(default_factory=list)
+    # "At the start of your next Main Phase, ..." (Iascylla): the same tuples,
+    # run at the start of that side's next Main Phase.
+    delayed_main: list = field(default_factory=list)
     # "Once each turn" / "The first time ... each turn" abilities used:
     # (id of the source card, effect index) -> turn number.
     once_per_turn_used: dict = field(default_factory=dict)
@@ -114,8 +168,41 @@ class GameState:
     move_group: Optional[tuple] = None
     # Jhin Virtuoso: side -> spells "banished with me".
     jhin_pile: dict = field(default_factory=dict)
+    # "If you've spent [4] or more to play a spell this turn" (Prepared
+    # Neophyte, Jhin Meticulous Killer): side -> (turn, most Energy spent on one
+    # spell that turn).
+    spell_spent: dict = field(default_factory=dict)
+    # "Your non-token units cost [1] more to play this turn" (Vaults of Helia):
+    # (side, turn, card filter, Energy more).
+    turn_cost_changes: list = field(default_factory=list)
+    # "Take a turn after this one" (Time Warp): who takes the extra turns.
+    extra_turns: list = field(default_factory=list)
+    # "You can hide ignoring costs this turn" (Guerilla Warfare): side -> turn.
+    free_hide: dict = field(default_factory=dict)
+    # "Buffs give an additional +1 [might] to friendly units this turn" (Stand
+    # United): side -> turn.
+    buff_bonus_turn: dict = field(default_factory=dict)
+    # "When a friendly unit is played this turn, buff it" (Rally the Troops):
+    # side -> turn.
+    rally_turn: dict = field(default_factory=dict)
+    # 'This turn, that unit has "When I conquer, you may move me to my base"'
+    # (Relentless Pursuit): (unit id, turn).
+    conquer_return: list = field(default_factory=list)
+    # "Its controller can't play spells this turn" (Lilting Lullaby): side -> turn.
+    cant_play_spells_turn: dict = field(default_factory=dict)
+    # "When I hold, the next time you play a unit this turn, ready it and BUFF
+    # it" (Nami Headstrong): side -> turn.
+    next_unit_ready_buff: dict = field(default_factory=dict)
+    # A friendly unit died during that side's Beginning Phase (Shadow Watcher):
+    # side -> turn.
+    died_in_beginning: dict = field(default_factory=dict)
     # True while the active player's Beginning Phase runs (Shard of Undoing).
     in_beginning_phase: bool = False
+    # Runes each player controlled as the Beginning Phase started, before the
+    # channel (Forsaken Baccai): (turn, {side: runes}).
+    runes_at_beginning: tuple = (0, {})
+    # True while the active player's Ending Phase runs (Runeblade Anvil).
+    in_ending_phase: bool = False
     # Turns each player has started ("their third turn": Forgotten Monument).
     turns_taken: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     # "Opponents can't play cards this turn" (Brynhir): side -> that turn.
@@ -128,6 +215,8 @@ class GameState:
     # "The next unit you play this turn enters ready" (Sun Disc): how many.
     next_units_enter_ready: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     friendly_unit_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
+    # "If a friendly unit or gear died this turn" (Lingering Animus): the gear.
+    friendly_gear_died_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     discarded_this_turn: dict = field(default_factory=lambda: {"A": False, "B": False})
     cards_burned_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
     conquered_this_turn: dict = field(default_factory=lambda: {"A": 0, "B": 0})
@@ -196,17 +285,17 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     # observer knows a card is hidden there, but not which. Fold them into the
     # unseen pool and resample, preferring a HIDDEN-keyword identity so the public
     # "a card is hidden here" fact stays consistent.
-    opp_facedowns = [bf for bf in gs.battlefields
-                     if bf.facedown is not None and bf.facedown.owner == other]
-    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedown.card for bf in opp_facedowns]
+    opp_facedowns = [(bf, slot) for bf in gs.battlefields
+                     for slot, fd in enumerate(bf.facedowns) if fd.owner == other]
+    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedowns[slot].card for bf, slot in opp_facedowns]
     rng.shuffle(pool)
-    for bf in opp_facedowns:
+    for bf, slot in opp_facedowns:
         pick = next((c for c in pool if c.has_keyword("HIDDEN")), pool[0] if pool else None)
         if pick is None:
             continue
         pool.remove(pick)
-        bf.facedown = FacedownCard(card=pick, owner=bf.facedown.owner,
-                                   turn_hidden=bf.facedown.turn_hidden)
+        fd = bf.facedowns[slot]
+        bf.facedowns[slot] = FacedownCard(card=pick, owner=fd.owner, turn_hidden=fd.turn_hidden)
 
     n_hand = len(opp.hand)
     opp.hand = pool[:n_hand]

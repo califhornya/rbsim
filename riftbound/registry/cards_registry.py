@@ -59,8 +59,10 @@ def _parse_domain(value: Optional[str]) -> Optional[Domain]:
 
 
 # Token "cards" are all filed as category "Token"; these are gear tokens
-# (Core Rules §187.5 Gold, §187.12 Bomb), the rest are unit tokens.
+# (Core Rules §187.5 Gold, §187.12 Bomb), these battlefield tokens (§187.8
+# Brush, §187.9 Baron Pit), the rest are unit tokens.
 _GEAR_TOKENS = frozenset({"Gold", "Bomb"})
+_BATTLEFIELD_TOKENS = frozenset({"Brush", "Baron Pit"})
 
 
 def _parse_card_type(value: str) -> CardType:
@@ -205,6 +207,8 @@ class CardSpec:
         category = _parse_card_type(category_str)
         if category_str.lower() == "token" and name in _GEAR_TOKENS:
             category = CardType.GEAR
+        if category_str.lower() == "token" and name in _BATTLEFIELD_TOKENS:
+            category = CardType.BATTLEFIELD
         domain_raw = data.get("domain")
         # Handle multi-domain strings (e.g. "FURY MIND") by taking primary domain
         if domain_raw:
@@ -415,8 +419,9 @@ _REPEAT_DISCARD = re.compile(r"REPEAT\W+Discard (\d+)", re.IGNORECASE)
 def _keyword_pip_cost(keyword: str, rules_text: str) -> Optional[Dict[str, Any]]:
     """A keyword's printed cost: "FLOW [4] [order] [order]" -> 4 Energy and two
     Order Power; "[rune]" is Power of any domain (domain None). None when the
-    keyword carries no number."""
-    m = re.search(keyword + r"\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)", rules_text)
+    keyword carries no number. Also "[Flow] [2] [Mind]" (Iterative Design)."""
+    m = re.search(r"\[?" + keyword + r"\]?\s*\[?(\d+)\]?((?:\s*\[[A-Za-z]+\])*)", rules_text,
+                  re.IGNORECASE)
     if not m:
         return None
     pips = re.findall(r"\[([A-Za-z]+)\]", m.group(2))
@@ -463,7 +468,11 @@ def _printed_keyword_heads(rules_text: str) -> set[str]:
         start = prefix == "" or prefix.endswith((".", "\n", "!"))
         header = t[m.end():].lstrip(" \t").startswith(("[>]", ">"))
         kw = m.group(1)
-        if not (start or chained) or header or kw == "EMPOWERED":
+        # "ACTION [1] [chaos]: Move me ..." / "ACTION Discard 1, [1] [fury]:
+        # Banish me ...": the timing of the ability its sentence holds.
+        sentence = re.split(r"[.\n¶]", t[m.end():], maxsplit=1)[0]
+        ability = kw in ("ACTION", "REACTION") and ":" in sentence
+        if not (start or chained) or header or ability or kw == "EMPOWERED":
             continue
         last_end = m.end()
         found.append(kw)
@@ -641,6 +650,39 @@ def load_sideboard_json(path: Path) -> tuple[dict[str, int], dict[str, dict]]:
     opponent's legend name, "*" for any opponent). Both empty if the deck has none."""
     with path.open("r", encoding="utf-8") as fh:
         return _parse_sideboard(json.load(fh), path)
+
+
+EXTRA_LEGENDS_MAX = 3
+
+
+def load_extra_legends_json(path: Path) -> list[CardSpec]:
+    """The legends a deck chose "in addition to your starting legend" (Neeko
+    Blending In: "If Neeko is in your deck, choose up to 3 different legends",
+    a deckbuilding choice, §103.1): the deck's "extra_legends" list of names.
+    Up to 3, legends, no two (nor the starting legend) with the same name, and
+    only with a card that allows it in the deck (main, sideboard or champion)."""
+    with path.open("r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    names = [str(n).strip() for n in data.get("extra_legends") or []]
+    if not names:
+        return []
+    if len(names) > EXTRA_LEGENDS_MAX:
+        raise ValueError(f"Deck '{path.name}' has {len(names)} extra legends — maximum is {EXTRA_LEGENDS_MAX}.")
+    if len(set(names) | {str(data.get("legend") or "").strip()}) != len(names) + 1:
+        raise ValueError(f"Deck '{path.name}' extra legends must have different names "
+                         f"(from each other and the starting legend)")
+    deck = set(_name_counts(data.get("cards", []), "cards", path)) | \
+        set(_name_counts(data.get("sideboard", []), "sideboard", path)) | {str(data.get("champion") or "")}
+    if not any(n in CARD_REGISTRY and any(es.effect == "add_extra_legend" for es in CARD_REGISTRY[n].effects)
+               for n in deck):
+        raise ValueError(f"Deck '{path.name}' has extra legends but no card that lets it choose them")
+    specs = []
+    for name in names:
+        spec = CARD_REGISTRY.get(name)
+        if spec is None or spec.category != CardType.LEGEND:
+            raise ValueError(f"Deck '{path.name}' extra legend '{name}' is not a legend")
+        specs.append(spec)
+    return specs
 
 
 def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]], Optional[CardSpec], Optional[CardSpec], list[CardSpec]]:

@@ -42,3 +42,32 @@ def test_loser_chooses_first_next_game():
         if prev.winner in ("A", "B"):
             loser = "B" if prev.winner == "A" else "A"
             assert cur.first_player == loser
+
+
+def test_a_single_game_at_the_turn_guard_needs_a_two_point_lead():
+    """The turn guard counts as the time running out (Riftbound has no turn
+    limit): a 2+ point lead wins, else a draw (TR 408.2.b); any lead won."""
+    import random
+    from riftbound.core.battlefield import Battlefield
+    from riftbound.core.loop import GameLoop
+    from riftbound.core.player import Deck, Player, RuneDeck
+    from riftbound.core.state import GameState
+    for points, winner in (((5, 4), "DRAW"), ((6, 4), "A"), ((3, 5), "B")):
+        a = Player(name="A", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+        b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
+        gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
+        gs.points_A, gs.points_B = points
+        assert GameLoop(gs)._final_result().winner == winner
+
+
+def test_bo1_altered_setup_sideboards_before_the_only_game():
+    """TR 406.1.h: in the head judge's best-of-1 setup, players sideboard as if
+    between games of a best of 3 (before game 1)."""
+    seen = []
+
+    def sideboarder(ctx):
+        seen.append((ctx.side, ctx.game_index))
+        return None
+    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=5, best_of=1,
+                     sideboarder=sideboarder, bo1_altered_setup=True)
+    assert len(res.games) == 1 and sorted(seen) == [("A", 0), ("B", 0)]

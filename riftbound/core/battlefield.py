@@ -12,7 +12,8 @@ if TYPE_CHECKING:
 @dataclass
 class FacedownCard:
     """A card in a battlefield's Facedown Zone (Core Rules §106.4), placed there by
-    the Hidden keyword's Hide action. Max one per battlefield; may only exist while
+    the Hidden keyword's Hide action. Max one per battlefield unless an effect
+    raises it (§107.3.b.1: Bandle Tree, Bushwhack Trap); may only exist while
     ``owner`` controls the battlefield. ``turn_hidden`` gates the "playable from the
     NEXT turn onward" rule (§737.1.b)."""
     card: "Card"
@@ -45,16 +46,34 @@ class Battlefield:
     # "First non-token unit played here this turn" per side (Star Spring trigger).
     first_unit_here_A: bool = False
     first_unit_here_B: bool = False
+    # side -> (turn, unit or gear cards it played here that turn): "the first
+    # unit or gear they play here on their turn" (Hunters' Circle).
+    plays_here: dict = field(default_factory=dict)
 
     last_controller: Optional[str] = None
+    held_by: Optional[str] = None      # control(): who controls it by the rules
+    # The side whose unit made it Contested (§190.3.a), until a showdown or
+    # combat here establishes control (establish_control); control is frozen meanwhile.
+    contested_by: Optional[str] = None
     showdown_pending: bool = False
     card: Optional["Card"] = None  # reference card for named battlefields (Baron Pit etc.)
-    facedown: Optional[FacedownCard] = None  # Facedown Zone occupant (Hidden keyword)
+    # The card a battlefield token here replaced (§439: Ivern Green Father's
+    # Brush). It waits in Banishment (§439.5) until the token swaps back (§439.7).
+    replaced: Optional["Card"] = None
+    # Facedown Zone occupants (Hidden keyword), oldest first. One at most unless
+    # an effect raises the zone's capacity (GameLoop._facedown_capacity).
+    facedowns: List[FacedownCard] = field(default_factory=list)
     # side -> the turn it last conquered here ("a battlefield you conquered this turn").
     conquered_turn: dict = field(default_factory=dict)
     # side -> (turn, excess combat damage it assigned here): "if you assigned 3
     # or more excess damage" (Vi Piltover Enforcer, Yeti Brawler).
     excess_damage: dict = field(default_factory=dict)
+    # The combat here (§466.2): ids of units that got their Attacker/Defender
+    # designation (their attack/defend triggers fired), and whether its start
+    # of combat effects happened. Cleared when the combat ends.
+    combat_designated: set = field(default_factory=set)
+    combat_started: bool = False
+    combat_attacker: Optional[str] = None
     # Gear deployed here (DEPLOY §830), per controlling side.
     gear_A: List[DeployedGear] = field(default_factory=list)
     gear_B: List[DeployedGear] = field(default_factory=list)
@@ -70,15 +89,69 @@ class Battlefield:
     def gear_for(self, who: str) -> List[DeployedGear]:
         return self.gear_A if who == "A" else self.gear_B
 
+    @property
+    def facedown(self) -> Optional[FacedownCard]:
+        """The first facedown card here, None if there is none. A single-slot
+        shorthand: setting it replaces every facedown card here."""
+        return self.facedowns[0] if self.facedowns else None
+
+    @facedown.setter
+    def facedown(self, fd: Optional[FacedownCard]) -> None:
+        self.facedowns = [] if fd is None else [fd]
+
     def count(self, who: str) -> int:
         return len(self._units_for(who))
 
     def controller(self) -> Optional[str]:
+        """The side alone here, None while both sides (or neither) have units:
+        the contest state the showdown/combat machinery runs on. Effects that
+        say "a battlefield you control" read control()."""
         if self.units_A and not self.units_B:
             return "A"
         if self.units_B and not self.units_A:
             return "B"
         return None
+
+    def _note_control(self) -> None:
+        if self.contested_by is not None:
+            return              # §190.4.b: it changes when the contest is over
+        sole = self.controller()
+        if sole is not None or not (self.units_A or self.units_B):
+            self.held_by = sole
+
+    def control(self) -> Optional[str]:
+        """Who controls this battlefield by the rules (§190.4): the side with
+        units here; while it is Contested (a unit of a side that didn't control
+        it arrived, until its showdown or combat ends), the side that held it
+        before: a side moving alone onto an uncontrolled battlefield controls
+        it after its showdown, a holder whose units all die mid-combat still
+        controls it until the combat's end (§190.4.b, §468.5)."""
+        self._note_control()
+        return self.held_by
+
+    def contest(self, who: str, before: Optional[str]) -> bool:
+        """`who`'s unit just arrived here (played, moved, or taken control of)
+        when `before` was the side alone here (None: nobody, or both sides).
+        Unless `who` controlled it, it is Contested now (§190.3.a): control stays
+        with its holder until establish_control. Returns whether it became so."""
+        if self.contested_by is not None or not self._units_for(who):
+            return False
+        both_before = before is None and self.units_A and self.units_B
+        held = self.held_by if both_before else before
+        if who == held:
+            return False
+        self.contested_by = who
+        self.held_by = held
+        return True
+
+    def establish_control(self) -> None:
+        """A showdown or combat here is over (§348.2.a, §468.5): the side alone
+        here controls it, nobody if no units are left (§468.5.b). Both sides
+        still here: still Contested (a combat follows)."""
+        if self.units_A and self.units_B:
+            return
+        self.contested_by = None
+        self._note_control()
 
     def begin_turn_reset(self) -> None:
         
@@ -95,7 +168,9 @@ class Battlefield:
 
     def add_unit(self, who: str, unit: UnitInPlay) -> None:
         unit_list = self._units_for(who)
+        self._note_control()       # who held it before this arrival
         unit_list.append(unit)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -107,6 +182,7 @@ class Battlefield:
         unit_list = self._units_for(who)
         if unit in unit_list:
             unit_list.remove(unit)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -119,6 +195,7 @@ class Battlefield:
         for unit in unit_list:
             if unit.ready:
                 unit_list.remove(unit)
+                self._note_control()
                 if self.units_A and self.units_B:
                     self.contested_this_turn = True
                     if self.controller() is None:
@@ -134,6 +211,7 @@ class Battlefield:
         self.kills_B += stats.kills_B
         self.deaths_A += stats.deaths_A
         self.deaths_B += stats.deaths_B
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:
@@ -177,6 +255,7 @@ class Battlefield:
 
         units = self._units_for(target)
         kills, dead = deal_direct_damage(units, damage, take)
+        self._note_control()
         if self.units_A and self.units_B:
             self.contested_this_turn = True
             if self.controller() is None:

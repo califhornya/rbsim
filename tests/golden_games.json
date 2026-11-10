@@ -4,7 +4,7 @@
       "battlefields": [
         {
           "A": [
-            "Tideturner"
+            "Hwei Brooding Painter"
           ],
           "B": [],
           "controller": "A",
@@ -37,23 +37,21 @@
       "player_B": {
         "banished": 0,
         "base_gear": 1,
-        "base_units": [
-          "Noxus Hopeful"
-        ],
-        "deck": 23,
-        "energy": 8,
+        "base_units": [],
+        "deck": 24,
+        "energy": 9,
         "hand": 2,
         "power_pool": {
-          "CHAOS": 6,
-          "FURY": 6
+          "CHAOS": 4,
+          "FURY": 5
         },
-        "runes_in_play": 12,
+        "runes_in_play": 9,
         "trash": 14
       },
       "points_A": 8,
-      "points_B": 5,
+      "points_B": 6,
       "spells_cast": 15,
-      "turns": 20,
+      "turns": 18,
       "units_played": 20,
       "winner": "A",
       "xp_A": 0,
@@ -62,8 +60,8 @@
     "spec": {
       "ai_a": "diana",
       "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
       "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#0",
       "seed": 123700868
     }
@@ -73,435 +71,9 @@
       "battlefields": [
         {
           "A": [
-            "Hwei Brooding Painter",
-            "Eager Apprentice"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
-          "A": [
-            "Vex Apathetic"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [],
-        "deck": 22,
-        "energy": 12,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 15
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Sharkling"
-        ],
-        "deck": 26,
-        "energy": 6,
-        "hand": 4,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 3
-        },
-        "runes_in_play": 9,
-        "trash": 8
-      },
-      "points_A": 9,
-      "points_B": 7,
-      "spells_cast": 13,
-      "turns": 18,
-      "units_played": 14,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#1",
-      "seed": 672578907
-    }
-  },
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Sharkling"
-          ],
-          "controller": "B",
-          "last_controller": "A"
-        },
-        {
-          "A": [],
-          "B": [
-            "Tideturner"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Ravenbloom Student",
-          "Diana Lunari"
-        ],
-        "deck": 27,
-        "energy": 0,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 5,
-          "MIND": 5
-        },
-        "runes_in_play": 10,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Treasure Hunter"
-        ],
-        "deck": 27,
-        "energy": 1,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 4,
-          "FURY": 3
-        },
-        "runes_in_play": 7,
-        "trash": 9
-      },
-      "points_A": 4,
-      "points_B": 8,
-      "spells_cast": 13,
-      "turns": 11,
-      "units_played": 14,
-      "winner": "B",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2",
-      "seed": 927649558
-    }
-  },
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Thousand-Tailed Watcher"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Fizz Trickster"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [],
-        "deck": 29,
-        "energy": 4,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 3
-        },
-        "runes_in_play": 10,
-        "trash": 10
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
-        "deck": 27,
-        "energy": 0,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 2,
-          "FURY": 2
-        },
-        "runes_in_play": 4,
-        "trash": 9
-      },
-      "points_A": 8,
-      "points_B": 3,
-      "spells_cast": 11,
-      "turns": 14,
-      "units_played": 14,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3",
-      "seed": 1022487120
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Hwei Brooding Painter"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Tideturner",
-            "Traveling Merchant",
-            "Vex Apathetic"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [],
-        "deck": 18,
-        "energy": 4,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 6,
-          "MIND": 5
-        },
-        "runes_in_play": 11,
-        "trash": 18
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Yasuo Remorseful",
-          "Adaptatron"
-        ],
-        "deck": 26,
-        "energy": 0,
-        "hand": 4,
-        "power_pool": {
-          "CALM": 2,
-          "CHAOS": 6
-        },
-        "runes_in_play": 8,
-        "trash": 5
-      },
-      "points_A": 8,
-      "points_B": 4,
-      "spells_cast": 17,
-      "turns": 15,
-      "units_played": 13,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 1
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0",
-      "seed": 194461789
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Tideturner",
-            "Vex Apathetic"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
-          "A": [
             "Eager Apprentice",
-            "Fizz Trickster"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Hwei Brooding Painter"
-        ],
-        "deck": 27,
-        "energy": 12,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 8
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 6,
-        "base_units": [
-          "Stellacorn Herder",
-          "Stellacorn Herder"
-        ],
-        "deck": 23,
-        "energy": 0,
-        "hand": 2,
-        "power_pool": {
-          "CALM": 4,
-          "CHAOS": 6
-        },
-        "runes_in_play": 10,
-        "trash": 7
-      },
-      "points_A": 8,
-      "points_B": 2,
-      "spells_cast": 16,
-      "turns": 16,
-      "units_played": 12,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
-      "seed": 914790882
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Adaptatron"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Ravenbloom Student"
-        ],
-        "deck": 20,
-        "energy": 10,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 19
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Lonely Poro",
-          "Lonely Poro",
-          "Scuttle Crab"
-        ],
-        "deck": 22,
-        "energy": 12,
-        "hand": 4,
-        "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
-        },
-        "runes_in_play": 12,
-        "trash": 7
-      },
-      "points_A": 4,
-      "points_B": 9,
-      "spells_cast": 17,
-      "turns": 16,
-      "units_played": 15,
-      "winner": "B",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2",
-      "seed": 125686143
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Ravenbloom Student"
+            "Vex Apathetic",
+            "Hwei Brooding Painter"
           ],
           "B": [],
           "controller": "A",
@@ -509,152 +81,9 @@
         },
         {
           "A": [
-            "Tideturner"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Traveling Merchant",
-          "Thousand-Tailed Watcher"
-        ],
-        "deck": 27,
-        "energy": 11,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 4
-        },
-        "runes_in_play": 11,
-        "trash": 7
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Scuttle Crab",
-          "Adaptatron"
-        ],
-        "deck": 25,
-        "energy": 0,
-        "hand": 5,
-        "power_pool": {
-          "CALM": 2,
-          "CHAOS": 6
-        },
-        "runes_in_play": 8,
-        "trash": 6
-      },
-      "points_A": 9,
-      "points_B": 2,
-      "spells_cast": 10,
-      "turns": 12,
-      "units_played": 10,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 1
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3",
-      "seed": 913268135
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Mindsplitter"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Fizz Trickster",
-            "Eager Apprentice"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Noxus Hopeful"
-        ],
-        "deck": 25,
-        "energy": 3,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 4,
-          "FURY": 3
-        },
-        "runes_in_play": 7,
-        "trash": 11
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [],
-        "deck": 24,
-        "energy": 9,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 14
-      },
-      "points_A": 8,
-      "points_B": 5,
-      "spells_cast": 16,
-      "turns": 15,
-      "units_played": 15,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0",
-      "seed": 71834130
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
+            "Diana Lunari",
             "Tideturner",
-            "Vex Apathetic"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [
-            "Bewitching Spirit",
-            "Tideturner"
+            "Hwei Brooding Painter"
           ],
           "B": [],
           "controller": "A",
@@ -664,165 +93,8 @@
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
-        "deck": 28,
-        "energy": 10,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 4
-        },
-        "runes_in_play": 10,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Hwei Brooding Painter"
-        ],
-        "deck": 23,
-        "energy": 3,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 6,
-          "MIND": 4
-        },
-        "runes_in_play": 10,
-        "trash": 14
-      },
-      "points_A": 8,
-      "points_B": 2,
-      "spells_cast": 11,
-      "turns": 12,
-      "units_played": 14,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1",
-      "seed": 712744719
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Hwei Brooding Painter"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Hwei Brooding Painter"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Treasure Hunter"
-        ],
-        "deck": 26,
-        "energy": 8,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 5
-        },
-        "runes_in_play": 10,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Ravenbloom Student"
-        ],
-        "deck": 21,
-        "energy": 12,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 16
-      },
-      "points_A": 2,
-      "points_B": 8,
-      "spells_cast": 14,
-      "turns": 16,
-      "units_played": 15,
-      "winner": "B",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2",
-      "seed": 776578904
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Fizz Trickster"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Diana Lunari"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 23,
-        "energy": 6,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 4,
-          "FURY": 5
-        },
-        "runes_in_play": 9,
-        "trash": 13
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Eager Apprentice",
           "Ravenbloom Student"
         ],
         "deck": 16,
@@ -833,42 +105,61 @@
           "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 20
+        "trash": 17
       },
-      "points_A": 5,
-      "points_B": 9,
-      "spells_cast": 21,
-      "turns": 20,
-      "units_played": 21,
-      "winner": "B",
+      "player_B": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Sharkling"
+        ],
+        "deck": 25,
+        "energy": 7,
+        "hand": 4,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 5
+        },
+        "runes_in_play": 10,
+        "trash": 9
+      },
+      "points_A": 9,
+      "points_B": 5,
+      "spells_cast": 12,
+      "turns": 18,
+      "units_played": 18,
+      "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3",
-      "seed": 958980926
+      "ai_a": "diana",
+      "ai_b": "pyke",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#1",
+      "seed": 672578907
     }
   },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0": {
+  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2": {
     "signature": {
       "battlefields": [
         {
           "A": [],
-          "B": [
-            "Yasuo Remorseful",
-            "Adaptatron"
-          ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": null,
+          "last_controller": null
+        },
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
         },
         {
           "A": [],
           "B": [
-            "Stellacorn Herder"
+            "Baron Nashor"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -877,51 +168,759 @@
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 1,
+        "base_gear": 0,
         "base_units": [
-          "Bewitching Spirit"
+          "Tideturner"
         ],
-        "deck": 26,
-        "energy": 7,
-        "hand": 3,
+        "deck": 19,
+        "energy": 10,
+        "hand": 0,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 6
+          "CHAOS": 7,
+          "MIND": 5
         },
-        "runes_in_play": 11,
-        "trash": 9
+        "runes_in_play": 12,
+        "trash": 20
       },
       "player_B": {
         "banished": 0,
         "base_gear": 1,
+        "base_units": [],
+        "deck": 25,
+        "energy": 9,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 3,
+          "FURY": 6
+        },
+        "runes_in_play": 9,
+        "trash": 13
+      },
+      "points_A": 6,
+      "points_B": 8,
+      "spells_cast": 16,
+      "turns": 17,
+      "units_played": 21,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "pyke",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2",
+      "seed": 927649558
+    }
+  },
+  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Hwei Brooding Painter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Diana Lunari"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
         "base_units": [
-          "Lonely Poro",
-          "Adaptatron"
+          "Traveling Merchant"
+        ],
+        "deck": 17,
+        "energy": 12,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 7,
+          "MIND": 5
+        },
+        "runes_in_play": 12,
+        "trash": 19
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 3,
+        "base_units": [
+          "Treasure Hunter"
+        ],
+        "deck": 24,
+        "energy": 2,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 3
+        },
+        "runes_in_play": 8,
+        "trash": 12
+      },
+      "points_A": 8,
+      "points_B": 5,
+      "spells_cast": 18,
+      "turns": 20,
+      "units_played": 23,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "pyke",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
+      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3",
+      "seed": 1022487120
+    }
+  },
+  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Adaptatron"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Scuttle Crab"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Tideturner",
+          "Vex Apathetic",
+          "Hwei Brooding Painter"
+        ],
+        "deck": 22,
+        "energy": 1,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 7,
+          "MIND": 4
+        },
+        "runes_in_play": 11,
+        "trash": 15
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Yasuo Remorseful",
+          "Lonely Poro"
         ],
         "deck": 26,
+        "energy": 8,
+        "hand": 5,
+        "power_pool": {
+          "CALM": 2,
+          "CHAOS": 6
+        },
+        "runes_in_play": 8,
+        "trash": 3
+      },
+      "points_A": 4,
+      "points_B": 9,
+      "spells_cast": 11,
+      "turns": 16,
+      "units_played": 16,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0",
+      "seed": 194461789
+    }
+  },
+  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Vex Apathetic",
+            "Eager Apprentice",
+            "Ravenbloom Student"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Diana Lunari",
+            "Tideturner",
+            "Hwei Brooding Painter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 20,
         "energy": 12,
         "hand": 0,
         "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
+          "CHAOS": 7,
+          "MIND": 5
         },
         "runes_in_play": 12,
-        "trash": 8
+        "trash": 14
       },
-      "points_A": 5,
-      "points_B": 9,
-      "spells_cast": 7,
-      "turns": 16,
+      "player_B": {
+        "banished": 0,
+        "base_gear": 4,
+        "base_units": [
+          "Stellacorn Herder",
+          "Lonely Poro"
+        ],
+        "deck": 18,
+        "energy": 1,
+        "hand": 6,
+        "power_pool": {
+          "CALM": 3,
+          "CHAOS": 6
+        },
+        "runes_in_play": 9,
+        "trash": 10
+      },
+      "points_A": 9,
+      "points_B": 3,
+      "spells_cast": 21,
+      "turns": 20,
+      "units_played": 13,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
+      "seed": 914790882
+    }
+  },
+  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Thousand-Tailed Watcher"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Hwei Brooding Painter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 22,
+        "energy": 9,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 6,
+          "MIND": 3
+        },
+        "runes_in_play": 9,
+        "trash": 12
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [
+          "Stellacorn Herder"
+        ],
+        "deck": 27,
+        "energy": 1,
+        "hand": 5,
+        "power_pool": {
+          "CALM": 3,
+          "CHAOS": 6
+        },
+        "runes_in_play": 9,
+        "trash": 5
+      },
+      "points_A": 8,
+      "points_B": 1,
+      "spells_cast": 12,
+      "turns": 13,
+      "units_played": 9,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2",
+      "seed": 125686143
+    }
+  },
+  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Adaptatron"
+          ],
+          "controller": "B",
+          "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Stellacorn Herder"
+          ],
+          "controller": "B",
+          "last_controller": null
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 24,
+        "energy": 10,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 7,
+          "MIND": 5
+        },
+        "runes_in_play": 12,
+        "trash": 16
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Lonely Poro"
+        ],
+        "deck": 19,
+        "energy": 1,
+        "hand": 4,
+        "power_pool": {
+          "CALM": 4,
+          "CHAOS": 6
+        },
+        "runes_in_play": 10,
+        "trash": 13
+      },
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 15,
+      "turns": 17,
       "units_played": 14,
       "winner": "B",
       "xp_A": 0,
-      "xp_B": 1
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "diana",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3",
+      "seed": 913268135
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Pyke Dockside Butcher",
+            "Tideturner"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Noxus Hopeful",
+            "Noxus Hopeful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Treasure Hunter"
+        ],
+        "deck": 28,
+        "energy": 7,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 1
+        },
+        "runes_in_play": 7,
+        "trash": 5
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Eager Apprentice"
+        ],
+        "deck": 26,
+        "energy": 3,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 6,
+          "MIND": 4
+        },
+        "runes_in_play": 10,
+        "trash": 11
+      },
+      "points_A": 8,
+      "points_B": 1,
+      "spells_cast": 13,
+      "turns": 11,
+      "units_played": 10,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "pyke",
+      "ai_b": "diana",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0",
+      "seed": 71834130
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Bewitching Spirit",
+            "Noxus Hopeful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Treasure Hunter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Treasure Hunter"
+        ],
+        "deck": 28,
+        "energy": 9,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 3
+        },
+        "runes_in_play": 9,
+        "trash": 7
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Hwei Brooding Painter"
+        ],
+        "deck": 24,
+        "energy": 3,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 6,
+          "MIND": 4
+        },
+        "runes_in_play": 10,
+        "trash": 15
+      },
+      "points_A": 8,
+      "points_B": 1,
+      "spells_cast": 9,
+      "turns": 12,
+      "units_played": 15,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "pyke",
+      "ai_b": "diana",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1",
+      "seed": 712744719
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Tideturner",
+            "Thousand-Tailed Watcher"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Hwei Brooding Painter",
+            "Hwei Brooding Painter"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [
+          "Treasure Hunter"
+        ],
+        "deck": 26,
+        "energy": 4,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 5
+        },
+        "runes_in_play": 10,
+        "trash": 9
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 16,
+        "energy": 11,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 7,
+          "MIND": 4
+        },
+        "runes_in_play": 11,
+        "trash": 18
+      },
+      "points_A": 3,
+      "points_B": 8,
+      "spells_cast": 14,
+      "turns": 16,
+      "units_played": 16,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "pyke",
+      "ai_b": "diana",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2",
+      "seed": 776578904
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Treasure Hunter"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 4,
+        "base_units": [
+          "Mindsplitter"
+        ],
+        "deck": 25,
+        "energy": 1,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 2,
+          "FURY": 4
+        },
+        "runes_in_play": 6,
+        "trash": 11
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 23,
+        "energy": 0,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 6,
+          "MIND": 5
+        },
+        "runes_in_play": 11,
+        "trash": 14
+      },
+      "points_A": 8,
+      "points_B": 3,
+      "spells_cast": 15,
+      "turns": 15,
+      "units_played": 14,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "pyke",
+      "ai_b": "diana",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
+      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3",
+      "seed": 958980926
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Bewitching Spirit"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Noxus Hopeful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [],
+        "deck": 28,
+        "energy": 9,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 3,
+          "FURY": 6
+        },
+        "runes_in_play": 9,
+        "trash": 5
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [
+          "Yasuo Remorseful",
+          "Stellacorn Herder",
+          "Lonely Poro"
+        ],
+        "deck": 29,
+        "energy": 0,
+        "hand": 3,
+        "power_pool": {
+          "CALM": 2,
+          "CHAOS": 6
+        },
+        "runes_in_play": 8,
+        "trash": 3
+      },
+      "points_A": 8,
+      "points_B": 3,
+      "spells_cast": 3,
+      "turns": 13,
+      "units_played": 11,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
     },
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0",
       "seed": 181392704
     }
@@ -930,82 +929,10 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Noxus Hopeful"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "B"
-        },
-        {
           "A": [],
           "B": [],
           "controller": null,
           "last_controller": null
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 4,
-        "base_units": [],
-        "deck": 27,
-        "energy": 9,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
-        },
-        "runes_in_play": 11,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Scuttle Crab",
-          "Lonely Poro",
-          "Lonely Poro"
-        ],
-        "deck": 21,
-        "energy": 0,
-        "hand": 0,
-        "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
-        },
-        "runes_in_play": 12,
-        "trash": 13
-      },
-      "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 13,
-      "turns": 18,
-      "units_played": 14,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#1",
-      "seed": 122476301
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Lonely Poro",
-            "Lonely Poro"
-          ],
-          "controller": "B",
-          "last_controller": "B"
         },
         {
           "A": [],
@@ -1021,21 +948,88 @@
         "banished": 0,
         "base_gear": 3,
         "base_units": [
-          "Tideturner"
+          "Fizz Trickster"
         ],
-        "deck": 27,
-        "energy": 9,
+        "deck": 29,
+        "energy": 4,
         "hand": 0,
         "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
+          "CHAOS": 2,
+          "FURY": 3
         },
-        "runes_in_play": 11,
-        "trash": 10
+        "runes_in_play": 5,
+        "trash": 8
       },
       "player_B": {
         "banished": 0,
         "base_gear": 3,
+        "base_units": [],
+        "deck": 22,
+        "energy": 10,
+        "hand": 2,
+        "power_pool": {
+          "CALM": 4,
+          "CHAOS": 6
+        },
+        "runes_in_play": 10,
+        "trash": 11
+      },
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 13,
+      "turns": 17,
+      "units_played": 14,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 1
+    },
+    "spec": {
+      "ai_a": "pyke",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#1",
+      "seed": 122476301
+    }
+  },
+  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Yasuo Remorseful"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Adaptatron"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [],
+        "deck": 26,
+        "energy": 10,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 4
+        },
+        "runes_in_play": 10,
+        "trash": 11
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 1,
         "base_units": [
           "Scuttle Crab"
         ],
@@ -1047,13 +1041,13 @@
           "CHAOS": 6
         },
         "runes_in_play": 12,
-        "trash": 10
+        "trash": 12
       },
-      "points_A": 7,
-      "points_B": 8,
+      "points_A": 5,
+      "points_B": 9,
       "spells_cast": 11,
-      "turns": 17,
-      "units_played": 11,
+      "turns": 19,
+      "units_played": 12,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1061,8 +1055,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2",
       "seed": 493981850
     }
@@ -1072,57 +1066,62 @@
       "battlefields": [
         {
           "A": [
-            "Fizz Trickster"
+            "Noxus Hopeful",
+            "Pyke Dockside Butcher"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": null
+          "last_controller": "A"
         },
         {
           "A": [
+            "Bewitching Spirit",
             "Sharkling"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": null
+          "last_controller": "A"
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
         "base_gear": 2,
-        "base_units": [],
-        "deck": 30,
-        "energy": 2,
+        "base_units": [
+          "Fizz Trickster"
+        ],
+        "deck": 31,
+        "energy": 6,
         "hand": 1,
         "power_pool": {
-          "CHAOS": 4,
+          "CHAOS": 5,
           "FURY": 1
         },
-        "runes_in_play": 5,
-        "trash": 6
+        "runes_in_play": 6,
+        "trash": 2
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Stellacorn Herder"
+          "Stellacorn Herder",
+          "Scuttle Crab"
         ],
-        "deck": 22,
-        "energy": 0,
-        "hand": 5,
+        "deck": 25,
+        "energy": 2,
+        "hand": 6,
         "power_pool": {
-          "CALM": 2,
+          "CALM": 4,
           "CHAOS": 6
         },
-        "runes_in_play": 8,
-        "trash": 12
+        "runes_in_play": 10,
+        "trash": 7
       },
       "points_A": 9,
-      "points_B": 2,
-      "spells_cast": 11,
+      "points_B": 1,
+      "spells_cast": 5,
       "turns": 12,
-      "units_played": 11,
+      "units_played": 12,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
@@ -1130,8 +1129,8 @@
     "spec": {
       "ai_a": "pyke",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound\\data\\decks\\fury_chaos_pyke.json",
-      "deck_b": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
+      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
+      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
       "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#3",
       "seed": 316088351
     }
@@ -1142,6 +1141,7 @@
         {
           "A": [],
           "B": [
+            "Noxus Hopeful",
             "Noxus Hopeful"
           ],
           "controller": "B",
@@ -1150,7 +1150,8 @@
         {
           "A": [],
           "B": [
-            "Noxus Hopeful"
+            "Fizz Trickster",
+            "Sharkling"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1159,40 +1160,40 @@
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 2,
+        "base_gear": 1,
         "base_units": [
-          "Adaptatron",
-          "Stellacorn Herder"
+          "Yasuo Remorseful",
+          "Scuttle Crab"
         ],
-        "deck": 23,
+        "deck": 22,
         "energy": 0,
-        "hand": 4,
+        "hand": 6,
         "power_pool": {
-          "CALM": 4,
+          "CALM": 3,
           "CHAOS": 6
         },
-        "runes_in_play": 10,
+        "runes_in_play": 9,
         "trash": 9
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 3,
+        "base_gear": 4,
         "base_units": [],
         "deck": 27,
-        "energy": 9,
+        "energy": 10,
         "hand": 2,
         "power_pool": {
-          "CHAOS": 6,
-          "FURY": 3
+          "CHAOS": 5,
+          "FURY": 5
         },
-        "runes_in_play": 9,
-        "trash": 8
+        "runes_in_play": 10,
+        "trash": 6
       },
-      "points_A": 5,
+      "points_A": 2,
       "points_B": 9,
-      "spells_cast": 14,
-      "turns": 16,
-      "units_played": 14,
+      "spells_cast": 11,
+      "turns": 14,
+      "units_played": 13,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1200,8 +1201,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#0",
       "seed": 621118472
     }
@@ -1210,65 +1211,60 @@
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Scuttle Crab"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
           "A": [],
           "B": [
-            "Baron Nashor"
+            "Bewitching Spirit",
+            "Noxus Hopeful"
           ],
           "controller": "B",
           "last_controller": "B"
         },
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
+          "B": [
+            "Pyke Dockside Butcher"
+          ],
+          "controller": "B",
+          "last_controller": "B"
         }
       ],
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 2,
+        "base_gear": 0,
         "base_units": [
-          "Yasuo Remorseful",
-          "Adaptatron"
+          "Adaptatron",
+          "Scuttle Crab"
         ],
-        "deck": 21,
+        "deck": 26,
         "energy": 0,
-        "hand": 2,
+        "hand": 4,
         "power_pool": {
           "CALM": 3,
           "CHAOS": 6
         },
         "runes_in_play": 9,
-        "trash": 11
+        "trash": 7
       },
       "player_B": {
         "banished": 0,
-        "base_gear": 3,
+        "base_gear": 4,
         "base_units": [],
-        "deck": 25,
-        "energy": 12,
+        "deck": 29,
+        "energy": 10,
         "hand": 1,
         "power_pool": {
           "CHAOS": 6,
-          "FURY": 6
+          "FURY": 4
         },
-        "runes_in_play": 12,
-        "trash": 13
+        "runes_in_play": 10,
+        "trash": 5
       },
-      "points_A": 7,
-      "points_B": 8,
-      "spells_cast": 14,
-      "turns": 18,
-      "units_played": 15,
+      "points_A": 1,
+      "points_B": 9,
+      "spells_cast": 7,
+      "turns": 12,
+      "units_played": 9,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1276,8 +1272,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#1",
       "seed": 1006899465
     }
@@ -1288,24 +1284,16 @@
         {
           "A": [],
           "B": [
-            "Baron Nashor"
+            "Fizz Trickster",
+            "Pyke Dockside Butcher"
           ],
           "controller": "B",
           "last_controller": "B"
         },
         {
-          "A": [
-            "Lonely Poro",
-            "Adaptatron"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
           "A": [],
           "B": [
-            "Baron Nashor"
+            "Fizz Trickster"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1314,42 +1302,39 @@
       "final_active": "B",
       "player_A": {
         "banished": 0,
-        "base_gear": 4,
+        "base_gear": 0,
         "base_units": [
-          "Scuttle Crab",
-          "Stellacorn Herder"
+          "Scuttle Crab"
         ],
-        "deck": 14,
-        "energy": 10,
-        "hand": 1,
+        "deck": 28,
+        "energy": 1,
+        "hand": 7,
         "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
+          "CALM": 4,
+          "CHAOS": 5
         },
-        "runes_in_play": 12,
-        "trash": 17
+        "runes_in_play": 9,
+        "trash": 4
       },
       "player_B": {
         "banished": 0,
         "base_gear": 2,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 24,
-        "energy": 11,
-        "hand": 1,
+        "base_units": [],
+        "deck": 30,
+        "energy": 6,
+        "hand": 3,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 6
+          "CHAOS": 2,
+          "FURY": 4
         },
-        "runes_in_play": 11,
-        "trash": 11
+        "runes_in_play": 6,
+        "trash": 3
       },
-      "points_A": 6,
+      "points_A": 1,
       "points_B": 8,
-      "spells_cast": 17,
-      "turns": 23,
-      "units_played": 16,
+      "spells_cast": 5,
+      "turns": 11,
+      "units_played": 7,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
@@ -1357,8 +1342,8 @@
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#2",
       "seed": 782733317
     }
@@ -1370,59 +1355,63 @@
           "A": [],
           "B": [],
           "controller": null,
-          "last_controller": "A"
+          "last_controller": null
         },
         {
-          "A": [],
-          "B": [
-            "Sharkling"
+          "A": [
+            "Stellacorn Herder"
           ],
-          "controller": "B",
+          "B": [],
+          "controller": "A",
           "last_controller": "A"
         }
       ],
-      "final_active": "B",
+      "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 4,
-        "base_units": [],
-        "deck": 25,
-        "energy": 1,
-        "hand": 4,
+        "base_gear": 5,
+        "base_units": [
+          "Adaptatron",
+          "Adaptatron"
+        ],
+        "deck": 10,
+        "energy": 12,
+        "hand": 7,
         "power_pool": {
-          "CALM": 2,
+          "CALM": 6,
           "CHAOS": 6
         },
-        "runes_in_play": 8,
-        "trash": 7
+        "runes_in_play": 12,
+        "trash": 14
       },
       "player_B": {
         "banished": 0,
         "base_gear": 3,
         "base_units": [],
-        "deck": 28,
-        "energy": 0,
-        "hand": 1,
+        "deck": 25,
+        "energy": 6,
+        "hand": 0,
         "power_pool": {
-          "CHAOS": 4
+          "CHAOS": 4,
+          "FURY": 3
         },
-        "runes_in_play": 4,
-        "trash": 8
+        "runes_in_play": 7,
+        "trash": 13
       },
-      "points_A": 3,
-      "points_B": 8,
-      "spells_cast": 9,
-      "turns": 12,
-      "units_played": 8,
-      "winner": "B",
+      "points_A": 8,
+      "points_B": 3,
+      "spells_cast": 21,
+      "turns": 23,
+      "units_played": 19,
+      "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
       "ai_a": "simple_trade",
       "ai_b": "pyke",
-      "deck_a": "riftbound\\data\\decks\\calm_chaos_yasuo.json",
-      "deck_b": "riftbound\\data\\decks\\fury_chaos_pyke.json",
+      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
+      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
       "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#3",
       "seed": 166370321
     }

@@ -95,8 +95,9 @@ class GameAction:
         return cls("HIDE", hand_idx, lane, None, label)
 
     @classmethod
-    def hidden_play(cls, lane: int, label: str) -> "GameAction":
-        return cls("HIDDEN_PLAY", None, lane, None, label)
+    def hidden_play(cls, lane: int, label: str, slot: int = 0) -> "GameAction":
+        # idx: the card's slot in that Facedown Zone, None for the first.
+        return cls("HIDDEN_PLAY", slot or None, lane, None, label)
 
     @classmethod
     def move(cls, src: int, dst: int, label: str, unit: Optional[int] = None) -> "GameAction":
@@ -146,10 +147,10 @@ class BattlefieldView:
     # Gear deployed here (DEPLOY §830), by name, per controlling side. Public.
     gear_A: tuple[str, ...] = ()
     gear_B: tuple[str, ...] = ()
-    # Who has scored here this turn, who has a facedown card here (not which).
+    # Who has scored here this turn, who has each facedown card here (not which).
     scored_A: bool = False
     scored_B: bool = False
-    facedown: Optional[str] = None
+    facedowns: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         return {
@@ -161,7 +162,7 @@ class BattlefieldView:
             "gear_B": list(self.gear_B),
             "scored_A": self.scored_A,
             "scored_B": self.scored_B,
-            "facedown": self.facedown,
+            "facedowns": list(self.facedowns),
         }
 
 
@@ -211,6 +212,9 @@ class Observation:
     opp_legend: Optional[str] = None
     my_legend_ready: bool = False
     opp_legend_ready: bool = False
+    # Legends Neeko Blending In added: (name, ready).
+    my_added_legends: tuple = ()
+    opp_added_legends: tuple = ()
     my_champion: Optional[str] = None
     opp_champion: Optional[str] = None
     my_base_gear: tuple[str, ...] = ()
@@ -221,6 +225,11 @@ class Observation:
     opp_rune_domains: dict = field(default_factory=dict)
     my_cards_played: int = 0
     opp_cards_played: int = 0
+    # The battlefield a Standard Move being declared goes to, the viewer's or
+    # the opponent's (GameState.pending_move: more units may still join it, its
+    # showdown hasn't started, §144.3). None: no move held.
+    my_held_move: Optional[int] = None
+    opp_held_move: Optional[int] = None
 
     @staticmethod
     def _uview(u) -> "UnitView":
@@ -246,13 +255,13 @@ class Observation:
             return BattlefieldView(
                 A=tuple(cls._uview(u) for u in bf.units_A),
                 B=tuple(cls._uview(u) for u in bf.units_B),
-                controller=bf.controller(),
+                controller=bf.control(),
                 named=getattr(bf.card, "name", None) if bf.card else None,
                 gear_A=tuple(dg.card.name for dg in bf.gear_A),
                 gear_B=tuple(dg.card.name for dg in bf.gear_B),
                 scored_A=bool(bf.scored_this_turn_A),
                 scored_B=bool(bf.scored_this_turn_B),
-                facedown=bf.facedown.owner if bf.facedown is not None else None,
+                facedowns=tuple(fd.owner for fd in bf.facedowns),
             )
 
         def legend(side):
@@ -260,6 +269,9 @@ class Observation:
             card = gs.legend_A if side == "A" else gs.legend_B
             name = unit.card.name if unit is not None else getattr(card, "name", None)
             return name, bool(unit.ready) if unit is not None else False
+
+        def added_legends(side):
+            return tuple((lu.card.name, bool(lu.ready)) for lu, _neeko in gs.added_legends[side])
 
         def champion(side):
             card = gs.champion_A if side == "A" else gs.champion_B
@@ -271,6 +283,7 @@ class Observation:
                     {d.name: len(rs) for d, rs in p.rune_pool.items() if rs})
 
         other = gs.other(viewer)
+        held = gs.pending_move
         my_leg, opp_leg = legend(viewer), legend(other)
         my_ready, my_doms = runes(me)
         opp_ready, opp_doms = runes(opp)
@@ -308,6 +321,7 @@ class Observation:
             opp_banished=tuple(c.name for c in opp.banished),
             my_legend=my_leg[0], opp_legend=opp_leg[0],
             my_legend_ready=my_leg[1], opp_legend_ready=opp_leg[1],
+            my_added_legends=added_legends(viewer), opp_added_legends=added_legends(other),
             my_champion=champion(viewer), opp_champion=champion(other),
             my_base_gear=tuple(g.name for g in me.base_gear),
             opp_base_gear=tuple(g.name for g in opp.base_gear),
@@ -315,6 +329,8 @@ class Observation:
             my_rune_domains=my_doms, opp_rune_domains=opp_doms,
             my_cards_played=int(gs.cards_played_this_turn.get(viewer, 0)),
             opp_cards_played=int(gs.cards_played_this_turn.get(other, 0)),
+            my_held_move=held[0] if held is not None and held[1] == viewer else None,
+            opp_held_move=held[0] if held is not None and held[1] == other else None,
         )
 
     def to_dict(self) -> dict:
@@ -350,12 +366,15 @@ class Observation:
             "opp_banished": list(self.opp_banished),
             "my_legend": self.my_legend, "opp_legend": self.opp_legend,
             "my_legend_ready": self.my_legend_ready, "opp_legend_ready": self.opp_legend_ready,
+            "my_added_legends": [list(x) for x in self.my_added_legends],
+            "opp_added_legends": [list(x) for x in self.opp_added_legends],
             "my_champion": self.my_champion, "opp_champion": self.opp_champion,
             "my_base_gear": list(self.my_base_gear), "opp_base_gear": list(self.opp_base_gear),
             "my_runes_ready": self.my_runes_ready, "opp_runes_ready": self.opp_runes_ready,
             "my_rune_domains": dict(self.my_rune_domains),
             "opp_rune_domains": dict(self.opp_rune_domains),
             "my_cards_played": self.my_cards_played, "opp_cards_played": self.opp_cards_played,
+            "my_held_move": self.my_held_move, "opp_held_move": self.opp_held_move,
         }
 
 

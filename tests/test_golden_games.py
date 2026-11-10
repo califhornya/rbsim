@@ -35,7 +35,8 @@ FIXTURE_PATH = Path(__file__).parent / "golden_games.json"
 
 
 def _resolve_deck(rel: str) -> Path:
-    return REPO_ROOT / rel
+    # Fixtures regenerated on Windows before the as_posix() below hold backslashes.
+    return REPO_ROOT / rel.replace("\\", "/")
 
 # (ai_a, deck_a, ai_b, deck_b, games) — seat-swapped matchups across all 3 decks
 # and all 3 agents so the oracle exercises both seats and varied decision paths.
@@ -63,9 +64,9 @@ def _specs() -> list[dict]:
                 {
                     "id": f"{ai_a}:{deck_a.stem}__vs__{ai_b}:{deck_b.stem}#{k}",
                     "ai_a": ai_a,
-                    "deck_a": str(deck_a),
+                    "deck_a": deck_a.as_posix(),
                     "ai_b": ai_b,
-                    "deck_b": str(deck_b),
+                    "deck_b": deck_b.as_posix(),
                     "seed": base.randrange(1 << 30),
                 }
             )
@@ -127,7 +128,7 @@ def _generate() -> dict:
 
 if os.environ.get("RBSIM_REGEN_GOLDEN"):
     # Regeneration mode: (re)write the fixture, then let the parity test confirm.
-    FIXTURE_PATH.write_text(json.dumps(_generate(), indent=2, sort_keys=True) + "\n")
+    FIXTURE_PATH.write_text(json.dumps(_generate(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 @pytest.mark.skipif(not FIXTURE_PATH.exists(), reason="golden fixture not generated yet")

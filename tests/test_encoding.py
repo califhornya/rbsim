@@ -47,15 +47,16 @@ def test_legal_mask_matches_legal_actions_and_round_trips():
         _obs, _r, done, info = env.step([])
         assert not done
     legal = info["legal_actions"]
-    mask = legal_mask(legal)
+    n = len(_obs.battlefields)
+    mask = legal_mask(legal, n)
     assert mask.shape == (ACTION_DIM,)
     # Every encodable legal action sets its slot; each True slot round-trips back
     # to a legal action whose index is that slot.
-    encodable = [a for a in legal if action_to_index(a) is not None]
-    assert mask.sum() == len({action_to_index(a) for a in encodable})
+    encodable = [a for a in legal if action_to_index(a, n) is not None]
+    assert mask.sum() == len({action_to_index(a, n) for a in encodable})
     for i in np.nonzero(mask)[0]:
-        a = index_to_legal_action(int(i), legal)
-        assert a is not None and action_to_index(a) == int(i)
+        a = index_to_legal_action(int(i), legal, n)
+        assert a is not None and action_to_index(a, n) == int(i)
 
 
 def test_action_to_index_stable_across_kinds():
@@ -69,12 +70,12 @@ def test_action_to_index_stable_across_kinds():
         GameAction.ability("ACTIVATED", 0, ""),
         GameAction.ability("ACTIVATED", 2, ""),
     ]
-    idxs = [action_to_index(a) for a in samples]
+    idxs = [action_to_index(a, 2) for a in samples]
     assert all(i is not None for i in idxs)
     assert len(set(idxs)) == len(idxs)             # injective
     assert all(0 <= i < ACTION_DIM for i in idxs)
     # Stable: recomputing gives the same slots.
-    assert idxs == [action_to_index(a) for a in samples]
+    assert idxs == [action_to_index(a, 2) for a in samples]
 
 
 def test_full_game_encodes_every_step():
@@ -87,11 +88,11 @@ def test_full_game_encodes_every_step():
         if info["decision_point"] == DecisionPoint.MULLIGAN.value:
             action = []
         else:
-            mask = legal_mask(info["legal_actions"])
+            mask = legal_mask(info["legal_actions"], len(obs.battlefields))
             assert mask.shape == (ACTION_DIM,)
             # Pick any legal, encodable slot; fall back to first legal action.
             hot = np.nonzero(mask)[0]
-            action = (index_to_legal_action(int(hot[0]), info["legal_actions"])
+            action = (index_to_legal_action(int(hot[0]), info["legal_actions"], len(obs.battlefields))
                       if len(hot) else (info["legal_actions"][0] if info["legal_actions"] else ("PASS", None, None)))
         obs, _r, done, info = env.step(action)
         steps += 1

@@ -3,7 +3,6 @@ from __future__ import annotations
 from riftbound.ai.heuristics.base_agent import Agent
 from riftbound.core.cards import UnitCard, SpellCard, GearCard, LegendCard
 from riftbound.core.player import Player
-from riftbound.core.legion_effects import get_legion_cost_reduction
 
 
 class PykeAgent(Agent):
@@ -13,29 +12,15 @@ class PykeAgent(Agent):
     """
 
     def decide_action(self, opponent: Player, cards_played: int = 0) -> tuple:
+        self._begin_decision()
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
         base_idx = len(bfs)
 
         candidates = []
 
-        # Score every affordable card in hand
+        # Score every card in hand we can pay for (what it costs now: LEGION, ...)
         for idx, card in enumerate(self.player.hand):
-            # For units, check affordability with LEGION discount
-            if isinstance(card, (UnitCard, LegendCard)):
-                effective_energy = self._effective_unit_cost(card, cards_played)
-                if not self.player.can_pay_cost(effective_energy, card.cost_power, card.cost_power_domain):
-                    continue
-            else:
-                if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                    continue
-
-            score = self._score_card(card, my_side, opponent, bfs)
-            if score <= 0:
-                continue
-
-            lane = self._lane_for_card(card, my_side, bfs)
-
             if isinstance(card, (UnitCard, LegendCard)):
                 action = "UNIT"
             elif isinstance(card, SpellCard):
@@ -44,34 +29,31 @@ class PykeAgent(Agent):
                 action = "GEAR"
             else:
                 continue
+            lane = self._lane_for_card(card, my_side, bfs)
+            check = self._card_check(
+                card, lane=lane if action == "SPELL" else None,
+                dst=lane if action == "GEAR" and card.has_keyword("DEPLOY") else None)
+            score = self._score_card(card, my_side, opponent, bfs)
+            if score <= 0:
+                continue
 
-            candidates.append((score, (action, idx, lane)))
+            candidates.append((score, (action, idx, lane), check))
 
         # Score MOVE opportunity
         move_score = self._score_move(my_side, bfs)
         if move_score > 0:
             best_bf = self._lane_for_unit(my_side, bfs)
-            candidates.append((move_score, ("MOVE", None, base_idx, best_bf)))
+            candidates.append((move_score, ("MOVE", None, base_idx, best_bf), None))
 
         # Champion deploy check (highest priority)
         if self._should_deploy_champion(my_side, opponent, bfs):
             lane = self._lane_for_unit(my_side, bfs)
-            return ("CHAMPION", None, lane)
+            champion = self.gs.champion_A if my_side == "A" else self.gs.champion_B
+            deploy = self._paying(("CHAMPION", None, lane), self._card_check(champion))
+            if deploy is not None:
+                return deploy
 
-        if not candidates:
-            return ("PASS", None, None)
-
-        candidates.sort(key=lambda x: -x[0])
-        return candidates[0][1]
-
-    def _effective_unit_cost(self, card, cards_played: int) -> int:
-        """Compute effective energy cost for units, accounting for LEGION discount."""
-        energy = card.cost_energy
-        if card.has_keyword("LEGION") and cards_played > 0:
-            legion_reduction = get_legion_cost_reduction(card.name)
-            if legion_reduction is not None:
-                energy = max(0, energy - legion_reduction)
-        return energy
+        return self._best_payable(candidates) or ("PASS", None, None)
 
     def decide_mulligan(self) -> list[int]:
         """Mulligan away slow cards (cost >= 5) and high-power-cost cards."""
@@ -265,9 +247,7 @@ class PykeAgent(Agent):
         if already_deployed:
             return False
 
-        if not self.player.can_pay_cost(
-            champion.cost_energy, champion.cost_power, champion.cost_power_domain
-        ):
+        if not self._can_pay(self._card_check(champion)):
             return False
 
         # Deploy if opponent controls any battlefield
@@ -280,6 +260,7 @@ class PykeAgent(Agent):
 
     def decide_showdown_action(self, opponent: Player, bf_idx: int) -> tuple:
         """Play best ACTION or REACTION spell during showdown."""
+        self._begin_decision()
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
 
@@ -289,24 +270,18 @@ class PykeAgent(Agent):
                 continue
             if not (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
                 continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
 
             score = self._score_card(card, my_side, opponent, bfs)
             if score <= 0:
                 continue
 
-            candidates.append((score, idx))
+            candidates.append((score, ("SPELL", idx, bf_idx), self._card_check(card, lane=bf_idx)))
 
-        if not candidates:
-            return ("PASS", None, None)
-
-        candidates.sort(key=lambda x: -x[0])
-        score, idx = candidates[0]
-        return ("SPELL", idx, bf_idx)
+        return self._best_payable(candidates) or ("PASS", None, None)
 
     def decide_reaction(self, opponent: Player, chain: list) -> tuple:
         """Play REACTION spell in response to chain."""
+        self._begin_decision()
         my_side = "A" if self.player.name == "A" else "B"
         bfs = self.player.battlefields
 
@@ -316,8 +291,6 @@ class PykeAgent(Agent):
                 continue
             if not card.has_keyword("REACTION"):
                 continue
-            if not self.player.can_pay_cost(card.cost_energy, card.cost_power, card.cost_power_domain):
-                continue
 
             score = self._score_card(card, my_side, opponent, bfs)
 
@@ -325,12 +298,7 @@ class PykeAgent(Agent):
             if score < 5:
                 continue
 
-            candidates.append((score, idx))
+            candidates.append((score, ("SPELL", idx, 0), self._card_check(card, lane=0)))
 
-        if not candidates:
-            return ("PASS", None, None)
-
-        candidates.sort(key=lambda x: -x[0])
-        score, idx = candidates[0]
-        return ("SPELL", idx, 0)
+        return self._best_payable(candidates) or ("PASS", None, None)
 

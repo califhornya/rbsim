@@ -21,10 +21,12 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "leaves_board",                             # any board exit (death/recall/bounce/banish)
     "on_move",                                  # move-into-battlefield
     "on_start_of_turn", "on_end_of_turn",       # turn boundaries
+    "on_start_of_main",                         # the start of your Main Phase (Orianna Lady of Clockwork)
     "on_friendly_unit_played",
     "on_friendly_unit_death",
     "on_play_spell",
     "on_win_combat",
+    "on_combat_end",                            # "When a combat that I was in ends"
     "passive",                                  # continuous abilities
     "activated",                                # main-phase tap-style
     "cost_modifier",                            # reduce_cost effects
@@ -43,6 +45,7 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "on_readied",                                # I go from exhausted to ready (Irelia Fervent)
     "cost_aura",                                 # reduce_cost on OTHER cards you play (Eager Apprentice)
     "enter_ready_aura",                          # units you play matching `filter` enter ready (Magma Wurm)
+    "self_enter_ready",                          # "I enter ready" / "If X, I enter ready" (Master Yi Honed)
     "on_hide",                                   # you hide a card (Katarina Reckless)
     "on_buffed",                                 # I get a buff (Simian Ancestor)
     "on_enemy_unit_moves",                       # an opponent's unit moves (Volibear Imposing)
@@ -75,6 +78,18 @@ KNOWN_TRIGGERS: frozenset[str] = frozenset({
     "granted_to_legend",                         # a battlefield gives your legend an ability (Forge of the Fluft)
     "on_friendly_moves_from_here",               # a friendly unit moves from my location (Stealthy Pursuer)
     "on_attached",                               # this Equipment is attached to a unit (Shady Spectacles)
+    "on_enemy_attack",                           # an enemy unit attacks a battlefield you control (Ahri Nine-Tailed Fox)
+    "on_you_defend",                             # you defend at a battlefield, anywhere (Loyal Pup)
+    "on_unit_dies_here",                         # battlefield: a non-token unit dies here (Black Rose Sanctum)
+    "granted_to_units_here",                     # battlefield: units here have this ability (Gardens of Becoming)
+    "on_recycle_rune",                           # you recycle a rune (Sivir Battle Mistress)
+    "trash_on_conquer",                          # in the trash, you conquer (Super Mega Death Rocket!)
+    "on_buff_spent",                             # you spend a buff (Fae Dragon)
+    "on_friendly_becomes_mighty",                # a friendly unit becomes MIGHTY (Fiora Worthy)
+    "on_revealed",                               # revealed from your deck (Undertitan)
+    "on_you_move_enemy",                         # you move an enemy unit (Blast Cone)
+    "from_trash",                                # may be played from your trash (Undying Legion)
+    "on_ability_played",                         # you play an activated ability (Nasus Curator of the Sands)
 })
 
 # Condition types accepted by Loop._check_condition.
@@ -86,6 +101,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_more_runes",
     "you_have_n_or_more_units_here",
     "spell_cost_at_least",
+    "spell_printed_cost_at_least",
     "this_is_alone",
     "this_is_mighty",
     "triggering_unit_is_mighty",
@@ -108,6 +124,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_no_other_units",        # "I enter ready if you control no other units"
     "card_with_my_name_in_trash",        # "... if you have a card with my name in your trash"
     "opponent_controls_stunned_unit",    # "If an opponent controls a stunned unit, ..."
+    "stunned_enemy_here",                # "While there's a stunned enemy unit here" (Kennen)
+    "empowered_times_at_least",          # "While I'm EMPOWERED three times" (Kayle Justified)
     "you_control_this_battlefield",      # "... if you control this battlefield" (DEPLOY gear, battlefields)
     "cards_in_hand_at_most",             # n: "if you have one or fewer cards in your hand"
     "first_turn_of_player",              # the actor's first turn of the game
@@ -117,6 +135,9 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there"
     "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
     "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
+    "played_to_battlefield_this_turn",   # "if you've played a unit or gear to a battlefield this turn"
+    "your_turn_from_facedown",           # "If it's your turn and you played this from face down"
+    "no_open_battlefields",              # "if there are no open battlefields"
     "this_is_at_battlefield",            # the source unit is at a battlefield (not in base)
     "triggering_unit_not_named",         # name: the unit that caused the trigger isn't named so ("non-Recruit")
     "triggering_unit_has_subtype",       # subtype: the unit that caused the trigger has this tag ("another Dragon")
@@ -125,7 +146,8 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "opponent_played_n_spells_this_turn",  # n: "if an opponent has played another spell this turn"
     "triggering_card_matches",           # filter: "when you play a spell / a card with Energy cost [7]+"
     "triggering_card_not_from_hand",     # "when you play a card from anywhere other than your hand"
-    "moved_to_battlefield",              # on_move: "when I move to a battlefield"
+    "ability_energy_at_least",           # n: "an activated ability with Energy cost [7] or more" (base cost)
+    "moved_to_battlefield",             # on_move: "when I move to a battlefield"
     "moved_from_battlefield",            # on_move: "when I move from a battlefield"
     "all_of",                            # conditions: [...] all hold
     "died_alone",                        # DEATHKNELL "if I died alone"
@@ -162,6 +184,22 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "triggering_unit_here",              # the unit is (or died) at my battlefield
     "has_all_pet_tags",                  # your units have Bird, Cat, Dog and Poro among them
     "signpost_possible",                 # Forgotten Signpost has a unit to exhaust and one to move
+    "friendly_mighty_unit_here",         # "When you conquer here with one or more MIGHTY units" (Sunken Temple)
+    "spell_spent_this_turn_at_least",    # n: "If you've spent [4] or more to play a spell this turn"
+    "none_played_this_turn",             # filter: "the first friendly gear played each turn" (Ornn's Forge)
+    "enemy_unit_died_this_turn",         # "If an enemy unit has died this turn" (Spoils of War)
+    "any_gear_in_play",                  # "you may kill a gear. If you do, ..." (Adaptatron)
+    "attached_this_turn",                # "If this was attached to me this turn" (Brutalizer)
+    "died_in_combat",                    # "When I die in combat" (Draven Audacious)
+    "gear_with_cost_at_most_in_play",    # n: "kill a gear with Energy cost no more than [1]" (Pickpocket)
+    "this_unattached",                   # "(Use only if unattached.)" (The Zero Drive)
+    "unit_died_this_turn",               # "If a unit died this turn" (Towering Pairofant)
+    "friendly_died_in_beginning_phase",  # Shadow Watcher
+    "played_from_hand",                  # "If you played this from your hand" (Back Off)
+    "undamaged_this_turn",               # "if I haven't been dealt damage this turn" (Affectionate Poro)
+    "this_in_combat",                    # "unless I'm in combat" (Akali Silent)
+    "you_control_empowered",             # "if you control something that's EMPOWERED" (Shock Blast)
+    "first_of_kind_this_turn",           # filter: "the first time you play a non-token gear each turn"
 })
 
 # Conditions the engine recognizes but always evaluates to False (no context).
@@ -183,6 +221,11 @@ KNOWN_FILTER_KEYS: frozenset[str] = frozenset({
     "is_exhausted", "is_ready", "energy_at_most", "energy_at_least",
     "power_at_most", "power_at_least",   # zone effects: "no more than [rune]" / "[rune][rune] or more"
     "at_battlefield",                    # "a unit at a battlefield" (not in a base)
+    "is_damaged",                        # "all damaged enemy units here" (Warwick Hunter)
+    "is_attacking",                      # "Stun an attacking unit" (Thwonk!)
+    "not_it",                            # "another unit" than the one just chosen (Piercing Light)
+    "has_named_tag",                     # "a unit with the named tag" (The List)
+    "domain", "is_empowered", "not_subtype", "fury_threatened",   # the Decrees, Aurok General, Ocean Drake
 })
 
 # amount_source values understood by effects._amount.
@@ -193,11 +236,17 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
     "cards_in_hand", "enemies_here", "friendly_units_here",
     "n_friendly_with_tag", "n_distinct_tags_among_friendlies",
     # SHOW OFF (§832): the shown object's info, snapshotted as the card was played.
-    "shown_might", "shown_power_cost", "shown_energy_cost",
+    "shown_might", "shown_power_cost", "shown_energy_cost", "chosen_friendly_gear_energy",
+    "self_shield",
     # Per-count cost reductions ("I cost [1] less for each ...").
     "cards_played_this_turn", "friendly_exhausted_units",
     "battlefields_conquered_this_turn", "hold_points_this_turn",
     "cards_with_my_name_in_trash",
+    "other_battlefields_controlled",     # Seat of Power
+    "discarded_energy", "it_might",      # Get Excited!, Last Breath
+    "countered_energy", "killed_might", "self_assault",   # Riposte, Deathgrip, Lucian Gunslinger
+    "battlefields_controlled", "friendly_units", "friendly_temporary_here",
+    "friendly_tokens", "same_name_here_others",   # Illaoi, Spiderling
 })
 
 # Cost dict keys accepted by Loop._parse_activated_cost (activated abilities).
@@ -208,9 +257,9 @@ KNOWN_AMOUNT_SOURCES: frozenset[str] = frozenset({
 # engine would silently drop; the parser flags such costs to suggested_vocab
 # instead. Add a key here only after the engine learns to parse + pay it.
 KNOWN_ACTIVATED_COST_KEYS: frozenset[str] = frozenset({
-    "energy", "power", "tap", "recycle", "sacrifice", "spend_xp",
+    "energy", "power", "tap", "recycle", "sacrifice_self", "spend_xp",
     "disempower_self", "banish_from_trash", "discard", "discard_type", "spend_buff",
-    "kill_other_token", "kill_other_friendly",
+    "kill_other_token", "kill_other_friendly", "recycle_type", "banish_self",
 })
 
 # Optional additional-cost (kicker) keys accepted by Loop._try_pay_additional_costs
@@ -223,16 +272,20 @@ KNOWN_ADDITIONAL_COST_KEYS: frozenset[str] = frozenset({
 # Engine verbs that aren't in effects.REGISTRY but are consumed elsewhere:
 # - reduce_cost           read by Loop._cost_reduction
 # - bonus_damage_here     battlefield passive read by EffectContext.deal_damage
-# - ignore_deflect_here   battlefield passive read by Loop._deflect_surcharge
+# - ignore_deflect_here   battlefield passive read by Loop._deflect_tax
+# - ignore_deflect        a spell's own "Ignore DEFLECT while paying" (Loop._deflect_tax)
+# - move_tax_here         a deployed gear's tax to move to its battlefield (Loop._move_tax)
 # - reduce_cost_here       battlefield passive read by Loop._bf_cost_reduction
 # - play_from_top          on_reveal_from_top marker read by Loop._offer_reveal_from_top
 # - ambush                 AMBUSH lane rule marker read by Loop._ambush_legal_lanes
 # - move_ally_here_to_base on_first_unit_here marker read by Loop._fire_first_unit_here
 # - show_off               SHOW OFF object marker (its target_filter) read by Loop._show_off
 # - no_combat_damage       passive marker ("I don't deal combat damage") folded by Loop._apply_passive_grant
-# - enter_ready            enter_ready_aura marker read by Loop._enters_ready
+# - enter_ready            enter_ready_aura marker read by Loop._enters_ready,
+#                          self_enter_ready marker read by Loop._enter_ready_self
 NON_HANDLER_VERBS: frozenset[str] = frozenset({
-    "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "reduce_cost_here",
+    "reduce_cost", "bonus_damage_here", "ignore_deflect_here", "ignore_deflect", "reduce_cost_here",
+    "move_tax_here",
     "play_from_top", "ambush", "move_ally_here_to_base", "show_off", "no_combat_damage",
     "enter_ready", "double_equipment_might", "double_deathknell",
     # restrictions read where they apply (GameLoop._can_choose, _can_move_to_base,
@@ -243,20 +296,53 @@ NON_HANDLER_VERBS: frozenset[str] = frozenset({
     "victory_score_plus",       # Aspirant's Climb: read when the game is built
     # damage and combat rules (GameLoop._take_damage, _combat_mods, combat cleanup)
     "spell_bonus_damage", "no_damage_if_moved_twice", "prevent_enemy_spell_damage",
-    "lone_defender_minus", "attacking_with_another_bonus", "ignore_tank_here", "tie_recall_all",
+    "lone_defender_minus", "lone_defender_bonus", "attacking_with_another_bonus", "ignore_tank_here",
+    "tie_recall_all",
+    # battlefield cost rules (GameLoop._destination_discount, _gear_ability_discount,
+    # _pay_repeat) and Altar of Blood (_try_replace_death)
+    "first_play_here_discount", "first_gear_ability_discount", "repeat_discount", "altar_of_blood",
+    # Detonation Amplifier, Jarvan IV Martial Paragon, Mel Newly Awakened,
+    # Renekton Brute (GameLoop._route_deaths, _play_timing, _uncounterable,
+    # _extra_might_reduction, _recompute_passives)
+    "double_deathknell_here", "deploy_gear_action", "uncounterable", "extra_might_reduction",
+    "empower_at_might", "repeat_costs",
+    # Origins: GameLoop._try_replace_death (Sett The Boss), _combat_mods (Wielder
+    # of Water), _recompute_passives (Leona Zealot), buff_unit (Lee Sin Ascetic),
+    # _cost_extras (Wallop, Call to Glory)
+    "sett_save", "lone_fighter_bonus", "stunned_enemies_here_minus", "unlimited_buffs",
+    "spend_buff_free", "discard_for_energy", "return_gear_for_energy",
+    # Spiritforged: Soraka Wanderer, Ezreal Prodigy, Jax Unmatched, Renata Glasc
+    # Chem-Baroness (GameLoop._try_replace_death, _pay_one_additional_cost,
+    # _quick_draw, _gold_bonus)
+    "protect_weaker_here", "cheaper_optional_costs", "equipment_quick_draw", "gold_bonus",
+    # Unleashed: Red Brambleback, Blue Sentinel, Vilemaw, Elder Dragon
+    "double_conquer_here", "double_hold_here", "weaker_enemies_no_damage", "lethal_damage",
+    # Vendetta: Ambessa The Wolf, Gangplank Naval, Jagged Cutlass, Decree of Rage
+    "no_damage_outside_combat", "gangplank_redirect", "unmovable_by_enemies", "cant_be_countered",
     # Equipment rules (UnitInPlay.tags, _apply_equipment_conditions, scoring)
     "grant_tag", "equip_conditional_might", "hold_conquer_swap",
+    "copy_unit_text",           # Svellsongur: GameLoop._card_effects, UnitInPlay.keyword_value
+    "look_before_reveal",       # Void Hatchling: GameLoop._before_deck_reveal
     "enemy_spell_tax",          # Helm of Suppression: GameLoop._enemy_spell_tax
+    "cheaper_spells_choosing_me",   # Irelia Graceful: GameLoop._graceful_discount
+    "songstress_discount",      # Seraphine Starry-Eyed Songstress: GameLoop._songstress_discount
+    "kill_unit_for_discount",   # Atakhan: GameLoop._kill_discounts
+    "play_me_for",              # Jhin Meticulous Killer: GameLoop._alt_cost
+    "equip_less_by_might",      # Hextech Gauntlets: GameLoop._equip_cost_for
+    # Endless Riches: GameLoop._begin_turn, activatable_abilities, _trash_banishes
+    "skip_draw_phase", "play_from_trash", "trash_to_banish",
     # where units may be played (GameLoop._unit_play_destinations, _play_unit)
     "play_location", "play_location_aura", "warden_only_base", "no_unit_plays_here",
     "accelerate_non_hand",
     "spells_repeat_in_showdown", "reaction_tax_in_showdown", "channel_plus_one",
+    "spells_reaction_in_showdown",
     "sacrifice_instead_of_dying", "mech_instead_of_tokens", "double_tokens_once",
     # cost rules (GameLoop._cost_extras, _effective_cost, _adjust_ability_cost,
     # _play_forbidden, _destination_surcharge, hiding)
-    "spend_buffs_for_power", "kill_tokens_for_power", "spend_xp_for_energy",
+    "spend_buffs_for_power", "kill_units_for_power", "spend_xp_for_energy",
     "reduce_cost_not_from_hand", "gear_discount_once", "vex_cheerless", "empower_discount_here",
     "dragon_roost", "requires_friendly_gear", "requires_pet", "hide_for_energy",
     "no_enemy_reveals_here",
+    "extra_facedown_slot",      # Bandle Tree, Bushwhack Trap: GameLoop._facedown_capacity
     "copy_tap_abilities", "group_move_toll", "jhin_pile", "zero_point_overflow", "rippers_bay",
 })

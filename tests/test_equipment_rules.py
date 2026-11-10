@@ -118,7 +118,7 @@ def test_attaching_fires_jax_unrelenting_and_aphelios_modes_once_each():
     loop.gs.battlefields[1].add_unit("A", aph)
     for _ in range(4):
         loop._fire_attached(aph, "A")
-    assert len(loop.gs.modes_chosen[(id(aph.card), loop.gs.turn)]) == 3
+    assert len(loop.gs.modes_chosen[(aph.card, loop.gs.turn)]) == 3
 
 
 def test_ornn_forge_god_grows_with_gear_and_riven_cuts_per_equipment():
