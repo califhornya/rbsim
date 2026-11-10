@@ -31,7 +31,7 @@ from __future__ import annotations
 import itertools
 import math
 import random
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
@@ -42,9 +42,20 @@ from riftbound.ai.encoding import (
     legal_mask,
 )
 from riftbound.ai.heuristics.base_agent import Action, Agent
-from riftbound.ai.net import RiftboundNet, predict
 from riftbound.core.decisions import DecisionPoint, Observation, describe_option
 from riftbound.core.legality import legal_actions
+
+if TYPE_CHECKING:
+    from riftbound.ai.net import RiftboundNet
+
+
+def predict(net, vec, mask):
+    """riftbound.ai.net.predict, imported when the net first runs: torch is an
+    optional extra, and the coach's text helpers (which import this module) are
+    used by engine tests that run without it."""
+    from riftbound.ai.net import predict as _predict
+    return _predict(net, vec, mask)
+
 
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
