@@ -67,8 +67,8 @@ def analyze(
 def simulate(
     games: int = typer.Option(100, help="Number of games to simulate"),
     seed: Optional[int] = typer.Option(None, help="Random seed for reproducibility (default: random each run)"),
-    ai_a: str = typer.Option("aggro", "--aiA", help="Agent for Player A (aggro|control)"),
-    ai_b: str = typer.Option("aggro", "--aiB", help="Agent for Player B (aggro|control)"),
+    ai_a: str = typer.Option("simple_trade", "--aiA", help="Agent for Player A (simple_trade|pyke|diana|random|mc|ismcts)"),
+    ai_b: str = typer.Option("simple_trade", "--aiB", help="Agent for Player B (simple_trade|pyke|diana|random|mc|ismcts)"),
     deck_a: Path = typer.Option(..., "--deckA", help="Path to deck JSON for Player A"),
     deck_b: Path = typer.Option(..., "--deckB", help="Path to deck JSON for Player B"),
     victory_score: int = typer.Option(8, help="Victory points needed to win via Hold/Conquer"),
