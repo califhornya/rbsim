@@ -35,7 +35,7 @@ said.
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | **fixed** (see D10) |
 | D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | **fixed** (see D11) |
 | D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | **fixed** (see D12) |
-| D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | open |
+| D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | **fixed** |
 | D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | open |
 | D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | open |
 | D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | open |

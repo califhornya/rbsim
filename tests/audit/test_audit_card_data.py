@@ -13,8 +13,6 @@ from audit_helpers import act, card, choices, labels, scripted, setup, unit
 
 # -- D13. Stupefy (OGN-095; chaos_mind_diana, vendetta_ezreal) -------------------
 
-@pytest.mark.xfail(strict=True, reason="Stupefy OGN-095: printed 'Give a unit -1 [Might] this turn', "
-                                       "encoded as +1")
 def test_stupefy_gives_minus_one():
     """'Give a unit -1 [Might] this turn, to a minimum of 1 [Might]. Draw 1.'"""
     loop, a, b = setup(active="A")

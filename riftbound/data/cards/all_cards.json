@@ -3331,7 +3331,7 @@
     "cost_energy": 1,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "REACTION (Play anytime, even before spells and abilities resolve.) Give a unit +1 [might] this turn, to a minimum of 1 [might]. Draw 1.",
+    "effect": "REACTION (Play anytime, even before spells and abilities resolve.) Give a unit -1 [might] this turn, to a minimum of 1 [might]. Draw 1.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -3349,7 +3349,7 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "chosen_unit",
-        "amount": 1,
+        "amount": -1,
         "duration": "this_turn",
         "min_might": 1,
         "where": "anywhere"
