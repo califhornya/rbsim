@@ -7272,7 +7272,32 @@ class GameLoop:
             self.gs.points_A += n
         else:
             self.gs.points_B += n
+        self._note_winner()
         return n
+
+    def _note_winner(self) -> None:
+        """§323.1 / §194.2: a player with points greater than or equal to the
+        Victory Score and more points than the opponent wins, in the next
+        Cleanup: the first one it is true of, recorded as the points change (a
+        point the other gains later in the turn doesn't undo it). With the same
+        points play continues (§194.2.b)."""
+        gs = self.gs
+        if gs.winner is not None:
+            return
+        if gs.points_A >= gs.victory_score and gs.points_A > gs.points_B:
+            gs.winner = "A"
+        elif gs.points_B >= gs.victory_score and gs.points_B > gs.points_A:
+            gs.winner = "B"
+
+    def _victory(self) -> Optional[Result]:
+        """The game's result once a player has won (§196: the game ends), None
+        while nobody has."""
+        self._note_winner()
+        if self.gs.winner is None:
+            return None
+        if self.recorder:
+            self._snapshot_state()
+        return Result(self.gs.winner, self.gs.turn, self.units_played, self.spells_cast)
 
     def _empowered_with(self, side: str, verb: str) -> bool:
         """An EMPOWERED unit of `side` has the passive `verb` (Mel Newly Awakened's
@@ -7392,7 +7417,9 @@ class GameLoop:
         passes = 0
         rounds = 0
 
-        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP and not self._all_pass:
+        # Nobody is asked anything once the game is won (§196).
+        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP and not self._all_pass \
+                and self.gs.winner is None:
             rounds += 1
             player = self.gs.get_player(active)
             if player.agent is None or not hasattr(player.agent, "decide_reaction"):
@@ -7538,6 +7565,8 @@ class GameLoop:
         """Execute a showdown at the given battlefield (§337–345)."""
         if self.gs.showdown_active:
             return  # Already in a showdown
+        if self.gs.winner is not None:
+            return  # The game is over (§196)
 
         if self.verbose:
             print(f"  [SHOWDOWN triggered at BF{bf_idx}] {attacker} has focus")
@@ -7564,7 +7593,7 @@ class GameLoop:
 
         passes = 0
         rounds = 0
-        while passes < 2 and rounds < _PRIORITY_ROUNDS_CAP:
+        while passes < 2 and rounds < _PRIORITY_ROUNDS_CAP and self.gs.winner is None:
             rounds += 1
             focus_player = self.gs.get_player(self.gs.focus_player)
             opponent_player = self.gs.get_player(self.gs.other(self.gs.focus_player))
@@ -8003,25 +8032,26 @@ class GameLoop:
                 gs.points_A += gained
             else:
                 gs.points_B += gained
-            if gs.points_A >= gs.victory_score:
-                if self.recorder:
-                    self._snapshot_state()
-                return Result("A", gs.turn, self.units_played, self.spells_cast)
-            if gs.points_B >= gs.victory_score:
-                if self.recorder:
-                    self._snapshot_state()
-                return Result("B", gs.turn, self.units_played, self.spells_cast)
+        # A player with the Victory Score and more points than the other has
+        # won (§323.1): after the Hold, and after anything else that gives a
+        # point before the Main Phase (a Burn Out in the Draw Phase, §432.2.c).
+        result = self._victory()
+        if result is not None:
+            return result
 
         self._fire_turn_trigger("on_start_of_turn", gs.active)
         self._recompute_passives()
         if not self._side_has_passive(gs.active, "skip_draw_phase"):     # Endless Riches
             self._phase_draw(gs.get_player(gs.active))
+        result = self._victory()
+        if result is not None:
+            return result
         # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
         # it makes at a battlefield has its showdown before any action.
         self._start_of_main(gs.active)
         self._recompute_passives()
         self._run_staged_showdowns()
-        return None
+        return self._victory()
 
     def _run_main_actions(self) -> Optional[Result]:
         """The active player's multi-action main phase (decide_action → apply until
@@ -8035,6 +8065,10 @@ class GameLoop:
 
         actions_this_turn = 0
         while True:
+            # The game ends as soon as a player has won (§323.1, §196).
+            result = self._victory()
+            if result is not None:
+                return result
             cards_played_this_turn = gs.cards_played_this_turn.get(gs.active, 0)
             if ap.agent is None:
                 act: Action = ("PASS", None, None)
@@ -8071,7 +8105,7 @@ class GameLoop:
                     print(f"  {ap.name} hit action cap — ending action phase")
                 break
         self._flush_pending_move()
-        return None
+        return self._victory()
 
     def _end_turn(self) -> Optional[Result]:
         """Showdown + combat/conquer (+victory) + end-of-turn triggers + cleanup +
@@ -8082,17 +8116,16 @@ class GameLoop:
         self._phase_showdown(gs.active, gs.other(gs.active))
 
         self._phase_combat_and_conquer(gs.active)
-        if gs.points_A >= gs.victory_score:
-            if self.recorder:
-                self._snapshot_state()
-            return Result("A", gs.turn, self.units_played, self.spells_cast)
-        if gs.points_B >= gs.victory_score:
-            if self.recorder:
-                self._snapshot_state()
-            return Result("B", gs.turn, self.units_played, self.spells_cast)
+        result = self._victory()
+        if result is not None:
+            return result
 
         gs.in_ending_phase = True
         self._ending_step(gs.active)
+        result = self._victory()          # a point given at the end of the turn
+        if result is not None:
+            gs.in_ending_phase = False
+            return result
 
         # Expiration step (§317.2): heal all units, and "this turn" Might bonuses
         # (REACTION spells like Discipline) end, wherever the unit is.

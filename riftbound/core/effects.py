@@ -2812,6 +2812,8 @@ def _win_game(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         gs.points_A = max(gs.points_A, gs.victory_score)
     else:
         gs.points_B = max(gs.points_B, gs.victory_score)
+    if gs.winner is None:
+        gs.winner = ctx.actor_side          # §195: it wins, whatever the points
 
 
 @effect("move_self_to_weaker_enemy_battlefield")

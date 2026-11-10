@@ -94,6 +94,9 @@ class GameState:
     points_A: int = 0
     points_B: int = 0
     victory_score: int = 8  # Duel Mode default
+    # The side that won, from the moment it had the Victory Score and more
+    # points than the other (§194.2, §323.1): GameLoop._note_winner.
+    winner: Optional[str] = None
 
     # Exactly two battlefields total in 1v1
     battlefields: list[Battlefield] = field(default_factory=lambda: [Battlefield(), Battlefield()])

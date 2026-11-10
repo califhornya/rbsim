@@ -28,7 +28,7 @@ said.
 | D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | open |
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | open |
-| D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | open |
+| D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | open |
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | open |
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
@@ -196,11 +196,22 @@ said.
   can't change the result but they are positions and moves in the training
   data whose value is fixed, labelled as decisions. (2) needs a Burn Out, as
   rare as D1 today; the winner did not change in 300 random games.
-- **Fix.** `_gain_points` records the winner the moment a side has the Victory
-  Score and more points than the other; `_begin_turn`, `_run_main_actions` and
-  `_end_turn` return that result as soon as they get control back. Stopping in
-  the middle of a resolving action would need the pausable loop to unwind;
-  that is not needed for the result to be right.
+- **Fixed.** `GameState.winner` is set the moment a side has the Victory Score
+  and more points than the other (`GameLoop._note_winner`, from
+  `_gain_points`); with equal points nobody has won yet (§194.2.b). From then
+  on no player is asked anything (no action, reaction or showdown step, no new
+  showdown), and `_begin_turn` (after the Hold and after the Draw Phase),
+  `_run_main_actions` and `_end_turn` return the result. "You win the game"
+  (`win_game`) sets it directly (§195). 300 random games: 310 decisions asked
+  after the last point before, none now. No golden game changes.
+- **Left over.** What is already resolving when the last point is gained (the
+  rest of that spell, the chain under it) still resolves with nobody choosing;
+  it can't change the winner. Hold points are still added after the Hold
+  triggers of that turn have been put on the chain (`_begin_turn`), where the
+  rule gives the point first: a Hold trigger that burns its controller out
+  while the Hold itself is the winning point would be judged in the wrong
+  order. Not seen, not fixed (it needs the Hold to gain its point inside
+  `_phase_beginning_steps`).
 
 ### D7. An Equipment is trashed when its unit is banished
 

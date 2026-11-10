@@ -163,8 +163,6 @@ def test_a_unit_stunned_in_its_base_is_no_longer_stunned_next_turn():
 
 # -- D6. The game ends when a player reaches the Victory Score ------------------
 
-@pytest.mark.xfail(strict=True, reason="§323.1 / §194.2: the game goes on to the end of the turn "
-                                       "after a player reached the Victory Score in the Main Phase")
 def test_the_game_ends_as_soon_as_a_player_has_the_victory_score():
     """'If a player has points greater than or equal to the Victory Score, and
     more points than every opponent, that player wins' in the next Cleanup."""
@@ -181,9 +179,6 @@ def test_the_game_ends_as_soon_as_a_player_has_the_victory_score():
     assert len([p for p, _ in A.log if p == "turn_action"]) == 2
 
 
-@pytest.mark.xfail(strict=True, reason="§323.1 / §432.2.c: a point that takes a player to the Victory "
-                                       "Score outside scoring (a Burn Out in the Draw Phase) doesn't "
-                                       "end the game: the turn is played on and the other may still win")
 def test_a_burn_out_that_gives_the_last_point_ends_the_game():
     loop, a, b = setup(active="A")
     loop.gs.points_B = 7                         # A's Main Deck and trash are empty
