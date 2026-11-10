@@ -27,7 +27,7 @@ said.
 | D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
 | D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | open |
-| D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | open |
+| D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | **fixed** (see D5) |
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | open |
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | open |
@@ -173,8 +173,8 @@ said.
   Exploitable by Shen: [2] on a unit in base disarms it for its next attack as
   well, where the rule gives one turn. Only Kennen stuns in the two decks (1
   copy, plus its attack trigger).
-- **Fix.** Clear `stunned` on every unit in play in the Expiration Step of
-  `_end_turn`.
+- **Fixed.** The Expiration Step of `_end_turn` clears `stunned` on every unit
+  in play, bases included. No golden game changes.
 
 ### D6. The game goes on after a player has the Victory Score
 

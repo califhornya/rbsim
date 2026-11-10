@@ -8132,6 +8132,7 @@ class GameLoop:
         for unit in self._all_units_in_play():
             unit.damage = 0
             unit.clear_turn_end_bonuses()
+            unit.stunned = False          # §424.1.a.2: wherever it is, its base too
         # Each player's Rune Pool empties (§317.2.d): ADDed Energy and Power are
         # lost; ready runes keep theirs for the next turn's reactions.
         gs.A.empty_rune_pool()

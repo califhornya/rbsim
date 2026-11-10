@@ -142,8 +142,6 @@ def test_a_combat_heals_the_units_everywhere():
 
 # -- D5. STUN ends with the turn, wherever the unit is --------------------------
 
-@pytest.mark.xfail(strict=True, reason="§424.1.a.2: a stunned unit in a base stays stunned turn after "
-                                       "turn (the status is only cleared from units at battlefields)")
 def test_a_unit_stunned_in_its_base_is_no_longer_stunned_next_turn():
     """Kennen Keeper of Balance: 'When you play me ..., you may pay [2] to STUN
     a unit.' 'Stunned Units lose the Stunned status during step 3d of the end
