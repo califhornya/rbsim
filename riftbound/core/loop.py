@@ -7820,6 +7820,12 @@ class GameLoop:
         # Route dead units (death replacements applied first), fire on_death etc.
         self._route_combat_deaths(stats, bf)
 
+        # Combat Cleanup, "3c. Heal all Units" (§468.1.a.1): every unit on the
+        # board, not only the ones that fought (combat.resolve_might_combat
+        # healed those).
+        for unit in self._all_units_in_play():
+            unit.damage = 0
+
         if self.recorder:
             self._record_combat_deaths(bf, before_A, before_B)
 

@@ -118,8 +118,6 @@ def test_a_facedown_card_is_trashed_as_its_battlefield_is_conquered():
 
 # -- D4. A Combat Cleanup heals all units ---------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="§468.1.a.1: the Combat Cleanup heals only the units that "
-                                       "fought, not all units")
 def test_a_combat_heals_the_units_everywhere():
     """'Invoke a Combat Special Cleanup. Insert "3c. Heal all Units."' Ruthless
     Strike deals 3 to a 5 [might] unit at one battlefield, then a combat ends at

@@ -26,7 +26,7 @@ said.
 | D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | open |
 | D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
 | D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
-| D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | open |
+| D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | **fixed** (see D4) |
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | **fixed** (see D5) |
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | open |
@@ -154,10 +154,12 @@ said.
   copies) and a lost combat add up across the turn, and Morgana Vindictive
   ("deal damage to a unit equal to the damage marked on it") finds damage that
   should be gone.
-- **Note.** "Heal all Units" is read literally: every unit on the board. If it
-  is meant as the units of that combat, this is not a deviation (see Q3).
-- **Fix.** After combat damage and deaths, clear `damage` on every unit in
-  play, as the Expiration Step does (`loop.py:8040`).
+- **Note.** "Heal all Units" is read as written: every unit on the board, the
+  same words as the end of the turn. If you know a ruling that limits it to
+  the units of that combat, the fix is one loop to remove.
+- **Fixed.** `_phase_combat_and_conquer_single` clears `damage` on every unit
+  in play once the combat's deaths are routed, before the attackers are
+  recalled (the order of §468.1.a). No golden game changes.
 
 ### D5. STUN never ends on a unit in a base
 
@@ -393,24 +395,20 @@ No test for these: they wait for an answer.
   moving a card out of an empty deck is a Burn Out, not an impossibility. With
   the D1 fix the engine will Burn Out (the opponent gains a point) and give the
   +1. Is that the reading you want?
-- **Q3. "Heal all Units" in the Combat Cleanup (§468.1.a.1).** Read literally
-  for D4: every unit on the board, as at the end of the turn. Confirm, or is
-  it the units of that combat (then D4 is no deviation and its fix must be
-  reverted)?
-- **Q4. The 40-turn cap in self-play.** `selfplay.py` and `env.py` build games
+- **Q3. The 40-turn cap in self-play.** `selfplay.py` and `env.py` build games
   with `max_turns=40`, and a game that reaches it is decided by a two-point
   lead (TR 408.2.b), a draw otherwise (`loop.py:8067`). Riftbound has no turn
   limit; the cap makes "be two points ahead at turn 40" a way to win. None of
   700 random / heuristic games reached turn 40, so today it is only a stall
   guard; a trained, defensive agent may reach it. Should a capped game be a
   draw for training?
-- **Q5. Keeper of Law.** "I cost [2] [order] less if you control a battlefield
+- **Q4. Keeper of Law.** "I cost [2] [order] less if you control a battlefield
   with exactly two units there": the engine counts the units of both players
   there (`loop.py:2884`). On your turn outside a combat only your units are at
   a battlefield you control, so it only matters when Keeper is played... never,
   in practice (it has no REACTION). Left as is; say if "two units" should be
   "two of your units".
-- **Q6. Choices the engine makes for the player.** Which rune pays a Power of
+- **Q5. Choices the engine makes for the player.** Which rune pays a Power of
   any domain (`player.py:296`: the domain with the most left), the order of
   combat damage beyond the first choice, which unit an effect picks when the
   search doesn't ask (BACKLOG O3): not rules deviations, but decisions the
