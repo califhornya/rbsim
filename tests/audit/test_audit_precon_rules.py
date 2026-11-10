@@ -181,8 +181,6 @@ def test_a_burn_out_that_gives_the_last_point_ends_the_game():
 
 # -- D7. An Equipment outlives the unit it is attached to -----------------------
 
-@pytest.mark.xfail(strict=True, reason="§719.5 / §436.4.b: an Equipment goes to the trash when the "
-                                       "unit it is attached to is banished")
 def test_an_equipment_stays_when_its_unit_is_banished():
     """Wind and Ghosts: 'Choose a unit at a battlefield. If it has 3 [might] or
     less, banish it.' 'When a Top-Most Card changes zones from a board zone to a

@@ -961,8 +961,9 @@ def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Banish an enemy unit at a battlefield with 3 Might or less" (Mel Defiant
     Soul): off the board into its owner's banishment — it doesn't die (no
-    DEATHKNELL, not to the trash); a token just ceases to exist, its gear goes
-    to the trash. `with_this`: the card is "banished with this" (Dockside
+    DEATHKNELL, not to the trash); a token just ceases to exist. Its Equipment
+    detaches and stays on the board, recalled to its controller's base
+    (§719.5, §436.4). `with_this`: the card is "banished with this" (Dockside
     Lock-Up, played back by play_banished_with_this)."""
     loop = ctx.loop
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")},
@@ -973,8 +974,7 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         side = where[0]
         owner = loop.gs.get_player(side)
         loop._remove_unit_from_play(unit, side)
-        for g in list(unit.gear):
-            loop._to_trash(owner, g)
+        owner.base_gear.extend(unit.gear)
         unit.gear.clear()
         if not unit.is_token:
             owner.banished.append(unit.card)

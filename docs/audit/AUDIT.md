@@ -29,7 +29,7 @@ said.
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | **fixed** (see D4) |
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | **fixed** (see D5) |
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
-| D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | open |
+| D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | **fixed** (see D7) |
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | open |
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | open |
@@ -234,8 +234,8 @@ said.
   less") against Shen's Hand Hammer (2 copies).
 - **Test.** `test_an_equipment_stays_when_its_unit_is_banished`.
 - **Weight.** ~1% of games. Zed gets a two-for-one the rules don't give.
-- **Fix.** In `_banish_unit`, the gear goes to its controller's base
-  (`base_gear`), as on death.
+- **Fixed.** In `_banish_unit` the gear goes to its controller's base
+  (`base_gear`), as on death. No golden game changes.
 
 ### D8. A unit played from facedown in the Main Phase chooses anywhere
 
