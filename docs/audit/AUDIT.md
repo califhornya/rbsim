@@ -123,12 +123,16 @@ said.
   the simulation, so Shen's hidden cards are safer than they should be and Zed
   never learns the answer.
 - **Fixed.** `_cleanup_hidden_cards` also runs once an action is done
-  (`_apply_action`) and once a chain has resolved (`_resolve_chain`), not only
+  (`_apply_action`), once a chain has resolved (`_resolve_chain`) and once a
+  showdown or combat is over (`_run_showdown`, §468.5.c: the first fix missed
+  this one, a second commit added it with
+  `test_a_facedown_card_is_trashed_as_its_battlefield_is_conquered`), not only
   as the turn ends. It reads `Battlefield.control()`, which keeps control
   during a showdown or combat there (§190.4.b), so a card hidden at a
-  battlefield under attack stays playable until the fight is over. Over 150
+  battlefield under attack stays playable until the fight is over. Over 300
   random games no facedown card is left at a battlefield its owner doesn't
-  control at any decision (18 before). No golden game changes.
+  control at any decision outside a showdown or chain (18 in 150 games
+  before). No golden game changes.
   `tests/test_g2_origins.py::test_pack_of_wonders_returns_a_gear_or_a_facedown_card`
   had a card hidden at a battlefield nobody controlled (§107.3.c forbids it);
   its board now has a unit there.

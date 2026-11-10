@@ -99,6 +99,23 @@ def test_a_facedown_card_is_trashed_as_its_player_loses_the_battlefield():
     assert not bf0.facedowns and any(c is hidden for c in b.trash)
 
 
+def test_a_facedown_card_is_trashed_as_its_battlefield_is_conquered():
+    """§468.5.c: as control is established after a combat, 'Remove all Hidden
+    cards from this Battlefield that do not share a controller with the
+    Battlefield.' Zed wins the combat: the card Shen left hidden there (and
+    didn't play) is gone before Zed's next action."""
+    loop, a, b = setup(active="A")
+    loop.gs.turn = 5
+    bf0 = loop.gs.battlefields[0]
+    bf0.add_unit("B", unit("Lone", 2))
+    hidden = hide(loop, "B", 0, "Resonating Strike")
+    a.base_units.append(unit("Mover", 4))
+    A, B = scripted(loop, a, b, A={"main": ["Move Mover base→BF0", "PASS", "PASS"]})
+    loop._run_main_actions()
+    assert bf0.control() == "A" and not bf0.facedowns and any(c is hidden for c in b.trash)
+    assert len([p for p, _ in A.log if p == "turn_action"]) == 3     # A decided again after the combat
+
+
 # -- D4. A Combat Cleanup heals all units ---------------------------------------
 
 @pytest.mark.xfail(strict=True, reason="§468.1.a.1: the Combat Cleanup heals only the units that "

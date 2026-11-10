@@ -3588,8 +3588,8 @@ class GameLoop:
     def _cleanup_hidden_cards(self) -> None:
         """§107.3.d / §323.6.a: a face-down card whose owner no longer controls
         its battlefield is removed to its owner's trash in the next Cleanup:
-        called once an action is done, once a chain has resolved, and as the
-        turn ends. Control doesn't change while a showdown or combat goes on
+        called once an action is done, once a chain has resolved, once a
+        showdown or combat is over (§468.5.c), and as the turn ends. Control doesn't change while a showdown or combat goes on
         there (Battlefield.control, §190.4.b), so a card hidden there stays
         playable until it is over."""
         for bf in self.gs.battlefields:
@@ -7593,6 +7593,10 @@ class GameLoop:
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 
         self._finish_showdown(bf_idx, attacker)
+        # Control is established: the cards hidden here by a player who no
+        # longer controls it go to the trash (§468.5.c, §348.2.a).
+        if not self.gs.chain:
+            self._cleanup_hidden_cards()
         # A unit an effect moved elsewhere during this showdown: its turn now.
         self._run_staged_showdowns()
 
