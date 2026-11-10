@@ -221,8 +221,6 @@ def test_a_unit_played_from_facedown_in_the_main_phase_chooses_at_its_battlefiel
 
 # -- D9. An activated ability needs a legal choice for its target ----------------
 
-@pytest.mark.xfail(strict=True, reason="§403.3 / §355.8: an activated ability can be activated (its "
-                                       "cost paid) with no legal target")
 def test_shen_eye_of_twilight_needs_a_friendly_unit():
     """'ACTION [tap]: Give a friendly unit TANK this turn.' 'If legal options
     are not available for an Activated Ability, it is not legal to activate it.'"""
@@ -233,8 +231,6 @@ def test_shen_eye_of_twilight_needs_a_friendly_unit():
     assert any("Shen Eye of Twilight" in lbl for lbl in labels(loop, "A"))
 
 
-@pytest.mark.xfail(strict=True, reason="§403.3 / §355.4.a: Zed Without a Sound's swap can be paid for "
-                                       "with no Shadow Clone at another location (nothing moves)")
 def test_zed_without_a_sound_needs_a_shadow_clone_somewhere_else():
     """'ACTION [1] [Chaos]: Move me and a Shadow Clone you control to each
     other's locations.' 'A valid Location for a Move Effect is one other than

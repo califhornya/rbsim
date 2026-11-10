@@ -6008,9 +6008,42 @@ class GameLoop:
             if not self._activated_affordable(ap, entry["unit"], self._unit_ability_cost(ap, entry["unit"], parsed)):
                 return False
         bf = self.gs.battlefields[entry["bf_idx"]] if entry.get("bf_idx") is not None             else self.gs.battlefields[0]
-        return self._check_condition(eff.condition, source, ap,
+        if not self._check_condition(eff.condition, source, ap,
                                      self.gs.get_player(self.gs.other(side)),
-                                     {"battlefield": bf})
+                                     {"battlefield": bf}):
+            return False
+        return self._ability_has_target(ap, source, entry.get("unit"), eff, bf)
+
+    def _ability_has_target(self, ap: Player, source: Card, unit, eff: EffectSpec,
+                            bf: Battlefield) -> bool:
+        """§403.3 / §355.8: an activated ability can be activated only with a
+        legal choice for its target. Checked for an ability that chooses one
+        unit (effects.has_valid_target; with no place named it looks at every
+        location, as _resolve_targets does for an ability) and for a swap of
+        locations (a valid Location for a Move is another one, §355.4.a)."""
+        from .effects import _SINGLE_UNIT_TARGETS, _choosable, _fallback_units, _passes_filter, \
+            has_valid_target
+        side = "A" if ap is self.gs.A else "B"
+        params = {**eff.merged_params(), "effect": eff.effect}
+        if eff.effect == "swap_position":
+            named = params.get("with_name")
+            where = self._locate_unit(unit) if unit is not None else None
+            if where is None:
+                return False
+            return any(u is not unit and (u.card.name == named if named else not u.is_token)
+                       and self._locate_unit(u)[1] is not where[1]
+                       for u in self._friendly_units_of(side))
+        ctx = EffectContext(self, source, ap, self.gs.get_player(self.gs.other(side)), bf)
+        ok = has_valid_target(ctx, params)
+        target = str(params.get("target", "")).lower()
+        if ok is False and not params.get("where") and target in _SINGLE_UNIT_TARGETS \
+                and params.get("effect") not in ("move_unit", "move_units_to_base"):
+            units = _fallback_units(ctx, target, "none")
+            tf = params.get("target_filter")
+            if tf:
+                units = [u for u in units if _passes_filter(u, tf, ctx)]
+            ok = bool(_choosable(ctx, units))
+        return ok is not False
 
     def _gear_left_board(self, gear, side: str) -> None:
         """A gear was killed (or sacrificed): its DEATHKNELL (Sprite Fountain)

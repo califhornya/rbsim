@@ -31,7 +31,7 @@ said.
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | open |
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | open |
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | open |
-| D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | open |
+| D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | open |
 | D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | open |
 | D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | open |
@@ -251,8 +251,19 @@ said.
   ~30% of games. It can't be exploited (the player only loses resources), but
   these are illegal actions in the legal set, visited by self-play and MCTS,
   and the legend is then exhausted for the showdown where it matters.
-- **Fix.** `_ability_usable` asks `effects.has_valid_target` for abilities
-  that choose one unit, and `swap_position` for a unit to swap with.
+- **Fixed.** `_ability_usable` ends with `_ability_has_target`: for an ability
+  that chooses one unit, `effects.has_valid_target` (every location when the
+  text names no place); for `swap_position`, a unit to swap with at another
+  location. Across the ten decks it now refuses, with no legal target: Shen Eye
+  of Twilight, Zed Without a Sound, Yasuo Unforgiven ("Move a friendly unit to
+  or from its base"), The List (no unit with the named tag), Kennen Heart of
+  the Tempest. 12 golden games change: all those `simple_trade` plays with the
+  Yasuo deck, where it used to pay [2] and exhaust Yasuo Unforgiven on turn 1
+  with no unit to move; it now plays a unit instead.
+- **Left over (card data, other decks).** Kennen Heart of the Tempest's "Give a
+  unit ASSAULT 2" is encoded as "a friendly unit": with only enemy units on the
+  board the ability is now refused, though by the print an enemy unit is a
+  legal (and pointless) choice.
 
 ### D10. A REACTION unit can't be played to base at reaction speed
 
