@@ -7,7 +7,7 @@
     uv run python scripts/piltover_sync.py compare --out piltover_diff.md
 
 `fetch` reads every page of https://piltoverarchive.com/cards (the card data
-is embedded in each page) and writes riftbound/data/cards/piltover_archive.json:
+is embedded in each page) and writes riftbound/data/reference/piltover_archive.json:
 one entry per printed variant, with the printed text, costs, Might, domains
 and the official errata (an errata'd card's text starts with "Card Errata
 Text"). Prices and shop ids are left out so a re-fetch only changes what
@@ -35,7 +35,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CARDS = ROOT / "riftbound" / "data" / "cards" / "all_cards.json"
-ARCHIVE = ROOT / "riftbound" / "data" / "cards" / "piltover_archive.json"
+ARCHIVE = ROOT / "riftbound" / "data" / "reference" / "piltover_archive.json"
 SITE = "https://piltoverarchive.com/cards"
 
 _PUSH = re.compile(r'self\.__next_f\.push\(\[1,(".*?")\]\)</script>', re.S)
