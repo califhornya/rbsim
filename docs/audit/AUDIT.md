@@ -30,7 +30,7 @@ said.
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | **fixed** (see D5) |
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
 | D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | **fixed** (see D7) |
-| D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | open |
+| D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | **fixed** (see D8) |
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | open |
 | D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | open |
@@ -254,8 +254,9 @@ said.
 - **Test.** `test_a_unit_played_from_facedown_in_the_main_phase_chooses_at_its_battlefield`.
 - **Weight.** 1 game in 400. Kennen is one card, and the play that shows the
   bug (from facedown in one's own Main Phase) is not the usual one.
-- **Fix.** Keep where it was played from on the pending trigger (its `extra`)
-  instead of on the card for the length of the call.
+- **Fixed.** The play effect's pending trigger carries the mark in its flags
+  (`_resolve_card_effects`), put back on the card while the ability is
+  finalized and resolves (`_card_flags`). No golden game changes.
 
 ### D9. An activated ability can be paid for with no legal target
 

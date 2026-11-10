@@ -199,8 +199,6 @@ def test_an_equipment_stays_when_its_unit_is_banished():
 
 # -- D8. A unit played from facedown chooses at its battlefield ------------------
 
-@pytest.mark.xfail(strict=True, reason="§811.1.d.3: the play effect of a unit played from facedown in "
-                                       "its player's Main Phase chooses among units anywhere")
 def test_a_unit_played_from_facedown_in_the_main_phase_chooses_at_its_battlefield():
     """Kennen Keeper of Balance hidden, then played: 'If a play effect of a
     hidden permanent chooses any targets, those targets must be chosen from

@@ -1429,12 +1429,18 @@ class GameLoop:
             # with what its play paid for (kicker, SHOW OFF).
             if play_specs:
                 side = "A" if actor is self.gs.A else "B"
+                flags = {"_kicker_paid": getattr(card, "_kicker_paid", False),
+                         "_showed_off": getattr(card, "_showed_off", False),
+                         "_shown": getattr(card, "_shown", None)}
+                if getattr(card, "_hidden_bf", None) is not None:
+                    # Played from facedown: its play effect chooses at that
+                    # battlefield (§811.1.d.3) whenever it gets to resolve, not
+                    # only while _play_from_hidden is still running.
+                    flags["_hidden_bf"] = card._hidden_bf
                 self._trigger(card, "on_play", [(i, es) for i, es in enumerate(effect_specs)
                                                 if es.trigger in ("on_play", "on_cast")],
                               battlefield, side, None, additional=False, once=False,
-                              flags={"_kicker_paid": getattr(card, "_kicker_paid", False),
-                                     "_showed_off": getattr(card, "_showed_off", False),
-                                     "_shown": getattr(card, "_shown", None)})
+                              flags=flags)
                 card._kicker_paid = False
                 card._showed_off = False
                 card._shown = None
