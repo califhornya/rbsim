@@ -1,3 +1,7 @@
+> **History, not the current state** (moved here 2026-11-10). Kept as written for the record;
+> some of it is outdated or wrong today. The current state is in `README.md`, the open work in
+> `BACKLOG.md`.
+
 # Deferred — what's parked, to pick up in the future
 
 Snapshot of everything intentionally left behind as of the Stage 0.5 + RL-env-

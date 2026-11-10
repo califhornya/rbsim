@@ -1,10 +1,67 @@
 # Backlog — everything left to finish before any training
 
 Rule (user, 2026-10-27): no training until this list is empty. Each item is
-checked against the current code before it is listed (DEFERRED.md and
-KNOWN_ISSUES.md hold the history, and many of their entries were fixed later
-without being marked). An item is done when a test plays the situation and
-checks what the card text / Core Rules say, not when the card "has effects".
+checked against the current code before it is listed (docs/history/DEFERRED.md
+and docs/history/KNOWN_ISSUES.md hold the history, and many of their entries
+were fixed later without being marked). An item is done when a test plays the
+situation and checks what the card text / Core Rules say, not when the card
+"has effects".
+
+This file has two parts: **Open now** (the only open items) and sections A-G
+(the closed work, kept as the log the code comments point to: "BACKLOG G3",
+"B20" ...). New items go in Open now.
+
+## Open now (2026-11-10)
+
+### O1. Card data that differs from the printed card
+`scripts/piltover_sync.py compare` against the official text
+(riftbound/data/reference/piltover_archive.json, Piltover Archive, errata
+included). The training precons (Zed, Shen): all 51 cards match. The other
+eight decks, 15 cards differ; checked so far:
+- [ ] Stupefy (Diana, Ezreal): printed **-1** Might, encoded `amount: 1` (+1).
+- [ ] Noxus Hopeful (Pyke, Rengar): printed Might 4, ours 3.
+- [ ] Pit Crew (Ornn), The Harrowing (Kennen): no text and no effects at all
+      (inert in their decks).
+- [ ] Thrill of the Hunt (Rengar): Power cost ours 2, printed 1 (check the
+      domains: ours "Fury/Body").
+- [ ] To read: En Garde, Yasuo Remorseful, Brutalizer, Ornn's Forge ("When"
+      vs printed "While"), Existential Dread (printed "attacking *enemy*
+      unit"); errata'd: Fizz Trickster, Emperor's Dais, Diana Lunari, Rengar
+      Trophy Hunter, Death from Below.
+- [ ] The rest of the corpus: 136 of 1100 cards flagged (many are the site's
+      typos or wording; a flag is a reason to read the card).
+
+### O2. Rules audit (independent of the card-by-card review)
+- [ ] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows not re-checked since G; at
+      least Flow is stale (implemented, tests/test_flow.py). Re-verify each
+      row against the code and a test.
+- [ ] An audit of the engine against docs/rules/CORE_RULES.md, deck cards
+      first (Zed, Shen), then the systems they use (combat, showdowns, chain,
+      costs): each deviation a failing test citing its §.
+
+### O3. AI, coach, match (from F, still open)
+- [ ] The net-guided search decides only the first choice of an action, none
+      while defending, none of the hidden ones (dig, predict).
+- [ ] Coach: the mulligan and the choices made during the opponent's moves
+      aren't coached; the page for two facedown cards (B8) and Neeko's legends
+      (B16) isn't visually checked.
+- [ ] Speed (B32): chain declarations run on a deep copy of the game (~1.3x
+      slower round robin); ideas in F.
+- [ ] Match: learned sideboarding; the battlefield chooser sees only its own
+      battlefields; the mulligan and the battlefield in the learned decision
+      space; `MINUTES_PER_TURN` (core/match.py) needs real turn times.
+- [ ] Stepwise engine for deep MCTS trees: only if the search needs it.
+
+### O4. Training
+- [ ] Nets saved before F3 (OBS_DIM 2979, ACTION_DIM 316) don't load and were
+      trained on old rules: retrain from scratch once O1-O2 are done.
+- [ ] Tuning left from docs/history/DEFERRED.md (Stage 1+): MCTS budget, LR
+      schedule, net size; evaluate on 100+ games (40 are too few to pick a
+      net); the net's early win estimates looked miscalibrated.
+
+### O5. Repository
+- [ ] `main` is 79 commits behind `coach` (all of the card-by-card review and
+      G1-G3 / F1-F3): merge.
 
 ## A. The precon decks, card by card (the cards the coach and training play)
 Method: read the text (the image when numbers matter), the encoding, the

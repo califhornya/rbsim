@@ -1,3 +1,7 @@
+> **History, not the current state** (moved here 2026-11-10). Kept as written for the record;
+> some of it is outdated or wrong today. The current state is in `README.md`, the open work in
+> `BACKLOG.md`.
+
 # Riftbound TCG Simulator — Handoff Recap
 
 This file is a self-contained briefing for the next model to pick up the work

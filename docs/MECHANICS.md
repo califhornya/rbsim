@@ -12,6 +12,11 @@
 
 # Riftbound Engine — Mechanics Completeness & Correctness
 
+> **Not re-checked since BACKLOG.md section G (2026-10-29).** Some rows lag the code: Flow
+> (§829) still reads "play-from-trash deferred", but it is implemented and tested
+> (`tests/test_flow.py`), and BACKLOG closes stacking EMPOWER. Re-verify every PARTIAL / GAP row
+> against the code and tests before relying on it (BACKLOG.md, "Open now").
+
 Burn-down of every game **dynamic**. Goal: every row `DONE` or explicitly
 `DEFERRED` (with a rule-cited reason) → then the simulator is trustworthy enough
 for AlphaZero. Card authoring (the long tail) is **not** tracked here.

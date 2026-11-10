@@ -20,7 +20,7 @@ Verdicts per card:
 - VANILLA — effects[] empty and no printed ability (pure stats/keywords). Fine.
 
 Usage:
-  uv run python scripts/coverage_audit.py            # writes COVERAGE_REPORT.md
+  uv run python scripts/coverage_audit.py            # writes docs/reports/COVERAGE_REPORT.md
   uv run python scripts/coverage_audit.py --decks-only
 """
 from __future__ import annotations
@@ -43,7 +43,7 @@ from riftbound.registry.engine_vocab import (
 REPO = Path(__file__).resolve().parent.parent
 DECK_DIR = REPO / "riftbound" / "data" / "decks"
 REVIEW_FILE = REPO / "scripts" / "review_needed.txt"
-OUT_FILE = REPO / "COVERAGE_REPORT.md"
+OUT_FILE = REPO / "docs" / "reports" / "COVERAGE_REPORT.md"
 
 _HANDLED_VERBS = set(EFFECT_REGISTRY) | set(NON_HANDLER_VERBS)
 _PARENS = re.compile(r"\([^)]*\)")

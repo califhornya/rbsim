@@ -23,7 +23,7 @@ gain is measured with that agent's play after the choice: a weak player can
 under-rate a choice whose payoff needs good follow-up.
 
 Usage:
-  uv run python scripts/choice_audit.py                         # writes CHOICE_AUDIT.md
+  uv run python scripts/choice_audit.py                         # writes docs/reports/CHOICE_AUDIT.md
   uv run python scripts/choice_audit.py --games 500 --events 200 --out /tmp/a.md
 """
 from __future__ import annotations
@@ -427,7 +427,7 @@ def main(
     seed: int = typer.Option(7, "--seed"),
     workers: int = typer.Option(default_workers(), "--workers",
                                 help="Worker processes (default: a quarter of the cores)"),
-    out: Path = typer.Option(ROOT / "CHOICE_AUDIT.md", "--out"),
+    out: Path = typer.Option(ROOT / "docs" / "reports" / "CHOICE_AUDIT.md", "--out"),
     raw: Path = typer.Option(None, "--raw", help="Optional: write the per-choice results as JSON"),
     only: str = typer.Option("", "--only", help="Comma-separated kind prefixes to replay (e.g. mode,discard)"),
 ) -> None:
