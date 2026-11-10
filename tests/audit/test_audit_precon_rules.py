@@ -18,8 +18,6 @@ from audit_helpers import act, card, choices, hide, labels, legend, scripted, se
 
 # -- D1. BURN past the end of the Main Deck is a Burn Out ----------------------
 
-@pytest.mark.xfail(strict=True, reason="§441.4 / §432.2: BURN with too few cards in the Main Deck "
-                                       "stops at the empty deck: no Burn Out, no point, the rest not burned")
 def test_burn_with_too_few_cards_burns_out():
     """Death Mark: 'BURN 3.' with one card left: burn it, Burn Out (the trash is
     recycled into the Main Deck, an opponent gains 1 point), burn two more."""
@@ -33,8 +31,6 @@ def test_burn_with_too_few_cards_burns_out():
     assert len(a.trash) == 3                     # those 2, and Death Mark
 
 
-@pytest.mark.xfail(strict=True, reason="§441.4 / §432.2: a player made to BURN with an empty Main "
-                                       "Deck doesn't Burn Out (Blade Twirler: 'They BURN 1')")
 def test_blade_twirler_burns_out_the_player_it_chooses():
     """'The first time I move each turn, choose a player. They BURN 1.'"""
     loop, a, b = setup()

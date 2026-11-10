@@ -23,7 +23,7 @@ said.
 
 | # | Deviation | § / card | Zed vs Shen | Status |
 |---|-----------|----------|-------------|--------|
-| D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | open |
+| D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | **fixed** (see D1) |
 | D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
 | D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | **fixed** (see D4) |
@@ -68,8 +68,12 @@ said.
   (the real rule gives the opponent a point each time) and denies Blade
   Twirler its point against an empty deck: an agent that gets there learns the
   opposite of the rule. Rare now, wrong in a way that pays.
-- **Fix.** `_burn` burns card by card and calls `GameLoop._burn_out` when the
-  deck is empty, as `_draw_one` does.
+- **Fixed.** `_burn` burns what is there, calls `GameLoop._burn_out` (trash
+  recycled, the opponent gains a point, which can end the game: D6) and burns
+  the rest. No golden game changes.
+- **Left over.** As for a draw (`_draw_one`), one Burn Out per instruction: with
+  the Main Deck and the trash both empty §432.3 has the player burn out again
+  and again until an opponent wins; the engine gives one point per attempt.
 
 ### D2. The Chosen Champion can't be played to a battlefield
 

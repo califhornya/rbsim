@@ -28,14 +28,20 @@ def test_burn_moves_cards_deck_to_trash():
     assert loop.gs.cards_burned_this_turn["A"] == 2
 
 
-def test_burn_stops_at_empty_deck():
+def test_burn_past_the_empty_deck_burns_out():
+    """§441.4: "If instructed to burn more cards than they have in their main
+    deck, they burn that many cards, burn out and then burn the rest." One
+    card, BURN 3: it is burned, the Burn Out recycles it and gives the opponent
+    a point (§432.2), it is burned again. (This test used to check that BURN
+    just stopped at the empty deck: docs/audit/AUDIT.md D1.)"""
     loop = _loop_with_deck(1)
     a = loop.gs.A
     ctx = EffectContext(loop, SpellCard(name="Src"), a, loop.gs.B, loop.gs.battlefields[0])
     EFFECT_REGISTRY["burn"](ctx, {"amount": 3})
     assert len(a.deck.cards) == 0
     assert len(a.trash) == 1
-    assert loop.gs.cards_burned_this_turn["A"] == 1
+    assert loop.gs.cards_burned_this_turn["A"] == 2
+    assert loop.gs.points_B == 1
 
 
 def test_cards_burned_condition():
