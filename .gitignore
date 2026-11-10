@@ -45,3 +45,13 @@ runs/
 
 # Card art copied from a saved RiftMana page (scripts/import_card_images.py): stays local
 riftbound/data/card_images/
+
+# Rulebook PDFs: the text lives in CORE_RULES.md / TOURNAMENT_RULES.md
+*.pdf
+
+# Script outputs and backups (regenerated on each run; not source)
+*.bak
+*.log
+scripts/review_needed.txt
+scripts/suggested_vocab.txt
+scripts/spot_check_*.md
