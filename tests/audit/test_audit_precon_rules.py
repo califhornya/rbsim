@@ -277,8 +277,6 @@ def test_a_reaction_unit_can_be_played_to_base_during_a_showdown():
 
 # -- D11. REACTION plays during a showdown aren't tied to its battlefield --------
 
-@pytest.mark.xfail(strict=True, reason="§822.1.b / §811.6: during a showdown an AMBUSH unit and a "
-                                       "facedown card can be played only at the showdown's battlefield")
 def test_ambush_and_facedown_plays_at_another_battlefield_during_a_showdown():
     """AMBUSH: 'I have [Reaction] as long as I'm being played to a battlefield
     where you control Units.' A facedown card 'may be played any time a card
@@ -297,3 +295,21 @@ def test_ambush_and_facedown_plays_at_another_battlefield_during_a_showdown():
     assert any("Soulspinner" in lbl and "BF0" in lbl for lbl in offered)     # here it can
     assert any("Soulspinner" in lbl and "BF1" in lbl for lbl in offered)
     assert any("from Hidden" in lbl and "BF1" in lbl for lbl in offered)
+
+
+def test_a_unit_ambushed_and_a_card_played_from_facedown_elsewhere_during_a_showdown():
+    """Played, not only offered: both enter at the other battlefield while the
+    showdown goes on at the first."""
+    loop, a, b = setup(active="A")
+    loop.gs.turn = 5
+    bf0, bf1 = loop.gs.battlefields
+    bf0.add_unit("B", unit("Defender", 2))
+    bf1.add_unit("B", unit("Elsewhere", 2))
+    hide(loop, "B", 1, "Disciple of Shen")
+    b.hand.append(card("Soulspinner"))
+    a.base_units.append(unit("Mover", 3))
+    A, B = scripted(loop, a, b, A={"main": ["Move Mover base→BF0", "PASS"]},
+                    B={"showdown": ["AMBUSH Soulspinner @BF1", "Play Disciple of Shen from Hidden @BF1"]})
+    loop._run_main_actions()
+    assert sorted(u.card.name for u in bf1.units_B) == ["Disciple of Shen", "Elsewhere", "Soulspinner"]
+    assert not bf0.units_B and bf0.control() == "A"      # the fight at battlefield 0 went on without them

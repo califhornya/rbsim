@@ -7689,12 +7689,13 @@ class GameLoop:
                 if len(player.hand) < before:
                     return "acted"
         elif kind == "CHAMPION":
-            # AMBUSH: deploy the champion into the showdown lane at reaction speed.
-            if self._deploy_ambush_champion(side, bf_idx):
+            # AMBUSH: deploy the champion at reaction speed, to the battlefield
+            # the action names (the showdown's if it names none).
+            if self._deploy_ambush_champion(side, lane if isinstance(lane, int) else bf_idx):
                 return "acted"
         elif kind == "HIDDEN_PLAY":
-            # Play a facedown card for [0] into the showdown lane (§737.1.b).
-            if self._play_from_hidden(side, bf_idx, idx or 0):
+            # Play a facedown card for [0] (§811.1.b), at its battlefield.
+            if self._play_from_hidden(side, lane if isinstance(lane, int) else bf_idx, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
             # ACTION / REACTION ability: on a chain run now, then focus passes

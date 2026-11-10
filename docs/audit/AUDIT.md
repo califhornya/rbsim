@@ -33,7 +33,7 @@ said.
 | D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | **fixed** (see D8) |
 | D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
 | D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | **fixed** (see D10) |
-| D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | open |
+| D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | **fixed** (see D11) |
 | D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | open |
 | D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | open |
 | D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | open |
@@ -331,8 +331,11 @@ said.
 - **Weight.** Low: a missing option (Soulspinner, Morgana, Shen Kinkou, the
   facedown cards), useful when the fight is lost and the other battlefield is
   the one to reinforce before the Hold.
-- **Fix.** In `_showdown_actions`, offer every lane `_ambush_unit_lanes` and
-  `_hidden_playable` return; `_showdown_step` uses the action's lane.
+- **Fixed.** `_showdown_actions` offers every battlefield `_ambush_unit_lanes`,
+  `_ambush_legal_lanes` (the champion) and `_hidden_playable` return;
+  `_showdown_step` plays at the battlefield the action names. Second test:
+  `test_a_unit_ambushed_and_a_card_played_from_facedown_elsewhere_during_a_showdown`.
+  No golden game changes.
 
 ## Deviations, priority 2: `docs/MECHANICS.md` PARTIAL / GAP rows
 

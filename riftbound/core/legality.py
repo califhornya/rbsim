@@ -243,22 +243,26 @@ def _showdown_actions(loop: "GameLoop", ap) -> list[GameAction]:
         elif isinstance(card, UnitCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
             if _affordable(loop, ap, card):
                 actions.append(GameAction.play("UNIT", idx, lane, f"Showdown unit {card.name}"))
-        # AMBUSH units into the showdown's battlefield.
-        if isinstance(card, UnitCard) and lane in loop._ambush_unit_lanes(card, ap.name) \
-                and _affordable(loop, ap, card, dst=lane):
-            actions.append(GameAction("UNIT", idx, lane, lane, f"AMBUSH {card.name} @BF{lane}"))
+        # AMBUSH (and REACTION) units, to any battlefield they may be played to
+        # at reaction speed, not only the showdown's (§822.1.b).
+        if isinstance(card, UnitCard):
+            for dst in loop._ambush_unit_lanes(card, ap.name):
+                if _affordable(loop, ap, card, dst=dst):
+                    actions.append(GameAction("UNIT", idx, lane, dst, f"AMBUSH {card.name} @BF{dst}"))
         # ACTION / REACTION gear (QUICK-DRAW §745, Jarvan IV's DEPLOY gear):
         # playable during a showdown.
-        elif isinstance(card, GearCard) and loop._play_timing(card, ap.name) in ("action", "reaction"):
+        if isinstance(card, GearCard) and loop._play_timing(card, ap.name) in ("action", "reaction"):
             if _affordable(loop, ap, card, dst=lane if card.has_keyword("DEPLOY") else None):
                 actions.append(GameAction.play("GEAR", idx, lane, f"Quick-Draw {card.name} @BF{lane}"))
-    # AMBUSH: deploy the champion into the showdown lane at reaction speed.
+    # AMBUSH: deploy the champion at reaction speed, wherever it may ambush.
     champ = gs.champion_A if ap.name == "A" else gs.champion_B
-    if (champ is not None and lane in loop._ambush_legal_lanes(ap.name)
-            and _affordable(loop, ap, champ, dst=lane)):
-        actions.append(GameAction.champion(lane, f"AMBUSH {champ.name} @BF{lane}"))
-    # HIDDEN: play a facedown card into the showdown lane for [0] (§737.1.b).
-    actions.extend(_hidden_play_actions(loop, ap.name, only_lane=lane))
+    if champ is not None:
+        for dst in loop._ambush_legal_lanes(ap.name):
+            if _affordable(loop, ap, champ, dst=dst):
+                actions.append(GameAction.champion(dst, f"AMBUSH {champ.name} @BF{dst}"))
+    # HIDDEN: play a facedown card for [0] (§811.6: any time a REACTION card
+    # may be played), at the battlefield it is hidden at.
+    actions.extend(_hidden_play_actions(loop, ap.name))
     # ACTION and REACTION abilities.
     actions.extend(_ability_actions(loop, ap, ap.name))
     return actions
