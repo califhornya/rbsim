@@ -3586,9 +3586,12 @@ class GameLoop:
                 or (teemo and ap.energy >= 1))
 
     def _cleanup_hidden_cards(self) -> None:
-        """§106.4.d / §322.8: a face-down card whose owner no longer controls its
-        battlefield is removed to its owner's trash. Called during end-of-turn
-        cleanup."""
+        """§107.3.d / §323.6.a: a face-down card whose owner no longer controls
+        its battlefield is removed to its owner's trash in the next Cleanup:
+        called once an action is done, once a chain has resolved, and as the
+        turn ends. Control doesn't change while a showdown or combat goes on
+        there (Battlefield.control, §190.4.b), so a card hidden there stays
+        playable until it is over."""
         for bf in self.gs.battlefields:
             for fd in [fd for fd in bf.facedowns if bf.control() != fd.owner]:
                 self._put_in_trash(self.gs.get_player(fd.owner), fd.card)
@@ -5543,6 +5546,8 @@ class GameLoop:
         # A unit a spell or ability moved into a battlefield (Twilight Step).
         if kind != "MOVE":
             self._run_staged_showdowns()
+        if not self.gs.chain:
+            self._cleanup_hidden_cards()      # the Cleanup after the action (§319)
 
     # ------------------------------------------------------------------
     # Generic activated abilities (Round 4 Tier 2 / D3)
@@ -7475,6 +7480,8 @@ class GameLoop:
         self._flush_triggers(run=False)
         if self.gs.chain:
             self._run_chain(self.gs.chain[-1].player)
+        elif not getattr(self, "_dry_run", False):
+            self._cleanup_hidden_cards()      # the Cleanup as the chain ends (§319.5)
 
     def _resolve_chain_passing(self) -> None:
         """Resolve the whole chain as if every player passed each time (a

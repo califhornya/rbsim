@@ -81,9 +81,6 @@ def test_the_chosen_champion_can_be_played_to_a_battlefield_you_control():
 
 # -- D3. A facedown card goes when its player loses the battlefield -------------
 
-@pytest.mark.xfail(strict=True, reason="§323.6.a / §107.3.d: a facedown card stays until the end of "
-                                       "the turn after its player lost control of the battlefield, and "
-                                       "can still be played there")
 def test_a_facedown_card_is_trashed_as_its_player_loses_the_battlefield():
     """Zed kills Shen's only unit at a battlefield in the Main Phase: Shen
     loses control in the next Cleanup (§323.5) and the card hidden there goes to

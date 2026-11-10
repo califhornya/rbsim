@@ -25,7 +25,7 @@ said.
 |---|-----------|----------|-------------|--------|
 | D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | open |
 | D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
-| D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | open |
+| D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | open |
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | open |
 | D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | open |
@@ -122,10 +122,16 @@ said.
   and Ghosts before attacking, and the hidden card is gone) doesn't exist in
   the simulation, so Shen's hidden cards are safer than they should be and Zed
   never learns the answer.
-- **Fix.** Run `_cleanup_hidden_cards` whenever a Cleanup would (after an
-  action, after a chain resolves, as a showdown or combat ends): it already
-  reads `Battlefield.control()`, which keeps control during a showdown or
-  combat (§190.4.b).
+- **Fixed.** `_cleanup_hidden_cards` also runs once an action is done
+  (`_apply_action`) and once a chain has resolved (`_resolve_chain`), not only
+  as the turn ends. It reads `Battlefield.control()`, which keeps control
+  during a showdown or combat there (§190.4.b), so a card hidden at a
+  battlefield under attack stays playable until the fight is over. Over 150
+  random games no facedown card is left at a battlefield its owner doesn't
+  control at any decision (18 before). No golden game changes.
+  `tests/test_g2_origins.py::test_pack_of_wonders_returns_a_gear_or_a_facedown_card`
+  had a card hidden at a battlefield nobody controlled (§107.3.c forbids it);
+  its board now has a unit there.
 
 ### D4. A Combat Cleanup heals only the units that fought
 

@@ -113,6 +113,9 @@ def test_pack_of_wonders_returns_a_gear_or_a_facedown_card():
     gear = GearCard(name="Mine", cost_energy=1)
     a.base_gear.extend([pack, gear])
     hidden = SpellCard(name="Hidden")
+    # A controls the battlefield its card is hidden at (§107.3.c), with a token
+    # (the baseline returns a card first).
+    loop.gs.battlefields[0].add_unit("A", _unit("Holder", 1, is_token=True))
     loop.gs.battlefields[0].facedowns.append(FacedownCard(card=hidden, owner="A", turn_hidden=0))
     loop._apply_activated_ability(a, b, _usable(loop, "A", "return_friendly_to_hand"))
     assert gear in a.hand and pack in a.base_gear and pack.tapped
