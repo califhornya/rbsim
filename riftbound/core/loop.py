@@ -5445,17 +5445,32 @@ class GameLoop:
             if champion is None or already_deployed:
                 return
             # The Chosen Champion is played from the Champion Zone like any unit
-            # from hand: its own reductions, ACCELERATE, "when you play me", ...
+            # from hand (§108.3.d): to base (dst None) or a battlefield it may be
+            # played to (§355.2.a), its own reductions, ACCELERATE, "when you
+            # play me", ...
+            dst = None if dst_lane is None or dst_lane == base_index else dst_lane
+            if dst not in self._unit_play_destinations(champion, ap.name):
+                return
+            bf = None if dst is None else self.gs.battlefields[dst]
+            prev_controller = bf.controller() if bf is not None else None
+            surcharge = self._destination_surcharge(champion, dst, ap.name)
             energy, power = self._effective_cost(champion, ap)
+            energy = max(0, energy - self._destination_discount(champion, dst, ap.name))
+            if surcharge and not self._can_pay_generic_power(ap, surcharge + int(power or 0)):
+                return
             if not self._pay_card(ap, champion, energy, power):
                 return
+            if surcharge:
+                self._pay_generic_power(ap, surcharge)
             if is_A:
                 self.gs.champion_A_deployed = True
             else:
                 self.gs.champion_B_deployed = True
             if self.verbose:
-                print(f"  {ap.name} deploys CHAMPION: {champion.name}")
-            self._play_unit(champion, ap.name, from_zone="champion")
+                print(f"  {ap.name} deploys CHAMPION: {champion.name}" + (f" to BF{dst}" if bf else ""))
+            self._play_unit(champion, ap.name, bf=bf, from_zone="champion")
+            if bf is not None:
+                self._arrive_at(bf, ap.name, prev_controller)
             if self.recorder:
                 self.recorder.record_play(
                     ap.name,

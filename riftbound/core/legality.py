@@ -93,8 +93,21 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     # --- deploy champion ---
     champ = gs.champion_A if side == "A" else gs.champion_B
     deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
-    if champ is not None and not deployed and _affordable(loop, ap, champ):
-        actions.append(GameAction.champion(0, f"Deploy champion {champ.name}"))
+    if champ is not None and not deployed:
+        # Played from the Champion Zone like a unit from hand (§108.3.d): to
+        # base or a battlefield its player controls (§355.2.a).
+        for dst in loop._unit_play_destinations(champ, side):
+            if not _affordable(loop, ap, champ, dst=dst):
+                continue
+            surcharge = loop._destination_surcharge(champ, dst, side)
+            if surcharge and not loop._can_pay_generic_power(
+                    ap, surcharge + int(loop._effective_cost(champ, ap)[1] or 0)):
+                continue
+            if dst is None:
+                actions.append(GameAction.champion(0, f"Deploy champion {champ.name}"))
+            else:
+                actions.append(GameAction("CHAMPION", None, 0, dst,
+                                          f"Deploy champion {champ.name} to BF{dst}"))
 
     # --- movement (illegal during showdown or an open chain), one action per
     # ready unit; consecutive moves to one battlefield go together (§144.3) ---

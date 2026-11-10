@@ -24,7 +24,7 @@ said.
 | # | Deviation | § / card | Zed vs Shen | Status |
 |---|-----------|----------|-------------|--------|
 | D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | open |
-| D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | open |
+| D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
 | D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | open |
 | D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | open |
 | D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | open |
@@ -90,10 +90,14 @@ said.
   the Shadows lose a full turn. Not an exploit: a systematic handicap on the
   strongest play of both decks, and the net learns to value the champion
   accordingly.
-- **Fix.** The main-phase CHAMPION action takes a destination like a UNIT
-  (`dst_lane`), from `_unit_play_destinations`; the action encoding
-  (`riftbound/ai/encoding.py`) needs one more champion slot (base + each
-  battlefield), which changes `ACTION_DIM`.
+- **Fixed.** The main-phase CHAMPION action takes a destination like a UNIT
+  (`("CHAMPION", None, 0, dst)`), from `_unit_play_destinations`, with the
+  destination's discount and surcharge. The action encoding
+  (`riftbound/ai/encoding.py`) has `N_BF` more slots (`_OFF_CHAMP_BF`):
+  **`ACTION_DIM` grows by 3, so a net saved before this commit no longer
+  loads** (BACKLOG O4 already calls for training from scratch). The heuristic
+  agents still play the champion to base (their choice, not a rule). No golden
+  game changes.
 
 ### D3. A facedown card outlives the loss of its battlefield
 

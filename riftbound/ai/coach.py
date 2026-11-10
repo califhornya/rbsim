@@ -295,7 +295,9 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
     elif kind == "CHAMPION":
         champ = gs.champion_A if side == "A" else gs.champion_B
         name, src = getattr(champ, "name", "?"), f"champion:{rel}"
-        if point == DecisionPoint.TURN_ACTION:
+        if point == DecisionPoint.TURN_ACTION and dst is not None and dst != n_bf:
+            text, to = f"Gioca il campione {name} su {_bf_name(gs, dst)}", f"bf:{dst}"
+        elif point == DecisionPoint.TURN_ACTION:
             text, to = f"Gioca il campione {name}", f"base:{rel}"
         else:
             text, to = f"Gioca il campione {name} con AMBUSH su {_bf_name(gs, lane)}", f"bf:{lane}"

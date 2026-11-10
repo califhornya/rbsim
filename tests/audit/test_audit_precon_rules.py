@@ -57,8 +57,6 @@ def _champion_board():
     return loop, a
 
 
-@pytest.mark.xfail(strict=True, reason="§108.3.d / §355.2.a: the Chosen Champion can only be played "
-                                       "to base, never to a battlefield its player controls")
 def test_the_chosen_champion_can_be_played_to_a_battlefield_you_control():
     """'The Chosen Champion can be played from here as normal' (§108.3.d); a unit
     is played to 'the controller's Base or a Battlefield the controller
@@ -73,6 +71,12 @@ def test_the_chosen_champion_can_be_played_to_a_battlefield_you_control():
         where = [u.card.name for u in loop.gs.battlefields[0].units_A]
         landed.append("BF0" if "Shen Leader of the Kinkou Order" in where else "base")
     assert sorted(landed) == ["BF0", "base"]
+    # The two plays are two policy slots (riftbound/ai/encoding.py).
+    from riftbound.ai.encoding import action_to_index
+    loop, a = _champion_board()
+    slots = [action_to_index(g, len(loop.gs.battlefields))
+             for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "CHAMPION"]
+    assert None not in slots and len(set(slots)) == 2
 
 
 # -- D3. A facedown card goes when its player loses the battlefield -------------
