@@ -7453,8 +7453,11 @@ class GameLoop:
                 self.gs.get_player(owner).base_gear.append(g)
 
     def _run_chain(self, caster: str) -> None:
-        """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336)."""
-        active = self.gs.other(caster)
+        """Execute the spell chain (LIFO stack) with two-player priority loop (§331–336).
+        The controller of the newest item gains Priority first (§337.4, §340.4):
+        `caster`, then, after each action, whoever controls the newest item; a
+        pass hands it to the other player (§338.1.b.1), two in a row resolve."""
+        active = caster
         passes = 0
         rounds = 0
 
@@ -7479,8 +7482,13 @@ class GameLoop:
             # An action that does nothing (a spell it can't pay for once taxes
             # are added) counts as a pass: two players proposing one each never
             # stopped.
-            passes = 0 if step == "acted" else passes + 1
-            active = self.gs.other(active)
+            if step == "acted":
+                passes = 0
+                if self.gs.chain:
+                    active = self.gs.chain[-1].player
+            else:
+                passes += 1
+                active = self.gs.other(active)
 
         self._resolve_chain()
 

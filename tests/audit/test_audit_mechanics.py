@@ -190,3 +190,46 @@ def test_keeper_of_law_counts_only_your_units_at_the_battlefield():
     bf0.add_unit("A", unit("Right", 1))      # two of yours, and an enemy unit
     assert bf0.control() == "A"
     assert loop._effective_cost(keeper, a, 0) == (3, 0)
+
+
+# -- Q1. Priority on a chain: the controller of the newest item first ------------
+
+def _reaction_order(sa, sb) -> list:
+    """Log which side is asked, in order, at each reaction decision."""
+    order: list = []
+    for s in (sa, sb):
+        ask = s.decide_reaction
+
+        def logged(opponent, chain, _ask=ask, _side=s.player.name):
+            order.append(_side)
+            return _ask(opponent, chain)
+        s.decide_reaction = logged
+    return order
+
+
+def test_the_player_who_plays_a_spell_gains_priority_first():
+    """§337.4: once the item is finalized 'the controller of the next item on
+    the chain gains Priority'; a pass hands it on (§338.1.b.1), two passes in a
+    row resolve (§339.1)."""
+    loop, a, b = setup(active="A")
+    _decks(a, b)
+    sa, sb = scripted(loop, a, b)
+    order = _reaction_order(sa, sb)
+    a.hand.append(card("Consult the Past"))
+    act(loop, "A", "Cast Consult the Past")
+    assert order == ["A", "B"] and not loop.gs.chain
+
+
+def test_a_reaction_gives_its_player_priority_first_and_then_the_older_item_its_own():
+    """B answers A's spell: B, controlling the newest item, has Priority first
+    (§337.4); once B's spell resolves, A, controlling the newest item left, has
+    it first (§340.4)."""
+    loop, a, b = setup(active="A")
+    _decks(a, b)
+    sa, sb = scripted(loop, a, b, B={"reaction": ["React Consult the Past"]})
+    order = _reaction_order(sa, sb)
+    a.hand.append(card("Consult the Past"))
+    b.hand.append(card("Consult the Past"))
+    act(loop, "A", "Cast Consult the Past")
+    assert order == ["A", "B", "B", "A", "A", "B"]
+    assert not loop.gs.chain and len(b.trash) == 1
