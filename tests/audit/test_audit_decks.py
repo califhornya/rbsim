@@ -60,7 +60,6 @@ def test_an_ability_has_only_the_timing_its_card_prints():
 
 # -- D24. QUICK-DRAW attaches only at the battlefield it is played "at" ----------
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D24")
 def test_quick_draw_attaches_to_a_unit_in_base():
     """§819.1.d: 'When you play this, attach it to a Unit you control.' Cloth
     Armor, the only unit of its player in base."""
@@ -72,7 +71,6 @@ def test_quick_draw_attaches_to_a_unit_in_base():
     assert [g.name for g in wearer.gear] == ["Cloth Armor"] and not a.base_gear
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D24")
 def test_quick_draw_chooses_among_all_the_units_you_control():
     loop, a, b = setup(active="A")
     front, back = unit("Front", 2), unit("Back", 2)

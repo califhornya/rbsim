@@ -4758,11 +4758,14 @@ class GameLoop:
         if card.has_keyword("DEPLOY"):
             deployed_bf = self.gs.battlefields[lane]
         elif self._quick_draw(card, side):
-            target_bf = self.gs.battlefields[lane]
-            friendly_units = target_bf.units_A if side == "A" else target_bf.units_B
+            # §819.1.d: "attach it to a Unit you control", any of them. The
+            # baseline keeps to the units at the battlefield it is played "at".
+            here = list(self.gs.battlefields[lane]._units_for(side))
+            friendly_units = here + [u for u in self._friendly_units_of(side)
+                                     if not any(u is h for h in here)]
             if friendly_units:
-                attached_to = self.choose("equip", side, list(friendly_units),
-                                          self._equip_baseline(friendly_units), card)
+                attached_to = self.choose("equip", side, friendly_units,
+                                          self._equip_baseline(here or friendly_units), card)
                 attached_to.gear.append(card)
                 self._fire_attached(attached_to, side)
         if deployed_bf is not None:
