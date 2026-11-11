@@ -29313,6 +29313,10 @@
     "name": "Patched Porobot",
     "domain": "Mind",
     "category": "Unit",
+    "types": [
+      "Unit",
+      "Gear"
+    ],
     "sub_type": "Mech, Piltover, Poro",
     "might": 2,
     "cost_energy": 2,

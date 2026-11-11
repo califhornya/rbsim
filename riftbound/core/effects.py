@@ -5,7 +5,7 @@ from typing import Any, Callable, Mapping, Optional
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 from .battlefield import Battlefield
-from .cards import GearCard, SpellCard, UnitCard
+from .cards import GearCard, SpellCard, UnitCard, is_gear
 from .combat import UnitInPlay
 from .state import ChainItem
 
@@ -47,7 +47,7 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "This deals 1 Bonus Damage for each card with this name in your trash"
         # (Consuming Curse)
         amount += _amount(ctx, {"amount_source": spec["bonus_source"]})
-    if amount > 0 and isinstance(ctx.card, GearCard):
+    if amount > 0 and is_gear(ctx.card):
         # "Abilities of friendly gear deal 1 Bonus Damage" (Ziggs Short-Fused)
         amount += sum(int(es.params.get("amount", 1)) for src, _bf in ctx.loop._sources_in_play(ctx.actor_side)
                       for es in (CARD_REGISTRY[src.name].effects if src.name in CARD_REGISTRY else ())
@@ -3829,7 +3829,7 @@ def _zone_card_matches(card, tf: Mapping[str, Any]) -> bool:
         return False
     if tf.get("is_spell") and cat != "SPELL":
         return False
-    if tf.get("is_gear") and cat != "GEAR":
+    if tf.get("is_gear") and not is_gear(card):
         return False
     if tf.get("is_champion") and cat != "CHAMPION":
         return False
@@ -3891,7 +3891,7 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     if "lacks_keyword" in tf and has(str(tf["lacks_keyword"])):
         return False
     cat = _card_category_name(card)
-    if tf.get("is_gear") and cat != "GEAR":
+    if tf.get("is_gear") and not is_gear(card):
         return False
     if tf.get("is_spell") and cat != "SPELL":
         return False
@@ -4534,7 +4534,8 @@ def _clockwork_animate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     entries = [e for e in _gear_entries(ctx, enemy_first=False) if e[0] == side]
     if not entries or not loop._can_pay_energy_and_generic(ctx.actor, 1, 0, None):
         return
-    current = loop._gear_units(side)
+    # (A unit printed as a gear too, Patched Porobot, is not one she made.)
+    current = [u for u in loop._gear_units(side) if not isinstance(u.card, UnitCard)]
 
     def energy(e):
         return int(getattr(getattr(e[2], "card", e[2]), "cost_energy", 0) or 0)
@@ -5069,7 +5070,8 @@ def _zone_effect_card_ok(card, spec: Mapping[str, Any]) -> bool:
     filter: its target_filter (type, tag, keyword, Energy/Power bounds) plus the
     older `filter` strings ("gear", "unit_or_gear") some specs still use."""
     legacy = _LEGACY_ZONE_FILTERS.get(str(spec.get("filter") or "").lower())
-    if legacy and _card_category_name(card) not in legacy:
+    if legacy and _card_category_name(card) not in legacy \
+            and not ("GEAR" in legacy and is_gear(card)):      # a unit that is a gear too (§178)
         return False
     tf = spec.get("target_filter") or {}
     if not _zone_card_matches(card, tf):

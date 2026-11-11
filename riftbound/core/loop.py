@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple, TYPE_CHECKING, Iterable
 
 from .state import GameState, ChainItem, PendingTrigger
-from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard
+from .cards import Card, GearCard, SpellCard, UnitCard, LegendCard, is_gear
 from .combat import UnitInPlay, kill_order
 from .player import Player
 from .battlefield import Battlefield, DeployedGear, FacedownCard
@@ -1824,6 +1824,8 @@ class GameLoop:
         Energy and Power (Kai'Sa). `spend`: use them up."""
         if isinstance(card, UnitCard):
             pools = [("earmarked_energy_unit", "energy"), ("earmarked_power_permanent", "power")]
+            if is_gear(card):                    # a unit that is a gear too (§178)
+                pools.append(("earmarked_power_gear", "power"))
         elif isinstance(card, GearCard):
             pools = [("earmarked_power_permanent", "power"), ("earmarked_power_gear", "power")]
         elif isinstance(card, SpellCard):
@@ -2892,8 +2894,9 @@ class GameLoop:
         if ctype == "you_control_n_or_more_gear":
             # Gear the actor controls: attached to their units + loose in base,
             # e.g. Patched Porobot "if you control 3 or more other gear, draw 1".
-            # The source is a unit, not gear, so nothing to exclude.
-            count = (sum(len(u.gear) + u.gear_unit for u in _friendly_units()) + len(actor.base_gear)
+            # Porobot is a gear itself ("Unit Gear", §178): "other" leaves it out.
+            count = (sum(len(u.gear) + (u.gear_unit and u.card is not card) for u in _friendly_units())
+                     + len(actor.base_gear)
                      + sum(len(bf.gear_for(side)) for bf in self.gs.battlefields))
             return count >= _threshold()
         if ctype == "opponent_controls_a_battlefield":
@@ -2994,7 +2997,7 @@ class GameLoop:
             # this turn" (Swain Visionary).
             played = self.gs.played_cards_this_turn.get(side, ())
             return (any(isinstance(c, UnitCard) for c in played)
-                    and any(isinstance(c, GearCard) for c in played)
+                    and any(is_gear(c) for c in played)
                     and any(isinstance(c, SpellCard) for c in played))
         if ctype == "controller_has_facedown_card":
             # "if you control a facedown card at a battlefield" (Mushroom Pouch).
@@ -3940,7 +3943,7 @@ class GameLoop:
         energy -= extras.get("energy", 0)
         if power:
             power = max(0, power - extras.get("power", 0))
-        if isinstance(card, GearCard) and self._orianna_discount_ready(side):
+        if is_gear(card) and self._orianna_discount_ready(side):
             energy -= 1                                    # Orianna Mechanical Marvel
             if power:
                 power = max(0, power - 1)
@@ -4127,6 +4130,15 @@ class GameLoop:
         elif parsed["power"]:
             parsed["power"] -= 1
         return parsed
+
+    def _use_gear_discount(self, side: str) -> None:
+        """A gear was played from hand: Orianna Mechanical Marvel's "once each
+        turn" is used up."""
+        for u in self._units_at_battlefields_with(side, "gear_discount_once"):
+            key = (id(u.card), "orianna")
+            if self.gs.once_per_turn_used.get(key) != self.gs.turn:
+                self.gs.once_per_turn_used[key] = self.gs.turn
+                break
 
     def _orianna_discount_ready(self, side: str) -> bool:
         """ "Once each turn, while I'm at a battlefield, you may pay [1] [rune]
@@ -4468,6 +4480,8 @@ class GameLoop:
             energy = max(0, energy - actor.earmarked_energy_spell)
         if isinstance(card, UnitCard):
             energy = max(0, energy - actor.earmarked_energy_unit)
+            if power and is_gear(card):          # a unit that is a gear too (§178)
+                power = max(0, power - actor.earmarked_power_gear)
         if power and domain is None:
             # Its power from the card's domains, or any (_power_domains).
             if not actor.can_pay_power_of(power, self._power_domains(card)):
@@ -4537,6 +4551,10 @@ class GameLoop:
             from_earmark = min(energy, actor.earmarked_energy_unit)
             actor.earmarked_energy_unit -= from_earmark
             energy -= from_earmark
+            if power and is_gear(card):          # a unit that is a gear too (§178)
+                from_earmark = min(power, actor.earmarked_power_gear)
+                actor.earmarked_power_gear -= from_earmark
+                power -= from_earmark
         if power and domain is None:
             if not actor.pay_power_of(power, self._power_domains(card)):
                 return False
@@ -4702,6 +4720,11 @@ class GameLoop:
         self._rally(unit, side)
         self._fire_enemy_unit_played(unit, side)
         self._fire_card_played(side, card, from_zone)
+        if is_gear(card):
+            # A unit that is a gear too (Patched Porobot, §178): a gear was played.
+            if from_zone == "hand":
+                self._use_gear_discount(side)
+            self._fire_units_trigger("on_enemy_gear_played", self.gs.other(side), triggering_card=card)
         if bf is not None:
             self._unit_played_here(bf, side, unit)
         self._unit_play_draw(side)
@@ -4762,11 +4785,7 @@ class GameLoop:
         played; DEPLOY (§830.1.a) gear go to a battlefield."""
         ap = self.gs.get_player(side)
         if from_zone == "hand":
-            for u in self._units_at_battlefields_with(side, "gear_discount_once"):
-                key = (id(u.card), "orianna")
-                if self.gs.once_per_turn_used.get(key) != self.gs.turn:
-                    self.gs.once_per_turn_used[key] = self.gs.turn     # used up
-                    break
+            self._use_gear_discount(side)
         attached_to = None
         deployed_bf = None
         if card.has_keyword("DEPLOY"):
@@ -6336,7 +6355,7 @@ class GameLoop:
     def _discardable(ap: Player, parsed: dict) -> list:
         kind = parsed.get("discard_type")
         if kind == "gear":
-            return [c for c in ap.hand if isinstance(c, GearCard)]
+            return [c for c in ap.hand if is_gear(c)]
         if kind == "spell":                 # "Discard a spell" (Mel Defiant Soul)
             return [c for c in ap.hand if isinstance(c, SpellCard)]
         return list(ap.hand)

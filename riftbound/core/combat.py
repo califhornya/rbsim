@@ -83,6 +83,12 @@ class UnitInPlay:
     # its Energy cost; it is still a gear for "a friendly gear".
     gear_unit: bool = False
 
+    def __post_init__(self) -> None:
+        # A unit printed "Unit Gear" (Patched Porobot, §178) is a unit gear
+        # wherever it is in play, like a gear an effect made a unit (Orianna).
+        if getattr(self.card, "also_gear", False):
+            self.gear_unit = True
+
     def reset_damage(self) -> None:
         self.damage = 0
         self.bonus_might = 0
@@ -120,7 +126,9 @@ class UnitInPlay:
         effect made it this turn."""
         if self.base_might_override is not None:
             return self.base_might_override
-        return int(self.card.cost_energy or 0) if self.gear_unit else int(self.card.might or 0)
+        if self.gear_unit and not isinstance(self.card, UnitCard):
+            return int(self.card.cost_energy or 0)      # a gear an effect made a unit
+        return int(self.card.might or 0)
 
     @property
     def tags(self) -> list:

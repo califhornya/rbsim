@@ -125,8 +125,8 @@ def test_ezreal_legend_counts_an_enemy_gear_chosen():
 
 
 # -- D27. Patched Porobot (VEN-058; vendetta_ornn) is a unit and a gear ----------
+# (Decided by the owner, 2026-11-11: it is both at once.)
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D27 (open)")
 def test_patched_porobot_is_a_gear_too():
     """Printed type 'Unit Gear'. §178.1: 'A Game Object that is more than one
     type has the properties of all of their types'. Pit Crew: 'When you play a
@@ -139,7 +139,6 @@ def test_patched_porobot_is_a_gear_too():
     assert crew.ready
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D27 (open)")
 def test_patched_porobot_is_killed_as_a_gear():
     """§178.3: 'A unit that is also a gear can be targeted by spells and
     abilities ... that say "Kill a unit," or "Kill a gear."' Detonate: 'Kill a
@@ -150,6 +149,56 @@ def test_patched_porobot_is_killed_as_a_gear():
     a.hand.append(card("Detonate"))
     act(loop, "A", "Cast Detonate")
     assert not b.base_units and len(b.hand) == 2
+
+
+def test_patched_porobot_is_the_first_gear_ornns_forge_makes_cheaper():
+    """Ornn's Forge: 'the first friendly non-token gear played each turn costs
+    [1] less.' The Porobot ([2]) is that gear; the next one pays in full."""
+    loop, a, b = setup(active="A", rich=())
+    forge = loop.gs.battlefields[0]
+    forge.card = card("Ornn's Forge")
+    forge.add_unit("A", unit("Holder", 2))
+    a.hand += [card("Patched Porobot"), card("Mask of Foresight")]      # [2] each
+    a.rune_energy = a.energy = 2
+    act(loop, "A", "Play Patched Porobot")
+    assert a.energy == 1
+    assert not any("Mask of Foresight" in lbl for lbl in labels(loop, "A"))
+
+
+def test_patched_porobot_counts_the_other_gear():
+    """'When you play me, if you control 3 or more other gear, draw 1.'"""
+    for others, drawn in ((2, 0), (3, 1)):
+        loop, a, b = setup(active="A")
+        a.deck.cards[:] = [card("Stacked Deck") for _ in range(2)]
+        a.base_gear += [card("Seal of Focus") for _ in range(others)]
+        a.hand.append(card("Patched Porobot"))
+        act(loop, "A", "Play Patched Porobot")
+        assert len(a.hand) == drawn
+
+
+def test_patched_porobot_is_a_gear_in_the_deck_and_in_the_trash():
+    """Ornn Blacksmith: 'You may reveal a gear from among them and draw it.'
+    Aspiring Engineer: 'return a gear from your trash to your hand.'"""
+    loop, a, b = setup(active="A")
+    a.deck.cards[:] = [card("Stacked Deck"), card("Patched Porobot"), card("Stacked Deck")]
+    a.hand.append(card("Ornn Blacksmith"))
+    act(loop, "A", "Play Ornn Blacksmith")
+    assert [c.name for c in a.hand] == ["Patched Porobot"]
+    a.trash.append(a.hand.pop())
+    a.hand.append(card("Aspiring Engineer"))
+    act(loop, "A", "Play Aspiring Engineer")
+    assert [c.name for c in a.hand] == ["Patched Porobot"]
+
+
+def test_a_unit_printed_as_a_gear_keeps_its_might():
+    """A gear an effect made a unit has Might equal to its Energy cost (Orianna);
+    a unit printed "Unit Gear" has the Might it prints."""
+    from riftbound.core.cards import UnitCard
+    from riftbound.core.combat import UnitInPlay
+    printed = UnitCard(name="Unit Gear", cost_energy=5, might=1)
+    printed.also_gear = True
+    in_play = UnitInPlay(card=printed)
+    assert in_play.gear_unit and in_play.might == 1
 
 
 # -- D28. "a unit" read as "a friendly unit" (Rengar and Kennen's legends) -------
