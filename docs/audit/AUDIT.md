@@ -13,8 +13,10 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
-**State (2026-11-11, second pass): 22 deviations found, 22 fixed, none open.**
-The suite is green (1669 passed, 5 skipped, no xfail left). The second pass
+**State (2026-11-11, third pass): 28 deviations found, 28 fixed, none open.**
+The suite is green (1683 passed, 5 skipped, no xfail left). The third pass
+read the 119 cards of the other eight decks against the printed text and
+played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
 D20) and fixed the two it met on the way (D21, D22). The owner answered Q1–Q4
 of "Ambiguous rules" (2026-11-11): Q1, Q3 and Q4 changed the engine, Q2 kept
@@ -58,6 +60,12 @@ said.
 | D20 | No Conquer of a battlefield lost and taken back in one turn | §471.1 | not measured; 2 of 20 golden games (Diana's Moonfall) | fixed, `eb8acb7` |
 | D21 | Moonfall is played at a battlefield with no unit of its player | UNL-198 | other decks (Diana) | fixed, `3ada8b6` |
 | D22 | A Hold gives its point after its abilities resolve | §473 | Shadow Temple's Burn Out at one point from the end each | fixed, `197be0b` |
+| D23 | An ability with no [Action] is used in a showdown | §145.2, §151.2 | other decks (Heart of Dark Ice: Yasuo; The List: Ezreal); 34 cards of the corpus | fixed, `17838db` |
+| D24 | QUICK-DRAW attaches only at the battlefield it is played "at" | §819.1.d | other decks (Cloth Armor, Sterak's Gage: Ornn; Long Sword: Akali) | fixed, `6376f85` |
+| D25 | Bellows Breath hits units at different locations | SFD-080 | other decks (Ezreal) | fixed, `4947f42` |
+| D26 | Ezreal's legend doesn't count an enemy gear chosen | SFD-199 | other decks (Ezreal) | fixed, `a0063f2` |
+| D27 | Patched Porobot is a unit only, printed "Unit Gear" | §178, VEN-058 | other decks (Ornn, 3 copies) | fixed, `840876a` |
+| D28 | Rengar's and Kennen's legends give only to a friendly unit | UNL-183, VEN-155 | other decks (Rengar, Kennen): a missing option, never the better one | fixed, `0ac459e` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -466,6 +474,138 @@ Tests in `tests/audit/test_audit_mechanics.py` (D19, D20) and
 - **Fixed.** The Scoring Step gives each point as it scores (`_gain_points`).
   No golden game changes.
 
+## Deviations, third pass (2026-11-11): the other eight decks, card by card
+
+How it was done: for each of the 119 cards of the eight decks that are not in
+the precons (106 Main Deck cards, legends and champions, 13 battlefields), the
+printed text and stats of `piltover_archive.json` next to our keywords and
+`effects`; then the card played in a hand-made situation wherever the reading
+left a doubt or no test names the card (about 60 cards; the others have their
+own tests, which were not re-read). Three static scans over the whole corpus
+followed the classes found (D23, D24, D28). Tests in
+`tests/audit/test_audit_decks.py`.
+
+### D23. An ability with no [Action] is used in a showdown
+
+- **Rule.** §145.2 (units), §151.2 (gear): "may be executed at any time during
+  the controlling player's Main Phase during an Open State, and not during a
+  Showdown." Only [Action] / [Reaction] widen that.
+- **Engine.** `_WINDOW_TIMINGS` is right; the data was not: 39 activated
+  abilities of 34 cards carried `"timing": "action"` their card doesn't print
+  (the example in `scripts/generate_effects.py`'s prompt has it). Each could
+  be used in a showdown, by the defender on the opponent's turn too.
+- **Cards.** In the decks: Heart of Dark Ice ("[Tap]: Give a unit +3 [Might]
+  this turn", Yasuo) and The List (Ezreal). In the corpus: Iron Ballista,
+  Xerath Freed, Arena Kingpin, Tools of Empire, Whirling Twirligig, Pitiless
+  Stalker and 26 more.
+- **Tests.** `test_a_gear_ability_with_no_action_is_not_used_in_a_showdown`,
+  `test_an_ability_has_only_the_timing_its_card_prints` (the whole corpus).
+- **Fixed.** `17838db`: the timing removed from the data.
+  `test_g3_abilities_on_chain` used Xerath Freed in a showdown: it uses
+  Divining Shells (printed [Action]) now.
+
+### D24. QUICK-DRAW attaches only at the battlefield it is played "at"
+
+- **Rule.** §819.1.d: "When you play this, attach it to a Unit you control."
+- **Engine.** `_play_gear` offered the units at the lane of the action; none
+  there, the gear stayed in base unattached, and a unit in base was never
+  offered. Long Sword and Sterak's Gage have an `attach_gear` instruction
+  that covered the first case; Cloth Armor, Spinning Axe, Protector's Shield
+  and Jax Unmatched's granted Quick-Draw have not.
+- **Tests.** `test_quick_draw_attaches_to_a_unit_in_base`,
+  `test_quick_draw_chooses_among_all_the_units_you_control`.
+- **Fixed.** `6376f85`: every unit of the player is offered, those at that
+  battlefield first (the baseline picks among them when there are any).
+
+### D25. Bellows Breath hits units at different locations
+
+- **Card.** SFD-080: "Deal 1 to up to three units at the same location."
+- **Engine.** `deal_damage` with `count: 3`, `where: anywhere`: three units
+  anywhere.
+- **Test.** `test_bellows_breath_hits_units_at_the_same_location`.
+- **Fixed.** `4947f42`: `same_location` on the instruction; `choose_many`
+  takes `allowed(taken, option)`. Not done: Facebreaker ("a friendly unit and
+  an enemy unit at the same battlefield", not in a deck) was not played.
+
+### D26. Ezreal's legend doesn't count an enemy gear chosen
+
+- **Card.** SFD-199: "Use only if you've chosen enemy units and/or gear twice
+  this turn with spells or unit abilities."
+- **Engine.** `_note_chosen` counts units only. In the deck: Turn to Dust,
+  Pickpocket; Detonate in others.
+- **Test.** `test_ezreal_legend_counts_an_enemy_gear_chosen`.
+- **Fixed.** `a0063f2`: `_note_gear_chosen`, called where a gear is chosen.
+  A unit is counted as the spell goes on the chain, a gear as it resolves
+  (where its DEFLECT is paid too): the legend can't answer on that same chain
+  with a gear's choice. Left as it is.
+
+### D27. Patched Porobot is a unit only
+
+- **Rule.** §178.1: "A Game Object that is more than one type has the
+  properties of all of their types"; §178.3: it "can be targeted by spells
+  and abilities ... that say 'Kill a unit,' or 'Kill a gear.'"
+- **Card.** VEN-058, printed type "Unit Gear": "(I enter exhausted.) When you
+  play me, if you control 3 or more other gear, draw 1." The only such card
+  in the archive. The owner confirmed it (2026-11-11): a unit and a gear at
+  once.
+- **Engine.** A `UnitCard`. Not a gear for: Pit Crew ("When you play a gear,
+  ready me"), Ornn's Forge (the first gear costs [1] less), Ornn Blacksmith
+  and Aspiring Engineer (a gear from the deck / the trash), Veiled Temple,
+  Detonate, the gear counts. All of these are in vendetta_ornn, with 3
+  Porobots.
+- **Tests.** `test_patched_porobot_is_a_gear_too`,
+  `test_patched_porobot_is_killed_as_a_gear`,
+  `test_patched_porobot_is_the_first_gear_ornns_forge_makes_cheaper`,
+  `test_patched_porobot_counts_the_other_gear`,
+  `test_patched_porobot_is_a_gear_in_the_deck_and_in_the_trash`,
+  `test_a_unit_printed_as_a_gear_keeps_its_might`.
+- **Fixed.** `840876a`. `types: [Unit, Gear]` in the data; the registry sets
+  `also_gear` on the card; `cards.is_gear()` is the one question "has the
+  gear type", asked by the zone filters (`is_gear`, the legacy `gear`
+  filter), Swain's condition, "discard a gear", gear's bonus damage,
+  Orianna's discount and the Power earmarked for gear. In play it is a unit
+  gear (`UnitInPlay.gear_unit`, set from the card): what Orianna's unit gear
+  already had (chosen, killed, readied and counted as a gear). Its Might is
+  the printed one; Orianna doesn't turn it back into a gear; "3 or more other
+  gear" leaves it out. It is still played, moved and paid for as a unit: the
+  `isinstance(card, GearCard)` tests that pick how a card is played are
+  unchanged. No golden game changed.
+- **Not checked.** An Equipment on it, Jax's and Azir's "your Equipment"
+  texts with it, and the AI's encoding (it is encoded as a unit).
+
+### D28. Rengar's and Kennen's legends give only to a friendly unit
+
+- **Cards.** Rengar Pridestalker: "give a unit +1 [Might] this turn"; Kennen
+  Heart of the Tempest: "Give a unit [Assault 2] this turn."
+- **Engine.** `target: friendly_unit` on both.
+- **Tests.** `test_rengar_legend_can_choose_an_enemy_unit`,
+  `test_kennen_legend_can_choose_an_enemy_unit`.
+- **Fixed.** `0ac459e`: `chosen_unit`. Same reading on two cards outside the
+  decks, not changed: Navori Fighting Pit ("buff a unit here"), Ambessa
+  Matriarch of War ("ready a unit").
+
+### Read, played and found right
+
+Costs, Might, keywords and equipment bonuses of all 119 match the print.
+Played and right: En Garde, Gust, Eclipse, Switcheroo, Thousand-Tailed
+Watcher (minimum 1), Kinkou Initiate (other units), First Mate, Grim
+Apothecary, Aspiring Engineer, Lecturing Yordle, Sterak's Gage, Sprite
+Fountain, Treasure Trove, Rhasa the Sunderer, Sky Splitter, Wages of Pain,
+Treasure Hunter and Pyke's legend (the Gold enters exhausted), Yasuo's legend,
+Yasuo Remorseful (an enemy here), Nidalee, Kai'Sa Survivor, Ferrous
+Forerunner, Irresistible Faefolk, Inferna, Minefield, Frozen Fortress (both
+players' turns), Seat of Power, the FLOW costs (Lightning Rush, Shuriken Flip,
+Up from the Deep), Last Rites' EQUIP cost, Helm of Suppression, Astral Heron,
+Emperor's Divide, Pack of Wonders, Deadly Flourish, Detonate, Sabotage, Irelia
+Fervent, Darius Trifarian, Mask of Foresight, Hard Bargain, Kennen's legend
+(empowered by a FLOW play, not by one from hand), Akali's legend (off its
+player's turn it exhausts and does nothing).
+
+Seen on the way, not a deviation of a card: a chooser that raises while a
+spell's choices are declared on the copy (`_declare_choices` swallows it)
+leaves the spell choosing as it resolves with `choices_noted` set, so "when
+you choose me" and DEFLECT are skipped. No agent of the repo raises there.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in
@@ -620,8 +760,10 @@ not played again.
   effect ordering (§372-373); layers and dependencies (§475-482) beyond the
   cases above; "this turn" keyword grants given twice to one unit; copy
   effects; three-player rules (not modeled).
-- **The corpus.** Of the 136 cards `piltover_sync.py compare` flags, only the
-  O1 list was read. The other eight decks were not audited card by card; only
-  the six data deviations above and the fuzz run.
+- **The corpus.** The eight decks were read card by card in the third pass
+  (see there for what "read" means: about 60 of the 119 cards were checked
+  only by reading, their existing tests trusted). The rest of the 136 cards
+  `piltover_sync.py compare` flags, and every card outside the ten decks,
+  were not: only the three static scans of D23, D24 and D28.
 - **The AI side.** Encoding, search and coach were read only where a fix
   touches them.

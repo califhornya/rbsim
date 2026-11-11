@@ -306,6 +306,9 @@ class CardSpec:
                 effects=effects,
             )
             unit.category = self.category
+            # Printed "Unit Gear" (Patched Porobot): a gear too (§178).
+            if "gear" in [str(t).lower() for t in (self.raw or {}).get("types") or ()]:
+                unit.also_gear = True
             return unit
         if self.category is CardType.SPELL:
             damage = self.damage if self.damage is not None else 0

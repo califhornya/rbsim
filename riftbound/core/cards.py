@@ -32,6 +32,9 @@ class Card:
     effects: list[dict[str, object]] = field(default_factory=list)
     uuid: str = field(default_factory=lambda: str(uuid4()), compare=False)
     tapped: bool = field(default=False, compare=False)  # gear exhausted-state for [tap] abilities
+    # A unit printed "Unit Gear" (Patched Porobot): it has both types (§178).
+    # Not a dataclass field: set on the instance by the registry.
+    also_gear = False
 
     def __deepcopy__(self, memo):
         """A copy of the card (a search's copy of the game, the one a chain
@@ -224,3 +227,11 @@ class BattlefieldCard(Card):
             keywords=list(keywords or []),
             effects=list(effects or []),
         )
+
+
+def is_gear(card) -> bool:
+    """Whether `card` has the gear type (§178): a Gear card, or a unit printed
+    "Unit Gear" (Patched Porobot). Such a unit is played, moves and fights as a
+    unit, and is a gear for everything that asks for one ("when you play a
+    gear", "kill a gear", "the first gear you play costs [1] less")."""
+    return isinstance(card, GearCard) or bool(getattr(card, "also_gear", False))

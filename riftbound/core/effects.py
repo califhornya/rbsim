@@ -5,7 +5,7 @@ from typing import Any, Callable, Mapping, Optional
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 from .battlefield import Battlefield
-from .cards import GearCard, SpellCard, UnitCard
+from .cards import GearCard, SpellCard, UnitCard, is_gear
 from .combat import UnitInPlay
 from .state import ChainItem
 
@@ -47,7 +47,7 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         # "This deals 1 Bonus Damage for each card with this name in your trash"
         # (Consuming Curse)
         amount += _amount(ctx, {"amount_source": spec["bonus_source"]})
-    if amount > 0 and isinstance(ctx.card, GearCard):
+    if amount > 0 and is_gear(ctx.card):
         # "Abilities of friendly gear deal 1 Bonus Damage" (Ziggs Short-Fused)
         amount += sum(int(es.params.get("amount", 1)) for src, _bf in ctx.loop._sources_in_play(ctx.actor_side)
                       for es in (CARD_REGISTRY[src.name].effects if src.name in CARD_REGISTRY else ())
@@ -92,8 +92,12 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if spec.get("up_to"):
             # "Deal 6 to each of up to two units": baseline, enemies only.
             picks = [u for u in picks if value(u)[0]]
+        allowed = None
+        if spec.get("same_location"):
+            picks, allowed = _same_location(
+                ctx, [u for u in cands if value(u)[0]] if spec.get("up_to") else cands, count)
         units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands, picks,
-                                     ctx.card, up_to=_up_to(spec, count))
+                                     ctx.card, up_to=_up_to(spec, count), allowed=allowed)
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
         ctx.extra["it"] = units
@@ -1123,6 +1127,7 @@ def _steal_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     pick = max(entries, key=lambda e: _zone_value(getattr(e[2], "card", e[2])))
     side, holder, gear = loop.choose(_kind("target", spec), ctx.actor_side, entries, pick, ctx.card)
+    loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     card = getattr(gear, "card", gear)
     unit = _unit_gear_of((side, holder, gear))
     if unit is not None:
@@ -1858,9 +1863,10 @@ def _disempower_or_kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
                                          ctx.card)
     card = getattr(gear, "card", gear)
     if ctx.loop._is_empowered(card):
+        ctx.loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
         ctx.loop._disempower(card)
     else:
-        _kill_gear(ctx, {"target": "chosen_gear", "_only": card})
+        _kill_gear(ctx, {"target": "chosen_gear", "_only": card})    # counts the choice
 
 
 @effect("match_might_plus_one")
@@ -2471,6 +2477,7 @@ def _return_gear_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     pick = max(entries, key=lambda e: (e[0] == ctx.opponent_side, _zone_value(getattr(e[2], "card", e[2]))))
     side, holder, gear = ctx.loop.choose(_kind("target", spec), ctx.actor_side, entries, pick, ctx.card)
+    ctx.loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     unit = _unit_gear_of((side, holder, gear))
     if unit is not None:
         _return_unit(ctx, unit, {})              # it leaves as the unit it is
@@ -3238,6 +3245,7 @@ def _give_gear_temporary(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         pick.granted_keywords.append("TEMPORARY")
         return
     side, _holder, gear = pick
+    loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     tax = loop._gear_deflect_tax(side, ctx.actor_side, gear)
     if tax and getattr(loop, "_declaring", None) is None:
         loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
@@ -3821,7 +3829,7 @@ def _zone_card_matches(card, tf: Mapping[str, Any]) -> bool:
         return False
     if tf.get("is_spell") and cat != "SPELL":
         return False
-    if tf.get("is_gear") and cat != "GEAR":
+    if tf.get("is_gear") and not is_gear(card):
         return False
     if tf.get("is_champion") and cat != "CHAMPION":
         return False
@@ -3883,7 +3891,7 @@ def _passes_filter(unit, tf: Mapping[str, Any], ctx: "EffectContext") -> bool:
     if "lacks_keyword" in tf and has(str(tf["lacks_keyword"])):
         return False
     cat = _card_category_name(card)
-    if tf.get("is_gear") and cat != "GEAR":
+    if tf.get("is_gear") and not is_gear(card):
         return False
     if tf.get("is_spell") and cat != "SPELL":
         return False
@@ -3966,6 +3974,18 @@ _EVERYWHERE_TARGETS = {
 # These resolve to a both-sides candidate pool; `bias` orders the deterministic
 # single-target pick so a harmful effect doesn't auto-hit the caster's own unit.
 _CHOOSER_TARGETS = {"chosen_unit", "chosen", "any_unit", "a_unit", "unit"}
+
+
+def _same_location(ctx: "EffectContext", pool: list, count: int):
+    """ "up to three units at the same location" (Bellows Breath): a
+    battlefield or one player's base. Returns the baseline's picks (up to
+    `count` of `pool`, where most of it is) and choose_many's `allowed`."""
+    def spot(u):
+        where = ctx.loop._locate_unit(u)
+        return None if where is None else (id(where[1]) if where[1] is not None else where[0])
+    best = max(pool, key=lambda u: sum(spot(v) == spot(u) for v in pool), default=None)
+    picks = [u for u in pool if spot(u) == spot(best)][:count]
+    return picks, lambda taken, option: not taken or spot(option) == spot(taken[0])
 
 
 def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str = "none",
@@ -4065,8 +4085,12 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     if spec.get("up_to") and bias != "none":
         want = ctx.opponent_side if bias == "enemy" else ctx.actor_side
         picks = [u for u in picks if side(u) == want]
+    allowed = None
+    if spec.get("same_location"):
+        pool = [u for u in units if side(u) == want] if spec.get("up_to") and bias != "none" else units
+        picks, allowed = _same_location(ctx, pool, count)
     picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units, picks,
-                                  ctx.card, up_to=_up_to(spec, count))
+                                  ctx.card, up_to=_up_to(spec, count), allowed=allowed)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     ctx.extra["it"] = picked
     return picked
@@ -4467,6 +4491,8 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         tax = loop._gear_deflect_tax(entries[0][0], ctx.actor_side, entries[0][2]) if entries else 0
         if tax and getattr(loop, "_declaring", None) is None:
             loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
+        if entries:
+            loop._note_gear_chosen(ctx.card, ctx.actor_side, entries[0][0])
 
     for side, holder, gear in entries:
         player = gs.get_player(side)
@@ -4508,7 +4534,8 @@ def _clockwork_animate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     entries = [e for e in _gear_entries(ctx, enemy_first=False) if e[0] == side]
     if not entries or not loop._can_pay_energy_and_generic(ctx.actor, 1, 0, None):
         return
-    current = loop._gear_units(side)
+    # (A unit printed as a gear too, Patched Porobot, is not one she made.)
+    current = [u for u in loop._gear_units(side) if not isinstance(u.card, UnitCard)]
 
     def energy(e):
         return int(getattr(getattr(e[2], "card", e[2]), "cost_energy", 0) or 0)
@@ -5043,7 +5070,8 @@ def _zone_effect_card_ok(card, spec: Mapping[str, Any]) -> bool:
     filter: its target_filter (type, tag, keyword, Energy/Power bounds) plus the
     older `filter` strings ("gear", "unit_or_gear") some specs still use."""
     legacy = _LEGACY_ZONE_FILTERS.get(str(spec.get("filter") or "").lower())
-    if legacy and _card_category_name(card) not in legacy:
+    if legacy and _card_category_name(card) not in legacy \
+            and not ("GEAR" in legacy and is_gear(card)):      # a unit that is a gear too (§178)
         return False
     tf = spec.get("target_filter") or {}
     if not _zone_card_matches(card, tf):
