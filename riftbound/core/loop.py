@@ -631,9 +631,14 @@ class GameLoop:
         only with a valid choice for every target. Checked for the instructions
         that choose a unit (or a spell to counter: effects.has_valid_target);
         conditional ones (a kicker's "deal 5 instead") need one of them to
-        have a target. "Up to N" can choose none (§355.13)."""
+        have a target. "Up to N" can choose none (§355.13). The battlefield
+        itself is a choice when the card restricts it: "Choose a battlefield
+        where you have units" (Moonfall: `battlefield: friendly_units`)."""
         from .effects import has_valid_target
         spec = CARD_REGISTRY.get(card.name)
+        if spec is not None and not self.gs.battlefields[lane]._units_for(side) and any(
+                es.params.get("battlefield") == "friendly_units" for es in spec.effects):
+            return False
         if spec is None or "up to" in str((spec.raw or {}).get("effect") or "").lower():
             return True
         ctx = EffectContext(self, card, self.gs.get_player(side),
