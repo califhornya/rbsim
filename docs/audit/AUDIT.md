@@ -8,9 +8,19 @@ PARTIAL / GAP rows of `docs/MECHANICS.md`; the other eight decks, from
 `BACKLOG.md` O1.
 
 Every deviation below has a test in `tests/audit/` that plays the situation and
-checks what the rules or the card say. In phase 1 each test is marked
-`xfail(strict=True)`; a fix removes the marker. Line numbers are those of the
-commit this audit started from (`ec62750`).
+checks what the rules or the card say. In phase 1 (`4af83ef`) each test was
+marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
+marker. Line numbers are those of the commit this audit started from
+(`ec62750`).
+
+**State (2026-11-11): 18 deviations found, 18 fixed, none open.** The suite is
+green (1655 passed, 5 skipped, no xfail left). What is still open is in
+"Ambiguous rules" (five questions waiting for an answer) and in "Not checked"
+(two suspected deviations seen in the code and not tested, and the leftovers
+noted under D1, D6 and D9). Two things a fix changed outside the engine:
+`ACTION_DIM` is 319, was 316 (D2: saved nets no longer load), and 23 golden
+games were regenerated in three commits (D9: 12, D14: 6, D18: 5), each for the
+reason given in its commit message.
 
 How the "weight for training" was estimated: 400 Zed-vs-Shen games with
 `random` agents (average 16 turns) and 400 with `simple_trade` (13 turns),
@@ -23,24 +33,24 @@ said.
 
 | # | Deviation | § / card | Zed vs Shen | Status |
 |---|-----------|----------|-------------|--------|
-| D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | **fixed** (see D1) |
-| D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | **fixed** (see D2) |
-| D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | **fixed** (see D3) |
-| D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | **fixed** (see D4) |
-| D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | **fixed** (see D5) |
-| D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | **fixed** (see D6) |
-| D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | **fixed** (see D7) |
-| D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | **fixed** (see D8) |
-| D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | **fixed** (see D9) |
-| D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | **fixed** (see D10) |
-| D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | **fixed** (see D11) |
-| D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | **fixed** (see D12) |
-| D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | **fixed** |
-| D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | **fixed** |
-| D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | **fixed** |
-| D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | **fixed** |
-| D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | **fixed** |
-| D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | **fixed** |
+| D1 | BURN past the end of the Main Deck is no Burn Out | §441.4, §432 | 0 / 800 games (games end first); free milling once it happens | fixed, `b496a02` |
+| D2 | The Chosen Champion can't be played to a battlefield | §108.3.d, §355.2.a | 30-57% of games | fixed, `944c733` |
+| D3 | A facedown card outlives the loss of its battlefield | §323.6.a, §107.3.d | the card lingers in ~10% of games; exploitable | fixed, `069bf5e, c6bded3` |
+| D4 | A Combat Cleanup heals only the units that fought | §468.1.a.1 | ~2% of games | fixed, `af44349` |
+| D5 | STUN never ends on a unit in a base | §424.1.a.2 | 3-5% of games | fixed, `5f7a55c` |
+| D6 | The game goes on after a player has the Victory Score | §323.1, §194.2 | 13-25% of games keep asking for actions; the winner can change | fixed, `8095a39` |
+| D7 | An Equipment is trashed when its unit is banished | §719.5, §436.4.b | ~1% of games | fixed, `bdb111a` |
+| D8 | A unit played from facedown in the Main Phase chooses anywhere | §811.1.d.3 | <1% of games (Kennen) | fixed, `983fc60` |
+| D9 | An activated ability can be paid for with no legal target | §403.3, §355.8, §355.4.a | 50-100% of games (wasted, not exploitable) | fixed, `6b64fc1` |
+| D10 | A REACTION unit can't be played to base at reaction speed | §813.1.c.1, §813.3.a | Shen Kinkou, 1 card: a missing option | fixed, `f7b6848` |
+| D11 | REACTION plays in a showdown only at its battlefield | §822.1.b, §811.6 | a missing option | fixed, `5452770` |
+| D12 | TANK + BACKLINE on one unit: no choice for the assigner | §467.2.c.8 | never (no BACKLINE in the two decks) | fixed, `d521c78` |
+| D13 | Stupefy gives +1 instead of -1 | OGN-095 | other decks (Diana, Ezreal) | fixed, `85da2a0` |
+| D14 | Noxus Hopeful has Might 3, printed 4 | OGN-012 | other decks (Pyke, Rengar) | fixed, `2cbb2b1` |
+| D15 | Thrill of the Hunt costs two Power, printed one | UNL-184 | other decks (Rengar) | fixed, `fe44ded` |
+| D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | fixed, `427f1dd` |
+| D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | fixed, `02c4877` |
+| D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | fixed, `cd5b5e9` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -407,9 +417,9 @@ No test for these: they wait for an answer.
 - **Q2. Shadow Order Disciple with an empty Main Deck.** "When I move, you may
   BURN 1 to give me +1 [might] this turn": BURN 1 is a cost within an
   instruction. §203.3 says an impossible cost can't be paid; §432.1.b says
-  moving a card out of an empty deck is a Burn Out, not an impossibility. With
-  the D1 fix the engine will Burn Out (the opponent gains a point) and give the
-  +1. Is that the reading you want?
+  moving a card out of an empty deck is a Burn Out, not an impossibility.
+  Since the D1 fix the engine Burns Out (the opponent gains a point) and gives
+  the +1; the player can decline the "you may". Is that the reading you want?
 - **Q3. The 40-turn cap in self-play.** `selfplay.py` and `env.py` build games
   with `max_turns=40`, and a game that reaches it is decided by a two-point
   lead (TR 408.2.b), a draw otherwise (`loop.py:8067`). Riftbound has no turn
