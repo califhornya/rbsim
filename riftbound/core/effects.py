@@ -4422,7 +4422,7 @@ def _gear_entries(ctx: "EffectContext", enemy_first: bool,
             for dg in bf.gear_for(side):
                 entries.append((side, bf, dg))
         if units:
-            entries.extend((side, u, u.card) for u in in_play if u.gear_unit)
+            entries.extend((side, u, u.card) for u in in_play if u.is_gear)
     return entries
 
 
@@ -4431,7 +4431,7 @@ def _unit_gear_of(entry):
     gear itself (Orianna Lady of Clockwork: a unit that is also a gear can be
     chosen as either, §143 example), else None."""
     holder, gear = entry[1], entry[2]
-    return holder if isinstance(holder, UnitInPlay) and holder.gear_unit and holder.card is gear else None
+    return holder if isinstance(holder, UnitInPlay) and holder.is_gear and holder.card is gear else None
 
 
 def _gear_matches(gear_card, tf: Mapping[str, Any]) -> bool:
@@ -4500,7 +4500,7 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if isinstance(holder, Battlefield):
             ctx.loop._kill_deployed_gear(holder, side, [gear])
             continue
-        if getattr(holder, "gear_unit", False) and holder.card is gear:
+        if getattr(holder, "is_gear", False) and holder.card is gear:
             # A unit gear dies as a unit (DEATHKNELL, "when a friendly unit dies").
             where = _take_off_board(ctx, holder)
             if where is not None:
@@ -4535,7 +4535,7 @@ def _clockwork_animate(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if not entries or not loop._can_pay_energy_and_generic(ctx.actor, 1, 0, None):
         return
     # (A unit printed as a gear too, Patched Porobot, is not one she made.)
-    current = [u for u in loop._gear_units(side) if not isinstance(u.card, UnitCard)]
+    current = [u for u in loop._gear_units(side) if u.gear_unit]
 
     def energy(e):
         return int(getattr(getattr(e[2], "card", e[2]), "cost_energy", 0) or 0)

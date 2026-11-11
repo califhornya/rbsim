@@ -2709,7 +2709,7 @@ class GameLoop:
         if ctype == "any_gear_in_play":
             # "you may kill a gear. If you do, ..." (Adaptatron): there is one.
             return any(p.base_gear for p in (self.gs.A, self.gs.B)) or any(
-                u.gear or u.gear_unit for u in self._all_units_in_play()) or any(
+                u.gear or u.is_gear for u in self._all_units_in_play()) or any(
                 bf.gear_A or bf.gear_B for bf in self.gs.battlefields)
         if ctype == "enemy_unit_died_this_turn":
             # "If an enemy unit has died this turn" (Spoils of War)
@@ -2739,7 +2739,7 @@ class GameLoop:
             where = self._locate_unit(unit) if unit is not None else None
             here = where[1] if where else None
             return here is not None and (bool(here.gear_for(side)) or
-                                         any(u.gear or u.gear_unit for u in here._units_for(side)))
+                                         any(u.gear or u.is_gear for u in here._units_for(side)))
         if ctype == "cards_in_hand_exactly":
             return len(actor.hand) == _threshold()
         if ctype == "units_at_battlefields_exactly":
@@ -2895,7 +2895,7 @@ class GameLoop:
             # Gear the actor controls: attached to their units + loose in base,
             # e.g. Patched Porobot "if you control 3 or more other gear, draw 1".
             # Porobot is a gear itself ("Unit Gear", §178): "other" leaves it out.
-            count = (sum(len(u.gear) + (u.gear_unit and u.card is not card) for u in _friendly_units())
+            count = (sum(len(u.gear) + (u.is_gear and u.card is not card) for u in _friendly_units())
                      + len(actor.base_gear)
                      + sum(len(bf.gear_for(side)) for bf in self.gs.battlefields))
             return count >= _threshold()
@@ -6175,7 +6175,7 @@ class GameLoop:
     # friendly gear here", "you control N gear" and "kill a gear".
 
     def _gear_units(self, side: str) -> list:
-        return [u for u in self._friendly_units_of(side) if u.gear_unit]
+        return [u for u in self._friendly_units_of(side) if u.is_gear]
 
     def _gear_to_unit(self, side: str, holder, gear) -> UnitInPlay:
         """`side`'s gear becomes a unit gear where it is: `holder` is the unit
@@ -6886,7 +6886,7 @@ class GameLoop:
             dead_unit.card._owner = None
             owner.base_gear.extend(dead_unit.gear)
             self.gs.friendly_unit_died_this_turn[owner_side] = True
-            if dead_unit.gear_unit:
+            if dead_unit.is_gear:
                 self.gs.friendly_gear_died_this_turn[owner_side] = True
             if self.gs.in_beginning_phase and owner_side == self.gs.active:
                 self.gs.died_in_beginning[owner_side] = self.gs.turn     # Shadow Watcher

@@ -198,7 +198,45 @@ def test_a_unit_printed_as_a_gear_keeps_its_might():
     printed = UnitCard(name="Unit Gear", cost_energy=5, might=1)
     printed.also_gear = True
     in_play = UnitInPlay(card=printed)
-    assert in_play.gear_unit and in_play.might == 1
+    assert in_play.is_gear and not in_play.gear_unit and in_play.might == 1
+
+
+def test_a_porobot_that_became_a_copy_of_a_unit_is_no_gear():
+    """Shady Spectacles: 'The equipped unit becomes a copy of that unit for as
+    long as this is attached to it.' A Porobot that is a copy of a unit that
+    isn't a gear can't be chosen by Detonate ('Kill a gear'); the Spectacles
+    off, it is a gear again."""
+    loop, a, b = setup(active="A")
+    porobot, model = unit("Patched Porobot"), unit("Pit Crew")
+    b.base_units += [porobot, model]
+    glasses = card("Shady Spectacles")
+    porobot.gear.append(glasses)
+    loop._fire_attached(porobot, "B")
+    assert porobot.card.name == "Pit Crew"
+    a.hand.append(card("Detonate"))
+    seen = choices(loop, {})
+    act(loop, "A", "Cast Detonate")
+    gear_offered = [names for kind, _side, names in seen if kind.startswith("target")]
+    assert gear_offered and all(len(names) == 1 for names in gear_offered)   # the Spectacles alone
+    assert porobot in b.base_units and not porobot.gear                       # they died, not the unit
+    loop._recompute_passives()
+    assert porobot.card.name == "Patched Porobot" and porobot.is_gear
+
+
+def test_a_unit_that_became_a_copy_of_a_porobot_is_a_gear():
+    loop, a, b = setup(active="A")
+    plain, model = unit("Pit Crew"), unit("Patched Porobot")
+    b.base_units += [plain, model]
+    b.deck.cards[:] = [card("Stacked Deck") for _ in range(4)]
+    assert not plain.is_gear
+    plain.gear.append(card("Shady Spectacles"))
+    loop._fire_attached(plain, "B")
+    assert plain.card.name == "Patched Porobot" and plain.is_gear
+    a.hand.append(card("Detonate"))
+    choices(loop, {"target": lambda _loop, options: next(
+        i for i, o in enumerate(options) if o[1] is not None and o[1].card is plain.card and o[2] is plain.card)})
+    act(loop, "A", "Cast Detonate")
+    assert plain not in b.base_units                                           # killed as a gear
 
 
 # -- D28. "a unit" read as "a friendly unit" (Rengar and Kennen's legends) -------

@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-11 (audit, terzo passaggio: le altre otto liste carta per carta).
+Aggiornato: 2026-11-11 (audit, terzo passaggio; D27 rivista dopo la review della PR #19).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -28,14 +28,16 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - D26: un gear nemico scelto si conta alla risoluzione (come il suo DEFLECT),
   non quando la spell va in catena: differenza accettata.
 - D27 (decisa dall'utente): Patched Porobot è unità e gear insieme. Un solo
-  predicato `cards.is_gear()`; in gioco è un "unit gear" (`gear_unit`, come
-  quello di Orianna) ma si gioca, muove e paga da unità.
+  predicato `cards.is_gear()`; in gioco `UnitInPlay.is_gear` è derivato dalla
+  carta attuale (non un flag fissato all'ingresso), così regge le copie
+  (Shady Spectacles); `gear_unit` resta solo "gear reso unità da Orianna".
+  Si gioca, muove e paga da unità.
 
 ## Fatto
 - Primo passaggio: D1–D18. Secondo: D19–D22 e risposte Q1–Q4. Tutte corrette.
 - Terzo passaggio (questa sessione): le 119 carte delle otto liste non precon
   lette contro il testo stampato, ~60 giocate nel motore. Suite verde
-  (1683 passed, 5 skipped, nessun xfail), nessuna golden cambiata:
+  (1685 passed, 5 skipped, nessun xfail), nessuna golden cambiata:
   - D23 `17838db`: 39 abilità di 34 carte avevano `timing: action` non
     stampato (usabili in showdown): Heart of Dark Ice, The List, ...
   - D24 `6376f85`: Quick-Draw si attacca a qualsiasi unità che controlli
