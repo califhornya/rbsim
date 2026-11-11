@@ -27,29 +27,31 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   unità del battlefield dell'azione, così le golden non cambiano.
 - D26: un gear nemico scelto si conta alla risoluzione (come il suo DEFLECT),
   non quando la spell va in catena: differenza accettata.
-- D27 lasciata aperta: non è un fix di dati ma un refactor (vedi Prossimi passi).
+- D27 (decisa dall'utente): Patched Porobot è unità e gear insieme. Un solo
+  predicato `cards.is_gear()`; in gioco è un "unit gear" (`gear_unit`, come
+  quello di Orianna) ma si gioca, muove e paga da unità.
 
 ## Fatto
 - Primo passaggio: D1–D18. Secondo: D19–D22 e risposte Q1–Q4. Tutte corrette.
 - Terzo passaggio (questa sessione): le 119 carte delle otto liste non precon
   lette contro il testo stampato, ~60 giocate nel motore. Suite verde
-  (1677 passed, 5 skipped, 2 xfail = D27), nessuna golden cambiata:
+  (1683 passed, 5 skipped, nessun xfail), nessuna golden cambiata:
   - D23 `17838db`: 39 abilità di 34 carte avevano `timing: action` non
     stampato (usabili in showdown): Heart of Dark Ice, The List, ...
   - D24 `6376f85`: Quick-Draw si attacca a qualsiasi unità che controlli
     (Cloth Armor restava in base non attaccata).
   - D25 `4947f42`: Bellows Breath solo su unità nella stessa location.
   - D26 `a0063f2`: la leggenda di Ezreal conta anche i gear nemici scelti.
+  - D27 `840876a`: Patched Porobot è anche un gear (Pit Crew, Ornn's Forge,
+    Ornn Blacksmith, Detonate, conteggi).
   - D28 `0ac459e`: le leggende di Rengar e Kennen scelgono qualsiasi unità.
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-1. **Decisione da prendere, D27**: Patched Porobot (Ornn, 3 copie) è stampato
-   "Unit Gear" (§178) ma per il motore è solo un'unità. Serve un unico
-   predicato "ha il tipo gear" per i ~30 punti che lo chiedono in tre modi
-   diversi. Due test xfail(strict) pronti in `tests/audit/test_audit_decks.py`.
+1. D27, non controllati: un Equipment sul Porobot, l'encoding AI (lo vede
+   come unità).
 2. Resto del corpus (carte fuori dalle dieci liste): non letto. Noti: Navori
    Fighting Pit, Ambessa Matriarch of War (come D28), Facebreaker (come D25).
 3. Non controllati: costruzione del mazzo (§103), procedura di match,

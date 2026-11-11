@@ -13,9 +13,8 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
-**State (2026-11-11, third pass): 28 deviations found, 27 fixed, 1 open
-(D27, a card that is a unit and a gear: it needs a decision, see below).**
-The suite is green (1677 passed, 5 skipped, 2 xfail: D27's). The third pass
+**State (2026-11-11, third pass): 28 deviations found, 28 fixed, none open.**
+The suite is green (1683 passed, 5 skipped, no xfail left). The third pass
 read the 119 cards of the other eight decks against the printed text and
 played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
@@ -65,7 +64,7 @@ said.
 | D24 | QUICK-DRAW attaches only at the battlefield it is played "at" | §819.1.d | other decks (Cloth Armor, Sterak's Gage: Ornn; Long Sword: Akali) | fixed, `6376f85` |
 | D25 | Bellows Breath hits units at different locations | SFD-080 | other decks (Ezreal) | fixed, `4947f42` |
 | D26 | Ezreal's legend doesn't count an enemy gear chosen | SFD-199 | other decks (Ezreal) | fixed, `a0063f2` |
-| D27 | Patched Porobot is a unit only, printed "Unit Gear" | §178, VEN-058 | other decks (Ornn, 3 copies) | **open** |
+| D27 | Patched Porobot is a unit only, printed "Unit Gear" | §178, VEN-058 | other decks (Ornn, 3 copies) | fixed, `840876a` |
 | D28 | Rengar's and Kennen's legends give only to a friendly unit | UNL-183, VEN-155 | other decks (Rengar, Kennen): a missing option, never the better one | fixed, `0ac459e` |
 
 ## Deviations, priority 1: the precons and the rules they use
@@ -540,27 +539,39 @@ followed the classes found (D23, D24, D28). Tests in
   (where its DEFLECT is paid too): the legend can't answer on that same chain
   with a gear's choice. Left as it is.
 
-### D27. Patched Porobot is a unit only (open)
+### D27. Patched Porobot is a unit only
 
 - **Rule.** §178.1: "A Game Object that is more than one type has the
   properties of all of their types"; §178.3: it "can be targeted by spells
   and abilities ... that say 'Kill a unit,' or 'Kill a gear.'"
 - **Card.** VEN-058, printed type "Unit Gear": "(I enter exhausted.) When you
   play me, if you control 3 or more other gear, draw 1." The only such card
-  in the archive.
+  in the archive. The owner confirmed it (2026-11-11): a unit and a gear at
+  once.
 - **Engine.** A `UnitCard`. Not a gear for: Pit Crew ("When you play a gear,
-  ready me"), Ornn's Forge (the first gear costs [1] less), Ornn's legend
-  (Power "only to play gear"), Ornn Blacksmith and Aspiring Engineer (a gear
-  from the deck / the trash), Veiled Temple, Detonate, the gear counts. All
-  of these are in vendetta_ornn, with 3 Porobots.
+  ready me"), Ornn's Forge (the first gear costs [1] less), Ornn Blacksmith
+  and Aspiring Engineer (a gear from the deck / the trash), Veiled Temple,
+  Detonate, the gear counts. All of these are in vendetta_ornn, with 3
+  Porobots.
 - **Tests.** `test_patched_porobot_is_a_gear_too`,
-  `test_patched_porobot_is_killed_as_a_gear` (xfail, strict).
-- **Why open.** "Is it a gear" is asked in ~30 places in three ways
-  (`isinstance(card, GearCard)`, the category name in the zone filters,
-  `UnitInPlay.gear_unit`). `gear_unit` can't be reused as it is: it means "a
-  gear an effect turned into a unit" (Might = Energy cost, Orianna turns it
-  back). It needs one predicate for "has the gear type" used by all of them:
-  a refactor to decide on, not a data fix.
+  `test_patched_porobot_is_killed_as_a_gear`,
+  `test_patched_porobot_is_the_first_gear_ornns_forge_makes_cheaper`,
+  `test_patched_porobot_counts_the_other_gear`,
+  `test_patched_porobot_is_a_gear_in_the_deck_and_in_the_trash`,
+  `test_a_unit_printed_as_a_gear_keeps_its_might`.
+- **Fixed.** `840876a`. `types: [Unit, Gear]` in the data; the registry sets
+  `also_gear` on the card; `cards.is_gear()` is the one question "has the
+  gear type", asked by the zone filters (`is_gear`, the legacy `gear`
+  filter), Swain's condition, "discard a gear", gear's bonus damage,
+  Orianna's discount and the Power earmarked for gear. In play it is a unit
+  gear (`UnitInPlay.gear_unit`, set from the card): what Orianna's unit gear
+  already had (chosen, killed, readied and counted as a gear). Its Might is
+  the printed one; Orianna doesn't turn it back into a gear; "3 or more other
+  gear" leaves it out. It is still played, moved and paid for as a unit: the
+  `isinstance(card, GearCard)` tests that pick how a card is played are
+  unchanged. No golden game changed.
+- **Not checked.** An Equipment on it, Jax's and Azir's "your Equipment"
+  texts with it, and the AI's encoding (it is encoded as a unit).
 
 ### D28. Rengar's and Kennen's legends give only to a friendly unit
 
