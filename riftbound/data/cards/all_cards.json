@@ -25620,7 +25620,7 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "on_friendly_unit_played",
-        "target": "friendly_unit",
+        "target": "chosen_unit",
         "amount": 1,
         "duration": "this_turn",
         "where": "anywhere"
@@ -33225,7 +33225,7 @@
           "tap": true,
           "disempower_self": true
         },
-        "target": "friendly_unit",
+        "target": "chosen_unit",
         "amount": 2,
         "where": "anywhere"
       }

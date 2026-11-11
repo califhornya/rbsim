@@ -154,7 +154,6 @@ def test_patched_porobot_is_killed_as_a_gear():
 
 # -- D28. "a unit" read as "a friendly unit" (Rengar and Kennen's legends) -------
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D28")
 def test_rengar_legend_can_choose_an_enemy_unit():
     """Rengar Pridestalker (UNL-183): 'When you play a unit, give a unit +1
     [Might] this turn.'"""
@@ -168,7 +167,6 @@ def test_rengar_legend_can_choose_an_enemy_unit():
     assert enemy.might == 3
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D28")
 def test_kennen_legend_can_choose_an_enemy_unit():
     """Kennen Heart of the Tempest (VEN-155): '[Action] Disempower me, [Tap]:
     Give a unit [Assault 2] this turn.'"""
