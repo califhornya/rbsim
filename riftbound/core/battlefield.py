@@ -50,8 +50,11 @@ class Battlefield:
     # unit or gear they play here on their turn" (Hunters' Circle).
     plays_here: dict = field(default_factory=dict)
 
-    last_controller: Optional[str] = None
+    last_controller: Optional[str] = None   # the side alone here as the turn started
     held_by: Optional[str] = None      # control(): who controls it by the rules
+    # The side that gained Control this turn and has it since (§471.1: what a
+    # Conquer is; keeping a battlefield through a combat is not one).
+    gained_control: Optional[str] = None
     # The side whose unit made it Contested (§190.3.a), until a showdown or
     # combat here establishes control (establish_control); control is frozen meanwhile.
     contested_by: Optional[str] = None
@@ -117,7 +120,13 @@ class Battlefield:
             return              # §190.4.b: it changes when the contest is over
         sole = self.controller()
         if sole is not None or not (self.units_A or self.units_B):
-            self.held_by = sole
+            self._hold(sole)
+
+    def _hold(self, side: Optional[str], gained: bool = True) -> None:
+        """Control passes to `side` (None: to nobody)."""
+        if side != self.held_by:
+            self.held_by = side
+            self.gained_control = side if gained else None
 
     def control(self) -> Optional[str]:
         """Who controls this battlefield by the rules (§190.4): the side with
@@ -141,7 +150,7 @@ class Battlefield:
         if who == held:
             return False
         self.contested_by = who
-        self.held_by = held
+        self._hold(held, gained=False)      # not `who`'s yet: back to its holder
         return True
 
     def establish_control(self) -> None:
@@ -154,7 +163,8 @@ class Battlefield:
         self._note_control()
 
     def begin_turn_reset(self) -> None:
-        
+        self._note_control()
+        self.gained_control = None
         self.contested_this_turn = False
         self.scored_this_turn_A = False
         self.scored_this_turn_B = False
@@ -240,8 +250,8 @@ class Battlefield:
         ctl_now = self.controller()
         if ctl_now != active:
             return False
-        if self.last_controller == ctl_now:
-            return False
+        if self.gained_control != active:
+            return False            # it kept the battlefield, it didn't gain it
         if not self.contested_this_turn:
             return False
         if active == "A" and self.scored_this_turn_A:

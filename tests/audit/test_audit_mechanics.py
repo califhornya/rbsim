@@ -123,8 +123,6 @@ def test_the_runes_in_play_pay_for_a_reaction_to_a_hold_ability():
 
 # -- D20. Conquer: gaining Control of a battlefield not yet scored this turn -----
 
-@pytest.mark.xfail(strict=True, reason="§471.1: no Conquer for a player who was alone at the "
-                                       "battlefield as the turn started, even after losing it")
 def test_a_player_conquers_a_battlefield_lost_and_taken_back_in_one_turn():
     """Charm: 'Move an enemy unit.' §471.1: 'Conquer: A player gains Control of a
     Battlefield they did not yet Score this turn.' A's unit, alone at a
