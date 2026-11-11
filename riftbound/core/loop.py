@@ -890,8 +890,8 @@ class GameLoop:
 
     def _phase_beginning(self, active: str) -> int:
         """The Start of Turn up to the Channel Phase (§315.1-315.3): Awaken,
-        Beginning (its start, then the Hold), Channel. Returns the points of
-        the Hold; _begin_turn gives them and goes on to the Draw Phase."""
+        Beginning (its start, then the Hold), Channel. Returns the points the
+        Hold gave; _begin_turn goes on to the Draw Phase."""
         self.gs.in_beginning_phase = True
         self.gs.runes_at_beginning = (self.gs.turn, {s: self.gs.get_player(s).total_runes_in_play()
                                                      for s in ("A", "B")})
@@ -974,11 +974,12 @@ class GameLoop:
         self._fire_turn_trigger("on_start_of_turn", active)
         self._recompute_passives()
 
-        # Scoring Step (§315.2.b): the Turn Player holds.
+        # Scoring Step (§315.2.b): the Turn Player holds. Each Hold gives its
+        # point, then its abilities trigger (§473.1, §473.2).
         vps = 0
         for bf in self.gs.battlefields:
             if bf.can_score_hold(active):
-                vps += self._points_allowed(active, 1, "hold", bf)
+                vps += self._gain_points(active, 1, "hold", bf)
                 bf.mark_scored(active)
                 if self.verbose:
                     bf_idx = self.gs.battlefields.index(bf)
@@ -8078,12 +8079,7 @@ class GameLoop:
         gs.conquered_this_turn["A"] = gs.conquered_this_turn["B"] = 0
         gs.hold_points_this_turn["A"] = gs.hold_points_this_turn["B"] = 0
 
-        gained = self._phase_beginning(gs.active)
-        if gained:
-            if gs.active == "A":
-                gs.points_A += gained
-            else:
-                gs.points_B += gained
+        self._phase_beginning(gs.active)
         # A player with the Victory Score and more points than the other has
         # won (§323.1): after the Hold, and after anything else that gives a
         # point before the Main Phase (a Burn Out in the Draw Phase, §432.2.c).
