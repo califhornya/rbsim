@@ -10,7 +10,7 @@ from riftbound.core.decisions import DecisionPoint
 from riftbound.core.enums import Domain
 from riftbound.core.player import Rune
 
-from audit_helpers import act, card, choices, scripted, setup, unit
+from audit_helpers import act, card, choices, legend, scripted, setup, unit
 
 
 def _decks(*players):
@@ -54,8 +54,6 @@ def test_tank_applies_to_a_unit_with_both_when_the_assigner_says_so():
 
 # -- D19. Start of Turn: Awaken, Beginning (start effects, then Hold), Channel ---
 
-@pytest.mark.xfail(strict=True, reason="§315.2: the Hold is scored before the 'at the start of your "
-                                       "Beginning Phase' abilities resolve")
 def test_frozen_fortress_deals_its_damage_before_the_hold():
     """Frozen Fortress: 'At the start of each player's Beginning Phase, deal 1 to
     each unit here. (This happens before scoring.)' §315.2.a: the Beginning Step,
@@ -70,15 +68,13 @@ def test_frozen_fortress_deals_its_damage_before_the_hold():
     assert loop.gs.points_A == 0                 # nobody there at the Scoring Step
 
 
-@pytest.mark.xfail(strict=True, reason="§315.2: a win by Hold ends the game before the 'at the start "
-                                       "of your Beginning Phase' abilities resolve")
 def test_a_start_of_beginning_ability_resolves_before_a_hold_that_wins():
     """Jinx Loose Cannon: 'At the start of your Beginning Phase, draw 1 if you
     have one or fewer cards in your hand.' The Hold that gives the last point
     comes after it."""
     loop, a, b = setup(active="A")
     _decks(a, b)
-    loop.gs.legend_A = card("Jinx Loose Cannon")
+    legend(loop, "A", "Jinx Loose Cannon")
     loop.gs.points_A = loop.gs.victory_score - 1
     loop.gs.battlefields[0].add_unit("A", unit("Holder", 2))
     result = loop._begin_turn()
@@ -86,8 +82,6 @@ def test_a_start_of_beginning_ability_resolves_before_a_hold_that_wins():
     assert len(a.hand) == 1                      # Jinx drew, then the Hold won
 
 
-@pytest.mark.xfail(strict=True, reason="§315.3: the turn's runes are channeled before the Hold, so "
-                                       "they pay for a reaction to a Hold ability")
 def test_the_runes_of_the_turn_are_channeled_after_the_hold():
     """Grove of the God-Willow: 'When you hold here, draw 1.' Ki Barrier costs
     [2] and one Order Power. With one rune in play the player can't react to the
