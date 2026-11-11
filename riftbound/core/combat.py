@@ -81,13 +81,15 @@ class UnitInPlay:
     copied_from: Optional[object] = None
     # A gear that became a unit gear (Orianna Lady of Clockwork): its Might is
     # its Energy cost; it is still a gear for "a friendly gear".
-    gear_unit: bool = False
+    gear_unit: bool = False      # a gear an effect made a unit (Orianna Lady of Clockwork)
 
-    def __post_init__(self) -> None:
-        # A unit printed "Unit Gear" (Patched Porobot, §178) is a unit gear
-        # wherever it is in play, like a gear an effect made a unit (Orianna).
-        if getattr(self.card, "also_gear", False):
-            self.gear_unit = True
+    @property
+    def is_gear(self) -> bool:
+        """Whether this unit is a gear too: a gear an effect made a unit
+        (`gear_unit`), or a unit printed "Unit Gear" (Patched Porobot, §178).
+        Read from the card it is now: one that became a copy of another unit
+        (Shady Spectacles) has that unit's types while it is one."""
+        return self.gear_unit or bool(getattr(self.card, "also_gear", False))
 
     def reset_damage(self) -> None:
         self.damage = 0

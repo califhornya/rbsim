@@ -14,7 +14,7 @@ marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
 **State (2026-11-11, third pass): 28 deviations found, 28 fixed, none open.**
-The suite is green (1683 passed, 5 skipped, no xfail left). The third pass
+The suite is green (1685 passed, 5 skipped, no xfail left). The third pass
 read the 119 cards of the other eight decks against the printed text and
 played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
@@ -558,14 +558,21 @@ followed the classes found (D23, D24, D28). Tests in
   `test_patched_porobot_is_the_first_gear_ornns_forge_makes_cheaper`,
   `test_patched_porobot_counts_the_other_gear`,
   `test_patched_porobot_is_a_gear_in_the_deck_and_in_the_trash`,
-  `test_a_unit_printed_as_a_gear_keeps_its_might`.
+  `test_a_unit_printed_as_a_gear_keeps_its_might`,
+  `test_a_porobot_that_became_a_copy_of_a_unit_is_no_gear`,
+  `test_a_unit_that_became_a_copy_of_a_porobot_is_a_gear`.
 - **Fixed.** `840876a`. `types: [Unit, Gear]` in the data; the registry sets
   `also_gear` on the card; `cards.is_gear()` is the one question "has the
   gear type", asked by the zone filters (`is_gear`, the legacy `gear`
   filter), Swain's condition, "discard a gear", gear's bonus damage,
-  Orianna's discount and the Power earmarked for gear. In play it is a unit
-  gear (`UnitInPlay.gear_unit`, set from the card): what Orianna's unit gear
-  already had (chosen, killed, readied and counted as a gear). Its Might is
+  Orianna's discount and the Power earmarked for gear. In play
+  `UnitInPlay.is_gear` (a gear Orianna made a unit, `gear_unit`, or a unit
+  whose card is a gear too) gives it what Orianna's unit gear already had
+  (chosen, killed, readied and counted as a gear). It is read from the card
+  the unit is now, so a Porobot that became a copy of another unit (Shady
+  Spectacles) is no gear while it is one, and a unit that became a copy of a
+  Porobot is (review of PR #19: the first version latched it as the unit
+  entered play). Its Might is
   the printed one; Orianna doesn't turn it back into a gear; "3 or more other
   gear" leaves it out. It is still played, moved and paid for as a unit: the
   `isinstance(card, GearCard)` tests that pick how a card is played are
