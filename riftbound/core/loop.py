@@ -2907,8 +2907,10 @@ class GameLoop:
             friends = bf.units_A if side == "A" else bf.units_B
             return len(enemies) == 1 and len(friends) == 1
         if ctype == "you_control_bf_with_exactly_n_units":
+            # Keeper of Law: "two units there" read as two of yours (the
+            # owner's decision, AUDIT Q4).
             n = _threshold(2)
-            return any(bf.control() == side and len(bf.units_A) + len(bf.units_B) == n
+            return any(bf.control() == side and len(bf.units_A if side == "A" else bf.units_B) == n
                        for bf in self.gs.battlefields)
         if ctype == "you_have_n_or_fewer_runes":
             return actor.total_runes_in_play() <= _threshold()

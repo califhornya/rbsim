@@ -173,3 +173,20 @@ def test_a_game_that_reaches_the_turn_cap_is_a_draw_even_with_a_lead():
     loop.gs.points_A, loop.gs.points_B = 6, 1
     assert loop._play_all_turns().winner == "DRAW"
 
+
+# -- Q4. Keeper of Law counts your units (the owner's decision) ------------------
+
+def test_keeper_of_law_counts_only_your_units_at_the_battlefield():
+    """'I cost [2] [order] less if you control a battlefield with exactly two
+    units there', read as two of your units (AUDIT Q4)."""
+    loop, a, b = setup(active="A")
+    bf0 = loop.gs.battlefields[0]
+    keeper = card("Keeper of Law")
+    a.hand.append(keeper)
+    bf0.add_unit("A", unit("Left", 1))
+    bf0.add_unit("B", unit("Raider", 1))     # one of each: not two of yours
+    assert bf0.control() == "A"
+    assert loop._effective_cost(keeper, a, 0) == (5, 1)
+    bf0.add_unit("A", unit("Right", 1))      # two of yours, and an enemy unit
+    assert bf0.control() == "A"
+    assert loop._effective_cost(keeper, a, 0) == (3, 0)
