@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-11 (risposte Q1–Q4 dell'audit applicate).
+Aggiornato: 2026-11-11 (audit, terzo passaggio: le altre otto liste carta per carta).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -14,50 +14,54 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   con il motivo partita per partita nel messaggio di commit.
 - D19: `_phase_beginning` copre ancora Awaken → Channel (non spezzato in più
   metodi) perché ~40 file di test lo chiamano direttamente.
-- D20: il Conquer dipende da `Battlefield.gained_control` (chi ha *ottenuto* il
-  controllo nel turno), non più da `last_controller`; quest'ultimo resta solo
-  perché la firma delle golden lo legge.
+- D20: il Conquer dipende da `Battlefield.gained_control`, non da
+  `last_controller` (che resta solo per la firma delle golden).
 - D21: restrizione "battlefield where you have units" come parametro della carta
   (`battlefield: friendly_units`), non come caso speciale per nome.
 - Q1–Q4 (decise dall'utente): priorità secondo §337.4; Shadow Order Disciple
   invariato; partita al cap dei turni = pareggio; Keeper of Law conta solo le
   unità di chi la gioca.
-- Q3: il pareggio è in `GameLoop._final_result`; il match tiene la regola dei
-  2 punti di TR 408.2.b tramite `match._game_result`, che non cambia.
+- D23: il tempo di un'abilità attivata sta nei dati solo se la carta stampa
+  [Action]/[Reaction]; un test statico lo controlla su tutto il corpus.
+- D24: Quick-Draw offre tutte le unità del giocatore; la baseline resta sulle
+  unità del battlefield dell'azione, così le golden non cambiano.
+- D26: un gear nemico scelto si conta alla risoluzione (come il suo DEFLECT),
+  non quando la spell va in catena: differenza accettata.
+- D27 lasciata aperta: non è un fix di dati ma un refactor (vedi Prossimi passi).
 
 ## Fatto
-- Primo passaggio (sessione precedente): D1–D18, tutte corrette.
-- Secondo passaggio (questa sessione), tutte corrette, suite verde
-  (1665 passed, 5 skipped, nessun xfail):
-  - D19 `99678b6`: ordine dello Start of Turn secondo §315 (Awaken, abilità di
-    inizio Beginning, Hold, Channel).
-  - D20 `eb8acb7`: Conquer anche per un battlefield perso e ripreso nello stesso
-    turno (§471.1). 2 golden rigenerate.
-  - D21 `3ada8b6`: Moonfall solo su un battlefield dove chi la gioca ha unità.
-    5 golden rigenerate.
-  - D22 `197be0b`: il punto dell'Hold viene dato prima delle sue abilità (§473).
-- Risposte Q1–Q4, suite verde (1669 passed, 5 skipped), nessuna golden cambiata:
-  - Q3 `c44d91b`: una partita che arriva al cap è sempre un pareggio.
-  - Q4 `81f90ea`: Keeper of Law conta solo le tue unità.
-  - Q1 `673643e`: la priorità va prima a chi controlla l'oggetto più recente.
-  - Q2: tenuto com'era (Burn Out e +1).
+- Primo passaggio: D1–D18. Secondo: D19–D22 e risposte Q1–Q4. Tutte corrette.
+- Terzo passaggio (questa sessione): le 119 carte delle otto liste non precon
+  lette contro il testo stampato, ~60 giocate nel motore. Suite verde
+  (1677 passed, 5 skipped, 2 xfail = D27), nessuna golden cambiata:
+  - D23 `17838db`: 39 abilità di 34 carte avevano `timing: action` non
+    stampato (usabili in showdown): Heart of Dark Ice, The List, ...
+  - D24 `6376f85`: Quick-Draw si attacca a qualsiasi unità che controlli
+    (Cloth Armor restava in base non attaccata).
+  - D25 `4947f42`: Bellows Breath solo su unità nella stessa location.
+  - D26 `a0063f2`: la leggenda di Ezreal conta anche i gear nemici scelti.
+  - D28 `0ac459e`: le leggende di Rengar e Kennen scelgono qualsiasi unità.
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-1. Audit carta per carta delle altre otto liste (finora solo le 7 carte di
-   D13–D18 e D21); 136 carte segnalate da `piltover_sync.py compare`.
-2. Non controllati: costruzione del mazzo (§103), procedura di match,
+1. **Decisione da prendere, D27**: Patched Porobot (Ornn, 3 copie) è stampato
+   "Unit Gear" (§178) ma per il motore è solo un'unità. Serve un unico
+   predicato "ha il tipo gear" per i ~30 punti che lo chiedono in tre modi
+   diversi. Due test xfail(strict) pronti in `tests/audit/test_audit_decks.py`.
+2. Resto del corpus (carte fuori dalle dieci liste): non letto. Noti: Navori
+   Fighting Pit, Ambessa Matriarch of War (come D28), Facebreaker (come D25).
+3. Non controllati: costruzione del mazzo (§103), procedura di match,
    effetti di sostituzione (§372-373), layer (§475-482), lato AI.
-3. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
+4. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
   non è stato controllato.
 - `tests/audit/`: un test per deviazione (`test_audit_precon_rules.py`,
-  `test_audit_mechanics.py`, `test_audit_card_data.py`, helper in
-  `audit_helpers.py`).
+  `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
+  per il terzo passaggio, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
 - `riftbound/core/battlefield.py`: controllo, contesa, Hold / Conquer.
 - `riftbound/core/effects.py`: gli effetti delle carte.

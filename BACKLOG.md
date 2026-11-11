@@ -28,8 +28,16 @@ eight decks, 15 cards differ; checked so far:
       vs printed "While"), Existential Dread (printed "attacking *enemy*
       unit"); errata'd: Fizz Trickster, Emperor's Dais, Diana Lunari, Rengar
       Trophy Hunter, Death from Below.
+- [x] The other eight decks, card by card (audit, third pass, 2026-11-11):
+      D23-D28 in docs/audit/AUDIT.md, all fixed but D27.
+- [ ] D27, Patched Porobot (Ornn, 3 copies) is printed "Unit Gear" and is a
+      unit only: one "has the gear type" predicate for the ~30 places that
+      ask (docs/audit/AUDIT.md D27).
 - [ ] The rest of the corpus: 136 of 1100 cards flagged (many are the site's
-      typos or wording; a flag is a reason to read the card).
+      typos or wording; a flag is a reason to read the card). Outside the ten
+      decks nothing was read; known there: Navori Fighting Pit and Ambessa
+      Matriarch of War choose only a friendly unit (D28), Facebreaker's "same
+      battlefield" not played (D25).
 
 ### O2. Rules audit (independent of the card-by-card review)
 - [ ] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows not re-checked since G; at
