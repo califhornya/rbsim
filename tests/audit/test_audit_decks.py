@@ -85,7 +85,6 @@ def test_quick_draw_chooses_among_all_the_units_you_control():
 
 # -- D25. Bellows Breath (SFD-080; vendetta_ezreal) ------------------------------
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D25")
 def test_bellows_breath_hits_units_at_the_same_location():
     """'Deal 1 to up to three units at the same location.'"""
     loop, a, b = setup(active="A", rich=())

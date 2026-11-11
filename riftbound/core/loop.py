@@ -535,13 +535,15 @@ class GameLoop:
         return got
 
     def choose_many(self, kind: str, side: str, options: list, picks: list, source=None,
-                    up_to: Optional[int] = None) -> list:
+                    up_to: Optional[int] = None, allowed=None) -> list:
         """`choose` for several picks: one choice per pick, in the baseline's
         order, each among the options not taken yet. `up_to` ("up to N", "any
         number", §355.13): the player may stop before the baseline's last pick
         (none at all too) or go on to N; each pick then offers NO_MORE too, the
-        baseline's answer once its picks are taken. Replayed (see `choose`),
-        the declared options still legal are kept (§359.3.e.8)."""
+        baseline's answer once its picks are taken. `allowed(taken, option)`:
+        whether `option` can follow the picks taken ("at the same location").
+        Replayed (see `choose`), the declared options still legal are kept
+        (§359.3.e.8)."""
         slot = self._choice_slot(kind, source)
         if slot is not None and self._replay is not None and slot in self._replay["choices"]:
             chosen = self._replay["choices"][slot][2]
@@ -562,7 +564,10 @@ class GameLoop:
             self._in_many = True
             try:
                 while len(out) < most:
-                    left = [o for o in order if not any(o is t for t in out)]
+                    left = [o for o in order if not any(o is t for t in out)
+                            and (allowed is None or allowed(out, o))]
+                    if not left:
+                        break
                     if up_to is None:
                         out.append(self.choose(kind, side, left, left[0], source))
                         continue

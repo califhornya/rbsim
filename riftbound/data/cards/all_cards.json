@@ -13742,7 +13742,8 @@
         "where": "anywhere",
         "amount": 1,
         "count": 3,
-        "up_to": true
+        "up_to": true,
+        "same_location": true
       }
     ]
   },

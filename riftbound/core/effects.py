@@ -92,8 +92,12 @@ def _deal_damage(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         if spec.get("up_to"):
             # "Deal 6 to each of up to two units": baseline, enemies only.
             picks = [u for u in picks if value(u)[0]]
+        allowed = None
+        if spec.get("same_location"):
+            picks, allowed = _same_location(
+                ctx, [u for u in cands if value(u)[0]] if spec.get("up_to") else cands, count)
         units = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, cands, picks,
-                                     ctx.card, up_to=_up_to(spec, count))
+                                     ctx.card, up_to=_up_to(spec, count), allowed=allowed)
         if units:
             ctx.loop._note_chosen(ctx.card, ctx.actor_side, units)
         ctx.extra["it"] = units
@@ -3968,6 +3972,18 @@ _EVERYWHERE_TARGETS = {
 _CHOOSER_TARGETS = {"chosen_unit", "chosen", "any_unit", "a_unit", "unit"}
 
 
+def _same_location(ctx: "EffectContext", pool: list, count: int):
+    """ "up to three units at the same location" (Bellows Breath): a
+    battlefield or one player's base. Returns the baseline's picks (up to
+    `count` of `pool`, where most of it is) and choose_many's `allowed`."""
+    def spot(u):
+        where = ctx.loop._locate_unit(u)
+        return None if where is None else (id(where[1]) if where[1] is not None else where[0])
+    best = max(pool, key=lambda u: sum(spot(v) == spot(u) for v in pool), default=None)
+    picks = [u for u in pool if spot(u) == spot(best)][:count]
+    return picks, lambda taken, option: not taken or spot(option) == spot(taken[0])
+
+
 def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str = "none",
                      prefer=None) -> list:
     """Return the list of units an effect should hit, honoring target + scope + target_filter.
@@ -4065,8 +4081,12 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     if spec.get("up_to") and bias != "none":
         want = ctx.opponent_side if bias == "enemy" else ctx.actor_side
         picks = [u for u in picks if side(u) == want]
+    allowed = None
+    if spec.get("same_location"):
+        pool = [u for u in units if side(u) == want] if spec.get("up_to") and bias != "none" else units
+        picks, allowed = _same_location(ctx, pool, count)
     picked = ctx.loop.choose_many(_kind("target", spec), ctx.actor_side, units, picks,
-                                  ctx.card, up_to=_up_to(spec, count))
+                                  ctx.card, up_to=_up_to(spec, count), allowed=allowed)
     ctx.loop._note_chosen(ctx.card, ctx.actor_side, picked)
     ctx.extra["it"] = picked
     return picked
