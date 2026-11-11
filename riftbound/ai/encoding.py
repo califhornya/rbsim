@@ -246,8 +246,9 @@ _OFF_PASS = 0
 _OFF_UNIT = _OFF_PASS + 1                          # MAX_HAND * (N_BF+1): base, then each BF
 _OFF_SPELL = _OFF_UNIT + MAX_HAND * (N_BF + 1)     # MAX_HAND * N_BF
 _OFF_GEAR = _OFF_SPELL + MAX_HAND * N_BF           # MAX_HAND * N_BF
-_OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF
-_OFF_MOVE = _OFF_CHAMP + N_BF                      # (N_BF+1)^2 * MAX_MOVERS
+_OFF_CHAMP = _OFF_GEAR + MAX_HAND * N_BF           # N_BF: to base (slot 0), or AMBUSH at a BF
+_OFF_CHAMP_BF = _OFF_CHAMP + N_BF                  # N_BF: Main Phase, to a battlefield
+_OFF_MOVE = _OFF_CHAMP_BF + N_BF                   # (N_BF+1)^2 * MAX_MOVERS
 _OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2 * MAX_MOVERS  # (MAX_HAND + the champion) * N_BF
 _OFF_HIDDEN = _OFF_HIDE + (MAX_HAND + 1) * N_BF    # N_BF * MAX_FACEDOWN
 _OFF_ABIL = _OFF_HIDDEN + N_BF * MAX_FACEDOWN      # ACTIVATED(MAX_ABIL)
@@ -292,6 +293,9 @@ def action_to_index(action, n_bf: int) -> Optional[int]:
     if kind == "GEAR":
         return hb(_OFF_GEAR, idx, N_BF, lane if isinstance(lane, int) else 0)
     if kind == "CHAMPION":
+        if dst is not None and dst != n_bf:
+            # Played in the Main Phase to a battlefield its player controls.
+            return _OFF_CHAMP_BF + dst if isinstance(dst, int) and 0 <= dst < min(n_bf, N_BF) else None
         return _OFF_CHAMP + lane if isinstance(lane, int) and 0 <= lane < N_BF else None
     if kind == "MOVE":
         if not (isinstance(lane, int) and isinstance(dst, int)):

@@ -102,7 +102,10 @@ def test_showdown_legality_offers_ambush_at_showdown_lane():
     loop.gs.showdown_bf_idx = 1
     acts = {a.to_engine() for a in legal_actions(loop, DecisionPoint.SHOWDOWN_ACTION, "A")}
     assert ("CHAMPION", None, 1) in acts
-    # A showdown at a lane with no legal AMBUSH target → not offered.
+    # A showdown at the other lane: AMBUSH is a REACTION play (§822.1.b), not
+    # tied to the showdown's battlefield; it is offered where it is legal
+    # (lane 1), not at the showdown's lane. (This test used to check it wasn't
+    # offered at all: docs/audit/AUDIT.md D11.)
     loop.gs.showdown_bf_idx = 0
     acts0 = {a.to_engine() for a in legal_actions(loop, DecisionPoint.SHOWDOWN_ACTION, "A")}
-    assert not any(k == "CHAMPION" for (k, _i, _l) in acts0)
+    assert [a for a in acts0 if a[0] == "CHAMPION"] == [("CHAMPION", None, 1)]

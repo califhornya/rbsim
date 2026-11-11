@@ -961,8 +961,9 @@ def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Banish an enemy unit at a battlefield with 3 Might or less" (Mel Defiant
     Soul): off the board into its owner's banishment — it doesn't die (no
-    DEATHKNELL, not to the trash); a token just ceases to exist, its gear goes
-    to the trash. `with_this`: the card is "banished with this" (Dockside
+    DEATHKNELL, not to the trash); a token just ceases to exist. Its Equipment
+    detaches and stays on the board, recalled to its controller's base
+    (§719.5, §436.4). `with_this`: the card is "banished with this" (Dockside
     Lock-Up, played back by play_banished_with_this)."""
     loop = ctx.loop
     for unit in _resolve_targets(ctx, {**spec, "target": spec.get("target", "enemy_unit")},
@@ -973,8 +974,7 @@ def _banish_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         side = where[0]
         owner = loop.gs.get_player(side)
         loop._remove_unit_from_play(unit, side)
-        for g in list(unit.gear):
-            loop._to_trash(owner, g)
+        owner.base_gear.extend(unit.gear)
         unit.gear.clear()
         if not unit.is_token:
             owner.banished.append(unit.card)
@@ -1720,13 +1720,18 @@ def _temporary_swap(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     loop._move_unit_by_effect(y, bx)
 
 
+def _attacking_enemies(ctx: "EffectContext") -> list:
+    """The attacking enemy units `ctx`'s player may choose (Existential Dread)."""
+    return _choosable(ctx, [u for u in _units_at(ctx, ctx.opponent_side, "battlefield")
+                            if ctx.loop._is_attacking(u)])
+
+
 @effect("stun_or_return_attacker")
 def _stun_or_return_attacker(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "STUN an attacking unit. If it's already stunned, return it to its
-    owner's hand instead" (Existential Dread)."""
+    """ "STUN an attacking enemy unit. If it's already stunned, return it to
+    its owner's hand instead" (Existential Dread)."""
     loop = ctx.loop
-    cands = _choosable(ctx, [u for s in ("A", "B") for u in _units_at(ctx, s, "battlefield")
-                             if loop._is_attacking(u)])
+    cands = _attacking_enemies(ctx)
     if not cands:
         return
     unit = loop.choose(_kind("target", spec), ctx.actor_side, cands,
@@ -2812,6 +2817,8 @@ def _win_game(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         gs.points_A = max(gs.points_A, gs.victory_score)
     else:
         gs.points_B = max(gs.points_B, gs.victory_score)
+    if gs.winner is None:
+        gs.winner = ctx.actor_side          # §195: it wins, whatever the points
 
 
 @effect("move_self_to_weaker_enemy_battlefield")
@@ -4076,6 +4083,8 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     effect = spec.get("effect")
     if effect == "counter_spell":
         return bool(_counter_targets(ctx, spec))
+    if effect == "stun_or_return_attacker":
+        return bool(_attacking_enemies(ctx))
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
     target = str(spec.get("target", "")).lower()
@@ -5237,10 +5246,15 @@ def _move_deployed_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("burn")
 def _burn(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """Vendetta BURN X: move the top X cards of the target's Main Deck to trash,
-    and track the count this turn (for 'cards burned this turn' conditions)."""
+    and track the count this turn (for 'cards burned this turn' conditions).
+    With fewer than X cards there: "they burn that many cards, burn out and
+    then burn the rest" (§441.4; the Burn Out of §432.2, as for a draw)."""
     amount = int(spec.get("amount", spec.get("count", 1)))
     player = ctx._player_for_target(str(spec.get("target", "actor")))
     burned = player.burn(amount)
+    if len(burned) < amount:
+        ctx.loop._burn_out(player)
+        burned += player.burn(amount - len(burned))
     side = ctx._side_for_player(player)
     gs = ctx.loop.gs
     gs.cards_burned_this_turn[side] = gs.cards_burned_this_turn.get(side, 0) + len(burned)

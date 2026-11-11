@@ -413,7 +413,7 @@
     "domain": "Fury",
     "category": "Unit",
     "sub_type": "Noxus, Trifarian",
-    "might": 3,
+    "might": 4,
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -3204,7 +3204,7 @@
     "cost_energy": 3,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "",
+    "effect": "When you play a gear, ready me.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -3214,7 +3214,21 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "ready_unit",
+        "trigger": "on_card_played",
+        "target": "self",
+        "condition": {
+          "type": "triggering_card_matches",
+          "params": {
+            "filter": {
+              "is_gear": true
+            }
+          }
+        }
+      }
+    ]
   },
   {
     "card_id": "OGN-092",
@@ -3331,7 +3345,7 @@
     "cost_energy": 1,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "REACTION (Play anytime, even before spells and abilities resolve.) Give a unit +1 [might] this turn, to a minimum of 1 [might]. Draw 1.",
+    "effect": "REACTION (Play anytime, even before spells and abilities resolve.) Give a unit -1 [might] this turn, to a minimum of 1 [might]. Draw 1.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -3349,7 +3363,7 @@
         "trigger": "on_cast",
         "timing": "reaction",
         "target": "chosen_unit",
-        "amount": 1,
+        "amount": -1,
         "duration": "this_turn",
         "min_might": 1,
         "where": "anywhere"
@@ -6790,7 +6804,7 @@
     "cost_energy": 6,
     "cost_power": 2,
     "cost_power_domain": "Chaos",
-    "effect": "",
+    "effect": "Play a unit from your trash, ignoring its Energy cost. (You must still pay its Power cost.)",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -6800,7 +6814,16 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "play_from_trash",
+        "trigger": "on_cast",
+        "target_filter": {
+          "is_unit": true
+        },
+        "ignore_energy_cost": true
+      }
+    ]
   },
   {
     "card_id": "OGN-199",
@@ -23731,7 +23754,7 @@
     "cost_energy": 1,
     "cost_power": 1,
     "cost_power_domain": "Chaos",
-    "effect": "ACTION (Play on your turn or in showdowns.) REPEAT[2] (You may pay the additional cost to repeat this spell's effect.) STUN an attacking unit. If it's already stunned, return it to its owner's hand instead. (A stunned unit doesn't deal combat damage this turn.)",
+    "effect": "ACTION (Play on your turn or in showdowns.) REPEAT[2] (You may pay the additional cost to repeat this spell's effect.) STUN an attacking enemy unit. If it's already stunned, return it to its owner's hand instead. (A stunned unit doesn't deal combat damage this turn.)",
     "effect_equipped": null,
     "set": "Unleashed",
     "variants": [
@@ -25633,7 +25656,7 @@
     "sub_type": "Rengar",
     "might": null,
     "cost_energy": 2,
-    "cost_power": 2,
+    "cost_power": 1,
     "cost_power_domain": "Fury/Body",
     "effect": "REACTION (Play any time, even before spells and abilities resolve.) Banish a friendly unit, then its owner plays it to any battlefield, ignoring its cost.",
     "effect_equipped": null,

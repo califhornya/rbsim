@@ -1429,12 +1429,18 @@ class GameLoop:
             # with what its play paid for (kicker, SHOW OFF).
             if play_specs:
                 side = "A" if actor is self.gs.A else "B"
+                flags = {"_kicker_paid": getattr(card, "_kicker_paid", False),
+                         "_showed_off": getattr(card, "_showed_off", False),
+                         "_shown": getattr(card, "_shown", None)}
+                if getattr(card, "_hidden_bf", None) is not None:
+                    # Played from facedown: its play effect chooses at that
+                    # battlefield (§811.1.d.3) whenever it gets to resolve, not
+                    # only while _play_from_hidden is still running.
+                    flags["_hidden_bf"] = card._hidden_bf
                 self._trigger(card, "on_play", [(i, es) for i, es in enumerate(effect_specs)
                                                 if es.trigger in ("on_play", "on_cast")],
                               battlefield, side, None, additional=False, once=False,
-                              flags={"_kicker_paid": getattr(card, "_kicker_paid", False),
-                                     "_showed_off": getattr(card, "_showed_off", False),
-                                     "_shown": getattr(card, "_shown", None)})
+                              flags=flags)
                 card._kicker_paid = False
                 card._showed_off = False
                 card._shown = None
@@ -3586,9 +3592,12 @@ class GameLoop:
                 or (teemo and ap.energy >= 1))
 
     def _cleanup_hidden_cards(self) -> None:
-        """§106.4.d / §322.8: a face-down card whose owner no longer controls its
-        battlefield is removed to its owner's trash. Called during end-of-turn
-        cleanup."""
+        """§107.3.d / §323.6.a: a face-down card whose owner no longer controls
+        its battlefield is removed to its owner's trash in the next Cleanup:
+        called once an action is done, once a chain has resolved, once a
+        showdown or combat is over (§468.5.c), and as the turn ends. Control doesn't change while a showdown or combat goes on
+        there (Battlefield.control, §190.4.b), so a card hidden there stays
+        playable until it is over."""
         for bf in self.gs.battlefields:
             for fd in [fd for fd in bf.facedowns if bf.control() != fd.owner]:
                 self._put_in_trash(self.gs.get_player(fd.owner), fd.card)
@@ -5061,11 +5070,25 @@ class GameLoop:
                                                self._has_effect(gs.battlefields[i].card, "no_unit_plays_here")))
 
     def _play_ambush_unit(self, ap: Player, idx: int, lane) -> bool:
-        """Play an AMBUSH unit from hand to `lane` at reaction speed."""
+        """Play an AMBUSH unit from hand to `lane` at reaction speed; a REACTION
+        unit also to its player's base (`lane` the base index; §813.3.a)."""
         side = "A" if ap is self.gs.A else "B"
-        if not (0 <= idx < len(ap.hand)) or lane not in self._ambush_unit_lanes(ap.hand[idx], side):
+        if not (0 <= idx < len(ap.hand)):
             return False
         card = ap.hand[idx]
+        if lane == len(self.gs.battlefields):
+            if not (isinstance(card, UnitCard) and card.has_keyword("REACTION")):
+                return False
+            energy, power = self._effective_cost(card, ap)
+            if not self._pay_card(ap, card, energy, power):
+                return False
+            ap.hand[:] = [c for c in ap.hand if c is not card]
+            if self.verbose:
+                print(f"  {side} plays UNIT at reaction speed: {card.name}")
+            self._play_unit(card, side)
+            return True
+        if lane not in self._ambush_unit_lanes(card, side):
+            return False
         energy, power = self._effective_cost(card, ap)
         energy = max(0, energy - self._destination_discount(card, lane, side))
         if not self._pay_card(ap, card, energy, power):
@@ -5445,17 +5468,32 @@ class GameLoop:
             if champion is None or already_deployed:
                 return
             # The Chosen Champion is played from the Champion Zone like any unit
-            # from hand: its own reductions, ACCELERATE, "when you play me", ...
+            # from hand (§108.3.d): to base (dst None) or a battlefield it may be
+            # played to (§355.2.a), its own reductions, ACCELERATE, "when you
+            # play me", ...
+            dst = None if dst_lane is None or dst_lane == base_index else dst_lane
+            if dst not in self._unit_play_destinations(champion, ap.name):
+                return
+            bf = None if dst is None else self.gs.battlefields[dst]
+            prev_controller = bf.controller() if bf is not None else None
+            surcharge = self._destination_surcharge(champion, dst, ap.name)
             energy, power = self._effective_cost(champion, ap)
+            energy = max(0, energy - self._destination_discount(champion, dst, ap.name))
+            if surcharge and not self._can_pay_generic_power(ap, surcharge + int(power or 0)):
+                return
             if not self._pay_card(ap, champion, energy, power):
                 return
+            if surcharge:
+                self._pay_generic_power(ap, surcharge)
             if is_A:
                 self.gs.champion_A_deployed = True
             else:
                 self.gs.champion_B_deployed = True
             if self.verbose:
-                print(f"  {ap.name} deploys CHAMPION: {champion.name}")
-            self._play_unit(champion, ap.name, from_zone="champion")
+                print(f"  {ap.name} deploys CHAMPION: {champion.name}" + (f" to BF{dst}" if bf else ""))
+            self._play_unit(champion, ap.name, bf=bf, from_zone="champion")
+            if bf is not None:
+                self._arrive_at(bf, ap.name, prev_controller)
             if self.recorder:
                 self.recorder.record_play(
                     ap.name,
@@ -5528,6 +5566,8 @@ class GameLoop:
         # A unit a spell or ability moved into a battlefield (Twilight Step).
         if kind != "MOVE":
             self._run_staged_showdowns()
+        if not self.gs.chain:
+            self._cleanup_hidden_cards()      # the Cleanup after the action (§319)
 
     # ------------------------------------------------------------------
     # Generic activated abilities (Round 4 Tier 2 / D3)
@@ -5993,9 +6033,42 @@ class GameLoop:
             if not self._activated_affordable(ap, entry["unit"], self._unit_ability_cost(ap, entry["unit"], parsed)):
                 return False
         bf = self.gs.battlefields[entry["bf_idx"]] if entry.get("bf_idx") is not None             else self.gs.battlefields[0]
-        return self._check_condition(eff.condition, source, ap,
+        if not self._check_condition(eff.condition, source, ap,
                                      self.gs.get_player(self.gs.other(side)),
-                                     {"battlefield": bf})
+                                     {"battlefield": bf}):
+            return False
+        return self._ability_has_target(ap, source, entry.get("unit"), eff, bf)
+
+    def _ability_has_target(self, ap: Player, source: Card, unit, eff: EffectSpec,
+                            bf: Battlefield) -> bool:
+        """§403.3 / §355.8: an activated ability can be activated only with a
+        legal choice for its target. Checked for an ability that chooses one
+        unit (effects.has_valid_target; with no place named it looks at every
+        location, as _resolve_targets does for an ability) and for a swap of
+        locations (a valid Location for a Move is another one, §355.4.a)."""
+        from .effects import _SINGLE_UNIT_TARGETS, _choosable, _fallback_units, _passes_filter, \
+            has_valid_target
+        side = "A" if ap is self.gs.A else "B"
+        params = {**eff.merged_params(), "effect": eff.effect}
+        if eff.effect == "swap_position":
+            named = params.get("with_name")
+            where = self._locate_unit(unit) if unit is not None else None
+            if where is None:
+                return False
+            return any(u is not unit and (u.card.name == named if named else not u.is_token)
+                       and self._locate_unit(u)[1] is not where[1]
+                       for u in self._friendly_units_of(side))
+        ctx = EffectContext(self, source, ap, self.gs.get_player(self.gs.other(side)), bf)
+        ok = has_valid_target(ctx, params)
+        target = str(params.get("target", "")).lower()
+        if ok is False and not params.get("where") and target in _SINGLE_UNIT_TARGETS \
+                and params.get("effect") not in ("move_unit", "move_units_to_base"):
+            units = _fallback_units(ctx, target, "none")
+            tf = params.get("target_filter")
+            if tf:
+                units = [u for u in units if _passes_filter(u, tf, ctx)]
+            ok = bool(_choosable(ctx, units))
+        return ok is not False
 
     def _gear_left_board(self, gear, side: str) -> None:
         """A gear was killed (or sacrificed): its DEATHKNELL (Sprite Fountain)
@@ -7219,7 +7292,32 @@ class GameLoop:
             self.gs.points_A += n
         else:
             self.gs.points_B += n
+        self._note_winner()
         return n
+
+    def _note_winner(self) -> None:
+        """§323.1 / §194.2: a player with points greater than or equal to the
+        Victory Score and more points than the opponent wins, in the next
+        Cleanup: the first one it is true of, recorded as the points change (a
+        point the other gains later in the turn doesn't undo it). With the same
+        points play continues (§194.2.b)."""
+        gs = self.gs
+        if gs.winner is not None:
+            return
+        if gs.points_A >= gs.victory_score and gs.points_A > gs.points_B:
+            gs.winner = "A"
+        elif gs.points_B >= gs.victory_score and gs.points_B > gs.points_A:
+            gs.winner = "B"
+
+    def _victory(self) -> Optional[Result]:
+        """The game's result once a player has won (§196: the game ends), None
+        while nobody has."""
+        self._note_winner()
+        if self.gs.winner is None:
+            return None
+        if self.recorder:
+            self._snapshot_state()
+        return Result(self.gs.winner, self.gs.turn, self.units_played, self.spells_cast)
 
     def _empowered_with(self, side: str, verb: str) -> bool:
         """An EMPOWERED unit of `side` has the passive `verb` (Mel Newly Awakened's
@@ -7339,7 +7437,9 @@ class GameLoop:
         passes = 0
         rounds = 0
 
-        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP and not self._all_pass:
+        # Nobody is asked anything once the game is won (§196).
+        while passes < 2 and self.gs.chain and rounds < _PRIORITY_ROUNDS_CAP and not self._all_pass \
+                and self.gs.winner is None:
             rounds += 1
             player = self.gs.get_player(active)
             if player.agent is None or not hasattr(player.agent, "decide_reaction"):
@@ -7427,6 +7527,8 @@ class GameLoop:
         self._flush_triggers(run=False)
         if self.gs.chain:
             self._run_chain(self.gs.chain[-1].player)
+        elif not getattr(self, "_dry_run", False):
+            self._cleanup_hidden_cards()      # the Cleanup as the chain ends (§319.5)
 
     def _resolve_chain_passing(self) -> None:
         """Resolve the whole chain as if every player passed each time (a
@@ -7483,6 +7585,8 @@ class GameLoop:
         """Execute a showdown at the given battlefield (§337–345)."""
         if self.gs.showdown_active:
             return  # Already in a showdown
+        if self.gs.winner is not None:
+            return  # The game is over (§196)
 
         if self.verbose:
             print(f"  [SHOWDOWN triggered at BF{bf_idx}] {attacker} has focus")
@@ -7509,7 +7613,7 @@ class GameLoop:
 
         passes = 0
         rounds = 0
-        while passes < 2 and rounds < _PRIORITY_ROUNDS_CAP:
+        while passes < 2 and rounds < _PRIORITY_ROUNDS_CAP and self.gs.winner is None:
             rounds += 1
             focus_player = self.gs.get_player(self.gs.focus_player)
             opponent_player = self.gs.get_player(self.gs.other(self.gs.focus_player))
@@ -7538,6 +7642,10 @@ class GameLoop:
             self.gs.focus_player = self.gs.other(self.gs.focus_player)
 
         self._finish_showdown(bf_idx, attacker)
+        # Control is established: the cards hidden here by a player who no
+        # longer controls it go to the trash (§468.5.c, §348.2.a).
+        if not self.gs.chain:
+            self._cleanup_hidden_cards()
         # A unit an effect moved elsewhere during this showdown: its turn now.
         self._run_staged_showdowns()
 
@@ -7564,9 +7672,10 @@ class GameLoop:
             if self._play_ambush_unit(player, idx, action[3]):
                 return "acted"
         elif kind == "UNIT" and idx is not None and 0 <= idx < len(player.hand):
-            # ACTION unit (§732.1.c.1): played during a showdown (to base).
+            # ACTION unit (§806.1.c.1), or REACTION one (§813.1.b): played during
+            # a showdown (to base).
             card = player.hand[idx]
-            if isinstance(card, UnitCard) and card.has_keyword("ACTION"):
+            if isinstance(card, UnitCard) and (card.has_keyword("ACTION") or card.has_keyword("REACTION")):
                 before = len(player.base_units)
                 self._apply_action(player, ("UNIT", idx, bf_idx, None))
                 if len(player.base_units) > before:
@@ -7580,12 +7689,13 @@ class GameLoop:
                 if len(player.hand) < before:
                     return "acted"
         elif kind == "CHAMPION":
-            # AMBUSH: deploy the champion into the showdown lane at reaction speed.
-            if self._deploy_ambush_champion(side, bf_idx):
+            # AMBUSH: deploy the champion at reaction speed, to the battlefield
+            # the action names (the showdown's if it names none).
+            if self._deploy_ambush_champion(side, lane if isinstance(lane, int) else bf_idx):
                 return "acted"
         elif kind == "HIDDEN_PLAY":
-            # Play a facedown card for [0] into the showdown lane (§737.1.b).
-            if self._play_from_hidden(side, bf_idx, idx or 0):
+            # Play a facedown card for [0] (§811.1.b), at its battlefield.
+            if self._play_from_hidden(side, lane if isinstance(lane, int) else bf_idx, idx or 0):
                 return "acted"
         elif kind == "ABILITY":
             # ACTION / REACTION ability: on a chain run now, then focus passes
@@ -7732,6 +7842,12 @@ class GameLoop:
         # Route dead units (death replacements applied first), fire on_death etc.
         self._route_combat_deaths(stats, bf)
 
+        # Combat Cleanup, "3c. Heal all Units" (§468.1.a.1): every unit on the
+        # board, not only the ones that fought (combat.resolve_might_combat
+        # healed those).
+        for unit in self._all_units_in_play():
+            unit.damage = 0
+
         if self.recorder:
             self._record_combat_deaths(bf, before_A, before_B)
 
@@ -7791,9 +7907,15 @@ class GameLoop:
             # order that kills the most Might (combat.kill_order).
             return lambda units, damage: self.choose("combat_damage_order", assigner, units,
                                                      kill_order(units, damage)[0])
+        def conflict(assigner):
+            # A unit with TANK and BACKLINE: `assigner` chooses which one it
+            # applies (§467.2.c.8). Baseline: TANK.
+            return lambda unit: self.choose("combat_tank_or_backline", assigner,
+                                            ["TANK", "BACKLINE"], "TANK", unit.card)
         return {"take": lambda u, a: self._take_damage(u, a, "combat"),
                 "ignore_tank_a": surfer("B"), "ignore_tank_b": surfer("A"),
-                "might_mods": mods, "first_a": first("B"), "first_b": first("A")}
+                "might_mods": mods, "first_a": first("B"), "first_b": first("A"),
+                "conflict_a": conflict("B"), "conflict_b": conflict("A")}
 
     def _combat_might_mods(self, bf: Battlefield, attacker: str) -> dict:
         """id(unit) -> Might change while fighting at `bf` (Forbidding Waste: a
@@ -7944,25 +8066,26 @@ class GameLoop:
                 gs.points_A += gained
             else:
                 gs.points_B += gained
-            if gs.points_A >= gs.victory_score:
-                if self.recorder:
-                    self._snapshot_state()
-                return Result("A", gs.turn, self.units_played, self.spells_cast)
-            if gs.points_B >= gs.victory_score:
-                if self.recorder:
-                    self._snapshot_state()
-                return Result("B", gs.turn, self.units_played, self.spells_cast)
+        # A player with the Victory Score and more points than the other has
+        # won (§323.1): after the Hold, and after anything else that gives a
+        # point before the Main Phase (a Burn Out in the Draw Phase, §432.2.c).
+        result = self._victory()
+        if result is not None:
+            return result
 
         self._fire_turn_trigger("on_start_of_turn", gs.active)
         self._recompute_passives()
         if not self._side_has_passive(gs.active, "skip_draw_phase"):     # Endless Riches
             self._phase_draw(gs.get_player(gs.active))
+        result = self._victory()
+        if result is not None:
+            return result
         # "At the start of your Main Phase" (Orianna Lady of Clockwork); a unit
         # it makes at a battlefield has its showdown before any action.
         self._start_of_main(gs.active)
         self._recompute_passives()
         self._run_staged_showdowns()
-        return None
+        return self._victory()
 
     def _run_main_actions(self) -> Optional[Result]:
         """The active player's multi-action main phase (decide_action → apply until
@@ -7976,6 +8099,10 @@ class GameLoop:
 
         actions_this_turn = 0
         while True:
+            # The game ends as soon as a player has won (§323.1, §196).
+            result = self._victory()
+            if result is not None:
+                return result
             cards_played_this_turn = gs.cards_played_this_turn.get(gs.active, 0)
             if ap.agent is None:
                 act: Action = ("PASS", None, None)
@@ -8012,7 +8139,7 @@ class GameLoop:
                     print(f"  {ap.name} hit action cap — ending action phase")
                 break
         self._flush_pending_move()
-        return None
+        return self._victory()
 
     def _end_turn(self) -> Optional[Result]:
         """Showdown + combat/conquer (+victory) + end-of-turn triggers + cleanup +
@@ -8023,23 +8150,23 @@ class GameLoop:
         self._phase_showdown(gs.active, gs.other(gs.active))
 
         self._phase_combat_and_conquer(gs.active)
-        if gs.points_A >= gs.victory_score:
-            if self.recorder:
-                self._snapshot_state()
-            return Result("A", gs.turn, self.units_played, self.spells_cast)
-        if gs.points_B >= gs.victory_score:
-            if self.recorder:
-                self._snapshot_state()
-            return Result("B", gs.turn, self.units_played, self.spells_cast)
+        result = self._victory()
+        if result is not None:
+            return result
 
         gs.in_ending_phase = True
         self._ending_step(gs.active)
+        result = self._victory()          # a point given at the end of the turn
+        if result is not None:
+            gs.in_ending_phase = False
+            return result
 
         # Expiration step (§317.2): heal all units, and "this turn" Might bonuses
         # (REACTION spells like Discipline) end, wherever the unit is.
         for unit in self._all_units_in_play():
             unit.damage = 0
             unit.clear_turn_end_bonuses()
+            unit.stunned = False          # §424.1.a.2: wherever it is, its base too
         # Each player's Rune Pool empties (§317.2.d): ADDed Energy and Power are
         # lost; ready runes keep theirs for the next turn's reactions.
         gs.A.empty_rune_pool()
