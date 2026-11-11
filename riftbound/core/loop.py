@@ -1972,6 +1972,15 @@ class GameLoop:
                                             context_extra={"battlefield": bf,
                                                            "triggering_card": source})
 
+    def _note_gear_chosen(self, source: Card, chooser: str, gear_side: str) -> None:
+        """A spell or ability of `chooser` chose a gear of `gear_side`: an
+        enemy's counts for Ezreal Prodigal Explorer ("chosen enemy units and/or
+        gear ... with spells or unit abilities"). Counted as the instruction
+        resolves, like a gear's DEFLECT is paid (not on the copy that declares)."""
+        if getattr(self, "_declaring", None) is None and gear_side != chooser \
+                and isinstance(source, (SpellCard, UnitCard)):
+            self.gs.enemy_choices_this_turn[chooser] = self.gs.enemy_choices_this_turn.get(chooser, 0) + 1
+
     def _graceful_discount(self, source: Optional[Card], chooser: Player, located: list,
                            tax: int) -> int:
         """ "Your spells that choose me cost [1] or [rune] less" (Irelia

@@ -106,7 +106,6 @@ def test_bellows_breath_hits_units_at_the_same_location():
 
 # -- D26. Ezreal Prodigal Explorer (SFD-199; vendetta_ezreal) --------------------
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D26")
 def test_ezreal_legend_counts_an_enemy_gear_chosen():
     """'Use only if you've chosen enemy units and/or gear twice this turn with
     spells or unit abilities.' Stupefy on an enemy unit, Detonate on an enemy

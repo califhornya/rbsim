@@ -1127,6 +1127,7 @@ def _steal_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     pick = max(entries, key=lambda e: _zone_value(getattr(e[2], "card", e[2])))
     side, holder, gear = loop.choose(_kind("target", spec), ctx.actor_side, entries, pick, ctx.card)
+    loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     card = getattr(gear, "card", gear)
     unit = _unit_gear_of((side, holder, gear))
     if unit is not None:
@@ -1862,9 +1863,10 @@ def _disempower_or_kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
                                          ctx.card)
     card = getattr(gear, "card", gear)
     if ctx.loop._is_empowered(card):
+        ctx.loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
         ctx.loop._disempower(card)
     else:
-        _kill_gear(ctx, {"target": "chosen_gear", "_only": card})
+        _kill_gear(ctx, {"target": "chosen_gear", "_only": card})    # counts the choice
 
 
 @effect("match_might_plus_one")
@@ -2475,6 +2477,7 @@ def _return_gear_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         return
     pick = max(entries, key=lambda e: (e[0] == ctx.opponent_side, _zone_value(getattr(e[2], "card", e[2]))))
     side, holder, gear = ctx.loop.choose(_kind("target", spec), ctx.actor_side, entries, pick, ctx.card)
+    ctx.loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     unit = _unit_gear_of((side, holder, gear))
     if unit is not None:
         _return_unit(ctx, unit, {})              # it leaves as the unit it is
@@ -3242,6 +3245,7 @@ def _give_gear_temporary(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         pick.granted_keywords.append("TEMPORARY")
         return
     side, _holder, gear = pick
+    loop._note_gear_chosen(ctx.card, ctx.actor_side, side)
     tax = loop._gear_deflect_tax(side, ctx.actor_side, gear)
     if tax and getattr(loop, "_declaring", None) is None:
         loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
@@ -4487,6 +4491,8 @@ def _kill_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         tax = loop._gear_deflect_tax(entries[0][0], ctx.actor_side, entries[0][2]) if entries else 0
         if tax and getattr(loop, "_declaring", None) is None:
             loop._pay_generic_power(ctx.actor, tax)     # DEFLECT, paid as it is chosen
+        if entries:
+            loop._note_gear_chosen(ctx.card, ctx.actor_side, entries[0][0])
 
     for side, holder, gear in entries:
         player = gs.get_player(side)
