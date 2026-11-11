@@ -313,3 +313,38 @@ def test_a_unit_ambushed_and_a_card_played_from_facedown_elsewhere_during_a_show
     loop._run_main_actions()
     assert sorted(u.card.name for u in bf1.units_B) == ["Disciple of Shen", "Elsewhere", "Soulspinner"]
     assert not bf0.units_B and bf0.control() == "A"      # the fight at battlefield 0 went on without them
+
+
+# -- D22. The Hold gives its point before its abilities resolve ------------------
+
+def test_the_hold_gives_its_point_before_a_hold_ability_burns_out():
+    """Shadow Temple: 'When you hold here, BURN 3.' §473: 'When a player Scores,
+    two things occur: The player Gains up to one Point ... Trigger Score
+    abilities at the Battlefield that Scored.' One point from the Victory
+    Score each, the holder has it first: the Burn Out of the BURN (a point for
+    the opponent, §432.2.b) comes when the game is won (§474)."""
+    loop, a, b = setup(active="A")
+    a.deck.cards = [UnitCard(name="Last", might=1)]
+    b.deck.cards = [UnitCard(name=f"Deck{i}", might=1) for i in range(5)]
+    bf0 = loop.gs.battlefields[0]
+    bf0.card = card("Shadow Temple")
+    bf0.add_unit("A", unit("Holder", 2))
+    loop.gs.points_A = loop.gs.points_B = loop.gs.victory_score - 1
+    result = loop._begin_turn()
+    assert result is not None and result.winner == "A"
+
+
+def test_a_hold_ability_sees_the_point_of_its_hold():
+    """Grove of the God-Willow: 'When you hold here, draw 1.' As it resolves the
+    holder already has the point."""
+    loop, a, b = setup(active="A")
+    a.deck.cards = [UnitCard(name=f"Deck{i}", might=1) for i in range(5)]
+    b.deck.cards = [UnitCard(name=f"Deck{i}", might=1) for i in range(5)]
+    bf0 = loop.gs.battlefields[0]
+    bf0.card = card("Grove of the God-Willow")
+    bf0.add_unit("A", unit("Holder", 2))
+    seen = []
+    draw = loop._draw_one
+    loop._draw_one = lambda p, *args, **kw: (seen.append(loop.gs.points_A), draw(p, *args, **kw))[1]
+    loop._begin_turn()
+    assert seen[0] == 1 and loop.gs.points_A == 1        # the Hold's draw, then the Draw Phase's

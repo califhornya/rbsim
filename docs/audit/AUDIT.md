@@ -13,14 +13,16 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
-**State (2026-11-11): 18 deviations found, 18 fixed, none open.** The suite is
-green (1655 passed, 5 skipped, no xfail left). What is still open is in
+**State (2026-11-11, second pass): 22 deviations found, 22 fixed, none open.**
+The suite is green (1665 passed, 5 skipped, no xfail left). The second pass
+tested the two suspected deviations the first one left in "Not checked" (D19,
+D20) and fixed the two it met on the way (D21, D22). What is still open is in
 "Ambiguous rules" (five questions waiting for an answer) and in "Not checked"
-(two suspected deviations seen in the code and not tested, and the leftovers
-noted under D1, D6 and D9). Two things a fix changed outside the engine:
-`ACTION_DIM` is 319, was 316 (D2: saved nets no longer load), and 23 golden
-games were regenerated in three commits (D9: 12, D14: 6, D18: 5), each for the
-reason given in its commit message.
+(what was not audited, and the leftovers noted under D1, D6 and D9). Two
+things a fix changed outside the engine: `ACTION_DIM` is 319, was 316 (D2:
+saved nets no longer load), and golden games were regenerated in five commits
+(D9: 12, D14: 6, D18: 5, D20: 2, D21: 5), each for the reason given in its
+commit message.
 
 How the "weight for training" was estimated: 400 Zed-vs-Shen games with
 `random` agents (average 16 turns) and 400 with `simple_trade` (13 turns),
@@ -51,6 +53,10 @@ said.
 | D16 | Pit Crew has no text | OGN-091 | other decks (Ornn) | fixed, `427f1dd` |
 | D17 | The Harrowing has no text | OGN-198 | other decks (Kennen) | fixed, `02c4877` |
 | D18 | Existential Dread can choose the caster's own attacker | UNL-134 | other decks (Diana) | fixed, `cd5b5e9` |
+| D19 | The Start of Turn runs Channel, Hold, then the start-of-Beginning abilities | §315 | every Hold with an ability: two runes too many to react with; other decks: Frozen Fortress after the Hold | fixed, `99678b6` |
+| D20 | No Conquer of a battlefield lost and taken back in one turn | §471.1 | not measured; 2 of 20 golden games (Diana's Moonfall) | fixed, `eb8acb7` |
+| D21 | Moonfall is played at a battlefield with no unit of its player | UNL-198 | other decks (Diana) | fixed, `3ada8b6` |
+| D22 | A Hold gives its point after its abilities resolve | §473 | Shadow Temple's Burn Out at one point from the end each | fixed, `197be0b` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -382,6 +388,83 @@ The other rows, re-read against the code and tests:
 | Targeting + Deflect (PARTIAL) | The row is stale for abilities: DEFLECT is charged to an ability's choice too (Mel Defiant Soul's banish choosing Steel Paws, checked by play). |
 | 822 Ambush as a verb | Not re-checked. |
 
+## Deviations, second pass (2026-11-11): the turn's start and the scoring
+
+Tests in `tests/audit/test_audit_mechanics.py` (D19, D20) and
+`tests/audit/test_audit_precon_rules.py` (D22). Line numbers here are those of
+`95ca177`, the commit this pass started from.
+
+### D19. The Start of Turn: Channel, Hold, then the start-of-Beginning abilities
+
+- **Rule.** §315: Awaken Phase (315.1, ready), Beginning Phase (315.2.a "At
+  the start of Beginning Phase game effects take place", 315.2.b the Scoring
+  Step: "The Turn Player Holds all Battlefields they Control"), Channel Phase
+  (315.3), Draw Phase (315.4). §816.1.b: TEMPORARY is "At the start of this
+  permanent's controller's Beginning Phase, before scoring, kill this."
+- **Engine.** `loop.py:895-995` (`_phase_beginning_steps`): TEMPORARY kills,
+  then ready, then the turn's runes, then the Hold; `loop.py:8076`
+  (`_begin_turn`): the "at the start of your Beginning Phase" abilities fire
+  after the Hold and its victory check.
+- **Cards.** Shen: Grove of the God-Willow, Shen Scourge of Shadows, Shen
+  Leader of the Kinkou Order (Hold abilities); Zed: Shadow Temple. The player
+  could react to them (Ki Barrier) with the two runes of the turn. Other
+  decks: Frozen Fortress (vendetta_ezreal) and Dusk Rose Lab say "This happens
+  before scoring" and happened after; Jinx Loose Cannon, Dr. Mundo Expert,
+  Sprite Queen, Mushroom Pouch, The Arena's Greatest, Gutter Palace.
+- **Tests.** `test_frozen_fortress_deals_its_damage_before_the_hold`,
+  `test_a_start_of_beginning_ability_resolves_before_a_hold_that_wins`,
+  `test_the_runes_of_the_turn_are_channeled_after_the_hold`; and
+  `test_the_runes_in_play_pay_for_a_reaction_to_a_hold_ability` (what must
+  stay).
+- **Fixed.** `_phase_beginning_steps`: ready (the readied runes' Energy and
+  Power go to the pool at once, as the engine pays from it), TEMPORARY kills
+  and `on_start_of_turn`, the Hold, then the turn's runes. No golden game
+  changes. `tests/test_corpus_vendetta.py` fired `on_start_of_turn` by hand
+  after `_phase_beginning`: it is part of it now.
+- **Left.** The victory check after the Hold is still made after the Channel
+  (the game is over either way). Forsaken Baccai and Oasis Raider ("fewer
+  runes than an opponent at the start of your Beginning Phase") still read
+  `runes_at_beginning`, a count taken before the phase: right, and no longer
+  needed.
+
+### D20. No Conquer of a battlefield lost and taken back in one turn
+
+- **Rule.** §471.1: "Conquer: A player gains Control of a Battlefield they did
+  not yet Score this turn." §472: once per battlefield per turn.
+- **Engine.** `battlefield.py:239` (`can_score_conquer`): no Conquer for the
+  side alone there as the turn started (`last_controller`), whatever happened
+  since.
+- **Test.** `test_a_player_conquers_a_battlefield_lost_and_taken_back_in_one_turn`
+  (two Charms: out to base, back); and
+  `test_a_defender_who_keeps_the_battlefield_does_not_conquer_it` (what
+  `last_controller` was there for).
+- **Weight.** Needs an effect that moves or plays a unit of the non-turn
+  player (Charm, Moonfall, a REACTION unit) onto a battlefield that player
+  lost this turn. In 2 of the 20 golden games: Diana's Moonfall moving an
+  enemy unit onto the battlefield its player had just left.
+- **Fixed.** `Battlefield.gained_control`: the side that gained Control this
+  turn and has it since (set as Control passes to a side, not when a contest
+  gives it back to its holder; cleared as the turn starts). `can_score_conquer`
+  asks for it. `last_controller` stays for the golden signature only. 2 golden
+  games regenerated.
+
+### D22. A Hold gives its point after its abilities resolve
+
+- **Rule.** §473: "When a player Scores, two things occur: 473.1 The player
+  Gains up to one Point ... 473.2 Trigger Score abilities at the Battlefield
+  that Scored." §474: the win is checked at the next cleanup.
+- **Engine.** `loop.py:983-995`: the Hold's points are counted
+  (`_points_allowed`) and given by `_begin_turn` after the phase
+  (`loop.py:8063`); the Hold abilities resolve in between.
+- **Cards.** Zed: Shadow Temple ("When you hold here, BURN 3"), for whoever
+  holds it. One point from the Victory Score each and fewer than 3 cards in
+  the holder's deck: the Burn Out gave the opponent the game.
+- **Tests.** `test_the_hold_gives_its_point_before_a_hold_ability_burns_out`,
+  `test_a_hold_ability_sees_the_point_of_its_hold`.
+- **Weight.** Not measured: needs a Burn Out (0 / 800 games, D1) at 7-7.
+- **Fixed.** The Scoring Step gives each point as it scores (`_gain_points`).
+  No golden game changes.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in
@@ -395,6 +478,12 @@ Printed text from `piltover_archive.json`; tests in
 | D16 | Pit Crew OGN-091 | "When you play a gear, ready me." | no text, no effects | vendetta_ornn | `test_pit_crew_readies_when_you_play_a_gear` |
 | D17 | The Harrowing OGN-198 | "Play a unit from your trash, ignoring its Energy cost. (You must still pay its Power cost.)" | no text, no effects | vendetta_kennen | `test_the_harrowing_plays_a_unit_from_your_trash` |
 | D18 | Existential Dread UNL-134 | "[Stun] an attacking enemy unit. If it's already stunned, return it to its owner's hand instead." | `stun_or_return_attacker`: any attacking unit; the attacker can play it on its own | chaos_mind_diana | `test_existential_dread_chooses_an_attacking_enemy_unit` |
+| D21 | Moonfall UNL-198 | "Choose a battlefield where you have units. You may move up to one enemy unit to that battlefield. Then give enemy units there -2 [Might] this turn." | played at any battlefield, with no unit of its player there | chaos_mind_diana | `test_moonfall_chooses_a_battlefield_where_its_player_has_units`, `test_moonfall_cannot_be_played_with_no_units_at_a_battlefield` |
+
+D21 was not in the O1 list: seen in the golden games D20 changed (second
+pass). Fixed with `battlefield: friendly_units` on the card's first
+instruction, read by `_spell_has_targets`; 5 golden games regenerated. No
+other spell of the corpus says "a battlefield where you have units".
 
 Read and found equivalent to the print (wording only): En Garde, Yasuo
 Remorseful, Ornn's Forge ("When" / "While": encoded as the passive it is),
@@ -511,19 +600,12 @@ not played again.
 
 ## Not checked
 
-- **Seen in the code, not tested.** The Beginning Phase runs Awaken, Channel,
-  then Hold (`loop.py:950-995`), and "at the start of your Beginning Phase"
-  abilities fire after Hold and Channel (`loop.py:7956`); §315 orders Awaken,
-  Beginning (start effects, then Hold), Channel, Draw. No card of the precons
-  has a start-of-Beginning ability and their Hold triggers cost nothing; the
-  visible difference there is two more runes for reactions to one's own Hold
-  triggers. Other decks (Dr. Mundo Expert, Loose Cannon, TEMPORARY "before
-  scoring") need a look.
-- **Seen in the code, not tested.** `can_score_conquer`
-  (`battlefield.py:239`) refuses a Conquer when the player was alone there at
-  the start of the turn (`last_controller`): a player who loses a battlefield
-  in the opponent's turn and gets it back the same turn (the opponent's Charm)
-  doesn't conquer it, though they "did not yet Score this turn" (§471.1).
+- **Seen in the code, not tested** (second pass). A unit taken off the board
+  by `_take_off_board` (returned to hand, recalled) leaves its battlefield's
+  `held_by` as it was until the next `Battlefield._note_control`; every reader
+  goes through `control()`, which calls it, so nothing was seen to go wrong.
+  A battlefield still Contested as a turn starts (both sides there) is held
+  by nobody for `can_score_hold`, which reads `controller()`, not `control()`.
 - **Not checked.** Deck construction (§103: 40 cards, 3 copies, domain
   identity, signature cards, Unique); the match procedure (`core/match.py`:
   best of 3, sideboards, the clock) beyond reading TR 404-408; replacement

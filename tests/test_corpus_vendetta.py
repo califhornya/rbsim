@@ -577,9 +577,8 @@ def test_public_execution_kills_an_enemy_weaker_than_your_unit():
 # -- Part 2 (BACKLOG.md D, Vendetta VEN-002..077) ---------------------------------
 
 def _start_turn(loop, side="A"):
-    """The Beginning Phase, then its start-of-turn triggers (as _begin_turn)."""
+    """The Beginning Phase: its start-of-turn triggers are part of it (§315.2.a)."""
     loop._phase_beginning(side)
-    loop._fire_turn_trigger("on_start_of_turn", side)
     loop._recompute_passives()
 
 

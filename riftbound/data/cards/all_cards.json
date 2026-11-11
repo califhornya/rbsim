@@ -26259,7 +26259,8 @@
         "target": "enemy_unit",
         "scope": "single",
         "destination": "here",
-        "up_to": true
+        "up_to": true,
+        "battlefield": "friendly_units"
       },
       {
         "effect": "grant_temporary_might",

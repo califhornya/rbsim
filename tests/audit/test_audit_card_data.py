@@ -103,3 +103,29 @@ def test_existential_dread_chooses_an_attacking_enemy_unit():
     loop._run_main_actions()
     assert any("Existential Dread" in lbl for lbl in B.offered("showdown_action"))
     assert not any("Existential Dread" in lbl for lbl in A.offered("showdown_action"))
+
+
+# -- D21. Moonfall (UNL-198; chaos_mind_diana) -----------------------------------
+
+def test_moonfall_chooses_a_battlefield_where_its_player_has_units():
+    """'Choose a battlefield where you have units. You may move up to one enemy
+    unit to that battlefield. Then give enemy units there -2 [Might] this
+    turn.' With units at one battlefield only, that is the one it is played at."""
+    loop, a, b = setup(active="A")
+    bf0, bf1 = loop.gs.battlefields
+    mine, home = unit("Mine", 3), unit("Home", 3)
+    bf1.add_unit("A", mine)
+    b.base_units.append(home)
+    a.hand.append(card("Moonfall"))
+    assert [lbl for lbl in labels(loop, "A") if "Moonfall" in lbl] == ["Cast Moonfall @BF1"]
+    act(loop, "A", "Cast Moonfall @BF1")
+    # Moved there with -2: it contests the battlefield and loses the combat.
+    assert home.might == 1 and home.card in b.trash and bf1.units_A == [mine]
+
+
+def test_moonfall_cannot_be_played_with_no_units_at_a_battlefield():
+    loop, a, b = setup(active="A")
+    a.base_units.append(unit("AtHome", 3))
+    b.base_units.append(unit("Home", 3))
+    a.hand.append(card("Moonfall"))
+    assert not [lbl for lbl in labels(loop, "A") if "Moonfall" in lbl]

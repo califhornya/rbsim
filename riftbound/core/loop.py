@@ -631,9 +631,14 @@ class GameLoop:
         only with a valid choice for every target. Checked for the instructions
         that choose a unit (or a spell to counter: effects.has_valid_target);
         conditional ones (a kicker's "deal 5 instead") need one of them to
-        have a target. "Up to N" can choose none (§355.13)."""
+        have a target. "Up to N" can choose none (§355.13). The battlefield
+        itself is a choice when the card restricts it: "Choose a battlefield
+        where you have units" (Moonfall: `battlefield: friendly_units`)."""
         from .effects import has_valid_target
         spec = CARD_REGISTRY.get(card.name)
+        if spec is not None and not self.gs.battlefields[lane]._units_for(side) and any(
+                es.params.get("battlefield") == "friendly_units" for es in spec.effects):
+            return False
         if spec is None or "up to" in str((spec.raw or {}).get("effect") or "").lower():
             return True
         ctx = EffectContext(self, card, self.gs.get_player(side),
@@ -884,6 +889,9 @@ class GameLoop:
                     g.tapped = False
 
     def _phase_beginning(self, active: str) -> int:
+        """The Start of Turn up to the Channel Phase (§315.1-315.3): Awaken,
+        Beginning (its start, then the Hold), Channel. Returns the points the
+        Hold gave; _begin_turn goes on to the Draw Phase."""
         self.gs.in_beginning_phase = True
         self.gs.runes_at_beginning = (self.gs.turn, {s: self.gs.get_player(s).total_runes_in_play()
                                                      for s in ("A", "B")})
@@ -896,9 +904,29 @@ class GameLoop:
         for bf in self.gs.battlefields:
             bf.begin_turn_reset()
 
+        # Clear STUN status at the start of the active player's turn
+        for bf in self.gs.battlefields:
+            for unit in bf.units_A + bf.units_B:
+                unit.stunned = False
+
+        # Awaken Phase (§315.1): the units, the gear and the runes ready. The
+        # engine pays from a pool, so the readied runes' Energy and Power are
+        # put there at once (Player.channel): they are what the player has in
+        # the Beginning Phase, the turn's own runes come after it.
+        self._ready_active_units(active)
+
+        active_player = self.gs.get_player(active)
+        # What an ADD gave was lost as the last turn ended.
+        active_player.empty_rune_pool()
+        active_player.energy = 0
+        active_player.power_pool.clear()
+        active_player.awaken_runes()
+        active_player.channel()
+
+        # Beginning Step (§315.2.a): "at the start of your Beginning Phase".
         # TEMPORARY units die at the start of their controller's Beginning Phase
         # (at battlefields and in base): DEATHKNELL, "when a friendly unit dies".
-        player = self.gs.get_player(active)
+        player = actor = active_player
         for bf in self.gs.battlefields:
             units = bf.units_A if active == "A" else bf.units_B
             if any(self._has_effect(u.card, "no_temporary_here") for u in units):
@@ -917,7 +945,6 @@ class GameLoop:
         # Remove unattached TEMPORARY gear at base (§742.1.b; e.g. Spinning Axe:
         # "if unattached, kill it at the start of its controller's Beginning
         # Phase"). Attached gear rides its host unit and is left alone.
-        actor = self.gs.get_player(active)
         temp_gear = [g for g in actor.base_gear if g.has_keyword("TEMPORARY")]
         for g in temp_gear:
             self._remove_gear(g, actor)       # killed: its DEATHKNELL (Sprite Fountain)
@@ -934,11 +961,6 @@ class GameLoop:
             if temp:
                 self._kill_deployed_gear(bf, active, temp)
 
-        # Clear STUN status at the start of the active player's turn
-        for bf in self.gs.battlefields:
-            for unit in bf.units_A + bf.units_B:
-                unit.stunned = False
-
         for bf in self.gs.battlefields:
             bf.last_controller = bf.controller()
         for bf in self.gs.battlefields:
@@ -947,17 +969,27 @@ class GameLoop:
                 if bf.controller() is None:
                     bf.showdown_pending = True
 
-        self._ready_active_units(active)
+        # The abilities that say so, before the scoring (Frozen Fortress, Dusk
+        # Rose Lab: "This happens before scoring").
+        self._fire_turn_trigger("on_start_of_turn", active)
+        self._recompute_passives()
 
-        active_player = self.gs.get_player(active)
-        # Awaken: the runes ready, so their Energy and Power are counted again
-        # (what an ADD gave was lost as the last turn ended).
-        active_player.empty_rune_pool()
-        active_player.energy = 0
-        active_player.power_pool.clear()
-        active_player.awaken_runes()
+        # Scoring Step (§315.2.b): the Turn Player holds. Each Hold gives its
+        # point, then its abilities trigger (§473.1, §473.2).
+        vps = 0
+        for bf in self.gs.battlefields:
+            if bf.can_score_hold(active):
+                vps += self._gain_points(active, 1, "hold", bf)
+                bf.mark_scored(active)
+                if self.verbose:
+                    bf_idx = self.gs.battlefields.index(bf)
+                    print(f"  [HOLD] {active} holds BF{bf_idx} -> +1 VP")
+                # DEPLOY (§830): "When an opponent holds here, kill this."
+                other = self.gs.other(active)
+                self._kill_deployed_gear(bf, other, list(bf.gear_for(other)))
+                self._fire_scoring_trigger("on_hold", bf, active)
 
-        # Channel Phase (§430): channel 2 runes from the rune deck. The player who
+        # Channel Phase (§315.3): channel 2 runes from the rune deck. The player who
         # goes second channels one extra rune on their first turn. Turn 2 is always
         # the second player's first turn (turn 1 = starter, active flips each turn),
         # so this works regardless of which side starts the game.
@@ -968,7 +1000,7 @@ class GameLoop:
             channel_count = 1     # Sandstone Chimera
         active_player.unlock_runes(channel_count)
         self._extra_channel(active)
-        active_player.channel()
+        active_player.channel()   # nothing left to exhaust: the Power in its order
         # Only the Turn Player channels — opponent channels on their own turn
 
         if self.verbose:
@@ -979,19 +1011,6 @@ class GameLoop:
                 f"  [CHANNEL] {active} energy={active_player.energy} "
                 f"power={{{power_summary}}}"
             )
-
-        vps = 0
-        for bf in self.gs.battlefields:
-            if bf.can_score_hold(active):
-                vps += self._points_allowed(active, 1, "hold", bf)
-                bf.mark_scored(active)
-                if self.verbose:
-                    bf_idx = self.gs.battlefields.index(bf)
-                    print(f"  [HOLD] {active} holds BF{bf_idx} -> +1 VP")
-                # DEPLOY (§830): "When an opponent holds here, kill this."
-                other = self.gs.other(active)
-                self._kill_deployed_gear(bf, other, list(bf.gear_for(other)))
-                self._fire_scoring_trigger("on_hold", bf, active)
         return vps
 
     @_as_task
@@ -8030,8 +8049,8 @@ class GameLoop:
         return self._final_result()
 
     def _begin_turn(self) -> Optional[Result]:
-        """Turn header + counter reset + beginning phase (channel/ready/hold-score)
-        + start-of-turn triggers + passive recompute + draw. Returns a Result if
+        """Turn header + counter reset + beginning phase (ready / start-of-turn
+        triggers / hold-score / channel) + passive recompute + draw. Returns a Result if
         the beginning phase's Hold scoring wins the game, else None."""
         gs = self.gs
         if self.verbose:
@@ -8060,12 +8079,7 @@ class GameLoop:
         gs.conquered_this_turn["A"] = gs.conquered_this_turn["B"] = 0
         gs.hold_points_this_turn["A"] = gs.hold_points_this_turn["B"] = 0
 
-        gained = self._phase_beginning(gs.active)
-        if gained:
-            if gs.active == "A":
-                gs.points_A += gained
-            else:
-                gs.points_B += gained
+        self._phase_beginning(gs.active)
         # A player with the Victory Score and more points than the other has
         # won (§323.1): after the Hold, and after anything else that gives a
         # point before the Main Phase (a Burn Out in the Draw Phase, §432.2.c).
@@ -8073,7 +8087,6 @@ class GameLoop:
         if result is not None:
             return result
 
-        self._fire_turn_trigger("on_start_of_turn", gs.active)
         self._recompute_passives()
         if not self._side_has_passive(gs.active, "skip_draw_phase"):     # Endless Riches
             self._phase_draw(gs.get_player(gs.active))
