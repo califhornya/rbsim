@@ -69,6 +69,9 @@ def test_battlefield_shape_conditions():
     assert not _check(loop, "one_on_one_here", extra)
     assert _check(loop, "enemy_alone_here", extra)
 
+    # Two of yours and an enemy unit: "two units there" counts yours (AUDIT Q4).
+    assert _check(loop, "you_control_bf_with_exactly_n_units", n=2)
+    bf0.add_unit("A", UnitInPlay(UnitCard(name="Third")))
     assert not _check(loop, "you_control_bf_with_exactly_n_units", n=2)
     bf1.add_unit("A", UnitInPlay(UnitCard(name="X")))
     bf1.add_unit("A", UnitInPlay(UnitCard(name="Y")))

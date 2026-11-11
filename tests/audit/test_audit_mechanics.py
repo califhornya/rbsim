@@ -161,3 +161,75 @@ def test_a_defender_who_keeps_the_battlefield_does_not_conquer_it():
     loop._flush_pending_move()                   # done moving: the showdown, the combat
     assert bf0.units_B == [] and raider.card in b.trash and bf0.control() == "A"
     assert loop.gs.points_A == 0 and loop.gs.points_B == 0
+
+
+# -- Q3. The turn cap is a draw, whatever the score (the owner's decision) -------
+
+def test_a_game_that_reaches_the_turn_cap_is_a_draw_even_with_a_lead():
+    """Riftbound has no turn limit: the cap is a stall guard, and a two-point
+    lead at the cap wins nothing (AUDIT Q3)."""
+    loop, a, b = setup(active="A")
+    loop.gs.turn, loop.gs.max_turns = 41, 40
+    loop.gs.points_A, loop.gs.points_B = 6, 1
+    assert loop._play_all_turns().winner == "DRAW"
+
+
+# -- Q4. Keeper of Law counts your units (the owner's decision) ------------------
+
+def test_keeper_of_law_counts_only_your_units_at_the_battlefield():
+    """'I cost [2] [order] less if you control a battlefield with exactly two
+    units there', read as two of your units (AUDIT Q4)."""
+    loop, a, b = setup(active="A")
+    bf0 = loop.gs.battlefields[0]
+    keeper = card("Keeper of Law")
+    a.hand.append(keeper)
+    bf0.add_unit("A", unit("Left", 1))
+    bf0.add_unit("B", unit("Raider", 1))     # one of each: not two of yours
+    assert bf0.control() == "A"
+    assert loop._effective_cost(keeper, a, 0) == (5, 1)
+    bf0.add_unit("A", unit("Right", 1))      # two of yours, and an enemy unit
+    assert bf0.control() == "A"
+    assert loop._effective_cost(keeper, a, 0) == (3, 0)
+
+
+# -- Q1. Priority on a chain: the controller of the newest item first ------------
+
+def _reaction_order(sa, sb) -> list:
+    """Log which side is asked, in order, at each reaction decision."""
+    order: list = []
+    for s in (sa, sb):
+        ask = s.decide_reaction
+
+        def logged(opponent, chain, _ask=ask, _side=s.player.name):
+            order.append(_side)
+            return _ask(opponent, chain)
+        s.decide_reaction = logged
+    return order
+
+
+def test_the_player_who_plays_a_spell_gains_priority_first():
+    """§337.4: once the item is finalized 'the controller of the next item on
+    the chain gains Priority'; a pass hands it on (§338.1.b.1), two passes in a
+    row resolve (§339.1)."""
+    loop, a, b = setup(active="A")
+    _decks(a, b)
+    sa, sb = scripted(loop, a, b)
+    order = _reaction_order(sa, sb)
+    a.hand.append(card("Consult the Past"))
+    act(loop, "A", "Cast Consult the Past")
+    assert order == ["A", "B"] and not loop.gs.chain
+
+
+def test_a_reaction_gives_its_player_priority_first_and_then_the_older_item_its_own():
+    """B answers A's spell: B, controlling the newest item, has Priority first
+    (§337.4); once B's spell resolves, A, controlling the newest item left, has
+    it first (§340.4)."""
+    loop, a, b = setup(active="A")
+    _decks(a, b)
+    sa, sb = scripted(loop, a, b, B={"reaction": ["React Consult the Past"]})
+    order = _reaction_order(sa, sb)
+    a.hand.append(card("Consult the Past"))
+    b.hand.append(card("Consult the Past"))
+    act(loop, "A", "Cast Consult the Past")
+    assert order == ["A", "B", "B", "A", "A", "B"]
+    assert not loop.gs.chain and len(b.trash) == 1

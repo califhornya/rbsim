@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-11 (fine del secondo passaggio dell'audit).
+Aggiornato: 2026-11-11 (risposte Q1–Q4 dell'audit applicate).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -19,6 +19,11 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   perché la firma delle golden lo legge.
 - D21: restrizione "battlefield where you have units" come parametro della carta
   (`battlefield: friendly_units`), non come caso speciale per nome.
+- Q1–Q4 (decise dall'utente): priorità secondo §337.4; Shadow Order Disciple
+  invariato; partita al cap dei turni = pareggio; Keeper of Law conta solo le
+  unità di chi la gioca.
+- Q3: il pareggio è in `GameLoop._final_result`; il match tiene la regola dei
+  2 punti di TR 408.2.b tramite `match._game_result`, che non cambia.
 
 ## Fatto
 - Primo passaggio (sessione precedente): D1–D18, tutte corrette.
@@ -31,19 +36,21 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   - D21 `3ada8b6`: Moonfall solo su un battlefield dove chi la gioca ha unità.
     5 golden rigenerate.
   - D22 `197be0b`: il punto dell'Hold viene dato prima delle sue abilità (§473).
+- Risposte Q1–Q4, suite verde (1669 passed, 5 skipped), nessuna golden cambiata:
+  - Q3 `c44d91b`: una partita che arriva al cap è sempre un pareggio.
+  - Q4 `81f90ea`: Keeper of Law conta solo le tue unità.
+  - Q1 `673643e`: la priorità va prima a chi controlla l'oggetto più recente.
+  - Q2: tenuto com'era (Burn Out e +1).
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-1. Risposte dell'utente a Q1–Q4 in `AUDIT.md` ("Ambiguous rules"): priorità
-   sulla chain, Shadow Order Disciple a mazzo vuoto, cap a 40 turni in
-   self-play, Keeper of Law.
-2. Audit carta per carta delle altre otto liste (finora solo le 7 carte di
+1. Audit carta per carta delle altre otto liste (finora solo le 7 carte di
    D13–D18 e D21); 136 carte segnalate da `piltover_sync.py compare`.
-3. Non controllati: costruzione del mazzo (§103), procedura di match,
+2. Non controllati: costruzione del mazzo (§103), procedura di match,
    effetti di sostituzione (§372-373), layer (§475-482), lato AI.
-4. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
+3. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa

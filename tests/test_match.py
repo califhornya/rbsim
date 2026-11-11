@@ -45,11 +45,13 @@ def test_loser_chooses_first_next_game():
 
 
 def test_a_single_game_at_the_turn_guard_needs_a_two_point_lead():
-    """The turn guard counts as the time running out (Riftbound has no turn
-    limit): a 2+ point lead wins, else a draw (TR 408.2.b); any lead won."""
+    """In a match the turn guard counts as the time running out (Riftbound has
+    no turn limit): a 2+ point lead wins, else a draw (TR 408.2.b). The game
+    loop alone calls it a draw (AUDIT Q3); the match applies the clock's rule."""
     import random
     from riftbound.core.battlefield import Battlefield
     from riftbound.core.loop import GameLoop
+    from riftbound.core.match import _game_result
     from riftbound.core.player import Deck, Player, RuneDeck
     from riftbound.core.state import GameState
     for points, winner in (((5, 4), "DRAW"), ((6, 4), "A"), ((3, 5), "B")):
@@ -57,7 +59,9 @@ def test_a_single_game_at_the_turn_guard_needs_a_two_point_lead():
         b = Player(name="B", deck=Deck(cards=[]), rune_deck=RuneDeck([]))
         gs = GameState(rng=random.Random(1), A=a, B=b, battlefields=[Battlefield(), Battlefield()])
         gs.points_A, gs.points_B = points
-        assert GameLoop(gs)._final_result().winner == winner
+        result = GameLoop(gs)._final_result()
+        assert result.winner == "DRAW"
+        assert _game_result(gs, result) == (winner, True)
 
 
 def test_bo1_altered_setup_sideboards_before_the_only_game():
