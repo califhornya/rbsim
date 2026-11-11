@@ -161,3 +161,15 @@ def test_a_defender_who_keeps_the_battlefield_does_not_conquer_it():
     loop._flush_pending_move()                   # done moving: the showdown, the combat
     assert bf0.units_B == [] and raider.card in b.trash and bf0.control() == "A"
     assert loop.gs.points_A == 0 and loop.gs.points_B == 0
+
+
+# -- Q3. The turn cap is a draw, whatever the score (the owner's decision) -------
+
+def test_a_game_that_reaches_the_turn_cap_is_a_draw_even_with_a_lead():
+    """Riftbound has no turn limit: the cap is a stall guard, and a two-point
+    lead at the cap wins nothing (AUDIT Q3)."""
+    loop, a, b = setup(active="A")
+    loop.gs.turn, loop.gs.max_turns = 41, 40
+    loop.gs.points_A, loop.gs.points_B = 6, 1
+    assert loop._play_all_turns().winner == "DRAW"
+

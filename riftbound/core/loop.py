@@ -8205,21 +8205,15 @@ class GameLoop:
         return None
 
     def _final_result(self) -> Result:
-        """The turn cap reached: it counts as the time running out (Riftbound
-        has no turn limit), so a player leading by 2 or more points wins, else
-        it is a draw (TR 408.2.b)."""
-        from .match import TIME_LEAD_TO_WIN
+        """The turn cap reached: a draw, whatever the score. Riftbound has no
+        turn limit; the cap is only a stall guard, so being ahead when it is
+        reached wins nothing (a learner would otherwise learn to get ahead and
+        stall). The round's clock of a match (TR 408.2.b, a 2-point lead wins)
+        is `match._game_result`'s, not this."""
         gs = self.gs
-        lead = gs.points_A - gs.points_B
-        if lead >= TIME_LEAD_TO_WIN:
-            winner = "A"
-        elif lead <= -TIME_LEAD_TO_WIN:
-            winner = "B"
-        else:
-            winner = "DRAW"
         if self.recorder:
             self._snapshot_state()
-        return Result(winner, gs.turn - 1, self.units_played, self.spells_cast)
+        return Result("DRAW", gs.turn - 1, self.units_played, self.spells_cast)
 
     def _snapshot_state(self, *, turn_override: Optional[int] = None) -> None:
         if not self.recorder:
