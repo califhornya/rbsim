@@ -14,10 +14,11 @@ marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
 **State (2026-11-11, second pass): 22 deviations found, 22 fixed, none open.**
-The suite is green (1665 passed, 5 skipped, no xfail left). The second pass
+The suite is green (1669 passed, 5 skipped, no xfail left). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
-D20) and fixed the two it met on the way (D21, D22). What is still open is in
-"Ambiguous rules" (five questions waiting for an answer) and in "Not checked"
+D20) and fixed the two it met on the way (D21, D22). The owner answered Q1–Q4
+of "Ambiguous rules" (2026-11-11): Q1, Q3 and Q4 changed the engine, Q2 kept
+it as it was; Q5 asks nothing. What is still open is in "Not checked"
 (what was not audited, and the leftovers noted under D1, D6 and D9). Two
 things a fix changed outside the engine: `ACTION_DIM` is 319, was 316 (D2:
 saved nets no longer load), and golden games were regenerated in five commits
@@ -493,7 +494,8 @@ text; ours has one, not compared.
 
 ## Ambiguous rules, and engine choices the rules don't dictate
 
-No test for these: they wait for an answer.
+Q1–Q4 answered by the owner (2026-11-11); each change has a test in
+`tests/audit/test_audit_mechanics.py`. Q5 is a list, not a question.
 
 - **Q1. Who gets priority first on a chain.** §337.4: after a chain item is
   finalized "the controller of the next item on the chain gains Priority",
@@ -503,25 +505,31 @@ No test for these: they wait for an answer.
   The same chains can be built either way (each player can still answer the
   other), but the caster decides whether to add to their own spell after
   seeing the opponent pass or react, not before. Keep, or follow §337.4?
+  **Answer: follow §337.4.** Fixed in `673643e`: the controller of the newest
+  item has Priority first, after each action and after each resolution
+  (§340.4). No golden game changed.
 - **Q2. Shadow Order Disciple with an empty Main Deck.** "When I move, you may
   BURN 1 to give me +1 [might] this turn": BURN 1 is a cost within an
   instruction. §203.3 says an impossible cost can't be paid; §432.1.b says
   moving a card out of an empty deck is a Burn Out, not an impossibility.
   Since the D1 fix the engine Burns Out (the opponent gains a point) and gives
   the +1; the player can decline the "you may". Is that the reading you want?
+  **Answer: yes, kept.**
 - **Q3. The 40-turn cap in self-play.** `selfplay.py` and `env.py` build games
   with `max_turns=40`, and a game that reaches it is decided by a two-point
   lead (TR 408.2.b), a draw otherwise (`loop.py:8067`). Riftbound has no turn
   limit; the cap makes "be two points ahead at turn 40" a way to win. None of
   700 random / heuristic games reached turn 40, so today it is only a stall
   guard; a trained, defensive agent may reach it. Should a capped game be a
-  draw for training?
+  draw for training? **Answer: yes, always a draw.** Fixed in `c44d91b`
+  (`GameLoop._final_result`); a match still applies the clock's 2-point rule
+  through `match._game_result`.
 - **Q4. Keeper of Law.** "I cost [2] [order] less if you control a battlefield
   with exactly two units there": the engine counts the units of both players
   there (`loop.py:2884`). On your turn outside a combat only your units are at
   a battlefield you control, so it only matters when Keeper is played... never,
   in practice (it has no REACTION). Left as is; say if "two units" should be
-  "two of your units".
+  "two of your units". **Answer: two of your units.** Fixed in `81f90ea`.
 - **Q5. Choices the engine makes for the player.** Which rune pays a Power of
   any domain (`player.py:296`: the domain with the most left), the order of
   combat damage beyond the first choice, which unit an effect picks when the
