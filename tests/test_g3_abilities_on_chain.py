@@ -188,8 +188,13 @@ def test_a_showdown_ability_passes_focus():
     loop, a, b = _setup()
     xerath, enemy = _xerath_vs(loop, a, b)
     loop.gs.showdown_active, loop.gs.showdown_bf_idx = True, 0
-    step = loop._showdown_step(a, "A", ("ABILITY", "ACTIVATED", _ability(loop, "A", "deal_damage")), 0)
-    assert step == "acted" and enemy not in loop.gs.battlefields[0].units_B
+    # Xerath's ability has no [Action] (§145.2: not during a showdown); Divining
+    # Shells' has: "ACTION Kill this, [tap]: Give a unit +2 [might] this turn."
+    assert not any(e["eff"].effect == "deal_damage" for e in loop.activatable_abilities("A"))
+    a.base_gear.append(CARD_REGISTRY["Divining Shells"].instantiate())
+    step = loop._showdown_step(a, "A", ("ABILITY", "ACTIVATED",
+                                        _ability(loop, "A", "grant_temporary_might")), 0)
+    assert step == "acted" and not a.base_gear and xerath.temporary_might + enemy.temporary_might == 2
     a.base_gear.append(CARD_REGISTRY["Energy Conduit"].instantiate())
     step = loop._showdown_step(a, "A", ("ABILITY", "ACTIVATED", _ability(loop, "A", "gain_energy")), 0)
     assert step == "kept"

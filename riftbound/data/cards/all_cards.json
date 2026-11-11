@@ -609,7 +609,6 @@
       {
         "effect": "deal_damage",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "amount": 2,
         "cost": {
@@ -1255,7 +1254,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "target": "self",
         "amount": 1,
         "cost": {
@@ -2419,7 +2417,6 @@
       {
         "effect": "deal_damage",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "amount_source": "self_might",
         "cost": {
@@ -2769,7 +2766,6 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "tap": true
         },
@@ -3182,7 +3178,6 @@
       {
         "effect": "debuff_might",
         "trigger": "activated",
-        "timing": "action",
         "amount": 1,
         "target": "chosen_unit",
         "duration": "this_turn",
@@ -6354,7 +6349,6 @@
       {
         "effect": "move_units_to_base",
         "trigger": "activated",
-        "timing": "action",
         "target": "friendly_unit",
         "cost": {
           "energy": 1,
@@ -9307,7 +9301,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "energy": 1,
           "tap": true
@@ -11651,7 +11644,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "energy": 1,
           "power": 1,
@@ -12729,7 +12721,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "amount": 3,
         "duration": "this_turn",
@@ -14015,7 +14006,6 @@
       {
         "effect": "draw_cards",
         "trigger": "activated",
-        "timing": "action",
         "count": 1,
         "cost": {
           "energy": 1,
@@ -14029,7 +14019,6 @@
       {
         "effect": "score_point",
         "trigger": "activated",
-        "timing": "action",
         "target": "actor",
         "amount": 1,
         "cost": {
@@ -16719,7 +16708,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "tap": true
         },
@@ -17780,7 +17768,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "energy": 1,
           "tap": true
@@ -18725,7 +18712,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "tap": true
         },
@@ -19606,7 +19592,6 @@
       {
         "effect": "deal_damage",
         "trigger": "activated",
-        "timing": "action",
         "amount": 3,
         "target": "chosen_unit",
         "cost": {
@@ -19779,7 +19764,6 @@
       {
         "effect": "double_might",
         "trigger": "activated",
-        "timing": "action",
         "target": "self",
         "duration": "this_turn",
         "cost": {
@@ -22596,7 +22580,6 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "self",
         "cost": {
           "spend_xp": 2
@@ -22859,7 +22842,6 @@
       {
         "effect": "ready_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "cost": {
           "spend_xp": 3,
@@ -23478,7 +23460,6 @@
       {
         "effect": "give_keyword",
         "trigger": "activated",
-        "timing": "action",
         "target": "all_friendly_units_here",
         "keyword": "GANKING",
         "duration": "this_turn",
@@ -23917,7 +23898,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "amount": -2,
         "target": "chosen_unit",
         "cost": {
@@ -24755,7 +24735,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "token_name": "Bird",
         "count": 2,
         "cost": {
@@ -24832,7 +24811,6 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "self",
         "cost": {
           "spend_xp": 2
@@ -25884,7 +25862,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "energy": 4,
           "tap": true
@@ -26383,7 +26360,6 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "cost": {
           "spend_xp": 1,
@@ -26393,7 +26369,6 @@
       {
         "effect": "move_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "friendly_unit",
         "target_filter": {
           "is_exhausted": true
@@ -29502,7 +29477,6 @@
       {
         "effect": "empower_self",
         "trigger": "activated",
-        "timing": "action",
         "target": "friendly_unit",
         "target_filter": {
           "is_gear": true,
@@ -30086,7 +30060,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "amount": 2,
         "target": "chosen_unit",
         "cost": {
@@ -30105,7 +30078,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "amount": 4,
         "target": "chosen_unit",
         "cost": {
@@ -30697,7 +30669,6 @@
       {
         "effect": "grant_temporary_might",
         "trigger": "activated",
-        "timing": "action",
         "amount": 1,
         "target": "self",
         "cost": {
@@ -33017,7 +32988,6 @@
       {
         "effect": "ready_gear",
         "trigger": "activated",
-        "timing": "action",
         "count": 1,
         "cost": {
           "energy": 1,
@@ -33035,7 +33005,6 @@
       {
         "effect": "ready_gear",
         "trigger": "activated",
-        "timing": "action",
         "count": 2,
         "cost": {
           "energy": 1,
@@ -34447,7 +34416,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "token_name": "Gold",
         "exhausted": true,
         "cost": {
@@ -34457,7 +34425,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "token_name": "Recruit",
         "cost": {
           "tap": true,
@@ -34467,7 +34434,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "token_name": "Mech",
         "cost": {
           "tap": true,
@@ -34640,7 +34606,6 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "chosen_unit",
         "cost": {
           "tap": true
@@ -34970,7 +34935,6 @@
       {
         "effect": "draw_cards",
         "trigger": "activated",
-        "timing": "action",
         "count": 1,
         "cost": {
           "tap": true,
@@ -35379,7 +35343,6 @@
       {
         "effect": "sequence",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "tap": true
         },
@@ -37384,7 +37347,6 @@
       {
         "effect": "stun_unit",
         "trigger": "activated",
-        "timing": "action",
         "target": "enemy_unit",
         "cost": {
           "tap": true
@@ -37655,7 +37617,6 @@
       {
         "effect": "play_token",
         "trigger": "activated",
-        "timing": "action",
         "cost": {
           "energy": 1,
           "tap": true

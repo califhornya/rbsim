@@ -27,7 +27,6 @@ def _pick(name: str):
 
 # -- D23. An ability with no [Action] is used in a showdown ----------------------
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D23")
 def test_a_gear_ability_with_no_action_is_not_used_in_a_showdown():
     """§151.2: 'The Activated Ability of Gear may be executed at any time during
     the controlling player's Main Phase during an Open State, and not during a
@@ -45,17 +44,16 @@ def test_a_gear_ability_with_no_action_is_not_used_in_a_showdown():
     assert offered and not any("Heart of Dark Ice" in lbl for lbl in offered)
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT D23")
 def test_an_ability_has_only_the_timing_its_card_prints():
     """§145.2, §151.2: an activated ability is used in a showdown or on a chain
     only with [Action] or [Reaction] ("Activate this any time" on older cards)."""
     wrong = []
     for c in json.loads(CARDS.read_text(encoding="utf-8")):
-        text = (c.get("effect") or "").lower()
+        text = re.sub(r"\([^)]*\)", "", (c.get("effect") or "").lower())     # no reminder text
         for e in c.get("effects") or []:
             timing = e.get("timing")
-            if e.get("trigger") == "activated" and timing and timing not in text \
-                    and "any time" not in text:
+            if e.get("trigger") == "activated" and timing and "any time" not in text \
+                    and not re.search(rf"\b{timing}\b", text):
                 wrong.append((c["name"], timing))
     assert not wrong
 
