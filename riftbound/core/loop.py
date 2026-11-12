@@ -5961,8 +5961,12 @@ class GameLoop:
             return False
         energy, power, domain = cost
         offer = self._songstress(side, card) if energy > 0 else None
-        if ap.energy < (energy if offer is None else max(0, energy - offer[2])):
+        energy = energy if offer is None else max(0, energy - offer[2])
+        # What is earmarked for spells pays a spell played from the trash too
+        # (Kai'Sa Daughter of the Void's [rune], Lux Crownguard's Energy).
+        if ap.energy < max(0, energy - ap.earmarked_energy_spell):
             return False
+        power = max(0, power - ap.earmarked_power_spell)
         if not power:
             return True
         return ap.can_pay_cost(0, power, domain) if domain else self._can_pay_generic_power(ap, power)
@@ -5975,9 +5979,15 @@ class GameLoop:
         if not self._can_pay_flow(ap, card, side):
             return
         energy, power, domain = self._flow_cost(card, side)
-        energy = self._songstress_discount(ap, card, energy, lambda e: ap.energy >= e)
-        ap.energy -= energy
+        energy = self._songstress_discount(ap, card, energy,
+                                           lambda e: ap.energy + ap.earmarked_energy_spell >= e)
         self._spell_energy_paid = energy
+        from_earmark = min(energy, ap.earmarked_energy_spell)
+        ap.earmarked_energy_spell -= from_earmark
+        ap.energy -= energy - from_earmark
+        from_earmark = min(power, ap.earmarked_power_spell)
+        ap.earmarked_power_spell -= from_earmark
+        power -= from_earmark
         if power:
             if domain:
                 ap.pay_cost(0, power, domain)

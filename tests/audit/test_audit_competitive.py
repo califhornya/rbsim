@@ -180,3 +180,19 @@ def test_brittle_steel_is_played_from_the_trash_with_flow():
     b.base_gear.append(card("Seal of Rage"))
     act(loop, "A", "Play Brittle Steel from trash (FLOW)")
     assert not b.base_gear and any(c.name == "Brittle Steel" for c in a.banished)
+
+
+def test_kaisa_legend_power_pays_a_flow_cost():
+    """D54. Kai'Sa Daughter of the Void's '[Add] [Rune]. Use only to play
+    spells.' pays a spell played from the trash with FLOW (§829.1.b: it is
+    played, for its Flow cost): Brittle Steel 'FLOW [4] [fury]' wasn't offered
+    with 4 Energy and her [rune]."""
+    loop, a, b = setup(active="A", rich=())
+    legend(loop, "A", "Kai'Sa Daughter of the Void")
+    a.energy = 4
+    a.trash.append(card("Brittle Steel"))
+    b.base_gear.append(card("Seal of Rage"))
+    assert not [lb for lb in labels(loop, "A") if "FLOW" in lb]
+    act(loop, "A", "Activate add_earmarked_power (Kai'Sa")
+    act(loop, "A", "Play Brittle Steel from trash (FLOW)")
+    assert not b.base_gear and a.energy == 0 and a.earmarked_power_spell == 0
