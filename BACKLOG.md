@@ -34,8 +34,10 @@ This file has two parts: **Open now** (the only open items) and sections A-G
       AUDIT.md sixth pass, D53-D56). Left: a FLOW cost ignores the §356.3-4
       modifiers other than cost auras (none in the four decks); Unique is
       deck construction (§103).
-- [ ] Never checked, touching the decks: replacement effects §367-373
-      (Zhonya's Hourglass, Abandon vs FLOW done in D55), layers §475-482.
+- [x] Replacement effects §367-373 and layers §475-482 for the decks' cards
+      (sixth pass). Left, no deck card: the order of several death
+      replacements (§372) and which simultaneous death one saves (§373);
+      layer dependencies (§480-481).
 - [ ] An audit of the engine against docs/rules/CORE_RULES.md, deck cards
       first (Zed, Shen), then the systems they use (combat, showdowns, chain,
       costs): each deviation a failing test citing its §.

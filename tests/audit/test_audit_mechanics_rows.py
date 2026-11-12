@@ -121,3 +121,64 @@ def test_deploy_gear_can_be_played_to_any_battlefield():
     a.hand.append(card("The Good Stuff"))
     offered = [lb for lb in labels(loop, "A") if "The Good Stuff" in lb]
     assert offered == ["Play gear The Good Stuff @BF0", "Play gear The Good Stuff @BF1"]
+
+
+# --- Replacement effects (§367-373) and layers (§475-482): the decks' cards ---
+
+def test_ki_barrier_prevents_the_bonus_damage_too():
+    """§438.1.a.1: 'Prevent includes any applied Bonus Damage'; §438.3: the
+    Prevent Value goes down by what it prevented. Hextech Ray at Void Gate
+    deals 3 + 1 to a unit under Ki Barrier: none dealt, 3 left to prevent."""
+    loop, a, b = setup(active="A")
+    bf = loop.gs.battlefields[0]
+    bf.card = card("Void Gate")
+    target = unit("target", 2)
+    bf.add_unit("B", target)
+    target.damage_shield = 7                       # Ki Barrier resolved on it
+    a.hand.append(card("Hextech Ray"))
+    act(loop, "A", "Cast Hextech Ray @BF0")
+    assert target.damage == 0 and target.damage_shield == 3 and target in bf.units_B
+    assert target.damaged_turn != loop.gs.turn     # §438.4: not dealt at all
+
+
+def test_a_minimum_of_one_is_snapshotted_as_it_applies():
+    """§479.4.b: '-4 [M] to a min of 1 this turn' on a 2 [M] unit 'will
+    generate -1 [M] this turn'. Thousand-Tailed Watcher's -3 to a minimum of 1
+    on a 2 [might] enemy, then +3: 4, not 1."""
+    loop, a, b = setup(active="A")
+    enemy = unit("enemy", 2)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    loop._play_unit(card("Thousand-Tailed Watcher"), "A")
+    assert enemy.might == 1
+    enemy.temporary_might += 3
+    assert enemy.might == 4
+
+
+def test_a_base_might_set_is_applied_before_the_arithmetic():
+    """§479.2 before §479.4: Dragon Form 'Its base Might becomes 5 this turn'
+    on a 3 [might] unit with a buff and -1 this turn: 5 + 1 - 1."""
+    loop, a, b = setup(active="A")
+    u = unit("u", 3)
+    u.might_counters, u.temporary_might = 1, -1
+    loop.gs.battlefields[0].add_unit("A", u)
+    a.hand.append(card("Dragon Form"))
+    choices(loop, {})
+    act(loop, "A", "Cast Dragon Form")
+    assert u.might == 5
+    u.temporary_might -= 2
+    assert u.might == 3
+
+
+def test_switcheroo_swaps_and_later_changes_still_apply():
+    """Switcheroo: 'Swap the Might of two units at the same battlefield this
+    turn.' (arithmetic, §479.4); a later +1 applies on top (§482 timestamps)."""
+    loop, a, b = setup(active="A")
+    x, y = unit("x", 2), unit("y", 5)
+    bf = loop.gs.battlefields[0]
+    bf.add_unit("A", x)
+    bf.add_unit("B", y)
+    a.hand.append(card("Switcheroo"))
+    act(loop, "A", "Cast Switcheroo @BF0")
+    assert (x.might, y.might) == (5, 2)
+    x.temporary_might += 1
+    assert x.might == 6

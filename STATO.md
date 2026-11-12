@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (sesto passaggio: righe PARTIAL/GAP di MECHANICS.md riverificate, D53-D56).
+Aggiornato: 2026-11-12 (sesto passaggio chiuso: punto 2 del piano, D53-D56).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -40,7 +40,9 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   - D55 `e115324`: Abandon su una spell giocata con Flow la rimandava in mano.
   - D56 `56ce034`: disempower toglieva tutti gli status (Kayle Justified).
   - `10dd08a`: `round_robin.py` di default cercava i mazzi rimossi.
-  Nessuna golden game cambiata. Suite verde (1751 passed, 5 skipped).
+  Poi sostituzioni §367-373 e layer §475-482 sulle carte dei mazzi: giusti
+  (Ki Barrier, Nocturne, snapshot del minimo, Dragon Form, Switcheroo).
+  Nessuna golden game cambiata. Suite verde (1755 passed, 5 skipped).
 
 ## In corso
 Niente.
@@ -49,11 +51,10 @@ Niente.
 Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 1. Banlist del 23/11: l'utente incolla l'elenco → aggiornare
    `riftbound/data/banned_cards.json`, ricontrollare i due mazzi competitive.
-2. **Regole, da qui si riparte.** Righe di MECHANICS.md fatte. Restano le
-   parti mai controllate che toccano i mazzi: effetti di sostituzione
-   §367-373 (Zhonya's Hourglass; Abandon contro Flow già in D55), layer
-   §475-482.
-3. **Ricerca della rete (BACKLOG O3), il punto più importante per la qualità.**
+2. Regole: fatto (sesto passaggio). Aperti, fuori dai mazzi: modificatori
+   del costo Flow §356.3-4, ordine delle sostituzioni di morte §372-373,
+   dipendenze dei layer §480-481 (AUDIT.md, "Left open").
+3. **Ricerca della rete (BACKLOG O3), da qui si riparte; il punto più importante per la qualità.**
    La ricerca guidata dalla rete decide solo la prima scelta di un'azione;
    bersagli dentro l'azione, scelte in difesa e scelte nascoste (dig,
    predict) restano alla baseline fissa: Kai'Sa e Kennen vivono di queste.

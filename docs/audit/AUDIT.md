@@ -20,7 +20,7 @@ document names those decks it is the record of where a card was found.
 
 **State (2026-11-12, sixth pass): 56 deviations found, 56 fixed, none open.**
 The sixth pass re-checked the PARTIAL / GAP rows of `docs/MECHANICS.md` and
-took two Codex review comments: D53-D56, see its section. Suite: 1751
+took two Codex review comments: D53-D56, see its section. Suite: 1755
 passed, 5 skipped, no xfail. The fifth pass read the owner's two competitive decks
 (`competitive_kaisa`, `competitive_kennen`): D50-D52. The fourth pass went outside the
 ten decks, by class and not card by card (D29-D49; no golden game changed):
@@ -757,9 +757,22 @@ which named the removed decks).
   row was stale. Hunt (per unit, summed, conquer and hold), Level (the
   current controller's XP), Backline (after every non-Backline unit), Deploy
   (any battlefield), "When I become EMPOWERED" (Mel), EMPOWERED DEATHKNELL.
+- **Replacement effects (§367-373) and layers (§475-482), the decks' cards.**
+  Scanned the four decks for "instead", "would", "as", "becomes", "minimum",
+  "swap", "copy", "maximum". Right: Ki Barrier (bonus damage prevented too,
+  §438.1.a.1; lethal counts the shield, §438.5.a; fully prevented is not
+  dealt, §438.4), Nocturne Horrifying (offered as it is looked at: dig,
+  predict), Abandon against FLOW (D55), "enter ready"; "to a minimum of 1"
+  snapshotted as it applies (§479.4.b: Thousand-Tailed Watcher, Smoke Screen,
+  Stupefy), Dragon Form's base Might before the arithmetic (§479.2), Switcheroo,
+  Might below 0 counted as 0 (§143.2.c). Zhonya's Hourglass is in no deck.
 - **Left open.** A FLOW cost takes cost auras only (Stargazer); the other
   increases and discounts of §356.3-4 are not applied to it (none in the four
-  decks). Unique: deck construction only (§825.4), with §103.
+  decks). Unique: deck construction only (§825.4), with §103. Several death
+  replacements on one death apply in a fixed engine order, not the one their
+  controller picks (§372), and one Zhonya's Hourglass saves the first of
+  simultaneous deaths, not the one chosen (§373): no such card in the decks.
+  Layer dependencies (§480-481: "increased to", "to a maximum") are in no deck.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
@@ -912,8 +925,8 @@ not played again.
 - **Not checked.** Deck construction (§103: 40 cards, 3 copies, domain
   identity, signature cards, Unique); the match procedure (`core/match.py`:
   best of 3, sideboards, the clock) beyond reading TR 404-408; replacement
-  effect ordering (§372-373); layers and dependencies (§475-482) beyond the
-  cases above; "this turn" keyword grants given twice to one unit; copy
+  effect ordering (§372-373) and layer dependencies (§480-481) outside the
+  decks' cards (sixth pass); "this turn" keyword grants given twice to one unit; copy
   effects; three-player rules (not modeled).
 - **The corpus.** The eight decks were read card by card in the third pass
   (see there for what "read" means: about 60 of the 119 cards were checked
