@@ -82,8 +82,7 @@ dove allenare (questo container o macchina con GPU).
   `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
   terzo passaggio, `test_audit_corpus.py` quarto, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
-- `riftbound/core/battlefield.py`: controllo, contesa, Hold / Conquer.
-- `riftbound/core/effects.py`: gli effetti delle carte.
+- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py` (effetti).
 - `riftbound/core/legality.py`: azioni legali offerte agli agenti.
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
   scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
