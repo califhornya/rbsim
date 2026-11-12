@@ -6630,7 +6630,7 @@ class GameLoop:
         if parsed["tap"] and unit is not None:
             self._exhaust(unit)
         if parsed["disempower"] and unit is not None:
-            unit.empowered, unit.empower_times = False, 0
+            self._disempower(unit.card)
         if parsed["exhaust_friendly_unit"]:
             other = self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"])
             if other is not None:
@@ -7067,8 +7067,12 @@ class GameLoop:
                                  triggering_card=card)
 
     def _disempower(self, card: Card) -> None:
+        """Remove the EMPOWERED status; from one empowered more than once
+        (Kayle Justified), one of them (§443.1.b)."""
         unit = self._find_unit_by_card(card)
-        if unit is not None:
+        if unit is not None and unit.empowered and unit.empower_times > 1:
+            unit.empower_times -= 1
+        elif unit is not None:
             unit.empowered = False
             unit.empower_times = 0
         else:

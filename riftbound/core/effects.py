@@ -2596,11 +2596,11 @@ def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     enemies = {id(u) for u in _units_at(ctx, ctx.opponent_side, "anywhere")}
 
     def after(u):
-        was = u.empowered
-        u.empowered, u.empower_times = False, 0
+        was = (u.empowered, u.empower_times)
+        loop._disempower(u.card)
         loop._recompute_passives()
         m = u.might
-        u.empowered = was
+        u.empowered, u.empower_times = was
         loop._recompute_passives()
         return m
 
