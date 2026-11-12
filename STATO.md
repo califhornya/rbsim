@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (sesto passaggio chiuso: punto 2 del piano, D53-D56).
+Aggiornato: 2026-11-12 (punto 3 del piano chiuso: le scelte nella ricerca, `6ebd0e7`).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -23,26 +23,32 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   2026-11-12 erano fondati: D53 e il default di `scripts/round_robin.py`).
 - Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
   §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
+- Scelte nella ricerca: nodi dell'albero per opzione con chiave (tipo, carta,
+  descrizione), non per indice: le copie determinizzate mostrano altre carte.
+  Prior uguali tra le opzioni (con 0.75 alla baseline le visite restavano
+  sulla baseline anche quando valeva meno).
+- Scelte nascoste: decise quando la partita le chiede, rigiocando il tratto
+  dall'ultima decisione del turno (giornale nel motore; un fork del processo
+  non funziona su Windows).
 
 ## Fatto
 - Passaggi 1-4: D1–D49, Q1–Q4, bug del coach (`cc3d776`). Dettagli in AUDIT.md.
 - Rimozione mazzi: test spostati sui precon, 20 golden game rigenerate.
-- Quinto passaggio (mazzi `competitive_kaisa`, `competitive_kennen`, con
-  sideboard): 22 carte nuove lette, 480 partite sotto gli invarianti; D50-D52
-  (gear HIDDEN da coperto, Standard Move e "when I become exhausted", Decree of
-  Unity senza bersaglio); 8 golden game Kai'Sa vs Kennen. Training di prova ok.
-- Sesto passaggio (righe PARTIAL/GAP di MECHANICS.md, BACKLOG O2 primo punto):
-  Deflect, Hunt, Level, Backline, Empower/Empowered, Flow, Deploy verificati
-  con test (`tests/audit/test_audit_mechanics_rows.py`); Unique rimandata
-  (§825.4). Corrette:
-  - D53 `0b877df`: Edge of Night senza unità "here" si attaccava altrove.
-  - D54 `5ef1d33`: il [rune] di Kai'Sa per le spell non pagava i costi Flow.
-  - D55 `e115324`: Abandon su una spell giocata con Flow la rimandava in mano.
-  - D56 `56ce034`: disempower toglieva tutti gli status (Kayle Justified).
-  - `10dd08a`: `round_robin.py` di default cercava i mazzi rimossi.
-  Poi sostituzioni §367-373 e layer §475-482 sulle carte dei mazzi: giusti
-  (Ki Barrier, Nocturne, snapshot del minimo, Dragon Form, Switcheroo).
-  Nessuna golden game cambiata. Suite verde (1755 passed, 5 skipped).
+- Quinto passaggio (mazzi competitive, D50-D52, 8 golden game Kai'Sa vs
+  Kennen) e sesto (righe MECHANICS.md, D53-D56 `0b877df` `5ef1d33` `e115324`
+  `56ce034`; sostituzioni §367-373 e layer §475-482 giusti). Dettagli in
+  AUDIT.md.
+- Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
+  giocatore (`riftbound/ai/net_mcts.py`): ogni scelta dell'azione (albero),
+  quelle in difesa (showdown/chain anche con solo PASS, se una sonda vede
+  scelte), quelle nascoste e quelle non viste dal piano (`_Fallback`:
+  rigioca il segmento per opzione, `GameLoop.journal`/`replay_segment`).
+  PREDICT: carte note in cima al mazzo in Observation/encoding (zona nuova),
+  determinize le lascia lì. Su 356 scelte in 8 partite Kai'Sa-Kennen: 318
+  dal piano, 35 rigiocate, 3 alla baseline (prima 41% cercate).
+  A/B stesso valutatore (punteggio del tavolo), 240 partite, 16 iterazioni:
+  nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%). Costo per
+  decisione invariato. Suite verde (1792 passed: ora torch è installato).
 
 ## In corso
 Niente.
@@ -54,14 +60,13 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 2. Regole: fatto (sesto passaggio). Aperti, fuori dai mazzi: modificatori
    del costo Flow §356.3-4, ordine delle sostituzioni di morte §372-373,
    dipendenze dei layer §480-481 (AUDIT.md, "Left open").
-3. **Ricerca della rete (BACKLOG O3), da qui si riparte; il punto più importante per la qualità.**
-   La ricerca guidata dalla rete decide solo la prima scelta di un'azione;
-   bersagli dentro l'azione, scelte in difesa e scelte nascoste (dig,
-   predict) restano alla baseline fissa: Kai'Sa e Kennen vivono di queste.
-4. Training (BACKLOG O4): reti vecchie non caricabili (`ACTION_DIM` 319),
-   riallenare da zero; budget MCTS, LR, dimensione rete; valutare su 100+
-   partite. Qui ~3 s a partita con 10 iterazioni MCTS su 4 core: con 100
-   serve una macchina con GPU.
+3. Fatto (sopra). Approssimazioni rimaste: il replay prosegue dalla scelta
+   con le carte nascoste vere (mano avversaria, mazzo sotto), un campione
+   per opzione, valore alla decisione successiva.
+4. **Training (BACKLOG O4), da qui si riparte**: reti vecchie non caricabili
+   (`ACTION_DIM` 319, ora anche una zona in più), riallenare da zero;
+   budget MCTS, LR, dimensione rete; valutare su 100+ partite. Self-play qui:
+   ~5 s a partita con 10 iterazioni (1 thread): con 100 serve una GPU.
 5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
    di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
    costruzione del mazzo (§103).
@@ -80,14 +85,16 @@ dove allenare (questo container o macchina con GPU).
 - `riftbound/core/battlefield.py`: controllo, contesa, Hold / Conquer.
 - `riftbound/core/effects.py`: gli effetti delle carte.
 - `riftbound/core/legality.py`: azioni legali offerte agli agenti.
+- `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
+  scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
 - `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
   `competitive_kennen` (le liste dell'utente).
-- `tests/audit/test_audit_competitive.py`: test del quinto passaggio (e D53-D55).
-- `tests/audit/test_audit_mechanics_rows.py`: sesto passaggio (righe MECHANICS.md, D56).
+- `tests/audit/test_audit_competitive.py` (quinto passaggio, D53-D55),
+  `tests/audit/test_audit_mechanics_rows.py` (sesto, D56).
 - `docs/MECHANICS.md`: stato di ogni meccanica (riverificato 2026-11-12).
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
