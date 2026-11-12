@@ -1004,9 +1004,15 @@ class CoachSession:
     # -- the page's side ---------------------------------------------------------
 
     def answer(self, payload: dict) -> None:
-        if self.pending is None:
-            raise RuntimeError("nothing is waiting for an answer")
-        self._answers.put(payload)
+        """Answer the pending question. It stops being pending at once: a
+        second answer sent before the game thread took the first one (a double
+        click) is refused, not kept for the next question."""
+        with self._lock:
+            if self.pending is None:
+                raise RuntimeError("nothing is waiting for an answer")
+            self.pending = None
+            self.status, self.activity = "thinking", "Sto giocando la mossa…"
+            self._answers.put(payload)
 
     def finish(self, save: bool = True) -> None:
         """Stop coaching: the net plays the rest of the game on its own, without
