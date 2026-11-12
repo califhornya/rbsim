@@ -2193,8 +2193,7 @@
         },
         "pay": "reduce",
         "reduce": 5,
-        "may": true,
-        "zone": "deck"
+        "may": true
       }
     ]
   },
@@ -5183,7 +5182,8 @@
       {
         "effect": "fight",
         "trigger": "on_play",
-        "first": "self"
+        "first": "self",
+        "where": "battlefield"
       }
     ]
   },
@@ -6474,7 +6474,7 @@
     "cost_energy": 4,
     "cost_power": 2,
     "cost_power_domain": "Chaos",
-    "effect": "",
+    "effect": "When you play me, return another unit at a battlefield to its owner's hand.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -6484,7 +6484,17 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "recall_unit",
+        "trigger": "on_play",
+        "target": "chosen_unit",
+        "target_filter": {
+          "exclude_self": true
+        },
+        "where": "battlefield"
+      }
+    ]
   },
   {
     "card_id": "OGN-189",
@@ -8014,7 +8024,7 @@
     "cost_energy": 6,
     "cost_power": 3,
     "cost_power_domain": "Order",
-    "effect": "Give friendly units +5 [might] this turn.",
+    "effect": "ACTION (Play on your turn or in showdowns.)\nGive friendly units +5 [might] this turn.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -8023,7 +8033,9 @@
         "rarity": "Rare"
       }
     ],
-    "keywords": [],
+    "keywords": [
+      "ACTION"
+    ],
     "effects": [
       {
         "effect": "grant_temporary_might",
@@ -8057,7 +8069,7 @@
       {
         "effect": "kill_unit",
         "trigger": "on_play",
-        "target": "chosen_unit",
+        "target": "enemy_unit",
         "where": "anywhere"
       }
     ]
@@ -8138,7 +8150,7 @@
     "cost_energy": 6,
     "cost_power": 2,
     "cost_power_domain": "Order",
-    "effect": "",
+    "effect": "Starting with the next player, each other player chooses a unit you don't control that hasn't been chosen for this spell. Kill those units.",
     "effect_equipped": null,
     "set": "Origins",
     "variants": [
@@ -8148,7 +8160,12 @@
       }
     ],
     "keywords": [],
-    "effects": []
+    "effects": [
+      {
+        "effect": "each_opponent_kills_own_unit",
+        "trigger": "on_cast"
+      }
+    ]
   },
   {
     "card_id": "OGN-238",
@@ -9875,7 +9892,7 @@
       {
         "effect": "buff_unit",
         "trigger": "on_hold",
-        "target": "friendly_unit"
+        "target": "chosen_unit"
       }
     ]
   },
@@ -13966,7 +13983,7 @@
     "cost_energy": 2,
     "cost_power": 3,
     "cost_power_domain": "Mind",
-    "effect": "REACTION (Play any time, even before spells and abilities resolve.)",
+    "effect": "REACTION (Play any time, even before spells and abilities resolve.)\nDraw 3.",
     "effect_equipped": null,
     "set": "Spiritforged",
     "variants": [
@@ -13978,7 +13995,14 @@
     "keywords": [
       "REACTION"
     ],
-    "effects": []
+    "effects": [
+      {
+        "effect": "draw_cards",
+        "trigger": "on_cast",
+        "timing": "reaction",
+        "count": 3
+      }
+    ]
   },
   {
     "card_id": "SFD-088",
@@ -19338,7 +19362,7 @@
     "cost_energy": 4,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "EQUIP [1] [fury] ([1] [fury]: Attach this to a unit you control.)",
+    "effect": "EQUIP [1] [rune] ([1] [rune]: Attach this to a unit you control.)",
     "effect_equipped": "At the end of your turn, if I didn't conquer this turn, unattach this and deal 4 to me.",
     "set": "Unleashed",
     "variants": [
@@ -20857,7 +20881,7 @@
     "cost_energy": 5,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "Whenever you play a token, I gain +1 Might. Friendly tokens gain Tank. (Not official text, translation might not be accurate)",
+    "effect": "When you play a token unit, give me +1 [might] this turn.\nYour token units have TANK.",
     "effect_equipped": null,
     "set": "Unleashed",
     "variants": [
@@ -20873,7 +20897,7 @@
     "keywords": [],
     "effects": [
       {
-        "effect": "gain_permanent_might",
+        "effect": "grant_temporary_might",
         "trigger": "on_friendly_unit_played",
         "amount": 1,
         "condition": {
@@ -20883,7 +20907,9 @@
               "is_token": true
             }
           }
-        }
+        },
+        "target": "self",
+        "duration": "this_turn"
       },
       {
         "effect": "give_keyword",
@@ -21298,7 +21324,7 @@
     "domain": "Mind",
     "category": "Unit",
     "sub_type": "Shadow Isles, Spirit",
-    "might": 5,
+    "might": 6,
     "cost_energy": 6,
     "cost_power": 0,
     "cost_power_domain": null,
@@ -27199,8 +27225,8 @@
     "sub_type": null,
     "might": null,
     "cost_energy": 2,
-    "cost_power": 0,
-    "cost_power_domain": null,
+    "cost_power": 1,
+    "cost_power_domain": "Fury",
     "effect": "Kill a gear.\nFLOW [4] [fury] (You may play this from your trash for its Flow cost. Then banish it.)",
     "effect_equipped": null,
     "set": "Vendetta",
@@ -28911,7 +28937,7 @@
     "cost_energy": 3,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle one of them and put the rest back in any order.)",
+    "effect": "EMPOWER [2] ([2]: Empower me. Use only if not Empowered.)\nWhen I become EMPOWERED, PREDICT 2. (Look at the top 2 cards of your Main Deck. Recycle one of them and put the rest back in any order.)\nEMPOWERED I have +1 [might].",
     "effect_equipped": null,
     "set": "Vendetta",
     "keywords": [
@@ -28930,6 +28956,15 @@
         "effect": "predict",
         "trigger": "on_become_empowered",
         "amount": 2
+      },
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "this_is_empowered"
+        }
       }
     ],
     "variants": [
@@ -32184,7 +32219,7 @@
     "domain": "Order",
     "category": "Unit",
     "sub_type": "Piltover, Cat",
-    "might": 2,
+    "might": 3,
     "cost_energy": 2,
     "cost_power": 1,
     "cost_power_domain": "Order",
@@ -33151,10 +33186,7 @@
       {
         "effect": "ready_unit",
         "trigger": "activated",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_exhausted": true
-        },
+        "target": "chosen_unit",
         "cost": {
           "disempower_self": true,
           "power": 1,
@@ -34611,7 +34643,7 @@
       {
         "effect": "buff_unit",
         "trigger": "activated",
-        "target": "chosen_unit",
+        "target": "friendly_unit",
         "cost": {
           "tap": true
         },
@@ -36219,11 +36251,22 @@
     "cost_energy": 2,
     "cost_power": 0,
     "cost_power_domain": null,
-    "effect": "",
+    "effect": "While there's a friendly gear with DEPLOY at my battlefield, I have +1 [might].",
     "effect_equipped": null,
     "set": "Radiance",
     "keywords": [],
-    "effects": [],
+    "effects": [
+      {
+        "effect": "grant_might",
+        "trigger": "passive",
+        "target": "self",
+        "amount": 1,
+        "condition": {
+          "type": "friendly_deploy_gear_at_my_battlefield",
+          "params": {}
+        }
+      }
+    ],
     "variants": [
       {
         "variant_id": "RAD-072",
@@ -36498,9 +36541,6 @@
         "effect": "grant_temporary_might",
         "trigger": "on_play",
         "target": "friendly_unit",
-        "target_filter": {
-          "exclude_self": true
-        },
         "amount": 3,
         "where": "anywhere"
       },
@@ -37925,8 +37965,7 @@
         "trigger": "trash_on_card_played",
         "optional": true,
         "cost": {
-          "power": 1,
-          "domain": "ORDER"
+          "power": 1
         },
         "condition": {
           "type": "triggering_card_matches",

@@ -585,20 +585,41 @@ def _kill_pet_cost(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("champion_to_hand")
 def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Put a Teemo unit you own into your hand from your Champion Zone"
-    (Teemo Swift Scout)."""
+    """ "Put a Teemo unit you own into your hand from your Champion Zone or
+    the board" (Teemo Swift Scout): the Chosen Champion still in its zone, or
+    a Teemo you own on the board (it leaves play as a returned unit does).
+    Baseline: the one in the Champion Zone."""
     gs = ctx.loop.gs
     side = ctx.actor_side
-    champ = gs.champion_A if side == "A" else gs.champion_B
-    deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
-    name = str(spec.get("name_prefix", ""))
-    if champ is None or deployed or not champ.name.startswith(name):
+    options = _teemo_options(ctx, spec)
+    if not options:
         return
-    ctx.actor.hand.append(champ)
+    pick = ctx.loop.choose(_kind("target", spec), side, options, options[0], ctx.card)
+    if isinstance(pick, UnitInPlay):
+        _return_unit(ctx, pick, spec)
+        return
+    ctx.actor.hand.append(pick)
     if side == "A":
         gs.champion_A_deployed = True
     else:
         gs.champion_B_deployed = True
+
+
+def _teemo_options(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
+    """champion_to_hand's choices: the card in the Champion Zone (if it is a
+    `name_prefix` unit), then the units of that name the actor owns on the
+    board, wherever they are and whoever controls them."""
+    gs = ctx.loop.gs
+    side = ctx.actor_side
+    name = str(spec.get("name_prefix", ""))
+    champ = gs.champion_A if side == "A" else gs.champion_B
+    deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
+    options: list = [champ] if champ is not None and not deployed and champ.name.startswith(name) else []
+    for s in (side, ctx.opponent_side):
+        options.extend(u for u in _units_at(ctx, s, "anywhere")
+                       if u.card.name.startswith(name) and not u.is_token
+                       and ctx.loop._owner_of(u.card, s) == side)
+    return options
 
 
 def _copy_card(card):
@@ -919,6 +940,24 @@ def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             loop._exhaust(unit)
         bf.remove_unit(me, unit)
         ctx.actor.base_units.append(unit)
+
+
+@effect("each_opponent_kills_own_unit")
+def _each_opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Starting with the next player, each other player chooses a unit you
+    don't control that hasn't been chosen for this spell. Kill those units."
+    (King's Edict): the opponent chooses one of the units the caster doesn't
+    control, anywhere; baseline its weakest. Their choice, so no DEFLECT."""
+    them = ctx.opponent_side
+    units = _units_at(ctx, them, "anywhere")
+    if not units:
+        return
+    unit = ctx.loop.choose(_kind("target", spec), them, units, min(units, key=lambda u: u.might), ctx.card)
+    where = _take_off_board(ctx, unit)
+    if where is not None:
+        side, bf = where
+        ctx.loop._route_deaths([(unit, side)], bf or ctx.battlefield, in_base=bf is None,
+                               killer=(ctx.actor_side, ctx.card))
 
 
 @effect("gain_permanent_might")
@@ -1806,12 +1845,7 @@ def _play_one_banished_with_this(ctx: "EffectContext", spec: Mapping[str, Any]) 
     """ "[tap]: Play a unit banished with this" (Cursed Sarcophagus): paying its
     cost; baseline the costliest affordable one."""
     loop = ctx.loop
-    options = []
-    for c in getattr(ctx.card, "_banished_with", []):
-        if any(x is c for x in ctx.actor.banished):
-            energy, power = loop._effective_cost(c, ctx.actor, from_zone="banished")
-            if loop._can_pay_card(ctx.actor, c, energy, power):
-                options.append((c, energy, power))
+    options = _sarcophagus_options(ctx)
     if not options:
         return
     card, energy, power = loop.choose(_kind("card", spec), ctx.actor_side, options,
@@ -1916,10 +1950,8 @@ def _akali_retreat(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "If it's your turn, move a friendly unit in a showdown to base and if I'm
     EMPOWERED ready it" (Akali Rogue Assassin)."""
     loop, gs = ctx.loop, ctx.loop.gs
-    if gs.active != ctx.actor_side or not gs.showdown_active or gs.showdown_bf_idx is None:
-        return
-    units = list(gs.battlefields[gs.showdown_bf_idx]._units_for(ctx.actor_side))
-    if not units:
+    units = _showdown_units(ctx)
+    if gs.active != ctx.actor_side or not units:
         return
     unit = loop.choose(_kind("target", spec), ctx.actor_side, units, min(units, key=lambda u: u.might), ctx.card)
     loop._move_unit_by_effect(unit, None)
@@ -2522,14 +2554,10 @@ def _ready_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     loop = ctx.loop
     if loop._readying_blocked(ctx.actor_side):
         return                                   # Mageseeker Warden
-    entries = [e for e in _gear_entries(ctx, enemy_first=False, units=True) if e[0] == ctx.actor_side]
+    entries = _exhausted_gear(ctx)
     holders = {id(getattr(g, "card", g)): h for _side, h, g in entries}
     units = {id(e[2]): _unit_gear_of(e) for e in entries if _unit_gear_of(e) is not None}
-
-    def exhausted(card):
-        unit = units.get(id(card))
-        return not unit.ready and loop._can_ready(unit) if unit is not None else getattr(card, "tapped", False)
-    gear = [getattr(g, "card", g) for _side, _h, g in entries if exhausted(getattr(g, "card", g))]
+    gear = [getattr(g, "card", g) for _side, _h, g in entries]
     picks = sorted(gear, key=_zone_value, reverse=True)[:int(spec.get("count", 1))]
     for g in loop.choose_many(_kind("target", spec), ctx.actor_side, gear, picks, ctx.card):
         if id(g) in units:
@@ -2623,27 +2651,27 @@ def _unattach_and_damage_holder(ctx: "EffectContext", spec: Mapping[str, Any]) -
 
 @effect("attach_equipment")
 def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Attach a detached Equipment you control to a unit you control" (Jax
-    Grandmaster at Arms; `from: attached` moves one from a unit in base to a
-    unit at a battlefield). Baseline unit: GameLoop._equip_baseline."""
+    """ "Attach a detached Equipment you control to a unit you control" / "Attach
+    an attached Equipment you control to a unit you control" (Jax Grandmaster
+    at Arms; `from: attached`: off any unit of yours, onto another one).
+    Baseline: the first Equipment (for an attached one, one worn in base
+    first), to GameLoop._equip_baseline's unit, a unit at a battlefield before
+    one in base when it comes off a unit."""
     loop = ctx.loop
-    mine = _units_at(ctx, ctx.actor_side, "anywhere")
-    at_bf = [u for u in mine if loop._locate_unit(u)[1] is not None]
-    if not mine:
+    options = _attach_options(ctx, spec)
+    if not options:
         return
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
     if str(spec.get("from", "detached")) == "attached":
-        holders = [u for u in mine if u.gear and loop._locate_unit(u)[1] is None]
-        gears = [g for u in holders for g in u.gear if loop._equip_cost(g) is not None]
-        if not gears or not at_bf:
-            return
-        gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
-        next(u for u in holders if gear in u.gear).gear.remove(gear)
-        target = loop.choose("equip", ctx.actor_side, at_bf, loop._equip_baseline(at_bf), ctx.card)
+        in_base = [o for o in options if loop._locate_unit(o[1])[1] is None]
+        gear, holder = loop.choose(_kind("card", spec), ctx.actor_side, options,
+                                   (in_base or options)[0], ctx.card)
+        others = [u for u in mine if u is not holder]
+        at_bf = [u for u in others if loop._locate_unit(u)[1] is not None]
+        holder.gear.remove(gear)
+        target = loop.choose("equip", ctx.actor_side, others, loop._equip_baseline(at_bf or others), ctx.card)
     else:
-        gears = [g for g in ctx.actor.base_gear if loop._equip_cost(g) is not None]
-        if not gears:
-            return
-        gear = loop.choose(_kind("card", spec), ctx.actor_side, gears, gears[0], ctx.card)
+        gear, _none = loop.choose(_kind("card", spec), ctx.actor_side, options, options[0], ctx.card)
         ctx.actor.base_gear.remove(gear)
         target = loop.choose("equip", ctx.actor_side, mine, loop._equip_baseline(mine), ctx.card)
     target.gear.append(gear)
@@ -2833,12 +2861,7 @@ def _move_self_to_weaker_enemy_battlefield(ctx: "EffectContext", spec: Mapping[s
     """ "Move me to an occupied enemy battlefield if my Might is greater than
     the total Might of enemy units there" (Maduli the Gatekeeper)."""
     me = _source_unit(ctx)
-    if me is None:
-        return
-    gs = ctx.loop.gs
-    opts = [bf for bf in gs.battlefields if bf._units_for(ctx.opponent_side)
-            and me.might > sum(u.might for u in bf._units_for(ctx.opponent_side))
-            and ctx.loop._locate_unit(me)[1] is not bf]
+    opts = _maduli_destinations(ctx)
     if opts:
         dst = ctx.loop.choose(_kind("destination", spec), ctx.actor_side, opts,
                               max(opts, key=lambda bf: len(bf._units_for(ctx.opponent_side))), ctx.card)
@@ -3093,10 +3116,13 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
     chooser, owner = gs.get_player(chooser_side), gs.get_player(owner_side)
     might_cap = None
     if spec.get("kill_friendly"):
-        mine = [u for u in _units_at(ctx, chooser_side, "anywhere") if not u.is_token]
+        # "Kill a friendly unit" (Baited Hook): any of them, a token too;
+        # baseline the weakest that isn't a token.
+        mine = _units_at(ctx, chooser_side, "anywhere")
         if not mine:
             return
-        victim = min(mine, key=lambda u: u.might)
+        victim = loop.choose(_kind("target", spec), chooser_side, mine,
+                             min(mine, key=lambda u: (u.is_token, u.might)), ctx.card)
         might_cap = victim.might + int(spec.get("might_margin", 1))
         where = loop._locate_unit(victim)
         if where[1] is None:
@@ -4100,6 +4126,90 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
 _SINGLE_UNIT_TARGETS = _CHOOSER_TARGETS | {"enemy_unit", "friendly_unit"}
 
 
+def _attach_options(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
+    """Jax Grandmaster at Arms: the (Equipment, unit wearing it or None) pairs
+    one of his abilities can choose: a detached Equipment you control (any
+    unit of yours can take it), or (`from: attached`) one a unit of yours
+    wears, with another unit of yours to take it."""
+    loop = ctx.loop
+    mine = _units_at(ctx, ctx.actor_side, "anywhere")
+    if not mine:
+        return []
+    if str(spec.get("from", "detached")) == "attached":
+        return [(g, u) for u in mine for g in u.gear
+                if loop._equip_cost(g) is not None and len(mine) > 1]
+    return [(g, None) for g in ctx.actor.base_gear if loop._equip_cost(g) is not None]
+
+
+def _exhausted_gear(ctx: "EffectContext") -> list:
+    """`ready_gear`'s choices: the actor's exhausted gear (in base, attached or
+    deployed, and its unit gear that can be readied), as _gear_entries rows."""
+    loop = ctx.loop
+
+    def exhausted(entry):
+        unit = _unit_gear_of(entry)
+        if unit is not None:
+            return not unit.ready and loop._can_ready(unit)
+        return bool(getattr(getattr(entry[2], "card", entry[2]), "tapped", False))
+    return [e for e in _gear_entries(ctx, enemy_first=False, units=True)
+            if e[0] == ctx.actor_side and exhausted(e)]
+
+
+def _maduli_destinations(ctx: "EffectContext") -> list:
+    me = _source_unit(ctx)
+    if me is None:
+        return []
+    enemy = ctx.opponent_side
+    return [bf for bf in ctx.loop.gs.battlefields if bf._units_for(enemy)
+            and me.might > sum(u.might for u in bf._units_for(enemy))
+            and ctx.loop._locate_unit(me)[1] is not bf]
+
+
+def _pack_of_wonders_options(ctx: "EffectContext") -> list:
+    """ "another friendly gear, unit, or facedown card": units, then gear rows
+    (_gear_entries), then (battlefield, facedown card) pairs."""
+    side = ctx.actor_side
+    units = _choosable(ctx, [u for u in _units_at(ctx, side, "anywhere") if u.card is not ctx.card])
+    gear = [e for e in _gear_entries(ctx, enemy_first=False)
+            if e[0] == side and getattr(e[2], "card", e[2]) is not ctx.card]
+    facedowns = [(bf, fd) for bf in ctx.loop.gs.battlefields for fd in bf.facedowns if fd.owner == side]
+    return units + gear + facedowns
+
+
+def _sarcophagus_options(ctx: "EffectContext") -> list:
+    """The units banished with this that its controller can pay for now, as
+    (card, energy, power)."""
+    loop, options = ctx.loop, []
+    for c in getattr(ctx.card, "_banished_with", []):
+        if any(x is c for x in ctx.actor.banished):
+            energy, power = loop._effective_cost(c, ctx.actor, from_zone="banished")
+            if loop._can_pay_card(ctx.actor, c, energy, power):
+                options.append((c, energy, power))
+    return options
+
+
+def _showdown_units(ctx: "EffectContext") -> list:
+    gs = ctx.loop.gs
+    if not gs.showdown_active or gs.showdown_bf_idx is None:
+        return []
+    return list(gs.battlefields[gs.showdown_bf_idx]._units_for(ctx.actor_side))
+
+
+# §403.3 / §355.8 for the instructions that choose something other than one
+# unit by `target`: effect -> whether its handler has a choice to make now.
+_HAS_OPTION = {
+    "attach_equipment": _attach_options,
+    "ready_gear": lambda ctx, spec: _exhausted_gear(ctx),
+    "move_self_to_weaker_enemy_battlefield": lambda ctx, spec: _maduli_destinations(ctx),
+    "champion_to_hand": lambda ctx, spec: _teemo_options(ctx, spec),
+    "akali_retreat": lambda ctx, spec: _showdown_units(ctx),
+    "ward_unit": lambda ctx, spec: _choosable(ctx, _units_at(ctx, ctx.actor_side, "anywhere")),
+    "return_friendly_to_hand": lambda ctx, spec: _pack_of_wonders_options(ctx),
+    "play_one_banished_with_this": lambda ctx, spec: _sarcophagus_options(ctx),
+}
+
+
+
 def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[bool]:
     """§355.8 for one instruction of a spell about to be played: whether the
     unit (or spell, for a counter) it chooses has a valid choice now. None: an
@@ -4111,6 +4221,18 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
         return bool(_attacking_enemies(ctx))
     if effect == "play_token" and spec.get("location") == "enemy_occupied":
         return any(bf._units_for(ctx.opponent_side) for bf in ctx.loop.gs.battlefields)
+    if effect == "sequence":
+        # One ability, several instructions: every one that chooses needs a
+        # valid choice (Pyke Bloodharbor Ripper: "Return a friendly unit at a
+        # battlefield ... Play a Gold gear token").
+        found = [has_valid_target(ctx, sub) for sub in spec.get("steps") or []
+                 if isinstance(sub, Mapping) and sub.get("target") != "it"]
+        return False if False in found else (True if True in found else None)
+    option = _HAS_OPTION.get(effect)
+    if option is not None:
+        return bool(option(ctx, spec))
+    if effect == "reveal_play_top" and spec.get("kill_friendly"):
+        return bool(_units_at(ctx, ctx.actor_side, "anywhere"))      # Baited Hook
     target = str(spec.get("target", "")).lower()
     single = str(spec.get("scope", "single")).lower() == "single"
     # A gear to choose (Detonate "Kill a gear", Factory Recall, Turn to Dust).
@@ -4647,11 +4769,7 @@ def _return_friendly_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
     from .combat import UnitInPlay
     loop, side = ctx.loop, ctx.actor_side
     gs = loop.gs
-    units = _choosable(ctx, [u for u in _units_at(ctx, side, "anywhere") if u.card is not ctx.card])
-    gear = [e for e in _gear_entries(ctx, enemy_first=False)
-            if e[0] == side and getattr(e[2], "card", e[2]) is not ctx.card]
-    facedowns = [(bf, fd) for bf in gs.battlefields for fd in bf.facedowns if fd.owner == side]
-    options = units + gear + facedowns
+    options = _pack_of_wonders_options(ctx)
     if not options:
         return
 

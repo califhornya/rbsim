@@ -13,8 +13,10 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
-**State (2026-11-11, third pass): 28 deviations found, 28 fixed, none open.**
-The suite is green (1685 passed, 5 skipped, no xfail left). The third pass
+**State (2026-11-12, fourth pass): 49 deviations found, 49 fixed, none open.**
+The suite is green (1754 passed, no xfail). The fourth pass went outside the
+ten decks, by class and not card by card (D29-D49; no golden game changed):
+see its section for what was scanned and what was not read. The third pass
 read the 119 cards of the other eight decks against the printed text and
 played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
@@ -66,6 +68,24 @@ said.
 | D26 | Ezreal's legend doesn't count an enemy gear chosen | SFD-199 | other decks (Ezreal) | fixed, `a0063f2` |
 | D27 | Patched Porobot is a unit only, printed "Unit Gear" | §178, VEN-058 | other decks (Ornn, 3 copies) | fixed, `840876a` |
 | D28 | Rengar's and Kennen's legends give only to a friendly unit | UNL-183, VEN-155 | other decks (Rengar, Kennen): a missing option, never the better one | fixed, `0ac459e` |
+| D29 | An ability that chooses a gear, a card or a place is offered with nothing to choose | §403.3, §355.5 | Pack of Wonders (Kennen, Pyke decks); 9 cards outside the decks | fixed, `b4d8b2e` |
+| D30 | Jax's legend moves an attached Equipment only from base to a battlefield | SFD-193 | outside the decks | fixed, `15475ff` |
+| D31 | Teemo's legend takes a Teemo only from the Champion Zone | OGN-263 | outside the decks | fixed, `bf2db18` |
+| D32 | Baited Hook kills the weakest non-token unit, unasked | OGN-242 | outside the decks | fixed, `2c54656` |
+| D33 | Ambessa's legend readies only a friendly exhausted unit | VEN-153 | outside the decks | fixed, `73f504b` |
+| D34 | [rune][rune] can't be paid with Power of two domains | generic Power | any deck: DEFLECT 2 (Ornn Forge God), Jayce, Dominus | fixed, `28c756d` |
+| D35-D38 | Premonition, Zaunite Bouncer, King's Edict, Overloaded Traveler have no effect | SFD-087, OGN-188, OGN-237, RAD-072 | outside the decks | fixed, `598611d` |
+| D39 | Spectral Centaur Might 5 (6), Fallen Feline Might 2 (3), Brittle Steel no Power cost ([Fury]), Grand Strategem no [ACTION] | UNL-068, VEN-132, VEN-003, OGN-233 | outside the decks | fixed, `598611d` |
+| D40 | Harnessed Dragon kills a unit of its own player | OGN-234 | outside the decks | fixed, `598611d` |
+| D41 | Carnivorous Snapvine fights an enemy unit in a base | OGN-149 | outside the decks | fixed, `598611d` |
+| D42 | Lillia Protector of Dreams keeps her +1 Might for good | UNL-058 | outside the decks | fixed, `598611d` |
+| D43 | Apprentice Mage has no "[Empowered] +1 Might" | VEN-047 | outside the decks | fixed, `598611d` |
+| D44 | Elnuk Herd can't give its +3 to itself (errata) | RAD-081 | outside the decks | fixed, `598611d` |
+| D45 | Iridescent Avian buffs an enemy unit | RAD-027 | outside the decks | fixed, `598611d` |
+| D46 | Meticulous Restorationist asks for Order Power, printed [Rune] | RAD-120 | outside the decks | fixed, `598611d` |
+| D47 | Blighted Battleaxe's Equip asks for Fury, printed [Rune] | UNL-019 | outside the decks | fixed, `598611d` |
+| D48 | Reinforce plays from the deck, errata: banish, then play | OGN-062 | outside the decks | fixed, `598611d` |
+| D49 | Mageseeker Investigator's toll is paid in Energy, printed [Rune] | UNL-163 | outside the decks | fixed, `598611d` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -577,8 +597,13 @@ followed the classes found (D23, D24, D28). Tests in
   gear" leaves it out. It is still played, moved and paid for as a unit: the
   `isinstance(card, GearCard)` tests that pick how a card is played are
   unchanged. No golden game changed.
-- **Not checked.** An Equipment on it, Jax's and Azir's "your Equipment"
-  texts with it, and the AI's encoding (it is encoded as a unit).
+- **Checked in the fourth pass, found right.** An Equipment on it: it is
+  attached and gives its Might (Long Sword: 4), Detonate offers the Porobot
+  and its Equipment as two gears, and the Equipment of a killed Porobot goes
+  back to base (§719.5). It is no Equipment: Arise! doesn't count it, Jax's
+  legend and Angle Shot don't offer it. The AI encodes it by its card, in the
+  unit zones: the net sees which card it is; the gear counts of the encoding
+  leave it out (as they leave out Orianna's unit gear).
 
 ### D28. Rengar's and Kennen's legends give only to a friendly unit
 
@@ -612,6 +637,52 @@ Seen on the way, not a deviation of a card: a chooser that raises while a
 spell's choices are declared on the copy (`_declare_choices` swallows it)
 leaves the spell choosing as it resolves with `choices_noted` set, so "when
 you choose me" and DEFLECT are skipped. No agent of the repo raises there.
+
+## Deviations, fourth pass (2026-11-12): outside the ten decks, by class
+
+How it was done. Not card by card: the corpus outside the ten decks is about
+930 cards. Four scans over the whole corpus, each followed by reading and
+playing what it flagged:
+1. every activated ability (138 cards) offered with its source alone on the
+   board, with one ready friendly unit, and on a full board (what is offered
+   with nothing to choose; what is never offered): D29, and D30-D33 read on
+   the way;
+2. the 131 cards `piltover_sync.py compare` flags, each read against the
+   print with its `effects` (most are the site's typos): D35-D49;
+3. cards with printed text and no effect; printed keywords missing from the
+   registry (only Grand Strategem); every Equipment's Equip cost and Might
+   bonus against the print (only Blighted Battleaxe);
+4. the leftovers of D25 / D28 (Facebreaker, Ambessa, Navori Fighting Pit).
+Tests in `tests/audit/test_audit_corpus.py`.
+
+- **D29.** §403.3. D9 covered an ability that chooses one unit. Still offered
+  with nothing to choose: Jax Grandmaster at Arms (both), Pyke Bloodharbor
+  Ripper, Jayce Defender of Tomorrow, Teemo Swift Scout, Akali Rogue Assassin
+  (outside a showdown), Maduli the Gatekeeper, Unlicensed Armory, Pack of
+  Wonders, Baited Hook, Cursed Sarcophagus. `effects.has_valid_target` now
+  asks the handler's own list of options (`_HAS_OPTION`) and looks inside a
+  `sequence`. As in D9, "legal" is "the handler has something to do": Jayce's
+  "Ready a gear" needs an exhausted gear of yours, though by the print a ready
+  or an enemy gear is a legal, pointless choice.
+- **D30-D33.** See the table: the handler was narrower than the print.
+- **D34.** Seen while reading Mageseeker Investigator:
+  `_can_pay_generic_power` wanted all the Power from one domain. One domain is
+  still used when it covers the cost, so nothing changes where it did.
+- **D35-D49.** See the table. King's Edict: the opponent chooses, among the
+  units the caster doesn't control, anywhere (two players only).
+- **Read and found right.** Facebreaker (a spell is cast "at" a battlefield:
+  both units are there); Wraith of Echoes (not its own death); Xerath Freed,
+  Ultrasoft Poro, Renata Glasc ("only while I'm at a battlefield");
+  Unyielding Spirit, Symbol of the Solari, Highlander, Possession, Siphon
+  Power, Conscription, Emperor's Dais, Diana Lunari, the two AMBUSH errata.
+- **Not a deviation, a bug met on the way** (`cc3d776`): the coach kept a
+  second answer to one question (a double click) for the next question; the
+  game then ended in an error. `tests/test_coach.py` failed about one run in
+  four under load because of it.
+- **Left open.** Navori Fighting Pit's data now say "a unit here" (no board
+  differs). Seraphine Not Alone is marked "Preview Card - Not Legal" on the
+  site. The decks vendetta_kennen and vendetta_ezreal hold Stacked Deck,
+  which `banned_cards.json` bans (a warning at load, not checked further).
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
@@ -769,8 +840,11 @@ not played again.
   effects; three-player rules (not modeled).
 - **The corpus.** The eight decks were read card by card in the third pass
   (see there for what "read" means: about 60 of the 119 cards were checked
-  only by reading, their existing tests trusted). The rest of the 136 cards
-  `piltover_sync.py compare` flags, and every card outside the ten decks,
-  were not: only the three static scans of D23, D24 and D28.
+  only by reading, their existing tests trusted). Outside the ten decks
+  (about 930 cards) the fourth pass read only what its scans flagged: a card
+  whose text matches the site and whose effects are wrong in a way no scan
+  looks for (a target narrower or wider than the print, a missing clause) is
+  still there. D40, D41, D45 are of that kind and were found only because
+  the site's wording differed from ours.
 - **The AI side.** Encoding, search and coach were read only where a fix
   touches them.

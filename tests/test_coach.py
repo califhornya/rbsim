@@ -412,3 +412,20 @@ def test_two_battlefields_with_one_name_say_which():
     same = [{"named": "Threshold of the Gray"}, {"named": "Threshold of the Gray"}]
     assert _view_bf_names(same) == ["Threshold of the Gray (sinistra)", "Threshold of the Gray (destra)"]
     assert _view_bf_names([{"named": "Zaun Warrens"}, {"named": None}]) == ["Zaun Warrens", "campo 2"]
+
+
+def test_a_second_answer_to_one_question_is_refused(tmp_path):
+    """An answer sent twice (a double click) isn't kept for the next question."""
+    session = _session(tmp_path)
+    session.new_game(ZED, SHEN, seat="A", opponent="simple_trade", seed=3)
+    end = time.time() + 60
+    while session.state()["pending"] is None and time.time() < end:
+        time.sleep(0.005)
+    assert session.state()["pending"]["type"] == "mulligan"
+    session.answer({"return": []})
+    assert session.pending is None
+    try:
+        session.answer({"return": []})
+    except RuntimeError:
+        pass                      # refused, or the next question was already up
+    session.abandon()

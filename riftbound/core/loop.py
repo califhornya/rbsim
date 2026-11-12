@@ -69,7 +69,7 @@ _HANDLED_CONDITIONS: frozenset[str] = frozenset({
     "you_have_n_or_fewer_runes", "friendly_deployed_gear_here", "played_to_battlefield_this_turn",
     "your_turn_from_facedown", "no_open_battlefields",
     "this_is_at_battlefield", "triggering_unit_not_named", "triggering_unit_has_subtype",
-    "fewer_runes_than_opponent",
+    "fewer_runes_than_opponent", "friendly_deploy_gear_at_my_battlefield",
     "cards_played_this_turn_exactly", "opponent_played_n_spells_this_turn",
     "triggering_card_matches", "triggering_card_not_from_hand", "ability_energy_at_least",
     "moved_to_battlefield", "moved_from_battlefield",
@@ -2947,6 +2947,11 @@ class GameLoop:
         if ctype == "triggering_unit_not_named":
             trig = extra.get("triggering_card")
             return trig is None or getattr(trig, "name", None) != params.get("name")
+        if ctype == "friendly_deploy_gear_at_my_battlefield":
+            # "While there's a friendly gear with DEPLOY at my battlefield"
+            # (Overloaded Traveler): where the unit is, not where a trigger was.
+            return any(bf.gear_for(side) for bf in self.gs.battlefields
+                       if any(u.card is card for u in bf._units_for(side)))
         if ctype == "friendly_deployed_gear_here":
             bf = extra.get("battlefield")
             return bf is not None and bool(bf.gear_for(side))
@@ -3267,12 +3272,11 @@ class GameLoop:
         return e_red, p_red
 
     def _can_pay_generic_power(self, actor: Player, n: int) -> bool:
-        """Whether the actor can pay n generic ([rune]) power from a single domain.
-        The engine's power pool is domain-keyed; generic power is modeled as 'any one
-        domain you have enough of' (a documented simplification)."""
+        """Whether the actor can pay n generic ([rune]) power: power of any
+        domains, mixed ([rune][rune] with one Fury and one Chaos)."""
         if n <= 0:
             return True
-        return any(actor.can_pay_cost(0, n, d) for d in list(actor.power_pool))
+        return actor.can_pay_power_of(n, list(actor.power_pool))
 
     def _can_pay_energy_and_generic(self, actor: Player, energy: int, power: int,
                                     domain: Optional[Domain] = None) -> bool:
@@ -3359,7 +3363,8 @@ class GameLoop:
         return True
 
     def _pay_generic_power(self, actor: Player, n: int) -> bool:
-        """Pay n generic ([rune]) power from the first domain that can cover it."""
+        """Pay n generic ([rune]) power: from the first domain that can cover
+        it alone, else from a mix of domains (Player.pay_power_of)."""
         if n <= 0:
             return True
         for d in list(actor.power_pool):
@@ -3367,7 +3372,11 @@ class GameLoop:
                 ok = actor.pay_cost(0, n, d)
                 self._drain_rune_recycles()
                 return ok
-        return False
+        if not actor.can_pay_power_of(n, list(actor.power_pool)):
+            return False
+        ok = actor.pay_power_of(n, list(actor.power_pool))
+        self._drain_rune_recycles()
+        return ok
 
     def _offer_reveal_from_top(self, actor: Player, cards: list) -> list:
         """When cards are looked at / revealed from the TOP of `actor`'s deck (dig /
@@ -5595,9 +5604,8 @@ class GameLoop:
                 return
             toll = self._group_move_toll(side, dst)
             if toll:
-                if ap.energy < toll:
+                if not self._pay_generic_power(ap, toll):
                     return
-                ap.energy -= toll
             joining = self.gs.pending_move is not None and self.gs.pending_move == (dst, side)
             if dst != base_index and not joining and \
                     not self._pay_move_tax(side, self.gs.battlefields[dst]):
@@ -7139,8 +7147,9 @@ class GameLoop:
         return self._pay_generic_power(player, power)
 
     def _group_move_toll(self, side: str, dst: int) -> int:
-        """ "Opponents must pay 1 for each unit beyond the first to move multiple
-        units to my battlefield at the same time" (Mageseeker Investigator)."""
+        """ "Opponents must pay [rune] for each unit beyond the first to move
+        multiple units to my battlefield at the same time" (Mageseeker
+        Investigator): that many Power of any domain."""
         if dst >= len(self.gs.battlefields):
             return 0
         g = self.gs.move_group

@@ -135,6 +135,7 @@ KNOWN_CONDITIONS: frozenset[str] = frozenset({
     "you_control_bf_with_exactly_n_units",  # n: "a battlefield with exactly two units there" (yours)
     "you_have_n_or_fewer_runes",         # n: "if you control 4 or fewer runes"
     "friendly_deployed_gear_here",       # "if there is a friendly gear with DEPLOY here"
+    "friendly_deploy_gear_at_my_battlefield",  # "While there's a friendly gear with DEPLOY at my battlefield"
     "played_to_battlefield_this_turn",   # "if you've played a unit or gear to a battlefield this turn"
     "your_turn_from_facedown",           # "If it's your turn and you played this from face down"
     "no_open_battlefields",              # "if there are no open battlefields"

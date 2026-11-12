@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-11 (audit, terzo passaggio; D27 rivista dopo la review della PR #19).
+Aggiornato: 2026-11-12 (audit, quarto passaggio: fuori dalle dieci liste, per classi).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -10,52 +10,60 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 ## Decisioni prese
 - Una deviazione = un test in `tests/audit/` che gioca la situazione + un commit
   di fix: così ogni correzione è verificabile e reversibile da sola.
+  Eccezione (quarto passaggio): D35-D49, correzioni di soli dati, in un commit
+  unico con un test per carta, per contenere l'uso.
 - Le golden game si rigenerano solo quando il cambio di comportamento è voluto,
   con il motivo partita per partita nel messaggio di commit.
-- D19: `_phase_beginning` copre ancora Awaken → Channel (non spezzato in più
-  metodi) perché ~40 file di test lo chiamano direttamente.
-- D20: il Conquer dipende da `Battlefield.gained_control`, non da
-  `last_controller` (che resta solo per la firma delle golden).
-- D21: restrizione "battlefield where you have units" come parametro della carta
-  (`battlefield: friendly_units`), non come caso speciale per nome.
+- D19: `_phase_beginning` copre ancora Awaken → Channel (~40 file di test lo
+  chiamano direttamente).
+- D20: il Conquer dipende da `Battlefield.gained_control`, non da `last_controller`.
+- D21: restrizione "battlefield where you have units" come parametro della carta.
 - Q1–Q4 (decise dall'utente): priorità secondo §337.4; Shadow Order Disciple
   invariato; partita al cap dei turni = pareggio; Keeper of Law conta solo le
   unità di chi la gioca.
 - D23: il tempo di un'abilità attivata sta nei dati solo se la carta stampa
   [Action]/[Reaction]; un test statico lo controlla su tutto il corpus.
-- D24: Quick-Draw offre tutte le unità del giocatore; la baseline resta sulle
-  unità del battlefield dell'azione, così le golden non cambiano.
-- D26: un gear nemico scelto si conta alla risoluzione (come il suo DEFLECT),
-  non quando la spell va in catena: differenza accettata.
-- D27 (decisa dall'utente): Patched Porobot è unità e gear insieme. Un solo
-  predicato `cards.is_gear()`; in gioco `UnitInPlay.is_gear` è derivato dalla
-  carta attuale (non un flag fissato all'ingresso), così regge le copie
-  (Shady Spectacles); `gear_unit` resta solo "gear reso unità da Orianna".
-  Si gioca, muove e paga da unità.
+- D26: un gear nemico scelto si conta alla risoluzione, non in catena.
+- D27 (decisa dall'utente): Patched Porobot è unità e gear insieme
+  (`cards.is_gear()`, `UnitInPlay.is_gear` derivato dalla carta attuale).
+- D29: "abilità legale" = "l'handler ha qualcosa da scegliere" (stessa lista di
+  opzioni per legalità e risoluzione, `effects._HAS_OPTION`); scelte legali ma
+  inutili per il testo (gear già pronto, gear nemico) non sono offerte, come in D9.
+- D34: il Power generico si paga da un solo dominio quando basta (nessuna
+  golden cambia), altrimenti da un misto.
+- Quarto passaggio per classi e non carta per carta: fuori dalle liste ci sono
+  ~930 carte; lette solo quelle segnalate da una scansione.
 
 ## Fatto
-- Primo passaggio: D1–D18. Secondo: D19–D22 e risposte Q1–Q4. Tutte corrette.
-- Terzo passaggio (questa sessione): le 119 carte delle otto liste non precon
-  lette contro il testo stampato, ~60 giocate nel motore. Suite verde
-  (1685 passed, 5 skipped, nessun xfail), nessuna golden cambiata:
-  - D23 `17838db`: 39 abilità di 34 carte avevano `timing: action` non
-    stampato (usabili in showdown): Heart of Dark Ice, The List, ...
-  - D24 `6376f85`: Quick-Draw si attacca a qualsiasi unità che controlli
-    (Cloth Armor restava in base non attaccata).
-  - D25 `4947f42`: Bellows Breath solo su unità nella stessa location.
-  - D26 `a0063f2`: la leggenda di Ezreal conta anche i gear nemici scelti.
-  - D27 `840876a`: Patched Porobot è anche un gear (Pit Crew, Ornn's Forge,
-    Ornn Blacksmith, Detonate, conteggi).
-  - D28 `0ac459e`: le leggende di Rengar e Kennen scelgono qualsiasi unità.
+- Passaggi 1-3: D1–D28 e risposte Q1–Q4, tutte corrette.
+- Quarto passaggio (questa sessione), suite verde (1754 passed), nessuna
+  golden cambiata:
+  - D27 chiusa: Equipment sul Porobot e testi "your Equipment" giusti.
+  - D29 `b4d8b2e`: 10 abilità attivate offerte senza niente da scegliere
+    (Jax, Pyke Bloodharbor Ripper, Jayce, Teemo, Akali Rogue Assassin, Maduli,
+    Unlicensed Armory, Pack of Wonders, Baited Hook, Cursed Sarcophagus).
+  - D30 `15475ff` Jax: Equipment attaccato fra due unità qualsiasi.
+  - D31 `bf2db18` Teemo: anche dal tavolo. D32 `2c54656` Baited Hook: l'unità
+    da uccidere è scelta. D33 `73f504b` Ambessa: "Ready a unit" qualsiasi.
+  - D34 `28c756d`: [rune][rune] pagabile con Power di domini diversi.
+  - D35-D49 `598611d`: dati contro la stampa (le 131 carte segnalate da
+    `piltover_sync compare`): 4 carte senza effetto, 4 statistiche/keyword,
+    bersagli, costi, errata. Elenco in AUDIT.md.
+  - Coach `cc3d776`: una seconda risposta alla stessa domanda (doppio click)
+    veniva applicata alla domanda successiva; ora è rifiutata. Era la causa
+    del test `test_coach` instabile sotto carico.
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-1. D27, non controllati: un Equipment sul Porobot, l'encoding AI (lo vede
-   come unità).
-2. Resto del corpus (carte fuori dalle dieci liste): non letto. Noti: Navori
-   Fighting Pit, Ambessa Matriarch of War (come D28), Facebreaker (come D25).
+1. Resto del corpus (~930 carte fuori dalle liste): letto solo dove una
+   scansione segnalava. Bersagli più stretti/larghi della stampa non sono
+   intercettati da nessuna scansione (D40, D41, D45 trovati per caso).
+   Lettura carta per carta: costosa, da decidere se serve prima del training
+   sulle dieci liste.
+2. Stacked Deck è in `banned_cards.json` ma sta in vendetta_kennen e
+   vendetta_ezreal (solo un warning al caricamento): da decidere.
 3. Non controllati: costruzione del mazzo (§103), procedura di match,
    effetti di sostituzione (§372-373), layer (§475-482), lato AI.
 4. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
@@ -65,13 +73,15 @@ Niente.
   non è stato controllato.
 - `tests/audit/`: un test per deviazione (`test_audit_precon_rules.py`,
   `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
-  per il terzo passaggio, helper in `audit_helpers.py`).
+  terzo passaggio, `test_audit_corpus.py` quarto, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
 - `riftbound/core/battlefield.py`: controllo, contesa, Hold / Conquer.
 - `riftbound/core/effects.py`: gli effetti delle carte.
 - `riftbound/core/legality.py`: azioni legali offerte agli agenti.
+- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
-  `riftbound/data/reference/piltover_archive.json`: testo stampato.
+  `riftbound/data/reference/piltover_archive.json`: testo stampato
+  (`scripts/piltover_sync.py compare` per le differenze).
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.
