@@ -13,7 +13,7 @@ import pytest
 from riftbound.core.enums import Domain
 from riftbound.registry.cards_registry import load_deck_json
 
-from audit_helpers import act, card, choices, hide, labels, legend, setup, unit
+from audit_helpers import act, card, choices, hide, labels, legend, scripted, setup, unit
 
 DECKS = Path(__file__).resolve().parents[2] / "riftbound" / "data" / "decks"
 
@@ -45,6 +45,29 @@ def test_edge_of_night_played_from_face_down_attaches_to_a_unit_here():
     act(loop, "A", "Play Edge of Night from Hidden @BF0")
     assert [g.name for g in here.gear] == ["Edge of Night"] and here.might == 4
     assert [opts for kind, _s, opts in seen if kind == "target:attach_gear"] == [["here"]]
+
+
+def test_edge_of_night_with_no_unit_of_yours_here_attaches_to_nothing():
+    """D53. Edge of Night: '... attach it to a unit you control (here).' With
+    the battlefield still yours but none of your units there (contested), it
+    went to a unit at another battlefield (or in base) instead: the "here"
+    choice fell back to everywhere once the face-down mark was gone."""
+    loop, a, b = setup(active="A")
+    bf = loop.gs.battlefields[0]
+    mine = unit("mine", 1)
+    bf.add_unit("A", mine)
+    bf.contested_by = "B"
+    bf.add_unit("B", unit("intruder", 2))
+    bf.units_A.remove(mine)
+    there = unit("there", 3)
+    loop.gs.battlefields[1].add_unit("A", there)
+    a.base_units.append(unit("home", 4))
+    hide(loop, "A", 0, "Edge of Night")
+    seen = choices(loop, {})
+    act(loop, "A", "Play Edge of Night from Hidden @BF0")
+    assert not there.gear and not a.base_units[0].gear
+    assert [g.name for g in a.base_gear] == ["Edge of Night"]
+    assert not [k for k, _s, _o in seen if k.startswith("target:attach")]
 
 
 def test_zhonyas_hourglass_played_from_face_down_goes_to_base():
@@ -157,3 +180,35 @@ def test_brittle_steel_is_played_from_the_trash_with_flow():
     b.base_gear.append(card("Seal of Rage"))
     act(loop, "A", "Play Brittle Steel from trash (FLOW)")
     assert not b.base_gear and any(c.name == "Brittle Steel" for c in a.banished)
+
+
+def test_abandon_on_a_spell_played_with_flow_banishes_it():
+    """D55. Abandon: 'Counter a spell. Return it to its owner's hand instead of
+    putting it in their trash.' §829.1.b.1: a spell played with FLOW that
+    leaves the chain, not by its own execution, is banished instead; whichever
+    replacement its controller applies first (§372), it ends banished. It went
+    back to hand still marked, and was banished after its next normal cast."""
+    loop, a, b = setup(active="A")
+    a.trash.append(card("Brittle Steel"))
+    b.base_gear.append(card("Seal of Rage"))
+    b.hand.append(card("Abandon"))
+    scripted(loop, a, b, B={"reaction": ["React Abandon"]})
+    act(loop, "A", "Play Brittle Steel from trash (FLOW)")
+    assert [c.name for c in b.base_gear] == ["Seal of Rage"]
+    assert [c.name for c in a.banished] == ["Brittle Steel"] and not a.hand
+
+
+def test_kaisa_legend_power_pays_a_flow_cost():
+    """D54. Kai'Sa Daughter of the Void's '[Add] [Rune]. Use only to play
+    spells.' pays a spell played from the trash with FLOW (§829.1.b: it is
+    played, for its Flow cost): Brittle Steel 'FLOW [4] [fury]' wasn't offered
+    with 4 Energy and her [rune]."""
+    loop, a, b = setup(active="A", rich=())
+    legend(loop, "A", "Kai'Sa Daughter of the Void")
+    a.energy = 4
+    a.trash.append(card("Brittle Steel"))
+    b.base_gear.append(card("Seal of Rage"))
+    assert not [lb for lb in labels(loop, "A") if "FLOW" in lb]
+    act(loop, "A", "Activate add_earmarked_power (Kai'Sa")
+    act(loop, "A", "Play Brittle Steel from trash (FLOW)")
+    assert not b.base_gear and a.energy == 0 and a.earmarked_power_spell == 0

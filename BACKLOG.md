@@ -30,9 +30,14 @@ This file has two parts: **Open now** (the only open items) and sections A-G
       fourth pass); read card by card only the cards of the decks in use.
 
 ### O2. Rules audit (independent of the card-by-card review)
-- [ ] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows not re-checked since G; at
-      least Flow is stale (implemented, tests/test_flow.py). Re-verify each
-      row against the code and a test.
+- [x] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows re-checked (2026-11-12,
+      AUDIT.md sixth pass, D53-D56). Left: a FLOW cost ignores the §356.3-4
+      modifiers other than cost auras (none in the four decks); Unique is
+      deck construction (§103).
+- [x] Replacement effects §367-373 and layers §475-482 for the decks' cards
+      (sixth pass). Left, no deck card: the order of several death
+      replacements (§372) and which simultaneous death one saves (§373);
+      layer dependencies (§480-481).
 - [ ] An audit of the engine against docs/rules/CORE_RULES.md, deck cards
       first (Zed, Shen), then the systems they use (combat, showdowns, chain,
       costs): each deviation a failing test citing its §.

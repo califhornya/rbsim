@@ -4,8 +4,8 @@ The engine checked against `docs/rules/CORE_RULES.md` (revision 2026-10-09),
 `docs/rules/TOURNAMENT_RULES.md` and the printed card text
 (`riftbound/data/reference/piltover_archive.json`), in this order: the two
 training precons (`precon_zed`, `precon_shen`) and the rules they play by; the
-PARTIAL / GAP rows of `docs/MECHANICS.md`; the other eight decks, from
-`BACKLOG.md` O1.
+PARTIAL / GAP rows of `docs/MECHANICS.md` (again in the sixth pass); the
+other eight decks, from `BACKLOG.md` O1.
 
 Every deviation below has a test in `tests/audit/` that plays the situation and
 checks what the rules or the card say. In phase 1 (`4af83ef`) each test was
@@ -18,10 +18,11 @@ owner will give two current competitive decks). Their passes (D13-D18,
 D23-D28) stay: they fixed cards, which are still in the corpus; where this
 document names those decks it is the record of where a card was found.
 
-**State (2026-11-12, fifth pass): 52 deviations found, 52 fixed, none open.**
-The fifth pass read the owner's two competitive decks (`competitive_kaisa`,
-`competitive_kennen`): D50-D52, see its section. Suite: 1773 passed.
-The suite is green (1754 passed, no xfail). The fourth pass went outside the
+**State (2026-11-12, sixth pass): 56 deviations found, 56 fixed, none open.**
+The sixth pass re-checked the PARTIAL / GAP rows of `docs/MECHANICS.md` and
+took two Codex review comments: D53-D56, see its section. Suite: 1755
+passed, 5 skipped, no xfail. The fifth pass read the owner's two competitive decks
+(`competitive_kaisa`, `competitive_kennen`): D50-D52. The fourth pass went outside the
 ten decks, by class and not card by card (D29-D49; no golden game changed):
 see its section for what was scanned and what was not read. The third pass
 read the 119 cards of the other eight decks against the printed text and
@@ -726,6 +727,53 @@ Tests in `tests/audit/test_audit_competitive.py`.
   card hidden at a battlefield for a vanished one, and a [Reaction] ability
   or a [Reaction] spell by FLOW on an open chain for an illegal action.
 
+## Deviations, sixth pass (2026-11-12): the MECHANICS.md rows
+
+The eight PARTIAL rows and the GAP row of `docs/MECHANICS.md` (BACKLOG O2),
+each read against its rule and the code, then pinned by a game situation
+(`tests/audit/test_audit_mechanics_rows.py`); the decks' cards first
+(Empower and Empowered: Zed, Shen, Kennen; Flow: all four; Deflect: Shen,
+Decree of Insight; Deploy: The Good Stuff). Two Codex review comments on the
+branch were checked: both right (D53, and the round robin's default glob,
+which named the removed decks).
+
+- **D53.** Edge of Night's "attach it to a unit you control (here)" fell
+  back to units at other battlefields and in base when none of yours was
+  there (the battlefield still yours, contested): `_resolve_targets` looks
+  elsewhere when nothing is here, and the face-down mark was gone by the
+  time the play trigger resolved. `here` now never falls back.
+- **D54.** Kai'Sa Daughter of the Void's spell-only [rune] (and Lux
+  Crownguard's spell Energy) didn't pay a FLOW cost: Brittle Steel from the
+  trash wasn't offered.
+- **D55.** Abandon on a spell played with FLOW put it back in hand, still
+  marked, so its next normal cast was banished. §829.1.b.1 with §372: in
+  either order of the two replacements it ends banished.
+- **D56.** Disempower took every EMPOWERED status (§443.1.b: one); Lacerate
+  killed a Kayle Justified empowered three times, and its baseline, weighing
+  targets, reset the count of a Kayle it didn't choose. Only Kayle stacks.
+- **Checked and right.** Deflect: per unit chosen, by spells and abilities
+  (Mel Defiant Soul's trigger pays for Steel Paws), any domain, summed,
+  waived by Decree of Insight; the old per-battlefield surcharge is gone, the
+  row was stale. Hunt (per unit, summed, conquer and hold), Level (the
+  current controller's XP), Backline (after every non-Backline unit), Deploy
+  (any battlefield), "When I become EMPOWERED" (Mel), EMPOWERED DEATHKNELL.
+- **Replacement effects (§367-373) and layers (§475-482), the decks' cards.**
+  Scanned the four decks for "instead", "would", "as", "becomes", "minimum",
+  "swap", "copy", "maximum". Right: Ki Barrier (bonus damage prevented too,
+  §438.1.a.1; lethal counts the shield, §438.5.a; fully prevented is not
+  dealt, §438.4), Nocturne Horrifying (offered as it is looked at: dig,
+  predict), Abandon against FLOW (D55), "enter ready"; "to a minimum of 1"
+  snapshotted as it applies (§479.4.b: Thousand-Tailed Watcher, Smoke Screen,
+  Stupefy), Dragon Form's base Might before the arithmetic (§479.2), Switcheroo,
+  Might below 0 counted as 0 (§143.2.c). Zhonya's Hourglass is in no deck.
+- **Left open.** A FLOW cost takes cost auras only (Stargazer); the other
+  increases and discounts of §356.3-4 are not applied to it (none in the four
+  decks). Unique: deck construction only (§825.4), with §103. Several death
+  replacements on one death apply in a fixed engine order, not the one their
+  controller picks (§372), and one Zhonya's Hourglass saves the first of
+  simultaneous deaths, not the one chosen (§373): no such card in the decks.
+  Layer dependencies (§480-481: "increased to", "to a maximum") are in no deck.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in
@@ -877,8 +925,8 @@ not played again.
 - **Not checked.** Deck construction (§103: 40 cards, 3 copies, domain
   identity, signature cards, Unique); the match procedure (`core/match.py`:
   best of 3, sideboards, the clock) beyond reading TR 404-408; replacement
-  effect ordering (§372-373); layers and dependencies (§475-482) beyond the
-  cases above; "this turn" keyword grants given twice to one unit; copy
+  effect ordering (§372-373) and layer dependencies (§480-481) outside the
+  decks' cards (sixth pass); "this turn" keyword grants given twice to one unit; copy
   effects; three-player rules (not modeled).
 - **The corpus.** The eight decks were read card by card in the third pass
   (see there for what "read" means: about 60 of the 119 cards were checked

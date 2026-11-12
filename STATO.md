@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (mazzi competitive verificati; training deciso su di essi; piano dei prossimi passi).
+Aggiornato: 2026-11-12 (sesto passaggio chiuso: punto 2 del piano, D53-D56).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -9,59 +9,52 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## Decisioni prese
 - Una deviazione = un test in `tests/audit/` che gioca la situazione + un commit
-  di fix: così ogni correzione è verificabile e reversibile da sola.
-  Eccezione (quarto passaggio): D35-D49, correzioni di soli dati, in un commit
-  unico con un test per carta, per contenere l'uso.
-- Le golden game si rigenerano solo quando il cambio di comportamento è voluto,
-  con il motivo partita per partita nel messaggio di commit.
-- D19-D21, D23, D26: scelte tecniche, motivate in AUDIT.md.
-- Q1–Q4 (decise dall'utente): priorità secondo §337.4; Shadow Order Disciple
-  invariato; partita al cap dei turni = pareggio; Keeper of Law conta solo le
-  unità di chi la gioca.
-- D27 (decisa dall'utente): Patched Porobot è unità e gear insieme
-  (`cards.is_gear()`, `UnitInPlay.is_gear` derivato dalla carta attuale).
-- D29: "abilità legale" = "l'handler ha qualcosa da scegliere" (stessa lista di
-  opzioni per legalità e risoluzione, `effects._HAS_OPTION`); scelte legali ma
-  inutili per il testo (gear già pronto, gear nemico) non sono offerte, come in D9.
-- D34: il Power generico si paga da un solo dominio quando basta (nessuna
-  golden cambia), altrimenti da un misto.
-- Quarto passaggio per classi e non carta per carta: fuori dalle liste ci sono
-  ~930 carte; lette solo quelle segnalate da una scansione.
-- (Utente, 2026-11-12) Gli otto mazzi non precon eliminati e non più
-  considerati, con gli agenti Pyke e Diana; le correzioni di carte restano.
-- (Utente, 2026-11-12) Il training si fa sui due mazzi competitive.
+  di fix (verificabile e reversibile). Eccezione: D35-D49, soli dati, un commit.
+- Golden game rigenerate solo per cambi voluti, motivo per partita nel commit.
+- D19-D21, D23, D26, D29, D34: scelte tecniche, motivate in AUDIT.md.
+- Q1–Q4, D27 (utente): priorità §337.4; Shadow Order Disciple invariato; cap
+  dei turni = pareggio; Keeper of Law conta solo le unità di chi la gioca;
+  Patched Porobot è unità e gear insieme.
+- Quarto passaggio per classi (~930 carte fuori dalle liste, lette le segnalate).
+- (Utente, 2026-11-12) Otto mazzi non precon eliminati (con agenti Pyke e
+  Diana), correzioni di carte tenute; training sui due mazzi competitive.
 - L'agente random è seminato dal seed della partita (riproducibile).
+- Commenti di Codex: verificati uno per uno prima di agire (i due del
+  2026-11-12 erano fondati: D53 e il default di `scripts/round_robin.py`).
+- Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
+  §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
 
 ## Fatto
-- Passaggi 1-3: D1–D28 e risposte Q1–Q4, tutte corrette.
-- Quarto passaggio: D29-D49 (abilità senza scelta legale, Jax, Teemo,
-  Baited Hook, Ambessa, Power generico misto, dati di 131 carte segnalate)
-  e bug del coach (doppia risposta, `cc3d776`). Dettagli in AUDIT.md.
+- Passaggi 1-4: D1–D49, Q1–Q4, bug del coach (`cc3d776`). Dettagli in AUDIT.md.
 - Rimozione mazzi: test spostati sui precon, 20 golden game rigenerate.
-- Mazzi competitive (quinto passaggio): `competitive_kaisa`, `competitive_kennen`
-  importati con sideboard. 22 carte nuove lette, dubbie giocate; 480 partite
-  sotto i controlli degli invarianti. Corrette:
-  - D50 `df33571`: un gear HIDDEN giocato da coperto spariva (Edge of Night,
-    Zhonya's Hourglass); Edge of Night si attacca a un'unità "here".
-  - D51 `0e03237`: lo Standard Move non attivava "when I become exhausted"
-    (Reckless Innovator e altre 5 carte).
-  - D52 `334e93c`: Decree of Unity lanciabile senza bersaglio legale.
-  - 8 golden game Kai'Sa vs Kennen aggiunte (le 20 dei precon invariate).
-  Suite verde (1773 passed). Prova di training sui competitive: funziona.
+- Quinto passaggio (mazzi `competitive_kaisa`, `competitive_kennen`, con
+  sideboard): 22 carte nuove lette, 480 partite sotto gli invarianti; D50-D52
+  (gear HIDDEN da coperto, Standard Move e "when I become exhausted", Decree of
+  Unity senza bersaglio); 8 golden game Kai'Sa vs Kennen. Training di prova ok.
+- Sesto passaggio (righe PARTIAL/GAP di MECHANICS.md, BACKLOG O2 primo punto):
+  Deflect, Hunt, Level, Backline, Empower/Empowered, Flow, Deploy verificati
+  con test (`tests/audit/test_audit_mechanics_rows.py`); Unique rimandata
+  (§825.4). Corrette:
+  - D53 `0b877df`: Edge of Night senza unità "here" si attaccava altrove.
+  - D54 `5ef1d33`: il [rune] di Kai'Sa per le spell non pagava i costi Flow.
+  - D55 `e115324`: Abandon su una spell giocata con Flow la rimandava in mano.
+  - D56 `56ce034`: disempower toglieva tutti gli status (Kayle Justified).
+  - `10dd08a`: `round_robin.py` di default cercava i mazzi rimossi.
+  Poi sostituzioni §367-373 e layer §475-482 sulle carte dei mazzi: giusti
+  (Ki Barrier, Nocturne, snapshot del minimo, Dragon Form, Switcheroo).
+  Nessuna golden game cambiata. Suite verde (1755 passed, 5 skipped).
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-Piano concordato (2026-11-12): la prossima sessione parte dal punto 2, poi,
-se c'è modo, il 3. Punti in ordine di peso per il training:
+Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 1. Banlist del 23/11: l'utente incolla l'elenco → aggiornare
    `riftbound/data/banned_cards.json`, ricontrollare i due mazzi competitive.
-2. **Regole (BACKLOG O2), da qui si riparte.** `docs/MECHANICS.md`: 8 righe
-   PARTIAL + 1 GAP mai riverificate (Flow è già superata): ognuna contro il
-   codice e un test. Poi le parti mai controllate che toccano i mazzi:
-   effetti di sostituzione §372-373 (Zhonya's Hourglass), layer §475-482.
-3. **Ricerca della rete (BACKLOG O3), il punto più importante per la qualità.**
+2. Regole: fatto (sesto passaggio). Aperti, fuori dai mazzi: modificatori
+   del costo Flow §356.3-4, ordine delle sostituzioni di morte §372-373,
+   dipendenze dei layer §480-481 (AUDIT.md, "Left open").
+3. **Ricerca della rete (BACKLOG O3), da qui si riparte; il punto più importante per la qualità.**
    La ricerca guidata dalla rete decide solo la prima scelta di un'azione;
    bersagli dentro l'azione, scelte in difesa e scelte nascoste (dig,
    predict) restano alla baseline fissa: Kai'Sa e Kennen vivono di queste.
@@ -93,7 +86,9 @@ dove allenare (questo container o macchina con GPU).
   (`scripts/piltover_sync.py compare` per le differenze).
 - `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
   `competitive_kennen` (le liste dell'utente).
-- `tests/audit/test_audit_competitive.py`: test del quinto passaggio.
+- `tests/audit/test_audit_competitive.py`: test del quinto passaggio (e D53-D55).
+- `tests/audit/test_audit_mechanics_rows.py`: sesto passaggio (righe MECHANICS.md, D56).
+- `docs/MECHANICS.md`: stato di ogni meccanica (riverificato 2026-11-12).
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.

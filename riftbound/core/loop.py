@@ -3948,8 +3948,8 @@ class GameLoop:
     def _effective_cost(self, card: Card, actor: Player,
                         lane: Optional[int] = None, from_zone: str = "hand") -> tuple[int, Optional[int]]:
         """(energy, power) `actor` pays to play `card`: the printed cost minus the
-        card's own reductions. A spell aimed at battlefield `lane` also pays the
-        DEFLECT surcharge there and gets that battlefield's discount."""
+        card's own reductions. A spell aimed at battlefield `lane` gets that
+        battlefield's discount (DEFLECT is paid as units are chosen)."""
         printed = int(card.cost_energy or 0)
         energy = printed - self._cost_reduction(card, actor)
         power = card.cost_power
@@ -5494,9 +5494,8 @@ class GameLoop:
                 target_lane = lane if lane is not None else 0
                 if not self._spell_has_targets(card, ap.name, target_lane):
                     return                       # §355.8: no valid target, no play
-                # DEFLECT: if this spell targets enemy units and the opponent
-                # controls DEFLECT units at the target battlefield, the spell
-                # costs that much more energy (additional cost, §809).
+                # DEFLECT (§809) is not in this cost: it is paid for each
+                # unit as the spell chooses it (_note_chosen).
                 energy, power = self._effective_cost(card, ap, target_lane)
                 if not self._pay_card(ap, card, energy, power, lane=target_lane):
                     return
@@ -5961,8 +5960,12 @@ class GameLoop:
             return False
         energy, power, domain = cost
         offer = self._songstress(side, card) if energy > 0 else None
-        if ap.energy < (energy if offer is None else max(0, energy - offer[2])):
+        energy = energy if offer is None else max(0, energy - offer[2])
+        # What is earmarked for spells pays a spell played from the trash too
+        # (Kai'Sa Daughter of the Void's [rune], Lux Crownguard's Energy).
+        if ap.energy < max(0, energy - ap.earmarked_energy_spell):
             return False
+        power = max(0, power - ap.earmarked_power_spell)
         if not power:
             return True
         return ap.can_pay_cost(0, power, domain) if domain else self._can_pay_generic_power(ap, power)
@@ -5975,9 +5978,15 @@ class GameLoop:
         if not self._can_pay_flow(ap, card, side):
             return
         energy, power, domain = self._flow_cost(card, side)
-        energy = self._songstress_discount(ap, card, energy, lambda e: ap.energy >= e)
-        ap.energy -= energy
+        energy = self._songstress_discount(ap, card, energy,
+                                           lambda e: ap.energy + ap.earmarked_energy_spell >= e)
         self._spell_energy_paid = energy
+        from_earmark = min(energy, ap.earmarked_energy_spell)
+        ap.earmarked_energy_spell -= from_earmark
+        ap.energy -= energy - from_earmark
+        from_earmark = min(power, ap.earmarked_power_spell)
+        ap.earmarked_power_spell -= from_earmark
+        power -= from_earmark
         if power:
             if domain:
                 ap.pay_cost(0, power, domain)
@@ -6620,7 +6629,7 @@ class GameLoop:
         if parsed["tap"] and unit is not None:
             self._exhaust(unit)
         if parsed["disempower"] and unit is not None:
-            unit.empowered, unit.empower_times = False, 0
+            self._disempower(unit.card)
         if parsed["exhaust_friendly_unit"]:
             other = self._unit_to_exhaust(side, parsed["exhaust_friendly_unit"])
             if other is not None:
@@ -7057,8 +7066,12 @@ class GameLoop:
                                  triggering_card=card)
 
     def _disempower(self, card: Card) -> None:
+        """Remove the EMPOWERED status; from one empowered more than once
+        (Kayle Justified), one of them (§443.1.b)."""
         unit = self._find_unit_by_card(card)
-        if unit is not None:
+        if unit is not None and unit.empowered and unit.empower_times > 1:
+            unit.empower_times -= 1
+        elif unit is not None:
             unit.empowered = False
             unit.empower_times = 0
         else:

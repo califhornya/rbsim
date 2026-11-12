@@ -2596,11 +2596,11 @@ def _disempower_then_kill(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     enemies = {id(u) for u in _units_at(ctx, ctx.opponent_side, "anywhere")}
 
     def after(u):
-        was = u.empowered
-        u.empowered, u.empower_times = False, 0
+        was = (u.empowered, u.empower_times)
+        loop._disempower(u.card)
         loop._recompute_passives()
         m = u.might
-        u.empowered = was
+        u.empowered, u.empower_times = was
         loop._recompute_passives()
         return m
 
@@ -3712,9 +3712,12 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     chain.remove(target_item)
     if spec.get("silence"):
         ctx.loop.gs.cant_play_spells_turn[target_item.player] = ctx.loop.gs.turn
-    if spec.get("return_to_hand"):
+    if spec.get("return_to_hand") and not getattr(target_card, "_flow_banish", False):
         owner.hand.append(target_card)
     else:
+        # Played with FLOW, it is banished whichever replacement applies
+        # first (§829.1.b.1: it leaves the chain, not by its own execution;
+        # §372: Abandon's "to hand instead" can't stop that).
         ctx.loop._spell_to_trash(owner, target_card)
 
 
@@ -4088,7 +4091,7 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
     if not units and scope == "single" and not target.startswith("all") and not where \
-            and hidden is None and not isinstance(ctx.card, SpellCard) \
+            and hidden is None and not isinstance(ctx.card, SpellCard) and not spec.get("here") \
             and target not in _BOTH_SIDES_TARGETS:
         # An ability or trigger isn't aimed at one battlefield the way a spell is
         # (a legend's "give a unit ASSAULT 2"): with no candidate here, look at
@@ -5581,6 +5584,7 @@ def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx.actor
     if not any(g is ctx.card for g in player.base_gear):
         return
+    # `here`: only here ("" in _units_where), never another battlefield or base.
     where = "" if spec.get("here") else spec.get("where", "anywhere")
     units = _resolve_targets(ctx, {**spec, "target": spec.get("target", "friendly_unit"),
                                    "where": where, "scope": "single"})

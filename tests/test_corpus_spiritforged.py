@@ -416,10 +416,11 @@ def test_factory_recall_can_return_your_own_gear():
 
 
 def test_edge_of_night_attaches_only_from_face_down():
-    """'When you play this from face down, attach it to a unit you control.'"""
+    """'When you play this from face down, attach it to a unit you control
+    (here).' (errata: a unit at the battlefield it is played at)"""
     loop, a, b = _setup()
     unit = _unit("Unit", 2)
-    a.base_units.append(unit)
+    loop.gs.battlefields[0].add_unit("A", unit)
     edge = CARD_REGISTRY["Edge of Night"].instantiate()
     loop._play_gear(edge, "A", 0, from_zone="hand")
     assert edge in a.base_gear and not unit.gear
