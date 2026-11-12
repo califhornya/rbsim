@@ -51,7 +51,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   decisione invariato. Suite verde (1792 passed: ora torch è installato).
 
 ## In corso
-Primo run di training sul Mac dell'utente (50 iterazioni, `runs/competitive`).
+Primo run sul Mac (2026-11-12, 50 iterazioni, 4 worker: 123,6 s la prima).
 
 ## Prossimi passi
 Piano concordato (2026-11-12). Punti in ordine di peso per il training:
@@ -72,8 +72,7 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 
 Training sulle macchine dell'utente, run in runs/competitive: PC Windows
 (Ryzen 7 7800X3D, `allena.bat`, 8 worker) o Mac M1 Max (`allena.command`, un
-worker per core veloce: 8; macOS 14+). La RTX 4070 serve a poco. Primo run
-avviato sul Mac il 2026-11-12 (4 worker, 123,6 s la prima iterazione).
+worker per core veloce: 8; macOS 14+). La RTX 4070 serve a poco.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
@@ -94,8 +93,7 @@ avviato sul Mac il 2026-11-12 (4 worker, 123,6 s la prima iterazione).
 - `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
   `competitive_kennen` (le liste dell'utente).
 - `tests/audit/test_audit_competitive.py` (quinto passaggio, D53-D55),
-  `test_audit_mechanics_rows.py` (sesto, D56); `docs/MECHANICS.md`: stato di
-  ogni meccanica (riverificato 2026-11-12).
+  `test_audit_mechanics_rows.py` (sesto); `docs/MECHANICS.md`: le meccaniche.
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.
