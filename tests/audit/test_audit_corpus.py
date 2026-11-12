@@ -62,6 +62,10 @@ def test_jax_legend_is_offered_with_an_equipment_and_a_unit():
     assert _abilities(loop, "A", "Jax") == []
     a.base_gear.append(card("Long Sword"))
     assert len(_abilities(loop, "A", "Jax")) == 1          # the detached one
+    a.base_units[0].gear.append(a.base_gear.pop())
+    assert _abilities(loop, "A", "Jax") == []              # attached, no other unit
+    a.base_units.append(unit("y", 2))
+    assert len(_abilities(loop, "A", "Jax")) == 1
 
 
 def test_pyke_legend_is_offered_with_a_unit_at_a_battlefield():
@@ -95,3 +99,18 @@ def test_baited_hook_is_offered_with_a_friendly_unit():
     loop, a, b, _c = _board("Baited Hook")
     a.base_units.append(unit("x", 2))
     assert len(_abilities(loop, "A", "Baited Hook")) == 1
+
+
+# -- D30. Jax's legend moves an attached Equipment only from base to a battlefield -
+
+def test_jax_legend_moves_an_attached_equipment_between_any_two_units():
+    """Jax, Grandmaster at Arms: '[Tap]: Attach an attached Equipment you
+    control to a unit you control.' No place is named for either unit."""
+    loop, a, b, _c = _board("Jax Grandmaster at Arms")
+    wearer, other = unit("wearer", 2), unit("other", 2)
+    sword = card("Long Sword")
+    wearer.gear.append(sword)
+    loop.gs.battlefields[0].units_A.append(wearer)        # worn at a battlefield
+    a.base_units.append(other)                            # the other unit in base
+    act(loop, "A", "Activate attach_equipment (Jax")
+    assert other.gear == [sword] and wearer.gear == []

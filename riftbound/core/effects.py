@@ -2628,8 +2628,10 @@ def _unattach_and_damage_holder(ctx: "EffectContext", spec: Mapping[str, Any]) -
 def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Attach a detached Equipment you control to a unit you control" / "Attach
     an attached Equipment you control to a unit you control" (Jax Grandmaster
-    at Arms; `from: attached` moves one from a unit in base to a unit at a
-    battlefield). Baseline unit: GameLoop._equip_baseline."""
+    at Arms; `from: attached`: off any unit of yours, onto another one).
+    Baseline: the first Equipment (for an attached one, one worn in base
+    first), to GameLoop._equip_baseline's unit, a unit at a battlefield before
+    one in base when it comes off a unit."""
     loop = ctx.loop
     options = _attach_options(ctx, spec)
     if not options:
@@ -2639,9 +2641,10 @@ def _attach_equipment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         in_base = [o for o in options if loop._locate_unit(o[1])[1] is None]
         gear, holder = loop.choose(_kind("card", spec), ctx.actor_side, options,
                                    (in_base or options)[0], ctx.card)
-        at_bf = [u for u in mine if loop._locate_unit(u)[1] is not None]
+        others = [u for u in mine if u is not holder]
+        at_bf = [u for u in others if loop._locate_unit(u)[1] is not None]
         holder.gear.remove(gear)
-        target = loop.choose("equip", ctx.actor_side, at_bf, loop._equip_baseline(at_bf), ctx.card)
+        target = loop.choose("equip", ctx.actor_side, others, loop._equip_baseline(at_bf or others), ctx.card)
     else:
         gear, _none = loop.choose(_kind("card", spec), ctx.actor_side, options, options[0], ctx.card)
         ctx.actor.base_gear.remove(gear)
@@ -4099,15 +4102,14 @@ def _attach_options(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
     """Jax Grandmaster at Arms: the (Equipment, unit wearing it or None) pairs
     one of his abilities can choose: a detached Equipment you control (any
     unit of yours can take it), or (`from: attached`) one a unit of yours
-    wears in base, with a unit of yours at a battlefield to take it."""
+    wears, with another unit of yours to take it."""
     loop = ctx.loop
     mine = _units_at(ctx, ctx.actor_side, "anywhere")
     if not mine:
         return []
     if str(spec.get("from", "detached")) == "attached":
-        at_bf = [u for u in mine if loop._locate_unit(u)[1] is not None]
-        return [(g, u) for u in mine if at_bf and loop._locate_unit(u)[1] is None
-                for g in u.gear if loop._equip_cost(g) is not None]
+        return [(g, u) for u in mine for g in u.gear
+                if loop._equip_cost(g) is not None and len(mine) > 1]
     return [(g, None) for g in ctx.actor.base_gear if loop._equip_cost(g) is not None]
 
 
