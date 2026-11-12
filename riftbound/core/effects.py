@@ -5566,12 +5566,15 @@ def _recall_borrowed(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("attach_gear")
 def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Attach it to a unit you control" (Edge of Night): this gear, from your
-    base, to a chosen unit (nothing if it is attached already: QUICK-DRAW)."""
+    base, to a chosen unit (nothing if it is attached already: QUICK-DRAW).
+    `here`: a unit at the battlefield it was played at (Edge of Night's
+    errata: "attach it to a unit you control (here)")."""
     player = ctx.actor
     if not any(g is ctx.card for g in player.base_gear):
         return
+    where = "" if spec.get("here") else spec.get("where", "anywhere")
     units = _resolve_targets(ctx, {**spec, "target": spec.get("target", "friendly_unit"),
-                                   "where": spec.get("where", "anywhere"), "scope": "single"})
+                                   "where": where, "scope": "single"})
     if not units:
         return
     player.base_gear.remove(ctx.card)

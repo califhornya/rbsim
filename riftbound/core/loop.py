@@ -3683,8 +3683,9 @@ class GameLoop:
 
     def _play_from_hidden(self, side: str, lane: int, slot: int = 0) -> bool:
         """Play the face-down card in `slot` of a Facedown Zone for [0] (§737.1.b).
-        A unit enters at that battlefield; a spell resolves on a fresh chain aimed
-        at that battlefield (§737.1.c.3 / §737.1.d). Returns True on success."""
+        A unit enters at that battlefield; a gear is played as a gear, "at" that
+        battlefield; a spell resolves on a fresh chain aimed at that battlefield
+        (§737.1.c.3 / §737.1.d). Returns True on success."""
         if (lane, slot) not in self._hidden_playable(side):
             return False
         bf = self.gs.battlefields[lane]
@@ -3699,7 +3700,11 @@ class GameLoop:
                 self._spell_played(card, ap, from_zone="facedown")
                 self._put_on_chain(ChainItem(player=side, card=card, bf_idx=lane))
                 self._run_chain(side)
-            else:  # unit / champion / gear-as-unit → enters at that battlefield
+            elif isinstance(card, GearCard):
+                # A HIDDEN gear (Edge of Night, Zhonya's Hourglass) is played
+                # as a gear, "at" that battlefield (it went nowhere before).
+                self._play_gear(card, side, lane, from_zone="facedown")
+            else:  # unit / champion → enters at that battlefield
                 self._play_unit(card, side, bf=bf, from_zone="facedown")
         finally:
             if hasattr(card, "_hidden_bf"):
