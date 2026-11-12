@@ -31,11 +31,16 @@ eight decks, 15 cards differ; checked so far:
 - [x] The other eight decks, card by card (audit, third pass, 2026-11-11):
       D23-D28 in docs/audit/AUDIT.md, all fixed (D27, Patched Porobot a unit
       and a gear at once: `cards.is_gear()`).
-- [ ] The rest of the corpus: 136 of 1100 cards flagged (many are the site's
-      typos or wording; a flag is a reason to read the card). Outside the ten
-      decks nothing was read; known there: Navori Fighting Pit and Ambessa
-      Matriarch of War choose only a friendly unit (D28), Facebreaker's "same
-      battlefield" not played (D25).
+- [x] The cards `piltover_sync.py compare` flags (131), read one by one
+      (audit, fourth pass, 2026-11-12): D35-D49 in docs/audit/AUDIT.md, all
+      fixed; the rest are the site's typos or wording. Ambessa Matriarch of
+      War (D33) fixed, Facebreaker found right.
+- [ ] The rest of the corpus (about 930 cards outside the ten decks): only
+      scanned by class (activated abilities with nothing to choose D29,
+      cards with no effect, keywords, Equip costs). Not read card by card: a
+      target narrower or wider than the print isn't caught by any scan.
+- [ ] vendetta_kennen and vendetta_ezreal hold Stacked Deck, banned in
+      `banned_cards.json` (a warning at load): decide whether to replace it.
 
 ### O2. Rules audit (independent of the card-by-card review)
 - [ ] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows not re-checked since G; at
