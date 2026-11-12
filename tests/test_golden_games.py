@@ -29,6 +29,8 @@ _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
 # Deck ids are stored relative in the fixture (portable); resolved via REPO_ROOT.
 ZED = Path("riftbound/data/decks/precon_zed.json")
 SHEN = Path("riftbound/data/decks/precon_shen.json")
+KAISA = Path("riftbound/data/decks/competitive_kaisa.json")
+KENNEN = Path("riftbound/data/decks/competitive_kennen.json")
 
 FIXTURE_PATH = Path(__file__).parent / "golden_games.json"
 
@@ -37,7 +39,7 @@ def _resolve_deck(rel: str) -> Path:
     # Fixtures regenerated on Windows before the as_posix() below hold backslashes.
     return REPO_ROOT / rel.replace("\\", "/")
 
-# (ai_a, deck_a, ai_b, deck_b, games) — the two training precons, seat-swapped,
+# (ai_a, deck_a, ai_b, deck_b, games) — the two precons and the two competitive decks, seat-swapped,
 # with the deterministic heuristic and the random agent, so the oracle exercises
 # both seats, both decks and varied decision paths.
 _MATCHUPS = [
@@ -46,6 +48,9 @@ _MATCHUPS = [
     ("random", ZED, "simple_trade", SHEN, 4),
     ("simple_trade", ZED, "random", SHEN, 4),
     ("random", SHEN, "random", ZED, 4),
+    # The owner's two competitive decks (2026-11-12).
+    ("simple_trade", KAISA, "simple_trade", KENNEN, 4),
+    ("random", KENNEN, "simple_trade", KAISA, 4),
 ]
 
 # Fixed master seed so the derived per-game seeds never move unless this changes.

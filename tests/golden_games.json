@@ -1,4 +1,291 @@
 {
+  "random:competitive_kennen__vs__simple_trade:competitive_kaisa#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Noxus Hopeful"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "The Empyrean"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 2,
+        "base_gear": 2,
+        "base_units": [
+          "Rhasa the Sunderer",
+          "Tideturner",
+          "Bedeviling Stranger"
+        ],
+        "deck": 20,
+        "energy": 2,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 2,
+          "ORDER": 3
+        },
+        "runes_in_play": 5,
+        "trash": 11
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Kai'Sa Survivor"
+        ],
+        "deck": 25,
+        "energy": 8,
+        "hand": 7,
+        "power_pool": {
+          "FURY": 3,
+          "MIND": 5
+        },
+        "runes_in_play": 8,
+        "trash": 5
+      },
+      "points_A": 1,
+      "points_B": 8,
+      "spells_cast": 11,
+      "turns": 12,
+      "units_played": 12,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kennen.json",
+      "deck_b": "riftbound/data/decks/competitive_kaisa.json",
+      "id": "random:competitive_kennen__vs__simple_trade:competitive_kaisa#0",
+      "seed": 349354548
+    }
+  },
+  "random:competitive_kennen__vs__simple_trade:competitive_kaisa#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "The Empyrean"
+          ],
+          "controller": "B",
+          "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Thousand-Tailed Watcher"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 2,
+        "base_gear": 2,
+        "base_units": [
+          "Trifarian Captain",
+          "Nocturne Horrifying",
+          "Rhasa the Sunderer"
+        ],
+        "deck": 6,
+        "energy": 0,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 2,
+          "ORDER": 3
+        },
+        "runes_in_play": 5,
+        "trash": 24
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 17,
+        "energy": 6,
+        "hand": 11,
+        "power_pool": {
+          "FURY": 6,
+          "MIND": 4
+        },
+        "runes_in_play": 10,
+        "trash": 10
+      },
+      "points_A": 3,
+      "points_B": 8,
+      "spells_cast": 14,
+      "turns": 14,
+      "units_played": 15,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kennen.json",
+      "deck_b": "riftbound/data/decks/competitive_kaisa.json",
+      "id": "random:competitive_kennen__vs__simple_trade:competitive_kaisa#1",
+      "seed": 930513051
+    }
+  },
+  "random:competitive_kennen__vs__simple_trade:competitive_kaisa#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Brynhir Thundersong"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Kai'Sa Survivor"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Kennen Storm of Shuriken"
+        ],
+        "deck": 25,
+        "energy": 3,
+        "hand": 4,
+        "power_pool": {
+          "CHAOS": 2,
+          "ORDER": 3
+        },
+        "runes_in_play": 5,
+        "trash": 9
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "The Empyrean"
+        ],
+        "deck": 28,
+        "energy": 10,
+        "hand": 9,
+        "power_pool": {
+          "FURY": 5,
+          "MIND": 5
+        },
+        "runes_in_play": 10,
+        "trash": 0
+      },
+      "points_A": 1,
+      "points_B": 8,
+      "spells_cast": 3,
+      "turns": 10,
+      "units_played": 7,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kennen.json",
+      "deck_b": "riftbound/data/decks/competitive_kaisa.json",
+      "id": "random:competitive_kennen__vs__simple_trade:competitive_kaisa#2",
+      "seed": 341913731
+    }
+  },
+  "random:competitive_kennen__vs__simple_trade:competitive_kaisa#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Thousand-Tailed Watcher"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Lecturing Yordle"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [
+          "Rhasa the Sunderer",
+          "Bedeviling Stranger"
+        ],
+        "deck": 26,
+        "energy": 5,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 4,
+          "ORDER": 3
+        },
+        "runes_in_play": 7,
+        "trash": 7
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Lecturing Yordle"
+        ],
+        "deck": 24,
+        "energy": 9,
+        "hand": 6,
+        "power_pool": {
+          "FURY": 6,
+          "MIND": 3
+        },
+        "runes_in_play": 9,
+        "trash": 7
+      },
+      "points_A": 2,
+      "points_B": 9,
+      "spells_cast": 7,
+      "turns": 15,
+      "units_played": 13,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kennen.json",
+      "deck_b": "riftbound/data/decks/competitive_kaisa.json",
+      "id": "random:competitive_kennen__vs__simple_trade:competitive_kaisa#3",
+      "seed": 735324004
+    }
+  },
   "random:precon_shen__vs__random:precon_zed#0": {
     "signature": {
       "battlefields": [
@@ -596,6 +883,284 @@
       "deck_b": "riftbound/data/decks/precon_shen.json",
       "id": "random:precon_zed__vs__simple_trade:precon_shen#3",
       "seed": 166370321
+    }
+  },
+  "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Brynhir Thundersong"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Thousand-Tailed Watcher"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Noxus Hopeful",
+          "Bilgewater Tracker",
+          "Bilgewater Tracker"
+        ],
+        "deck": 27,
+        "energy": 0,
+        "hand": 2,
+        "power_pool": {
+          "FURY": 4,
+          "MIND": 2
+        },
+        "runes_in_play": 6,
+        "trash": 6
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [],
+        "deck": 24,
+        "energy": 1,
+        "hand": 4,
+        "power_pool": {
+          "CHAOS": 1,
+          "ORDER": 3
+        },
+        "runes_in_play": 4,
+        "trash": 11
+      },
+      "points_A": 8,
+      "points_B": 1,
+      "spells_cast": 6,
+      "turns": 12,
+      "units_played": 13,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kaisa.json",
+      "deck_b": "riftbound/data/decks/competitive_kennen.json",
+      "id": "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#0",
+      "seed": 37532489
+    }
+  },
+  "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Brynhir Thundersong"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        },
+        {
+          "A": [
+            "Noxus Hopeful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [
+          "Thousand-Tailed Watcher"
+        ],
+        "deck": 22,
+        "energy": 3,
+        "hand": 4,
+        "power_pool": {
+          "FURY": 6,
+          "MIND": 3
+        },
+        "runes_in_play": 9,
+        "trash": 11
+      },
+      "player_B": {
+        "banished": 1,
+        "base_gear": 2,
+        "base_units": [
+          "Trifarian Captain"
+        ],
+        "deck": 19,
+        "energy": 1,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 2,
+          "ORDER": 3
+        },
+        "runes_in_play": 5,
+        "trash": 16
+      },
+      "points_A": 8,
+      "points_B": 6,
+      "spells_cast": 9,
+      "turns": 15,
+      "units_played": 19,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kaisa.json",
+      "deck_b": "riftbound/data/decks/competitive_kennen.json",
+      "id": "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#1",
+      "seed": 886936032
+    }
+  },
+  "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Brynhir Thundersong"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        },
+        {
+          "A": [
+            "Thousand-Tailed Watcher"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [],
+        "deck": 19,
+        "energy": 4,
+        "hand": 4,
+        "power_pool": {
+          "FURY": 6,
+          "MIND": 4
+        },
+        "runes_in_play": 10,
+        "trash": 15
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 3,
+        "base_units": [],
+        "deck": 22,
+        "energy": 3,
+        "hand": 2,
+        "power_pool": {
+          "ORDER": 3
+        },
+        "runes_in_play": 3,
+        "trash": 13
+      },
+      "points_A": 8,
+      "points_B": 7,
+      "spells_cast": 6,
+      "turns": 16,
+      "units_played": 22,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kaisa.json",
+      "deck_b": "riftbound/data/decks/competitive_kennen.json",
+      "id": "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#2",
+      "seed": 249935480
+    }
+  },
+  "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Noxus Hopeful"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        },
+        {
+          "A": [
+            "Thousand-Tailed Watcher"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Brynhir Thundersong",
+          "Thousand-Tailed Watcher",
+          "Plundering Poro"
+        ],
+        "deck": 24,
+        "energy": 7,
+        "hand": 5,
+        "power_pool": {
+          "FURY": 5,
+          "MIND": 3
+        },
+        "runes_in_play": 8,
+        "trash": 6
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 2,
+        "base_units": [],
+        "deck": 24,
+        "energy": 0,
+        "hand": 4,
+        "power_pool": {
+          "ORDER": 3
+        },
+        "runes_in_play": 3,
+        "trash": 11
+      },
+      "points_A": 8,
+      "points_B": 2,
+      "spells_cast": 6,
+      "turns": 12,
+      "units_played": 12,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/competitive_kaisa.json",
+      "deck_b": "riftbound/data/decks/competitive_kennen.json",
+      "id": "simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#3",
+      "seed": 228101174
     }
   },
   "simple_trade:precon_shen__vs__simple_trade:precon_zed#0": {

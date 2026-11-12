@@ -1,0 +1,142 @@
+{
+  "name": "Kennen Storm of Shuriken",
+  "legend": "Kennen Heart of the Tempest",
+  "champion": "Kennen Storm of Shuriken",
+  "runes": [
+    {
+      "domain": "ORDER",
+      "count": 3
+    },
+    {
+      "domain": "CHAOS",
+      "count": 9
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Zaun Warrens"
+    },
+    {
+      "name": "Veiled Temple"
+    },
+    {
+      "name": "Minefield"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Traveling Merchant",
+      "count": 3
+    },
+    {
+      "name": "Tideturner",
+      "count": 1
+    },
+    {
+      "name": "Bedeviling Stranger",
+      "count": 2
+    },
+    {
+      "name": "Trifarian Captain",
+      "count": 3
+    },
+    {
+      "name": "Reckless Innovator",
+      "count": 2
+    },
+    {
+      "name": "Fizz Trickster",
+      "count": 1
+    },
+    {
+      "name": "Nocturne Horrifying",
+      "count": 3
+    },
+    {
+      "name": "Rhasa the Sunderer",
+      "count": 3
+    },
+    {
+      "name": "Gust",
+      "count": 2
+    },
+    {
+      "name": "Lightning Rush",
+      "count": 3
+    },
+    {
+      "name": "Rebuke",
+      "count": 1
+    },
+    {
+      "name": "Ride the Wind",
+      "count": 1
+    },
+    {
+      "name": "Hidden Blade",
+      "count": 1
+    },
+    {
+      "name": "Hard Bargain",
+      "count": 1
+    },
+    {
+      "name": "Switcheroo",
+      "count": 2
+    },
+    {
+      "name": "Star-Crossed",
+      "count": 2
+    },
+    {
+      "name": "Seal of Discord",
+      "count": 3
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "count": 1
+    },
+    {
+      "name": "Edge of Night",
+      "count": 2
+    },
+    {
+      "name": "Last Rites",
+      "count": 2
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Fizz Trickster",
+      "count": 1
+    },
+    {
+      "name": "Ravenbloom Prefect",
+      "count": 2
+    },
+    {
+      "name": "Ride the Wind",
+      "count": 1
+    },
+    {
+      "name": "Abandon",
+      "count": 1
+    },
+    {
+      "name": "Lacerate",
+      "count": 1
+    },
+    {
+      "name": "Decree of Unity",
+      "count": 2
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "count": 1
+    },
+    {
+      "name": "The Good Stuff",
+      "count": 1
+    }
+  ]
+}
