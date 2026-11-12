@@ -3098,10 +3098,13 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
     chooser, owner = gs.get_player(chooser_side), gs.get_player(owner_side)
     might_cap = None
     if spec.get("kill_friendly"):
-        mine = [u for u in _units_at(ctx, chooser_side, "anywhere") if not u.is_token]
+        # "Kill a friendly unit" (Baited Hook): any of them, a token too;
+        # baseline the weakest that isn't a token.
+        mine = _units_at(ctx, chooser_side, "anywhere")
         if not mine:
             return
-        victim = min(mine, key=lambda u: u.might)
+        victim = loop.choose(_kind("target", spec), chooser_side, mine,
+                             min(mine, key=lambda u: (u.is_token, u.might)), ctx.card)
         might_cap = victim.might + int(spec.get("might_margin", 1))
         where = loop._locate_unit(victim)
         if where[1] is None:
@@ -4211,7 +4214,7 @@ def has_valid_target(ctx: "EffectContext", spec: Mapping[str, Any]) -> Optional[
     if option is not None:
         return bool(option(ctx, spec))
     if effect == "reveal_play_top" and spec.get("kill_friendly"):
-        return any(not u.is_token for u in _units_at(ctx, ctx.actor_side, "anywhere"))   # Baited Hook
+        return bool(_units_at(ctx, ctx.actor_side, "anywhere"))      # Baited Hook
     target = str(spec.get("target", "")).lower()
     single = str(spec.get("scope", "single")).lower() == "single"
     # A gear to choose (Detonate "Kill a gear", Factory Recall, Turn to Dust).

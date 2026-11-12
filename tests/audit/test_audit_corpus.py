@@ -135,3 +135,26 @@ def test_teemo_legend_takes_the_teemo_in_the_champion_zone():
     a.base_units.append(unit("x", 2))
     act(loop, "A", "Activate champion_to_hand (Teemo")
     assert loop.gs.champion_A in a.hand and loop.gs.champion_A_deployed
+
+
+# -- D32. Baited Hook kills the weakest unit that isn't a token, unasked -----------
+
+def test_baited_hook_kills_the_friendly_unit_its_player_chooses():
+    """Baited Hook: 'Kill a friendly unit. Look at the top 5 cards of your Main
+    Deck. You may banish a unit from among them that has Might up to 1 more
+    than the killed unit and play it, ignoring its cost.' A token is a unit."""
+    loop, a, b, _c = _board("Baited Hook")
+    weak, strong = unit("weak", 1), unit("strong", 5)
+    token = unit("Recruit", 1)
+    token.is_token = True
+    a.base_units.extend([weak, strong])
+    seen = choices(loop, {"target:reveal_play_top": lambda _loop, options: options.index(strong)})
+    a.deck.cards[:] = [card("Maduli the Gatekeeper")] + [card("Stacked Deck") for _ in range(4)]
+    act(loop, "A", "Gear reveal_play_top (Baited Hook")
+    assert strong not in a.base_units and weak in a.base_units
+    assert [u.card.name for u in a.base_units] == ["weak", "Maduli the Gatekeeper"]   # Might 6 <= 5 + 1
+    assert any(kind == "target:reveal_play_top" for kind, _side, _opts in seen)
+
+    loop, a, b, _c = _board("Baited Hook")
+    a.base_units.append(token)                            # only a token to kill
+    assert len(_abilities(loop, "A", "Baited Hook")) == 1
