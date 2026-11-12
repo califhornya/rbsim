@@ -42,23 +42,9 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## Fatto
 - Passaggi 1-3: D1–D28 e risposte Q1–Q4, tutte corrette.
-- Quarto passaggio (questa sessione), suite verde (1754 passed), nessuna
-  golden cambiata:
-  - D27 chiusa: Equipment sul Porobot e testi "your Equipment" giusti.
-  - D29 `b4d8b2e`: 10 abilità attivate offerte senza niente da scegliere
-    (Jax, Pyke Bloodharbor Ripper, Jayce, Teemo, Akali Rogue Assassin, Maduli,
-    Unlicensed Armory, Pack of Wonders, Baited Hook, Cursed Sarcophagus).
-  - D30 `15475ff` Jax: Equipment attaccato fra due unità qualsiasi.
-  - D31 `bf2db18` Teemo: anche dal tavolo. D32 `2c54656` Baited Hook: l'unità
-    da uccidere è scelta. D33 `73f504b` Ambessa: "Ready a unit" qualsiasi.
-  - D34 `28c756d`: [rune][rune] pagabile con Power di domini diversi.
-  - D35-D49 `598611d`: dati contro la stampa (le 131 carte segnalate da
-    `piltover_sync compare`): 4 carte senza effetto, 4 statistiche/keyword,
-    bersagli, costi, errata. Elenco in AUDIT.md.
-  - Coach `cc3d776`: una seconda risposta alla stessa domanda (doppio click)
-    veniva applicata alla domanda successiva; ora è rifiutata. Era la causa
-    del test `test_coach` instabile sotto carico.
-
+- Quarto passaggio: D29-D49 (abilità senza scelta legale, Jax, Teemo,
+  Baited Hook, Ambessa, Power generico misto, dati di 131 carte segnalate)
+  e bug del coach (doppia risposta, `cc3d776`). Dettagli in AUDIT.md.
 - Rimozione mazzi: tolti 8 mazzi e 2 agenti, test spostati sui precon,
   20 golden game rigenerate su Zed vs Shen.
 
