@@ -57,23 +57,22 @@ Niente.
 Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 1. Banlist del 23/11: l'utente incolla l'elenco → aggiornare
    `riftbound/data/banned_cards.json`, ricontrollare i due mazzi competitive.
-2. Regole: fatto (sesto passaggio). Aperti, fuori dai mazzi: modificatori
-   del costo Flow §356.3-4, ordine delle sostituzioni di morte §372-373,
-   dipendenze dei layer §480-481 (AUDIT.md, "Left open").
+2. Regole: fatto. Aperti, fuori dai mazzi: Flow §356.3-4, sostituzioni di
+   morte §372-373, layer §480-481 (AUDIT.md, "Left open").
 3. Fatto (sopra). Approssimazioni rimaste: il replay prosegue dalla scelta
    con le carte nascoste vere (mano avversaria, mazzo sotto), un campione
    per opzione, valore alla decisione successiva.
 4. **Training (BACKLOG O4), da qui si riparte**: reti vecchie non caricabili
    (`ACTION_DIM` 319, ora anche una zona in più), riallenare da zero;
    budget MCTS, LR, dimensione rete; valutare su 100+ partite. Self-play qui:
-   ~5 s a partita con 10 iterazioni (1 thread): con 100 serve una GPU.
-5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
-   di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
-   costruzione del mazzo (§103).
+   ~5 s a partita con 10 iterazioni (1 thread). Conta la CPU, non la GPU: la
+   rete (~1M parametri, una posizione per volta) è ~25% del tempo.
+5. Possono aspettare: sideboard imparato, tempi per turno del match, carte
+   del corpus fuori dai mazzi, costruzione del mazzo (§103).
 
-Da decidere (utente): allentare la regola "niente training finché il
-BACKLOG non è vuoto" (proposta: partire dopo 1-3, il punto 5 in parallelo);
-dove allenare (questo container o macchina con GPU).
+Training sulle macchine dell'utente, run in runs/competitive: PC Windows
+(Ryzen 7 7800X3D, `scripts/allena.bat`, 8 worker) o Mac M1 (`allena.command`,
+4 worker, torch 2.13 vuole macOS 14+). La RTX 4070 serve a poco.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
@@ -82,11 +81,12 @@ dove allenare (questo container o macchina con GPU).
   `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
   terzo passaggio, `test_audit_corpus.py` quarto, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
-- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py` (effetti).
-- `riftbound/core/legality.py`: azioni legali offerte agli agenti.
+- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py`
+  (effetti), `legality.py` (azioni legali offerte agli agenti).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
   scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
-- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
+- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina;
+  `scripts/allena.bat` / `allena.command`: il training con doppio clic.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
