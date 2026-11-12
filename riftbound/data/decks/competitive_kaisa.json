@@ -1,0 +1,122 @@
+{
+  "name": "Kai'Sa Survivor",
+  "legend": "Kai'Sa Daughter of the Void",
+  "champion": "Kai'Sa Survivor",
+  "runes": [
+    {
+      "domain": "MIND",
+      "count": 6
+    },
+    {
+      "domain": "FURY",
+      "count": 6
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Frozen Fortress"
+    },
+    {
+      "name": "Void Gate"
+    },
+    {
+      "name": "Rockfall Path"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Plundering Poro",
+      "count": 3
+    },
+    {
+      "name": "Lecturing Yordle",
+      "count": 2
+    },
+    {
+      "name": "Bilgewater Tracker",
+      "count": 3
+    },
+    {
+      "name": "Noxus Hopeful",
+      "count": 3
+    },
+    {
+      "name": "Brynhir Thundersong",
+      "count": 3
+    },
+    {
+      "name": "Thousand-Tailed Watcher",
+      "count": 3
+    },
+    {
+      "name": "The Empyrean",
+      "count": 2
+    },
+    {
+      "name": "Hextech Ray",
+      "count": 3
+    },
+    {
+      "name": "Stupefy",
+      "count": 3
+    },
+    {
+      "name": "Bellows Breath",
+      "count": 1
+    },
+    {
+      "name": "Falling Star",
+      "count": 3
+    },
+    {
+      "name": "Smoke Screen",
+      "count": 2
+    },
+    {
+      "name": "Brittle Steel",
+      "count": 1
+    },
+    {
+      "name": "Temporal Breach",
+      "count": 3
+    },
+    {
+      "name": "Singularity",
+      "count": 2
+    },
+    {
+      "name": "Time Warp",
+      "count": 2
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Sprite Fountain",
+      "count": 1
+    },
+    {
+      "name": "Brittle Steel",
+      "count": 1
+    },
+    {
+      "name": "Decree of Insight",
+      "count": 1
+    },
+    {
+      "name": "Decree of Rage",
+      "count": 3
+    },
+    {
+      "name": "Bellows Breath",
+      "count": 1
+    },
+    {
+      "name": "The Empyrean",
+      "count": 1
+    },
+    {
+      "name": "Ferrous Forerunner",
+      "count": 2
+    }
+  ]
+}

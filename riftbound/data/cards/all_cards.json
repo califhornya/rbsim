@@ -15727,7 +15727,8 @@
           "params": {
             "zone": "facedown"
           }
-        }
+        },
+        "here": true
       }
     ]
   },

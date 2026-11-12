@@ -23,14 +23,14 @@ from riftbound.core.loop import GameLoop  # noqa: E402
 from riftbound.core.match import play_match  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def test_learned_mulligan_returns_valid_subset():
     torch.manual_seed(0)
     net = RiftboundNet()
-    gs = build_game(game_seed=1, deck_a_path=KENNEN, deck_b_path=ORNN,
+    gs = build_game(game_seed=1, deck_a_path=SHEN, deck_b_path=ZED,
                     ai_a=None, ai_b="simple_trade", first_player="a")
     agent = NetGuidedMCTSAgent(gs.A, net, iterations=1, rng=random.Random(0),
                                mulligan_samples=2)
@@ -49,21 +49,21 @@ def test_learned_mulligan_returns_valid_subset():
 def test_battlefield_values_and_choice_valid():
     torch.manual_seed(0)
     net = RiftboundNet()
-    names = deck_battlefield_names(KENNEN)
-    vals = battlefield_values(net, KENNEN, ORNN, "A", seed=3)
+    names = deck_battlefield_names(SHEN)
+    vals = battlefield_values(net, SHEN, ZED, "A", seed=3)
     assert set(vals) == set(names)
     assert all(-1.0 <= v <= 1.0 for v in vals.values())
-    choice = choose_battlefield(net, KENNEN, ORNN, "A", seed=3)
+    choice = choose_battlefield(net, SHEN, ZED, "A", seed=3)
     assert choice in names
     # Deterministic for a fixed net + seed.
-    assert choice == choose_battlefield(net, KENNEN, ORNN, "A", seed=3)
+    assert choice == choose_battlefield(net, SHEN, ZED, "A", seed=3)
 
 
 def test_net_bf_chooser_in_match_respects_availability():
     torch.manual_seed(0)
     net = RiftboundNet()
-    chooser = make_net_bf_chooser(net, KENNEN, ORNN, seed=0)
-    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=5,
+    chooser = make_net_bf_chooser(net, SHEN, ZED, seed=0)
+    res = play_match(SHEN, ZED, "simple_trade", "simple_trade", seed=5,
                      bf_chooser=chooser)
     assert res.winner in ("A", "B", "DRAW")
     a_used = [g.bf_a for g in res.games]
@@ -71,5 +71,5 @@ def test_net_bf_chooser_in_match_respects_availability():
     assert len(a_used) == len(set(a_used))     # no reuse
     assert len(b_used) == len(set(b_used))
     for g in res.games:
-        assert g.bf_a in deck_battlefield_names(KENNEN)
-        assert g.bf_b in deck_battlefield_names(ORNN)
+        assert g.bf_a in deck_battlefield_names(SHEN)
+        assert g.bf_b in deck_battlefield_names(ZED)

@@ -8,12 +8,12 @@ from pathlib import Path
 from riftbound.core.match import MatchResult, play_match
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def test_match_produces_a_winner_and_clinches_early():
-    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=3)
+    res = play_match(SHEN, ZED, "simple_trade", "simple_trade", seed=3)
     assert isinstance(res, MatchResult)
     assert res.winner in ("A", "B", "DRAW")
     # Bo3 clinches at 2 wins: never more than 3 games, and the leader has >= 2
@@ -28,7 +28,7 @@ def test_match_produces_a_winner_and_clinches_early():
 
 
 def test_battlefields_not_reused_within_match():
-    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=7)
+    res = play_match(SHEN, ZED, "simple_trade", "simple_trade", seed=7)
     a_used = [g.bf_a for g in res.games]
     b_used = [g.bf_b for g in res.games]
     # Kennen and Ornn each declare 3 battlefields, so a Bo3 never needs to reuse.
@@ -37,7 +37,7 @@ def test_battlefields_not_reused_within_match():
 
 
 def test_loser_chooses_first_next_game():
-    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=11)
+    res = play_match(SHEN, ZED, "simple_trade", "simple_trade", seed=11)
     for prev, cur in zip(res.games, res.games[1:]):
         if prev.winner in ("A", "B"):
             loser = "B" if prev.winner == "A" else "A"
@@ -72,6 +72,6 @@ def test_bo1_altered_setup_sideboards_before_the_only_game():
     def sideboarder(ctx):
         seen.append((ctx.side, ctx.game_index))
         return None
-    res = play_match(KENNEN, ORNN, "simple_trade", "simple_trade", seed=5, best_of=1,
+    res = play_match(SHEN, ZED, "simple_trade", "simple_trade", seed=5, best_of=1,
                      sideboarder=sideboarder, bo1_altered_setup=True)
     assert len(res.games) == 1 and sorted(seen) == [("A", 0), ("B", 0)]

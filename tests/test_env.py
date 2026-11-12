@@ -10,8 +10,8 @@ from riftbound.ai.env import RiftboundEnv
 from riftbound.core.decisions import DecisionPoint, Observation
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 _PASS = ("PASS", None, None)
 
@@ -39,7 +39,7 @@ def _play_to_end(env):
 
 
 def test_env_runs_a_full_game_and_reports_reward():
-    env = RiftboundEnv(deck_a_path=KENNEN, deck_b_path=ORNN,
+    env = RiftboundEnv(deck_a_path=SHEN, deck_b_path=ZED,
                        agent_side="A", opponent="simple_trade", seed=5)
     obs, info = _play_to_end(env)
     assert info["done"] is True
@@ -55,7 +55,7 @@ def test_env_runs_a_full_game_and_reports_reward():
 
 
 def test_env_reset_gives_observation_and_legal_actions():
-    env = RiftboundEnv(deck_a_path=KENNEN, deck_b_path=ORNN, agent_side="A", seed=1)
+    env = RiftboundEnv(deck_a_path=SHEN, deck_b_path=ZED, agent_side="A", seed=1)
     obs, info = env.reset()
     assert obs.viewer == "A"
     assert info["decision_point"] in {p.value for p in DecisionPoint}
@@ -65,7 +65,7 @@ def test_env_reset_gives_observation_and_legal_actions():
 
 
 def test_env_agent_side_b_reward_perspective():
-    env = RiftboundEnv(deck_a_path=KENNEN, deck_b_path=ORNN,
+    env = RiftboundEnv(deck_a_path=SHEN, deck_b_path=ZED,
                        agent_side="B", opponent="simple_trade", seed=5)
     _obs, info = _play_to_end(env)
     if env.result.winner == "B":

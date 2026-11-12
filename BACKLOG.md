@@ -13,34 +13,21 @@ This file has two parts: **Open now** (the only open items) and sections A-G
 
 ## Open now (2026-11-10)
 
-### O1. Card data that differs from the printed card
-`scripts/piltover_sync.py compare` against the official text
-(riftbound/data/reference/piltover_archive.json, Piltover Archive, errata
-included). The training precons (Zed, Shen): all 51 cards match. The other
-eight decks, 15 cards differ; checked so far:
-- [ ] Stupefy (Diana, Ezreal): printed **-1** Might, encoded `amount: 1` (+1).
-- [ ] Noxus Hopeful (Pyke, Rengar): printed Might 4, ours 3.
-- [ ] Pit Crew (Ornn), The Harrowing (Kennen): no text and no effects at all
-      (inert in their decks).
-- [ ] Thrill of the Hunt (Rengar): Power cost ours 2, printed 1 (check the
-      domains: ours "Fury/Body").
-- [ ] To read: En Garde, Yasuo Remorseful, Brutalizer, Ornn's Forge ("When"
-      vs printed "While"), Existential Dread (printed "attacking *enemy*
-      unit"); errata'd: Fizz Trickster, Emperor's Dais, Diana Lunari, Rengar
-      Trophy Hunter, Death from Below.
-- [x] The other eight decks, card by card (audit, third pass, 2026-11-11):
-      D23-D28 in docs/audit/AUDIT.md, all fixed (D27, Patched Porobot a unit
-      and a gear at once: `cards.is_gear()`).
-- [x] The cards `piltover_sync.py compare` flags (131), read one by one
-      (audit, fourth pass, 2026-11-12): D35-D49 in docs/audit/AUDIT.md, all
-      fixed; the rest are the site's typos or wording. Ambessa Matriarch of
-      War (D33) fixed, Facebreaker found right.
-- [ ] The rest of the corpus (about 930 cards outside the ten decks): only
-      scanned by class (activated abilities with nothing to choose D29,
-      cards with no effect, keywords, Equip costs). Not read card by card: a
-      target narrower or wider than the print isn't caught by any scan.
-- [ ] vendetta_kennen and vendetta_ezreal hold Stacked Deck, banned in
-      `banned_cards.json` (a warning at load): decide whether to replace it.
+### O1. Decks and card data
+- [x] The eight non-precon decks removed (2026-11-12, owner: out of date),
+      with the Pyke and Diana heuristic agents built for them. Training and
+      tests use only `precon_zed` and `precon_shen`.
+- [x] Two current competitive decks, from the owner (2026-11-12):
+      `competitive_kaisa.json`, `competitive_kennen.json`, read and played
+      (audit, fifth pass: D50-D52 fixed).
+- [ ] Banlist: a new one is announced for 2026-11-13, legal from 2026-11-23.
+      Update `riftbound/data/banned_cards.json` (now: Ekko Recurrent, Stacked
+      Deck, updated 2026-10-25).
+- [x] The precons (Zed, Shen): all 51 cards match the print.
+- [x] The cards `piltover_sync.py compare` flags (131): read, D35-D49 fixed
+      (audit, fourth pass).
+- [ ] The rest of the corpus: scanned by class only (docs/audit/AUDIT.md,
+      fourth pass); read card by card only the cards of the decks in use.
 
 ### O2. Rules audit (independent of the card-by-card review)
 - [ ] docs/MECHANICS.md: 8 PARTIAL + 1 GAP rows not re-checked since G; at
@@ -64,6 +51,9 @@ eight decks, 15 cards differ; checked so far:
 - [ ] Stepwise engine for deep MCTS trees: only if the search needs it.
 
 ### O4. Training
+- Decks (owner, 2026-11-12): `competitive_kaisa` and `competitive_kennen`.
+  A smoke run (2 iterations, 10 MCTS iterations, 4 workers) works end to end:
+  ~3 s a game on this container's 4 cores.
 - [ ] Nets saved before F3 (OBS_DIM 2979, ACTION_DIM 316) don't load and were
       trained on old rules: retrain from scratch once O1-O2 are done.
 - [ ] Tuning left from docs/history/DEFERRED.md (Stage 1+): MCTS budget, LR

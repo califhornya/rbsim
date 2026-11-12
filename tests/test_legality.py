@@ -22,14 +22,13 @@ from riftbound.core.decisions import DecisionPoint, Observation, DecisionRequest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
-PYKE = _DECKS / "fury_chaos_pyke.json"
-DIANA = _DECKS / "chaos_mind_diana.json"
-YASUO = _DECKS / "calm_chaos_yasuo.json"
+ZED = _DECKS / "precon_zed.json"
+SHEN = _DECKS / "precon_shen.json"
 
 _GAMES = [
-    ("pyke", PYKE, "diana", DIANA, 42),
-    ("diana", DIANA, "pyke", PYKE, 7),
-    ("simple_trade", YASUO, "pyke", PYKE, 99),
+    ("simple_trade", ZED, "random", SHEN, 42),
+    ("random", SHEN, "simple_trade", ZED, 7),
+    ("simple_trade", ZED, "random", ZED, 99),
 ]
 
 
@@ -126,7 +125,7 @@ def test_game_action_round_trips():
 
 
 def test_observation_hides_opponent_hand_and_deck_order():
-    gs = build_game(game_seed=1, deck_a_path=PYKE, deck_b_path=DIANA, ai_a="pyke", ai_b="diana")
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a="simple_trade", ai_b="random")
     for _ in range(5):
         gs.A.draw()
         gs.B.draw()
@@ -150,7 +149,7 @@ def test_observation_hides_opponent_hand_and_deck_order():
 def test_decision_request_is_json_serializable():
     import json
 
-    gs = build_game(game_seed=1, deck_a_path=PYKE, deck_b_path=DIANA, ai_a="pyke", ai_b="diana")
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a="simple_trade", ai_b="random")
     obs = Observation.from_state(gs, "A")
     req = DecisionRequest(DecisionPoint.TURN_ACTION, "A", obs, (GameAction.pass_(),))
     json.dumps(req.to_dict())  # must not raise

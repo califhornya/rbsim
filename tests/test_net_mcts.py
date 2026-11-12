@@ -19,14 +19,14 @@ from riftbound.core.legality import legal_actions  # noqa: E402
 from riftbound.core.loop import GameLoop  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def _game_with_net_mcts(seed=1, iters=8):
     torch.manual_seed(0)
     net = RiftboundNet()
-    gs = build_game(game_seed=seed, deck_a_path=KENNEN, deck_b_path=ORNN,
+    gs = build_game(game_seed=seed, deck_a_path=SHEN, deck_b_path=ZED,
                     ai_a=None, ai_b="simple_trade", first_player="a")
     gs.A.agent = NetGuidedMCTSAgent(gs.A, net, iterations=iters, rng=random.Random(0))
     return gs, gs.A.agent

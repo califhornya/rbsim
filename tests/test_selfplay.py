@@ -16,14 +16,14 @@ from riftbound.ai.net import RiftboundNet  # noqa: E402
 from riftbound.ai.selfplay import play_selfplay_game, run_training, train_step  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def test_selfplay_generates_labeled_examples():
     torch.manual_seed(0)
     net = RiftboundNet()
-    ex = play_selfplay_game(net, KENNEN, ORNN, seed=1, iterations=4, max_turns=12)
+    ex = play_selfplay_game(net, SHEN, ZED, seed=1, iterations=4, max_turns=12)
     assert len(ex) > 0
     for e in ex:
         assert e["state"].shape == (OBS_DIM,)
@@ -38,7 +38,7 @@ def test_selfplay_generates_labeled_examples():
 def test_train_step_updates_params_and_finite_loss():
     torch.manual_seed(0)
     net = RiftboundNet()
-    ex = play_selfplay_game(net, KENNEN, ORNN, seed=2, iterations=4, max_turns=12)
+    ex = play_selfplay_game(net, SHEN, ZED, seed=2, iterations=4, max_turns=12)
     assert ex
     opt = torch.optim.Adam(net.parameters(), lr=1e-3)
     before = [p.detach().clone() for p in net.parameters()]
@@ -53,7 +53,7 @@ def test_run_training_smoke(tmp_path):
     torch.manual_seed(0)
     net = RiftboundNet()
     ckpt = tmp_path / "net.pt"
-    run_training(net, KENNEN, ORNN, iterations=1, games_per_iter=1, mcts_iters=4,
+    run_training(net, SHEN, ZED, iterations=1, games_per_iter=1, mcts_iters=4,
                  train_steps=2, batch_size=4, checkpoint=ckpt, seed=0,
                  device=torch.device("cpu"), log=lambda *a, **k: None)
     assert ckpt.exists()
@@ -64,7 +64,7 @@ def test_a_stop_file_ends_the_run(tmp_path):
     net = RiftboundNet()
     (tmp_path / "STOP").write_text("")
     logs = []
-    run_training(net, KENNEN, ORNN, iterations=3, games_per_iter=1, mcts_iters=2,
+    run_training(net, SHEN, ZED, iterations=3, games_per_iter=1, mcts_iters=2,
                  train_steps=1, batch_size=4, checkpoint=tmp_path / "net.pt", seed=0,
                  device=torch.device("cpu"), log=logs.append)
     assert sum(1 for line in logs if line.startswith("[iter")) == 1
@@ -74,7 +74,7 @@ def test_training_keeps_a_copy_at_each_evaluation_and_the_best(tmp_path):
     from riftbound.ai.selfplay import train
     torch.manual_seed(0)
     net = RiftboundNet()
-    train(net, [KENNEN, ORNN], iterations=2, games_per_iter=1, mcts_iters=2, batch_size=4,
+    train(net, [SHEN, ZED], iterations=2, games_per_iter=1, mcts_iters=2, batch_size=4,
           checkpoint=tmp_path / "net.pt", log_path=tmp_path / "log.jsonl", workers=0,
           eval_every=1, eval_games=1, eval_vs=("random",), max_turns=8, pause=0,
           device=torch.device("cpu"), log=lambda *a, **k: None)

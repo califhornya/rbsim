@@ -14,8 +14,8 @@ from riftbound.core.legality import legal_actions
 from riftbound.core.loop import GameLoop
 
 REPO = Path(__file__).resolve().parent.parent
-AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def test_registered():
@@ -23,7 +23,7 @@ def test_registered():
 
 
 def test_ismcts_action_is_legal_and_drives_game():
-    gs = build_game(game_seed=2, deck_a_path=AKALI, deck_b_path=KENNEN, ai_a=None, ai_b=None)
+    gs = build_game(game_seed=2, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
     gs.A.agent = ISMCTSAgent(gs.A, iterations=8, k_mulligan=0, rollout="simple_trade",
                              rng=random.Random(0))
     gs.B.agent = SimpleTradeAgent(gs.B)
@@ -33,7 +33,7 @@ def test_ismcts_action_is_legal_and_drives_game():
 
 
 def test_ismcts_decision_is_a_legal_action():
-    gs = build_game(game_seed=1, deck_a_path=AKALI, deck_b_path=KENNEN, ai_a=None, ai_b=None)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
     agent = ISMCTSAgent(gs.A, iterations=8, k_mulligan=0, rollout="simple_trade", rng=random.Random(0))
     gs.A.agent = agent
     loop = GameLoop(gs)

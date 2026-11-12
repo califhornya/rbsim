@@ -11,7 +11,7 @@ from riftbound.core.enums import Domain
 from audit_helpers import act, card, choices, labels, scripted, setup, unit
 
 
-# -- D13. Stupefy (OGN-095; chaos_mind_diana, vendetta_ezreal) -------------------
+# -- D13. Stupefy (OGN-095) -------------------
 
 def test_stupefy_gives_minus_one():
     """'Give a unit -1 [Might] this turn, to a minimum of 1 [Might]. Draw 1.'"""
@@ -24,7 +24,7 @@ def test_stupefy_gives_minus_one():
     assert big.might == 2
 
 
-# -- D14. Noxus Hopeful (OGN-012; fury_chaos_pyke, vendetta_rengar) --------------
+# -- D14. Noxus Hopeful (OGN-012) --------------
 
 def test_noxus_hopeful_has_four_might():
     loop, a, b = setup(active="A")
@@ -35,7 +35,7 @@ def test_noxus_hopeful_has_four_might():
     assert not bf0.units_B                       # 4 damage kills a 4 [might] unit
 
 
-# -- D15. Thrill of the Hunt (UNL-184; vendetta_rengar) --------------------------
+# -- D15. Thrill of the Hunt (UNL-184) --------------------------
 
 def test_thrill_of_the_hunt_costs_one_power():
     loop, a, b = setup(active="A", rich=())
@@ -46,7 +46,7 @@ def test_thrill_of_the_hunt_costs_one_power():
     assert any("Thrill of the Hunt" in lbl for lbl in labels(loop, "A"))
 
 
-# -- D16. Pit Crew (OGN-091; vendetta_ornn) --------------------------------------
+# -- D16. Pit Crew (OGN-091) --------------------------------------
 
 def test_pit_crew_readies_when_you_play_a_gear():
     loop, a, b = setup(active="A")
@@ -59,7 +59,7 @@ def test_pit_crew_readies_when_you_play_a_gear():
     assert crew.ready
 
 
-# -- D17. The Harrowing (OGN-198; vendetta_kennen) -------------------------------
+# -- D17. The Harrowing (OGN-198) -------------------------------
 
 def test_the_harrowing_plays_a_unit_from_your_trash():
     loop, a, b = setup(active="A", rich=())
@@ -89,7 +89,7 @@ def test_the_harrowing_needs_a_unit_in_the_trash_and_its_power_cost():
     assert [u.card for u in a.base_units] == [back] and a.power_pool.get(Domain.FURY, 0) == 0
 
 
-# -- D18. Existential Dread (UNL-134; chaos_mind_diana) --------------------------
+# -- D18. Existential Dread (UNL-134) --------------------------
 
 def test_existential_dread_chooses_an_attacking_enemy_unit():
     """The attacker has no attacking enemy unit to choose: it can't play it
@@ -105,7 +105,7 @@ def test_existential_dread_chooses_an_attacking_enemy_unit():
     assert not any("Existential Dread" in lbl for lbl in A.offered("showdown_action"))
 
 
-# -- D21. Moonfall (UNL-198; chaos_mind_diana) -----------------------------------
+# -- D21. Moonfall (UNL-198) -----------------------------------
 
 def test_moonfall_chooses_a_battlefield_where_its_player_has_units():
     """'Choose a battlefield where you have units. You may move up to one enemy

@@ -15,19 +15,19 @@ from riftbound.core.state import GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec, load_deck_json
 
 REPO = Path(__file__).resolve().parent.parent
-AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def test_load_deck_json_returns_legend():
-    cards, runes, champion, legend, battlefields = load_deck_json(AKALI)
+    cards, runes, champion, legend, battlefields = load_deck_json(ZED)
     assert legend is not None
-    assert legend.name == "Akali Rogue Assassin"
+    assert legend.name == "Zed Master of Shadows"
 
 
 def test_build_game_places_legend():
-    gs = build_game(game_seed=1, deck_a_path=AKALI, deck_b_path=AKALI,
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=ZED,
                     ai_a="simple_trade", ai_b="simple_trade")
-    assert gs.legend_A is not None and gs.legend_A.name == "Akali Rogue Assassin"
+    assert gs.legend_A is not None and gs.legend_A.name == "Zed Master of Shadows"
     assert gs.legend_B is not None
 
 

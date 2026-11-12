@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import random
 
 from riftbound.core.battlefield import Battlefield
@@ -26,7 +28,7 @@ def test_registry_loads_master_data():
     assert "Darius Trifarian" in CARD_REGISTRY
     assert "Chemtech Enforcer" in CARD_REGISTRY
 
-def test_banned_cards_listed_and_warned():
+def test_banned_cards_listed_and_warned(tmp_path):
     import warnings
     from pathlib import Path
 
@@ -34,7 +36,11 @@ def test_banned_cards_listed_and_warned():
 
     assert {"Ekko Recurrent", "Stacked Deck"} <= BANNED_CARDS
     assert all(name in CARD_REGISTRY for name in BANNED_CARDS)
-    deck = Path(__file__).resolve().parent.parent / "riftbound/data/decks/fury_chaos_pyke.json"
+    zed = Path(__file__).resolve().parent.parent / "riftbound/data/decks/precon_zed.json"
+    data = json.loads(zed.read_text(encoding="utf-8"))
+    data["cards"] = list(data["cards"]) + [{"name": "Stacked Deck", "count": 1}]
+    deck = tmp_path / "with_banned.json"
+    deck.write_text(json.dumps(data), encoding="utf-8")
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         load_deck_json(deck)

@@ -13,7 +13,14 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
-**State (2026-11-12, fourth pass): 49 deviations found, 49 fixed, none open.**
+**The eight non-precon decks were removed on 2026-11-12** (out of date; the
+owner will give two current competitive decks). Their passes (D13-D18,
+D23-D28) stay: they fixed cards, which are still in the corpus; where this
+document names those decks it is the record of where a card was found.
+
+**State (2026-11-12, fifth pass): 52 deviations found, 52 fixed, none open.**
+The fifth pass read the owner's two competitive decks (`competitive_kaisa`,
+`competitive_kennen`): D50-D52, see its section. Suite: 1773 passed.
 The suite is green (1754 passed, no xfail). The fourth pass went outside the
 ten decks, by class and not card by card (D29-D49; no golden game changed):
 see its section for what was scanned and what was not read. The third pass
@@ -86,6 +93,9 @@ said.
 | D47 | Blighted Battleaxe's Equip asks for Fury, printed [Rune] | UNL-019 | outside the decks | fixed, `598611d` |
 | D48 | Reinforce plays from the deck, errata: banish, then play | OGN-062 | outside the decks | fixed, `598611d` |
 | D49 | Mageseeker Investigator's toll is paid in Energy, printed [Rune] | UNL-163 | outside the decks | fixed, `598611d` |
+| D50 | A HIDDEN gear played from face down goes into no zone | §737.1 | competitive Kennen (2 Edge of Night) | fixed, `df33571` |
+| D51 | A Standard Move doesn't fire "when I become exhausted" | §144.2 | competitive Kennen (2 Reckless Innovator) | fixed, `0e03237` |
+| D52 | Decree of Unity is cast with no enemy Chaos unit or gear | §355.8 | competitive Kennen (sideboard) | fixed, `334e93c` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -681,8 +691,40 @@ Tests in `tests/audit/test_audit_corpus.py`.
   four under load because of it.
 - **Left open.** Navori Fighting Pit's data now say "a unit here" (no board
   differs). Seraphine Not Alone is marked "Preview Card - Not Legal" on the
-  site. The decks vendetta_kennen and vendetta_ezreal hold Stacked Deck,
-  which `banned_cards.json` bans (a warning at load, not checked further).
+  site.
+
+## Deviations, fifth pass (2026-11-12): the two competitive decks
+
+The owner's lists (Kai'Sa: Kai'Sa Daughter of the Void, Kai'Sa Survivor;
+Kennen: Kennen Heart of the Tempest, Kennen Storm of Shuriken), imported as
+`competitive_kaisa.json` and `competitive_kennen.json`, sideboards included.
+55 cards: 33 already read (the removed decks of the third pass, the
+precons), their tests trusted; the 22 others read against the print with
+their `effects`, and the doubtful ones played. Then 480 games of the four
+decks with `simple_trade` and `random` under the checks of
+`tests/test_invariants.py` (card conservation, no aliasing, resources).
+Tests in `tests/audit/test_audit_competitive.py`.
+
+- **D50.** `_play_from_hidden` played every non-spell as a unit: Edge of
+  Night and Zhonya's Hourglass, the two HIDDEN gears of the corpus, left the
+  Facedown Zone for no zone. Played as gear now; Edge of Night's errata
+  ("attach it to a unit you control (here)") chooses among the units there.
+- **D51.** The Standard Move took the unit off its location, then exhausted
+  it (§144.2): `_exhaust` found no controller and fired nothing. Six cards
+  have such abilities (Reckless Innovator, Riven Broken Blade, Strigian
+  Oracle, Seraphine Not Alone; Riven Deserter for another unit; Resplendent
+  Rostrum is a gear). Attacking and other exhausts were right.
+- **D52.** §355.8: `kill_unit_or_gear` was unknown to `has_valid_target`.
+- **Read, played and found right.** Kai'Sa's legend (its Power pays only a
+  spell), Plundering Poro and An Offer You Can't Refuse (the Gold enters
+  exhausted), Reckless Innovator's Gold, Smoke Screen (minimum 1), Bilgewater
+  Tracker (two different units), Brittle Steel's FLOW. Read and right:
+  Brynhir Thundersong, Hextech Ray, Temporal Breach, The Empyrean, Time Warp,
+  Rockfall Path, Decree of Insight, Decree of Rage, Abandon, Bedeviling
+  Stranger, Hidden Blade, The Good Stuff, Trifarian Captain.
+- **Seen on the way, a test and not the engine.** The invariant test took a
+  card hidden at a battlefield for a vanished one, and a [Reaction] ability
+  or a [Reaction] spell by FLOW on an open chain for an illegal action.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

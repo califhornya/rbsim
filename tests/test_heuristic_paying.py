@@ -7,7 +7,6 @@ turn ends), never on its own (Agent._paying)."""
 
 from __future__ import annotations
 
-from riftbound.ai.heuristics.diana_agent import DianaAgent
 from riftbound.ai.heuristics.simple_trade_agent import SimpleTradeAgent
 from riftbound.core.cards import SpellCard, UnitCard
 from riftbound.core.enums import Domain
@@ -117,16 +116,3 @@ def test_a_spell_only_songstress_makes_affordable_is_played():
     a.energy = 4                                    # Progress Day costs [6] [mind]
     a.hand.append(CARD_REGISTRY["Progress Day"].instantiate())
     assert _agent(loop, a).decide_action(b) == ("SPELL", 0, 0)
-
-
-def test_the_diana_agent_checks_what_a_card_costs_now_too():
-    loop, a, b = _setup()
-    _pool(a, 8, Domain.CALM)
-    a.hand.append(CARD_REGISTRY["Tibbers"].instantiate())
-    agent = _agent(loop, a, DianaAgent)
-    act = agent.decide_action(b)
-    assert act[0] != "UNIT"
-    _pool(a, 2, Domain.CALM)
-    a.hand[:] = [_brute()]
-    seal = _gear(a, "Seal of Rage")
-    assert _ability_source(loop, a, agent.decide_action(b)) is seal

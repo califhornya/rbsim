@@ -1990,15 +1990,10 @@ def _public_execution(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                            killer=(ctx.actor_side, ctx.card))
 
 
-@effect("kill_unit_or_gear")
-def _kill_unit_or_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Kill an enemy Chaos unit or gear" (Decree of Unity): one choice among
-    both; baseline the mightiest unit, else the priciest gear. `side: any` ("a
-    unit or gear", Mordekaiser Dominating: an enemy one is the baseline, none
-    when only friendly ones are left), `where: here` (Mournful Spirit), `banish`
-    ("Banish a unit with 3 [might] or less or a gear": Burn Away; the filter's
-    Might is the unit's)."""
-    loop = ctx.loop
+def _unit_or_gear_options(ctx: "EffectContext", spec: Mapping[str, Any]) -> tuple:
+    """kill_unit_or_gear's choices: (units, gear cards) that pass its filter,
+    the opponent's (and with `side: any` the actor's too), `where: here` or
+    anywhere."""
     tf = spec.get("target_filter") or {}
     here = spec.get("where") == "here"
     sides = (ctx.opponent_side, ctx.actor_side) if spec.get("side") == "any" else (ctx.opponent_side,)
@@ -2010,6 +2005,19 @@ def _kill_unit_or_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
                  if e[0] == side and _gear_matches(e[2], tf)
                  and (not here or e[1] is ctx.battlefield
                       or (isinstance(e[1], UnitInPlay) and e[1] in ctx.battlefield._units_for(side)))]
+    return units, gear
+
+
+@effect("kill_unit_or_gear")
+def _kill_unit_or_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Kill an enemy Chaos unit or gear" (Decree of Unity): one choice among
+    both; baseline the mightiest unit, else the priciest gear. `side: any` ("a
+    unit or gear", Mordekaiser Dominating: an enemy one is the baseline, none
+    when only friendly ones are left), `where: here` (Mournful Spirit), `banish`
+    ("Banish a unit with 3 [might] or less or a gear": Burn Away; the filter's
+    Might is the unit's)."""
+    loop = ctx.loop
+    units, gear = _unit_or_gear_options(ctx, spec)
     enemy_units = [u for u in units if loop._locate_unit(u)[0] == ctx.opponent_side]
     enemy_gear = [g for g in gear if any(getattr(e[2], "card", e[2]) is g and e[0] == ctx.opponent_side
                                          for e in _gear_entries(ctx, enemy_first=True, units=True))]
@@ -4206,6 +4214,7 @@ _HAS_OPTION = {
     "ward_unit": lambda ctx, spec: _choosable(ctx, _units_at(ctx, ctx.actor_side, "anywhere")),
     "return_friendly_to_hand": lambda ctx, spec: _pack_of_wonders_options(ctx),
     "play_one_banished_with_this": lambda ctx, spec: _sarcophagus_options(ctx),
+    "kill_unit_or_gear": lambda ctx, spec: any(_unit_or_gear_options(ctx, spec)),
 }
 
 
@@ -5566,12 +5575,15 @@ def _recall_borrowed(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("attach_gear")
 def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "Attach it to a unit you control" (Edge of Night): this gear, from your
-    base, to a chosen unit (nothing if it is attached already: QUICK-DRAW)."""
+    base, to a chosen unit (nothing if it is attached already: QUICK-DRAW).
+    `here`: a unit at the battlefield it was played at (Edge of Night's
+    errata: "attach it to a unit you control (here)")."""
     player = ctx.actor
     if not any(g is ctx.card for g in player.base_gear):
         return
+    where = "" if spec.get("here") else spec.get("where", "anywhere")
     units = _resolve_targets(ctx, {**spec, "target": spec.get("target", "friendly_unit"),
-                                   "where": spec.get("where", "anywhere"), "scope": "single"})
+                                   "where": where, "scope": "single"})
     if not units:
         return
     player.base_gear.remove(ctx.card)

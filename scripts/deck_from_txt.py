@@ -27,7 +27,7 @@ games of a match (riftbound/core/match.py); per-matchup swap plans
 (`sideboard_plans`) are added to the JSON by hand.
 
 Usage:
-  uv run python scripts/deck_from_txt.py path/to/Kennen.txt --out riftbound/data/decks/vendetta_kennen.json
+  uv run python scripts/deck_from_txt.py path/to/Kennen.txt --out riftbound/data/decks/my_deck.json
   uv run python scripts/deck_from_txt.py path/to/Kennen.txt          # prints JSON to stdout
 """
 from __future__ import annotations

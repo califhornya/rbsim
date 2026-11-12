@@ -28,14 +28,16 @@ from riftbound.core.loop import GameLoop
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
-PYKE = _DECKS / "fury_chaos_pyke.json"
-DIANA = _DECKS / "chaos_mind_diana.json"
-YASUO = _DECKS / "calm_chaos_yasuo.json"
+ZED = _DECKS / "precon_zed.json"
+SHEN = _DECKS / "precon_shen.json"
+KAISA = _DECKS / "competitive_kaisa.json"
+KENNEN = _DECKS / "competitive_kennen.json"
 
 _MATCHUPS = [
-    ("pyke", PYKE, "diana", DIANA),
-    ("diana", DIANA, "simple_trade", YASUO),
-    ("simple_trade", YASUO, "pyke", PYKE),
+    ("simple_trade", ZED, "random", SHEN),
+    ("random", SHEN, "simple_trade", ZED),
+    ("simple_trade", KAISA, "random", KENNEN),
+    ("random", KENNEN, "simple_trade", KAISA),
 ]
 _SEEDS = [1, 7, 42, 99, 100000, 271828]
 
@@ -79,6 +81,8 @@ def _collect(gs) -> list[tuple[int, str, str, str]]:
                 add(u.card, "battlefield")
             for g in u.gear:
                 add(g, "gear")
+        for fd in bf.facedowns:              # a HIDDEN card hidden here
+            add(fd.card, "facedown")
     if gs.champion_A is not None and not gs.champion_A_deployed:
         add(gs.champion_A, "champion")
     if gs.champion_B is not None and not gs.champion_B_deployed:
@@ -90,7 +94,18 @@ class _InvariantLoop(GameLoop):
     """GameLoop that asserts resource + chain invariants around each action."""
 
     def _apply_action(self, ap, action, cards_played_this_turn: int = 0) -> None:
-        assert not self.gs.chain, f"chain not empty before action {action}: {self.gs.chain}"
+        # A [Reaction] ability (Seal of Discord, Gold, Kai'Sa's legend: they add
+        # resources) or a [Reaction] spell played by FLOW is used while a spell
+        # waits on the chain; nothing else is.
+        if action[0] == "ABILITY" and self.gs.chain:
+            side = "A" if ap is self.gs.A else "B"
+            entry = self.activatable_abilities(side)[action[2]]
+            eff, card = entry.get("eff"), entry.get("card")
+            reaction = (eff is not None and (eff.timing or "").lower() == "reaction") or \
+                (card is not None and card.has_keyword("REACTION"))     # a [Reaction] spell by FLOW
+            assert reaction, f"{entry['type']} {getattr(eff, 'effect', '')} used on an open chain"
+        else:
+            assert not self.gs.chain, f"chain not empty before action {action}: {self.gs.chain}"
         super()._apply_action(ap, action, cards_played_this_turn=cards_played_this_turn)
         for p in (self.gs.A, self.gs.B):
             assert p.energy >= 0, f"negative energy for {p.name}: {p.energy}"

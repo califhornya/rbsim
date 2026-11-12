@@ -19,8 +19,8 @@ from riftbound.core.legality import legal_actions
 from riftbound.core.loop import GameLoop
 
 REPO = Path(__file__).resolve().parent.parent
-AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def test_agents_registered():
@@ -29,7 +29,7 @@ def test_agents_registered():
 
 
 def test_random_agent_action_is_legal():
-    gs = build_game(game_seed=1, deck_a_path=AKALI, deck_b_path=KENNEN, ai_a=None, ai_b=None)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
     gs.A.agent = RandomAgent(gs.A, rng=random.Random(0))
     loop = GameLoop(gs)          # injects loop/gs into the agent
     loop._setup()
@@ -42,7 +42,7 @@ def test_random_agent_action_is_legal():
 def test_mc_agent_drives_a_game_to_completion():
     # Tiny budget so the test is fast; correctness of *strength* is validated
     # separately in a head-to-head run, not here.
-    gs = build_game(game_seed=2, deck_a_path=AKALI, deck_b_path=KENNEN, ai_a=None, ai_b=None)
+    gs = build_game(game_seed=2, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
     gs.A.agent = MonteCarloAgent(gs.A, k=1, max_candidates=2, rollout="simple_trade",
                                  rng=random.Random(0))
     gs.B.agent = SimpleTradeAgent(gs.B)
@@ -54,7 +54,7 @@ def test_mc_agent_drives_a_game_to_completion():
 def test_mc_makes_at_least_one_non_pass_play():
     # Regression against the noisy-tie stall (mc must develop its board, not just
     # PASS every turn to the cap).
-    gs = build_game(game_seed=5, deck_a_path=AKALI, deck_b_path=KENNEN, ai_a=None, ai_b=None)
+    gs = build_game(game_seed=5, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
     mc = MonteCarloAgent(gs.A, k=2, max_candidates=4, rollout="simple_trade", rng=random.Random(1))
     gs.A.agent = mc
     gs.B.agent = SimpleTradeAgent(gs.B)

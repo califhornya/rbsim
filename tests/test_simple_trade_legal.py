@@ -15,8 +15,8 @@ DECKS = Path(__file__).resolve().parents[1] / "riftbound" / "data" / "decks"
 
 
 def test_ezreal_uses_only_usable_abilities_and_plays_cards():
-    gs = build_game(game_seed=3, deck_a_path=DECKS / "vendetta_ezreal.json",
-                    deck_b_path=DECKS / "vendetta_kennen.json", ai_a=None, ai_b=None)
+    gs = build_game(game_seed=3, deck_a_path=DECKS / "precon_zed.json",
+                    deck_b_path=DECKS / "precon_shen.json", ai_a=None, ai_b=None)
     agent = SimpleTradeAgent(gs.A)
     gs.A.agent, gs.B.agent = agent, SimpleTradeAgent(gs.B)
     loop = GameLoop(gs)

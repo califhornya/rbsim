@@ -24,8 +24,6 @@ from riftbound.registry.cards_registry import (CARD_REGISTRY, load_deck_json, lo
 
 # Agents. Imported here (not in the CLI) so every entry point builds games the
 # same way. Agents only depend on Player, so there is no import cycle with core.
-from riftbound.ai.heuristics.pyke_agent import PykeAgent
-from riftbound.ai.heuristics.diana_agent import DianaAgent
 from riftbound.ai.heuristics.simple_trade_agent import SimpleTradeAgent
 from riftbound.ai.search.random_agent import RandomAgent
 from riftbound.ai.search.monte_carlo_agent import MonteCarloAgent
@@ -33,8 +31,6 @@ from riftbound.ai.search.ismcts_agent import ISMCTSAgent
 
 
 AI_REGISTRY = {
-    "pyke": PykeAgent,
-    "diana": DianaAgent,
     "simple_trade": SimpleTradeAgent,
     "random": RandomAgent,
     "mc": MonteCarloAgent,
@@ -183,6 +179,12 @@ def build_game(
         A.agent = make_agent(ai_a, A)
     if ai_b is not None:
         B.agent = make_agent(ai_b, B)
+    # The random agent draws from its own rng: seeded from the game's seed and
+    # its seat (never from the game rng, so the game's draws don't move), the
+    # same seed plays the same game.
+    for seat, player in ((0, A), (1, B)):
+        if isinstance(player.agent, RandomAgent):
+            player.agent.rng = random.Random(game_seed * 2 + seat)
 
     starter = resolve_starter(rng, first_player)
 

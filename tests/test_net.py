@@ -34,8 +34,8 @@ from riftbound.ai.net import (  # noqa: E402
 from riftbound.core.decisions import DecisionPoint  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def test_forward_shapes_and_value_range():
@@ -60,7 +60,7 @@ def test_masked_log_softmax_zeros_illegal():
 
 def test_predict_returns_legal_distribution_and_value():
     net = RiftboundNet().to(default_device())
-    env = RiftboundEnv(deck_a_path=KENNEN, deck_b_path=ORNN, agent_side="A",
+    env = RiftboundEnv(deck_a_path=SHEN, deck_b_path=ZED, agent_side="A",
                        opponent="simple_trade", seed=5)
     obs, info = env.reset()
     while info["decision_point"] == DecisionPoint.MULLIGAN.value:
