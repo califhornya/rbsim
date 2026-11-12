@@ -179,3 +179,18 @@ def test_ambessa_legend_can_choose_any_unit():
     b.base_units.append(unit("theirs", 2, ready=False))
     act(loop, "A", "Activate ready_unit (Ambessa")       # the baseline readies its own
     assert mine.ready and not b.base_units[0].ready
+
+# -- D34. [rune][rune] can't be paid with Power of two domains ---------------------
+
+def test_generic_power_is_paid_with_any_mix_of_domains():
+    """§ costs: [rune] is 1 Power of any domain, each one on its own. Jayce,
+    Defender of Tomorrow: '[Empower][2][Rune][Rune]'."""
+    from riftbound.core.enums import Domain
+    loop, a, b = setup(active="A", rich=())
+    legend(loop, "A", "Jayce Defender of Tomorrow")
+    a.energy = 2
+    a.add_power(Domain.FURY, 1)
+    a.add_power(Domain.CHAOS, 1)
+    act(loop, "A", "Activate empower_self (Jayce")
+    assert loop.gs.legend_unit_A.empowered and not any(a.power_pool.values())
+

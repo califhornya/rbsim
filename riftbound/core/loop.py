@@ -3267,12 +3267,11 @@ class GameLoop:
         return e_red, p_red
 
     def _can_pay_generic_power(self, actor: Player, n: int) -> bool:
-        """Whether the actor can pay n generic ([rune]) power from a single domain.
-        The engine's power pool is domain-keyed; generic power is modeled as 'any one
-        domain you have enough of' (a documented simplification)."""
+        """Whether the actor can pay n generic ([rune]) power: power of any
+        domains, mixed ([rune][rune] with one Fury and one Chaos)."""
         if n <= 0:
             return True
-        return any(actor.can_pay_cost(0, n, d) for d in list(actor.power_pool))
+        return actor.can_pay_power_of(n, list(actor.power_pool))
 
     def _can_pay_energy_and_generic(self, actor: Player, energy: int, power: int,
                                     domain: Optional[Domain] = None) -> bool:
@@ -3359,7 +3358,8 @@ class GameLoop:
         return True
 
     def _pay_generic_power(self, actor: Player, n: int) -> bool:
-        """Pay n generic ([rune]) power from the first domain that can cover it."""
+        """Pay n generic ([rune]) power: from the first domain that can cover
+        it alone, else from a mix of domains (Player.pay_power_of)."""
         if n <= 0:
             return True
         for d in list(actor.power_pool):
@@ -3367,7 +3367,11 @@ class GameLoop:
                 ok = actor.pay_cost(0, n, d)
                 self._drain_rune_recycles()
                 return ok
-        return False
+        if not actor.can_pay_power_of(n, list(actor.power_pool)):
+            return False
+        ok = actor.pay_power_of(n, list(actor.power_pool))
+        self._drain_rune_recycles()
+        return ok
 
     def _offer_reveal_from_top(self, actor: Player, cards: list) -> list:
         """When cards are looked at / revealed from the TOP of `actor`'s deck (dig /
