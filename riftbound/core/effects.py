@@ -3712,9 +3712,12 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     chain.remove(target_item)
     if spec.get("silence"):
         ctx.loop.gs.cant_play_spells_turn[target_item.player] = ctx.loop.gs.turn
-    if spec.get("return_to_hand"):
+    if spec.get("return_to_hand") and not getattr(target_card, "_flow_banish", False):
         owner.hand.append(target_card)
     else:
+        # Played with FLOW, it is banished whichever replacement applies
+        # first (§829.1.b.1: it leaves the chain, not by its own execution;
+        # §372: Abandon's "to hand instead" can't stop that).
         ctx.loop._spell_to_trash(owner, target_card)
 
 

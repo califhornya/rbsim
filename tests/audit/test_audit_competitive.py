@@ -13,7 +13,7 @@ import pytest
 from riftbound.core.enums import Domain
 from riftbound.registry.cards_registry import load_deck_json
 
-from audit_helpers import act, card, choices, hide, labels, legend, setup, unit
+from audit_helpers import act, card, choices, hide, labels, legend, scripted, setup, unit
 
 DECKS = Path(__file__).resolve().parents[2] / "riftbound" / "data" / "decks"
 
@@ -180,6 +180,22 @@ def test_brittle_steel_is_played_from_the_trash_with_flow():
     b.base_gear.append(card("Seal of Rage"))
     act(loop, "A", "Play Brittle Steel from trash (FLOW)")
     assert not b.base_gear and any(c.name == "Brittle Steel" for c in a.banished)
+
+
+def test_abandon_on_a_spell_played_with_flow_banishes_it():
+    """D55. Abandon: 'Counter a spell. Return it to its owner's hand instead of
+    putting it in their trash.' §829.1.b.1: a spell played with FLOW that
+    leaves the chain, not by its own execution, is banished instead; whichever
+    replacement its controller applies first (§372), it ends banished. It went
+    back to hand still marked, and was banished after its next normal cast."""
+    loop, a, b = setup(active="A")
+    a.trash.append(card("Brittle Steel"))
+    b.base_gear.append(card("Seal of Rage"))
+    b.hand.append(card("Abandon"))
+    scripted(loop, a, b, B={"reaction": ["React Abandon"]})
+    act(loop, "A", "Play Brittle Steel from trash (FLOW)")
+    assert [c.name for c in b.base_gear] == ["Seal of Rage"]
+    assert [c.name for c in a.banished] == ["Brittle Steel"] and not a.hand
 
 
 def test_kaisa_legend_power_pays_a_flow_cost():
