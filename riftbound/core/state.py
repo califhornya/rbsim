@@ -304,6 +304,10 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     opp.hand = pool[:n_hand]
     opp.deck.cards = pool[n_hand:]
 
-    rng.shuffle(me.deck.cards)
-    rng.shuffle(opp.deck.cards)
+    # The observer's own known top cards (PREDICT) stay where they are.
+    k = len(me.deck.known_on_top())
+    below = me.deck.cards[:len(me.deck.cards) - k]
+    rng.shuffle(below)
+    me.deck.cards[:len(below)] = below
+    opp.deck.shuffle(rng)
     return gs

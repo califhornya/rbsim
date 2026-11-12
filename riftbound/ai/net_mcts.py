@@ -17,13 +17,21 @@ and the showdown settle, both players then passing); the mulligan compares the
 net's value of each keep.
 
 **Choices inside an action** (a spell's target, a mode, the unit an Equipment
-goes on, which enemy combat damage kills first, a "you may"...; GameLoop.choose)
-are searched too: the first time a child action is tried, the player's first
-choice of a SEARCH_CHOICES kind it meets splits that child into one child per
-option (the action's prior shared out), each later tried with that option
-forced. The value of the position each leads to decides, as for actions; the
-chosen variant's option is then forced in the real game (_ForcedChoice). The
-policy target counts all variants of an action as that action.
+goes on, which enemy combat damage kills first, a "you may", a card looked at
+on the deck...; GameLoop.choose) are searched too, every one the player makes
+while the action plays out (its chain and showdown included): the tree goes on
+below an action through one node per option chosen, keyed by the choice and
+the option's description (_choice_key), so a determinized copy that shows
+other cards (dig, predict) only adds options. A choice node's options have
+equal priors, the baseline's tried first. The real game then follows the
+most visited options (_Plan) until the player's next decision of that kind.
+
+**Choices while the other player acts** (combat damage as the defender, a
+spell of theirs that makes this player choose, the resolution of this player's
+own spell after they passed) come after a showdown or chain decision of this
+player: that one-ply search plays on until things settle, so it searches them
+too, and runs even when passing is the only option if a probe sees such a
+choice ahead (_choices_ahead).
 """
 
 from __future__ import annotations
@@ -60,71 +68,232 @@ def predict(net, vec, mask):
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
 
-# The GameLoop.choose kinds the search branches on (by prefix): ones the player
-# sees, so a determinized copy offers the same options in the same order.
-# Hidden ones (dig and predict look at the deck) and the Power domain (six
-# options, rarely mattering) keep their baseline.
-SEARCH_CHOICES = ("target:", "mode", "equip", "combat_damage_order", "cost_unit:",
-                  "destination", "optional:", "deploy", "discard", "player", "token_location",
-                  "battlefield:", "tag:")
-_MAX_VARIANTS = 6
+# Choices the search leaves to the baseline (GameLoop.choose kinds, by prefix).
+UNSEARCHED_CHOICES: tuple = ()
 
 
 def _searchable(kind: str, side: str, me: str, n: int) -> bool:
-    return side == me and n > 1 and kind.startswith(SEARCH_CHOICES)
+    return side == me and n > 1 and not (UNSEARCHED_CHOICES and kind.startswith(UNSEARCHED_CHOICES))
+
+
+def _label(loop, side: str, option, i: int) -> str:
+    """An option's description, the same on every copy of the game (an object
+    without one is named by its place among the options)."""
+    text = describe_option(loop, side, option)
+    return f"{type(option).__name__} #{i}" if " at 0x" in text else text
+
+
+def _choice_keys(loop, kind: str, side: str, options: list, source) -> list:
+    """One key per option: (kind, the card making the choice, the option's
+    description). Two options with one key are the same choice."""
+    src = getattr(source, "name", None) or ""
+    return [(kind, src, _label(loop, side, o, i)) for i, o in enumerate(options)]
 
 
 def _split_key(key) -> tuple:
-    """A child key is an engine action tuple, or (action, (kind, n, option)) for
-    one variant of an action's choice. -> (action, force or None)."""
+    """A suggestion's key is an engine action tuple, or (action, choice key)
+    for one option of the action's first choice. -> (action, choice key or None)."""
     if key and isinstance(key[0], tuple):
         return key[0], key[1]
     return key, None
 
 
-class _ChoiceProbe:
-    """Chooser for one action applied in the search: records the first choice
-    `me` makes of a searched kind, as (kind, n options, baseline index), and
-    with `force` = (kind, n, j) takes option j there if it is that choice."""
-
-    def __init__(self, me: str, force=None):
-        self.me, self.force, self.first = me, force, None
-        self.labels: Optional[list] = None      # the first choice's options, described
-
-    def __call__(self, loop, kind, side, options, default, source):
-        if self.first is not None or not _searchable(kind, side, self.me, len(options)):
-            return None
-        self.first = (kind, len(options), default)
-        self.labels = [describe_option(loop, side, o) for o in options]
-        if self.force is not None and tuple(self.force[:2]) == (kind, len(options)):
-            return self.force[2]
-        return None
+def _unlink(loop, chooser) -> None:
+    """Take `chooser` out of the loop's chain of choosers (each one passes what
+    isn't its own to `previous`), wherever it is in it."""
+    if loop.chooser is chooser:
+        loop.chooser = chooser.previous
+        return
+    c = loop.chooser
+    while c is not None:
+        prev = getattr(c, "previous", None)
+        if prev is chooser:
+            c.previous = chooser.previous
+            return
+        c = prev
 
 
-class _ForcedChoice(_ChoiceProbe):
-    """The searched option, forced in the real game for the action just
-    returned: fires at the player's first choice of that kind and number of
-    options, then puts the loop's previous chooser back; any other choice goes
-    to that chooser."""
+class _ForcedChoice:
+    """One option forced in the real game (the coach's suggestion taken): fires
+    at the player's first choice that offers it, then leaves the loop's chain
+    of choosers; any other choice goes to the previous chooser."""
 
     def __init__(self, me: str, force, loop, previous):
-        super().__init__(me, force)
-        self.loop, self.previous = loop, previous
+        self.me, self.force, self.loop, self.previous = me, force, loop, previous
 
     def __call__(self, loop, kind, side, options, default, source):
-        if _searchable(kind, side, self.me, len(options)) and \
-                tuple(self.force[:2]) == (kind, len(options)):
-            self.release()
-            return self.force[2]
+        if _searchable(kind, side, self.me, len(options)):
+            keys = _choice_keys(loop, kind, side, options, source)
+            if self.force in keys:
+                self.release()
+                return keys.index(self.force)
         return self.previous(loop, kind, side, options, default, source) if self.previous else None
 
     def release(self) -> None:
-        if self.loop.chooser is self:
-            self.loop.chooser = self.previous
+        _unlink(self.loop, self)
+
+
+# How long a plan lasts: a decision of the player releases its plans of that
+# level and the ones below it (a turn action all of them).
+_LEVEL = {DecisionPoint.TURN_ACTION: 0, DecisionPoint.SHOWDOWN_ACTION: 1, DecisionPoint.REACTION: 2}
+
+
+class _Plan:
+    """The search's choices for the action just played, followed in the real
+    game: at each choice of the player, the most visited option the tree has
+    for it (its node then goes one step down); a choice the tree hasn't seen
+    goes to the previous chooser (or the baseline). Only during the turn it was
+    made in."""
+
+    def __init__(self, me: str, node: "_Node", level: int, loop, previous):
+        self.me, self.node, self.level = me, node, level
+        self.loop, self.previous = loop, previous
+        self.turn = loop.gs.turn
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if self.node is None or loop.gs.turn != self.turn or \
+                not _searchable(kind, side, self.me, len(options)):
+            return self.previous(loop, kind, side, options, default, source) if self.previous else None
+        keys = _choice_keys(loop, kind, side, options, source)
+        seen = [(c.N, -i) for i, k in enumerate(keys)
+                if (c := self.node.choices.get(k)) is not None and c.N > 0]
+        # The tree saw other options for this kind of choice: it depends on
+        # hidden cards (dig, predict); the previous chooser (_Fallback) sees
+        # the real ones.
+        hidden = any(k[0] == kind and k not in keys for k in self.node.choices)
+        if seen and not hidden:
+            i = -max(seen)[1]
+        else:
+            i = self.previous(loop, kind, side, options, default, source) if self.previous else None
+        got = default if i is None else i
+        self.node = self.node.choices.get(keys[got], self.node)
+        return i
+
+    def release(self) -> None:
+        _unlink(self.loop, self)
+
+
+class _Stop(BaseException):
+    """A replayed segment reached a decision the journal doesn't have yet."""
+
+
+class _Diverged(BaseException):
+    """A replayed segment left the journal's path."""
+
+
+class _Cursor:
+    """Replays a loop's journal on a copy of its segment: the decisions (for
+    _ReplayAgent) and the choices, in order; then the choice being weighed
+    gets `force` (its randomness from here on is new, `seed`), any later one
+    the baseline, and the next decision stops the replay (_Stop)."""
+
+    def __init__(self, journal: list, target: tuple, force: int, seed: int, gs):
+        self.journal, self.target, self.force, self.seed, self.gs = journal, target, force, seed, gs
+        self.k = 0
+        self.done = False
+
+    def decision(self, side: str, point: str):
+        if self.k >= len(self.journal):
+            raise _Stop()
+        e = self.journal[self.k]
+        if e[0] != "decision" or e[1] != side or e[2] != point:
+            raise _Diverged()
+        self.k += 1
+        return e[3]
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if self.k < len(self.journal):
+            e = self.journal[self.k]
+            if e[0] != "choice" or e[1:4] != (side, kind, len(options)):
+                raise _Diverged()
+            self.k += 1
+            return e[4]
+        if self.done:
+            return None
+        if (side, kind, len(options)) != self.target:
+            raise _Diverged()
+        self.done = True
+        self.k += 1
+        self.gs.rng = random.Random(self.seed)
+        return self.force
+
+
+class _ReplayAgent:
+    """A player's agent on a replayed segment: decides as the journal says."""
+
+    def __init__(self, player, cursor: _Cursor):
+        self.player, self.cursor = player, cursor
+
+    def decide_action(self, opponent, cards_played: int = 0):
+        return self.cursor.decision(self.player.name, DecisionPoint.TURN_ACTION.value)
+
+    def decide_reaction(self, opponent, chain):
+        return self.cursor.decision(self.player.name, DecisionPoint.REACTION.value)
+
+    def decide_showdown_action(self, opponent, bf_idx: int):
+        return self.cursor.decision(self.player.name, DecisionPoint.SHOWDOWN_ACTION.value)
+
+    def decide_mulligan(self) -> list:
+        return []
+
+    def decide_optional(self, card, effect_name: str) -> bool:
+        return True
+
+    def decide_predict_recycle(self, card) -> bool:
+        return False
+
+    def decide_mode(self, card, n_modes: int):
+        return None
+
+
+class _Fallback:
+    """At the bottom of the real loop's choosers: a choice of the agent's
+    player no plan answers (one the search didn't meet, or one on hidden
+    cards: the ones looked at are real now) is weighed by replaying the loop's
+    segment once per option (NetGuidedMCTSAgent.replay_values)."""
+
+    def __init__(self, agent: "NetGuidedMCTSAgent", previous):
+        self.agent, self.previous = agent, previous
+        self.me = agent.player.name
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if _searchable(kind, side, self.me, len(options)):
+            values = self.agent.replay_values(kind, side, options, source)
+            if values:
+                best = max(range(len(values)), key=lambda i: (values[i], i == default))
+                if values[best] > values[default] + 1e-6:
+                    return best
+            return None
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+
+class _TreeChooser:
+    """Chooser for one action applied in the search: at each choice of `me`,
+    PUCT over the node's options (created as the choice is met, with equal
+    priors), one step down the tree; `path` collects the nodes."""
+
+    def __init__(self, agent: "NetGuidedMCTSAgent", me: str, node: "_Node", path: list):
+        self.agent, self.me, self.node, self.path = agent, me, node, path
+        self.met = False
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if not _searchable(kind, side, self.me, len(options)):
+            return None
+        self.met = True
+        keys = _choice_keys(loop, kind, side, options, source)
+        node, n = self.node, len(options)
+        for i, k in enumerate(keys):
+            if k not in node.choices:
+                node.choices[k] = _Node()
+                node.cprior[k] = 1.0 / n
+        i = self.agent._select_option(node, keys, default)
+        self.node = node.choices[keys[i]]
+        self.path.append(self.node)
+        return i
 
 
 class _Node:
-    __slots__ = ("N", "W", "P", "children", "expanded", "value", "labels")
+    __slots__ = ("N", "W", "P", "children", "expanded", "value", "choices", "cprior")
 
     def __init__(self):
         self.N = 0
@@ -133,7 +302,10 @@ class _Node:
         self.children: dict = {}   # action_tuple -> _Node
         self.expanded = False
         self.value = 0.0
-        self.labels: dict = {}     # variant key -> its option, described
+        # The choices met right after this node, as an action plays out:
+        # choice key (_choice_keys) -> _Node, and its prior.
+        self.choices: dict = {}
+        self.cprior: dict = {}
 
 
 class NetGuidedMCTSAgent(Agent):
@@ -224,14 +396,73 @@ class NetGuidedMCTSAgent(Agent):
 
     # -- search --------------------------------------------------------------
 
-    def _release_forced(self) -> None:
-        """A forced choice the last action never reached doesn't outlive it."""
-        chooser = getattr(getattr(self, "loop", None), "chooser", None)
-        if isinstance(chooser, _ForcedChoice) and chooser.me == self.player.name:
-            chooser.release()
+    def _ensure_fallback(self) -> None:
+        """The real loop records its journal, and this player's choices no plan
+        answers go to a _Fallback (once per loop)."""
+        loop = getattr(self, "loop", None)
+        if loop is None or getattr(self, "_fallback_loop", None) is loop:
+            return
+        self._fallback_loop = loop
+        if loop.journal is None:
+            loop.journal = []
+        loop.chooser = _Fallback(self, loop.chooser)
+
+    def replay_values(self, kind: str, side: str, options: list, source) -> Optional[list]:
+        """The value, for this player, of each option of the choice the real
+        loop is asking now: its segment replayed on a copy with that option,
+        up to the next decision. None when it can't be replayed (no segment
+        yet, or the copy took another path)."""
+        from riftbound.core.loop import GameLoop
+        loop = self.loop
+        if loop.segment is None or loop.journal is None:
+            return None
+        self._ensure_rng()
+        journal = list(loop.journal)
+        snap = loop.segment[0]
+        keys = _choice_keys(loop, kind, side, options, source)
+        seed = self._rng.randrange(1 << 30)
+        values: list = []
+        for j, key in enumerate(keys):
+            if key in keys[:j]:
+                values.append(values[keys.index(key)])
+                continue
+            clone = snap.clone()
+            cursor = _Cursor(journal, (side, kind, len(options)), j, seed, clone)
+            clone.A.agent = _ReplayAgent(clone.A, cursor)
+            clone.B.agent = _ReplayAgent(clone.B, cursor)
+            rl = GameLoop(clone)
+            rl.chooser, rl.segment = cursor, loop.segment
+            try:
+                rl.replay_segment()
+            except _Stop:
+                pass
+            except (_Diverged, Exception):  # noqa: BLE001 — a replay never stops the game
+                return None
+            if not cursor.done:
+                return None
+            clone.A.agent = clone.B.agent = None
+            v = self._terminal_value(clone, self.player.name)
+            values.append(self._net_value(clone, self.player.name) if v is None else v)
+        return values
+
+    def _release_forced(self, level: int = 0) -> None:
+        """The plans (and forced choices) of this player's earlier decisions
+        don't outlive the next one of their level: a turn action releases
+        all of them, a showdown decision the showdown and chain ones, a chain
+        decision the chain ones (the one-ply search plans what comes next)."""
+        loop = getattr(self, "loop", None)
+        c = getattr(loop, "chooser", None)
+        while c is not None:
+            prev = getattr(c, "previous", None)
+            if getattr(c, "me", None) == self.player.name and (
+                    isinstance(c, _ForcedChoice) and level == 0
+                    or isinstance(c, _Plan) and (c.level >= level or c.turn != loop.gs.turn)):
+                c.release()
+            c = prev
 
     def decide_action(self, opponent, cards_played: int = 0) -> Action:
         self._ensure_rng()
+        self._ensure_fallback()
         self._release_forced()
         side = self.player.name
         root_legal = legal_actions(self.loop, DecisionPoint.TURN_ACTION, side)
@@ -256,30 +487,44 @@ class NetGuidedMCTSAgent(Agent):
                 self._iterate_now(root, side, point, legal, bf_idx)
         return root
 
-    def _conclude(self, root: _Node, side: str, legal: list) -> Action:
+    def _conclude(self, root: _Node, side: str, legal: list,
+                  point: DecisionPoint = DecisionPoint.TURN_ACTION) -> Action:
         """Record the visit distribution (and the training example) and play."""
         if not root.children or not any(c.N for c in root.children.values()):
             return _PASS
         total = sum(c.N for c in root.children.values()) or 1
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
-        if self.record is not None:
+        if self.record is not None and len(legal) > 1:
             self._record_example(side, legal)
-        return self._play(root, side)
+        return self._play(root, side, point)
 
-    def _play(self, root: _Node, side: str) -> Action:
+    def _play(self, root: _Node, side: str, point: DecisionPoint = DecisionPoint.TURN_ACTION) -> Action:
         """The root child to play: the most visited (AlphaZero's move choice), or
-        early in an exploring game one drawn in proportion to its visits; its
-        searched option is forced in the real game."""
-        self._decisions += 1
+        early in an exploring game one drawn in proportion to its visits; the
+        real game then follows its searched choices (_Plan)."""
         items = [(k, c) for k, c in root.children.items() if c.N > 0] or list(root.children.items())
-        if self.explore and self._decisions <= self.temperature_moves:
+        if len(items) > 1:
+            self._decisions += 1
+        if self.explore and len(items) > 1 and self._decisions <= self.temperature_moves:
             key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
         else:
             key = self.prefer_pass(root, max(items, key=lambda kv: kv[1].N)[0])
-        action, force = _split_key(key)
-        if force is not None:
-            self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
-        return action
+        child = root.children[key]
+        if child.choices:
+            self.loop.chooser = _Plan(side, child, _LEVEL[point], self.loop, self.loop.chooser)
+        return key
+
+    def variants(self, root: _Node) -> list:
+        """The root's moves as suggestions: (key, visits, total value) for each
+        action, or for each option of its first choice the search tried
+        (key = (action, choice key)), most visited first."""
+        out = []
+        for action, child in root.children.items():
+            tried = [(k, c) for k, c in child.choices.items() if c.N > 0]
+            if not tried:
+                out.append((action, child.N, child.W))
+            out += [((action, k), c.N, c.W) for k, c in tried]
+        return sorted(out, key=lambda v: -v[1])
 
     def prefer_pass(self, root: _Node, key):
         """PASS instead of `key` when `key` isn't clearly better: a free-looking
@@ -289,7 +534,7 @@ class NetGuidedMCTSAgent(Agent):
         abilities: a unit, spell or move the search prefers is played (the margin
         made the net skip its 2-drop on turn 2, a noisy Q nudging it to PASS)."""
         p = root.children.get(_PASS)
-        best = root.children.get(key)
+        best = root.children.get(_split_key(key)[0])
         if key == _PASS or p is None or best is None or not p.N or not best.N \
                 or _split_key(key)[0][0] != "ABILITY" \
                 or getattr(self.gs, "pending_move", None) is not None:
@@ -312,8 +557,7 @@ class NetGuidedMCTSAgent(Agent):
         obs = Observation.from_state(self.gs, side)
         n_bf = len(self.gs.battlefields)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
-        for key, share in self.last_visits.items():
-            a_tuple, _force = _split_key(key)
+        for a_tuple, share in self.last_visits.items():
             idx = action_to_index(a_tuple, n_bf)
             if idx is not None:
                 policy[idx] += share
@@ -372,23 +616,20 @@ class NetGuidedMCTSAgent(Agent):
             if key is None:
                 value = self._net_value(clone, side)
                 break
+            node = node.children[key]
+            path.append(node)
             if key == _PASS and clone.pending_move is None:
                 # Stop-here: evaluate the position where we choose to end acting.
                 # (PASS during a move ends the move: its showdown, then more turn.)
-                path.append(node.children[key])
                 value = self._net_value(clone, side)
                 break
-            action, force = _split_key(key)
-            probe = _ChoiceProbe(side, force)
-            loop.chooser = probe
-            loop._apply_action(clone.get_player(side), action, cards_played_this_turn=cpt)
+            tree = _TreeChooser(self, side, node, path)
+            loop.chooser = tree
+            loop._apply_action(clone.get_player(side), key, cards_played_this_turn=cpt)
             loop.chooser = None
             loop._recompute_passives()
             cpt += 1
-            if force is None and probe.first is not None:
-                key = self._split_child(node, action, probe.first, probe.labels)
-            node = node.children[key]
-            path.append(node)
+            node = tree.node          # below the options chosen
         else:
             value = self._net_value(clone, side)
 
@@ -396,27 +637,31 @@ class NetGuidedMCTSAgent(Agent):
             n.N += 1
             n.W += value
 
-    @staticmethod
-    def _split_child(node: _Node, action, first, labels: Optional[list] = None) -> tuple:
-        """The action met a choice: one child per option (at most _MAX_VARIANTS:
-        the baseline's and the first others), sharing the action's prior; the
-        baseline's keeps the existing child. Returns that child's key."""
-        kind, n, default = first
-        options = [default] + [j for j in range(n) if j != default][:_MAX_VARIANTS - 1]
-        child, prior = node.children.pop(action), node.P.pop(action, 0.0)
-        for j in options:
-            key = (action, (kind, n, j))
-            node.children[key] = child if j == default else _Node()
-            node.P[key] = prior / len(options)
-            if labels and j < len(labels):
-                node.labels[key] = labels[j]
-        return (action, (kind, n, default))
+    def _select_option(self, node: _Node, keys: list, default: int = 0) -> int:
+        """PUCT over a choice's options (by key; the first of two with one key):
+        an option not tried yet is worth the node's own mean so far; on a tie
+        the baseline's option goes first."""
+        sqrt_total = math.sqrt(max(1, node.N))
+        fpu = node.W / node.N if node.N else 0.0
+        best, best_val, seen = default, -1e30, set()
+        order = [default] + [i for i in range(len(keys)) if i != default]
+        for i in order:
+            k = keys[i]
+            if k in seen:
+                continue
+            seen.add(k)
+            child = node.choices[k]
+            q = child.W / child.N if child.N else fpu
+            val = q + self.c_puct * node.cprior.get(k, 0.0) * sqrt_total / (1 + child.N)
+            if val > best_val:
+                best, best_val = i, val
+        return best
 
     def _puct_select(self, node: _Node, legal: list):
-        """PUCT over children that are currently legal (a choice variant when its
-        action is):  argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
+        """PUCT over children that are currently legal:
+        argmax  Q(a) + c_puct * P(a) * sqrt(sum_b N_b) / (1 + N_a)."""
         legal_set = set(legal)
-        candidates = [(a, c) for a, c in node.children.items() if _split_key(a)[0] in legal_set]
+        candidates = [(a, c) for a, c in node.children.items() if a in legal_set]
         if not candidates:
             return None
         sqrt_total = math.sqrt(max(1, node.N))
@@ -475,17 +720,52 @@ class NetGuidedMCTSAgent(Agent):
 
     def _search_now(self, point: DecisionPoint, bf_idx: Optional[int]) -> Action:
         """A decision in a showdown (with focus) or on an open chain: one-ply
-        PUCT over the legal actions and their choice variants. Each is played on
-        a determinized copy until things settle (the chain resolved, then the
-        showdown over with its combat, both players passing) and the net's
-        value of that position counts. Free when passing is the only option."""
+        PUCT over the legal actions and the choices each meets. Each is played
+        on a determinized copy until things settle (the chain resolved, then
+        the showdown over with its combat, both players passing) and the net's
+        value of that position counts. When passing is the only option, only
+        if this player has a choice to make before things settle."""
         self._ensure_rng()
+        self._ensure_fallback()
+        self._release_forced(_LEVEL[point])
         side = self.player.name
         legal = legal_actions(self.loop, point, side)
-        if len(legal) <= 1:
+        if len(legal) <= 1 and not (legal and self._choices_ahead(legal[0].to_engine(), point, bf_idx)):
             return legal[0].to_engine() if legal else _PASS
         root = self.search(point, legal, bf_idx=bf_idx)
-        return self._conclude(root, side, legal)
+        return self._conclude(root, side, legal, point)
+
+    def _choices_ahead(self, action, point: DecisionPoint, bf_idx: Optional[int]) -> bool:
+        """Whether this player makes a choice (more than one option) on a
+        determinized copy where `action` is taken and things settle."""
+        from riftbound.core.state import determinize
+        clone = self.gs.clone()
+        clone.rng = random.Random(self._rng.randrange(1 << 30))
+        determinize(clone, observer=self.player.name, rng=clone.rng)
+        loop = self._loop_for(clone)
+        met = []
+
+        def probe(_loop, kind, side, options, default, source):
+            if _searchable(kind, side, self.player.name, len(options)):
+                met.append(kind)
+            return None
+        loop.chooser = probe
+        try:
+            self._step(loop, point, action, bf_idx)
+            self._settle(loop)
+        except Exception:  # noqa: BLE001 — a probe never stops the game
+            return False
+        return bool(met)
+
+    def _step(self, loop, point: DecisionPoint, action, bf_idx: Optional[int]) -> None:
+        """Take `action` at a showdown or chain decision on `loop` (a copy)."""
+        if action == _PASS:
+            return
+        player = loop.gs.get_player(self.player.name)
+        if point == DecisionPoint.SHOWDOWN_ACTION:
+            loop._showdown_step(player, self.player.name, action, bf_idx)
+        else:
+            loop._reaction_step(player, self.player.name, action)
 
     def _iterate_now(self, root: _Node, side: str, point: DecisionPoint, legal: list,
                      bf_idx: Optional[int]) -> None:
@@ -507,24 +787,16 @@ class NetGuidedMCTSAgent(Agent):
         key = self._puct_select(root, [a.to_engine() for a in legal])
         if key is None:
             return
-        action, force = _split_key(key)
-        probe = _ChoiceProbe(side, force)
-        loop.chooser = probe
-        if action != _PASS:
-            player = clone.get_player(side)
-            if point == DecisionPoint.SHOWDOWN_ACTION:
-                loop._showdown_step(player, side, action, bf_idx)
-            else:
-                loop._reaction_step(player, side, action)
-        loop.chooser = None
+        child = root.children[key]
+        path = [root, child]
+        loop.chooser = _TreeChooser(self, side, child, path)
+        self._step(loop, point, key, bf_idx)
         self._settle(loop)
+        loop.chooser = None
         value = self._terminal_value(clone, side)
         if value is None:
             value = self._net_value(clone, side)
-        if force is None and probe.first is not None:
-            key = self._split_child(root, action, probe.first, probe.labels)
-        child = root.children[key]
-        for n in (root, child):
+        for n in path:
             n.N += 1
             n.W += value
 

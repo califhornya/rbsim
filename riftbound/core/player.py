@@ -40,9 +40,26 @@ class RuneDeck:
 @dataclass
 class Deck:
     cards: List[Card]
+    # Cards its owner has seen on top (top first: PREDICT puts them back),
+    # still known while they are there (known_on_top).
+    known_top: List[Card] = field(default_factory=list)
 
     def shuffle(self, rng: random.Random) -> None:
         rng.shuffle(self.cards)
+        self.known_top = []
+
+    def known_on_top(self) -> List[Card]:
+        """The known cards still on top, in order (top first): one drawn is
+        skipped, one no longer where it was ends what is known."""
+        out: List[Card] = []
+        for card in self.known_top:
+            if not any(card is c for c in self.cards):
+                continue
+            if len(out) < len(self.cards) and self.cards[-1 - len(out)] is card:
+                out.append(card)
+            else:
+                break
+        return out
 
     def draw(self) -> Optional[Card]:
         if not self.cards:

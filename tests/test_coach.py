@@ -286,7 +286,7 @@ def test_a_suggested_move_names_the_unit_it_moves():
     a.hand = [CARD_REGISTRY["Twilight Step"].instantiate()]
     a.base_units.append(UnitInPlay(card=CARD_REGISTRY["Shadow Order Disciple"].instantiate()))
     b.base_units.append(UnitInPlay(card=CARD_REGISTRY["Kinkou Lifeblade"].instantiate()))
-    seen = _choice_preview(gs, "A", ("SPELL", 0, 1), ("destination:move_unit", 2, 1), 0)
+    seen = _choice_preview(gs, "A", ("SPELL", 0, 1), ("destination:move_unit", "Twilight Step", "battlefield 1"), 0)
     assert seen["text"].startswith("bersaglio: Shadow Order Disciple (tua")
     assert seen["text"].endswith("verso: campo 2") and seen["ref"] == "bf:1"
 
@@ -316,7 +316,7 @@ def test_the_advice_names_the_card_of_a_you_may_and_banishes_are_logged():
     clone.is_token = True
     a.base_units.append(clone)
     loop._apply_action(a, ("MOVE", 0, 2, 0))                 # held: the showdown waits
-    seen = _choice_preview(gs, "A", ("PASS", None, None), ("optional:give_temporary_assault", 2, 0), 0)
+    seen = _choice_preview(gs, "A", ("PASS", None, None), ("optional:give_temporary_assault", "Shadow Clone", "yes"), 0)
     assert seen["text"] == "Shadow Clone: Usare questo effetto? Sì"
     before = Observation.from_state(gs, "A").to_dict()
     loop._apply_action(a, ("PASS", None, None))

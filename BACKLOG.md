@@ -43,8 +43,32 @@ This file has two parts: **Open now** (the only open items) and sections A-G
       costs): each deviation a failing test citing its §.
 
 ### O3. AI, coach, match (from F, still open)
-- [ ] The net-guided search decides only the first choice of an action, none
-      while defending, none of the hidden ones (dig, predict).
+- [x] The net-guided search makes the player's choices (2026-11-12,
+      `riftbound/ai/net_mcts.py`, tests in `tests/test_net_mcts.py`):
+      - every choice of an action, not only the first: the tree goes on below
+        the action through one node per option, keyed by (kind, card, option
+        described), equal priors, the baseline's tried first; the real game
+        follows the most visited options (`_Plan`) until the player's next
+        decision of that level;
+      - while the other player acts: the showdown / chain search plays on
+        until things settle with the tree still choosing, and runs even when
+        PASS is the only option if a probe sees a choice of the player ahead
+        (combat damage as the defender, the resolution of a spell);
+      - hidden ones (dig, predict) and any choice the plan hasn't seen: weighed
+        when the real game asks it (`_Fallback`). The loop keeps a journal
+        since the latest main-phase decision (`GameLoop.journal`, `segment`);
+        the segment is replayed on a copy once per option, both players'
+        decisions and choices as they were, up to the next decision, and the
+        net's value picks (the baseline on a tie);
+      - PREDICT: the cards a player knows are on top of their deck
+        (`Deck.known_top`) are in the Observation (`my_deck_top`) and the
+        encoding (a zone of their own, one row each with its place), and
+        determinize keeps them there.
+      Approximations: a replay goes on from the choice with the real hidden
+      cards (the opponent's hand, the deck below; only what becomes public
+      before the next decision can show) and fresh randomness, one sample
+      per option, valued at the next decision. The new zone changes the
+      net's shape: one more reason the old nets don't load.
 - [ ] Coach: the mulligan and the choices made during the opponent's moves
       aren't coached; the page for two facedown cards (B8) and Neeko's legends
       (B16) isn't visually checked.
