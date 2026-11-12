@@ -44,3 +44,19 @@ def test_zhonyas_hourglass_played_from_face_down_goes_to_base():
     hide(loop, "A", 0, "Zhonya's Hourglass")
     act(loop, "A", "Play Zhonya's Hourglass from Hidden @BF0")
     assert [g.name for g in a.base_gear] == ["Zhonya's Hourglass"]
+
+
+# -- D51. A Standard Move doesn't fire "when I become exhausted" -------------------
+
+def test_a_standard_move_fires_when_i_become_exhausted():
+    """Reckless Innovator: 'When I become exhausted choose one - Play a Gold
+    gear token exhausted. - Pay [Chaos] to draw 1.' §144.2: exhausting the unit
+    is the cost of a Standard Move. The unit had left its location as it was
+    exhausted, so its controller wasn't found and nothing fired."""
+    loop, a, b = setup(active="A")
+    innovator = unit("Reckless Innovator")
+    a.base_units.append(innovator)
+    seen = choices(loop, {"mode": lambda _l, options: 0})
+    act(loop, "A", "Move Reckless Innovator base→BF0")
+    assert [k for k, _s, _o in seen if k.startswith("mode")]
+    assert [(g.name, g.tapped) for g in a.base_gear] == [("Gold", True)]

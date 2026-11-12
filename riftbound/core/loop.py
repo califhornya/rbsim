@@ -1139,20 +1139,23 @@ class GameLoop:
                 context_extra={"battlefield": bf},
             )
 
-    def _exhaust(self, unit) -> None:
+    def _exhaust(self, unit, side: Optional[str] = None, bf: Optional[Battlefield] = None) -> None:
         """Exhaust a unit. A ready → exhausted change fires its "when I become
-        exhausted" (on_exhaust) abilities for its controller."""
+        exhausted" (on_exhaust) abilities for its controller. `side` (and `bf`,
+        where it was): a unit off the board for a moment, as a Standard Move
+        exhausts it (§144.2) once it has left its location."""
         if not unit.ready:
             return
         unit.ready = False
-        for side in ("A", "B"):
-            actor = self.gs.get_player(side)
-            bf = next((b for b in self.gs.battlefields
-                       if unit in (b.units_A if side == "A" else b.units_B)), None)
-            if bf is None and unit not in actor.base_units and \
-                    not any(unit is lu for lu in self._legend_units(side)):
+        for s in (side,) if side is not None else ("A", "B"):
+            actor = self.gs.get_player(s)
+            here = next((b for b in self.gs.battlefields
+                         if unit in (b.units_A if s == "A" else b.units_B)), None)
+            if side is None and here is None and unit not in actor.base_units and \
+                    not any(unit is lu for lu in self._legend_units(s)):
                 continue
-            bf = bf or self.gs.battlefields[0]
+            side = s
+            bf = here or bf or self.gs.battlefields[0]
             self._resolve_triggered_effects(unit.card, "on_exhaust", bf, actor,
                                             self.gs.get_player(self.gs.other(side)),
                                             context_extra={"battlefield": bf})
@@ -5269,7 +5272,9 @@ class GameLoop:
         base_index = len(self.gs.battlefields)
         src_bf = None if src == base_index else self.gs.battlefields[src]
         dst_bf = None if dst == base_index else self.gs.battlefields[dst]
-        self._exhaust(unit)
+        # The unit has left its location already: its controller and where it
+        # was are given, or "when I become exhausted" wouldn't fire.
+        self._exhaust(unit, side, src_bf)
         g = self.gs.move_group
         count = g[3] + 1 if g is not None and g[:3] == (self.gs.turn, side, dst) else 1
         self.gs.move_group = (self.gs.turn, side, dst, count)
