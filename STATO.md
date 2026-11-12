@@ -51,7 +51,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   decisione invariato. Suite verde (1792 passed: ora torch è installato).
 
 ## In corso
-Niente.
+Primo run di training sul Mac dell'utente (50 iterazioni, `runs/competitive`).
 
 ## Prossimi passi
 Piano concordato (2026-11-12). Punti in ordine di peso per il training:
@@ -71,8 +71,9 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    del corpus fuori dai mazzi, costruzione del mazzo (§103).
 
 Training sulle macchine dell'utente, run in runs/competitive: PC Windows
-(Ryzen 7 7800X3D, `scripts/allena.bat`, 8 worker) o Mac M1 (`allena.command`,
-4 worker, torch 2.13 vuole macOS 14+). La RTX 4070 serve a poco.
+(Ryzen 7 7800X3D, `allena.bat`, 8 worker) o Mac M1 Max (`allena.command`, un
+worker per core veloce: 8; macOS 14+). La RTX 4070 serve a poco. Primo run
+avviato sul Mac il 2026-11-12 (4 worker, 123,6 s la prima iterazione).
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
@@ -81,8 +82,8 @@ Training sulle macchine dell'utente, run in runs/competitive: PC Windows
   `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
   terzo passaggio, `test_audit_corpus.py` quarto, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
-- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py`
-  (effetti), `legality.py` (azioni legali offerte agli agenti).
+- `riftbound/core/`: `battlefield.py` (controllo, Hold / Conquer),
+  `effects.py` (effetti), `legality.py` (azioni legali offerte agli agenti).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
   scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina;
@@ -93,8 +94,8 @@ Training sulle macchine dell'utente, run in runs/competitive: PC Windows
 - `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
   `competitive_kennen` (le liste dell'utente).
 - `tests/audit/test_audit_competitive.py` (quinto passaggio, D53-D55),
-  `tests/audit/test_audit_mechanics_rows.py` (sesto, D56).
-- `docs/MECHANICS.md`: stato di ogni meccanica (riverificato 2026-11-12).
+  `test_audit_mechanics_rows.py` (sesto, D56); `docs/MECHANICS.md`: stato di
+  ogni meccanica (riverificato 2026-11-12).
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.
