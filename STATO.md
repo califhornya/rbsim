@@ -72,8 +72,8 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
    costruzione del mazzo (§103).
 
-Da decidere (utente): allentare la regola "niente training finché il
-BACKLOG non è vuoto"; l'utente propone la sua macchina (Windows, RTX 4070).
+Training sulla macchina dell'utente (Windows, Ryzen 7 7800X3D 8 core,
+RTX 4070 poco utile): `scripts/allena.bat`, 8 worker, run in runs\competitive.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
