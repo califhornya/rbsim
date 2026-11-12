@@ -36,6 +36,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - (Utente, 2026-11-12) Gli otto mazzi non precon sono superati: eliminati e
   non più considerati. Rimossi con loro gli agenti Pyke e Diana, costruiti per
   quei mazzi. Le correzioni di carte trovate su quei mazzi restano.
+- (Utente, 2026-11-12) Il training si fa sui due mazzi competitive.
 - Golden game e test generici giocano solo i precon; l'agente random è ora
   seminato dal seed della partita (prima non era riproducibile), così può
   stare nelle golden.
@@ -63,7 +64,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 Niente.
 
 ## Prossimi passi
-1. Decidere su quali mazzi fare training (precon o competitive).
+1. Prima del training (regola utente: BACKLOG vuoto), vedi BACKLOG O1-O4.
 2. Banlist nuova annunciata per il 13/11, legale dal 23/11: aggiornare
    `riftbound/data/banned_cards.json` appena è pubblica.
 3. Resto del corpus: solo scansioni per classi; carta per carta solo le

@@ -4,8 +4,8 @@
 After `uv sync --extra rl`:
 
     uv run python scripts/train_selfplay.py \
-        --decks riftbound/data/decks/precon_zed.json riftbound/data/decks/precon_shen.json \
-        --iterations 50 --games-per-iter 16 --mcts-iters 100 --run-dir runs/precons
+        --decks riftbound/data/decks/competitive_kaisa.json riftbound/data/decks/competitive_kennen.json \
+        --iterations 50 --games-per-iter 16 --mcts-iters 100 --run-dir runs/competitive
 
 Each game draws two decks from --decks (mirrors included). Games run in
 --workers processes (default: a quarter of the cores, below-normal priority, one

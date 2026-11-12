@@ -51,6 +51,9 @@ This file has two parts: **Open now** (the only open items) and sections A-G
 - [ ] Stepwise engine for deep MCTS trees: only if the search needs it.
 
 ### O4. Training
+- Decks (owner, 2026-11-12): `competitive_kaisa` and `competitive_kennen`.
+  A smoke run (2 iterations, 10 MCTS iterations, 4 workers) works end to end:
+  ~3 s a game on this container's 4 cores.
 - [ ] Nets saved before F3 (OBS_DIM 2979, ACTION_DIM 316) don't load and were
       trained on old rules: retrain from scratch once O1-O2 are done.
 - [ ] Tuning left from docs/history/DEFERRED.md (Stage 1+): MCTS budget, LR
