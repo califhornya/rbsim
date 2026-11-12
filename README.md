@@ -36,7 +36,7 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
 | `riftbound/core/` | The rules engine: `loop.py` (turn structure, chain, payments), `effects.py` (effect handlers), `combat.py`, `legality.py`, `match.py` (Bo3) |
 | `riftbound/registry/` | Card loading (`cards_registry.py`) and the engine vocabulary (`engine_vocab.py`) |
 | `riftbound/data/cards/all_cards.json` | The card corpus with its encoded effects. Every `.json` under `data/cards/` is loaded as cards |
-| `riftbound/data/decks/` | The two training precons, `precon_zed` and `precon_shen` (the other decks were removed on 2026-11-12: out of date) |
+| `riftbound/data/decks/` | The two precons (`precon_zed`, `precon_shen`) and the owner's two competitive decks (`competitive_kaisa`, `competitive_kennen`); the older decks were removed on 2026-11-12 |
 | `riftbound/data/reference/` | `piltover_archive.json`: the official printed text, errata included (not loaded by the engine) |
 | `riftbound/ai/` | Heuristic agent (`simple_trade`), random, MC / ISMCTS search, the net (`net.py`, `encoding.py`), net-guided MCTS, self-play, coach |
 | `scripts/` | Training, coach, round robin, game tracer, audits (`card_text_audit.py`, `coverage_audit.py`, `choice_audit.py`, `piltover_sync.py`) |
@@ -52,13 +52,13 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
   Proving Grounds), every set read card by card with a test per card
   (`BACKLOG.md` A-G, closed). The two training precons match the official text
   on all 51 cards. Rules audit in four passes (`docs/audit/AUDIT.md`).
-- **Tests.** With torch: 1753 passed.
+- **Tests.** With torch: 1773 passed.
 - **AI.** Heuristic agents, search agents, net-guided MCTS with self-play
   training, learned mulligan and battlefield choice, coach mode. The last
   training runs reached 0.50 against `simple_trade`; nets saved before F3 don't
   load (the encoding changed) and were trained on older rules.
-- **Next.** Two current competitive decks from the owner, the banlist legal
-  from 2026-11-23 (`riftbound/data/banned_cards.json`), then training.
+- **Next.** The banlist legal from 2026-11-23
+  (`riftbound/data/banned_cards.json`), then training.
 
 ## Conventions
 

@@ -17,9 +17,9 @@ This file has two parts: **Open now** (the only open items) and sections A-G
 - [x] The eight non-precon decks removed (2026-11-12, owner: out of date),
       with the Pyke and Diana heuristic agents built for them. Training and
       tests use only `precon_zed` and `precon_shen`.
-- [ ] Two current competitive decks, from the owner: import them
-      (`scripts/deck_from_txt.py`), read their cards against the print, play
-      the ones no test names (as the third pass of docs/audit/AUDIT.md).
+- [x] Two current competitive decks, from the owner (2026-11-12):
+      `competitive_kaisa.json`, `competitive_kennen.json`, read and played
+      (audit, fifth pass: D50-D52 fixed).
 - [ ] Banlist: a new one is announced for 2026-11-13, legal from 2026-11-23.
       Update `riftbound/data/banned_cards.json` (now: Ekko Recurrent, Stacked
       Deck, updated 2026-10-25).

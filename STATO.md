@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (rimossi gli otto mazzi non precon; in attesa di due mazzi competitive).
+Aggiornato: 2026-11-12 (importati e verificati i due mazzi competitive; audit quinto passaggio).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -59,17 +59,25 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
     veniva applicata alla domanda successiva; ora è rifiutata. Era la causa
     del test `test_coach` instabile sotto carico.
 
-- Rimozione mazzi: tolti 8 mazzi e 2 agenti, ~20 file di test spostati sui
-  precon, 20 golden game rigenerate (tutte su Zed vs Shen, `simple_trade` e
-  `random`). Suite verde (1753 passed). Trovato e corretto nel test degli
-  invarianti: non contava le carte facedown (non un bug del motore).
+- Rimozione mazzi: tolti 8 mazzi e 2 agenti, test spostati sui precon,
+  20 golden game rigenerate su Zed vs Shen.
+
+- Mazzi competitive (quinto passaggio): `competitive_kaisa`, `competitive_kennen`
+  importati con sideboard. 22 carte nuove lette, dubbie giocate; 480 partite
+  sotto i controlli degli invarianti. Corrette:
+  - D50 `df33571`: un gear HIDDEN giocato da coperto spariva (Edge of Night,
+    Zhonya's Hourglass); Edge of Night si attacca a un'unità "here".
+  - D51 `0e03237`: lo Standard Move non attivava "when I become exhausted"
+    (Reckless Innovator e altre 5 carte).
+  - D52 `334e93c`: Decree of Unity lanciabile senza bersaglio legale.
+  - 8 golden game Kai'Sa vs Kennen aggiunte (le 20 dei precon invariate).
+  Suite verde (1773 passed).
 
 ## In corso
-In attesa dei due mazzi competitive dell'utente.
+Niente.
 
 ## Prossimi passi
-1. Due mazzi competitive (dall'utente): importarli, leggere le loro carte
-   contro la stampa e giocare quelle senza test (come il terzo passaggio).
+1. Decidere su quali mazzi fare training (precon o competitive).
 2. Banlist nuova annunciata per il 13/11, legale dal 23/11: aggiornare
    `riftbound/data/banned_cards.json` appena è pubblica.
 3. Resto del corpus: solo scansioni per classi; carta per carta solo le
@@ -92,7 +100,9 @@ In attesa dei due mazzi competitive dell'utente.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
-- `riftbound/data/decks/`: solo `precon_zed.json`, `precon_shen.json`.
+- `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
+  `competitive_kennen` (le liste dell'utente).
+- `tests/audit/test_audit_competitive.py`: test del quinto passaggio.
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.
