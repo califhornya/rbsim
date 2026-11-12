@@ -4088,7 +4088,7 @@ def _resolve_targets(ctx: "EffectContext", spec: Mapping[str, Any], *, bias: str
     if tf:
         units = [u for u in units if _passes_filter(u, tf, ctx)]
     if not units and scope == "single" and not target.startswith("all") and not where \
-            and hidden is None and not isinstance(ctx.card, SpellCard) \
+            and hidden is None and not isinstance(ctx.card, SpellCard) and not spec.get("here") \
             and target not in _BOTH_SIDES_TARGETS:
         # An ability or trigger isn't aimed at one battlefield the way a spell is
         # (a legend's "give a unit ASSAULT 2"): with no candidate here, look at
@@ -5581,6 +5581,7 @@ def _attach_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx.actor
     if not any(g is ctx.card for g in player.base_gear):
         return
+    # `here`: only here ("" in _units_where), never another battlefield or base.
     where = "" if spec.get("here") else spec.get("where", "anywhere")
     units = _resolve_targets(ctx, {**spec, "target": spec.get("target", "friendly_unit"),
                                    "where": where, "scope": "single"})

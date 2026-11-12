@@ -47,6 +47,29 @@ def test_edge_of_night_played_from_face_down_attaches_to_a_unit_here():
     assert [opts for kind, _s, opts in seen if kind == "target:attach_gear"] == [["here"]]
 
 
+def test_edge_of_night_with_no_unit_of_yours_here_attaches_to_nothing():
+    """D53. Edge of Night: '... attach it to a unit you control (here).' With
+    the battlefield still yours but none of your units there (contested), it
+    went to a unit at another battlefield (or in base) instead: the "here"
+    choice fell back to everywhere once the face-down mark was gone."""
+    loop, a, b = setup(active="A")
+    bf = loop.gs.battlefields[0]
+    mine = unit("mine", 1)
+    bf.add_unit("A", mine)
+    bf.contested_by = "B"
+    bf.add_unit("B", unit("intruder", 2))
+    bf.units_A.remove(mine)
+    there = unit("there", 3)
+    loop.gs.battlefields[1].add_unit("A", there)
+    a.base_units.append(unit("home", 4))
+    hide(loop, "A", 0, "Edge of Night")
+    seen = choices(loop, {})
+    act(loop, "A", "Play Edge of Night from Hidden @BF0")
+    assert not there.gear and not a.base_units[0].gear
+    assert [g.name for g in a.base_gear] == ["Edge of Night"]
+    assert not [k for k, _s, _o in seen if k.startswith("target:attach")]
+
+
 def test_zhonyas_hourglass_played_from_face_down_goes_to_base():
     """Zhonya's Hourglass: '[Hidden] If a friendly unit would die, kill this
     instead.' Played from face down it is a gear in its player's base."""
