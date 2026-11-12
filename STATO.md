@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (importati e verificati i due mazzi competitive; audit quinto passaggio).
+Aggiornato: 2026-11-12 (mazzi competitive verificati; training deciso su di essi; piano dei prossimi passi).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -14,16 +14,10 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   unico con un test per carta, per contenere l'uso.
 - Le golden game si rigenerano solo quando il cambio di comportamento è voluto,
   con il motivo partita per partita nel messaggio di commit.
-- D19: `_phase_beginning` copre ancora Awaken → Channel (~40 file di test lo
-  chiamano direttamente).
-- D20: il Conquer dipende da `Battlefield.gained_control`, non da `last_controller`.
-- D21: restrizione "battlefield where you have units" come parametro della carta.
+- D19-D21, D23, D26: scelte tecniche, motivate in AUDIT.md.
 - Q1–Q4 (decise dall'utente): priorità secondo §337.4; Shadow Order Disciple
   invariato; partita al cap dei turni = pareggio; Keeper of Law conta solo le
   unità di chi la gioca.
-- D23: il tempo di un'abilità attivata sta nei dati solo se la carta stampa
-  [Action]/[Reaction]; un test statico lo controlla su tutto il corpus.
-- D26: un gear nemico scelto si conta alla risoluzione, non in catena.
 - D27 (decisa dall'utente): Patched Porobot è unità e gear insieme
   (`cards.is_gear()`, `UnitInPlay.is_gear` derivato dalla carta attuale).
 - D29: "abilità legale" = "l'handler ha qualcosa da scegliere" (stessa lista di
@@ -33,22 +27,17 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   golden cambia), altrimenti da un misto.
 - Quarto passaggio per classi e non carta per carta: fuori dalle liste ci sono
   ~930 carte; lette solo quelle segnalate da una scansione.
-- (Utente, 2026-11-12) Gli otto mazzi non precon sono superati: eliminati e
-  non più considerati. Rimossi con loro gli agenti Pyke e Diana, costruiti per
-  quei mazzi. Le correzioni di carte trovate su quei mazzi restano.
+- (Utente, 2026-11-12) Gli otto mazzi non precon eliminati e non più
+  considerati, con gli agenti Pyke e Diana; le correzioni di carte restano.
 - (Utente, 2026-11-12) Il training si fa sui due mazzi competitive.
-- Golden game e test generici giocano solo i precon; l'agente random è ora
-  seminato dal seed della partita (prima non era riproducibile), così può
-  stare nelle golden.
+- L'agente random è seminato dal seed della partita (riproducibile).
 
 ## Fatto
 - Passaggi 1-3: D1–D28 e risposte Q1–Q4, tutte corrette.
 - Quarto passaggio: D29-D49 (abilità senza scelta legale, Jax, Teemo,
   Baited Hook, Ambessa, Power generico misto, dati di 131 carte segnalate)
   e bug del coach (doppia risposta, `cc3d776`). Dettagli in AUDIT.md.
-- Rimozione mazzi: tolti 8 mazzi e 2 agenti, test spostati sui precon,
-  20 golden game rigenerate su Zed vs Shen.
-
+- Rimozione mazzi: test spostati sui precon, 20 golden game rigenerate.
 - Mazzi competitive (quinto passaggio): `competitive_kaisa`, `competitive_kennen`
   importati con sideboard. 22 carte nuove lette, dubbie giocate; 480 partite
   sotto i controlli degli invarianti. Corrette:
@@ -58,20 +47,35 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
     (Reckless Innovator e altre 5 carte).
   - D52 `334e93c`: Decree of Unity lanciabile senza bersaglio legale.
   - 8 golden game Kai'Sa vs Kennen aggiunte (le 20 dei precon invariate).
-  Suite verde (1773 passed).
+  Suite verde (1773 passed). Prova di training sui competitive: funziona.
 
 ## In corso
 Niente.
 
 ## Prossimi passi
-1. Prima del training (regola utente: BACKLOG vuoto), vedi BACKLOG O1-O4.
-2. Banlist nuova annunciata per il 13/11, legale dal 23/11: aggiornare
-   `riftbound/data/banned_cards.json` appena è pubblica.
-3. Resto del corpus: solo scansioni per classi; carta per carta solo le
-   carte dei mazzi in uso.
-4. Non controllati: costruzione del mazzo (§103), procedura di match,
-   effetti di sostituzione (§372-373), layer (§475-482), lato AI.
-5. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
+Piano concordato (2026-11-12): la prossima sessione parte dal punto 2, poi,
+se c'è modo, il 3. Punti in ordine di peso per il training:
+1. Banlist del 23/11: l'utente incolla l'elenco → aggiornare
+   `riftbound/data/banned_cards.json`, ricontrollare i due mazzi competitive.
+2. **Regole (BACKLOG O2), da qui si riparte.** `docs/MECHANICS.md`: 8 righe
+   PARTIAL + 1 GAP mai riverificate (Flow è già superata): ognuna contro il
+   codice e un test. Poi le parti mai controllate che toccano i mazzi:
+   effetti di sostituzione §372-373 (Zhonya's Hourglass), layer §475-482.
+3. **Ricerca della rete (BACKLOG O3), il punto più importante per la qualità.**
+   La ricerca guidata dalla rete decide solo la prima scelta di un'azione;
+   bersagli dentro l'azione, scelte in difesa e scelte nascoste (dig,
+   predict) restano alla baseline fissa: Kai'Sa e Kennen vivono di queste.
+4. Training (BACKLOG O4): reti vecchie non caricabili (`ACTION_DIM` 319),
+   riallenare da zero; budget MCTS, LR, dimensione rete; valutare su 100+
+   partite. Qui ~3 s a partita con 10 iterazioni MCTS su 4 core: con 100
+   serve una macchina con GPU.
+5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
+   di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
+   costruzione del mazzo (§103).
+
+Da decidere (utente): allentare la regola "niente training finché il
+BACKLOG non è vuoto" (proposta: partire dopo 1-3, il punto 5 in parallelo);
+dove allenare (questo container o macchina con GPU).
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
