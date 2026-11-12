@@ -585,8 +585,10 @@ def _kill_pet_cost(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 @effect("champion_to_hand")
 def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
-    """ "Put a Teemo unit you own into your hand from your Champion Zone"
-    (Teemo Swift Scout)."""
+    """ "Put a Teemo unit you own into your hand from your Champion Zone or
+    the board" (Teemo Swift Scout): the Chosen Champion still in its zone, or
+    a Teemo you own on the board (it leaves play as a returned unit does).
+    Baseline: the one in the Champion Zone."""
     gs = ctx.loop.gs
     side = ctx.actor_side
     options = _teemo_options(ctx, spec)
@@ -604,14 +606,19 @@ def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 
 
 def _teemo_options(ctx: "EffectContext", spec: Mapping[str, Any]) -> list:
-    """champion_to_hand's choices: the card in the Champion Zone, if it is a
-    `name_prefix` unit."""
+    """champion_to_hand's choices: the card in the Champion Zone (if it is a
+    `name_prefix` unit), then the units of that name the actor owns on the
+    board, wherever they are and whoever controls them."""
     gs = ctx.loop.gs
     side = ctx.actor_side
     name = str(spec.get("name_prefix", ""))
     champ = gs.champion_A if side == "A" else gs.champion_B
     deployed = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
     options: list = [champ] if champ is not None and not deployed and champ.name.startswith(name) else []
+    for s in (side, ctx.opponent_side):
+        options.extend(u for u in _units_at(ctx, s, "anywhere")
+                       if u.card.name.startswith(name) and not u.is_token
+                       and ctx.loop._owner_of(u.card, s) == side)
     return options
 
 

@@ -114,3 +114,24 @@ def test_jax_legend_moves_an_attached_equipment_between_any_two_units():
     a.base_units.append(other)                            # the other unit in base
     act(loop, "A", "Activate attach_equipment (Jax")
     assert other.gear == [sword] and wearer.gear == []
+
+
+# -- D31. Teemo's legend takes a Teemo only from the Champion Zone -----------------
+
+def test_teemo_legend_takes_a_teemo_from_the_board():
+    """Teemo, Swift Scout: '[1], [Tap]: Put a Teemo unit you own into your
+    hand from your Champion Zone or the board.'"""
+    loop, a, b, _c = _board("Teemo Swift Scout")
+    loop.gs.champion_A_deployed = True
+    teemo = unit("Teemo Scout")
+    loop.gs.battlefields[1].units_A.append(teemo)
+    act(loop, "A", "Activate champion_to_hand (Teemo")
+    assert teemo.card in a.hand and not loop.gs.battlefields[1].units_A
+
+
+def test_teemo_legend_takes_the_teemo_in_the_champion_zone():
+    loop, a, b, _c = _board("Teemo Swift Scout")
+    loop.gs.champion_A = card("Teemo Scout")
+    a.base_units.append(unit("x", 2))
+    act(loop, "A", "Activate champion_to_hand (Teemo")
+    assert loop.gs.champion_A in a.hand and loop.gs.champion_A_deployed
