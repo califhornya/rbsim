@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (audit, quarto passaggio: fuori dalle dieci liste, per classi).
+Aggiornato: 2026-11-12 (rimossi gli otto mazzi non precon; in attesa di due mazzi competitive).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -33,6 +33,12 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   golden cambia), altrimenti da un misto.
 - Quarto passaggio per classi e non carta per carta: fuori dalle liste ci sono
   ~930 carte; lette solo quelle segnalate da una scansione.
+- (Utente, 2026-11-12) Gli otto mazzi non precon sono superati: eliminati e
+  non più considerati. Rimossi con loro gli agenti Pyke e Diana, costruiti per
+  quei mazzi. Le correzioni di carte trovate su quei mazzi restano.
+- Golden game e test generici giocano solo i precon; l'agente random è ora
+  seminato dal seed della partita (prima non era riproducibile), così può
+  stare nelle golden.
 
 ## Fatto
 - Passaggi 1-3: D1–D28 e risposte Q1–Q4, tutte corrette.
@@ -53,20 +59,24 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
     veniva applicata alla domanda successiva; ora è rifiutata. Era la causa
     del test `test_coach` instabile sotto carico.
 
+- Rimozione mazzi: tolti 8 mazzi e 2 agenti, ~20 file di test spostati sui
+  precon, 20 golden game rigenerate (tutte su Zed vs Shen, `simple_trade` e
+  `random`). Suite verde (1753 passed). Trovato e corretto nel test degli
+  invarianti: non contava le carte facedown (non un bug del motore).
+
 ## In corso
-Niente.
+In attesa dei due mazzi competitive dell'utente.
 
 ## Prossimi passi
-1. Resto del corpus (~930 carte fuori dalle liste): letto solo dove una
-   scansione segnalava. Bersagli più stretti/larghi della stampa non sono
-   intercettati da nessuna scansione (D40, D41, D45 trovati per caso).
-   Lettura carta per carta: costosa, da decidere se serve prima del training
-   sulle dieci liste.
-2. Stacked Deck è in `banned_cards.json` ma sta in vendetta_kennen e
-   vendetta_ezreal (solo un warning al caricamento): da decidere.
-3. Non controllati: costruzione del mazzo (§103), procedura di match,
+1. Due mazzi competitive (dall'utente): importarli, leggere le loro carte
+   contro la stampa e giocare quelle senza test (come il terzo passaggio).
+2. Banlist nuova annunciata per il 13/11, legale dal 23/11: aggiornare
+   `riftbound/data/banned_cards.json` appena è pubblica.
+3. Resto del corpus: solo scansioni per classi; carta per carta solo le
+   carte dei mazzi in uso.
+4. Non controllati: costruzione del mazzo (§103), procedura di match,
    effetti di sostituzione (§372-373), layer (§475-482), lato AI.
-4. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
+5. `ACTION_DIM` è 319 (era 316): le reti salvate prima di D2 non si caricano.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
@@ -82,6 +92,7 @@ Niente.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
+- `riftbound/data/decks/`: solo `precon_zed.json`, `precon_shen.json`.
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
-  riferimento (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
+  riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.

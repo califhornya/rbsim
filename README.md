@@ -36,29 +36,29 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
 | `riftbound/core/` | The rules engine: `loop.py` (turn structure, chain, payments), `effects.py` (effect handlers), `combat.py`, `legality.py`, `match.py` (Bo3) |
 | `riftbound/registry/` | Card loading (`cards_registry.py`) and the engine vocabulary (`engine_vocab.py`) |
 | `riftbound/data/cards/all_cards.json` | The card corpus with its encoded effects. Every `.json` under `data/cards/` is loaded as cards |
-| `riftbound/data/decks/` | 10 decks; training uses `precon_zed` and `precon_shen` |
+| `riftbound/data/decks/` | The two training precons, `precon_zed` and `precon_shen` (the other decks were removed on 2026-11-12: out of date) |
 | `riftbound/data/reference/` | `piltover_archive.json`: the official printed text, errata included (not loaded by the engine) |
-| `riftbound/ai/` | Heuristic agents, MC / ISMCTS search, the net (`net.py`, `encoding.py`), net-guided MCTS, self-play, coach |
+| `riftbound/ai/` | Heuristic agent (`simple_trade`), random, MC / ISMCTS search, the net (`net.py`, `encoding.py`), net-guided MCTS, self-play, coach |
 | `scripts/` | Training, coach, round robin, game tracer, audits (`card_text_audit.py`, `coverage_audit.py`, `choice_audit.py`, `piltover_sync.py`) |
-| `tests/` | ~1660 tests, including the golden games (`tests/golden_games.json`) |
+| `tests/` | ~1750 tests, including the golden games (`tests/golden_games.json`) |
 | `docs/rules/` | Core Rules (revision 2026-10-09) and Tournament Rules as text |
 | `docs/MECHANICS.md` | Rules mechanics, one row each, with status (some rows lag the code: see its header) |
 | `docs/reports/` | Generated reports (coverage, choice audit) |
 | `docs/history/` | Old status notes and issue logs, kept for the record. Not the current state |
 
-## Where it stands (2026-11-10)
+## Where it stands (2026-11-12)
 
 - **Engine.** 1100 cards (Origins, Spiritforged, Unleashed, Vendetta, Radiance,
   Proving Grounds), every set read card by card with a test per card
   (`BACKLOG.md` A-G, closed). The two training precons match the official text
-  on all 51 cards; the other eight decks have 15 cards that don't
-  (`BACKLOG.md` O1).
-- **Tests.** Without torch: 1628 passed, 5 skipped. With torch: 1660 passed.
+  on all 51 cards. Rules audit in four passes (`docs/audit/AUDIT.md`).
+- **Tests.** With torch: 1753 passed.
 - **AI.** Heuristic agents, search agents, net-guided MCTS with self-play
   training, learned mulligan and battlefield choice, coach mode. The last
   training runs reached 0.50 against `simple_trade`; nets saved before F3 don't
   load (the encoding changed) and were trained on older rules.
-- **Next.** An independent rules audit (`BACKLOG.md` O2), then training.
+- **Next.** Two current competitive decks from the owner, the banlist legal
+  from 2026-11-23 (`riftbound/data/banned_cards.json`), then training.
 
 ## Conventions
 

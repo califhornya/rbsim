@@ -13,12 +13,12 @@ from riftbound.core.loop import GameLoop
 from scripts.trace_game import TracingAgent
 
 REPO = Path(__file__).resolve().parent.parent
-AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def test_trace_logs_every_decision_with_board_state():
-    gs = build_game(game_seed=1, deck_a_path=AKALI, deck_b_path=KENNEN,
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN,
                     ai_a=None, ai_b=None, first_player="a", max_turns=40)
     gs.A.agent = TracingAgent(gs.A, make_agent("simple_trade", gs.A))
     gs.B.agent = TracingAgent(gs.B, make_agent("simple_trade", gs.B))

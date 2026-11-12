@@ -19,12 +19,12 @@ from riftbound.ai.env import RiftboundEnv
 from riftbound.core.decisions import DecisionPoint, GameAction, Observation
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
-ORNN = REPO / "riftbound" / "data" / "decks" / "vendetta_ornn.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
 
 
 def _env():
-    return RiftboundEnv(deck_a_path=KENNEN, deck_b_path=ORNN, agent_side="A",
+    return RiftboundEnv(deck_a_path=SHEN, deck_b_path=ZED, agent_side="A",
                         opponent="simple_trade", seed=5)
 
 

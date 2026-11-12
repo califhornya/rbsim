@@ -10,12 +10,12 @@ from riftbound.core.drivers import SyncDriver, SessionDriver
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
-PYKE = _DECKS / "fury_chaos_pyke.json"
-DIANA = _DECKS / "chaos_mind_diana.json"
+ZED = _DECKS / "precon_zed.json"
+SHEN = _DECKS / "precon_shen.json"
 
 
-def _game(seed=42, ai_a="pyke", ai_b="diana"):
-    return build_game(game_seed=seed, deck_a_path=PYKE, deck_b_path=DIANA, ai_a=ai_a, ai_b=ai_b)
+def _game(seed=42, ai_a="simple_trade", ai_b="random"):
+    return build_game(game_seed=seed, deck_a_path=ZED, deck_b_path=SHEN, ai_a=ai_a, ai_b=ai_b)
 
 
 def test_sync_driver_is_identical_to_direct_loop():
@@ -50,7 +50,7 @@ def _drive_human_passes(driver: SessionDriver, max_steps: int = 5000):
 
 def test_session_driver_runs_a_full_human_game():
     driver = SessionDriver(_game())
-    driver.make_remote("A")  # A is the human; B keeps its Diana heuristic
+    driver.make_remote("A")  # A is the human; B keeps its heuristic
     driver.start()
 
     decisions = _drive_human_passes(driver)

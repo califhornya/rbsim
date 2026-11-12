@@ -20,11 +20,11 @@ from riftbound.core.state import GameState
 from riftbound.registry.cards_registry import CARD_REGISTRY, CardSpec
 
 REPO = Path(__file__).resolve().parent.parent
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def test_build_game_places_deck_battlefields():
-    gs = build_game(game_seed=3, deck_a_path=KENNEN, deck_b_path=KENNEN,
+    gs = build_game(game_seed=3, deck_a_path=SHEN, deck_b_path=SHEN,
                     ai_a="simple_trade", ai_b="simple_trade")
     # Both in-play battlefields carry an identity card from the decks.
     assert all(bf.card is not None for bf in gs.battlefields)

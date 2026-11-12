@@ -27,16 +27,16 @@ def _build_game(seed: int) -> GameState:
     from riftbound.core.game_factory import make_deck_from_file, make_agent
 
     rng = random.Random(seed)
-    dA, rA, cA, lA, bfA = make_deck_from_file(DECK_DIR / "fury_chaos_pyke.json")
-    dB, rB, cB, lB, bfB = make_deck_from_file(DECK_DIR / "chaos_mind_diana.json")
+    dA, rA, cA, lA, bfA = make_deck_from_file(DECK_DIR / "precon_zed.json")
+    dB, rB, cB, lB, bfB = make_deck_from_file(DECK_DIR / "precon_shen.json")
     random.Random(seed + 1).shuffle(rA.runes)
     random.Random(seed + 2).shuffle(rB.runes)
     dA.shuffle(rng)
     dB.shuffle(rng)
     A = Player(name="A", hp=10, deck=dA, rune_energy=0, rune_deck=rA)
     B = Player(name="B", hp=10, deck=dB, rune_energy=0, rune_deck=rB)
-    A.agent = make_agent("pyke", A)
-    B.agent = make_agent("diana", B)
+    A.agent = make_agent("simple_trade", A)
+    B.agent = make_agent("random", B)
     return GameState(rng=rng, A=A, B=B, turn=1, max_turns=40, active="A",
                      victory_score=8, champion_A=cA, champion_B=cB)
 

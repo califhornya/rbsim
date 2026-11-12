@@ -27,9 +27,8 @@ from riftbound.core.loop import GameLoop
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
 # Deck ids are stored relative in the fixture (portable); resolved via REPO_ROOT.
-PYKE = Path("riftbound/data/decks/fury_chaos_pyke.json")
-DIANA = Path("riftbound/data/decks/chaos_mind_diana.json")
-YASUO = Path("riftbound/data/decks/calm_chaos_yasuo.json")
+ZED = Path("riftbound/data/decks/precon_zed.json")
+SHEN = Path("riftbound/data/decks/precon_shen.json")
 
 FIXTURE_PATH = Path(__file__).parent / "golden_games.json"
 
@@ -38,14 +37,15 @@ def _resolve_deck(rel: str) -> Path:
     # Fixtures regenerated on Windows before the as_posix() below hold backslashes.
     return REPO_ROOT / rel.replace("\\", "/")
 
-# (ai_a, deck_a, ai_b, deck_b, games) — seat-swapped matchups across all 3 decks
-# and all 3 agents so the oracle exercises both seats and varied decision paths.
+# (ai_a, deck_a, ai_b, deck_b, games) — the two training precons, seat-swapped,
+# with the deterministic heuristic and the random agent, so the oracle exercises
+# both seats, both decks and varied decision paths.
 _MATCHUPS = [
-    ("pyke", PYKE, "diana", DIANA, 4),
-    ("diana", DIANA, "pyke", PYKE, 4),
-    ("simple_trade", YASUO, "pyke", PYKE, 4),
-    ("pyke", PYKE, "simple_trade", YASUO, 4),
-    ("diana", DIANA, "simple_trade", YASUO, 4),
+    ("simple_trade", ZED, "simple_trade", SHEN, 4),
+    ("simple_trade", SHEN, "simple_trade", ZED, 4),
+    ("random", ZED, "simple_trade", SHEN, 4),
+    ("simple_trade", ZED, "random", SHEN, 4),
+    ("random", SHEN, "random", ZED, 4),
 ]
 
 # Fixed master seed so the derived per-game seeds never move unless this changes.

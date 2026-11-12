@@ -11,12 +11,12 @@ from riftbound.core.loop import GameLoop
 from riftbound.core.state import determinize
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PYKE = REPO_ROOT / "riftbound" / "data" / "decks" / "fury_chaos_pyke.json"
-DIANA = REPO_ROOT / "riftbound" / "data" / "decks" / "chaos_mind_diana.json"
+ZED = REPO_ROOT / "riftbound" / "data" / "decks" / "precon_zed.json"
+SHEN = REPO_ROOT / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def _fresh(seed=1):
-    return build_game(game_seed=seed, deck_a_path=PYKE, deck_b_path=DIANA, ai_a="pyke", ai_b="diana")
+    return build_game(game_seed=seed, deck_a_path=ZED, deck_b_path=SHEN, ai_a="simple_trade", ai_b="random")
 
 
 def _deal(gs, na=5, nb=5):
@@ -77,8 +77,8 @@ def test_clone_then_full_game_leaves_original_untouched():
     before = _public_sig(gs)
 
     clone = gs.clone()
-    clone.A.agent = make_agent("pyke", clone.A)
-    clone.B.agent = make_agent("diana", clone.B)
+    clone.A.agent = make_agent("simple_trade", clone.A)
+    clone.B.agent = make_agent("random", clone.B)
     result = GameLoop(clone).start()  # heavy mutation of the clone
 
     assert result.winner in ("A", "B", "DRAW")

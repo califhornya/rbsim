@@ -83,7 +83,7 @@ def test_quick_draw_chooses_among_all_the_units_you_control():
     assert [names for kind, _side, names in seen if kind == "equip"] == [["Front", "Back"]]
 
 
-# -- D25. Bellows Breath (SFD-080; vendetta_ezreal) ------------------------------
+# -- D25. Bellows Breath (SFD-080) ------------------------------
 
 def test_bellows_breath_hits_units_at_the_same_location():
     """'Deal 1 to up to three units at the same location.'"""
@@ -104,7 +104,7 @@ def test_bellows_breath_hits_units_at_the_same_location():
     assert (there.damage, home.damage) == (0, 0)
 
 
-# -- D26. Ezreal Prodigal Explorer (SFD-199; vendetta_ezreal) --------------------
+# -- D26. Ezreal Prodigal Explorer (SFD-199) --------------------
 
 def test_ezreal_legend_counts_an_enemy_gear_chosen():
     """'Use only if you've chosen enemy units and/or gear twice this turn with
@@ -124,7 +124,7 @@ def test_ezreal_legend_counts_an_enemy_gear_chosen():
     assert any("Ezreal" in lbl for lbl in labels(loop, "A"))
 
 
-# -- D27. Patched Porobot (VEN-058; vendetta_ornn) is a unit and a gear ----------
+# -- D27. Patched Porobot (VEN-058) is a unit and a gear ----------
 # (Decided by the owner, 2026-11-11: it is both at once.)
 
 def test_patched_porobot_is_a_gear_too():

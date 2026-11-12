@@ -9,8 +9,8 @@ scoring, end-of-turn) is interleaved via verbose mode. This is the tool for
 confirming an agent actually plays sensibly, start to finish.
 
 Usage:
-  uv run python scripts/trace_game.py --deckA riftbound/data/decks/vendetta_akali.json \
-      --deckB riftbound/data/decks/vendetta_kennen.json --aiA mc --aiB simple_trade \
+  uv run python scripts/trace_game.py --deckA riftbound/data/decks/precon_zed.json \
+      --deckB riftbound/data/decks/precon_shen.json --aiA mc --aiB simple_trade \
       --seed 1 --out trace.log
   # then read trace.log (also echoed to the terminal unless --quiet)
 """

@@ -28,14 +28,13 @@ from riftbound.core.loop import GameLoop
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
-PYKE = _DECKS / "fury_chaos_pyke.json"
-DIANA = _DECKS / "chaos_mind_diana.json"
-YASUO = _DECKS / "calm_chaos_yasuo.json"
+ZED = _DECKS / "precon_zed.json"
+SHEN = _DECKS / "precon_shen.json"
 
 _MATCHUPS = [
-    ("pyke", PYKE, "diana", DIANA),
-    ("diana", DIANA, "simple_trade", YASUO),
-    ("simple_trade", YASUO, "pyke", PYKE),
+    ("simple_trade", ZED, "random", SHEN),
+    ("random", SHEN, "simple_trade", ZED),
+    ("simple_trade", ZED, "random", ZED),
 ]
 _SEEDS = [1, 7, 42, 99, 100000, 271828]
 
@@ -79,6 +78,8 @@ def _collect(gs) -> list[tuple[int, str, str, str]]:
                 add(u.card, "battlefield")
             for g in u.gear:
                 add(g, "gear")
+        for fd in bf.facedowns:              # a HIDDEN card hidden here
+            add(fd.card, "facedown")
     if gs.champion_A is not None and not gs.champion_A_deployed:
         add(gs.champion_A, "champion")
     if gs.champion_B is not None and not gs.champion_B_deployed:

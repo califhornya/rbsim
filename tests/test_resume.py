@@ -15,10 +15,8 @@ from riftbound.core.game_factory import build_game, make_agent
 from riftbound.core.loop import GameLoop
 
 REPO = Path(__file__).resolve().parent.parent
-PYKE = REPO / "riftbound" / "data" / "decks" / "fury_chaos_pyke.json"
-DIANA = REPO / "riftbound" / "data" / "decks" / "chaos_mind_diana.json"
-AKALI = REPO / "riftbound" / "data" / "decks" / "vendetta_akali.json"
-KENNEN = REPO / "riftbound" / "data" / "decks" / "vendetta_kennen.json"
+ZED = REPO / "riftbound" / "data" / "decks" / "precon_zed.json"
+SHEN = REPO / "riftbound" / "data" / "decks" / "precon_shen.json"
 
 
 def _public_sig(gs):
@@ -32,7 +30,7 @@ def _public_sig(gs):
 
 
 def test_start_still_produces_valid_result():
-    gs = build_game(game_seed=7, deck_a_path=PYKE, deck_b_path=DIANA, ai_a="pyke", ai_b="diana")
+    gs = build_game(game_seed=7, deck_a_path=ZED, deck_b_path=SHEN, ai_a="simple_trade", ai_b="random")
     result = GameLoop(gs).start()
     assert result.winner in ("A", "B", "DRAW")
     assert result.turns >= 1
@@ -40,7 +38,7 @@ def test_start_still_produces_valid_result():
 
 def test_resume_from_mid_turn_finishes_the_game():
     # Drive a real game up to the active player's main action phase...
-    gs = build_game(game_seed=3, deck_a_path=AKALI, deck_b_path=KENNEN,
+    gs = build_game(game_seed=3, deck_a_path=ZED, deck_b_path=SHEN,
                     ai_a="simple_trade", ai_b="simple_trade")
     loop = GameLoop(gs)
     loop._setup()
@@ -61,7 +59,7 @@ def test_resume_from_mid_turn_finishes_the_game():
 def test_resume_is_deterministic():
     # Two clones from the same mid-turn point, resumed with same-seeded agents,
     # reach the same result — the property a search agent relies on.
-    gs = build_game(game_seed=11, deck_a_path=AKALI, deck_b_path=KENNEN,
+    gs = build_game(game_seed=11, deck_a_path=ZED, deck_b_path=SHEN,
                     ai_a="simple_trade", ai_b="simple_trade")
     loop = GameLoop(gs)
     loop._setup()
@@ -80,7 +78,7 @@ def test_clone_preserves_session_state_fields():
     # Regression: clone must deep-copy the state added this session (empowered,
     # legend units, battlefield identity, burn counter) or search would be blind
     # to it. deepcopy handles this; lock it in.
-    gs = build_game(game_seed=1, deck_a_path=AKALI, deck_b_path=KENNEN,
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN,
                     ai_a="simple_trade", ai_b="simple_trade")
     GameLoop(gs)._setup()  # creates legend units
     gs.legend_unit_A.empowered = True

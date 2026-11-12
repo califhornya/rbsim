@@ -1,152 +1,84 @@
 {
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#0": {
+  "random:precon_shen__vs__random:precon_zed#0": {
     "signature": {
       "battlefields": [
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Thousand-Tailed Watcher"
+          "B": [
+            "Shadow Clone"
           ],
-          "B": [],
-          "controller": "A",
+          "controller": "B",
           "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Tideturner"
-        ],
-        "deck": 23,
-        "energy": 12,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 15
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
-        "deck": 25,
-        "energy": 5,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 4,
-          "FURY": 4
-        },
-        "runes_in_play": 8,
-        "trash": 14
-      },
-      "points_A": 8,
-      "points_B": 5,
-      "spells_cast": 14,
-      "turns": 16,
-      "units_played": 20,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#0",
-      "seed": 123700868
-    }
-  },
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Bewitching Spirit"
-          ],
-          "controller": "B",
-          "last_controller": null
         },
         {
           "A": [],
           "B": [
-            "Sharkling"
+            "Zed From the Shadows",
+            "Zed Without a Sound"
           ],
           "controller": "B",
-          "last_controller": null
+          "last_controller": "B"
         }
       ],
       "final_active": "B",
       "player_A": {
         "banished": 0,
         "base_gear": 0,
-        "base_units": [],
-        "deck": 24,
-        "energy": 10,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 16
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
+        "base_units": [
+          "Shen Kinkou",
+          "Serene Ascetic",
+          "Shen Leader of the Kinkou Order",
+          "Mournful Witness",
+          "Noxian Emissary"
+        ],
         "deck": 26,
         "energy": 1,
-        "hand": 3,
+        "hand": 1,
+        "power_pool": {
+          "CALM": 4,
+          "ORDER": 4
+        },
+        "runes_in_play": 8,
+        "trash": 8
+      },
+      "player_B": {
+        "banished": 4,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 10,
+        "energy": 2,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 5,
-          "FURY": 1
+          "FURY": 4
         },
-        "runes_in_play": 6,
-        "trash": 7
+        "runes_in_play": 9,
+        "trash": 23
       },
-      "points_A": 3,
+      "points_A": 6,
       "points_B": 8,
-      "spells_cast": 12,
-      "turns": 15,
-      "units_played": 15,
+      "spells_cast": 9,
+      "turns": 14,
+      "units_played": 14,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#1",
-      "seed": 672578907
+      "ai_a": "random",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "random:precon_shen__vs__random:precon_zed#0",
+      "seed": 194461789
     }
   },
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2": {
+  "random:precon_shen__vs__random:precon_zed#1": {
     "signature": {
       "battlefields": [
         {
           "A": [
-            "Hwei Brooding Painter"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
-          "A": [
-            "Thousand-Tailed Watcher"
+            "Soulspinner"
           ],
           "B": [],
           "controller": "A",
@@ -155,7 +87,10 @@
         {
           "A": [],
           "B": [
-            "Baron Nashor"
+            "Zed From the Shadows",
+            "Shadow Clone",
+            "Shadowblade Lurker",
+            "Shadow Clone"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -163,277 +98,78 @@
       ],
       "final_active": "A",
       "player_A": {
-        "banished": 0,
+        "banished": 1,
         "base_gear": 0,
         "base_units": [
-          "Eager Apprentice"
+          "Shen Scourge of Shadows",
+          "Mournful Witness",
+          "Disciple of Shen",
+          "Serene Ascetic",
+          "Shen Scourge of Shadows",
+          "Loyal Poro"
         ],
-        "deck": 20,
+        "deck": 25,
         "energy": 12,
         "hand": 0,
         "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
+          "CALM": 6,
+          "ORDER": 6
         },
         "runes_in_play": 12,
-        "trash": 17
+        "trash": 6
       },
       "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [],
-        "deck": 25,
-        "energy": 0,
-        "hand": 1,
+        "banished": 3,
+        "base_gear": 0,
+        "base_units": [
+          "Shadow Clone",
+          "Ravenbloom Prefect",
+          "Zed Without a Sound"
+        ],
+        "deck": 18,
+        "energy": 1,
+        "hand": 0,
         "power_pool": {
           "CHAOS": 2,
           "FURY": 5
         },
         "runes_in_play": 7,
-        "trash": 13
+        "trash": 15
       },
-      "points_A": 9,
-      "points_B": 7,
-      "spells_cast": 15,
-      "turns": 16,
+      "points_A": 8,
+      "points_B": 4,
+      "spells_cast": 9,
+      "turns": 18,
       "units_played": 20,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#2",
-      "seed": 927649558
+      "ai_a": "random",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "random:precon_shen__vs__random:precon_zed#1",
+      "seed": 914790882
     }
   },
-  "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Thousand-Tailed Watcher"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
-          "A": [
-            "Tideturner"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Traveling Merchant",
-          "Vex Apathetic"
-        ],
-        "deck": 19,
-        "energy": 12,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 16
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Treasure Hunter"
-        ],
-        "deck": 24,
-        "energy": 2,
-        "hand": 3,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 3
-        },
-        "runes_in_play": 8,
-        "trash": 12
-      },
-      "points_A": 9,
-      "points_B": 5,
-      "spells_cast": 16,
-      "turns": 20,
-      "units_played": 24,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "diana:chaos_mind_diana__vs__pyke:fury_chaos_pyke#3",
-      "seed": 1022487120
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0": {
+  "random:precon_shen__vs__random:precon_zed#2": {
     "signature": {
       "battlefields": [
         {
           "A": [],
           "B": [
-            "Adaptatron"
+            "Shadow Order Disciple",
+            "Ravenbloom Prefect"
           ],
           "controller": "B",
           "last_controller": "B"
         },
         {
-          "A": [
-            "Diana Lunari"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Eager Apprentice"
-        ],
-        "deck": 23,
-        "energy": 12,
-        "hand": 5,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 10
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [],
-        "deck": 28,
-        "energy": 1,
-        "hand": 6,
-        "power_pool": {
-          "CHAOS": 6
-        },
-        "runes_in_play": 6,
-        "trash": 3
-      },
-      "points_A": 8,
-      "points_B": 3,
-      "spells_cast": 11,
-      "turns": 13,
-      "units_played": 8,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#0",
-      "seed": 194461789
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Ravenbloom Student",
-            "Hwei Brooding Painter"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [],
-        "deck": 20,
-        "energy": 12,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 18
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 6,
-        "base_units": [
-          "Yasuo Remorseful",
-          "Stellacorn Herder"
-        ],
-        "deck": 17,
-        "energy": 1,
-        "hand": 4,
-        "power_pool": {
-          "CALM": 4,
-          "CHAOS": 6
-        },
-        "runes_in_play": 10,
-        "trash": 10
-      },
-      "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 21,
-      "turns": 20,
-      "units_played": 13,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#1",
-      "seed": 914790882
-    }
-  },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Hwei Brooding Painter"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
           "A": [],
           "B": [
-            "Lonely Poro"
+            "Shadow Clone"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -444,60 +180,355 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Ravenbloom Student",
-          "Vex Apathetic"
+          "Soulspinner"
         ],
-        "deck": 18,
-        "energy": 2,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 18
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Adaptatron",
-          "Scuttle Crab"
-        ],
-        "deck": 22,
-        "energy": 12,
+        "deck": 26,
+        "energy": 10,
         "hand": 5,
         "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
+          "CALM": 4,
+          "ORDER": 6
         },
-        "runes_in_play": 12,
-        "trash": 8
+        "runes_in_play": 10,
+        "trash": 7
       },
-      "points_A": 4,
+      "player_B": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [
+          "Shadowblade Lurker",
+          "Zed Without a Sound",
+          "Zed From the Shadows"
+        ],
+        "deck": 17,
+        "energy": 10,
+        "hand": 6,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 5
+        },
+        "runes_in_play": 10,
+        "trash": 11
+      },
+      "points_A": 2,
       "points_B": 8,
-      "spells_cast": 18,
-      "turns": 16,
-      "units_played": 15,
+      "spells_cast": 3,
+      "turns": 12,
+      "units_played": 9,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "diana",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#2",
+      "ai_a": "random",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "random:precon_shen__vs__random:precon_zed#2",
       "seed": 125686143
     }
   },
-  "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3": {
+  "random:precon_shen__vs__random:precon_zed#3": {
     "signature": {
       "battlefields": [
         {
           "A": [
-            "Ravenbloom Student"
+            "Shen Leader of the Kinkou Order"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [
+            "Sacred Protector",
+            "Disciple of Shen"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 2,
+        "base_gear": 0,
+        "base_units": [
+          "Shen Kinkou",
+          "Soulspinner",
+          "Shen Scourge of Shadows"
+        ],
+        "deck": 22,
+        "energy": 11,
+        "hand": 1,
+        "power_pool": {
+          "CALM": 5,
+          "ORDER": 6
+        },
+        "runes_in_play": 11,
+        "trash": 8
+      },
+      "player_B": {
+        "banished": 3,
+        "base_gear": 0,
+        "base_units": [
+          "Shadowblade Lurker",
+          "Gust Monk",
+          "Shadowblade Lurker"
+        ],
+        "deck": 13,
+        "energy": 2,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 6
+        },
+        "runes_in_play": 11,
+        "trash": 20
+      },
+      "points_A": 9,
+      "points_B": 5,
+      "spells_cast": 7,
+      "turns": 16,
+      "units_played": 17,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "random:precon_shen__vs__random:precon_zed#3",
+      "seed": 913268135
+    }
+  },
+  "random:precon_zed__vs__simple_trade:precon_shen#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Shen Leader of the Kinkou Order"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [
+            "Mel Defiant Soul",
+            "Shadow Assassin",
+            "Shadow Order Disciple"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 2,
+        "base_gear": 0,
+        "base_units": [
+          "Shadow Clone"
+        ],
+        "deck": 24,
+        "energy": 0,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 3,
+          "FURY": 5
+        },
+        "runes_in_play": 8,
+        "trash": 10
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Recruit",
+          "Sacred Protector"
+        ],
+        "deck": 18,
+        "energy": 7,
+        "hand": 4,
+        "power_pool": {
+          "CALM": 4,
+          "ORDER": 3
+        },
+        "runes_in_play": 7,
+        "trash": 15
+      },
+      "points_A": 3,
+      "points_B": 8,
+      "spells_cast": 6,
+      "turns": 14,
+      "units_played": 11,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "random:precon_zed__vs__simple_trade:precon_shen#0",
+      "seed": 621118472
+    }
+  },
+  "random:precon_zed__vs__simple_trade:precon_shen#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [],
+          "controller": null,
+          "last_controller": null
+        },
+        {
+          "A": [],
+          "B": [
+            "Shen Leader of the Kinkou Order"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 2,
+        "base_gear": 0,
+        "base_units": [
+          "Shadow Assassin"
+        ],
+        "deck": 27,
+        "energy": 1,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 5,
+          "FURY": 2
+        },
+        "runes_in_play": 7,
+        "trash": 8
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Pakaa Protector",
+          "Serene Ascetic",
+          "Noxian Emissary",
+          "Shen Kinkou"
+        ],
+        "deck": 29,
+        "energy": 10,
+        "hand": 4,
+        "power_pool": {
+          "CALM": 6,
+          "ORDER": 4
+        },
+        "runes_in_play": 10,
+        "trash": 2
+      },
+      "points_A": 1,
+      "points_B": 8,
+      "spells_cast": 4,
+      "turns": 12,
+      "units_played": 10,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "random:precon_zed__vs__simple_trade:precon_shen#1",
+      "seed": 1006899465
+    }
+  },
+  "random:precon_zed__vs__simple_trade:precon_shen#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Keeper of Law"
+          ],
+          "controller": "B",
+          "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Sacred Protector"
+          ],
+          "controller": "B",
+          "last_controller": null
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 3,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 21,
+        "energy": 4,
+        "hand": 2,
+        "power_pool": {
+          "CHAOS": 4,
+          "FURY": 5
+        },
+        "runes_in_play": 9,
+        "trash": 14
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Noxian Emissary",
+          "Disciple of Shen",
+          "Pakaa Protector"
+        ],
+        "deck": 23,
+        "energy": 1,
+        "hand": 3,
+        "power_pool": {
+          "CALM": 6,
+          "ORDER": 2
+        },
+        "runes_in_play": 8,
+        "trash": 9
+      },
+      "points_A": 5,
+      "points_B": 8,
+      "spells_cast": 7,
+      "turns": 13,
+      "units_played": 13,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "random",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "random:precon_zed__vs__simple_trade:precon_shen#2",
+      "seed": 782733317
+    }
+  },
+  "random:precon_zed__vs__simple_trade:precon_shen#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Shadowblade Lurker",
+            "Traveling Merchant",
+            "Zed Without a Sound"
           ],
           "B": [],
           "controller": "A",
@@ -505,78 +536,83 @@
         },
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
+          "B": [
+            "Serene Ascetic"
+          ],
+          "controller": "B",
+          "last_controller": "B"
         }
       ],
-      "final_active": "A",
+      "final_active": "B",
       "player_A": {
-        "banished": 0,
+        "banished": 2,
         "base_gear": 0,
         "base_units": [
-          "Hwei Brooding Painter"
+          "Zed From the Shadows",
+          "Shadow Assassin"
         ],
-        "deck": 25,
-        "energy": 11,
+        "deck": 21,
+        "energy": 9,
         "hand": 0,
         "power_pool": {
-          "CHAOS": 7,
-          "MIND": 4
+          "CHAOS": 5,
+          "FURY": 6
         },
         "runes_in_play": 11,
-        "trash": 13
+        "trash": 12
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Adaptatron"
+          "Loyal Poro",
+          "Steel Paws",
+          "Loyal Poro",
+          "Disciple of Shen"
         ],
-        "deck": 22,
-        "energy": 0,
-        "hand": 6,
+        "deck": 14,
+        "energy": 12,
+        "hand": 2,
         "power_pool": {
           "CALM": 6,
-          "CHAOS": 6
+          "ORDER": 6
         },
         "runes_in_play": 12,
-        "trash": 11
+        "trash": 19
       },
-      "points_A": 8,
-      "points_B": 4,
-      "spells_cast": 15,
-      "turns": 14,
-      "units_played": 13,
-      "winner": "A",
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 3,
+      "turns": 18,
+      "units_played": 25,
+      "winner": "B",
       "xp_A": 0,
-      "xp_B": 1
+      "xp_B": 0
     },
     "spec": {
-      "ai_a": "diana",
+      "ai_a": "random",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/chaos_mind_diana.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "diana:chaos_mind_diana__vs__simple_trade:calm_chaos_yasuo#3",
-      "seed": 913268135
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "random:precon_zed__vs__simple_trade:precon_shen#3",
+      "seed": 166370321
     }
   },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0": {
+  "simple_trade:precon_shen__vs__simple_trade:precon_zed#0": {
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Pyke Dockside Butcher",
-            "Noxus Hopeful"
+          "A": [],
+          "B": [
+            "Shadow Assassin",
+            "Traveling Merchant"
           ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
+          "controller": "B",
+          "last_controller": "B"
         },
         {
           "A": [
-            "Noxus Hopeful",
-            "Tideturner"
+            "Steel Paws"
           ],
           "B": [],
           "controller": "A",
@@ -586,61 +622,283 @@
       "final_active": "A",
       "player_A": {
         "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Keeper of Law",
+          "Noxian Emissary",
+          "Soulspinner",
+          "Field Musicians"
+        ],
+        "deck": 19,
+        "energy": 9,
+        "hand": 2,
+        "power_pool": {
+          "CALM": 5,
+          "ORDER": 4
+        },
+        "runes_in_play": 9,
+        "trash": 14
+      },
+      "player_B": {
+        "banished": 3,
+        "base_gear": 0,
+        "base_units": [
+          "Punching Poro",
+          "Shadow Clone",
+          "Shadowblade Lurker",
+          "Mel Defiant Soul"
+        ],
+        "deck": 16,
+        "energy": 2,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 3,
+          "FURY": 6
+        },
+        "runes_in_play": 9,
+        "trash": 16
+      },
+      "points_A": 8,
+      "points_B": 6,
+      "spells_cast": 6,
+      "turns": 14,
+      "units_played": 18,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "simple_trade:precon_shen__vs__simple_trade:precon_zed#0",
+      "seed": 123700868
+    }
+  },
+  "simple_trade:precon_shen__vs__simple_trade:precon_zed#1": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Morgana Vindictive"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Punching Poro"
+          ],
+          "controller": "B",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
         "base_gear": 1,
         "base_units": [
-          "Treasure Hunter"
+          "Field Musicians",
+          "Serene Ascetic",
+          "Recruit",
+          "Recruit"
         ],
-        "deck": 28,
-        "energy": 7,
+        "deck": 21,
+        "energy": 1,
+        "hand": 2,
+        "power_pool": {
+          "CALM": 3,
+          "ORDER": 4
+        },
+        "runes_in_play": 7,
+        "trash": 14
+      },
+      "player_B": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [],
+        "deck": 22,
+        "energy": 12,
+        "hand": 1,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 6
+        },
+        "runes_in_play": 12,
+        "trash": 14
+      },
+      "points_A": 7,
+      "points_B": 8,
+      "spells_cast": 2,
+      "turns": 15,
+      "units_played": 20,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "simple_trade:precon_shen__vs__simple_trade:precon_zed#1",
+      "seed": 672578907
+    }
+  },
+  "simple_trade:precon_shen__vs__simple_trade:precon_zed#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Shen Leader of the Kinkou Order"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Shadow Assassin"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Sacred Protector"
+        ],
+        "deck": 29,
+        "energy": 1,
+        "hand": 4,
+        "power_pool": {
+          "CALM": 2,
+          "ORDER": 1
+        },
+        "runes_in_play": 3,
+        "trash": 4
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Shadow Order Disciple",
+          "Traveling Merchant"
+        ],
+        "deck": 23,
+        "energy": 10,
         "hand": 2,
         "power_pool": {
           "CHAOS": 6,
-          "FURY": 1
+          "FURY": 4
         },
-        "runes_in_play": 7,
+        "runes_in_play": 10,
+        "trash": 12
+      },
+      "points_A": 4,
+      "points_B": 8,
+      "spells_cast": 2,
+      "turns": 11,
+      "units_played": 11,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "simple_trade:precon_shen__vs__simple_trade:precon_zed#2",
+      "seed": 927649558
+    }
+  },
+  "simple_trade:precon_shen__vs__simple_trade:precon_zed#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Mournful Witness"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": null
+        },
+        {
+          "A": [
+            "Kennen Keeper of Balance",
+            "Recruit"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Sacred Protector",
+          "Steel Paws"
+        ],
+        "deck": 29,
+        "energy": 1,
+        "hand": 2,
+        "power_pool": {
+          "CALM": 6,
+          "ORDER": 3
+        },
+        "runes_in_play": 9,
         "trash": 5
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Eager Apprentice",
-          "Vex Apathetic"
+          "Zed Without a Sound"
         ],
-        "deck": 26,
-        "energy": 0,
-        "hand": 2,
+        "deck": 27,
+        "energy": 10,
+        "hand": 1,
         "power_pool": {
           "CHAOS": 6,
-          "MIND": 5
+          "FURY": 5
         },
         "runes_in_play": 11,
-        "trash": 10
+        "trash": 11
       },
       "points_A": 8,
-      "points_B": 1,
-      "spells_cast": 12,
-      "turns": 11,
-      "units_played": 11,
+      "points_B": 6,
+      "spells_cast": 0,
+      "turns": 12,
+      "units_played": 18,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#0",
-      "seed": 71834130
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_shen.json",
+      "deck_b": "riftbound/data/decks/precon_zed.json",
+      "id": "simple_trade:precon_shen__vs__simple_trade:precon_zed#3",
+      "seed": 1022487120
     }
   },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1": {
+  "simple_trade:precon_zed__vs__random:precon_shen#0": {
     "signature": {
       "battlefields": [
         {
           "A": [
-            "Treasure Hunter"
+            "Zed From the Shadows"
           ],
           "B": [],
           "controller": "A",
@@ -648,8 +906,7 @@
         },
         {
           "A": [
-            "Bewitching Spirit",
-            "Pyke Dockside Butcher"
+            "Shadow Clone"
           ],
           "B": [],
           "controller": "A",
@@ -659,154 +916,237 @@
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Treasure Hunter"
-        ],
-        "deck": 28,
-        "energy": 9,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 3
-        },
-        "runes_in_play": 9,
-        "trash": 7
-      },
-      "player_B": {
-        "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Ravenbloom Student",
-          "Hwei Brooding Painter"
+          "Shadow Assassin",
+          "Shadow Assassin",
+          "Traveling Merchant"
         ],
-        "deck": 23,
-        "energy": 5,
-        "hand": 0,
+        "deck": 26,
+        "energy": 10,
+        "hand": 6,
         "power_pool": {
-          "CHAOS": 7,
-          "MIND": 4
+          "CHAOS": 5,
+          "FURY": 5
         },
-        "runes_in_play": 11,
-        "trash": 15
+        "runes_in_play": 10,
+        "trash": 4
       },
-      "points_A": 8,
-      "points_B": 3,
-      "spells_cast": 9,
-      "turns": 12,
-      "units_played": 16,
+      "player_B": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [
+          "Steel Paws",
+          "Disciple of Shen",
+          "Keeper of Law"
+        ],
+        "deck": 28,
+        "energy": 3,
+        "hand": 3,
+        "power_pool": {
+          "CALM": 4,
+          "ORDER": 3
+        },
+        "runes_in_play": 7,
+        "trash": 3
+      },
+      "points_A": 9,
+      "points_B": 1,
+      "spells_cast": 6,
+      "turns": 11,
+      "units_played": 9,
       "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#1",
-      "seed": 712744719
+      "ai_a": "simple_trade",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__random:precon_shen#0",
+      "seed": 181392704
     }
   },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2": {
+  "simple_trade:precon_zed__vs__random:precon_shen#1": {
     "signature": {
       "battlefields": [
         {
-          "A": [],
-          "B": [
-            "Tideturner",
-            "Thousand-Tailed Watcher"
+          "A": [
+            "Shadow Clone"
           ],
-          "controller": "B",
+          "B": [],
+          "controller": "A",
           "last_controller": "B"
         },
         {
-          "A": [],
-          "B": [
-            "Hwei Brooding Painter"
+          "A": [
+            "Blade Twirler"
           ],
-          "controller": "B",
-          "last_controller": "B"
+          "B": [],
+          "controller": "A",
+          "last_controller": null
         }
       ],
-      "final_active": "B",
+      "final_active": "A",
       "player_A": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 25,
-        "energy": 8,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 6
-        },
-        "runes_in_play": 11,
-        "trash": 10
-      },
-      "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Hwei Brooding Painter"
+          "Kinkou Lifeblade",
+          "Blade Twirler",
+          "Zed Without a Sound"
         ],
-        "deck": 17,
-        "energy": 11,
-        "hand": 0,
+        "deck": 26,
+        "energy": 1,
+        "hand": 2,
         "power_pool": {
-          "CHAOS": 7,
-          "MIND": 4
+          "FURY": 6
         },
-        "runes_in_play": 11,
-        "trash": 19
+        "runes_in_play": 6,
+        "trash": 8
       },
-      "points_A": 4,
-      "points_B": 8,
-      "spells_cast": 17,
-      "turns": 18,
-      "units_played": 18,
-      "winner": "B",
+      "player_B": {
+        "banished": 0,
+        "base_gear": 1,
+        "base_units": [
+          "Loyal Poro",
+          "Sacred Protector",
+          "Shen Kinkou"
+        ],
+        "deck": 27,
+        "energy": 0,
+        "hand": 4,
+        "power_pool": {
+          "CALM": 5,
+          "ORDER": 2
+        },
+        "runes_in_play": 7,
+        "trash": 5
+      },
+      "points_A": 8,
+      "points_B": 1,
+      "spells_cast": 2,
+      "turns": 12,
+      "units_played": 12,
+      "winner": "A",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#2",
-      "seed": 776578904
+      "ai_a": "simple_trade",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__random:precon_shen#1",
+      "seed": 122476301
     }
   },
-  "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3": {
+  "simple_trade:precon_zed__vs__random:precon_shen#2": {
     "signature": {
       "battlefields": [
         {
-          "A": [],
+          "A": [
+            "Shadow Clone"
+          ],
           "B": [],
-          "controller": null,
+          "controller": "A",
           "last_controller": null
         },
         {
           "A": [
-            "Treasure Hunter",
-            "Treasure Hunter"
+            "Shadow Order Disciple"
           ],
           "B": [],
           "controller": "A",
-          "last_controller": "A"
+          "last_controller": "B"
         }
       ],
       "final_active": "A",
       "player_A": {
         "banished": 0,
-        "base_gear": 4,
+        "base_gear": 0,
         "base_units": [
-          "Mindsplitter"
+          "Twilight Reveler",
+          "Shadow Order Disciple",
+          "Shadowblade Lurker"
         ],
-        "deck": 26,
+        "deck": 25,
+        "energy": 7,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 6
+        },
+        "runes_in_play": 12,
+        "trash": 11
+      },
+      "player_B": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [
+          "Sacred Protector",
+          "Steel Paws"
+        ],
+        "deck": 23,
+        "energy": 1,
+        "hand": 1,
+        "power_pool": {
+          "CALM": 5,
+          "ORDER": 5
+        },
+        "runes_in_play": 10,
+        "trash": 13
+      },
+      "points_A": 8,
+      "points_B": 7,
+      "spells_cast": 3,
+      "turns": 16,
+      "units_played": 25,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__random:precon_shen#2",
+      "seed": 493981850
+    }
+  },
+  "simple_trade:precon_zed__vs__random:precon_shen#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Zed Without a Sound"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        },
+        {
+          "A": [],
+          "B": [
+            "Serene Ascetic",
+            "Pakaa Protector",
+            "Steel Paws"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Gust Monk",
+          "Shadow Clone"
+        ],
+        "deck": 16,
         "energy": 8,
         "hand": 2,
         "power_pool": {
@@ -814,557 +1154,132 @@
           "FURY": 6
         },
         "runes_in_play": 8,
-        "trash": 8
+        "trash": 20
+      },
+      "player_B": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [
+          "Mournful Witness",
+          "Pakaa Protector"
+        ],
+        "deck": 20,
+        "energy": 0,
+        "hand": 0,
+        "power_pool": {
+          "CALM": 4,
+          "ORDER": 4
+        },
+        "runes_in_play": 8,
+        "trash": 14
+      },
+      "points_A": 8,
+      "points_B": 7,
+      "spells_cast": 4,
+      "turns": 14,
+      "units_played": 17,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "random",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__random:precon_shen#3",
+      "seed": 316088351
+    }
+  },
+  "simple_trade:precon_zed__vs__simple_trade:precon_shen#0": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Serene Ascetic"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Shen Leader of the Kinkou Order"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Shadowblade Lurker",
+          "Blade Twirler"
+        ],
+        "deck": 28,
+        "energy": 1,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 4
+        },
+        "runes_in_play": 10,
+        "trash": 7
       },
       "player_B": {
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Tideturner",
-          "Vex Apathetic"
+          "Sacred Protector",
+          "Disciple of Shen",
+          "Pakaa Protector"
         ],
-        "deck": 20,
-        "energy": 1,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 7,
-          "MIND": 5
-        },
-        "runes_in_play": 12,
-        "trash": 17
-      },
-      "points_A": 8,
-      "points_B": 1,
-      "spells_cast": 13,
-      "turns": 15,
-      "units_played": 15,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "diana",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/chaos_mind_diana.json",
-      "id": "pyke:fury_chaos_pyke__vs__diana:chaos_mind_diana#3",
-      "seed": 958980926
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Lonely Poro"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 26,
-        "energy": 7,
-        "hand": 3,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
-        },
-        "runes_in_play": 11,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Adaptatron",
-          "Adaptatron"
-        ],
-        "deck": 27,
-        "energy": 12,
-        "hand": 3,
+        "deck": 28,
+        "energy": 9,
+        "hand": 4,
         "power_pool": {
           "CALM": 6,
-          "CHAOS": 6
-        },
-        "runes_in_play": 12,
-        "trash": 4
-      },
-      "points_A": 2,
-      "points_B": 8,
-      "spells_cast": 5,
-      "turns": 16,
-      "units_played": 14,
-      "winner": "B",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#0",
-      "seed": 181392704
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Lonely Poro"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [
-            "Noxus Hopeful"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Noxus Hopeful"
-        ],
-        "deck": 30,
-        "energy": 8,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 3
-        },
-        "runes_in_play": 8,
-        "trash": 6
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
-        "deck": 26,
-        "energy": 0,
-        "hand": 0,
-        "power_pool": {
-          "CALM": 3,
-          "CHAOS": 6
+          "ORDER": 3
         },
         "runes_in_play": 9,
-        "trash": 10
+        "trash": 3
       },
-      "points_A": 8,
-      "points_B": 4,
-      "spells_cast": 8,
-      "turns": 12,
-      "units_played": 10,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 1
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#1",
-      "seed": 122476301
-    }
-  },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [
-            "Yasuo Remorseful",
-            "Lonely Poro"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        },
-        {
-          "A": [],
-          "B": [
-            "Adaptatron"
-          ],
-          "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "B",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Tideturner"
-        ],
-        "deck": 27,
-        "energy": 9,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
-        },
-        "runes_in_play": 11,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [
-          "Lonely Poro",
-          "Scuttle Crab"
-        ],
-        "deck": 23,
-        "energy": 12,
-        "hand": 1,
-        "power_pool": {
-          "CALM": 6,
-          "CHAOS": 6
-        },
-        "runes_in_play": 12,
-        "trash": 9
-      },
-      "points_A": 5,
+      "points_A": 3,
       "points_B": 8,
-      "spells_cast": 9,
-      "turns": 17,
+      "spells_cast": 1,
+      "turns": 12,
       "units_played": 12,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
-      "ai_a": "pyke",
+      "ai_a": "simple_trade",
       "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#2",
-      "seed": 493981850
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__simple_trade:precon_shen#0",
+      "seed": 71834130
     }
   },
-  "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#3": {
+  "simple_trade:precon_zed__vs__simple_trade:precon_shen#1": {
     "signature": {
       "battlefields": [
         {
-          "A": [
-            "Noxus Hopeful"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": "A"
-        },
-        {
           "A": [],
           "B": [
-            "Stellacorn Herder"
+            "Shen Scourge of Shadows"
           ],
           "controller": "B",
-          "last_controller": "B"
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [],
-        "deck": 31,
-        "energy": 7,
-        "hand": 1,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 2
-        },
-        "runes_in_play": 7,
-        "trash": 6
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 1,
-        "base_units": [],
-        "deck": 23,
-        "energy": 1,
-        "hand": 6,
-        "power_pool": {
-          "CALM": 3,
-          "CHAOS": 6
-        },
-        "runes_in_play": 9,
-        "trash": 9
-      },
-      "points_A": 8,
-      "points_B": 4,
-      "spells_cast": 7,
-      "turns": 12,
-      "units_played": 11,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "pyke",
-      "ai_b": "simple_trade",
-      "deck_a": "riftbound/data/decks/fury_chaos_pyke.json",
-      "deck_b": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "id": "pyke:fury_chaos_pyke__vs__simple_trade:calm_chaos_yasuo#3",
-      "seed": 316088351
-    }
-  },
-  "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#0": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Yasuo Remorseful"
-          ],
-          "B": [],
-          "controller": "A",
           "last_controller": "A"
         },
         {
           "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [],
-        "deck": 21,
-        "energy": 10,
-        "hand": 6,
-        "power_pool": {
-          "CALM": 4,
-          "CHAOS": 6
-        },
-        "runes_in_play": 10,
-        "trash": 9
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Treasure Hunter"
-        ],
-        "deck": 26,
-        "energy": 8,
-        "hand": 2,
-        "power_pool": {
-          "CHAOS": 5,
-          "FURY": 5
-        },
-        "runes_in_play": 10,
-        "trash": 10
-      },
-      "points_A": 8,
-      "points_B": 6,
-      "spells_cast": 12,
-      "turns": 17,
-      "units_played": 14,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "simple_trade",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#0",
-      "seed": 621118472
-    }
-  },
-  "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#1": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Adaptatron"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Stellacorn Herder"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Lonely Poro"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Adaptatron",
-          "Lonely Poro",
-          "Stellacorn Herder"
-        ],
-        "deck": 12,
-        "energy": 0,
-        "hand": 5,
-        "power_pool": {
-          "CALM": 5,
-          "CHAOS": 6
-        },
-        "runes_in_play": 11,
-        "trash": 13
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 2,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 23,
-        "energy": 5,
-        "hand": 0,
-        "power_pool": {
-          "CHAOS": 6,
-          "FURY": 5
-        },
-        "runes_in_play": 11,
-        "trash": 16
-      },
-      "points_A": 8,
-      "points_B": 7,
-      "spells_cast": 14,
-      "turns": 19,
-      "units_played": 21,
-      "winner": "A",
-      "xp_A": 0,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "simple_trade",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#1",
-      "seed": 1006899465
-    }
-  },
-  "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#2": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [
-            "Adaptatron"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        },
-        {
-          "A": [
-            "Lonely Poro"
-          ],
-          "B": [],
-          "controller": "A",
-          "last_controller": null
-        }
-      ],
-      "final_active": "A",
-      "player_A": {
-        "banished": 0,
-        "base_gear": 3,
-        "base_units": [
-          "Adaptatron",
-          "Lonely Poro"
-        ],
-        "deck": 10,
-        "energy": 1,
-        "hand": 2,
-        "power_pool": {
-          "CALM": 5,
-          "CHAOS": 6
-        },
-        "runes_in_play": 11,
-        "trash": 20
-      },
-      "player_B": {
-        "banished": 0,
-        "base_gear": 0,
-        "base_units": [
-          "Bewitching Spirit"
-        ],
-        "deck": 26,
-        "energy": 0,
-        "hand": 3,
-        "power_pool": {
-          "CHAOS": 4,
-          "FURY": 2
-        },
-        "runes_in_play": 6,
-        "trash": 10
-      },
-      "points_A": 8,
-      "points_B": 7,
-      "spells_cast": 19,
-      "turns": 22,
-      "units_played": 18,
-      "winner": "A",
-      "xp_A": 1,
-      "xp_B": 0
-    },
-    "spec": {
-      "ai_a": "simple_trade",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#2",
-      "seed": 782733317
-    }
-  },
-  "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#3": {
-    "signature": {
-      "battlefields": [
-        {
-          "A": [],
-          "B": [],
-          "controller": null,
-          "last_controller": null
-        },
-        {
-          "A": [],
           "B": [
-            "Sharkling"
+            "Serene Ascetic"
           ],
           "controller": "B",
           "last_controller": "B"
@@ -1375,48 +1290,199 @@
         "banished": 0,
         "base_gear": 0,
         "base_units": [
-          "Stellacorn Herder"
+          "Shadow Order Disciple",
+          "Gust Monk"
         ],
-        "deck": 21,
-        "energy": 0,
-        "hand": 5,
+        "deck": 26,
+        "energy": 9,
+        "hand": 1,
         "power_pool": {
-          "CALM": 5,
-          "CHAOS": 6
+          "CHAOS": 6,
+          "FURY": 6
         },
-        "runes_in_play": 11,
-        "trash": 12
+        "runes_in_play": 12,
+        "trash": 11
       },
       "player_B": {
-        "banished": 0,
-        "base_gear": 3,
+        "banished": 1,
+        "base_gear": 0,
         "base_units": [],
-        "deck": 28,
+        "deck": 24,
         "energy": 8,
-        "hand": 2,
+        "hand": 6,
         "power_pool": {
-          "CHAOS": 5,
-          "FURY": 3
+          "CALM": 5,
+          "ORDER": 3
         },
         "runes_in_play": 8,
         "trash": 7
       },
-      "points_A": 2,
+      "points_A": 4,
       "points_B": 8,
-      "spells_cast": 12,
-      "turns": 14,
-      "units_played": 11,
+      "spells_cast": 1,
+      "turns": 13,
+      "units_played": 14,
       "winner": "B",
       "xp_A": 0,
       "xp_B": 0
     },
     "spec": {
       "ai_a": "simple_trade",
-      "ai_b": "pyke",
-      "deck_a": "riftbound/data/decks/calm_chaos_yasuo.json",
-      "deck_b": "riftbound/data/decks/fury_chaos_pyke.json",
-      "id": "simple_trade:calm_chaos_yasuo__vs__pyke:fury_chaos_pyke#3",
-      "seed": 166370321
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__simple_trade:precon_shen#1",
+      "seed": 712744719
+    }
+  },
+  "simple_trade:precon_zed__vs__simple_trade:precon_shen#2": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [],
+          "B": [
+            "Serene Ascetic"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        },
+        {
+          "A": [],
+          "B": [
+            "Shen Leader of the Kinkou Order"
+          ],
+          "controller": "B",
+          "last_controller": "B"
+        }
+      ],
+      "final_active": "B",
+      "player_A": {
+        "banished": 1,
+        "base_gear": 0,
+        "base_units": [
+          "Shadow Clone",
+          "Punching Poro",
+          "Twilight Reveler"
+        ],
+        "deck": 23,
+        "energy": 1,
+        "hand": 0,
+        "power_pool": {
+          "CHAOS": 4,
+          "FURY": 5
+        },
+        "runes_in_play": 9,
+        "trash": 14
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Sacred Protector",
+          "Soulspinner",
+          "Keeper of Law",
+          "Soulspinner"
+        ],
+        "deck": 27,
+        "energy": 9,
+        "hand": 5,
+        "power_pool": {
+          "CALM": 6,
+          "ORDER": 3
+        },
+        "runes_in_play": 9,
+        "trash": 2
+      },
+      "points_A": 2,
+      "points_B": 9,
+      "spells_cast": 2,
+      "turns": 12,
+      "units_played": 15,
+      "winner": "B",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__simple_trade:precon_shen#2",
+      "seed": 776578904
+    }
+  },
+  "simple_trade:precon_zed__vs__simple_trade:precon_shen#3": {
+    "signature": {
+      "battlefields": [
+        {
+          "A": [
+            "Shadow Fiend"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "B"
+        },
+        {
+          "A": [
+            "Morgana Vindictive"
+          ],
+          "B": [],
+          "controller": "A",
+          "last_controller": "A"
+        }
+      ],
+      "final_active": "A",
+      "player_A": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Punching Poro",
+          "Zed Without a Sound",
+          "Traveling Merchant"
+        ],
+        "deck": 23,
+        "energy": 2,
+        "hand": 3,
+        "power_pool": {
+          "CHAOS": 6,
+          "FURY": 3
+        },
+        "runes_in_play": 9,
+        "trash": 9
+      },
+      "player_B": {
+        "banished": 0,
+        "base_gear": 0,
+        "base_units": [
+          "Noxian Emissary",
+          "Sacred Protector",
+          "Keeper of Law"
+        ],
+        "deck": 27,
+        "energy": 0,
+        "hand": 3,
+        "power_pool": {
+          "CALM": 5
+        },
+        "runes_in_play": 5,
+        "trash": 6
+      },
+      "points_A": 8,
+      "points_B": 4,
+      "spells_cast": 1,
+      "turns": 11,
+      "units_played": 15,
+      "winner": "A",
+      "xp_A": 0,
+      "xp_B": 0
+    },
+    "spec": {
+      "ai_a": "simple_trade",
+      "ai_b": "simple_trade",
+      "deck_a": "riftbound/data/decks/precon_zed.json",
+      "deck_b": "riftbound/data/decks/precon_shen.json",
+      "id": "simple_trade:precon_zed__vs__simple_trade:precon_shen#3",
+      "seed": 958980926
     }
   }
 }

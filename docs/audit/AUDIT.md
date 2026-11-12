@@ -13,6 +13,11 @@ marked `xfail(strict=True)`; each fix, one commit per deviation, removed its
 marker. Line numbers are those of the commit this audit started from
 (`ec62750`).
 
+**The eight non-precon decks were removed on 2026-11-12** (out of date; the
+owner will give two current competitive decks). Their passes (D13-D18,
+D23-D28) stay: they fixed cards, which are still in the corpus; where this
+document names those decks it is the record of where a card was found.
+
 **State (2026-11-12, fourth pass): 49 deviations found, 49 fixed, none open.**
 The suite is green (1754 passed, no xfail). The fourth pass went outside the
 ten decks, by class and not card by card (D29-D49; no golden game changed):
@@ -681,8 +686,7 @@ Tests in `tests/audit/test_audit_corpus.py`.
   four under load because of it.
 - **Left open.** Navori Fighting Pit's data now say "a unit here" (no board
   differs). Seraphine Not Alone is marked "Preview Card - Not Legal" on the
-  site. The decks vendetta_kennen and vendetta_ezreal hold Stacked Deck,
-  which `banned_cards.json` bans (a warning at load, not checked further).
+  site.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
