@@ -67,8 +67,7 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    (`ACTION_DIM` 319, ora anche una zona in più), riallenare da zero;
    budget MCTS, LR, dimensione rete; valutare su 100+ partite. Self-play qui:
    ~5 s a partita con 10 iterazioni (1 thread). Conta la CPU, non la GPU: la
-   rete (~1M parametri, una posizione per volta) è ~25% del tempo, il resto
-   è il motore in Python; le partite girano sulla CPU, una per worker.
+   rete (~1M parametri, una posizione per volta) è ~25% del tempo.
 5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
    di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
    costruzione del mazzo (§103).
