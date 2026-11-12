@@ -3948,8 +3948,8 @@ class GameLoop:
     def _effective_cost(self, card: Card, actor: Player,
                         lane: Optional[int] = None, from_zone: str = "hand") -> tuple[int, Optional[int]]:
         """(energy, power) `actor` pays to play `card`: the printed cost minus the
-        card's own reductions. A spell aimed at battlefield `lane` also pays the
-        DEFLECT surcharge there and gets that battlefield's discount."""
+        card's own reductions. A spell aimed at battlefield `lane` gets that
+        battlefield's discount (DEFLECT is paid as units are chosen)."""
         printed = int(card.cost_energy or 0)
         energy = printed - self._cost_reduction(card, actor)
         power = card.cost_power
@@ -5494,9 +5494,8 @@ class GameLoop:
                 target_lane = lane if lane is not None else 0
                 if not self._spell_has_targets(card, ap.name, target_lane):
                     return                       # §355.8: no valid target, no play
-                # DEFLECT: if this spell targets enemy units and the opponent
-                # controls DEFLECT units at the target battlefield, the spell
-                # costs that much more energy (additional cost, §809).
+                # DEFLECT (§809) is not in this cost: it is paid for each
+                # unit as the spell chooses it (_note_chosen).
                 energy, power = self._effective_cost(card, ap, target_lane)
                 if not self._pay_card(ap, card, energy, power, lane=target_lane):
                     return

@@ -4,8 +4,8 @@ The engine checked against `docs/rules/CORE_RULES.md` (revision 2026-10-09),
 `docs/rules/TOURNAMENT_RULES.md` and the printed card text
 (`riftbound/data/reference/piltover_archive.json`), in this order: the two
 training precons (`precon_zed`, `precon_shen`) and the rules they play by; the
-PARTIAL / GAP rows of `docs/MECHANICS.md`; the other eight decks, from
-`BACKLOG.md` O1.
+PARTIAL / GAP rows of `docs/MECHANICS.md` (again in the sixth pass); the
+other eight decks, from `BACKLOG.md` O1.
 
 Every deviation below has a test in `tests/audit/` that plays the situation and
 checks what the rules or the card say. In phase 1 (`4af83ef`) each test was
@@ -18,10 +18,11 @@ owner will give two current competitive decks). Their passes (D13-D18,
 D23-D28) stay: they fixed cards, which are still in the corpus; where this
 document names those decks it is the record of where a card was found.
 
-**State (2026-11-12, fifth pass): 52 deviations found, 52 fixed, none open.**
-The fifth pass read the owner's two competitive decks (`competitive_kaisa`,
-`competitive_kennen`): D50-D52, see its section. Suite: 1773 passed.
-The suite is green (1754 passed, no xfail). The fourth pass went outside the
+**State (2026-11-12, sixth pass): 56 deviations found, 56 fixed, none open.**
+The sixth pass re-checked the PARTIAL / GAP rows of `docs/MECHANICS.md` and
+took two Codex review comments: D53-D56, see its section. Suite: 1751
+passed, 5 skipped, no xfail. The fifth pass read the owner's two competitive decks
+(`competitive_kaisa`, `competitive_kennen`): D50-D52. The fourth pass went outside the
 ten decks, by class and not card by card (D29-D49; no golden game changed):
 see its section for what was scanned and what was not read. The third pass
 read the 119 cards of the other eight decks against the printed text and
@@ -725,6 +726,40 @@ Tests in `tests/audit/test_audit_competitive.py`.
 - **Seen on the way, a test and not the engine.** The invariant test took a
   card hidden at a battlefield for a vanished one, and a [Reaction] ability
   or a [Reaction] spell by FLOW on an open chain for an illegal action.
+
+## Deviations, sixth pass (2026-11-12): the MECHANICS.md rows
+
+The eight PARTIAL rows and the GAP row of `docs/MECHANICS.md` (BACKLOG O2),
+each read against its rule and the code, then pinned by a game situation
+(`tests/audit/test_audit_mechanics_rows.py`); the decks' cards first
+(Empower and Empowered: Zed, Shen, Kennen; Flow: all four; Deflect: Shen,
+Decree of Insight; Deploy: The Good Stuff). Two Codex review comments on the
+branch were checked: both right (D53, and the round robin's default glob,
+which named the removed decks).
+
+- **D53.** Edge of Night's "attach it to a unit you control (here)" fell
+  back to units at other battlefields and in base when none of yours was
+  there (the battlefield still yours, contested): `_resolve_targets` looks
+  elsewhere when nothing is here, and the face-down mark was gone by the
+  time the play trigger resolved. `here` now never falls back.
+- **D54.** Kai'Sa Daughter of the Void's spell-only [rune] (and Lux
+  Crownguard's spell Energy) didn't pay a FLOW cost: Brittle Steel from the
+  trash wasn't offered.
+- **D55.** Abandon on a spell played with FLOW put it back in hand, still
+  marked, so its next normal cast was banished. §829.1.b.1 with §372: in
+  either order of the two replacements it ends banished.
+- **D56.** Disempower took every EMPOWERED status (§443.1.b: one); Lacerate
+  killed a Kayle Justified empowered three times, and its baseline, weighing
+  targets, reset the count of a Kayle it didn't choose. Only Kayle stacks.
+- **Checked and right.** Deflect: per unit chosen, by spells and abilities
+  (Mel Defiant Soul's trigger pays for Steel Paws), any domain, summed,
+  waived by Decree of Insight; the old per-battlefield surcharge is gone, the
+  row was stale. Hunt (per unit, summed, conquer and hold), Level (the
+  current controller's XP), Backline (after every non-Backline unit), Deploy
+  (any battlefield), "When I become EMPOWERED" (Mel), EMPOWERED DEATHKNELL.
+- **Left open.** A FLOW cost takes cost auras only (Stargazer); the other
+  increases and discounts of §356.3-4 are not applied to it (none in the four
+  decks). Unique: deck construction only (§825.4), with §103.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
