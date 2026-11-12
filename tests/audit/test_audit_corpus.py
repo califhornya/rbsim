@@ -158,3 +158,24 @@ def test_baited_hook_kills_the_friendly_unit_its_player_chooses():
     loop, a, b, _c = _board("Baited Hook")
     a.base_units.append(token)                            # only a token to kill
     assert len(_abilities(loop, "A", "Baited Hook")) == 1
+
+
+# -- D33. Ambessa's legend readies only a friendly exhausted unit ------------------
+
+def test_ambessa_legend_can_choose_any_unit():
+    """Ambessa, Matriarch of War: 'Disempower me, [Rune], [Tap]: Ready a
+    unit.' (As D28: 'a unit' is any unit.)"""
+    loop, a, b, _c = _board("Ambessa Matriarch of War")
+    loop.gs.legend_unit_A.empowered = True
+    mine, theirs = unit("mine", 2, ready=False), unit("theirs", 2, ready=False)
+    b.base_units.append(theirs)
+    seen = choices(loop, {})
+    act(loop, "A", "Activate ready_unit (Ambessa")       # an enemy unit is enough
+    assert seen[0][2] == ["theirs"] and theirs.ready
+
+    loop, a, b, _c = _board("Ambessa Matriarch of War")
+    loop.gs.legend_unit_A.empowered = True
+    a.base_units.append(mine)
+    b.base_units.append(unit("theirs", 2, ready=False))
+    act(loop, "A", "Activate ready_unit (Ambessa")       # the baseline readies its own
+    assert mine.ready and not b.base_units[0].ready

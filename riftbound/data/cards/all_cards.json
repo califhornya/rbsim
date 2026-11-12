@@ -9875,7 +9875,7 @@
       {
         "effect": "buff_unit",
         "trigger": "on_hold",
-        "target": "friendly_unit"
+        "target": "chosen_unit"
       }
     ]
   },
@@ -33151,10 +33151,7 @@
       {
         "effect": "ready_unit",
         "trigger": "activated",
-        "target": "friendly_unit",
-        "target_filter": {
-          "is_exhausted": true
-        },
+        "target": "chosen_unit",
         "cost": {
           "disempower_self": true,
           "power": 1,
