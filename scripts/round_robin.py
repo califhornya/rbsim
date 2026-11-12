@@ -12,9 +12,9 @@ For each unordered pair (X, Y) it plays `--games` games with X in seat A and
 denominators (win% = wins / decided).
 
 Usage:
-  uv run python scripts/round_robin.py                       # all decks/vendetta_*.json, 50 games/side
+  uv run python scripts/round_robin.py                       # all decks/*.json, 50 games/side
   uv run python scripts/round_robin.py --games 100 --seed 7
-  uv run python scripts/round_robin.py --glob "riftbound/data/decks/*.json"
+  uv run python scripts/round_robin.py --glob "riftbound/data/decks/competitive_*.json"
   uv run python scripts/round_robin.py --agent simple_trade --csv out.csv
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ def _play(deck_a: Path, deck_b: Path, agent: str, seed: int, victory_score: int,
 
 @app.command()
 def main(
-    glob: str = typer.Option("riftbound/data/decks/vendetta_*.json", "--glob",
+    glob: str = typer.Option("riftbound/data/decks/*.json", "--glob",
                              help="Glob for deck files (ignored if --decks given)"),
     decks: str = typer.Option("", "--decks", help="Comma-separated deck paths (overrides --glob)"),
     games: int = typer.Option(50, "--games", help="Games per seat orientation per pair (total per pair = 2x)"),
