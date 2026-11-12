@@ -57,9 +57,8 @@ Niente.
 Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 1. Banlist del 23/11: l'utente incolla l'elenco → aggiornare
    `riftbound/data/banned_cards.json`, ricontrollare i due mazzi competitive.
-2. Regole: fatto (sesto passaggio). Aperti, fuori dai mazzi: modificatori
-   del costo Flow §356.3-4, ordine delle sostituzioni di morte §372-373,
-   dipendenze dei layer §480-481 (AUDIT.md, "Left open").
+2. Regole: fatto. Aperti, fuori dai mazzi: Flow §356.3-4, sostituzioni di
+   morte §372-373, layer §480-481 (AUDIT.md, "Left open").
 3. Fatto (sopra). Approssimazioni rimaste: il replay prosegue dalla scelta
    con le carte nascoste vere (mano avversaria, mazzo sotto), un campione
    per opzione, valore alla decisione successiva.
@@ -68,9 +67,8 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    budget MCTS, LR, dimensione rete; valutare su 100+ partite. Self-play qui:
    ~5 s a partita con 10 iterazioni (1 thread). Conta la CPU, non la GPU: la
    rete (~1M parametri, una posizione per volta) è ~25% del tempo.
-5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
-   di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
-   costruzione del mazzo (§103).
+5. Possono aspettare: sideboard imparato, tempi per turno del match, carte
+   del corpus fuori dai mazzi, costruzione del mazzo (§103).
 
 Training sulle macchine dell'utente, run in runs/competitive: PC Windows
 (Ryzen 7 7800X3D, `scripts/allena.bat`, 8 worker) o Mac M1 (`allena.command`,
