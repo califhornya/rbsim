@@ -5633,6 +5633,7 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     n = max(0, min(amount, len(deck.cards)))
     if n == 0:
         return
+    known = deck.known_on_top()
     look = deck.cards[-n:]
     # Cards with an on_reveal_from_top ability (Nocturne) may banish + play now.
     ctx.loop._offer_reveal_from_top(ctx.actor, look)
@@ -5655,6 +5656,8 @@ def _predict(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     rest = deck.cards[:-len(look)]
     # Recycled ones to the bottom (front of the list), each below the one before.
     deck.cards[:] = list(reversed(recycled)) + rest + list(reversed(kept))
+    # Its player knows them now, and what they knew below them.
+    deck.known_top = list(kept) + [c for c in known if not any(c is d for d in look)]
     if recycled:
         ctx.loop._note_recycled(ctx.actor_side)
 

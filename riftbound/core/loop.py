@@ -471,6 +471,13 @@ class GameLoop:
         # n_options, chosen, source); a spell's declared choices are told as
         # it goes on the chain, not again as it resolves.
         self.on_choice = None
+        # A list (an agent turns it on): since the latest main-phase decision,
+        # the agents' decisions ("decision", side, point, action) and the
+        # chooser's answers ("choice", side, kind, n_options, index), in order;
+        # `segment` is that decision: (the game as it was made, side, action,
+        # cards played). replay_segment plays it again on a copy.
+        self.journal: Optional[list] = None
+        self.segment: Optional[tuple] = None
         # Declared choices (§355): the spell instruction running and how many
         # choices it made [run, instruction, n]; the spell whose choices are
         # being declared (on a copy of the game) or replayed (as it resolves).
@@ -529,10 +536,43 @@ class GameLoop:
         got = pick
         if self.chooser is not None and options:
             default = next((i for i, o in enumerate(options) if o is pick), 0)
-            i = self.chooser(self, kind, side, options, default, source)
+            i = self._consult(self, kind, side, options, default, source)
             got = pick if i is None else options[i]
         self._chose(slot, kind, side, options, got, source)
         return got
+
+    def _consult(self, loop, kind: str, side: str, options: list, default: int, source):
+        """Ask the chooser (on `loop`, this loop or a copy a spell's choices are
+        declared on); the answer goes in the journal."""
+        i = self.chooser(loop, kind, side, options, default, source)
+        if self.journal is not None:
+            self.journal.append(("choice", side, kind, len(options), default if i is None else int(i)))
+        return i
+
+    def _note_decision(self, side: str, point: str, action) -> None:
+        if self.journal is not None:
+            self.journal.append(("decision", side, point, action))
+
+    def _open_segment(self, side: str, action, cards_played: int) -> None:
+        """A main-phase decision made: the journal starts again from it."""
+        if self.journal is not None:
+            self.segment = (self.gs.clone(), side, action, cards_played)
+            self.journal = []
+
+    def replay_segment(self) -> None:
+        """On a copy of `segment`'s game (its own loop, agents that answer from
+        the journal): what the main loop does with that decision, up to the
+        next one (the turn ending, the next turn beginning, for a PASS)."""
+        gs = self.gs
+        _snap, side, act, cpt = self.segment
+        ap = gs.get_player(side)
+        if act[0] == "PASS" and gs.pending_move is None:
+            self._flush_pending_move()
+            if self._victory() is None and self._end_turn() is None and gs.turn <= gs.max_turns:
+                self._begin_turn()
+            return
+        self._apply_action(ap, act, cards_played_this_turn=cpt)
+        self._recompute_passives()
 
     def choose_many(self, kind: str, side: str, options: list, picks: list, source=None,
                     up_to: Optional[int] = None, allowed=None) -> list:
@@ -688,7 +728,10 @@ class GameLoop:
         for p, p2 in ((gs.A, gs2.A), (gs.B, gs2.B)):
             if hasattr(p.agent, "decide_mode"):
                 p2.agent = _ModeAsker(p.agent)
-        real = self.chooser
+        real = None
+        if self.chooser is not None:
+            def real(_loop, kind, side, options, default, source):
+                return self._consult(_loop, kind, side, options, default, source)
         # The Irelia Graceful it was paid for with must be chosen (§355.16:
         # no choice that makes the play illegal): a unit target offering her
         # offers only her (as card uuids: the same on every copy).
@@ -1415,7 +1458,7 @@ class GameLoop:
         if player.trash:
             player.deck.cards.extend(player.trash)
             player.trash.clear()
-            self.gs.rng.shuffle(player.deck.cards)
+            player.deck.shuffle(self.gs.rng)
         # §418.2.c: an opponent gains 1 point (2-player: the other player).
         side = "A" if player is self.gs.A else "B"
         self._gain_points(self.gs.other(side), 1, "burn_out")
@@ -7540,6 +7583,7 @@ class GameLoop:
                 continue
 
             action = player.agent.decide_reaction(self.gs.get_player(self.gs.other(active)), self.gs.chain)
+            self._note_decision(active, "reaction", action)
             depth = len(self.gs.chain)
             step = "pass" if action[0] == "PASS" else self._reaction_step(player, active, action)
             self._flush_triggers(run=False)       # what it triggered goes on the chain
@@ -7721,6 +7765,7 @@ class GameLoop:
                 continue
 
             action = focus_player.agent.decide_showdown_action(opponent_player, bf_idx)
+            self._note_decision(self.gs.focus_player, "showdown_action", action)
 
             if action[0] == "PASS":
                 passes += 1
@@ -8199,6 +8244,7 @@ class GameLoop:
                 act: Action = ("PASS", None, None)
             else:
                 act = ap.agent.decide_action(op, cards_played=cards_played_this_turn)
+                self._open_segment(gs.active, act, cards_played_this_turn)
             if act[0] == "PASS":
                 if gs.pending_move is not None:
                     # Done declaring a move: its showdown, then the turn goes on.

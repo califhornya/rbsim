@@ -139,7 +139,9 @@ def test_observation_hides_opponent_hand_and_deck_order():
     d = obs.to_dict()
     assert "opp_hand" not in d and "opp_deck" not in d
     for key, val in d.items():
-        if "deck" in key:
+        if key == "my_deck_top":       # only the cards its player has seen there (PREDICT)
+            assert val == []
+        elif "deck" in key:
             assert isinstance(val, int), f"{key} leaks deck contents/order: {val!r}"
     # Public facts are present.
     assert d["opp_deck_count"] == len(gs.B.deck.cards)

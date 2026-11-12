@@ -208,6 +208,8 @@ class Observation:
     # unattached gear in base, ready runes and runes by domain, cards played
     # this turn.
     my_deck: tuple[str, ...] = ()
+    # The cards the viewer knows are on top of their deck, top first (PREDICT).
+    my_deck_top: tuple[str, ...] = ()
     my_banished: tuple[str, ...] = ()
     opp_banished: tuple[str, ...] = ()
     my_legend: Optional[str] = None
@@ -319,6 +321,7 @@ class Observation:
             my_chain=tuple(i.card.name for i in gs.chain if i.player == viewer),
             opp_chain=tuple(i.card.name for i in gs.chain if i.player != viewer),
             my_deck=tuple(sorted(c.name for c in me.deck.cards)),
+            my_deck_top=tuple(c.name for c in me.deck.known_on_top()),
             my_banished=tuple(c.name for c in me.banished),
             opp_banished=tuple(c.name for c in opp.banished),
             my_legend=my_leg[0], opp_legend=opp_leg[0],
@@ -364,6 +367,7 @@ class Observation:
             "my_chain": list(self.my_chain),
             "opp_chain": list(self.opp_chain),
             "my_deck_size": len(self.my_deck),
+            "my_deck_top": list(self.my_deck_top),
             "my_banished": list(self.my_banished),
             "opp_banished": list(self.opp_banished),
             "my_legend": self.my_legend, "opp_legend": self.opp_legend,

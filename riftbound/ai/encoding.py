@@ -16,7 +16,8 @@ The state vector has two parts: DENSE_DIM scalar features (points, energy, runes
 each battlefield's state...), then MAX_TOKENS rows of TOKEN_WIDTH, one per card
 the viewer can see: (zone, card id, features). A unit's row carries its state
 (Might, damage, ready, stunned, buff, keywords in effect...); a card in a zone
-(hand, trash, deck...) its number of copies. The network embeds each card once,
+(hand, trash, deck...) its number of copies; a card the viewer knows is on top
+of their deck (PREDICT) has a row of its own, with its place. The network embeds each card once,
 the same wherever it is, and pools the rows zone by zone (net.py).
 """
 
@@ -51,6 +52,7 @@ N_CARD_IDS = VOCAB_SIZE + 2
 _LOCATIONS = ("base",) + tuple(f"bf{i}" for i in range(N_BF))
 ZONES: tuple[str, ...] = (
     "my_hand", "my_trash", "opp_trash", "my_deck", "my_banished", "opp_banished",
+    "my_deck_top",
     "my_chain", "opp_chain", "my_legend", "opp_legend", "my_champion", "opp_champion",
     *(f"{w}_units_{loc}" for w in ("my", "opp") for loc in _LOCATIONS),
     *(f"{w}_attached_{loc}" for w in ("my", "opp") for loc in _LOCATIONS),
@@ -194,6 +196,9 @@ def _tokens(obs: Observation) -> list:
         if bf.named:
             card(f"battlefield_{i}", bf.named)
     counted("my_hand", obs.my_hand)
+    # Known top of the deck (PREDICT): one row each, the next draw first.
+    for rank, name in enumerate(obs.my_deck_top):
+        card("my_deck_top", name, [1.0 / 3.0, rank / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))
     for (who, loc), us in units.items():
         counted(f"{who}_attached_{loc}", [g for u in us for g in u.gear])
     counted("my_base_gear", obs.my_base_gear)

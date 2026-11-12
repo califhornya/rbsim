@@ -34,7 +34,14 @@ from typing import Optional
 import numpy as np
 
 from riftbound.ai.encoding import ACTION_DIM, action_to_index, encode_observation, legal_mask
-from riftbound.ai.net_mcts import _PASS, NetGuidedMCTSAgent, _ForcedChoice, _split_key
+from riftbound.ai.net_mcts import (
+    _PASS,
+    NetGuidedMCTSAgent,
+    _choice_keys,
+    _ForcedChoice,
+    _split_key,
+    _unlink,
+)
 from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
 from riftbound.core.loop import NO_MORE
@@ -360,8 +367,9 @@ def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
     targets: list = []
 
     def chooser(_loop, kind, s, options, default, source):
-        if not seen and s == side and (kind, len(options)) == tuple(force[:2]):
-            opt = options[force[2]]
+        keys = _choice_keys(_loop, kind, s, options, source) if not seen and s == side else []
+        if force in keys:
+            opt = options[keys.index(force)]
             head = kind.partition(":")[0]
             # "you may" of a card that isn't the move's (Shadow Clone attacking
             # when the showdown starts): name the card.
@@ -369,7 +377,7 @@ def _choice_preview(gs, side: str, action, force, cards_played: int) -> dict:
             text = f"{name + ': ' if name else ''}{question(kind)} {option_text(_loop.gs, side, opt)}" \
                 if head == "optional" else f"{_SHORT.get(head, 'scelta')}: {option_text(_loop.gs, side, opt)}"
             seen.update(text=", ".join(targets + [text]), ref=option_ref(_loop.gs, side, opt))
-            return force[2]
+            return keys.index(force)
         if not seen and s == side and kind.startswith("target"):
             targets.append(f"{_SHORT['target']}: {option_text(_loop.gs, side, options[default])}")
         return None
@@ -603,8 +611,7 @@ class _CoachChooser:
         return self.previous(loop, kind, side, options, default, source) if self.previous else None
 
     def release(self) -> None:
-        if self.loop.chooser is self:
-            self.loop.chooser = self.previous
+        _unlink(self.loop, self)
 
 
 class CoachAgent(NetGuidedMCTSAgent):
@@ -687,12 +694,12 @@ class CoachAgent(NetGuidedMCTSAgent):
         tuples = [a.to_engine() for a in legal]
         infos = [action_info(self.loop, side, side, point, t) for t in tuples]
         total = sum(c.N for c in root.children.values()) or 1
-        ranked = sorted(root.children.items(), key=lambda kv: -kv[1].N)
+        ranked = self.variants(root)
         if ranked and self.prefer_pass(root, ranked[0][0]) == _PASS and ranked[0][0] != _PASS:
             # The net would pass: its top move isn't clearly better (prefer_pass).
-            ranked = [(_PASS, root.children[_PASS])] + [kv for kv in ranked if kv[0] != _PASS]
+            ranked = [kv for kv in ranked if kv[0] == _PASS] + [kv for kv in ranked if kv[0] != _PASS]
         suggestions = []
-        for key, child in ranked:
+        for key, n_visits, w_total in ranked:
             if len(suggestions) == 3:
                 break
             action, force = _split_key(key)
@@ -703,10 +710,10 @@ class CoachAgent(NetGuidedMCTSAgent):
             text = infos[i]["text"] + (f" → {choice['text']}" if choice else "")
             same = next((s for s in suggestions if s["text"] == text), None)
             if same is not None:              # two copies of a card in hand: one idea
-                same["share"] += child.N / total
+                same["share"] += n_visits / total
                 continue
-            q = child.W / child.N if child.N else 0.0
-            suggestions.append({"key": key, "action": i, "share": child.N / total, "win": (q + 1) / 2,
+            q = w_total / n_visits if n_visits else 0.0
+            suggestions.append({"key": key, "action": i, "share": n_visits / total, "win": (q + 1) / 2,
                                 "text": text, "choice": choice.get("text"), "choice_ref": choice.get("ref")})
         answer = self.session.ask_decision(point, side, infos, suggestions, self._context(point, bf_idx))
         force = None
