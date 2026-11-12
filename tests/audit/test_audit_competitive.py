@@ -60,3 +60,18 @@ def test_a_standard_move_fires_when_i_become_exhausted():
     act(loop, "A", "Move Reckless Innovator base→BF0")
     assert [k for k, _s, _o in seen if k.startswith("mode")]
     assert [(g.name, g.tapped) for g in a.base_gear] == [("Gold", True)]
+
+
+# -- D52. Decree of Unity is cast with no enemy Chaos unit or gear -----------------
+
+def test_decree_of_unity_needs_an_enemy_chaos_unit_or_gear():
+    """Decree of Unity: 'Kill an enemy Chaos unit or gear.' §355.8: valid
+    choices must be made for all targets to put a spell on the chain."""
+    loop, a, b = setup(active="A")
+    a.base_units.append(unit("Reckless Innovator"))          # Chaos, but friendly
+    b.base_units.append(unit("plain", 2))
+    a.hand.append(card("Decree of Unity"))
+    assert not [lb for lb in labels(loop, "A") if "Decree of Unity" in lb]
+    b.base_units.append(unit("Reckless Innovator"))
+    act(loop, "A", "Cast Decree of Unity")
+    assert [u.card.name for u in b.base_units] == ["plain"]
