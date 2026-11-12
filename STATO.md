@@ -66,14 +66,15 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
 4. **Training (BACKLOG O4), da qui si riparte**: reti vecchie non caricabili
    (`ACTION_DIM` 319, ora anche una zona in più), riallenare da zero;
    budget MCTS, LR, dimensione rete; valutare su 100+ partite. Self-play qui:
-   ~5 s a partita con 10 iterazioni (1 thread): con 100 serve una GPU.
+   ~5 s a partita con 10 iterazioni (1 thread). Conta la CPU, non la GPU: la
+   rete (~1M parametri, una posizione per volta) è ~25% del tempo, il resto
+   è il motore in Python; le partite girano sulla CPU, una per worker.
 5. Possono aspettare: sideboard imparato, tempi per turno del match, merge
    di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
    costruzione del mazzo (§103).
 
 Da decidere (utente): allentare la regola "niente training finché il
-BACKLOG non è vuoto" (proposta: partire dopo 1-3, il punto 5 in parallelo);
-dove allenare (questo container o macchina con GPU).
+BACKLOG non è vuoto"; l'utente propone la sua macchina (Windows, RTX 4070).
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
