@@ -129,7 +129,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                     if dst == base_index and not loop._can_move_to_base(
                             u, None if src == base_index else gs.battlefields[src]):
                         continue      # "can't move to base" (Vilemaw's Lair, Sentry)
-                    if loop._group_move_toll(side, dst) > ap.energy:
+                    if not loop._can_pay_generic_power(ap, loop._group_move_toll(side, dst)):
                         continue      # Mageseeker Investigator
                     joining = gs.pending_move is not None and gs.pending_move == (dst, side)
                     if dst != base_index and not joining and \

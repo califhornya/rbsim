@@ -942,6 +942,24 @@ def _take_control(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         ctx.actor.base_units.append(unit)
 
 
+@effect("each_opponent_kills_own_unit")
+def _each_opponent_kills_own_unit(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
+    """ "Starting with the next player, each other player chooses a unit you
+    don't control that hasn't been chosen for this spell. Kill those units."
+    (King's Edict): the opponent chooses one of the units the caster doesn't
+    control, anywhere; baseline its weakest. Their choice, so no DEFLECT."""
+    them = ctx.opponent_side
+    units = _units_at(ctx, them, "anywhere")
+    if not units:
+        return
+    unit = ctx.loop.choose(_kind("target", spec), them, units, min(units, key=lambda u: u.might), ctx.card)
+    where = _take_off_board(ctx, unit)
+    if where is not None:
+        side, bf = where
+        ctx.loop._route_deaths([(unit, side)], bf or ctx.battlefield, in_base=bf is None,
+                               killer=(ctx.actor_side, ctx.card))
+
+
 @effect("gain_permanent_might")
 def _gain_permanent_might(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "I gain +1 Might" for good (Lillia Protector of Dreams)."""

@@ -33,8 +33,8 @@ def test_equip_cost_parses_domain_and_energy():
     assert _cost(loop, "Skyfall of Areion")["energy"] == 1        # "Equip [1] [fury]"
     assert _cost(loop, "Skyfall of Areion")["domain_power"] == {"fury": 1}
     assert _cost(loop, "Spinning Axe")["generic"] == 1            # "Equip [rune]"
-    bb = _cost(loop, "Blighted Battleaxe")                        # "Equip [1] [fury]"
-    assert bb["energy"] == 1 and bb["domain_power"] == {"fury": 1}
+    bb = _cost(loop, "Blighted Battleaxe")                        # "Equip [1] [rune]" (UNL-019)
+    assert bb["energy"] == 1 and bb["domain_power"] == {} and bb["generic"] == 1
 
 
 def test_equip_cost_parses_additional_costs():

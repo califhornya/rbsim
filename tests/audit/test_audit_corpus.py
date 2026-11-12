@@ -180,6 +180,7 @@ def test_ambessa_legend_can_choose_any_unit():
     act(loop, "A", "Activate ready_unit (Ambessa")       # the baseline readies its own
     assert mine.ready and not b.base_units[0].ready
 
+
 # -- D34. [rune][rune] can't be paid with Power of two domains ---------------------
 
 def test_generic_power_is_paid_with_any_mix_of_domains():
@@ -194,3 +195,194 @@ def test_generic_power_is_paid_with_any_mix_of_domains():
     act(loop, "A", "Activate empower_self (Jayce")
     assert loop.gs.legend_unit_A.empowered and not any(a.power_pool.values())
 
+
+# -- D35-D49. Card data against the print (piltover_sync compare, 131 cards) -------
+
+def _data(name: str) -> dict:
+    import json
+    from pathlib import Path
+    path = Path(__file__).resolve().parents[2] / "riftbound" / "data" / "cards" / "all_cards.json"
+    return next(c for c in json.loads(path.read_text(encoding="utf-8")) if c["name"] == name)
+
+
+def test_printed_stats():
+    """Spectral Centaur (UNL-068): Might 6. Fallen Feline (VEN-132): Might 3.
+    Brittle Steel (VEN-003): [2][Fury]. Grand Strategem (OGN-233): [ACTION]."""
+    assert card("Spectral Centaur").might == 6
+    assert card("Fallen Feline").might == 3
+    assert (_data("Brittle Steel")["cost_power"], _data("Brittle Steel")["cost_power_domain"]) == (1, "Fury")
+    assert "ACTION" in card("Grand Strategem").keywords
+
+
+def test_premonition_draws_three():
+    """Premonition (SFD-087): '[REACTION] Draw 3.' It had no effect."""
+    loop, a, b = setup(active="A")
+    a.deck.cards[:] = [card("Stacked Deck") for _ in range(5)]
+    a.hand.append(card("Premonition"))
+    act(loop, "A", "Cast Premonition")
+    assert len(a.hand) == 3
+
+
+def test_zaunite_bouncer_returns_another_unit_at_a_battlefield():
+    """Zaunite Bouncer (OGN-188): 'When you play me, return another unit at a
+    battlefield to its owner's hand.' It had no effect."""
+    loop, a, b = setup(active="A")
+    enemy, home = unit("enemy", 3), unit("home", 3)
+    loop.gs.battlefields[0].add_unit("B", enemy)
+    b.base_units.append(home)
+    a.hand.append(card("Zaunite Bouncer"))
+    seen = choices(loop, {})
+    act(loop, "A", "Play Zaunite Bouncer")
+    assert enemy.card in b.hand and home in b.base_units
+    assert [opts for kind, _s, opts in seen if kind == "target:recall_unit"] == [["enemy"]]
+
+
+def test_kings_edict_kills_the_unit_the_opponent_chooses():
+    """King's Edict (OGN-237): 'Starting with the next player, each other
+    player chooses a unit you don't control that hasn't been chosen for this
+    spell. Kill those units.' It had no effect."""
+    loop, a, b = setup(active="A")
+    weak, strong, mine = unit("weak", 1), unit("strong", 5), unit("mine", 1)
+    b.base_units.extend([weak, strong])
+    a.base_units.append(mine)
+    a.hand.append(card("King's Edict"))
+    seen = choices(loop, {"target:each_opponent_kills_own_unit": lambda _l, options: options.index(strong)})
+    act(loop, "A", "Cast King's Edict")
+    assert b.base_units == [weak] and a.base_units == [mine]
+    asked = {(side, tuple(opts)) for kind, side, opts in seen if kind.startswith("target:each")}
+    assert asked == {("B", ("weak", "strong"))}
+
+
+def test_overloaded_traveler_has_one_more_might_next_to_a_deployed_gear():
+    """Overloaded Traveler (RAD-072): 'While there's a friendly gear with
+    [Deploy] at my battlefield, I have +1 [Might].' It had no effect."""
+    from riftbound.core.battlefield import DeployedGear
+    loop, a, b = setup(active="A")
+    traveler = unit("Overloaded Traveler")
+    bf0, bf1 = loop.gs.battlefields
+    bf0.add_unit("A", traveler)
+    bf1.gear_for("A").append(DeployedGear(card=card("Seal of Rage")))
+    loop._recompute_passives()
+    assert traveler.might == 2                           # the gear is elsewhere
+    bf0.gear_for("A").append(DeployedGear(card=card("Seal of Rage")))
+    loop._recompute_passives()
+    assert traveler.might == 3
+
+
+def test_harnessed_dragon_kills_only_an_enemy_unit():
+    """Harnessed Dragon (OGN-234): 'When you play me, kill an enemy unit.'"""
+    loop, a, b = setup(active="A")
+    mine = unit("mine", 2)
+    a.base_units.append(mine)
+    a.hand.append(card("Harnessed Dragon"))
+    act(loop, "A", "Play Harnessed Dragon")
+    assert [u.card.name for u in a.base_units] == ["mine", "Harnessed Dragon"]
+
+
+def test_carnivorous_snapvine_fights_an_enemy_unit_at_a_battlefield():
+    """Carnivorous Snapvine (OGN-149): 'choose an enemy unit at a battlefield.'"""
+    loop, a, b = setup(active="A")
+    b.base_units.append(unit("home", 2))
+    loop.gs.battlefields[0].add_unit("B", unit("out", 2))
+    a.hand.append(card("Carnivorous Snapvine"))
+    seen = choices(loop, {})
+    act(loop, "A", "Play Carnivorous Snapvine")
+    assert [opts for kind, _s, opts in seen if kind == "target:fight"] == [["out"]]
+
+
+def test_lillia_protector_of_dreams_gains_might_for_the_turn():
+    """Lillia, Protector of Dreams (UNL-058): 'When you play a token unit,
+    give me +1 [Might] this turn.' It kept the Might for good."""
+    loop, a, b = setup(active="A")
+    lillia = unit("Lillia Protector of Dreams")
+    a.base_units.append(lillia)
+    a.base_gear.append(card("Long Sword"))
+    a.hand.append(card("Arise!"))                        # one Sand Soldier token
+    act(loop, "A", "Cast Arise!")
+    assert lillia.might == 5
+    lillia.clear_turn_end_bonuses()
+    assert lillia.might == 4
+
+
+def test_apprentice_mage_empowered_has_one_more_might():
+    """Apprentice Mage (VEN-047): '[Empowered] I have +1 [Might].'"""
+    loop, a, b = setup(active="A")
+    mage = unit("Apprentice Mage")
+    a.base_units.append(mage)
+    a.deck.cards[:] = [card("Stacked Deck") for _ in range(4)]
+    act(loop, "A", "Activate empower_self (Apprentice Mage")
+    assert mage.might == 4
+
+
+def test_elnuk_herd_can_give_its_might_to_itself():
+    """Elnuk Herd (RAD-081, errata): 'give a friendly unit +3 [Might] this
+    turn' (it read 'another friendly unit')."""
+    loop, a, b = setup(active="A")
+    a.hand.append(card("Elnuk Herd"))
+    act(loop, "A", "Play Elnuk Herd")
+    assert a.base_units[0].might == 8
+
+
+def test_iridescent_avian_buffs_only_a_friendly_unit():
+    """Iridescent Avian (RAD-027): '[Tap]: [Buff] a friendly unit.'"""
+    loop, a, b = setup(active="A")
+    a.base_units.append(unit("Iridescent Avian"))
+    b.base_units.append(unit("enemy", 2))
+    seen = choices(loop, {})
+    act(loop, "A", "Activate buff_unit (Iridescent Avian")
+    assert [opts for kind, _s, opts in seen if kind == "target:buff_unit"] == [["Iridescent Avian"]]
+
+
+def test_meticulous_restorationist_is_paid_with_any_power():
+    """Meticulous Restorationist (RAD-120): 'you may play me from your trash
+    for [Rune]' (it asked for Order Power)."""
+    from riftbound.core.enums import Domain
+    loop, a, b = setup(active="A", rich=())
+    a.energy = 7
+    a.add_power(Domain.CHAOS, 2)
+    a.trash.append(card("Meticulous Restorationist"))
+    a.hand.append(card("Maduli the Gatekeeper"))         # Energy cost 7
+    choices(loop, {"optional": lambda _l, options: options.index(True)})
+    act(loop, "A", "Play Maduli")
+    assert sorted(u.card.name for u in a.base_units) == ["Maduli the Gatekeeper", "Meticulous Restorationist"]
+
+
+def test_blighted_battleaxe_is_equipped_for_any_power():
+    """Blighted Battleaxe (UNL-019): '[Equip][1][Rune]' (it asked for Fury)."""
+    from riftbound.core.enums import Domain
+    loop, a, b = setup(active="A", rich=())
+    a.energy = 1
+    a.add_power(Domain.MIND, 1)
+    a.base_units.append(unit("x", 2))
+    a.base_gear.append(card("Blighted Battleaxe"))
+    act(loop, "A", "Equip Blighted Battleaxe")
+    assert a.base_units[0].might == 6
+
+
+def test_reinforce_banishes_the_unit_it_plays():
+    """Reinforce (OGN-062, errata): 'You may banish a unit from among them,
+    then play it, reducing its cost by [5].' Zed, Master of Shadows: 'When you
+    banish a card you own, empower me.'"""
+    loop, a, b = setup(active="A")
+    zed = legend(loop, "A", "Zed Master of Shadows")
+    a.deck.cards[:] = [card("Maduli the Gatekeeper")]
+    a.hand.append(card("Reinforce"))
+    choices(loop, {"optional": lambda _l, options: options.index(True)})
+    act(loop, "A", "Cast Reinforce")
+    assert [u.card.name for u in a.base_units] == ["Maduli the Gatekeeper"] and zed.empowered
+
+
+def test_mageseeker_investigator_is_paid_in_power():
+    """Mageseeker Investigator (UNL-163): 'Opponents must pay [Rune] for each
+    unit beyond the first to move multiple units to my battlefield at the same
+    time.' It took Energy."""
+    from riftbound.core.enums import Domain
+    loop, a, b = setup(active="A", rich=())
+    a.energy = 5
+    loop.gs.battlefields[1].add_unit("B", unit("Mageseeker Investigator"))
+    a.base_units.extend([unit("x", 2), unit("y", 2)])
+    act(loop, "A", "Move x base→BF1")
+    assert not [lb for lb in labels(loop, "A") if lb.startswith("Move y base→BF1")]
+    a.add_power(Domain.BODY, 1)
+    act(loop, "A", "Move y base→BF1")
+    assert a.energy == 5 and not any(a.power_pool.values())

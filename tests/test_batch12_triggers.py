@@ -111,10 +111,13 @@ def test_mageseeker_investigator_tolls_the_second_unit():
     loop._apply_action(loop.gs.A, ("MOVE", 0, base, 1))
     assert loop._group_move_toll("A", 1) == 1
     loop._apply_action(loop.gs.A, ("MOVE", 0, base, 1))
-    assert b in loop.gs.A.base_units                 # no Energy for the toll
+    assert b in loop.gs.A.base_units                 # no Power for the toll ([rune])
     loop.gs.A.energy = 1
     loop._apply_action(loop.gs.A, ("MOVE", 0, base, 1))
-    assert b in loop.gs.battlefields[1].units_A and loop.gs.A.energy == 0
+    assert b in loop.gs.A.base_units                 # Energy doesn't pay it
+    loop.gs.A.add_power(Domain.CHAOS, 1)
+    loop._apply_action(loop.gs.A, ("MOVE", 0, base, 1))
+    assert b in loop.gs.battlefields[1].units_A and loop.gs.A.energy == 1
 
 
 def test_immortal_phoenix_rises_when_a_spell_kills():
