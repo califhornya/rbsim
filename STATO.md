@@ -72,8 +72,9 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    di `main` (indietro di molti commit), carte del corpus fuori dai mazzi,
    costruzione del mazzo (§103).
 
-Training sulla macchina dell'utente (Windows, Ryzen 7 7800X3D 8 core,
-RTX 4070 poco utile): `scripts/allena.bat`, 8 worker, run in runs\competitive.
+Training sulle macchine dell'utente, run in runs/competitive: PC Windows
+(Ryzen 7 7800X3D, `scripts/allena.bat`, 8 worker) o Mac M1 (`allena.command`,
+4 worker, torch 2.13 vuole macOS 14+). La RTX 4070 serve a poco.
 
 ## File principali
 - `docs/audit/AUDIT.md`: elenco delle deviazioni, stato, domande aperte, cosa
@@ -82,11 +83,12 @@ RTX 4070 poco utile): `scripts/allena.bat`, 8 worker, run in runs\competitive.
   `test_audit_mechanics.py`, `test_audit_card_data.py`, `test_audit_decks.py`
   terzo passaggio, `test_audit_corpus.py` quarto, helper in `audit_helpers.py`).
 - `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
-- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py` (effetti).
-- `riftbound/core/legality.py`: azioni legali offerte agli agenti.
+- `riftbound/core/battlefield.py` (controllo, Hold / Conquer), `effects.py`
+  (effetti), `legality.py` (azioni legali offerte agli agenti).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
   scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
-- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
+- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina;
+  `scripts/allena.bat` / `allena.command`: il training con doppio clic.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
