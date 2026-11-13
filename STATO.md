@@ -69,7 +69,7 @@ ancora al run 4: non rilanciarlo.
    (cosa vale cosa, cosa temere da ogni mazzo) come valutazione della
    ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
-2. Situazioni di prova dall'utente ("Segnala un problema" nella pagina del coach).
+2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
    ricontrollare i due mazzi.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
