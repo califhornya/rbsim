@@ -28,6 +28,10 @@ rbsim = "riftbound.cli.main:main"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# Only the engine is a package: runs/, scripts/, docs/ at the root are not.
+[tool.setuptools.packages.find]
+include = ["riftbound*"]
+
 [tool.uv]
 
 [dependency-groups]

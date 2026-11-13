@@ -2,7 +2,11 @@
 """Coach the net in the browser: it plays, you decide.
 
     uv run python scripts/coach.py                       # opens http://127.0.0.1:8765
-    uv run python scripts/coach.py --net runs/precons-2/net.pt --port 8765
+    uv run python scripts/coach.py --net runs/competitive/net.pt --port 8765
+
+Without a saved net (none trained yet) it starts with an untrained one, saved
+as runs/coach/untrained_net.pt: the page works, the moves and win chances it
+shows mean nothing until a net is trained.
 
 A local page (nothing leaves the machine) shows the board from your seat, as a
 table of card images (scripts/import_card_images.py copies them in; a card
@@ -34,7 +38,7 @@ IMAGES = ROOT / "riftbound" / "data" / "card_images"
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Coach the Riftbound net in the browser")
-    ap.add_argument("--net", type=Path, default=ROOT / "runs" / "precons-2" / "net.pt")
+    ap.add_argument("--net", type=Path, default=ROOT / "runs" / "competitive" / "net.pt")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
     ap.add_argument("--iterations", type=int, default=100, help="Search simulations per decision")
     ap.add_argument("--port", type=int, default=8765)
@@ -46,6 +50,14 @@ def main() -> None:
     from riftbound.ai.coach import CoachSession
     from riftbound.compute import be_gentle
     be_gentle()
+    if not args.net.is_file():
+        from riftbound.ai.net import RiftboundNet, save_checkpoint
+        untrained = args.out / "untrained_net.pt"
+        if not untrained.is_file():
+            untrained.parent.mkdir(parents=True, exist_ok=True)
+            save_checkpoint(RiftboundNet(), untrained)
+        print(f"No net at {args.net}: using an UNTRAINED net ({untrained}).", flush=True)
+        args.net = untrained
     session = CoachSession(args.net, args.out, iterations=args.iterations, opponent_pause=args.pause)
 
     def decks() -> list:

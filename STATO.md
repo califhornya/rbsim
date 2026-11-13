@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-12 (punto 3 del piano chiuso: le scelte nella ricerca, `6ebd0e7`).
+Aggiornato: 2026-11-13 (coach senza rete allenata; build con `runs/` nella radice).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -49,6 +49,11 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   A/B stesso valutatore (punteggio del tavolo), 240 partite, 16 iterazioni:
   nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%). Costo per
   decisione invariato. Suite verde (1792 passed: ora torch è installato).
+
+- Coach (2026-11-13): senza `runs/competitive/net.pt` parte con una rete non
+  allenata (`runs/coach/untrained_net.pt`), mosse e probabilità senza senso.
+  `pyproject.toml`: pacchetti solo `riftbound*` (con `runs/` nella radice
+  `uv sync` falliva: "Multiple top-level packages").
 
 ## In corso
 Niente.
