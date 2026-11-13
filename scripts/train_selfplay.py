@@ -52,6 +52,11 @@ def main() -> None:
                     help="Decisions coached in scripts/coach.py (e.g. runs/coach)")
     ap.add_argument("--coach-fraction", type=float, default=0.1,
                     help="Share of each batch taken from the coached decisions")
+    ap.add_argument("--fast-iters", type=int, default=0,
+                    help="Self-play: MCTS iterations of the decisions not searched in full (0: all in full)")
+    ap.add_argument("--full-fraction", type=float, default=0.25,
+                    help="With --fast-iters: share of the decisions searched in full (the training examples)")
+    ap.add_argument("--weight-decay", type=float, default=0.0)
     ap.add_argument("--run-dir", type=Path, required=True)
     ap.add_argument("--resume", action="store_true", help="Continue the run in --run-dir")
     args = ap.parse_args()
@@ -85,7 +90,8 @@ def main() -> None:
         workers=args.workers, eval_every=args.eval_every, eval_games=args.eval_games,
         eval_vs=args.eval_vs,
         pause=args.pause, rest=args.rest, coach_dir=args.coach_dir,
-        coach_fraction=args.coach_fraction, log=log,
+        coach_fraction=args.coach_fraction, fast_iters=args.fast_iters,
+        full_fraction=args.full_fraction, weight_decay=args.weight_decay, log=log,
     )
     log("done.")
 

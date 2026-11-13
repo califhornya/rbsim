@@ -84,3 +84,35 @@ def test_training_keeps_a_copy_at_each_evaluation_and_the_best(tmp_path):
     import json
     rates = [json.loads(line)["lr"] for line in lines]
     assert rates[0] > rates[1]                       # the learning rate decays
+
+
+def test_only_the_decisions_searched_in_full_become_examples():
+    """Two budgets in self-play: with no decision searched in full, a game
+    leaves no example; with all of them, as many as without the fast budget."""
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    none = play_selfplay_game(net, SHEN, ZED, seed=3, iterations=4, max_turns=8,
+                              fast_iterations=2, full_fraction=0.0)
+    assert none == []
+    full = play_selfplay_game(net, SHEN, ZED, seed=3, iterations=4, max_turns=8,
+                              fast_iterations=2, full_fraction=1.0)
+    assert len(full) > 0
+
+
+def test_the_log_carries_the_value_error_on_new_games_and_the_empty_turns(tmp_path):
+    import json
+
+    from riftbound.ai.selfplay import fresh_value_error, train
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    ex = play_selfplay_game(net, SHEN, ZED, seed=4, iterations=4, max_turns=8)
+    err = fresh_value_error(net, ex)
+    assert 0.0 <= err["value_fresh"] <= 4.0 and 0.0 <= err["value_abs"] <= 1.0
+    train(net, [SHEN, ZED], iterations=1, games_per_iter=1, mcts_iters=2, batch_size=4,
+          checkpoint=tmp_path / "net.pt", log_path=tmp_path / "log.jsonl", workers=0,
+          eval_every=1, eval_games=1, eval_vs=("random",), max_turns=8, pause=0,
+          fast_iters=2, full_fraction=0.5, weight_decay=1e-4,
+          device=torch.device("cpu"), log=lambda *a, **k: None)
+    row = json.loads((tmp_path / "log.jsonl").read_text().splitlines()[0])
+    assert "value_fresh" in row and "value_abs" in row
+    assert 0.0 <= row["empty_turns"] <= 1.0

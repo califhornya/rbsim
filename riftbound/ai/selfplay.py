@@ -41,17 +41,22 @@ from riftbound.core.loop import GameLoop
 
 def play_selfplay_game(net: RiftboundNet, deck_a: Path, deck_b: Path, *,
                        seed: int = 0, iterations: int = 100, c_puct: float = 1.5,
-                       max_turns: int = 40, explore: bool = True) -> list[dict]:
+                       max_turns: int = 40, explore: bool = True,
+                       fast_iterations: Optional[int] = None,
+                       full_fraction: float = 1.0) -> list[dict]:
     """Play one self-play game; return training examples with value target ``z``
     (+1/-1/0) already filled from the outcome, per each example's seat.
-    `explore`: Dirichlet noise and early visit-proportional moves (self-play)."""
+    `explore`: Dirichlet noise and early visit-proportional moves (self-play).
+    `fast_iterations`: the budget of the decisions not searched in full (a
+    share `full_fraction` is; only those become examples)."""
     examples: list = []
     gs = build_game(game_seed=seed, deck_a_path=deck_a, deck_b_path=deck_b,
                     ai_a=None, ai_b=None, max_turns=max_turns)
     rng = random.Random(seed)
     for side, player in (("A", gs.A), ("B", gs.B)):
         agent = NetGuidedMCTSAgent(player, net, iterations=iterations, c_puct=c_puct,
-                                   rng=random.Random(rng.randrange(1 << 30)), explore=explore)
+                                   rng=random.Random(rng.randrange(1 << 30)), explore=explore,
+                                   fast_iterations=fast_iterations, full_fraction=full_fraction)
         agent.record = examples
         player.agent = agent
     result = GameLoop(gs).start()
@@ -65,9 +70,10 @@ def play_selfplay_game(net: RiftboundNet, deck_a: Path, deck_b: Path, *,
 
 def play_eval_game(net: RiftboundNet, deck_net: Path, deck_opp: Path, *, seed: int = 0,
                    iterations: int = 100, net_seat: str = "A", opponent: str = "simple_trade",
-                   max_turns: int = 40) -> float:
+                   max_turns: int = 40, stats: Optional[dict] = None) -> float:
     """The net (searching, no exploration) against a heuristic agent: 1 for a
-    net win, 0.5 for a draw, 0 for a loss."""
+    net win, 0.5 for a draw, 0 for a loss. `stats` (a dict) receives the net's
+    turns with a choice and those it passed at once ("turns", "empty_turns")."""
     deck_a, deck_b = (deck_net, deck_opp) if net_seat == "A" else (deck_opp, deck_net)
     gs = build_game(game_seed=seed, deck_a_path=deck_a, deck_b_path=deck_b,
                     ai_a=None, ai_b=None, max_turns=max_turns)
@@ -80,7 +86,28 @@ def play_eval_game(net: RiftboundNet, deck_net: Path, deck_opp: Path, *, seed: i
     else:
         them.agent = make_agent(opponent, them)
     winner = GameLoop(gs).start().winner
+    if stats is not None:
+        stats["turns"], stats["empty_turns"] = me.agent.turns, me.agent.empty_turns
     return 1.0 if winner == net_seat else 0.5 if winner == "DRAW" else 0.0
+
+
+@torch.no_grad()
+def fresh_value_error(net: RiftboundNet, examples: list[dict],
+                      device: Optional[torch.device] = None) -> dict:
+    """The value's error on examples the net hasn't trained on (the games it
+    just played): mean squared error against the outcome, and how sure the
+    value is (mean |v|). An error near 1 with |v| high: sure and wrong."""
+    if not examples:
+        return {"value_fresh": float("nan"), "value_abs": float("nan")}
+    device = device or next(net.parameters()).device
+    net.eval()
+    z = torch.as_tensor(np.asarray([e["z"] for e in examples], dtype=np.float32), device=device)
+    vs = []
+    for i in range(0, len(examples), 1024):
+        states = torch.as_tensor(np.stack([e["state"] for e in examples[i:i + 1024]]), device=device)
+        vs.append(net(states)[1].squeeze(1))
+    v = torch.cat(vs)
+    return {"value_fresh": float(((v - z) ** 2).mean().item()), "value_abs": float(v.abs().mean().item())}
 
 
 def train_step(net: RiftboundNet, optimizer, batch: list[dict],
@@ -131,20 +158,23 @@ def _worker_net(path: str, version: int) -> RiftboundNet:
 
 
 def _selfplay_task(task) -> list[dict]:
-    path, version, deck_a, deck_b, seed, iterations, max_turns, rest = task
+    path, version, deck_a, deck_b, seed, iterations, max_turns, rest, fast, full_fraction = task
     net = _worker_net(path, version)
     examples = play_selfplay_game(net, deck_a, deck_b, seed=seed, iterations=iterations,
-                                  max_turns=max_turns, explore=True)
+                                  max_turns=max_turns, explore=True,
+                                  fast_iterations=fast or None, full_fraction=full_fraction)
     if rest:
         time.sleep(rest)
     return examples
 
 
-def _eval_task(task) -> tuple[str, float]:
+def _eval_task(task) -> tuple[str, float, int, int]:
     path, version, deck_net, deck_opp, seed, iterations, net_seat, max_turns, opponent = task
     net = _worker_net(path, version)
-    return opponent, play_eval_game(net, deck_net, deck_opp, seed=seed, iterations=iterations,
-                                    net_seat=net_seat, opponent=opponent, max_turns=max_turns)
+    stats: dict = {}
+    score = play_eval_game(net, deck_net, deck_opp, seed=seed, iterations=iterations,
+                           net_seat=net_seat, opponent=opponent, max_turns=max_turns, stats=stats)
+    return opponent, score, stats["turns"], stats["empty_turns"]
 
 
 # --- the loop ------------------------------------------------------------------
@@ -159,6 +189,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
           eval_vs: Sequence[str] = ("simple_trade", "random"), max_turns: int = 40,
           pause: float = 10.0, rest: float = 0.0, device: Optional[torch.device] = None,
           coach_dir: Optional[Path] = None, coach_fraction: float = 0.1,
+          fast_iters: int = 0, full_fraction: float = 0.25, weight_decay: float = 0.0,
           log=print) -> RiftboundNet:
     """Self-play → train, `iterations` times, over a pool of decks (each game
     two decks drawn from `decks`, mirrors included). `workers`: processes for
@@ -173,7 +204,12 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     after each game let the machine breathe. Saves `checkpoint` and appends a
     JSON line per iteration to `log_path`. `coach_dir`: decisions a person
     coached (riftbound.ai.coach), re-read every iteration; `coach_fraction` of
-    each batch comes from them."""
+    each batch comes from them. `fast_iters` > 0: a self-play decision is
+    searched with `mcts_iters` (and becomes an example) with probability
+    `full_fraction`, otherwise with `fast_iters`. `weight_decay`: AdamW's.
+    The log carries the value's error on each iteration's new games before it
+    trains on them (value_fresh, value_abs) and, at an evaluation, the share
+    of the net's turns it passed at once (empty_turns)."""
     from multiprocessing import Pool
 
     from riftbound.ai.net import save_checkpoint
@@ -185,7 +221,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     if workers:
         be_gentle()                   # the trainer too: low priority, one thread
     net.to(device)
-    opt = torch.optim.Adam(net.parameters(), lr=lr)
+    opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
     lr_final = lr / 10 if lr_final is None else lr_final
     best = -1.0
     buffer: deque = deque(maxlen=buffer_size)
@@ -214,11 +250,14 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
             tasks = []
             for _ in range(games_per_iter):
                 tasks.append((str(weights), it, rng.choice(decks), rng.choice(decks),
-                              rng.randrange(1 << 30), mcts_iters, max_turns, rest))
-            new = 0
+                              rng.randrange(1 << 30), mcts_iters, max_turns, rest,
+                              fast_iters, full_fraction))
+            fresh_examples: list = []
             for examples in run(_selfplay_task, tasks):
-                buffer.extend(examples)
-                new += len(examples)
+                fresh_examples.extend(examples)
+            fresh = fresh_value_error(net, fresh_examples, device)
+            buffer.extend(fresh_examples)
+            new = len(fresh_examples)
             stats = {"loss": float("nan"), "policy_loss": float("nan"), "value_loss": float("nan")}
             coached: list = []
             if coach_dir is not None and Path(coach_dir).exists():
@@ -233,7 +272,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
                          for _ in range(n_steps)]
                 stats = {k: mean(s[k] for s in steps) for k in stats}
             record = {"iteration": it + 1, "games": games_per_iter, "examples": new,
-                      "buffer": len(buffer), "lr": rate, "coached": len(coached), **stats}
+                      "buffer": len(buffer), "lr": rate, "coached": len(coached), **stats, **fresh}
             if eval_every and (it + 1) % eval_every == 0 and eval_games:
                 save_checkpoint(net.to("cpu"), weights)
                 net.to(device)
@@ -242,10 +281,14 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
                            max_turns, opponent)
                           for opponent in eval_vs for g in range(eval_games)]
                 scores: dict = {}
-                for opponent, score in run(_eval_task, etasks):
+                turns = empty = 0
+                for opponent, score, n_turns, n_empty in run(_eval_task, etasks):
                     scores.setdefault(opponent, []).append(score)
+                    turns += n_turns
+                    empty += n_empty
                 for opponent, xs in scores.items():
                     record[f"vs_{opponent}"] = mean(xs)
+                record["empty_turns"] = empty / max(1, turns)
                 if checkpoint is not None:
                     snap = Path(checkpoint).with_name(f"net_{it + 1:04d}.pt")
                     shutil.copyfile(weights, snap)
@@ -260,9 +303,11 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
             if log_path is not None:
                 with open(log_path, "a", encoding="utf-8") as fh:
                     fh.write(json.dumps(record) + "\n")
-            vs = "".join(f" {k}={v:.2f}" for k, v in record.items() if k.startswith("vs_"))
+            vs = "".join(f" {k}={v:.2f}" for k, v in record.items()
+                         if k.startswith("vs_") or k == "empty_turns")
             log(f"[iter {it + 1}] examples+={new} buffer={len(buffer)} loss={stats['loss']:.4f} "
-                f"(policy {stats['policy_loss']:.3f}, value {stats['value_loss']:.3f}){vs} "
+                f"(policy {stats['policy_loss']:.3f}, value {stats['value_loss']:.3f}) "
+                f"fresh={fresh['value_fresh']:.3f} |v|={fresh['value_abs']:.2f}{vs} "
                 f"{record['seconds']}s")
             # A file named STOP (or STOP.txt) next to the checkpoint ends the run
             # here, saved.

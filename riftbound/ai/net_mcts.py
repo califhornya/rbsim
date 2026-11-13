@@ -316,7 +316,8 @@ class NetGuidedMCTSAgent(Agent):
                  mulligan_samples: int = 3, reaction_iterations: Optional[int] = None,
                  explore: bool = False, dirichlet_alpha: float = 0.3,
                  noise_frac: float = 0.25, temperature_moves: int = 10,
-                 pass_margin: float = 0.02):
+                 pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
+                 full_fraction: float = 1.0):
         super().__init__(player)
         # A move whose searched value isn't at least this much above passing's
         # (values in [-1, 1]: 0.02 = 1 point of win chance) isn't played.
@@ -336,6 +337,19 @@ class NetGuidedMCTSAgent(Agent):
         self.noise_frac = noise_frac
         self.temperature_moves = temperature_moves
         self._decisions = 0
+        # Self-play with two budgets (KataGo's playout cap randomization): a
+        # decision is searched in full (noise, recorded for training) with
+        # probability `full_fraction`, otherwise with `fast_iterations`, no
+        # noise, not recorded. More games for the same time, and fewer examples
+        # of one game sharing its outcome (the value memorized games: 16 games
+        # an iteration, 90 examples each, made it sure of itself and wrong).
+        self.fast_iterations = fast_iterations
+        self.full_fraction = full_fraction
+        self._full = True
+        # Turns where this player had something else to do and passed at once.
+        self.turns = 0
+        self.empty_turns = 0
+        self._turn_seen = None
         # Last root visit distribution (action_tuple -> visit share), for the
         # self-play trainer's policy target and for debugging.
         self.last_visits: dict = {}
@@ -469,7 +483,13 @@ class NetGuidedMCTSAgent(Agent):
         if len(root_legal) <= 1:
             return root_legal[0].to_engine() if root_legal else _PASS
         root = self.search(DecisionPoint.TURN_ACTION, root_legal, cards_played=cards_played)
-        return self._conclude(root, side, root_legal)
+        action = self._conclude(root, side, root_legal)
+        if self._turn_seen != self.gs.turn:
+            self._turn_seen = self.gs.turn
+            self.turns += 1
+            if action == _PASS and self.gs.pending_move is None:
+                self.empty_turns += 1
+        return action
 
     def search(self, point: DecisionPoint, legal: list, *, cards_played: int = 0,
                bf_idx: Optional[int] = None) -> _Node:
@@ -479,11 +499,14 @@ class NetGuidedMCTSAgent(Agent):
         self._ensure_rng()
         side = self.player.name
         root = _Node()
+        self._full = not (self.explore and self.fast_iterations
+                          and self._rng.random() >= self.full_fraction)
         if point == DecisionPoint.TURN_ACTION:
-            for _ in range(self.iterations):
+            for _ in range(self.iterations if self._full else self.fast_iterations):
                 self._iterate(root, side, cards_played)
         else:
-            for _ in range(self.reaction_iterations):
+            n = self.reaction_iterations if self._full else max(4, self.fast_iterations // 4)
+            for _ in range(n):
                 self._iterate_now(root, side, point, legal, bf_idx)
         return root
 
@@ -494,7 +517,7 @@ class NetGuidedMCTSAgent(Agent):
             return _PASS
         total = sum(c.N for c in root.children.values()) or 1
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
-        if self.record is not None and len(legal) > 1:
+        if self.record is not None and len(legal) > 1 and self._full:
             self._record_example(side, legal)
         return self._play(root, side, point)
 
@@ -544,7 +567,7 @@ class NetGuidedMCTSAgent(Agent):
     def _add_noise(self, node: _Node) -> None:
         """Dirichlet noise on a root's priors, so self-play also tries what the
         net doesn't (yet) favour."""
-        if not self.explore or len(node.P) < 2:
+        if not self.explore or not self._full or len(node.P) < 2:
             return
         noise = [self._rng.gammavariate(self.dirichlet_alpha, 1.0) for _ in node.P]
         total = sum(noise) or 1.0
