@@ -17,8 +17,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   Patched Porobot è unità e gear insieme.
 - (Utente, 2026-11-12) Otto mazzi non precon eliminati (con agenti Pyke e
   Diana), correzioni di carte tenute; training sui due mazzi competitive.
-- L'agente random è seminato dal seed della partita (riproducibile).
-- Commenti di Codex: verificati uno per uno prima di agire.
+- Agente random seminato dal seed della partita; commenti di Codex
+  verificati uno per uno. Imitazione di simple_trade scartata (da neofita).
 - Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
   §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
 - Scelte nella ricerca: nodi dell'albero per opzione con chiave (tipo, carta,
