@@ -99,6 +99,20 @@ def test_only_the_decisions_searched_in_full_become_examples():
     assert len(full) > 0
 
 
+def test_the_q_policy_target_makes_valid_examples():
+    """With policy_target="q" each example's policy is a distribution over the
+    legal slots, like the visit shares, and not the same as them."""
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    q = play_selfplay_game(net, SHEN, ZED, seed=5, iterations=8, max_turns=8, policy_target="q")
+    visits = play_selfplay_game(net, SHEN, ZED, seed=5, iterations=8, max_turns=8)
+    assert q
+    for e in q:
+        assert abs(float(e["policy"].sum()) - 1.0) < 1e-4
+        assert float(e["policy"][~e["mask"]].sum()) < 1e-6
+    assert any(not np.allclose(a["policy"], b["policy"]) for a, b in zip(q, visits))
+
+
 def test_the_log_carries_the_value_error_on_new_games_and_the_empty_turns(tmp_path):
     import json
 

@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (run 3 finito: ricerca corretta regge, ma il gioco non sale dopo la 10).
+Aggiornato: 2026-11-13 (run 3 fermo dopo la 10; pronto il run 4, politica dai Q).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -43,7 +43,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
-  nel log (`fd01c63`); ricerca `backup="best"`.
+  nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
+  Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
 
 ## In corso
 Training (O4). Trovati due difetti, in quest'ordine di peso:
@@ -63,12 +64,12 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
    contro simple_trade.
 
 ## Prossimi passi
-1. Run 3 finito: 0,72 contro simple_trade dalla 10 alla 60, pendenza nulla
-   → fermo. Rete 60 contro rete 10 (`scripts/diag/net_vs_net.py`, 200
-   partite): 0,49 ± 0,07, ferma anche contro se stessa. Proposto all'utente:
-   bersaglio della politica dai Q prima dell'imitazione. In attesa di risposta.
-2. Non ancora fatto: bersaglio della politica dai Q (le visite seguono i
-   prior più dei valori); con "best" il self-play non è stato ancora provato.
+1. Run 3 fermo (0,72 simple_trade, rete 60 contro 10: 0,49 ± 0,07). Ora:
+   `--policy-target q` (politica dai Q, `improved_policy`); `allena.command`
+   = 30 iterazioni in `runs/competitive4` dalla `net_0060` del run 3. Poi
+   `net_vs_net.py` 0030 contro 0060: ≥ 0,60 → run lungo; ~0,50 → imitazione.
+2. Rischio non misurato del bersaglio dai Q: con "best" i Q delle mosse molto
+   visitate sono ottimisti (massimo su più foglie), e spingono verso i prior.
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
    ricontrollare i due mazzi; il run "buono" è quello dopo.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
@@ -76,7 +77,6 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
 `fresh`/`|v|` (valore sulle partite nuove), `empty_turns` (turni a vuoto).
-Run 3 (13/11), 60 iterazioni: media 0,72 simple_trade, 0,97 random; non sale.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato

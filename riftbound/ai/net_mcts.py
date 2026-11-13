@@ -293,7 +293,7 @@ class _TreeChooser:
 
 
 class _Node:
-    __slots__ = ("N", "W", "Q", "P", "children", "expanded", "value", "choices", "cprior")
+    __slots__ = ("N", "W", "Q", "P", "P0", "children", "expanded", "value", "choices", "cprior")
 
     def __init__(self):
         self.N = 0
@@ -302,6 +302,7 @@ class _Node:
         # backup="best" the best of what was tried below it.
         self.Q = 0.0
         self.P: dict = {}          # action_tuple -> prior
+        self.P0: Optional[dict] = None   # a root's priors before the noise
         self.children: dict = {}   # action_tuple -> _Node
         self.expanded = False
         self.value = 0.0
@@ -309,6 +310,44 @@ class _Node:
         # choice key (_choice_keys) -> _Node, and its prior.
         self.choices: dict = {}
         self.cprior: dict = {}
+
+
+def improved_policy(prior: dict, children: dict, value: float, *,
+                    c_visit: float = 50.0, c_scale: float = 0.1) -> dict:
+    """The policy target from the search's values (Gumbel MuZero's "completed
+    Q", Danihelka et al. 2022; mctx's defaults): softmax(log prior +
+    sigma(completed Q)) over a root's actions. A visited action's Q is the
+    search's; one not visited gets the mixed value (the root's net value and
+    the visited actions' Q weighted by their prior). The completed Qs go to
+    [0, 1] (min to max over the actions) and sigma multiplies them by
+    (c_visit + the most visits) * c_scale: with a hundred iterations the
+    best action gains about 10 in logit over the worst.
+    The visits as a target follow the priors more than the values and taught
+    the policy little: run 3, policy loss 1.34 → 1.24 in 60 iterations, the
+    play flat after the 10th (0.49 net 60 against net 10)."""
+    keys = list(prior)
+    if not keys:
+        return {}
+    visited = [k for k in keys if k in children and children[k].N > 0]
+    total_n = sum(children[k].N for k in visited)
+    mixed = value
+    if visited:
+        w = {k: prior[k] for k in visited}
+        s = sum(w.values())
+        if s <= 1e-12:
+            w, s = {k: 1.0 for k in visited}, float(len(visited))
+        weighted = sum(w[k] * children[k].Q for k in visited) / s
+        mixed = (value + total_n * weighted) / (1 + total_n)
+    seen = set(visited)
+    q = {k: children[k].Q if k in seen else mixed for k in keys}
+    lo, hi = min(q.values()), max(q.values())
+    scale = (c_visit + max((children[k].N for k in visited), default=0)) * c_scale
+    logits = {k: math.log(max(prior[k], 1e-12)) + scale * (q[k] - lo) / max(hi - lo, 1e-8)
+              for k in keys}
+    top = max(logits.values())
+    e = {k: math.exp(v - top) for k, v in logits.items()}
+    z = sum(e.values())
+    return {k: v / z for k, v in e.items()}
 
 
 class NetGuidedMCTSAgent(Agent):
@@ -320,8 +359,15 @@ class NetGuidedMCTSAgent(Agent):
                  explore: bool = False, dirichlet_alpha: float = 0.3,
                  noise_frac: float = 0.25, temperature_moves: int = 10,
                  pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
-                 full_fraction: float = 1.0, backup: str = "best"):
+                 full_fraction: float = 1.0, backup: str = "best",
+                 policy_target: str = "visits"):
         super().__init__(player)
+        # What a recorded example's policy is: the root's visit shares
+        # (AlphaZero) or "q", the policy improved by the search's values
+        # (improved_policy).
+        if policy_target not in ("visits", "q"):
+            raise ValueError(f"policy_target {policy_target!r}")
+        self.policy_target = policy_target
         # How a turn's tree values a node. "mean": the average of every line
         # tried below it (MCTS). "best": the best of its children, a line's
         # end being the average of its own visits. A turn is one player's
@@ -532,7 +578,7 @@ class NetGuidedMCTSAgent(Agent):
         total = sum(c.N for c in root.children.values()) or 1
         self.last_visits = {a: c.N / total for a, c in root.children.items()}
         if self.record is not None and len(legal) > 1 and self._full:
-            self._record_example(side, legal)
+            self._record_example(side, legal, root)
         return self._play(root, side, point)
 
     def _play(self, root: _Node, side: str, point: DecisionPoint = DecisionPoint.TURN_ACTION) -> Action:
@@ -587,18 +633,24 @@ class NetGuidedMCTSAgent(Agent):
         net doesn't (yet) favour."""
         if not self.explore or not self._full or len(node.P) < 2:
             return
-        noise = [self._rng.gammavariate(self.dirichlet_alpha, 1.0) for _ in node.P]
+        node.P0 = dict(node.P)
+        noise =[self._rng.gammavariate(self.dirichlet_alpha, 1.0) for _ in node.P]
         total = sum(noise) or 1.0
         f = self.noise_frac
         for key, n in zip(list(node.P), noise):
             node.P[key] = (1 - f) * node.P[key] + f * n / total
 
-    def _record_example(self, side: str, root_legal: list) -> None:
-        """Append (state, MCTS visit policy, legal mask, player) for training."""
+    def _record_example(self, side: str, root_legal: list, root: Optional[_Node] = None) -> None:
+        """Append (state, policy target, legal mask, player) for training: the
+        visit shares, or with policy_target="q" the improved policy."""
         obs = Observation.from_state(self.gs, side)
         n_bf = len(self.gs.battlefields)
         policy = np.zeros(ACTION_DIM, dtype=np.float32)
-        for a_tuple, share in self.last_visits.items():
+        shares = self.last_visits
+        if self.policy_target == "q" and root is not None:
+            shares = improved_policy(root.P0 if root.P0 is not None else root.P,
+                                     root.children, root.value)
+        for a_tuple, share in shares.items():
             idx = action_to_index(a_tuple, n_bf)
             if idx is not None:
                 policy[idx] += share
@@ -830,6 +882,7 @@ class NetGuidedMCTSAgent(Agent):
             root.P = priors
             root.children = {t: _Node() for t in priors}
             root.expanded = True
+            root.value = value
             self._add_noise(root)
             self._backup([root], value)
             return

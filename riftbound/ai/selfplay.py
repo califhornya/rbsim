@@ -43,12 +43,14 @@ def play_selfplay_game(net: RiftboundNet, deck_a: Path, deck_b: Path, *,
                        seed: int = 0, iterations: int = 100, c_puct: float = 1.5,
                        max_turns: int = 40, explore: bool = True,
                        fast_iterations: Optional[int] = None,
-                       full_fraction: float = 1.0) -> list[dict]:
+                       full_fraction: float = 1.0,
+                       policy_target: str = "visits") -> list[dict]:
     """Play one self-play game; return training examples with value target ``z``
     (+1/-1/0) already filled from the outcome, per each example's seat.
     `explore`: Dirichlet noise and early visit-proportional moves (self-play).
     `fast_iterations`: the budget of the decisions not searched in full (a
-    share `full_fraction` is; only those become examples)."""
+    share `full_fraction` is; only those become examples). `policy_target`:
+    the examples' policy, "visits" or "q" (net_mcts.improved_policy)."""
     examples: list = []
     gs = build_game(game_seed=seed, deck_a_path=deck_a, deck_b_path=deck_b,
                     ai_a=None, ai_b=None, max_turns=max_turns)
@@ -56,7 +58,8 @@ def play_selfplay_game(net: RiftboundNet, deck_a: Path, deck_b: Path, *,
     for side, player in (("A", gs.A), ("B", gs.B)):
         agent = NetGuidedMCTSAgent(player, net, iterations=iterations, c_puct=c_puct,
                                    rng=random.Random(rng.randrange(1 << 30)), explore=explore,
-                                   fast_iterations=fast_iterations, full_fraction=full_fraction)
+                                   fast_iterations=fast_iterations, full_fraction=full_fraction,
+                                   policy_target=policy_target)
         agent.record = examples
         player.agent = agent
     result = GameLoop(gs).start()
@@ -158,11 +161,13 @@ def _worker_net(path: str, version: int) -> RiftboundNet:
 
 
 def _selfplay_task(task) -> list[dict]:
-    path, version, deck_a, deck_b, seed, iterations, max_turns, rest, fast, full_fraction = task
+    (path, version, deck_a, deck_b, seed, iterations, max_turns, rest, fast, full_fraction,
+     policy_target) = task
     net = _worker_net(path, version)
     examples = play_selfplay_game(net, deck_a, deck_b, seed=seed, iterations=iterations,
                                   max_turns=max_turns, explore=True,
-                                  fast_iterations=fast or None, full_fraction=full_fraction)
+                                  fast_iterations=fast or None, full_fraction=full_fraction,
+                                  policy_target=policy_target)
     if rest:
         time.sleep(rest)
     return examples
@@ -190,7 +195,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
           pause: float = 10.0, rest: float = 0.0, device: Optional[torch.device] = None,
           coach_dir: Optional[Path] = None, coach_fraction: float = 0.1,
           fast_iters: int = 0, full_fraction: float = 0.25, weight_decay: float = 0.0,
-          log=print) -> RiftboundNet:
+          policy_target: str = "visits", log=print) -> RiftboundNet:
     """Self-play → train, `iterations` times, over a pool of decks (each game
     two decks drawn from `decks`, mirrors included). `workers`: processes for
     the games (None: riftbound.compute.default_workers(); 0: in this process).
@@ -207,6 +212,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
     each batch comes from them. `fast_iters` > 0: a self-play decision is
     searched with `mcts_iters` (and becomes an example) with probability
     `full_fraction`, otherwise with `fast_iters`. `weight_decay`: AdamW's.
+    `policy_target`: "visits" or "q" (net_mcts.improved_policy).
     The log carries the value's error on each iteration's new games before it
     trains on them (value_fresh, value_abs) and, at an evaluation, the share
     of the net's turns it passed at once (empty_turns)."""
@@ -251,7 +257,7 @@ def train(net: RiftboundNet, decks: Sequence[Path], *, iterations: int = 20,
             for _ in range(games_per_iter):
                 tasks.append((str(weights), it, rng.choice(decks), rng.choice(decks),
                               rng.randrange(1 << 30), mcts_iters, max_turns, rest,
-                              fast_iters, full_fraction))
+                              fast_iters, full_fraction, policy_target))
             fresh_examples: list = []
             for examples in run(_selfplay_task, tasks):
                 fresh_examples.extend(examples)

@@ -53,6 +53,38 @@ def test_drives_full_game_to_completion():
     assert result.turns >= 1
 
 
+def _searched(n, q):
+    from riftbound.ai.net_mcts import _Node
+    node = _Node()
+    node.N, node.Q = n, q
+    return node
+
+
+def test_the_improved_policy_moves_mass_to_the_action_the_search_values():
+    """Completed Q: the prior favours "a", the search found "b" better; the
+    target moves mass to "b". An unvisited action gets the mixed value (here
+    between the two), so it lands between them."""
+    from riftbound.ai.net_mcts import improved_policy
+    prior = {"a": 0.7, "b": 0.2, "c": 0.1}
+    children = {"a": _searched(40, -0.2), "b": _searched(10, 0.3), "c": _searched(0, 0.0)}
+    pi = improved_policy(prior, children, value=0.0)
+    assert abs(sum(pi.values()) - 1.0) < 1e-9
+    assert pi["b"] > 0.9 and pi["b"] > prior["b"]
+    assert pi["a"] < prior["a"]
+    # Mixed value: (0 + 50 * (0.7 * -0.2 + 0.2 * 0.3) / 0.9) / 51 ≈ -0.087,
+    # between a's -0.2 and b's 0.3: c gains on a, not on b.
+    assert pi["c"] / prior["c"] > pi["a"] / prior["a"]
+
+
+def test_the_improved_policy_with_equal_values_is_the_prior():
+    """Nothing learned from the search (all the same Q): the target is the prior."""
+    from riftbound.ai.net_mcts import improved_policy
+    prior = {"a": 0.5, "b": 0.3, "c": 0.2}
+    children = {k: _searched(5, 0.1) for k in prior}
+    pi = improved_policy(prior, children, value=0.1)
+    assert all(abs(pi[k] - prior[k]) < 1e-9 for k in prior)
+
+
 def test_visits_prefer_searched_actions():
     gs, agent = _game_with_net_mcts(seed=3, iters=24)
     loop = GameLoop(gs)

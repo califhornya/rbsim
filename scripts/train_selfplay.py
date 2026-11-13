@@ -15,7 +15,7 @@ the machine keeps plenty of headroom. Every --eval-every iterations the net play
 sanity check). The run directory holds the checkpoint (net.pt) and one JSON line
 per iteration (log.jsonl), and at each evaluation a copy of the net (net_0050.pt...)
 and the best one so far against the first --eval-vs agent (net_best.pt); --resume
-continues it. A file named STOP in the run
+continues it, --init starts a new run from a net. A file named STOP in the run
 directory (or STOP.txt) ends the run after the current iteration, everything saved.
 """
 from __future__ import annotations
@@ -57,8 +57,12 @@ def main() -> None:
     ap.add_argument("--full-fraction", type=float, default=0.25,
                     help="With --fast-iters: share of the decisions searched in full (the training examples)")
     ap.add_argument("--weight-decay", type=float, default=0.0)
+    ap.add_argument("--policy-target", choices=("visits", "q"), default="visits",
+                    help="The examples' policy: the visit shares, or improved by the search's values")
     ap.add_argument("--run-dir", type=Path, required=True)
     ap.add_argument("--resume", action="store_true", help="Continue the run in --run-dir")
+    ap.add_argument("--init", type=Path, default=None,
+                    help="Start from this net (when there is no run to resume in --run-dir)")
     args = ap.parse_args()
 
     decks = [Path(p) for pattern in args.decks for p in (sorted(glob.glob(pattern)) or [pattern])]
@@ -75,10 +79,16 @@ def main() -> None:
         if log_path.exists():
             lines = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines() if line]
             start = lines[-1]["iteration"] if lines else 0
+    elif args.init is not None:
+        if not args.init.exists():
+            raise SystemExit(f"--init: {args.init} not found")
+        net = load_checkpoint(args.init, device=torch.device("cpu"))
     else:
         net = RiftboundNet()
     log = functools.partial(print, flush=True)       # a redirected log stays current
-    log(f"decks={[d.name for d in decks]} start={start}")
+    origin = ("resumed" if args.resume and ckpt.exists()
+              else str(args.init) if args.init is not None else "new net")
+    log(f"decks={[d.name for d in decks]} start={start} from={origin} policy_target={args.policy_target}")
 
     train(
         net, decks,
@@ -91,7 +101,8 @@ def main() -> None:
         eval_vs=args.eval_vs,
         pause=args.pause, rest=args.rest, coach_dir=args.coach_dir,
         coach_fraction=args.coach_fraction, fast_iters=args.fast_iters,
-        full_fraction=args.full_fraction, weight_decay=args.weight_decay, log=log,
+        full_fraction=args.full_fraction, weight_decay=args.weight_decay,
+        policy_target=args.policy_target, log=log,
     )
     log("done.")
 
