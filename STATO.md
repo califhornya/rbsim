@@ -90,8 +90,7 @@ Run 3 lanciato il 13/11: iterazione 5 a 0,55 / 0,93, esito non ancora noto.
 - `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`: self-play e
   training; `scripts/allena.bat` / `allena.command`: lo stesso con doppio clic.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
-- `docs/history/SESSIONE_2026-11-13.md`: il primo training nel dettaglio
-  (run, numeri, cosa non è verificato); `scripts/diag/`: gli script di misura.
+- `docs/history/SESSIONE_2026-11-13.md`: il primo training nel dettaglio; `scripts/diag/`: le misure.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
