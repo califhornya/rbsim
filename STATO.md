@@ -28,6 +28,11 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Scelte nascoste: decise quando la partita le chiede, rigiocando il tratto
   dall'ultima decisione del turno (giornale nel motore; un fork del processo
   non funziona su Windows).
+- (Utente, 13/11) La rete serve come avversario per allenarsi e per misurare
+  mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
+  Proposte in parole semplici (cosa faccio, quanto costa, cosa sapremo);
+  ogni deviazione dal piano concordato detta esplicitamente.
+- Imitazione di simple_trade scartata: insegnerebbe a giocare da neofita.
 - Training: si parte senza aspettare il BACKLOG vuoto (di fatto, 2026-11-12).
   Più partite e meno esempi per partita invece di più ricerca per mossa: il
   valore ha bisogno di esiti, non di posizioni della stessa partita.
@@ -47,31 +52,26 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
 
 ## In corso
-Training (O4). Trovati due difetti, in quest'ordine di peso:
-1. **La ricerca passava troppo** (`backup="mean"`): un'azione valeva la media
-   di tutte le linee provate dopo, PASS un valore netto. Con una valutazione
-   scritta a mano al posto della rete: 0,20 contro simple_trade, un turno su
-   tre a vuoto. Ora `backup="best"` (default): un nodo vale la migliore linea
-   sotto di sé e si gioca la mossa col Q più alto. Stesse 40 partite: a mano
-   0,20 → 0,55; rete del run di prova (20 iterazioni) 0,57 → 0,70 e
-   0,93 → 0,97 contro random.
-2. **Il valore memorizzava le partite** (16 partite a iterazione, 90 esempi
-   l'una): primo run (`runs/competitive`, 205 iterazioni) da buttare, la rete
-   aveva imparato a passare. Ricetta nuova (48 partite, `--fast-iters 16
-   --full-fraction 0.25 --weight-decay 1e-4`): nel run `competitive2` (60
-   iterazioni, ricerca vecchia) nessun crollo (turni a vuoto 8-13%, errore
-   del valore sulle partite nuove 0,75 → 0,50) ma gioco fermo: 0,52 di media
-   contro simple_trade.
+Training (O4) fermo per decisione (13/11). Esiti contro simple_trade:
+- Run 1 (ricetta originale): la rete imparava a passare, da buttare.
+- Run 2 (ricetta nuova, ricerca vecchia): 0,52.
+- Run 3 (`backup="best"`): 0,80 alla 10, poi fermo (0,72 fino alla 60);
+  rete 60 contro rete 10 (`scripts/diag/net_vs_net.py`): 0,49 ± 0,07.
+- Run 4 (`--policy-target q`, 30 iterazioni dalla rete 60 del run 3): 0,68,
+  valore peggiorato (errore sulle partite nuove 0,70 → 0,84). Il log basta,
+  confronto testa a testa non fatto.
+simple_trade è un bot a regole fisse da neofita (gioca il campione appena
+può): 0,72 contro di lui vuol dire una rete debole. `allena.command` punta
+ancora al run 4: non rilanciarlo.
 
 ## Prossimi passi
-1. Run 3 fermo (0,72 simple_trade, rete 60 contro 10: 0,49 ± 0,07). Ora:
-   `--policy-target q` (politica dai Q, `improved_policy`); `allena.command`
-   = 30 iterazioni in `runs/competitive4` dalla `net_0060` del run 3. Poi
-   `net_vs_net.py` 0030 contro 0060: ≥ 0,60 → run lungo; ~0,50 → imitazione.
-2. Rischio non misurato del bersaglio dai Q: con "best" i Q delle mosse molto
-   visitate sono ottimisti (massimo su più foglie), e spingono verso i prior.
+1. Proposto all'utente, in attesa di risposta: un bot con i suoi giudizi
+   (cosa vale cosa, cosa temere da ogni mazzo) come valutazione della
+   ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
+   se non batte nettamente simple_trade o non gioca in modo sensato per lui.
+2. Situazioni di prova dall'utente ("Segnala un problema" nella pagina del coach).
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
-   ricontrollare i due mazzi; il run "buono" è quello dopo.
+   ricontrollare i due mazzi.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
