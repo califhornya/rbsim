@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (primo training fallito e diagnosticato; ricetta nuova in prova).
+Aggiornato: 2026-11-13 (training: la ricerca passava troppo, corretta; da provare in self-play).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -42,42 +42,41 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
-- Training: due budget di ricerca in self-play (piena solo sulle decisioni
-  che diventano esempi), weight decay, misure nuove nel log (`fd01c63`).
+- Training: due budget di ricerca in self-play, weight decay, misure nuove
+  nel log (`fd01c63`); ricerca `backup="best"`.
 
 ## In corso
-Training (O4), ricetta nuova in prova: run dell'utente sul Mac in
-`runs/competitive2` (60 iterazioni, 48 partite, `--fast-iters 16
---full-fraction 0.25 --weight-decay 1e-4`). A 27 iterazioni tiene: 0,50-0,65
-contro simple_trade, turni a vuoto 9-13%. Run di prova qui (20 iterazioni):
-rete 10 → 20 su 40 partite: 0,45 → 0,57 simple_trade, 0,90 → 0,93 random.
-
-Primo run (2026-11-12/13, `runs/competitive`, 205 iterazioni da 16 partite,
-tutto in ricerca piena): **da buttare**. La rete impara a passare (turni a
-vuoto 8% → 30-50%; random 0,95 → 0,55; simple_trade mai sopra 0,45). Causa:
-il valore memorizza le partite (90 esempi con un solo esito): su partite nuove
-è sicuro (|v| 0,8) e sbaglia (errore 0,91 nel primo terzo); le mosse di un
-turno non si distinguono più e la politica scivola sul PASS. Scegliere la
-mossa per Q o abbassare c_puct sulla rete finale non la recupera.
+Training (O4). Trovati due difetti, in quest'ordine di peso:
+1. **La ricerca passava troppo** (`backup="mean"`): un'azione valeva la media
+   di tutte le linee provate dopo, PASS un valore netto. Con una valutazione
+   scritta a mano al posto della rete: 0,20 contro simple_trade, un turno su
+   tre a vuoto. Ora `backup="best"` (default): un nodo vale la migliore linea
+   sotto di sé e si gioca la mossa col Q più alto. Stesse 40 partite: a mano
+   0,20 → 0,55; rete del run di prova (20 iterazioni) 0,57 → 0,70 e
+   0,93 → 0,97 contro random.
+2. **Il valore memorizzava le partite** (16 partite a iterazione, 90 esempi
+   l'una): primo run (`runs/competitive`, 205 iterazioni) da buttare, la rete
+   aveva imparato a passare. Ricetta nuova (48 partite, `--fast-iters 16
+   --full-fraction 0.25 --weight-decay 1e-4`): nel run `competitive2` (60
+   iterazioni, ricerca vecchia) nessun crollo (turni a vuoto 8-13%, errore
+   del valore sulle partite nuove 0,75 → 0,50) ma gioco fermo: 0,52 di media
+   contro simple_trade.
 
 ## Prossimi passi
-1. Log del run `competitive2` → se tiene fino a 60: la ricetta nuova diventa
-   il default di `allena.command`/`.bat`, poi run lungo. Reti da confrontare
-   su 100+ partite (20 a valutazione ballano di ±0,1).
-2. Da guardare: 0,70 contro random all'iterazione 25 con 0,65 contro
-   simple_trade (rumore o stati mai visti in self-play?).
-3. Se il valore torna a memorizzare (`fresh` lontano da `value`): più partite
-   per iterazione, bersaglio del valore misto all'esito della ricerca, gating
-   sulla rete migliore. PASS: bersaglio della politica con i Q (Gumbel).
-4. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
+1. Run dell'utente con ricerca corretta + ricetta nuova: `allena.command` /
+   `allena.bat` (ora 60 iterazioni in `runs/competitive3`, valutazioni da 40
+   partite). Criterio: simple_trade sopra 0,70 e in salita → run lungo;
+   fermo → rete che parte imitando partite di agenti euristici.
+2. Non ancora fatto: bersaglio della politica dai Q (le visite seguono i
+   prior più dei valori); con "best" il self-play non è stato ancora provato.
+3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
    ricontrollare i due mazzi; il run "buono" è quello dopo.
-5. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
+4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
-Macchine: PC Windows (Ryzen 7 7800X3D, `allena.bat`, 8 worker) o Mac M1 Max
-(`allena.command`, un worker per core veloce). Conta la CPU, non la GPU.
-Nel log: `fresh`/`|v|` (errore e sicurezza del valore sulle partite nuove
-prima di allenarcisi), `empty_turns` (turni passati senza fare nulla).
+Macchine: PC Windows (Ryzen 7 7800X3D, 8 worker) o Mac M1 Max (un worker per
+core veloce). Conta la CPU, non la GPU. Nel log: `fresh`/`|v|` (errore e
+sicurezza del valore sulle partite nuove), `empty_turns` (turni a vuoto).
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato

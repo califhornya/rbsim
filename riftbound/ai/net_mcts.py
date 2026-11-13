@@ -320,7 +320,7 @@ class NetGuidedMCTSAgent(Agent):
                  explore: bool = False, dirichlet_alpha: float = 0.3,
                  noise_frac: float = 0.25, temperature_moves: int = 10,
                  pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
-                 full_fraction: float = 1.0, backup: str = "mean"):
+                 full_fraction: float = 1.0, backup: str = "best"):
         super().__init__(player)
         # How a turn's tree values a node. "mean": the average of every line
         # tried below it (MCTS). "best": the best of its children, a line's
@@ -544,6 +544,10 @@ class NetGuidedMCTSAgent(Agent):
             self._decisions += 1
         if self.explore and len(items) > 1 and self._decisions <= self.temperature_moves:
             key = self._rng.choices([k for k, _ in items], weights=[max(c.N, 1e-9) for _, c in items])[0]
+        elif self.backup == "best":
+            # The line worth the most: the visits follow the priors more than
+            # the values (differences of a few points against c_puct's term).
+            key = max(items, key=lambda kv: kv[1].Q)[0]
         else:
             key = self.prefer_pass(root, max(items, key=lambda kv: kv[1].N)[0])
         child = root.children[key]
