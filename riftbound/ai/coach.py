@@ -5,8 +5,9 @@ seat is a `CoachAgent`: at each of its decisions with more than one option it
 searches as usual, then waits for the coach to accept one of the net's top
 moves or pick any legal one. A move the coach picked asks the coach for the
 choices inside it too (a target, a mode, ...). Every coached decision becomes a
-training example whose policy target is the coach's move; when the game ends
-they are saved with its result (coach_<time>.npz in the session's directory),
+training example whose policy target is the coach's move (the value head
+doesn't learn from it: the moves count, not how the game ended); when the game
+ends they are saved with its result (coach_<time>.npz in the session's directory),
 for `selfplay.train(coach_dir=...)` to mix into its batches. The coach can also
 file a report on what they see (reports.jsonl): rule bugs, odd plays.
 
@@ -1107,7 +1108,8 @@ class CoachSession:
 
 
 def load_coach_examples(coach_dir: Path) -> list[dict]:
-    """Every coached decision saved in `coach_dir`, as training examples. Files
+    """Every coached decision saved in `coach_dir`, as training examples for the
+    policy only (`value_weight` 0: the result is kept in the file). Files
     saved under another state encoding (OBS_DIM / ACTION_DIM changed since)
     are skipped with a note: training can't read them."""
     out: list = []
@@ -1118,5 +1120,6 @@ def load_coach_examples(coach_dir: Path) -> list[dict]:
                 continue
             for i in range(len(data["z"])):
                 out.append({"state": data["state"][i], "policy": data["policy"][i],
-                            "mask": data["mask"][i], "z": float(data["z"][i])})
+                            "mask": data["mask"][i], "z": float(data["z"][i]),
+                            "value_weight": 0.0})
     return out

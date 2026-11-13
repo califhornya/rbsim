@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (coach senza rete allenata; build con `runs/` nella radice).
+Aggiornato: 2026-11-13 (coach: rete non allenata, partite nel training).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -49,9 +49,10 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   A/B stesso valutatore (punteggio del tavolo), 240 partite, 16 iterazioni:
   nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%), stesso costo.
 
-- Coach senza `runs/competitive/net.pt`: rete non allenata. `allena` mescola
-  le partite di `runs/coach` (prima no); file di encoding vecchi saltati.
-  `pyproject.toml`: pacchetti solo `riftbound*` (`runs/` rompeva `uv sync`).
+- Coach senza `runs/competitive/net.pt`: rete non allenata. `allena` usa
+  `runs/coach` (prima no), solo per la policy (conta la mossa, non il
+  risultato: utente); file di encoding vecchi saltati.
+  `pyproject.toml`: solo `riftbound*` (`runs/` rompeva `uv sync`).
 
 ## In corso
 Niente.
@@ -72,7 +73,6 @@ Piano concordato (2026-11-12). Punti in ordine di peso per il training:
    rete (~1M parametri, una posizione per volta) è ~25% del tempo.
 5. Possono aspettare: sideboard imparato, tempi per turno del match, carte
    del corpus fuori dai mazzi, costruzione del mazzo (§103).
-
 Training sulle macchine dell'utente, run in runs/competitive: PC Windows
 (Ryzen 7 7800X3D, `scripts/allena.bat`, 8 worker) o Mac M1 (`allena.command`,
 4 worker, torch 2.13 vuole macOS 14+). La RTX 4070 serve a poco.

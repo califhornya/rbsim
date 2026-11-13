@@ -86,19 +86,23 @@ def play_eval_game(net: RiftboundNet, deck_net: Path, deck_opp: Path, *, seed: i
 def train_step(net: RiftboundNet, optimizer, batch: list[dict],
                device: Optional[torch.device] = None) -> dict:
     """One gradient step on a batch of examples. Loss = policy cross-entropy
-    (visit target vs masked policy) + value MSE. Returns loss components."""
+    (visit target vs masked policy) + value MSE. An example with
+    ``value_weight`` 0 (a coached decision: what counts is the move, not how
+    the game ended) trains the policy only. Returns loss components."""
     device = device or next(net.parameters()).device
     states = torch.as_tensor(np.stack([e["state"] for e in batch]), device=device)
     target_p = torch.as_tensor(np.stack([e["policy"] for e in batch]), device=device)
     masks = torch.as_tensor(np.stack([e["mask"] for e in batch]), device=device)
     target_v = torch.as_tensor(np.asarray([e["z"] for e in batch], dtype=np.float32),
                                device=device).unsqueeze(1)
+    weight_v = torch.as_tensor(np.asarray([e.get("value_weight", 1.0) for e in batch],
+                                          dtype=np.float32), device=device).unsqueeze(1)
 
     net.train()
     logits, value = net(states)
     logp = masked_log_softmax(logits, masks)
     policy_loss = -(target_p * logp).sum(dim=1).mean()
-    value_loss = F.mse_loss(value, target_v)
+    value_loss = (weight_v * (value - target_v) ** 2).sum() / weight_v.sum().clamp(min=1.0)
     loss = policy_loss + value_loss
 
     optimizer.zero_grad()

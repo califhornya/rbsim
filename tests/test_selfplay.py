@@ -35,6 +35,20 @@ def test_selfplay_generates_labeled_examples():
         assert float(e["policy"][~e["mask"]].sum()) < 1e-6
 
 
+def test_coached_examples_train_the_policy_not_the_value():
+    """A coached decision (value_weight 0) leaves the value loss out: what the
+    coach chose counts, not how the game ended."""
+    torch.manual_seed(0)
+    net = RiftboundNet()
+    ex = play_selfplay_game(net, SHEN, ZED, seed=2, iterations=4, max_turns=12)[:4]
+    opt = torch.optim.SGD(net.parameters(), lr=0.0)
+    coached = [{**e, "z": 1.0, "value_weight": 0.0} for e in ex]
+    assert train_step(net, opt, coached)["value_loss"] == 0.0
+    flipped = [{**e, "z": -1.0, "value_weight": 0.0} for e in ex]
+    assert train_step(net, opt, coached)["policy_loss"] == train_step(net, opt, flipped)["policy_loss"]
+    assert train_step(net, opt, ex)["value_loss"] > 0.0
+
+
 def test_train_step_updates_params_and_finite_loss():
     torch.manual_seed(0)
     net = RiftboundNet()
