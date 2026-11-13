@@ -293,11 +293,14 @@ class _TreeChooser:
 
 
 class _Node:
-    __slots__ = ("N", "W", "P", "children", "expanded", "value", "choices", "cprior")
+    __slots__ = ("N", "W", "Q", "P", "children", "expanded", "value", "choices", "cprior")
 
     def __init__(self):
         self.N = 0
         self.W = 0.0
+        # What the node is worth to the search (_backup): its mean, or with
+        # backup="best" the best of what was tried below it.
+        self.Q = 0.0
         self.P: dict = {}          # action_tuple -> prior
         self.children: dict = {}   # action_tuple -> _Node
         self.expanded = False
@@ -317,8 +320,19 @@ class NetGuidedMCTSAgent(Agent):
                  explore: bool = False, dirichlet_alpha: float = 0.3,
                  noise_frac: float = 0.25, temperature_moves: int = 10,
                  pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
-                 full_fraction: float = 1.0):
+                 full_fraction: float = 1.0, backup: str = "mean"):
         super().__init__(player)
+        # How a turn's tree values a node. "mean": the average of every line
+        # tried below it (MCTS). "best": the best of its children, a line's
+        # end being the average of its own visits. A turn is one player's
+        # sequence of actions: playing a card is worth the best that follows
+        # it, not the average of all the search tried after it, bad lines
+        # included (with a hundred iterations that average sat below PASS,
+        # which is one exact value: the search passed a turn in three with a
+        # sane value, and self-play learned it).
+        if backup not in ("best", "mean"):
+            raise ValueError(f"backup {backup!r}")
+        self.backup = backup
         # A move whose searched value isn't at least this much above passing's
         # (values in [-1, 1]: 0.02 = 1 point of win chance) isn't played.
         self.pass_margin = pass_margin
@@ -545,8 +559,8 @@ class NetGuidedMCTSAgent(Agent):
         for action, child in root.children.items():
             tried = [(k, c) for k, c in child.choices.items() if c.N > 0]
             if not tried:
-                out.append((action, child.N, child.W))
-            out += [((action, k), c.N, c.W) for k, c in tried]
+                out.append((action, child.N, child.Q * child.N))
+            out += [((action, k), c.N, c.Q * c.N) for k, c in tried]
         return sorted(out, key=lambda v: -v[1])
 
     def prefer_pass(self, root: _Node, key):
@@ -562,7 +576,7 @@ class NetGuidedMCTSAgent(Agent):
                 or _split_key(key)[0][0] != "ABILITY" \
                 or getattr(self.gs, "pending_move", None) is not None:
             return key
-        return _PASS if best.W / best.N - p.W / p.N < self.pass_margin else key
+        return _PASS if best.Q - p.Q < self.pass_margin else key
 
     def _add_noise(self, node: _Node) -> None:
         """Dirichlet noise on a root's priors, so self-play also tries what the
@@ -656,16 +670,25 @@ class NetGuidedMCTSAgent(Agent):
         else:
             value = self._net_value(clone, side)
 
+        self._backup(path, value)
+
+    def _backup(self, path: list, value: float) -> None:
+        """Count the visit along `path` (root first) and update each node's Q."""
         for n in path:
             n.N += 1
             n.W += value
+        best = self.backup == "best"
+        for n in reversed(path):
+            below = [c.Q for c in n.children.values() if c.N] if best else []
+            below += [c.Q for c in n.choices.values() if c.N] if best else []
+            n.Q = max(below) if below else n.W / n.N
 
     def _select_option(self, node: _Node, keys: list, default: int = 0) -> int:
         """PUCT over a choice's options (by key; the first of two with one key):
         an option not tried yet is worth the node's own mean so far; on a tie
         the baseline's option goes first."""
         sqrt_total = math.sqrt(max(1, node.N))
-        fpu = node.W / node.N if node.N else 0.0
+        fpu = node.Q if node.N else 0.0
         best, best_val, seen = default, -1e30, set()
         order = [default] + [i for i in range(len(keys)) if i != default]
         for i in order:
@@ -674,7 +697,7 @@ class NetGuidedMCTSAgent(Agent):
                 continue
             seen.add(k)
             child = node.choices[k]
-            q = child.W / child.N if child.N else fpu
+            q = child.Q if child.N else fpu
             val = q + self.c_puct * node.cprior.get(k, 0.0) * sqrt_total / (1 + child.N)
             if val > best_val:
                 best, best_val = i, val
@@ -690,7 +713,7 @@ class NetGuidedMCTSAgent(Agent):
         sqrt_total = math.sqrt(max(1, node.N))
         best, best_val = None, -1e30
         for a, child in candidates:
-            q = (child.W / child.N) if child.N > 0 else 0.0
+            q = child.Q if child.N > 0 else 0.0
             u = self.c_puct * node.P.get(a, 0.0) * sqrt_total / (1 + child.N)
             val = q + u
             if val > best_val:
@@ -804,8 +827,7 @@ class NetGuidedMCTSAgent(Agent):
             root.children = {t: _Node() for t in priors}
             root.expanded = True
             self._add_noise(root)
-            root.N += 1
-            root.W += value
+            self._backup([root], value)
             return
         key = self._puct_select(root, [a.to_engine() for a in legal])
         if key is None:
@@ -819,9 +841,7 @@ class NetGuidedMCTSAgent(Agent):
         value = self._terminal_value(clone, side)
         if value is None:
             value = self._net_value(clone, side)
-        for n in path:
-            n.N += 1
-            n.W += value
+        self._backup(path, value)
 
     @staticmethod
     def _settle(loop) -> None:

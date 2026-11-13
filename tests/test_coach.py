@@ -234,7 +234,7 @@ def test_the_net_passes_when_its_move_isnt_clearly_better():
 
     def node(n, q):
         x = _Node()
-        x.N, x.W = n, n * q
+        x.N, x.W, x.Q = n, n * q, q
         return x
     tank = ("ABILITY", "ACTIVATED", 0)
     root = _Node()
