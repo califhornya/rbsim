@@ -720,6 +720,8 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         champion_spec = CARD_REGISTRY.get(champion_name)
         if champion_spec is None:
             raise ValueError(f"Deck champion '{champion_name}' not found in registry")
+        if champion_name in BANNED_CARDS:
+            warnings.warn(f"Deck '{path.name}' has banned champion '{champion_name}'", stacklevel=2)
 
     # --- Legend (identity card, starts in play) ---
     legend_spec: Optional[CardSpec] = None
@@ -738,6 +740,8 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         bf_spec = CARD_REGISTRY.get(bf_name)
         if bf_spec is None:
             raise ValueError(f"Deck battlefield '{bf_name}' not found in registry")
+        if bf_name in BANNED_CARDS:
+            warnings.warn(f"Deck '{path.name}' contains banned battlefield '{bf_name}'", stacklevel=2)
         battlefield_specs.append(bf_spec)
 
     # --- Main deck cards ---

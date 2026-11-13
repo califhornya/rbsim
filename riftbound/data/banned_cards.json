@@ -1,8 +1,19 @@
 {
   "note": "Cards banned in competitive play. Decks containing them still load (with a warning) so existing training decks keep working until they are rebuilt.",
-  "updated": "2026-10-25",
+  "updated": "2026-11-13",
+  "effective": "2026-11-23",
   "cards": [
     "Ekko Recurrent",
-    "Stacked Deck"
+    "Stacked Deck",
+    "Riven Broken Blade",
+    "Zhonya's Hourglass",
+    "Stellacorn Herder",
+    "Nocturne Horrifying",
+    "Rhasa the Sunderer",
+    "Brynhir Thundersong",
+    "Dazzling Aurora",
+    "Baited Hook",
+    "Emperor's Dais",
+    "Star Spring"
   ]
 }

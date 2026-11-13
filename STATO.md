@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (run 3 fermo dopo la 10; pronto il run 4, politica dai Q).
+Aggiornato: 2026-11-13 (ban del 13/11 registrate; i due mazzi competitive da rifare).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -47,6 +47,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
+- Ban del 13/11: 8 carte e 2 campi in `banned_cards.json`; avviso anche per
+  campi di battaglia e campione banditi (prima solo le carte del mazzo).
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
   nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
@@ -70,8 +72,13 @@ ancora al run 4: non rilanciarlo.
    ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
-3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
-   ricontrollare i due mazzi.
+3. Ban del 13/11 (effettive dal 23/11) in `banned_cards.json`; i mazzi si
+   caricano ancora, con un avviso. Toccano Kai'Sa (3 Brynhir Thundersong) e
+   Kennen (3 Nocturne Horrifying, 3 Rhasa the Sunderer): in attesa delle
+   sostituzioni dell'utente. GIUDIZI.md (G1, G4, G6, S1) parla di queste
+   carte: rivederlo con le liste nuove prima della sessione sul bot.
+   `banned_cards.json` non ha tutta la lista di settembre (12 carte secondo
+   i siti; qui 2 + le nuove; Reaver's Row non è nel registro).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
