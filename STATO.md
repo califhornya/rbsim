@@ -74,9 +74,9 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
-Macchine: PC Windows (Ryzen 7 7800X3D, 8 worker) o Mac M1 Max (un worker per
-core veloce). Conta la CPU, non la GPU. Nel log: `fresh`/`|v|` (errore e
-sicurezza del valore sulle partite nuove), `empty_turns` (turni a vuoto).
+Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
+`fresh`/`|v|` (valore sulle partite nuove), `empty_turns` (turni a vuoto).
+Run 3 lanciato il 13/11: iterazione 5 a 0,55 / 0,93, esito non ancora noto.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
@@ -90,6 +90,8 @@ sicurezza del valore sulle partite nuove), `empty_turns` (turni a vuoto).
 - `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`: self-play e
   training; `scripts/allena.bat` / `allena.command`: lo stesso con doppio clic.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
+- `docs/history/SESSIONE_2026-11-13.md`: il primo training nel dettaglio
+  (run, numeri, cosa non è verificato); `scripts/diag/`: gli script di misura.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
