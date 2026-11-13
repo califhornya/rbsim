@@ -55,3 +55,20 @@ Kai'Sa:
   avversario in base (giocato al suo primo turno). Mano: Falling Star,
   Noxus Hopeful, Stupefy, Lecturing Yordle, Hextech Ray. → Falling Star su
   Kennen, poi Noxus Hopeful scontato.
+
+## In attesa di risposta (secondo gruppo, metà partita)
+Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
+- S3. Tu Kennen, turno 5, 3-3. 6 rune e Seal in campo. Tu controlli il tuo
+  campo con Traveling Merchant (2), lei il suo con Noxus Hopeful (4).
+  Kennen in base, pronto. Lei: 4 carte in mano, 6 rune aperte. Mano:
+  Nocturne Horrifying, Star-Crossed, Ride the Wind, Lightning Rush.
+- S4. Tu Kai'Sa, sotto 5-6, tuo turno. 8 rune (4 Fury, 4 Mind). Lui
+  controlla il suo campo con Kennen (4) e Traveling Merchant (2): al suo
+  turno lo tiene e va a 7. Tu controlli il tuo con Noxus Hopeful (4),
+  pronto. Lui: 3 carte in mano. Mano: Singularity, Brynhir Thundersong,
+  Falling Star, Hextech Ray, Thousand-Tailed Watcher.
+- S5. Tu Kennen, turno 4, avanti 3-2. Lei senza unità in campo, 2 carte in
+  mano, 5 rune aperte; il suo campo è vuoto. Il tuo è presidiato da
+  Bedeviling Stranger (2). In base: Trifarian Captain (1) e Traveling
+  Merchant (2), pronti. Conquistare il suo campo con tutti e due, uno,
+  nessuno? (Interessa quanto si rischia.)
