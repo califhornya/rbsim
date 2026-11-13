@@ -64,9 +64,9 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
 
 ## Prossimi passi
 1. Run 3 finito: 0,72 contro simple_trade dalla 10 alla 60, pendenza nulla
-   → per il criterio è fermo. Proposto all'utente, prima di cambiare: rete 60
-   contro rete 10, 200 partite (script da scrivere); se ferma anche lì,
-   bersaglio della politica dai Q prima dell'imitazione. In attesa di risposta.
+   → per il criterio è fermo. Prima di cambiare: rete 60 contro rete 10, 200
+   partite (`scripts/diag/net_vs_net.py`, l'utente lo lancia sul Mac); se
+   ferma anche lì, bersaglio della politica dai Q prima dell'imitazione.
 2. Non ancora fatto: bersaglio della politica dai Q (le visite seguono i
    prior più dei valori); con "best" il self-play non è stato ancora provato.
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
