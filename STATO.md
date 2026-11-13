@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (training: la ricerca passava troppo, corretta; da provare in self-play).
+Aggiornato: 2026-11-13 (run 3 finito: ricerca corretta regge, ma il gioco non sale dopo la 10).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -63,10 +63,10 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
    contro simple_trade.
 
 ## Prossimi passi
-1. Run dell'utente con ricerca corretta + ricetta nuova: `allena.command` /
-   `allena.bat` (ora 60 iterazioni in `runs/competitive3`, valutazioni da 40
-   partite). Criterio: simple_trade sopra 0,70 e in salita → run lungo;
-   fermo → rete che parte imitando partite di agenti euristici.
+1. Run 3 finito: 0,72 contro simple_trade dalla 10 alla 60, pendenza nulla
+   → per il criterio è fermo. Proposto all'utente, prima di cambiare: rete 60
+   contro rete 10, 200 partite (script da scrivere); se ferma anche lì,
+   bersaglio della politica dai Q prima dell'imitazione. In attesa di risposta.
 2. Non ancora fatto: bersaglio della politica dai Q (le visite seguono i
    prior più dei valori); con "best" il self-play non è stato ancora provato.
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
@@ -76,7 +76,7 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
 `fresh`/`|v|` (valore sulle partite nuove), `empty_turns` (turni a vuoto).
-Run 3 (13/11) fino alla 50: media 0,71 simple_trade, 0,96 random; non sale.
+Run 3 (13/11), 60 iterazioni: media 0,72 simple_trade, 0,97 random; non sale.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
