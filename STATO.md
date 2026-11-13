@@ -21,8 +21,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - L'agente random è seminato dal seed della partita (riproducibile).
 - Commenti di Codex: verificati uno per uno prima di agire (i due del
   2026-11-12 erano fondati: D53 e il default di `scripts/round_robin.py`).
-- Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
-  §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
+- (Utente, 2026-11-13) Sessioni di coach dopo il primo training, contro la
+  rete allenata: correzioni mirate e segnalazioni, non spinta iniziale.
 - Scelte nella ricerca: nodi dell'albero per opzione con chiave (tipo, carta,
   descrizione), non per indice: le copie determinizzate mostrano altre carte.
   Prior uguali tra le opzioni (con 0.75 alla baseline le visite restavano
@@ -51,7 +51,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 - Coach senza `runs/competitive/net.pt`: rete non allenata. `allena` usa
   `runs/coach` (prima no), solo per la policy (conta la mossa, non il
-  risultato: utente); file di encoding vecchi saltati.
+  risultato); file di encoding vecchi saltati.
   `pyproject.toml`: solo `riftbound*` (`runs/` rompeva `uv sync`).
 
 ## In corso
