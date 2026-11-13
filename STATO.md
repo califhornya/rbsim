@@ -32,14 +32,12 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
   Proposte in parole semplici (cosa faccio, quanto costa, cosa sapremo);
   ogni deviazione dal piano concordato detta esplicitamente.
-- Imitazione di simple_trade scartata: insegnerebbe a giocare da neofita.
 - Training: si parte senza aspettare il BACKLOG vuoto (di fatto, 2026-11-12).
   Più partite e meno esempi per partita invece di più ricerca per mossa: il
   valore ha bisogno di esiti, non di posizioni della stessa partita.
 
 ## Fatto
 - Passaggi 1-4: D1–D49, Q1–Q4, bug del coach (`cc3d776`). Dettagli in AUDIT.md.
-- Rimozione mazzi: test spostati sui precon, 20 golden game rigenerate.
 - Quinto passaggio (mazzi competitive, D50-D52, 8 golden game Kai'Sa vs
   Kennen) e sesto (righe MECHANICS.md, D53-D56 `0b877df` `5ef1d33` `e115324`
   `56ce034`; sostituzioni §367-373 e layer §475-482 giusti). Dettagli in
@@ -47,8 +45,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
-- Ban del 13/11: 8 carte e 2 campi in `banned_cards.json`; avviso anche per
-  campi di battaglia e campione banditi (prima solo le carte del mazzo).
+- Ban del 13/11 in `banned_cards.json`; avviso anche per campi e campione.
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
   nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
@@ -62,9 +59,8 @@ Training (O4) fermo per decisione (13/11). Esiti contro simple_trade:
 - Run 4 (`--policy-target q`, 30 iterazioni dalla rete 60 del run 3): 0,68,
   valore peggiorato (errore sulle partite nuove 0,70 → 0,84). Il log basta,
   confronto testa a testa non fatto.
-simple_trade è un bot a regole fisse da neofita (gioca il campione appena
-può): 0,72 contro di lui vuol dire una rete debole. `allena.command` punta
-ancora al run 4: non rilanciarlo.
+simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
+`allena.command` punta ancora al run 4: non rilanciarlo.
 
 ## Prossimi passi
 1. Proposto all'utente, in attesa di risposta: un bot con i suoi giudizi
@@ -75,10 +71,8 @@ ancora al run 4: non rilanciarlo.
 3. Ban del 13/11 (effettive dal 23/11) in `banned_cards.json`; i mazzi si
    caricano ancora, con un avviso. Toccano Kai'Sa (3 Brynhir Thundersong) e
    Kennen (3 Nocturne Horrifying, 3 Rhasa the Sunderer): in attesa delle
-   sostituzioni dell'utente. GIUDIZI.md (G1, G4, G6, S1) parla di queste
-   carte: rivederlo con le liste nuove prima della sessione sul bot.
-   `banned_cards.json` non ha tutta la lista di settembre (12 carte secondo
-   i siti; qui 2 + le nuove; Reaver's Row non è nel registro).
+   sostituzioni dell'utente. GIUDIZI.md (G1, G4, G6, S1) usa queste carte:
+   da rivedere. Manca la lista di settembre (12 carte, qui solo 2).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
