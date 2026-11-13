@@ -47,11 +47,11 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   determinize le lascia lì. Su 356 scelte in 8 partite Kai'Sa-Kennen: 318
   dal piano, 35 rigiocate, 3 alla baseline (prima 41% cercate).
   A/B stesso valutatore (punteggio del tavolo), 240 partite, 16 iterazioni:
-  nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%). Costo per
-  decisione invariato. Suite verde (1792 passed: ora torch è installato).
+  nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%), stesso costo.
 
-- Coach senza `runs/competitive/net.pt`: rete non allenata. `pyproject.toml`:
-  pacchetti solo `riftbound*` (con `runs/` nella radice `uv sync` falliva).
+- Coach senza `runs/competitive/net.pt`: rete non allenata. `allena` mescola
+  le partite di `runs/coach` (prima no); file di encoding vecchi saltati.
+  `pyproject.toml`: pacchetti solo `riftbound*` (`runs/` rompeva `uv sync`).
 
 ## In corso
 Niente.

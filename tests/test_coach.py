@@ -429,3 +429,21 @@ def test_a_second_answer_to_one_question_is_refused(tmp_path):
     except RuntimeError:
         pass                      # refused, or the next question was already up
     session.abandon()
+
+
+def test_coach_files_from_another_encoding_are_skipped(tmp_path):
+    """A file coached before the encoding changed can't be trained on: it is
+    left out, not stacked with the others (which would stop the training)."""
+    import numpy as np
+
+    from riftbound.ai.encoding import ACTION_DIM, OBS_DIM
+    d = tmp_path / "coach"
+    d.mkdir()
+    np.savez_compressed(d / "coach_old.npz", state=np.zeros((2, OBS_DIM - 5), np.float32),
+                        policy=np.zeros((2, 319), np.float32), mask=np.zeros((2, 319), bool),
+                        z=np.ones(2, np.float32), corrected=np.zeros(2, bool))
+    np.savez_compressed(d / "coach_new.npz", state=np.zeros((3, OBS_DIM), np.float32),
+                        policy=np.zeros((3, ACTION_DIM), np.float32),
+                        mask=np.zeros((3, ACTION_DIM), bool), z=np.ones(3, np.float32),
+                        corrected=np.zeros(3, bool))
+    assert len(load_coach_examples(d)) == 3

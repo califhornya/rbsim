@@ -33,7 +33,7 @@ from typing import Optional
 
 import numpy as np
 
-from riftbound.ai.encoding import ACTION_DIM, action_to_index, encode_observation, legal_mask
+from riftbound.ai.encoding import ACTION_DIM, OBS_DIM, action_to_index, encode_observation, legal_mask
 from riftbound.ai.net_mcts import (
     _PASS,
     NetGuidedMCTSAgent,
@@ -1107,10 +1107,15 @@ class CoachSession:
 
 
 def load_coach_examples(coach_dir: Path) -> list[dict]:
-    """Every coached decision saved in `coach_dir`, as training examples."""
+    """Every coached decision saved in `coach_dir`, as training examples. Files
+    saved under another state encoding (OBS_DIM / ACTION_DIM changed since)
+    are skipped with a note: training can't read them."""
     out: list = []
     for path in sorted(Path(coach_dir).glob("coach_*.npz")):
         with np.load(path) as data:
+            if data["state"].shape[1:] != (OBS_DIM,) or data["policy"].shape[1:] != (ACTION_DIM,):
+                print(f"coach: {path.name} skipped, saved under another encoding", file=sys.stderr)
+                continue
             for i in range(len(data["z"])):
                 out.append({"state": data["state"][i], "policy": data["policy"][i],
                             "mask": data["mask"][i], "z": float(data["z"][i])})
