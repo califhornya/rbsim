@@ -94,8 +94,6 @@ prima di allenarcisi), `empty_turns` (turni passati senza fare nulla).
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
-- `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
-  `competitive_kennen` (le liste dell'utente).
-- `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
-  riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
-- `BACKLOG.md`: quel che resta (in gran parte carte e regole fuori dai mazzi).
+- `riftbound/data/decks/`: i due precon e i due competitive dell'utente.
+- `tests/golden_games.json` + `test_golden_games.py`: 20 partite Zed vs Shen
+  (`RBSIM_REGEN_GOLDEN=1` per rigenerarle); `BACKLOG.md`: quel che resta.
