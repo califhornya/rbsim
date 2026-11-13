@@ -76,7 +76,7 @@ Training (O4). Trovati due difetti, in quest'ordine di peso:
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
 `fresh`/`|v|` (valore sulle partite nuove), `empty_turns` (turni a vuoto).
-Run 3 lanciato il 13/11: iterazione 5 a 0,55 / 0,93, esito non ancora noto.
+Run 3 (13/11) fino alla 50: media 0,71 simple_trade, 0,96 random; non sale.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
