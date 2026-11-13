@@ -50,10 +50,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   nuova 68,8% contro la vecchia (Kai'Sa 81%, Kennen 56%). Costo per
   decisione invariato. Suite verde (1792 passed: ora torch è installato).
 
-- Coach (2026-11-13): senza `runs/competitive/net.pt` parte con una rete non
-  allenata (`runs/coach/untrained_net.pt`), mosse e probabilità senza senso.
-  `pyproject.toml`: pacchetti solo `riftbound*` (con `runs/` nella radice
-  `uv sync` falliva: "Multiple top-level packages").
+- Coach senza `runs/competitive/net.pt`: rete non allenata. `pyproject.toml`:
+  pacchetti solo `riftbound*` (con `runs/` nella radice `uv sync` falliva).
 
 ## In corso
 Niente.
@@ -97,9 +95,6 @@ Training sulle macchine dell'utente, run in runs/competitive: PC Windows
   (`scripts/piltover_sync.py compare` per le differenze).
 - `riftbound/data/decks/`: `precon_zed`, `precon_shen`, `competitive_kaisa`,
   `competitive_kennen` (le liste dell'utente).
-- `tests/audit/test_audit_competitive.py` (quinto passaggio, D53-D55),
-  `tests/audit/test_audit_mechanics_rows.py` (sesto, D56).
-- `docs/MECHANICS.md`: stato di ogni meccanica (riverificato 2026-11-12).
 - `tests/golden_games.json` + `tests/test_golden_games.py`: 20 partite di
   riferimento Zed vs Shen (rigenerare con `RBSIM_REGEN_GOLDEN=1`).
 - `BACKLOG.md`: tutto ciò che resta prima del training.
