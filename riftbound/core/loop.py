@@ -460,6 +460,9 @@ class GameLoop:
 
     def __init__(self, gs: GameState, recorder: Optional["GameRecorder"] = None, verbose: bool = False):
         self.gs = gs
+        # The Result's counts, kept by the loop, not the state: a copy played
+        # on with a new GameLoop counts from the copy point only. Nobody reads
+        # them from a copy (the search reads the winner); left so (owner, 17/11).
         self.units_played = 0
         self.spells_cast = 0
         self.recorder = recorder
@@ -1142,7 +1145,7 @@ class GameLoop:
                     print(f"  [HUNT] {side} gains {amount} XP (now {self.gs.get_xp(side)})")
             if trigger == "on_conquer":
                 unit.conquered_turn = self.gs.turn
-                if (id(unit), self.gs.turn) in self.gs.conquer_return and self.choose(
+                if (unit, self.gs.turn) in self.gs.conquer_return and self.choose(
                         "optional:return_to_base", side, [True, False], False, unit.card):
                     self._move_unit_by_effect(unit, None)      # Relentless Pursuit
                     continue
@@ -1681,7 +1684,7 @@ class GameLoop:
     def _once_used(self, card: Card, i, es: EffectSpec) -> bool:
         """ "Once each turn" / "The first time ... each turn": used this turn."""
         return bool(es.params.get("once_per_turn")) and \
-            self.gs.once_per_turn_used.get((id(card), i)) == self.gs.turn
+            self.gs.once_per_turn_used.get((card, i)) == self.gs.turn
 
     @contextmanager
     def _card_flags(self, card: Card, flags: Optional[dict]):
@@ -1744,7 +1747,7 @@ class GameLoop:
         if EFFECT_REGISTRY.get(es.effect) is None:
             return False
         if once and es.params.get("once_per_turn"):
-            self.gs.once_per_turn_used[(id(card), i)] = self.gs.turn
+            self.gs.once_per_turn_used[(card, i)] = self.gs.turn
         return True
 
     def _flush_triggers(self, run: bool = True) -> None:
@@ -4201,7 +4204,7 @@ class GameLoop:
         """A gear was played from hand: Orianna Mechanical Marvel's "once each
         turn" is used up."""
         for u in self._units_at_battlefields_with(side, "gear_discount_once"):
-            key = (id(u.card), "orianna")
+            key = (u.card, "orianna")
             if self.gs.once_per_turn_used.get(key) != self.gs.turn:
                 self.gs.once_per_turn_used[key] = self.gs.turn
                 break
@@ -4209,7 +4212,7 @@ class GameLoop:
     def _orianna_discount_ready(self, side: str) -> bool:
         """ "Once each turn, while I'm at a battlefield, you may pay [1] [rune]
         less to play a gear" (Orianna Mechanical Marvel), not used yet this turn."""
-        return any(self.gs.once_per_turn_used.get((id(u.card), "orianna")) != self.gs.turn
+        return any(self.gs.once_per_turn_used.get((u.card, "orianna")) != self.gs.turn
                    for u in self._units_at_battlefields_with(side, "gear_discount_once"))
 
     def _vex_cheerless_delta(self, side: str, energy: int) -> int:
@@ -5037,7 +5040,7 @@ class GameLoop:
             # "Once each turn ... play that token and an additional copy of it"
             # (Zilean Time Mage).
             for z in self._units_at_battlefields_with(side, "double_tokens_once"):
-                key = (id(z.card), "double_tokens_once")
+                key = (z.card, "double_tokens_once")
                 if self.gs.once_per_turn_used.get(key) != self.gs.turn:
                     self.gs.once_per_turn_used[key] = self.gs.turn
                     self._play_token(name, side, bf=bf, ready=ready, might=might)
@@ -5734,7 +5737,7 @@ class GameLoop:
     def _once_key(src: Card, eff: EffectSpec, entry: dict) -> tuple:
         """The "use only once each turn" record of an activated ability entry:
         one per instance (Svellsongur's copy is entry `copy` N)."""
-        key = (id(src), "activated", eff.effect)
+        key = (src, "activated", eff.effect)
         return key + (entry["copy"],) if entry.get("copy") else key
 
     def activatable_abilities(self, side: str) -> list:
@@ -6128,7 +6131,7 @@ class GameLoop:
         if entry["type"] == "bf_ability":
             # Black Market: once per player, on their turn.
             if self.gs.active != side or self.gs.once_per_turn_used.get(
-                    (id(entry["bf"].card), side, "bf_ability")) == self.gs.turn:
+                    (entry["bf"].card, side, "bf_ability")) == self.gs.turn:
                 return False
             parsed = self._parse_activated_cost(eff.cost)
             return self._can_pay_energy_and_generic(ap, parsed["energy"], parsed["power"],
@@ -6627,7 +6630,7 @@ class GameLoop:
             parsed = self._parse_activated_cost(eff.cost)
             if not self._pay_energy_and_generic(ap, parsed["energy"], parsed["power"], parsed["domain"]):
                 return
-            self.gs.once_per_turn_used[(id(bf.card), side, "bf_ability")] = self.gs.turn
+            self.gs.once_per_turn_used[(bf.card, side, "bf_ability")] = self.gs.turn
             self._activate(side, bf.card, eff, entry["bf_idx"], "bf_ability", parsed["energy"],
                            extra={"battlefield": bf})
             return
@@ -6912,7 +6915,7 @@ class GameLoop:
         or the weakest other friendly unit is killed."""
         if not self._has_effect(dead_unit.card, "sacrifice_instead_of_dying"):
             return False
-        key = (id(dead_unit.card), "sacrifice_instead_of_dying")
+        key = (dead_unit.card, "sacrifice_instead_of_dying")
         if self.gs.once_per_turn_used.get(key) == self.gs.turn:
             return False
         others = [u for u in self._friendly_units_of(side) if u is not dead_unit]
@@ -7020,7 +7023,7 @@ class GameLoop:
             if not in_base and bf.card is not None and not dead_unit.is_token:
                 # "For each player, the first time each turn a non-token unit they
                 # control dies here, ..." (Black Rose Sanctum).
-                key = (id(bf.card), owner_side, "unit_dies_here")
+                key = (bf.card, owner_side, "unit_dies_here")
                 if self.gs.once_per_turn_used.get(key) != self.gs.turn and \
                         self._has_trigger(bf.card, "on_unit_dies_here"):
                     self.gs.once_per_turn_used[key] = self.gs.turn
@@ -7293,7 +7296,7 @@ class GameLoop:
         """`unit` has the Attacker or Defender designation at a battlefield."""
         where = self._locate_unit(unit)
         return (where is not None and where[1] is not None and where[1].combat_started
-                and id(unit) in where[1].combat_designated)
+                and unit in where[1].combat_designated)
 
     def _refresh_combat_keywords(self) -> None:
         """ASSAULT is "+X [might] while I'm an attacker", SHIELD "while I'm a
@@ -7306,7 +7309,7 @@ class GameLoop:
             mods = self._combat_might_mods(bf, bf.combat_attacker) if bf.combat_started else {}
             for side in ("A", "B"):
                 for u in bf._units_for(side):
-                    if bf.combat_started and id(u) in bf.combat_designated:
+                    if bf.combat_started and u in bf.combat_designated:
                         u.bonus_might = u.keyword_value("ASSAULT" if side == bf.combat_attacker else "SHIELD") \
                             + mods.get(id(u), 0)
                     else:
@@ -7322,7 +7325,7 @@ class GameLoop:
         if where is None or where[1] is None:
             return False
         side, bf = where
-        return (bf.combat_started and id(unit) in bf.combat_designated
+        return (bf.combat_started and unit in bf.combat_designated
                 and self.gs.showdown_attacker == side)
 
     def _gold_bonus(self, side: str) -> bool:
@@ -7919,10 +7922,10 @@ class GameLoop:
                                                     self.gs.get_player(side),
                                                     self.gs.get_player(self.gs.other(side)),
                                                     context_extra={"battlefield": bf})
-        new = {side: [u for u in bf._units_for(side) if id(u) not in bf.combat_designated]
+        new = {side: [u for u in bf._units_for(side) if u not in bf.combat_designated]
                for side in (attacker, defender)}
         for side in new:
-            bf.combat_designated.update(id(u) for u in new[side])
+            bf.combat_designated.update(new[side])
         bf.combat_attacker = attacker
         self._refresh_combat_keywords()
         for unit in new[attacker]:

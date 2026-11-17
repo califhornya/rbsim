@@ -23,11 +23,13 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**State (2026-11-17, eighth pass): 68 deviations found, 58 fixed, 10 open (D59-D68).**
+**State (2026-11-17, eighth pass): 68 deviations found, 61 fixed, 7 open (D59-D65).**
 The eighth pass is an external review of the engine (reports in
 `docs/audit/revisione_esterna/`, checked in this repository as its section
-says): D59-D68 are open and, unlike earlier passes, have no test yet; the
-order of the fixes is in `docs/PIANO_MOTORE.md`.
+says): D59-D65 are open and, unlike earlier passes, have no test yet; the
+order of the fixes is in `docs/PIANO_MOTORE.md`. D66-D68 (the copies of the
+game, its phase 1) are fixed, red tests first. Suite: 1831 passed, 6 skipped
+(no torch or sqlalchemy in that environment), no xfail.
 Before it, (2026-11-17, seventh pass): 58 found, 58 fixed, none open.
 The seventh pass read the owner's two post-ban decks: D57-D58, see its
 section; the owner answered Q6. Suite: 1786 passed, 5 skipped, no xfail.
@@ -117,9 +119,9 @@ said.
 | D63 | A multi-unit Standard Move is declared one unit at a time, after the first unit's triggers | §144.3, §421.3 | 2 golden games | open, no test |
 | D64 | "If this kills it" and Alpha Strike's XP count a unit banished instead of dying | §429.1, §370.1.a.1 | outside the decks (Smite + Disintegrate / Alpha Strike) | open, no test |
 | D65 | A once-per-turn ability stays used after its card leaves the board and comes back as a new object | §124, §377.2.b | outside the decks (Riven Deserter + Temporal Breach) | open, no test |
-| D66 | A copy of the game forgets once-per-turn uses (`once_per_turn_used` keyed by `id()`) | search copies | 3 of 3,123 copy points (Pyke Returned); Black Market constructed | open, no test |
-| D67 | A copy of the game forgets who attacks and defends (`combat_designated` keyed by `id()`) | search copies | 58 of 3,123 copy points (Kha'Zix Mutating Horror, Shadow Clone, Twilight Reveler, Kennen) | open, no test |
-| D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | open, no test |
+| D66 | A copy of the game forgets once-per-turn uses (`once_per_turn_used` keyed by `id()`) | search copies | 3 of 3,123 copy points (Pyke Returned); Black Market constructed | fixed, `b6e6c76` |
+| D67 | A copy of the game forgets who attacks and defends (`combat_designated` keyed by `id()`) | search copies | 58 of 3,123 copy points (Kha'Zix Mutating Horror, Shadow Clone, Twilight Reveler, Kennen) | fixed, `d4bc220` |
+| D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | fixed, `ca16a51` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -853,7 +855,8 @@ action reproductions and the 613 + 69 focused trials, the static counts, the
 eight small copy reproductions; Black Market, combat designation and Riven
 Deserter reproduced with our own scripts; D62 and D64 read in the code. Not
 rerun here: the 3,123-point copy probe, D63, the golden forecasts.
-**No test yet**: writing the failing tests is phase 0 of `docs/PIANO_MOTORE.md`.
+D59-D65: **no test yet** (the failing tests are phase 0 of
+`docs/PIANO_MOTORE.md`). D66-D68: fixed (phase 1), see below.
 
 The live game:
 
@@ -908,6 +911,24 @@ point to the original's objects:
   winner; rebasing these stores alone removes all 61.
 - **D68.** `conquer_return`: a copied Relentless Pursuit runner doesn't return
   to base on conquer.
+
+Fixed (2026-11-17, phase 1): the three stores hold the Card or UnitInPlay
+itself (identity equality, `eq=False`), which a copy maps to its own. Red
+tests first (`f4a9315`), then one commit each. `tests/audit/test_audit_copies.py`
+plays the reviewer's reproductions (M1-M7, design 4.1-4.2: a test for each
+once-per-turn record), each on three copy routes: `GameState.clone`, the
+declaration's deepcopy of the state, the deepcopy of the whole loop. The
+real game didn't change: the 28 golden games are identical, and so is the
+final state of 1,440 more seeded games (the six decks, `random` and
+`simple_trade`, before and after the fix). An `id()` could also be reused
+once its object was gone; an object can't. `id()` calls in
+`riftbound/`: 96, now 79. Also fixed by D66, checked here with a constructed
+case: Evelynn, Agony's Embrace (the legend of `competitive_evelynn`) drew
+again in a copy after a second play from face down. Left as it is (owner,
+2026-11-17): a copy played on with a new `GameLoop` counts `units_played`
+and `spells_cast` from the copy point (comment in `GameLoop.__init__`); no
+one reads them from a copy, the search reads the winner. Not rerun here: the
+reviewer's 3,123-point copy probe (its scripts are not in the repository).
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
