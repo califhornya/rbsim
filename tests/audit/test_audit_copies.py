@@ -26,7 +26,6 @@ from audit_helpers import Scripted, act, card, choices, labels, setup, unit
 
 ROUTES = ["clone", "deepcopy", "loop"]
 
-D66 = pytest.mark.xfail(strict=True, reason="D66: once_per_turn_used keeps id() of the original's cards")
 D67 = pytest.mark.xfail(strict=True, reason="D67: combat_designated keeps id() of the original's units")
 D68 = pytest.mark.xfail(strict=True, reason="D68: conquer_return keeps id() of the original's unit")
 
@@ -61,7 +60,6 @@ def _yes(loop: GameLoop) -> list:
 
 # ------------------------------------------------- D66: once_per_turn_used
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_pyke_returned_makes_one_gold_a_turn_in_a_copy(route):
     """Pyke, Returned: 'Once each turn, when an enemy unit dies while I'm at a
@@ -82,7 +80,6 @@ def test_pyke_returned_makes_one_gold_a_turn_in_a_copy(route):
     assert golds == [["Gold"], ["Gold"]]                     # the original, the copy
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_black_market_used_this_turn_is_not_offered_in_a_copy(route):
     """Black Market: '[Rune] [Rune]: Draw 1. Each player may use this ability
@@ -98,7 +95,6 @@ def test_black_market_used_this_turn_is_not_offered_in_a_copy(route):
     assert len(copied.gs.A.hand) == 1 and offered == [False, False]
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_riven_ability_used_this_turn_leaves_only_svellsongurs_use_in_a_copy(route):
     """Riven Deserter: 'Exhaust a friendly unit: Ready a unit. Use this ability
@@ -120,7 +116,6 @@ def test_riven_ability_used_this_turn_leaves_only_svellsongurs_use_in_a_copy(rou
     assert usable == [[(None, False), (1, True)]] * 2
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_black_rose_sanctum_first_death_each_turn_per_player_in_a_copy(route):
     """Black Rose Sanctum: 'For each player, the first time each turn a
@@ -146,7 +141,6 @@ def test_black_rose_sanctum_first_death_each_turn_per_player_in_a_copy(route):
     assert recruits == [[1, 1], [1, 1]]
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_mordekaiser_dies_the_second_time_in_a_copy(route):
     """Mordekaiser, Twice Slain: 'Once each turn, if I would die, you may kill
@@ -169,7 +163,6 @@ def test_mordekaiser_dies_the_second_time_in_a_copy(route):
     assert [lethal(game) for game in (loop, copied)] == [False, False]
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_orianna_discounts_one_gear_a_turn_in_a_copy(route):
     """Orianna, Mechanical Marvel: 'Once each turn, while I'm at a battlefield,
@@ -190,7 +183,6 @@ def test_orianna_discounts_one_gear_a_turn_in_a_copy(route):
     assert paid == [1, 1]
 
 
-@D66
 @pytest.mark.parametrize("route", ROUTES)
 def test_zilean_doubles_one_token_a_turn_in_a_copy(route):
     """Zilean, Time Mage: 'Once each turn, if you would play a token unit

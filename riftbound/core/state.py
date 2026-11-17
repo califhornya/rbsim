@@ -144,7 +144,8 @@ class GameState:
     # run at the start of that side's next Main Phase.
     delayed_main: list = field(default_factory=list)
     # "Once each turn" / "The first time ... each turn" abilities used:
-    # (id of the source card, effect index) -> turn number.
+    # (the source card, effect index or ability, ...) -> turn number. The Card
+    # itself, not its id(): a copy of the game maps it to its own copy (D66).
     once_per_turn_used: dict = field(default_factory=dict)
     # The last turn each side gained XP (Wily Newtfish).
     xp_gained_turn: dict = field(default_factory=dict)
