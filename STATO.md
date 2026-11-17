@@ -75,7 +75,7 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
    Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot), e
    rifare il lanciatore a doppio clic.
 4. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
-5. Pulizia, passo 3 (da decidere): spezzare `loop.py` per fasi, golden identiche.
+5. Motore: dividere `loop.py` e sciogliere il groviglio con `effects.py`: `docs/PIANO_MOTORE.md` (non avviato).
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
