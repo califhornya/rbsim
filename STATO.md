@@ -68,7 +68,7 @@ run 4 (`--policy-target q`): 0,68, valore peggiorato (0,70 → 0,84). Rete debol
    batte nettamente simple_trade o non gioca in modo sensato. Base (17/11,
    `handwritten_value.py 200 100`, 400 partite): 0,59 contro simple_trade (0,50
    con Evelynn, 0,69 con Kha'Zix), 0,85 contro random; rifatta prima del fix:
-   identica (misura deterministica). Dopo la fase 1: in corso.
+   identica (misura deterministica). Dopo la fase 1: identica in tutto.
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli quando
