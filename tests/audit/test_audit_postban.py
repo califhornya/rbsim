@@ -82,6 +82,33 @@ def test_evelynn_legend_on_your_turn_draws_once_and_never_discards():
     assert not [k for k, _s, _o in seen if k == "discard"]
 
 
+
+def test_evelynn_legend_triggers_at_most_once_a_turn():
+    """Once each turn (§383.3.e.1): a second card from face down on another
+    chain of the same turn draws and discards nothing; the next turn it does."""
+    loop, a, b = setup(active="B")
+    _decks(a, b)
+    legend(loop, "A", "Evelynn Agony's Embrace")
+    a.hand += [card("Rampage"), card("Punch First")]
+    loop.gs.battlefields[0].add_unit("A", unit("mine", 2))
+    loop.gs.battlefields[1].add_unit("B", unit("theirs", 2))
+    for name in ("Momentary Companion", "Gutter Guardian", "Bedeviling Stranger"):
+        hide(loop, "A", 0, name)
+    b.hand += [card("Onslaught"), card("Onslaught")]
+    seen = choices(loop, {})
+    scripted(loop, a, b, A={"reaction": ["Play Momentary Companion from Hidden", "PASS",
+                                         "Play Gutter Guardian from Hidden"]})
+    act(loop, "B", "Cast Onslaught")
+    assert (len(a.hand), len(a.deck.cards), len(a.trash)) == (2, 4, 1)
+    act(loop, "B", "Cast Onslaught")
+    assert "Gutter Guardian" in [u.card.name for u in loop.gs.battlefields[0].units_A]
+    assert (len(a.hand), len(a.deck.cards), len(a.trash)) == (2, 4, 1)
+    loop.gs.turn += 1
+    loop.gs.active = "A"
+    act(loop, "A", "Play Bedeviling Stranger from Hidden @BF0")
+    assert (len(a.hand), len(a.deck.cards)) == (3, 3)
+    assert [k for k, _s, _o in seen].count("discard") == 1
+
 # -- D58. Kha'Zix's legend buffs only a unit at the first battlefield ----------------
 
 def test_khazix_legend_buffs_a_unit_anywhere():
