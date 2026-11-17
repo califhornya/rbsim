@@ -6,7 +6,8 @@ is trained in, bugs included, so the rules engine has to be right before
 training means anything.
 
 This README is the entry point: what is here, how to run it, and where it
-stands. Open work is in [`BACKLOG.md`](BACKLOG.md) ("Open now").
+stands. Current state, decisions and next steps: [`STATO.md`](STATO.md) (Italian).
+Open work: [`BACKLOG.md`](BACKLOG.md).
 
 ## Quick start
 
@@ -36,29 +37,24 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
 | `riftbound/core/` | The rules engine: `loop.py` (turn structure, chain, payments), `effects.py` (effect handlers), `combat.py`, `legality.py`, `match.py` (Bo3) |
 | `riftbound/registry/` | Card loading (`cards_registry.py`) and the engine vocabulary (`engine_vocab.py`) |
 | `riftbound/data/cards/all_cards.json` | The card corpus with its encoded effects. Every `.json` under `data/cards/` is loaded as cards |
-| `riftbound/data/decks/` | The two precons (`precon_zed`, `precon_shen`) and the owner's two competitive decks (`competitive_kaisa`, `competitive_kennen`); the older decks were removed on 2026-11-12 |
+| `riftbound/data/decks/` | The two precons (`precon_zed`, `precon_shen`) and the owner's competitive decks: `competitive_evelynn`, `competitive_khazix` (in use); `competitive_kaisa`, `competitive_kennen` (banned since 2026-11-17, kept as test fixtures and for the existing nets) |
 | `riftbound/data/reference/` | `piltover_archive.json`: the official printed text, errata included (not loaded by the engine) |
 | `riftbound/ai/` | Heuristic agent (`simple_trade`), random, MC / ISMCTS search, the net (`net.py`, `encoding.py`), net-guided MCTS, self-play, coach |
-| `scripts/` | Training, coach, round robin, game tracer, audits (`card_text_audit.py`, `coverage_audit.py`, `choice_audit.py`, `piltover_sync.py`) |
-| `tests/` | ~1750 tests, including the golden games (`tests/golden_games.json`) |
+| `scripts/` | Training, coach, scenarios, round robin, game tracer, card import, audits (`card_text_audit.py`, `coverage_audit.py`, `choice_audit.py`, `piltover_sync.py`); `diag/`: net measurements |
+| `tests/` | ~1790 tests (`tests/audit/`: one per rules deviation), including the golden games (`tests/golden_games.json`) |
 | `docs/rules/` | Core Rules (revision 2026-10-09) and Tournament Rules as text |
 | `docs/MECHANICS.md` | Rules mechanics, one row each, with status (some rows lag the code: see its header) |
 | `docs/reports/` | Generated reports (coverage, choice audit) |
-| `docs/history/` | Old status notes and issue logs, kept for the record. Not the current state |
+| `docs/audit/AUDIT.md` | The rules audit: every deviation found (D1-D58), the owner's rulings (Q1-Q6), what was not checked |
+| `docs/bot/` | The owner's judgments for the bot (`GIUDIZI.md`) and the scenarios |
+| `docs/archivio/` | Old status notes, issue logs and the closed backlog (A-G, cited in code comments). Not the current state |
 
-## Where it stands (2026-11-12)
+## Where it stands
 
-- **Engine.** 1100 cards (Origins, Spiritforged, Unleashed, Vendetta, Radiance,
-  Proving Grounds), every set read card by card with a test per card
-  (`BACKLOG.md` A-G, closed). The two training precons match the official text
-  on all 51 cards. Rules audit in four passes (`docs/audit/AUDIT.md`).
-- **Tests.** With torch: 1773 passed.
-- **AI.** Heuristic agents, search agents, net-guided MCTS with self-play
-  training, learned mulligan and battlefield choice, coach mode. The last
-  training runs reached 0.50 against `simple_trade`; nets saved before F3 don't
-  load (the encoding changed) and were trained on older rules.
-- **Next.** The banlist legal from 2026-11-23
-  (`riftbound/data/banned_cards.json`), then training.
+See [`STATO.md`](STATO.md): it is the only status file, updated at the end of
+each work phase. Short version: the engine is audited against the Core Rules and
+the printed cards (`docs/audit/AUDIT.md`); training is paused because the nets
+stay weak against `simple_trade`.
 
 ## Conventions
 
@@ -70,4 +66,4 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
 - Card text: check `all_cards.json` against the printed text with
   `uv run python scripts/piltover_sync.py compare` (`fetch` refreshes the
   reference data).
-- New work goes in `BACKLOG.md` "Open now".
+- New open items go in `BACKLOG.md`; the state goes in `STATO.md`.

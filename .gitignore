@@ -56,4 +56,3 @@ riftbound/data/card_images_piltover/
 *.log
 scripts/review_needed.txt
 scripts/suggested_vocab.txt
-scripts/spot_check_*.md
