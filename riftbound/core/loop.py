@@ -7293,7 +7293,7 @@ class GameLoop:
         """`unit` has the Attacker or Defender designation at a battlefield."""
         where = self._locate_unit(unit)
         return (where is not None and where[1] is not None and where[1].combat_started
-                and id(unit) in where[1].combat_designated)
+                and unit in where[1].combat_designated)
 
     def _refresh_combat_keywords(self) -> None:
         """ASSAULT is "+X [might] while I'm an attacker", SHIELD "while I'm a
@@ -7306,7 +7306,7 @@ class GameLoop:
             mods = self._combat_might_mods(bf, bf.combat_attacker) if bf.combat_started else {}
             for side in ("A", "B"):
                 for u in bf._units_for(side):
-                    if bf.combat_started and id(u) in bf.combat_designated:
+                    if bf.combat_started and u in bf.combat_designated:
                         u.bonus_might = u.keyword_value("ASSAULT" if side == bf.combat_attacker else "SHIELD") \
                             + mods.get(id(u), 0)
                     else:
@@ -7322,7 +7322,7 @@ class GameLoop:
         if where is None or where[1] is None:
             return False
         side, bf = where
-        return (bf.combat_started and id(unit) in bf.combat_designated
+        return (bf.combat_started and unit in bf.combat_designated
                 and self.gs.showdown_attacker == side)
 
     def _gold_bonus(self, side: str) -> bool:
@@ -7919,10 +7919,10 @@ class GameLoop:
                                                     self.gs.get_player(side),
                                                     self.gs.get_player(self.gs.other(side)),
                                                     context_extra={"battlefield": bf})
-        new = {side: [u for u in bf._units_for(side) if id(u) not in bf.combat_designated]
+        new = {side: [u for u in bf._units_for(side) if u not in bf.combat_designated]
                for side in (attacker, defender)}
         for side in new:
-            bf.combat_designated.update(id(u) for u in new[side])
+            bf.combat_designated.update(new[side])
         bf.combat_attacker = attacker
         self._refresh_combat_keywords()
         for unit in new[attacker]:

@@ -26,7 +26,6 @@ from audit_helpers import Scripted, act, card, choices, labels, setup, unit
 
 ROUTES = ["clone", "deepcopy", "loop"]
 
-D67 = pytest.mark.xfail(strict=True, reason="D67: combat_designated keeps id() of the original's units")
 D68 = pytest.mark.xfail(strict=True, reason="D68: conquer_return keeps id() of the original's unit")
 
 
@@ -213,7 +212,6 @@ class _CopiesInTheShowdown(Scripted):
         return super().decide_showdown_action(opponent, bf_idx)
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_a_copy_in_the_showdown_keeps_its_attackers_and_defenders(route):
     """ASSAULT is '+X [Might] while I'm an attacker', SHIELD 'while I'm a
@@ -235,7 +233,6 @@ def test_a_copy_in_the_showdown_keeps_its_attackers_and_defenders(route):
     assert copied._is_attacking(atk2) and copied._in_combat(dfn2) and not copied._is_attacking(dfn2)
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_khazix_attack_bonus_once_per_combat_in_a_copy(route):
     """Kha'Zix, Mutating Horror: 'When I attack or defend, if an enemy unit is
@@ -255,7 +252,6 @@ def test_khazix_attack_bonus_once_per_combat_in_a_copy(route):
     assert seen == [(6, 2), (6, 2)]
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_only_a_new_arrival_becomes_an_attacker_in_a_copy(route):
     """A unit arriving in the combat is designated and its attack trigger
@@ -275,7 +271,6 @@ def test_only_a_new_arrival_becomes_an_attacker_in_a_copy(route):
     assert copied._in_combat(arrival) and (kz.might, loop.gs.xp_A) == (6, 2)
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_shadow_clone_banishes_once_per_combat_in_a_copy(route):
     """Shadow Clone: 'When I attack, you may banish a unit from your trash. If
@@ -295,7 +290,6 @@ def test_shadow_clone_banishes_once_per_combat_in_a_copy(route):
     assert banished == [["F1"], ["F1"]]
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_twilight_reveler_readies_once_per_combat_in_a_copy(route):
     """Twilight Reveler: 'When I attack, ready another friendly unit.' The
@@ -318,7 +312,6 @@ def test_twilight_reveler_readies_once_per_combat_in_a_copy(route):
     assert ready == [False, False]
 
 
-@D67
 @pytest.mark.parametrize("route", ROUTES)
 def test_kennen_pays_to_stun_once_per_combat_in_a_copy(route):
     """Kennen, Keeper of Balance: 'When you play me or I attack, you may pay

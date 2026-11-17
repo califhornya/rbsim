@@ -71,9 +71,10 @@ class Battlefield:
     # side -> (turn, excess combat damage it assigned here): "if you assigned 3
     # or more excess damage" (Vi Piltover Enforcer, Yeti Brawler).
     excess_damage: dict = field(default_factory=dict)
-    # The combat here (§466.2): ids of units that got their Attacker/Defender
+    # The combat here (§466.2): the units that got their Attacker/Defender
     # designation (their attack/defend triggers fired), and whether its start
-    # of combat effects happened. Cleared when the combat ends.
+    # of combat effects happened. Cleared when the combat ends. The units
+    # themselves, not their id(): a copy of the game maps them (D67).
     combat_designated: set = field(default_factory=set)
     combat_started: bool = False
     combat_attacker: Optional[str] = None
