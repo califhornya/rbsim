@@ -1,0 +1,46 @@
+I re-measured all four at `2900311`, the `main` revision from the plan review. The engine, tests, and scripts are identical to `e72318e`. **Direct state mutation is the finding I’d move up in the severity table.** The deck count materially strengthens the existing verification finding.
+
+### 1. Six decks cover 56 of 212 effect keys — correct statically
+
+I reproduced **56/212** by recursively collecting `effect` keys that match `effects.REGISTRY`, then comparing the full card corpus with the cards in the six decklists. That includes champions, legends, battlefields, **and sideboards**. With sideboards excluded, as in the single-game fixtures, the count is **54/212**.
+
+I also wrapped the registry handlers and counted keys actually dispatched:
+
+| Workload | Corpus keys dispatched |
+|---|---:|
+| 28 existing golden games | **35/212** in live games, **37/212** including speculative copies |
+| 288 six-deck games | **53/212** in live games |
+| Default test suite | **200/212**, with 1,790 tests passed and five PyTorch-dependent modules skipped |
+
+The 288 games cover every ordered deck pairing, including mirrors, with `random` and `simple_trade` in both seats and two seeded games per configuration. A dispatch establishes that a handler was entered. It doesn’t establish that its branches were checked. Some mechanics also run outside registry dispatch. Baron Pit creation, for example, has a dedicated test and runs through the unit-play path despite `add_battlefield` being absent from the observed dispatches.
+
+**Severity — Medium** under verification coverage, **High if the six-deck trace becomes the sole refactor gate**. The full suite reaches far more than the deck matrix. Keep both, and add focused traces for the timing or effect family being moved. [Deck loader](https://github.com/califhornya/rbsim/blob/2900311/riftbound/registry/cards_registry.py#L691) · [Golden matchups](https://github.com/califhornya/rbsim/blob/2900311/tests/test_golden_games.py#L45) · [Baron Pit test](https://github.com/califhornya/rbsim/blob/2900311/tests/test_baron_nashor.py#L43)
+
+### 2. Direct state writes in `effects.py` — correct, with a counting caveat
+
+My AST count found **126 attribute assignment targets** including augmented assignments, **239 calls** to `append`, `extend`, `remove`, `pop`, `insert`, or `clear`, and **47 subscript writes or deletes**. Those are source sites. Some modify temporary lists or fresh objects. Even restricting the count to expressions rooted directly at `ctx.loop.gs`, `ctx.actor`, or `ctx.opponent` gives **59 potentially mutating sites** before following aliases such as `gs` and `ap`.
+
+The important part is what handlers own. `_take_over_spell` directly changes a chain item’s controller and clears its declared choices. `_conquer_return_this_turn` writes a persisted `id(unit)` straight into game state, the same pattern behind the clone failures. An API migration that only replaces private method calls can leave both mutations exactly where they are.
+
+**Severity — Medium-high**, above file size and private-call counts. I’d track ownership of chain, zone, and timing mutations as an explicit refactor criterion. The confirmed clone defect still ranks **High**. [Spell takeover](https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/effects.py#L715) · [Conquer-return state](https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/effects.py#L1408)
+
+### 3. Tests depend on private methods — correct in scale
+
+Matching private `GameLoop` method names against `tests/**/*.py`, the broad regex `\.(_\w+)` gave **113 files, 142 names, and 1,722 matches**. Counting AST call sites gave **111 files, 133 names, and 1,691 calls**. Both match by name and can include a different receiver with the same method name. The regex also picks up comments and strings. Two files entered its count solely through textual mentions.
+
+**Severity — Medium**, as a migration cost. Removing or changing a private entry point can break valid behavior tests. Moving its implementation while preserving the entry point can keep them green. Tests that override the method need more care. The legality probe, for example, overrides `_apply_action` to inspect actual play, so a new execution path can bypass the probe while its method still exists. [Counting method in the plan](https://github.com/califhornya/rbsim/blob/2900311/docs/PIANO_MOTORE.md#L351) · [Legality probe](https://github.com/califhornya/rbsim/blob/2900311/tests/test_legality.py#L65)
+
+### 4. October growth — correct numbers, sharper timeline
+
+I ran `git show <sha>:<path>` for both files at each revision, counted physical lines, and counted distinct private `GameLoop` method names called through `ctx.loop` or `loop` in `effects.py`.
+
+| Revision | `loop.py` lines | Distinct private methods called |
+|---|---:|---:|
+| [10 Aug · `bc4dcb8`](https://github.com/califhornya/rbsim/commit/bc4dcb8) | 1,827 | 0 |
+| [25 Oct, early · `9129f74`](https://github.com/califhornya/rbsim/commit/9129f74) | 3,080 | 7 |
+| [25 Oct, evening · `dd462a5`](https://github.com/califhornya/rbsim/commit/dd462a5) | 4,986 | 51 |
+| [26 Oct, morning · `b20f28f`](https://github.com/califhornya/rbsim/commit/b20f28f) | 5,093 | 51 |
+| [26 Oct, evening · `9675579`](https://github.com/califhornya/rbsim/commit/9675579) | 5,273 | 52 |
+| [17 Nov · `2900311`](https://github.com/califhornya/rbsim/commit/2900311) | 8,448 | 94 |
+
+**Severity — historical evidence, no separate rank.** The jump from 7 to 51 had already happened by the evening of **25 October**. The history helps locate the commits where card-specific fixes added dependencies. The severity comes from what those dependencies can change today, especially state ownership and timing.

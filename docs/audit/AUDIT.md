@@ -23,7 +23,12 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**State (2026-11-17, seventh pass): 58 deviations found, 58 fixed, none open.**
+**State (2026-11-17, eighth pass): 68 deviations found, 58 fixed, 10 open (D59-D68).**
+The eighth pass is an external review of the engine (reports in
+`docs/audit/revisione_esterna/`, checked in this repository as its section
+says): D59-D68 are open and, unlike earlier passes, have no test yet; the
+order of the fixes is in `docs/PIANO_MOTORE.md`.
+Before it, (2026-11-17, seventh pass): 58 found, 58 fixed, none open.
 The seventh pass read the owner's two post-ban decks: D57-D58, see its
 section; the owner answered Q6. Suite: 1786 passed, 5 skipped, no xfail.
 Before it, (2026-11-12, sixth pass): 56 found, 56 fixed.
@@ -105,6 +110,16 @@ said.
 | D50 | A HIDDEN gear played from face down goes into no zone | §737.1 | competitive Kennen (2 Edge of Night) | fixed, `df33571` |
 | D51 | A Standard Move doesn't fire "when I become exhausted" | §144.2 | competitive Kennen (2 Reckless Innovator) | fixed, `0e03237` |
 | D52 | Decree of Unity is cast with no enemy Chaos unit or gear | §355.8 | competitive Kennen (sideboard) | fixed, `334e93c` |
+| D59 | An ability chosen in a reaction/showdown window while a Standard Move is pending is not performed (counts as a pass) | §144.3, §323.11, §430.2-3 | 17 times in 576 games of the six decks (Gold, Seal of Discord, Kai'Sa legend) | open, no test |
+| D60 | A gear that draws, played in a showdown, counts as a pass | §337.2, §348 | constructed (Jarvan IV + Detonation Amplifier / The Good Stuff); not seen in games | open, no test |
+| D61 | A free champion hide (Teemo Scout, Guerilla Warfare) ends the Main Phase | §811.1.b | outside the decks | open, no test |
+| D62 | After an Add ability in a chain the pass streak is not reset: the opponent loses a chance to respond | §339.1, §337.2 | 1 golden game, 3 times (same final state) | open, no test |
+| D63 | A multi-unit Standard Move is declared one unit at a time, after the first unit's triggers | §144.3, §421.3 | 2 golden games | open, no test |
+| D64 | "If this kills it" and Alpha Strike's XP count a unit banished instead of dying | §429.1, §370.1.a.1 | outside the decks (Smite + Disintegrate / Alpha Strike) | open, no test |
+| D65 | A once-per-turn ability stays used after its card leaves the board and comes back as a new object | §124, §377.2.b | outside the decks (Riven Deserter + Temporal Breach) | open, no test |
+| D66 | A copy of the game forgets once-per-turn uses (`once_per_turn_used` keyed by `id()`) | search copies | 3 of 3,123 copy points (Pyke Returned); Black Market constructed | open, no test |
+| D67 | A copy of the game forgets who attacks and defends (`combat_designated` keyed by `id()`) | search copies | 58 of 3,123 copy points (Kha'Zix Mutating Horror, Shadow Clone, Twilight Reveler, Kennen) | open, no test |
+| D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | open, no test |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -824,6 +839,75 @@ decks (with each other, themselves and the precons; `simple_trade` and
   (Edge of Night) is played at its battlefield: it counts for Rakelstake and
   for Hold 'Em, as a unit from face down already did. The engine counted
   neither.
+
+## Deviations, eighth pass (2026-11-17): external review
+
+An outside reviewer read the engine at `e72318e` (no engine change since) and
+measured it with its own probes: every action offered in 576 seeded games
+applied to a copy, the copies of the game played to the end against the
+original at 3,123 points, and constructed cases with real cards. Its reports
+are in `docs/audit/revisione_esterna/`; its scripts and data are not in the
+repository (they hold pickled states). Checked here, in this repository: the
+576-game action probe and its control rerun with identical totals, the eight
+action reproductions and the 613 + 69 focused trials, the static counts, the
+eight small copy reproductions; Black Market, combat designation and Riven
+Deserter reproduced with our own scripts; D62 and D64 read in the code. Not
+rerun here: the 3,123-point copy probe, D63, the golden forecasts.
+**No test yet**: writing the failing tests is phase 0 of `docs/PIANO_MOTORE.md`.
+
+The live game:
+
+- **D59.** An ability chosen in a reaction or showdown window while a Standard
+  Move is still pending is not performed. `_apply_action` (loop.py ~5500)
+  applies the Main Phase rule (anything but joining the move ends it), ends the
+  move and returns; `_use_ability_now` sees no change in its partial
+  fingerprint, so the window counts a pass. With a showdown already active,
+  `_flush_pending_move` clears the marker and `_run_showdown` returns at once.
+  The filter at legality.py ~162 covers only the Main Phase menu. Seen with
+  Gold, Seal of Discord and Kai'Sa Daughter of the Void (17 times in 576
+  games); Gold is made by cards in both current decks. Hiding the ability is
+  not the fix (Add abilities may be used while paying a cost, §430.3): see
+  the reviewer's `design_action_outcomes`, section 1.
+- **D60.** A gear played in a showdown counts only if the hand got smaller
+  (`_showdown_step`, loop.py ~7843): Detonation Amplifier (draws 1) and The
+  Good Stuff (draws 3), made playable by Jarvan IV Martial Paragon, count as a
+  pass. The same check is in `_reaction_step` (~7641), no failing case found.
+- **D61.** `_run_main_actions` (~8278) takes an action that changes none of
+  `_action_fingerprint`'s counts as nothing done and ends the Main Phase: a
+  free hide of Teemo Scout from the Champion Zone (Guerilla Warfare) does that.
+- **D62.** `_run_chain` (~7606): an Add ability ("kept") does not reset the
+  pass count, so B passes, A uses Gold, A passes, and the chain resolves
+  without B's chance (§339.1; the showdown loop does reset it). Seen 3 times in
+  the golden game `random:competitive_kennen__vs__simple_trade:competitive_kaisa#2`,
+  final state unchanged.
+- **D63.** A Standard Move of several units is one action (§144.3): the group
+  is chosen before anything happens. The engine adds units one at a time, after
+  the first unit's move triggers have resolved. Seen in the golden games
+  `random:precon_zed__vs__simple_trade:precon_shen#3` and
+  `simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#2`.
+  Reported by the reviewer, not reproduced here.
+- **D64.** `_deal_damage` (effects.py ~120) runs "if this kills it" when a
+  target is no longer on the board, and `_unit_split_damage` (~2801) gives XP
+  the same way: a Smite-marked unit banished instead of dying makes
+  Disintegrate draw and Alpha Strike give XP (§429.1, §370.1.a.1).
+- **D65.** A once-per-turn mark is keyed by the Card, which survives a zone
+  change: Riven Deserter, banished and replayed by Temporal Breach, can't use
+  "Exhaust a friendly unit: Ready a unit" again that turn, though she is a new
+  object (§124, §377.2.b).
+
+The copies of the game (search, speculative declarations) — `GameState.clone`
+and `deepcopy` remap objects, but three stores hold `id()` integers that still
+point to the original's objects:
+
+- **D66.** `once_per_turn_used`: in a copy Black Market can be used again,
+  Pyke Returned makes extra Gold.
+- **D67.** `combat_designated`: copied units are no longer attacking or
+  defending; reopened combat repeats attack/defend triggers (Kha'Zix Mutating
+  Horror +2 Might and +2 XP again, Shadow Clone, Twilight Reveler, Kennen
+  Keeper of Balance). With D66: 61 of 3,123 copy points diverge, 19 change the
+  winner; rebasing these stores alone removes all 61.
+- **D68.** `conquer_return`: a copied Relentless Pursuit runner doesn't return
+  to base on conquer.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

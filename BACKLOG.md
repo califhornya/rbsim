@@ -10,10 +10,24 @@ citate nei commenti del codice come "BACKLOG G3", "B20"):
 Una voce è chiusa quando un test gioca la situazione e controlla cosa dicono il
 testo della carta o le Core Rules. Le voci nuove vanno qui.
 
-## Struttura del motore
-- [ ] `loop.py` in un blocco unico e groviglio tra motore ed `effects.py`
-      (89 metodi interni usati dagli effetti): problema e piano a fasi in
-      `docs/PIANO_MOTORE.md`.
+## Motore: correttezza e struttura
+- [ ] Deviazioni aperte D59-D68 (AUDIT, ottavo passaggio: revisione esterna),
+      ancora senza test; l'ordine dei fix è in `docs/PIANO_MOTORE.md` (v2).
+- [ ] Un errore dentro un effetto è ignorato in silenzio (loop.py ~1575,
+      ~1852): la partita può restare modificata a metà. Zero casi in 120
+      partite dei sei mazzi; nei test deve far fallire (piano, fase 0).
+- [ ] `scripts/trace_game.py` non è deterministico con un seed: installa gli
+      agenti dopo la factory, senza il seed per posto.
+- [ ] Un `GameLoop` nuovo su una copia azzera `units_played` e `spells_cast`
+      (il `Result` di una copia).
+- [ ] Registro delle partite: un'unità salvata da Guardian Angel risulta
+      morta; una morte da Disintegrate non viene registrata.
+- [ ] Coach: sbaglia morti e pescate quando entra ed esce una carta con lo
+      stesso nome (Baited Hook, Traveling Merchant).
+- [ ] Rete: la codifica arriva a 12 carte in mano (`MAX_HAND`), una 13ª carta
+      non si può scegliere.
+- [ ] Struttura: `loop.py` in un blocco unico, effetti che usano 94 metodi
+      interni del motore e scrivono nello stato; fase 6 del piano.
 
 ## Carte e regole
 - [ ] Il resto del corpus: letto per classi (AUDIT, quarto passaggio); carta per

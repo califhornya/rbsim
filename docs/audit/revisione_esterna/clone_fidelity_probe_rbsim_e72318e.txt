@@ -1,0 +1,347 @@
+CLONE-FIDELITY PROBE — RBSIM e72318e
+Measured 2026-11-17. Report and all experiment programs included in the ZIP.
+No production engine changes. Numbers below are measured, not estimates.
+
+The copies are not faithful. Across 576 seeded source games and 3,123 sampled
+copy points, 61 points diverged in decisions/choices in ALL THREE copy variants.
+19 points changed the winner (16 distinct source games). 57 of the 576 source
+games contained at least one failing checkpoint; these are correlated samples,
+not an estimate of a random game's probability of failure.
+
+Isolating one store at a time attributes 58 failing points to combat_designated
+and 3 to once_per_turn_used (Pyke Returned). No seeded sampled point contained
+conquer_return. A separate small constructed case confirms its known failure.
+
+Beyond those stores: a fresh GameLoop loses cumulative units_played and
+spells_cast. This is a real full-Result fidelity failure of the GS+new-loop
+integration, separate from gameplay divergence. I found no additional cause
+of gameplay divergence in this measured scope. That last statement is bounded
+negative evidence, not proof that the rest of the card corpus is clone-safe.
+
+1. Source, workload and exact counts
+
+Requested pin: e72318e0b60956c80228f83d7defd321dfb98950.
+Execution checkout: 29003114edc1fef0322ec987367fd3e219073116.
+git diff e72318e HEAD -- riftbound/core riftbound/ai riftbound/registry
+    riftbound/data tests docs/rules/CORE_RULES.md
+has no output. Worktree is clean. See environment.json (also 96 AST id() calls).
+Runtime: Python 3.12.14, Linux x86_64; optional torch stack is not needed here.
+
+The six deckfiles are competitive_evelynn, competitive_kaisa,
+competitive_kennen, competitive_khazix, precon_shen, precon_zed.
+36 ordered deck pairs x 4 ordered agent pairs x 4 seeds = 576 source games.
+Agent pairs cover random/random, random/simple_trade, simple_trade/random,
+simple_trade/simple_trade. Each deck/agent/seat combination appears 48 times.
+Two replicas start A and two start B; max_turns=40, normal victory score.
+Master seed: 2026111719; explicit per-game specs are in exact_results/games.jsonl.
+
+Source decision windows visited: main 32,792; showdown 12,104; reaction 33,262.
+Sampled copy points: main 2,390; showdown 441; reaction 292 = 3,123.
+The deciding seat was A at 1,546 points and B at 1,577.
+874 points had a nonempty once_per_turn_used store (including old/non-id keys);
+122 had at least one current-turn native-id entry. 527 had nonempty
+combat_designated; zero had conquer_return.
+
+Per checkpoint there are three baseline copy continuations, one native
+reference and one original-graph adapter control. Thus the main pass ran
+9,369 baseline copied futures + 3,123 native references + 3,123 controls.
+183 additional initial-rebase diagnostics bring its suffix continuations
+to 15,798. All go to victory or the simulator's normal 40-turn DRAW cap.
+
+The earlier coarse-choice-label pass ran the SAME 576 seeds and 3,123 points;
+it is a confirmation pass, not another 576 independent seeds. Its source
+results, sampling contexts and aggregate failure counts match. The main pass
+adds weak identity labels so duplicate-name targets can be distinguished.
+Separately, 576 clean uninstrumented games reproduced every source-game Result
+and final points. All 3,123 native reference suffixes also matched the source
+game's terminal Result/points. See validation.json and unobserved_results.json.
+
+2. What exactly was copied and compared
+
+C: clone_state — gs.clone(), then GameLoop(copied_gs), with no pending loop
+work at the sampled boundary. Native code: state.py:245; loop.py:458.
+
+D: deepcopy_state — copy.deepcopy((gs, anchor_card), memo), memo mapping each
+current agent to None, then a fresh GameLoop. This is the graph-copy primitive
+used in _declare_choices, loop.py:719-725. The anchor's aliases are copied in
+the same operation as the state.
+
+L: deepcopy_loop — copy.deepcopy((loop, EffectContext), agent-detachment memo),
+then equivalent agents. This extra control preserves loop counters and context;
+its graph shape is the second declaration copy at loop.py:853-858. It uses the
+same agent detachment as D; the actual nested declaration's empty memo and
+ModeAsker graph are not an end-to-end tested service/recorder integration.
+
+I did NOT play a declaration's _dry_run/ghost-restored board as though it were
+a live game. Those flags intentionally change execution. C and D test the
+copy primitives under full live continuation; L separates lost loop history
+from bad state-object references. Actual declarations still run normally
+inside every reference and copied continuation.
+
+Original and copy both get fresh policies of the same classes, with each
+RandomAgent's exact getstate()/setstate() transferred; the game RNG is copied.
+Policy caches are reset symmetrically. All 9,369 baseline pairs have identical
+starting game/agent RNG fingerprints. This does not test transplanting a
+historical agent cache onto a new gs identity.
+
+The reference is an OS fork that returns to the ORIGINAL live Python stack,
+not another serialized copy. It runs native start()/main/showdown/chain code.
+Each copy and control runs in a different fork, preventing speculative games
+from altering the parent's RNG, registry objects or allocation history.
+
+Native loop bodies are extracted with AST for resumable main/chain/showdown
+tails. The live local main-action count and priority pass/round counters are
+retained. At EVERY checkpoint, running that adapter on the UNCOPIED original
+graph matches the native reference: zero invalid adapters, zero exceptions.
+No rules are reimplemented in the adapter. The largest observed main-action
+budget upper bound was 18, far below the 200 cap; retaining the local offset
+therefore cannot hide an observed native resume_to_completion cap difference.
+
+Fresh-loop guard: no pending_move, staged_showdowns, pending triggers, task
+depth, trigger flush, all-pass resolution, active declaration/replay/choice
+slot, ghost board, resolving item, choose_many or discard frame. A main point
+also has no chain or active showdown. SD/reaction points preserve explicit
+priority-window locals: SD must come directly from main PASS -> flush move;
+reaction must come directly from a SPELL in that SD. Arbitrary nested effect
+resolution, other call paths and pending tasks are excluded, not assumed safe.
+
+Sampling: up to eight points/game. Main points are after an action, on each
+seat's second-or-later own turn, in early/late buckets; a current-turn id-store
+use gets an extra slot. One combat SD and one eligible reaction are sampled,
+with deciding seat alternated by replica. See Audit.visit/checkpoint_context.
+
+Compared: every returned action tuple, its window/seat/turn and direct card
+label; engine target/mode/optional choices including weak identity labels;
+winner, turns, final points; full Result; full terminal model-graph hash;
+ending game and policy RNG. Alias relationships, zone/deck order and dynamic
+card/unit fields are retained in the graph. Random UUID4 spelling and raw
+addresses are excluded. The three known integer-id stores are inventoried
+separately and omitted from the terminal hash: their raw integer differences
+must not be mistaken for an additional cause. No trace retains live units.
+
+3. Results by copy path
+
+Path | points | decision/choice divergence | winner changes | full Result differs
+C    | 3,123  | 61                         | 19             | 3,116
+D    | 3,123  | 61                         | 19             | 3,116
+L    | 3,123  | 61                         | 19             | 53
+
+For each path, 42 points change (winner, turns, final points); 33 change turns;
+57 change the normalized terminal state; 50 change ending RNG state. An equal
+winner or even equal full Result does not imply a faithful continuation.
+
+3,056 points have only the Result-history problem in C/D: choices, gameplay
+outcome, normalized final state and final RNG agree. In every such pair, the
+missing unit/spell counts equal EXACTLY the source loop's counts at the copy
+point (zero residual mismatches). L preserves them and has zero metric-only
+differences. The constructor's zeroing at loop.py:463-464, Result creation at
+7466/8354, and minimal.py:historical_result isolate this mechanism. This is
+missing cumulative loop history, not a fourth bad GameState id-keyed store.
+
+4. Causal isolation and small reproductions
+
+All 61 behavioral points fail in all three paths, including L which preserves
+the rest of the loop. Initial rebasing of only the THREE known stores removes
+all 183 behavioral path failures. A second experiment replays EVERY saved
+checkpoint and rebases ONE store at a time; it identifies the following:
+
+Card | failing points | single store sufficient to restore continuation
+Kha'Zix Mutating Horror | 32 | combat_designated
+Shadow Clone | 18 | combat_designated
+Twilight Reveler | 5 | combat_designated
+Kennen Keeper of Balance | 3 | combat_designated
+Pyke Returned | 3 | once_per_turn_used
+
+Window | store | failing points
+main | once_per_turn_used | 3
+reaction | combat_designated | 10
+showdown | combat_designated | 48
+
+
+The four combat cards re-enter the attack/defend designation machinery as if
+new, because old object addresses don't designate their copies:
+- Kha'Zix Mutating Horror: repeat +2 temporary Might and +2 XP against a lone
+  enemy (attack or defend).
+- Shadow Clone: repeat optional trash-unit banishment for ASSAULT 4.
+- Twilight Reveler: repeat ready-another-friendly-unit trigger.
+- Kennen Keeper of Balance: repeat optional pay-2-to-STUN trigger.
+Pyke Returned loses its once-per-turn enemy-death guard and can make extra Gold.
+The first _trigger request is diagnostic only; actual effects/choices and full
+continuations are checked, not inferred just from a trigger function call.
+
+Small command: RBSIM_REPO=/path/to/rbsim python minimal.py
+All asserts passed; exact observed values are in minimal_results.json.
+
+M1 Pyke: notify an enemy death with Pyke at a battlefield (1 Gold), copy, then
+   notify another death this turn. Original stays at 1 Gold, C/D/L make 2.
+   This constructed notification isolates the guard; the three saved seeded
+   game checkpoints separately prove failures with real deaths and live agents.
+M2 Kha'Zix: open combat against one enemy, copy, open combat again. Original
+   keeps 2 XP / +2 Might; C/D/L reach 4 XP / +4 Might.
+M3 Shadow Clone: open combat with two unit cards in trash, copy, open again.
+   Original banishes 1 cost unit total; C/D/L banish 2.
+M4 Twilight Reveler: attack readies a friend; that friend exhausts again during
+   the same combat (represented directly in this constructed setup), then copy.
+   Another open-combat check leaves it exhausted in the original but readies
+   it again in C/D/L. Seeded game replays establish reachable failing cases.
+M5 Kennen: start with 8 energy and one enemy. First open combat spends 2 and
+   stuns it. Copy and open again: original stays at 6; C/D/L fall to 4.
+M6 Black Market (supplement outside the seeded failure families): use once,
+   copy with enough Power left. Original's ability is unusable this turn;
+   C/D/L report it reusable. Same store as Pyke; not counted among the 61.
+M7 Relentless Pursuit (supplement): execute the real conquer_return_this_turn
+   handler for a Runner, then copy. On Conquer, give BOTH sides a chooser that
+   accepts optional:return_to_base. Original returns the Runner, C/D/L don't.
+   Default agents decline that optional choice; no seeded sampled point held
+   this store. This is confirmed by a constructed case, not claimed as a seeded
+   finding. A valid-id rebase restores the return in all paths.
+M8 Result history: actually play one free unit, copy at main with no pending
+   work, PASS to the turn cap. Original/L Result.units_played=1; C/D=0. Winner,
+   turn and board agree. A store rebase cannot restore omitted loop counters.
+
+These small fixtures isolate every observed card mechanism. Each of the 61
+seeded occurrences also has its own no-prefix checkpoint reproduction below.
+Those saved states are exact checkpoints, not asserted to be globally minimal
+card/deck graphs; no automated delta-minimization of all 61 graphs was done.
+
+5. Every behavioral occurrence
+
+For each row, all C/D/L fail and rebasing the stated ONE store restores the
+decision/choice trace, final state, outcome and final RNG. Fresh-loop metrics
+still omit history until separately restored. C/D/L have the same gameplay
+winner/turn result at each row. "A@11 -> B@14" means winner and final turn.
+
+Reproduce any row without replaying its game prefix:
+  RBSIM_REPO=/path/to/rbsim python reproduce.py exact_results/gNNNN/pN
+This compares the saved original with C/D/L and initial-rebase controls.
+The saved original contains a sidecar binding raw ids to actual referenced
+objects. Loading reconstructs ONLY the original's valid native-id bindings;
+without this, merely pickling the reference would itself break the reference.
+Already stale/unreachable ids stay stale. The sidecar is then dropped before
+play, so it cannot pin dead units and mask address reuse.
+
+All 61 loaded originals reproduce the measured native trace, Result, normalized
+state and RNG (zero failures). attribute.py records additional trigger events
+to name the offending card, and replays all paths with selective-store controls.
+
+Checkpoint | seed | turn/seat/window | card | store | original -> copy
+g0037/p4 | 190747295 | 9/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@12 -> B@14
+g0046/p5 | 695067676 | 10/A/showdown | Shadow Clone | combat_designated | B@18 -> A@11
+g0073/p4 | 138840500 | 7/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@18 -> A@17
+g0077/p5 | 723907787 | 11/B/reaction | Kha'Zix Mutating Horror | combat_designated | B@12 -> B@14
+g0081/p4 | 735540007 | 14/B/reaction | Kha'Zix Mutating Horror | combat_designated | B@16 -> A@17
+g0081/p5 | 735540007 | 14/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@16 -> A@17
+g0086/p4 | 164817526 | 8/A/showdown | Kha'Zix Mutating Horror | combat_designated | A@11 -> A@11
+g0095/p2 | 245108627 | 4/A/showdown | Twilight Reveler | combat_designated | B@10 -> B@10
+g0108/p4 | 547431031 | 9/A/showdown | Kha'Zix Mutating Horror | combat_designated | A@15 -> B@14
+g0133/p4 | 68908894 | 15/A/showdown | Shadow Clone | combat_designated | B@16 -> A@17
+g0143/p2 | 830142872 | 4/A/showdown | Twilight Reveler | combat_designated | B@12 -> B@12
+g0181/p2 | 828952953 | 6/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@11 -> B@11
+g0204/p2 | 853757632 | 4/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@17 -> A@14
+g0214/p5 | 425067039 | 9/B/showdown | Shadow Clone | combat_designated | A@14 -> A@14
+g0225/p5 | 845293748 | 12/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@13 -> B@17
+g0234/p4 | 973940679 | 7/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@12 -> A@14
+g0236/p4 | 127179884 | 11/B/showdown | Shadow Clone | combat_designated | B@15 -> A@18
+g0237/p4 | 181519103 | 10/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@11 -> B@13
+g0253/p3 | 995978858 | 6/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@11 -> B@11
+g0257/p4 | 995452995 | 10/B/showdown | Kennen Keeper of Balance | combat_designated | B@11 -> B@11
+g0260/p3 | 385665029 | 11/B/showdown | Shadow Clone | combat_designated | B@13 -> B@11
+g0265/p2 | 882339951 | 4/B/showdown | Shadow Clone | combat_designated | B@13 -> B@11
+g0271/p2 | 409552961 | 4/B/showdown | Twilight Reveler | combat_designated | B@13 -> B@13
+g0273/p4 | 117428399 | 12/B/showdown | Shadow Clone | combat_designated | A@12 -> A@14
+g0303/p5 | 387892075 | 15/A/main | Pyke Returned | once_per_turn_used | A@19 -> A@19
+g0324/p5 | 391016928 | 23/B/reaction | Shadow Clone | combat_designated | A@24 -> B@25
+g0333/p3 | 208312538 | 4/A/showdown | Twilight Reveler | combat_designated | B@10 -> B@10
+g0348/p4 | 1026514535 | 12/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@18 -> B@20
+g0358/p2 | 804348168 | 6/A/showdown | Shadow Clone | combat_designated | A@13 -> B@14
+g0360/p5 | 368235833 | 13/A/main | Pyke Returned | once_per_turn_used | A@19 -> A@19
+g0364/p5 | 786232462 | 10/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@20 -> A@17
+g0365/p4 | 56514600 | 13/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@20 -> B@20
+g0366/p4 | 404739105 | 8/B/reaction | Kha'Zix Mutating Horror | combat_designated | B@16 -> B@16
+g0368/p4 | 312720495 | 8/A/showdown | Kha'Zix Mutating Horror | combat_designated | A@17 -> A@21
+g0374/p2 | 1006385772 | 6/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@18 -> A@13
+g0374/p5 | 1006385772 | 14/B/reaction | Kha'Zix Mutating Horror | combat_designated | B@18 -> A@17
+g0382/p2 | 616720894 | 6/A/showdown | Shadow Clone | combat_designated | A@11 -> A@11
+g0397/p5 | 295615261 | 11/B/reaction | Kha'Zix Mutating Horror | combat_designated | B@12 -> B@12
+g0401/p3 | 905440347 | 7/A/showdown | Kennen Keeper of Balance | combat_designated | A@13 -> A@13
+g0406/p2 | 499063963 | 6/A/showdown | Shadow Clone | combat_designated | A@13 -> A@11
+g0408/p4 | 958117509 | 9/A/showdown | Shadow Clone | combat_designated | A@13 -> A@23
+g0421/p4 | 817494105 | 9/A/showdown | Kha'Zix Mutating Horror | combat_designated | B@20 -> A@21
+g0421/p5 | 817494105 | 17/B/reaction | Shadow Clone | combat_designated | B@20 -> A@19
+g0424/p4 | 675471938 | 11/A/showdown | Shadow Clone | combat_designated | B@16 -> B@16
+g0431/p2 | 1028322107 | 4/A/showdown | Twilight Reveler | combat_designated | A@11 -> A@11
+g0434/p5 | 557685028 | 7/B/main | Pyke Returned | once_per_turn_used | B@17 -> B@13
+g0444/p5 | 337669069 | 12/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@18 -> B@21
+g0446/p3 | 994424676 | 7/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@16 -> B@17
+g0493/p2 | 754572141 | 6/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@11 -> B@11
+g0502/p4 | 971662890 | 9/B/showdown | Shadow Clone | combat_designated | B@13 -> B@13
+g0505/p3 | 659068812 | 6/B/showdown | Kha'Zix Mutating Horror | combat_designated | B@11 -> A@16
+g0506/p5 | 443340487 | 7/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@16 -> A@16
+g0510/p5 | 331287060 | 9/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@14 -> A@14
+g0516/p4 | 1061178139 | 13/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@14 -> A@14
+g0518/p4 | 917144507 | 9/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@12 -> A@12
+g0526/p2 | 202398810 | 7/B/showdown | Kha'Zix Mutating Horror | combat_designated | A@16 -> A@16
+g0526/p3 | 202398810 | 7/A/reaction | Kha'Zix Mutating Horror | combat_designated | A@16 -> A@16
+g0533/p5 | 203047934 | 10/A/reaction | Kennen Keeper of Balance | combat_designated | B@11 -> B@11
+g0556/p2 | 14588685 | 6/B/showdown | Shadow Clone | combat_designated | B@25 -> B@17
+g0557/p4 | 246804610 | 10/B/showdown | Shadow Clone | combat_designated | B@13 -> B@13
+g0572/p5 | 372808098 | 13/A/reaction | Shadow Clone | combat_designated | A@16 -> B@13
+
+
+The first differing event and its previous three events, full source spec,
+all route outcomes and controls for EVERY row are machine-readable in
+exact_results/behavioral_divergences.json and attribution/attribution.json.
+Every full-Result mismatch, including metric-only pairs, is enumerated in
+exact_results/all_result_divergences.json (6,285 route rows). All 3,123 points,
+including passing cases, are in checkpoint_inventory.csv and games.jsonl.
+Both passes' complete branch traces and canonical final states are included
+losslessly in continuations.jsonl.xz; pack_raw.py --extract restores the files.
+
+6. What beyond the three stores did and did not cause a failure
+
+Confirmed additional full-Result cause (HIGH confidence): fresh-loop cumulative
+history reset. It affects C/D and is independently reproduced without a live
+id-keyed store. L is the counter-preserving control. No change to engine code
+is needed to observe this; no claim that this changes winner-based rollouts.
+
+No additional gameplay cause found (HIGH confidence for these 61 cases;
+LIMITED confidence as a corpus-wide absence claim): every baseline behavioral
+failure is eliminated by one initial store rebase and L has the same 61. Thus
+there is no unexplained gameplay divergence in this data. This does not prove
+that discarded transient loop state, agent caches, shared printed card data,
+declaration ghost-board restoration, or other handlers are universally safe.
+
+The base_agent _adds_now id(gs) cache is not a fourth tested persistent
+GameState identity store. Cache contents are reset on BOTH sides and the
+requested policies are RNG-aligned; transplanting live policy caches is out
+of scope. Random uuid4 spelling is not a game decision; target aliases and
+model-graph relationships are compared independently of those strings.
+
+Confidence and limits:
+- Counts, 61 failing checkpoints, 19 winner changes, replay validity: HIGH,
+  measured with raw traces, controls and assertions.
+- Attribution of 58 combat / 3 Pyke cases: HIGH, selective single-store
+  intervention restores each of the 183 corresponding path continuations.
+- conquer_return failure: HIGH for M7, NOT VERIFIED in the seeded sample.
+- No further gameplay causes in the chosen scope: HIGH for this dataset,
+  no universal claim about cards/windows not reached.
+- Real declaration-UI/recorder/SQLite copying, learned/search agents, network
+  agents, arbitrary mid-resolution/queued-work cloning, every legal alternative
+  action and every corpus card: NOT VERIFIED by this experiment.
+- This is policy continuation fidelity, not another counterfactual legal-action
+  probe and not an official-rules adjudication. It does not decide whether the
+  original continuation itself follows all rules.
+
+7. Repeatable commands and delivery
+
+From the unpacked clone_fidelity_audit directory, on Linux:
+  export RBSIM_REPO=/absolute/path/to/rbsim
+  export RBSIM_CLONE_OUT="$PWD/fresh_exact"
+  python exact_trace.py --repeats 4 --workers 6
+  python analyse.py fresh_exact
+  python attribute.py fresh_exact --output fresh_attribution
+  python minimal.py
+For the earlier confirmation pass use probe.py with a separate output directory.
+Scripts need the repo's normal dependencies; no torch or GPU. Tests were not
+modified and no engine fixes were applied. Detailed setup, dataset extraction,
+commands and checksums are in README.txt and SHA256SUMS.txt in the ZIP.
