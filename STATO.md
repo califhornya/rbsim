@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-13 (run 3 fermo dopo la 10; pronto il run 4, politica dai Q).
+Aggiornato: 2026-11-17 (mazzo Evelynn post-banlist registrato).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -71,7 +71,13 @@ ancora al run 4: non rilanciarlo.
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
-   ricontrollare i due mazzi.
+   ricontrollare i mazzi. Mazzo post-banlist dell'utente già registrato:
+   `competitive_evelynn.json` (Body/Chaos, sideboard 10). Si carica e gioca;
+   18 carte nuove rispetto ai mazzi controllati (Evelynn x2, K'Sante, Rengar,
+   Pyke, Vex, Gutter Guardian, Momentary Companion, Hold 'Em, Rampage, Punch
+   First, Boots of Swiftness, 3 campi, Ruin Runner, Onslaught, Unyielding
+   Spirit): `coverage_audit` le dà LIVE, ma il confronto col testo stampato
+   (come D50-D56) non è fatto. Non è nel training.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
@@ -94,6 +100,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
-- `riftbound/data/decks/`: i due precon e i due competitive dell'utente.
+- `riftbound/data/decks/`: i due precon, i due competitive dell'utente e il
+  suo Evelynn post-banlist (`scripts/deck_from_txt.py` per importarne altri).
 - `tests/golden_games.json` + `test_golden_games.py`: 20 partite Zed vs Shen
   (`RBSIM_REGEN_GOLDEN=1` per rigenerarle); `BACKLOG.md`: quel che resta.
