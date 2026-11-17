@@ -1652,6 +1652,12 @@ class GameLoop:
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
         flags = dict(flags) if flags is not None else {"_kicker_paid": False}
+        if once and all(es.params.get("once_per_turn") for _i, es in specs) and \
+                any(self._once_used(card, i, es) for i, es in specs):
+            # One "once each turn" ability of several instructions (Evelynn
+            # Agony's Embrace: "draw 1. Then ... discard 1"): performed once,
+            # it doesn't trigger again, not even for its later instructions.
+            return
         lead = None
         with self._card_flags(card, flags):
             for n, (i, es) in enumerate(specs):
