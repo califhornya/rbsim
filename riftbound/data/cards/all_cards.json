@@ -26389,6 +26389,7 @@
         "effect": "buff_unit",
         "trigger": "activated",
         "target": "chosen_unit",
+        "where": "anywhere",
         "cost": {
           "spend_xp": 1,
           "tap": true

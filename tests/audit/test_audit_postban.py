@@ -80,3 +80,24 @@ def test_evelynn_legend_on_your_turn_draws_once_and_never_discards():
     act(loop, "A", "Play Gutter Guardian from Hidden @BF0")
     assert len(a.hand) == 1 and not a.trash
     assert not [k for k, _s, _o in seen if k == "discard"]
+
+
+# -- D58. Kha'Zix's legend buffs only a unit at the first battlefield ----------------
+
+def test_khazix_legend_buffs_a_unit_anywhere():
+    """Kha'Zix, Voidreaver: 'Spend 1 XP, [Tap]: [Buff] a unit.' A legend is at
+    no battlefield: "a unit" is any unit, friendly or enemy, base included. The
+    choice was the units at the first battlefield (a legend's "here")."""
+    loop, a, b = setup(active="A")
+    legend(loop, "A", "Kha'Zix Voidreaver")
+    loop.gs.xp_A = 1
+    loop.gs.battlefields[0].add_unit("A", unit("first", 1))
+    loop.gs.battlefields[1].add_unit("A", unit("second", 1))
+    loop.gs.battlefields[1].add_unit("B", unit("enemy", 1))
+    target = unit("home", 1)
+    a.base_units.append(target)
+    seen = choices(loop, {"target:buff_unit": lambda _l, o: _names(o).index("home")})
+    act(loop, "A", "Activate buff_unit")
+    assert sorted(*[opts for kind, _s, opts in seen if kind == "target:buff_unit"]) == \
+        ["enemy", "first", "home", "second"]
+    assert target.might_counters == 1 and loop.gs.xp_A == 0
