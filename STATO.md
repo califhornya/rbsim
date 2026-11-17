@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-17 (settimo passaggio: mazzi Evelynn e Kha'Zix, D57-D58; PR #26).
+Aggiornato: 2026-11-17 (PR #26 su main; base del bot misurata sui mazzi nuovi).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -64,16 +64,16 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
 `allena.command` punta ancora al run 4: non rilanciarlo.
 
 ## Prossimi passi
-1. Proposto all'utente, in attesa di risposta: un bot con i suoi giudizi
-   (cosa vale cosa, cosa temere da ogni mazzo) come valutazione della
-   ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
+1. Bot con i giudizi dell'utente come valutazione della ricerca che c'è; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
+   Base (17/11, `handwritten_value.py`, 400 partite): 0,59 contro simple_trade
+   (0,50 se gioca Evelynn, 0,69 Kha'Zix), 0,85 contro random.
+0. Sera del 17/11: partita dal vivo su RiftAtlas, vedi `docs/bot/PARTITA_LIVE.md`.
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli su
    Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot).
-4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
-   costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
+4. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 

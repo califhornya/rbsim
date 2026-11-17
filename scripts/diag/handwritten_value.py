@@ -4,7 +4,8 @@ import sys, math, random, time
 from pathlib import Path
 from collections import Counter
 from multiprocessing import Pool
-DECKS = [Path("riftbound/data/decks/competitive_kaisa.json"), Path("riftbound/data/decks/competitive_kennen.json")]
+# The owner's post-ban decks (Kai'Sa and Kennen until 2026-11-17).
+DECKS = [Path("riftbound/data/decks/competitive_evelynn.json"), Path("riftbound/data/decks/competitive_khazix.json")]
 
 def table_value(obs) -> float:
     me = obs.viewer
@@ -64,7 +65,8 @@ def game(task):
         them.agent = make_agent(opponent, them)
     res = GameLoop(gs).start()
     out = "W" if res.winner == seat else "D" if res.winner == "DRAW" else "L"
-    return dict(out=out, opp=opponent, turns=res.turns, t=me.agent.turns, e=me.agent.empty_turns)
+    return dict(out=out, opp=opponent, turns=res.turns, t=me.agent.turns, e=me.agent.empty_turns,
+                mine=d_net.stem.split("_")[-1], theirs=d_opp.stem.split("_")[-1])
 
 if __name__ == "__main__":
     n, iters = int(sys.argv[1]), int(sys.argv[2])
@@ -75,4 +77,10 @@ if __name__ == "__main__":
     for o in opps:
         rs = [r for r in rows if r["opp"] == o]; c = Counter(r["out"] for r in rs)
         print(f"{o:13s} W{c['W']} D{c['D']} L{c['L']} score={(c['W'] + 0.5 * c['D']) / len(rs):.2f} turns={sum(r['turns'] for r in rs) / len(rs):.1f} empty={sum(r['e'] for r in rs) / max(1, sum(r['t'] for r in rs)):.2f}")
+        for mine in sorted({r["mine"] for r in rs}):
+            for theirs in sorted({r["theirs"] for r in rs}):
+                sub = [r for r in rs if r["mine"] == mine and r["theirs"] == theirs]
+                if sub:
+                    w = sum(1 for r in sub if r["out"] == "W") + 0.5 * sum(1 for r in sub if r["out"] == "D")
+                    print(f"    search {mine:8s} vs {theirs:8s} {w / len(sub):.2f} ({len(sub)} games)")
     print(f"{time.time() - t0:.0f}s")
