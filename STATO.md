@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-17 (PR #26 su main; base del bot misurata sui mazzi nuovi).
+Aggiornato: 2026-11-17 (PR #27 su main; pulizia di documenti e file morti).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -19,6 +19,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   Diana), correzioni di carte tenute; training sui due mazzi competitive.
 - (Utente, 17/11) Kai'Sa e Kennen non si usano più (ban): i competitive sono
   Evelynn e Kha'Zix. File vecchi tenuti come fixture (test, golden game).
+- (Utente, 17/11) Pulizia: un solo file di stato (questo), BACKLOG solo voci aperte.
 - Agente random seminato dal seed della partita; commenti di Codex
   verificati uno per uno. Imitazione di simple_trade scartata (da neofita).
 - Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
@@ -39,10 +40,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   valore ha bisogno di esiti, non di posizioni della stessa partita.
 
 ## Fatto
-- Passaggi 1-4: D1–D49, Q1–Q4, bug del coach (`cc3d776`). Dettagli in AUDIT.md.
-- Quinto passaggio (Kai'Sa, Kennen: D50-D52) e sesto (righe MECHANICS.md,
-  D53-D56). Dettagli in AUDIT.md.
-- Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
+- Audit, passaggi 1-6: D1–D56, Q1–Q4, bug del coach (`cc3d776`); dettagli in AUDIT.md.
+- Ricerca (`6ebd0e7`): la ricerca fa tutte le scelte del suo
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
 - Banlist completa (marzo-novembre). Settimo passaggio (Evelynn, Kha'Zix):
@@ -50,9 +49,11 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
   nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
+- Pulizia (17/11): storico in `docs/archivio/`; tolti `legion_effects.py`, script
+  una tantum e `allena.bat`/`.command` (ripartivano dal run 4). 1790 test verdi.
 
 ## In corso
-Training (O4) fermo per decisione (13/11). Esiti contro simple_trade:
+Training fermo per decisione (13/11). Esiti contro simple_trade:
 - Run 1 (ricetta originale): la rete imparava a passare, da buttare.
 - Run 2 (ricetta nuova, ricerca vecchia): 0,52.
 - Run 3 (`backup="best"`): 0,80 alla 10, poi fermo (0,72 fino alla 60);
@@ -61,7 +62,6 @@ Training (O4) fermo per decisione (13/11). Esiti contro simple_trade:
   valore peggiorato (errore sulle partite nuove 0,70 → 0,84). Il log basta,
   confronto testa a testa non fatto.
 simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
-`allena.command` punta ancora al run 4: non rilanciarlo.
 
 ## Prossimi passi
 1. Bot con i giudizi dell'utente come valutazione della ricerca che c'è; stop
@@ -72,8 +72,10 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli su
-   Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot).
+   Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot), e
+   rifare il lanciatore a doppio clic.
 4. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
+5. Pulizia, passo 3 (da decidere): spezzare `loop.py` per fasi, golden identiche.
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
@@ -81,19 +83,17 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
   controllato; `tests/audit/`: un test per deviazione (un file per passaggio,
   helper in `audit_helpers.py`); `docs/MECHANICS.md`: le meccaniche.
-- `riftbound/core/loop.py`: il motore (turno, chain, showdown, combattimento).
-- `riftbound/core/`: `battlefield.py` (controllo, Hold / Conquer),
-  `effects.py` (effetti), `legality.py` (azioni legali offerte agli agenti).
+- `riftbound/core/`: il motore. `loop.py` (turno, chain, showdown, combattimento),
+  `effects.py`, `battlefield.py` (Hold / Conquer), `legality.py` (azioni legali).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete (albero delle
   scelte, `_Plan`, `_Fallback`); test in `tests/test_net_mcts.py`.
-- `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`: self-play e
-  training; `scripts/allena.bat` / `allena.command`: lo stesso con doppio clic.
+- `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`: self-play e training.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
 - `riftbound/ai/scenari.py` + `scripts/scenari.py`: scenari dei giudizi (mosse vere).
-- `docs/history/SESSIONE_2026-11-13.md`: il primo training nel dettaglio; `scripts/diag/`: le misure.
+- `scripts/diag/`: le misure. `docs/archivio/`: storico (training del 13/11, BACKLOG A-G).
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato
   (`scripts/piltover_sync.py compare` per le differenze).
 - `riftbound/data/decks/`: precon, competitive dell'utente (`scripts/deck_from_txt.py`).
 - `tests/golden_games.json` + `test_golden_games.py`: 20 partite Zed vs Shen
-  (`RBSIM_REGEN_GOLDEN=1` per rigenerarle); `BACKLOG.md`: quel che resta.
+  (`RBSIM_REGEN_GOLDEN=1` per rigenerarle). `BACKLOG.md`: solo le voci aperte.
