@@ -460,6 +460,9 @@ class GameLoop:
 
     def __init__(self, gs: GameState, recorder: Optional["GameRecorder"] = None, verbose: bool = False):
         self.gs = gs
+        # The Result's counts, kept by the loop, not the state: a copy played
+        # on with a new GameLoop counts from the copy point only. Nobody reads
+        # them from a copy (the search reads the winner); left so (owner, 17/11).
         self.units_played = 0
         self.spells_cast = 0
         self.recorder = recorder

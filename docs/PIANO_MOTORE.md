@@ -3,9 +3,10 @@
 Scritto il 2026-11-17, dopo una revisione esterna del motore. Sostituisce la
 v1 (`docs/archivio/PIANO_MOTORE_v1.md`), che metteva la struttura per prima:
 la revisione ha trovato difetti più gravi, nella partita vera e nelle copie
-della partita usate dalla ricerca del bot. **Non avviato.** Chi esegue e quando
-lo decide l'utente; stato e priorità in `STATO.md`. Le deviazioni D59-D68 sono
-in `docs/audit/AUDIT.md`, ottavo passaggio.
+della partita usate dalla ricerca del bot. **Fatta solo la fase 1** (17/11):
+l'utente ha scelto la strada A, prima il bot; le altre fasi aspettano. Stato e
+priorità in `STATO.md`. Le deviazioni D59-D68 sono in `docs/audit/AUDIT.md`,
+ottavo passaggio.
 
 ## 1. Cosa cambia rispetto alla v1
 
@@ -62,8 +63,9 @@ il suo test di deviazione. Le golden non si rigenerano per avere il verde: si
 spiega la prima divergenza, poi si decide.
 
 ### Fase 0: reti di sicurezza
-- Test rossi `xfail(strict=True)` in `tests/audit/` per D59-D68, dalle
-  riproduzioni dei rapporti (come il primo passaggio dell'audit).
+- Test rossi `xfail(strict=True)` in `tests/audit/` per D59-D65, dalle
+  riproduzioni dei rapporti (come il primo passaggio dell'audit); quelli di
+  D66-D68 sono entrati con la fase 1.
 - Modalità rigorosa nei test: un'eccezione dentro un effetto fa fallire il
   test (oggi è ignorata in silenzio e la partita può restare modificata a metà).
 - Tracce deterministiche: il tracciatore semina gli agenti come la factory e
@@ -77,10 +79,12 @@ spiega la prima divergenza, poi si decide.
 - Nelle tre memorie (`once_per_turn_used`, `combat_designated`,
   `conquer_return`) si salva l'oggetto invece del suo indirizzo `id()`: le copie
   lo ricollegano da sole. La partita vera non cambia (Riven resta com'è: passo B).
-- Previsione della revisione: nessuna delle 28 golden cambia.
-- Verifica: i test D66-D68 passano; la sonda sulle copie torna a 0 divergenze.
-- Da decidere: una copia con un `GameLoop` nuovo azzera `units_played` e
-  `spells_cast` (il `Result` di una copia).
+- Previsione della revisione: nessuna delle 28 golden cambia. Verificato.
+- Verifica: i test D66-D68 passano (fatto); la sonda sulle copie torna a 0
+  divergenze (non rifatta: gli script sono negli ZIP della revisione).
+- Deciso (utente, 17/11): una copia con un `GameLoop` nuovo conta
+  `units_played` e `spells_cast` dal punto di copia; resta così, scritto in
+  `GameLoop.__init__` e in AUDIT (nessuno li legge da una copia).
 - Perché per prima: è piccola, non cambia la partita vera, e la ricerca smette
   di giocare copie sbagliate proprio con i mazzi in uso (Kha'Zix Mutating
   Horror e Shadow Clone nel mazzo Kha'Zix, Pyke Returned nel mazzo Evelynn).
@@ -145,8 +149,11 @@ interni. Cambia il criterio di riuscita:
 - Toccare training e rete: fuori perimetro.
 
 ## 7. Avanzamento
-- [ ] Fase 0: test rossi D59-D68, modalità rigorosa, tracce deterministiche
-- [ ] Fase 1: identità passo A (D66-D68)
+- [ ] Fase 0: test rossi D59-D65, modalità rigorosa, tracce deterministiche
+  (i test rossi D66-D68 sono entrati con la fase 1, `f4a9315`)
+- [x] Fase 1: identità passo A (D66-D68), 17/11: `b6e6c76`, `d4bc220`,
+  `ca16a51`; suite verde, 28 golden identiche; base del bot rimisurata
+  (`STATO.md`); sonda grande sulle copie non rifatta
 - [ ] Fase 2: esiti delle azioni (D59-D62)
 - [ ] Fase 3: movimento atomico (D63)
 - [ ] Fase 4: morti effettive (D64), registro e coach
