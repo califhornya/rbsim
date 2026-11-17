@@ -10,6 +10,11 @@ citate nei commenti del codice come "BACKLOG G3", "B20"):
 Una voce è chiusa quando un test gioca la situazione e controlla cosa dicono il
 testo della carta o le Core Rules. Le voci nuove vanno qui.
 
+## Struttura del motore
+- [ ] `loop.py` in un blocco unico e groviglio tra motore ed `effects.py`
+      (89 metodi interni usati dagli effetti): problema e piano a fasi in
+      `docs/PIANO_MOTORE.md`.
+
 ## Carte e regole
 - [ ] Il resto del corpus: letto per classi (AUDIT, quarto passaggio); carta per
       carta solo le carte dei mazzi in uso.
