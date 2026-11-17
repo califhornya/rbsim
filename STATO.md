@@ -68,10 +68,10 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
    (cosa vale cosa, cosa temere da ogni mazzo) come valutazione della
    ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
-2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
-3. GIUDIZI.md (G1, G4, G6, S1) usa carte bannate: da rivedere sui mazzi
-   nuovi. Script di training e diag puntano ancora a Kai'Sa/Kennen: da
-   spostare su Evelynn/Kha'Zix prima di riallenare.
+2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Kai'Sa/Kennen storico; Evelynn e
+   Kha'Zix: primo gruppo (S6-S10) in attesa di risposta.
+3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli su
+   Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 

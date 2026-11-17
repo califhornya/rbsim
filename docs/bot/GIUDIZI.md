@@ -2,8 +2,9 @@
 
 Raccolti rispondendo a situazioni concrete (formato: situazione → cosa fai
 e perché). Servono a scrivere la valutazione del bot dentro la ricerca che
-c'è già, e come situazioni di prova. Mazzi: i due competitive (Kai'Sa,
-Kennen).
+c'è già, e come situazioni di prova. Mazzi: dal 17/11 Evelynn e Kha'Zix
+(`competitive_evelynn`, `competitive_khazix`); i giudizi su Kai'Sa e Kennen
+(sotto) restano come storico, i due mazzi non si giocano più (ban).
 
 ## Lezione sul metodo
 - I confronti astratti tra posizioni ("5-3 con 2 carte in mano contro 3-3
@@ -12,7 +13,7 @@ Kennen).
   generici. Il bot va pensato per mazzo, non con pesi uguali per tutti.
 - Le situazioni concrete funzionano: risposte ricche, con il perché.
 
-## Giudizi (13/11, primo gruppo)
+## Kai'Sa e Kennen (storico): giudizi (13/11, primo gruppo)
 
 Kennen:
 - G1. Il cimitero è il motore del mazzo (Rhasa costa meno, FLOW, Last
@@ -39,7 +40,7 @@ Kai'Sa:
   giocata enorme: toglie il campione a chi ha anche riciclato una runa, e
   con le 2 rune rimaste Noxus Hopeful costa 2 (LEGION). "Avantissimo."
 
-## Situazioni di prova (con la risposta dell'utente)
+## Kai'Sa e Kennen (storico): situazioni di prova (con la risposta)
 - S1a. Kennen secondo, primo turno, 3 rune (2 Chaos, 1 Order), Kai'Sa ha
   Plundering Poro in base. Mano: Seal of Discord, Trifarian Captain,
   Traveling Merchant, Lightning Rush, Star-Crossed. → Seal, con l'energia
@@ -56,7 +57,7 @@ Kai'Sa:
   Noxus Hopeful, Stupefy, Lecturing Yordle, Hextech Ray. → Falling Star su
   Kennen, poi Noxus Hopeful scontato.
 
-## In attesa di risposta (secondo gruppo, metà partita)
+## Kai'Sa e Kennen (storico): secondo gruppo, mai risposto
 Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
 - S3. Tu Kennen, turno 5, 3-3. 6 rune e Seal in campo. Tu controlli il tuo
   campo con Traveling Merchant (2), lei il suo con Noxus Hopeful (4).
@@ -72,3 +73,31 @@ Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
   Bedeviling Stranger (2). In base: Trifarian Captain (1) e Traveling
   Merchant (2), pronti. Conquistare il suo campo con tutti e due, uno,
   nessuno? (Interessa quanto si rischia.)
+
+## Evelynn e Kha'Zix: primo gruppo (17/11, in attesa di risposta)
+Campi: Evelynn ha Bandle Scouts' Academy, Kha'Zix ha Sandswept Tomb; gli altri
+non contano. Si vince a 8. Nascondere costa [rune] (una runa riciclata) e si
+può solo su un campo che controlli, una carta per campo.
+- S6. Tu Evelynn, primo giocatore, tuo secondo turno, 4 rune (2 Body, 2
+  Chaos), 0-0. Controlli l'Academy con Bedeviling Stranger (2). Lui ha
+  Traveling Merchant (2) al suo campo e Irresistible Faefolk (1) in base,
+  3 rune. Mano: Pyke Returned, Gutter Guardian, Momentary Companion, Hold 'Em,
+  Star-Crossed. Cosa fai? (Es. Gutter Guardian mostrando Pyke dalla mano: la
+  potenza che dà paga il nascondere Pyke all'Academy, che dà un Gold.)
+- S7. Tu Kha'Zix, secondo giocatore, primo turno, 3 rune (2 Body, 1 Chaos).
+  Lei ha giocato Bedeviling Stranger (2) e controlla l'Academy; al suo turno
+  ci potrà nascondere una carta e prendere un Gold. Mano: Irresistible
+  Faefolk, Traveling Merchant, Reckless Innovator, Void Assault, Punch First.
+  Cosa giochi, e vai subito al suo campo?
+- S8. Tu Evelynn, suo turno 4, 3-3. All'Academy hai Pyke Returned (3) da solo
+  e Momentary Companion nascosta. Lui muove Kha'Zix Mutating Horror (4) dalla
+  base al tuo campo (se un nemico è solo lì, Kha'Zix prende +2 e 2 XP). Hai 3
+  rune aperte (2 Chaos, 1 Body), in mano Star-Crossed, Gust, Hold 'Em. Cosa
+  fai, e quando?
+- S9. Tu Kha'Zix, tuo turno 5, 5-4 per te. Zed Without a Sound (5) è al suo
+  campo, esaurito: l'ha appena conquistato (Shadow Clone in base). Hai 3 XP,
+  leggenda pronta, 2 rune aperte; in mano Punch First, Traveling Merchant.
+  Lei: Vex Apathetic (4) in base, 5 rune, 3 carte in mano. Spendi 2 XP per
+  riportare Zed in base, 1 XP per dargli il Buff, o li tieni? Perché?
+- S10. Domanda sulle carte, non sulle posizioni: con Evelynn, quali carte di
+  Kha'Zix temi di più e come giochi intorno? E con Kha'Zix, quali di Evelynn?
