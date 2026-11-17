@@ -71,8 +71,7 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
 3. Ban del 13/11 (dal 23/11) in `banned_cards.json`; i mazzi caricano con un
    avviso. Toccano Kai'Sa (3 Brynhir) e Kennen (3 Nocturne, 3 Rhasa); GIUDIZI.md
    (G1, G4, G6, S1) da rivedere. Ban di marzo-settembre aggiunte (17/11, fonti Riot).
-   Post-ban dell'utente: `competitive_evelynn.json`, `competitive_khazix.json`
-   (28 carte mai confrontate col testo stampato; caricano e giocano).
+   Post-ban: `competitive_evelynn/khazix.json` (28 carte da audit sul testo).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
