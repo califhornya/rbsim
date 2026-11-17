@@ -1,0 +1,486 @@
+{
+  "note": "Scenari per i giudizi (docs/bot/GIUDIZI.md), costruiti giocando mosse vere: vedi riftbound/ai/scenari.py. Si aprono con scripts/scenari.py.",
+  "scenari": [
+    {
+      "id": "S6",
+      "title": "S6 · Evelynn, il tuo secondo turno",
+      "question": "Sei Evelynn, primo giocatore, all'inizio del tuo secondo turno (0-0). Bedeviling Stranger è in base, pronta; lui ha Traveling Merchant in base. Cosa fai in questo turno, e perché? (È il turno 3 della partita: i turni si contano per giocatore.)",
+      "decks": {
+        "A": "competitive_evelynn",
+        "B": "competitive_khazix"
+      },
+      "battlefields": {
+        "A": "Bandle Scouts' Academy",
+        "B": "Sandswept Tomb"
+      },
+      "first": "A",
+      "human": "A",
+      "seed": 6,
+      "hands": {
+        "A": [
+          "Bedeviling Stranger",
+          "Pyke Returned",
+          "Gutter Guardian",
+          "Momentary Companion",
+          "Hold 'Em",
+          "Star-Crossed"
+        ],
+        "B": [
+          "Traveling Merchant",
+          "Irresistible Faefolk",
+          "Void Assault",
+          "Punch First",
+          "Reckless Innovator"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS"
+        ],
+        "B": [
+          "BODY",
+          "BODY",
+          "CHAOS"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Bedeviling Stranger"
+          ]
+        },
+        {
+          "turn": 2,
+          "seat": "B",
+          "main": [
+            "Play Traveling Merchant"
+          ]
+        }
+      ],
+      "turn": 3,
+      "expect": {
+        "point": "turn_action",
+        "turn": 3,
+        "score": [
+          0,
+          0
+        ],
+        "hand": [
+          "Gutter Guardian",
+          "Hold 'Em",
+          "Momentary Companion",
+          "Pyke Returned",
+          "Star-Crossed"
+        ],
+        "me": {
+          "base": [
+            "Bedeviling Stranger (2)"
+          ]
+        },
+        "opp": {
+          "base": [
+            "Traveling Merchant (2) esausta"
+          ]
+        },
+        "controls": {
+          "Bandle Scouts' Academy": null,
+          "Sandswept Tomb": null
+        },
+        "runes": 4,
+        "opp_runes": 3
+      }
+    },
+    {
+      "id": "S7",
+      "title": "S7 · Kha'Zix, il tuo primo turno",
+      "question": "Sei Kha'Zix, secondo giocatore, al tuo primo turno (0-0). Lei ha Bedeviling Stranger in base: al suo prossimo turno può portarla all'Academy, conquistarla, nasconderci una carta e prendere un Gold. Cosa giochi, pensando al suo turno dopo? (Turno 2 della partita.)",
+      "decks": {
+        "A": "competitive_evelynn",
+        "B": "competitive_khazix"
+      },
+      "battlefields": {
+        "A": "Bandle Scouts' Academy",
+        "B": "Sandswept Tomb"
+      },
+      "first": "A",
+      "human": "B",
+      "seed": 7,
+      "hands": {
+        "A": [
+          "Bedeviling Stranger",
+          "Pyke Returned",
+          "Gutter Guardian",
+          "Momentary Companion",
+          "Hold 'Em"
+        ],
+        "B": [
+          "Irresistible Faefolk",
+          "Traveling Merchant",
+          "Reckless Innovator",
+          "Void Assault",
+          "Punch First"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "CHAOS"
+        ],
+        "B": [
+          "BODY",
+          "BODY",
+          "CHAOS"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Bedeviling Stranger"
+          ]
+        }
+      ],
+      "turn": 2,
+      "expect": {
+        "point": "turn_action",
+        "turn": 2,
+        "score": [
+          0,
+          0
+        ],
+        "hand": [
+          "Irresistible Faefolk",
+          "Punch First",
+          "Reckless Innovator",
+          "Traveling Merchant",
+          "Void Assault"
+        ],
+        "opp": {
+          "base": [
+            "Bedeviling Stranger (2) esausta"
+          ]
+        },
+        "runes": 3,
+        "opp_runes": 2
+      }
+    },
+    {
+      "id": "S8",
+      "title": "S8 · Evelynn, Kha'Zix arriva all'Academy",
+      "question": "Sei Evelynn, nel suo quarto turno, 3-3. All'Academy hai Pyke da solo e Momentary Companion nascosta; Bedeviling Stranger è in base. Lui ha appena mosso Kha'Zix Mutating Horror dalla base al tuo campo («quando attacco o difendo, se un nemico è solo qui, +2 Might e 2 XP»): tocca a te. Cosa fai, e in che momento? (Turno 8 della partita.)",
+      "decks": {
+        "A": "competitive_evelynn",
+        "B": "competitive_khazix"
+      },
+      "battlefields": {
+        "A": "Bandle Scouts' Academy",
+        "B": "Sandswept Tomb"
+      },
+      "first": "A",
+      "human": "A",
+      "seed": 8,
+      "hands": {
+        "A": [
+          "Bedeviling Stranger",
+          "Pyke Returned",
+          "Momentary Companion",
+          "Star-Crossed",
+          "Gust",
+          "Hold 'Em",
+          "Reckless Innovator",
+          "Boots of Swiftness"
+        ],
+        "B": [
+          "Traveling Merchant",
+          "Irresistible Faefolk",
+          "Punch First",
+          "Void Assault",
+          "Reckless Innovator",
+          "Star-Crossed",
+          "Rampage",
+          "Grim Resolve"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "BODY",
+          "CHAOS"
+        ],
+        "B": [
+          "BODY",
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Bedeviling Stranger"
+          ]
+        },
+        {
+          "turn": 2,
+          "seat": "B",
+          "main": [
+            "Play Traveling Merchant"
+          ]
+        },
+        {
+          "turn": 3,
+          "seat": "A",
+          "main": [
+            "Move Bedeviling Stranger base→BF0",
+            "PASS",
+            "Play Pyke Returned to BF0"
+          ]
+        },
+        {
+          "turn": 4,
+          "seat": "B",
+          "main": [
+            "Move Traveling Merchant base→BF1",
+            "PASS"
+          ]
+        },
+        {
+          "turn": 5,
+          "seat": "A",
+          "main": [
+            "Hide Momentary Companion @BF0",
+            "Move Bedeviling Stranger BF0→base"
+          ]
+        },
+        {
+          "turn": 6,
+          "seat": "B",
+          "main": [
+            "Deploy champion Kha'Zix Mutating Horror"
+          ]
+        },
+        {
+          "turn": 8,
+          "seat": "B",
+          "main": [
+            "Move Kha'Zix Mutating Horror base→BF0",
+            "PASS"
+          ]
+        }
+      ],
+      "turn": 8,
+      "expect": {
+        "point": "reaction",
+        "turn": 8,
+        "score": [
+          3,
+          3
+        ],
+        "hand": [
+          "Boots of Swiftness",
+          "Gust",
+          "Hold 'Em",
+          "Reckless Innovator",
+          "Star-Crossed"
+        ],
+        "me": {
+          "base": [
+            "Bedeviling Stranger (2)"
+          ],
+          "Bandle Scouts' Academy": [
+            "Pyke Returned (3)"
+          ]
+        },
+        "my_facedown": {
+          "Bandle Scouts' Academy": [
+            "Momentary Companion"
+          ]
+        },
+        "opp": {
+          "Bandle Scouts' Academy": [
+            "Kha'Zix Mutating Horror (4) esausta"
+          ]
+        },
+        "gear": [
+          "Gold"
+        ]
+      }
+    },
+    {
+      "id": "S9",
+      "title": "S9 · Kha'Zix, Zed ha appena conquistato",
+      "question": "Sei Kha'Zix, al tuo quarto turno, 4-2. Con Grim Resolve Zed ha appena conquistato l'Academy ed è lì esausto (8 di Might fino a fine turno); lo Shadow Clone è in base. Hai 3 XP e la leggenda pronta; lei ha Vex in base e 4 carte in mano. Spendi 2 XP per riportare Zed in base, 1 XP per il Buff, o li tieni? Perché? E il resto del turno? (Turno 7 della partita.)",
+      "decks": {
+        "A": "competitive_khazix",
+        "B": "competitive_evelynn"
+      },
+      "battlefields": {
+        "A": "Sandswept Tomb",
+        "B": "Bandle Scouts' Academy"
+      },
+      "first": "A",
+      "human": "A",
+      "seed": 9,
+      "hands": {
+        "A": [
+          "Traveling Merchant",
+          "Grim Resolve",
+          "Zed Without a Sound",
+          "Punch First",
+          "Up from the Deep",
+          "Void Assault",
+          "Star-Crossed",
+          "Rampage",
+          "Irresistible Faefolk"
+        ],
+        "B": [
+          "Bedeviling Stranger",
+          "Vex Apathetic",
+          "Pyke Returned",
+          "Hold 'Em",
+          "Gust",
+          "Momentary Companion",
+          "Star-Crossed",
+          "Gutter Guardian"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS"
+        ],
+        "B": [
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Traveling Merchant"
+          ]
+        },
+        {
+          "turn": 2,
+          "seat": "B",
+          "main": [
+            "Play Bedeviling Stranger"
+          ]
+        },
+        {
+          "turn": 3,
+          "seat": "A",
+          "main": [
+            "Move Traveling Merchant base→BF0",
+            "PASS"
+          ],
+          "choices": [
+            [
+              "discard",
+              "Up from the Deep"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "seat": "B",
+          "main": [
+            "Move Bedeviling Stranger base→BF1",
+            "PASS",
+            "Play Vex Apathetic"
+          ]
+        },
+        {
+          "turn": 5,
+          "seat": "A",
+          "main": [
+            "Play Zed Without a Sound"
+          ]
+        },
+        {
+          "turn": 6,
+          "seat": "B",
+          "main": [
+            "Hide Pyke Returned @BF1"
+          ]
+        },
+        {
+          "turn": 7,
+          "seat": "A",
+          "main": [
+            "Cast Grim Resolve @BF0",
+            "Move Zed Without a Sound base→BF1",
+            "PASS"
+          ],
+          "choices": [
+            [
+              "target",
+              "Zed Without a Sound"
+            ]
+          ]
+        }
+      ],
+      "turn": 7,
+      "expect": {
+        "point": "turn_action",
+        "turn": 7,
+        "score": [
+          4,
+          2
+        ],
+        "xp": 3,
+        "me": {
+          "base": [
+            "Shadow Clone (0) esausta"
+          ],
+          "Bandle Scouts' Academy": [
+            "Zed Without a Sound (8) esausta"
+          ]
+        },
+        "opp": {
+          "base": [
+            "Vex Apathetic (4)"
+          ]
+        },
+        "opp_hand": 4
+      },
+      "human_from": "main"
+    }
+  ]
+}

@@ -2,8 +2,9 @@
 
 Raccolti rispondendo a situazioni concrete (formato: situazione → cosa fai
 e perché). Servono a scrivere la valutazione del bot dentro la ricerca che
-c'è già, e come situazioni di prova. Mazzi: i due competitive (Kai'Sa,
-Kennen).
+c'è già, e come situazioni di prova. Mazzi: dal 17/11 Evelynn e Kha'Zix
+(`competitive_evelynn`, `competitive_khazix`); i giudizi su Kai'Sa e Kennen
+(sotto) restano come storico, i due mazzi non si giocano più (ban).
 
 ## Lezione sul metodo
 - I confronti astratti tra posizioni ("5-3 con 2 carte in mano contro 3-3
@@ -12,7 +13,7 @@ Kennen).
   generici. Il bot va pensato per mazzo, non con pesi uguali per tutti.
 - Le situazioni concrete funzionano: risposte ricche, con il perché.
 
-## Giudizi (13/11, primo gruppo)
+## Kai'Sa e Kennen (storico): giudizi (13/11, primo gruppo)
 
 Kennen:
 - G1. Il cimitero è il motore del mazzo (Rhasa costa meno, FLOW, Last
@@ -39,7 +40,7 @@ Kai'Sa:
   giocata enorme: toglie il campione a chi ha anche riciclato una runa, e
   con le 2 rune rimaste Noxus Hopeful costa 2 (LEGION). "Avantissimo."
 
-## Situazioni di prova (con la risposta dell'utente)
+## Kai'Sa e Kennen (storico): situazioni di prova (con la risposta)
 - S1a. Kennen secondo, primo turno, 3 rune (2 Chaos, 1 Order), Kai'Sa ha
   Plundering Poro in base. Mano: Seal of Discord, Trifarian Captain,
   Traveling Merchant, Lightning Rush, Star-Crossed. → Seal, con l'energia
@@ -56,7 +57,7 @@ Kai'Sa:
   Noxus Hopeful, Stupefy, Lecturing Yordle, Hextech Ray. → Falling Star su
   Kennen, poi Noxus Hopeful scontato.
 
-## In attesa di risposta (secondo gruppo, metà partita)
+## Kai'Sa e Kennen (storico): secondo gruppo, mai risposto
 Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
 - S3. Tu Kennen, turno 5, 3-3. 6 rune e Seal in campo. Tu controlli il tuo
   campo con Traveling Merchant (2), lei il suo con Noxus Hopeful (4).
@@ -72,3 +73,30 @@ Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
   Bedeviling Stranger (2). In base: Trifarian Captain (1) e Traveling
   Merchant (2), pronti. Conquistare il suo campo con tutti e due, uno,
   nessuno? (Interessa quanto si rischia.)
+
+## Evelynn e Kha'Zix: primo gruppo (17/11, in attesa di risposta)
+S6-S9 si giocano sulla pagina degli scenari (`scripts/scenari.bat` o
+`scenari.command`, doppio clic): la posizione è costruita con mosse vere
+(`docs/bot/scenari.json`, controllata da `tests/test_scenari.py`), giochi tu
+il turno e scrivi il perché; le risposte vanno in
+`docs/bot/risposte_scenari.jsonl`. I testi:
+- S6. Sei Evelynn, primo giocatore, all'inizio del tuo secondo turno (0-0).
+  Bedeviling Stranger è in base, pronta; lui ha Traveling Merchant in base.
+  Cosa fai in questo turno, e perché? (È il turno 3 della partita: i turni si
+  contano per giocatore.)
+- S7. Sei Kha'Zix, secondo giocatore, al tuo primo turno (0-0). Lei ha
+  Bedeviling Stranger in base: al suo prossimo turno può portarla all'Academy,
+  conquistarla, nasconderci una carta e prendere un Gold. Cosa giochi,
+  pensando al suo turno dopo? (Turno 2 della partita.)
+- S8. Sei Evelynn, nel suo quarto turno, 3-3. All'Academy hai Pyke da solo e
+  Momentary Companion nascosta; Bedeviling Stranger è in base. Lui ha appena
+  mosso Kha'Zix Mutating Horror dalla base al tuo campo («quando attacco o
+  difendo, se un nemico è solo qui, +2 Might e 2 XP»): tocca a te. Cosa fai, e
+  in che momento? (Turno 8 della partita.)
+- S9. Sei Kha'Zix, al tuo quarto turno, 4-2. Con Grim Resolve Zed ha appena
+  conquistato l'Academy ed è lì esausto (8 di Might fino a fine turno); lo
+  Shadow Clone è in base. Hai 3 XP e la leggenda pronta; lei ha Vex in base e
+  4 carte in mano. Spendi 2 XP per riportare Zed in base, 1 XP per il Buff, o
+  li tieni? Perché? E il resto del turno? (Turno 7 della partita.)
+- S10. Domanda sulle carte, non sulle posizioni: con Evelynn, quali carte di
+  Kha'Zix temi di più e come giochi intorno? E con Kha'Zix, quali di Evelynn?

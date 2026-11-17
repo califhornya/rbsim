@@ -1652,6 +1652,12 @@ class GameLoop:
         actor = self.gs.get_player(side)
         opponent = self.gs.get_player(self.gs.other(side))
         flags = dict(flags) if flags is not None else {"_kicker_paid": False}
+        if once and all(es.params.get("once_per_turn") for _i, es in specs) and \
+                any(self._once_used(card, i, es) for i, es in specs):
+            # One "once each turn" ability of several instructions (Evelynn
+            # Agony's Embrace: "draw 1. Then ... discard 1"): performed once,
+            # it doesn't trigger again, not even for its later instructions.
+            return
         lead = None
         with self._card_flags(card, flags):
             for n, (i, es) in enumerate(specs):
@@ -4866,6 +4872,12 @@ class GameLoop:
             self._note_play_here(deployed_bf, side, card)
         elif attached_to is None:
             ap.base_gear.append(card)
+        # Played from face down, a gear is played at that battlefield (owner,
+        # Q6 of AUDIT.md: Edge of Night at Rakelstake, Hold 'Em).
+        hidden_bf = self.gs.battlefields[lane] if from_zone == "facedown" and deployed_bf is None \
+            else None
+        if hidden_bf is not None:
+            self._note_play_here(hidden_bf, side, card)
         # "This enters exhausted" gear cannot use its [tap] ability the turn
         # it is played (§ enters exhausted) — it untaps on the next turn.
         _gspec = CARD_REGISTRY.get(card.name)
@@ -4893,6 +4905,8 @@ class GameLoop:
             self._fire_units_trigger("on_friendly_deploy", side, triggering_card=card,
                                      extra={"deployed_at": deployed_bf})
             self._fire_first_play_here(side, deployed_bf, card)   # Rakelstake
+        if hidden_bf is not None:
+            self._fire_first_play_here(side, hidden_bf, card)     # Rakelstake (Q6)
 
     def _cast_spell_now(self, card: Card, side: str, lane: int = 0,
                         from_zone: str = "hand") -> None:

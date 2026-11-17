@@ -1,0 +1,122 @@
+{
+  "name": "Kha'Zix Mutating Horror",
+  "legend": "Kha'Zix Voidreaver",
+  "champion": "Kha'Zix Mutating Horror",
+  "runes": [
+    {
+      "domain": "BODY",
+      "count": 6
+    },
+    {
+      "domain": "CHAOS",
+      "count": 6
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Sandswept Tomb"
+    },
+    {
+      "name": "Packed Amphitheater"
+    },
+    {
+      "name": "Zaun Warrens"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Rampage",
+      "count": 2
+    },
+    {
+      "name": "Up from the Deep",
+      "count": 2
+    },
+    {
+      "name": "Zed Without a Sound",
+      "count": 2
+    },
+    {
+      "name": "Irresistible Faefolk",
+      "count": 3
+    },
+    {
+      "name": "Rengar Trophy Hunter",
+      "count": 2
+    },
+    {
+      "name": "Star-Crossed",
+      "count": 2
+    },
+    {
+      "name": "Vex Apathetic",
+      "count": 2
+    },
+    {
+      "name": "Void Assault",
+      "count": 3
+    },
+    {
+      "name": "Punch First",
+      "count": 3
+    },
+    {
+      "name": "Fizz Trickster",
+      "count": 3
+    },
+    {
+      "name": "Switcheroo",
+      "count": 1
+    },
+    {
+      "name": "Sabotage",
+      "count": 1
+    },
+    {
+      "name": "Traveling Merchant",
+      "count": 3
+    },
+    {
+      "name": "Reckless Innovator",
+      "count": 3
+    },
+    {
+      "name": "Evelynn Entrancing",
+      "count": 2
+    },
+    {
+      "name": "Onslaught",
+      "count": 1
+    },
+    {
+      "name": "Grim Resolve",
+      "count": 1
+    },
+    {
+      "name": "The Good Stuff",
+      "count": 3
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Acceptable Losses",
+      "count": 3
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "count": 1
+    },
+    {
+      "name": "Decree of Strength",
+      "count": 2
+    },
+    {
+      "name": "Sabotage",
+      "count": 2
+    },
+    {
+      "name": "Unyielding Spirit",
+      "count": 2
+    }
+  ]
+}

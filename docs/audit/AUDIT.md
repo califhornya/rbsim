@@ -18,7 +18,15 @@ owner will give two current competitive decks). Their passes (D13-D18,
 D23-D28) stay: they fixed cards, which are still in the corpus; where this
 document names those decks it is the record of where a card was found.
 
-**State (2026-11-12, sixth pass): 56 deviations found, 56 fixed, none open.**
+**Kai'Sa and Kennen are no longer played (2026-11-17)**: the 2026-11-13 bans
+hit both. The owner's post-ban decks are `competitive_evelynn` and
+`competitive_khazix` (seventh pass); the two old files stay, with their tests
+and golden games, as engine fixtures.
+
+**State (2026-11-17, seventh pass): 58 deviations found, 58 fixed, none open.**
+The seventh pass read the owner's two post-ban decks: D57-D58, see its
+section; the owner answered Q6. Suite: 1786 passed, 5 skipped, no xfail.
+Before it, (2026-11-12, sixth pass): 56 found, 56 fixed.
 The sixth pass re-checked the PARTIAL / GAP rows of `docs/MECHANICS.md` and
 took two Codex review comments: D53-D56, see its section. Suite: 1755
 passed, 5 skipped, no xfail. The fifth pass read the owner's two competitive decks
@@ -29,7 +37,7 @@ read the 119 cards of the other eight decks against the printed text and
 played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
 D20) and fixed the two it met on the way (D21, D22). The owner answered Q1–Q4
-of "Ambiguous rules" (2026-11-11): Q1, Q3 and Q4 changed the engine, Q2 kept
+of "Ambiguous rules" (2026-11-11) and Q6 (2026-11-17): Q1, Q3 and Q4 changed the engine, Q2 kept
 it as it was; Q5 asks nothing. What is still open is in "Not checked"
 (what was not audited, and the leftovers noted under D1, D6 and D9). Two
 things a fix changed outside the engine: `ACTION_DIM` is 319, was 316 (D2:
@@ -774,6 +782,49 @@ which named the removed decks).
   simultaneous deaths, not the one chosen (§373): no such card in the decks.
   Layer dependencies (§480-481: "increased to", "to a maximum") are in no deck.
 
+## Deviations, seventh pass (2026-11-17): the owner's post-ban decks
+
+The owner's lists (Evelynn: Evelynn Agony's Embrace, Evelynn Entrancing;
+Kha'Zix: Kha'Zix Voidreaver, Kha'Zix Mutating Horror), imported as
+`competitive_evelynn.json` and `competitive_khazix.json`, sideboards
+included; no banned card. 28 cards not in the audited decks: 8 read in the
+third pass (Irresistible Faefolk, Punch First, Rampage, Rengar Trophy Hunter,
+Sabotage, Sandswept Tomb, Up from the Deep, Vex Apathetic), their tests
+trusted; the 20 others read against the print with their `effects`, and all
+played but Unyielding Spirit (read: its prevention covers "spell" damage,
+which in `_take_damage` is spells and abilities). Then 480 games of the two
+decks (with each other, themselves and the precons; `simple_trade` and
+`random`) under the checks of `tests/test_invariants.py`. Tests in
+`tests/audit/test_audit_postban.py`.
+
+- **D57.** Evelynn Agony's Embrace: "Once each turn, when you play a card
+  from face down, draw 1. Then, if it's not your turn, discard 1." Once each
+  turn was kept per instruction: two cards played from face down in a row on
+  the opponent's turn, the second trigger skipped the draw (used by the first,
+  still on the chain) and kept the discard, which resolved first. An ability
+  whose every instruction is once each turn now doesn't trigger again once
+  performed (§383.3.e.1). The only such ability in the corpus.
+- **D58.** Kha'Zix Voidreaver: "Spend 1 XP, [Tap]: [Buff] a unit." With no
+  place given, a legend's chosen unit was one at the first battlefield (the
+  others only if none was there). Data: `where` "anywhere"; the only legend
+  with such an activated ability.
+- **Read, played and found right.** Evelynn Entrancing (a unit at another
+  location, bases included; its player attacks, §466.2.c.1; nothing from hand
+  or on the opponent's turn), Momentary Companion, Gutter Guardian, Pyke
+  Returned (Gold exhausted, once a turn, only while at a battlefield),
+  Kha'Zix Mutating Horror and the legend's XP and move, K'Sante Courageous,
+  Hold 'Em (a gear to base doesn't count), Boots of Swiftness ([Equip]
+  [Chaos], GANKING), Void Assault (the caster attacks), Grim Resolve, Acceptable
+  Losses (each player chooses), Decree of Strength, Bandle Scouts' Academy,
+  Packed Amphitheater (every champion unit, both sides), Rakelstake (one
+  PREDICT a turn per player), Ruin Runner, Onslaught's FLOW.
+- **Seen on the way, a test and not the engine.** The invariant test didn't
+  count a DEPLOY gear on a battlefield (The Good Stuff): it looked vanished.
+- **Q6, answered by the owner (2026-11-17).** A gear played from face down
+  (Edge of Night) is played at its battlefield: it counts for Rakelstake and
+  for Hold 'Em, as a unit from face down already did. The engine counted
+  neither.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in
@@ -844,6 +895,11 @@ Q1–Q4 answered by the owner (2026-11-11); each change has a test in
   search doesn't ask (BACKLOG O3): not rules deviations, but decisions the
   rules give the player and the learner doesn't make. Listed so they aren't
   mistaken for audited rules.
+- **Q6. Rakelstake and a hidden gear.** "The first time they play a unit or
+  gear here each turn, they [Predict]." Edge of Night played from face down
+  at Rakelstake attaches to a unit there: played here or not? The owner
+  (2026-11-17): played here. The engine now counts it, for Rakelstake and
+  Hold 'Em ("played a unit or gear to a battlefield this turn").
 
 ## Checked and found correct
 

@@ -1,0 +1,130 @@
+{
+  "name": "Evelynn Entrancing",
+  "legend": "Evelynn Agony's Embrace",
+  "champion": "Evelynn Entrancing",
+  "runes": [
+    {
+      "domain": "BODY",
+      "count": 5
+    },
+    {
+      "domain": "CHAOS",
+      "count": 7
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Bandle Scouts' Academy"
+    },
+    {
+      "name": "Packed Amphitheater"
+    },
+    {
+      "name": "Rakelstake"
+    }
+  ],
+  "cards": [
+    {
+      "name": "K'Sante Courageous",
+      "count": 2
+    },
+    {
+      "name": "Rengar Trophy Hunter",
+      "count": 3
+    },
+    {
+      "name": "Pyke Returned",
+      "count": 3
+    },
+    {
+      "name": "Vex Apathetic",
+      "count": 2
+    },
+    {
+      "name": "Fizz Trickster",
+      "count": 1
+    },
+    {
+      "name": "Momentary Companion",
+      "count": 2
+    },
+    {
+      "name": "Gutter Guardian",
+      "count": 3
+    },
+    {
+      "name": "Reckless Innovator",
+      "count": 3
+    },
+    {
+      "name": "Bedeviling Stranger",
+      "count": 2
+    },
+    {
+      "name": "Hold 'Em",
+      "count": 3
+    },
+    {
+      "name": "Rampage",
+      "count": 2
+    },
+    {
+      "name": "Star-Crossed",
+      "count": 2
+    },
+    {
+      "name": "Punch First",
+      "count": 2
+    },
+    {
+      "name": "Switcheroo",
+      "count": 2
+    },
+    {
+      "name": "Gust",
+      "count": 1
+    },
+    {
+      "name": "Boots of Swiftness",
+      "count": 2
+    },
+    {
+      "name": "Edge of Night",
+      "count": 2
+    },
+    {
+      "name": "The Good Stuff",
+      "count": 2
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Rebuke",
+      "count": 1
+    },
+    {
+      "name": "Abandon",
+      "count": 1
+    },
+    {
+      "name": "Ruin Runner",
+      "count": 2
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "count": 2
+    },
+    {
+      "name": "Ravenbloom Prefect",
+      "count": 2
+    },
+    {
+      "name": "Onslaught",
+      "count": 1
+    },
+    {
+      "name": "Unyielding Spirit",
+      "count": 1
+    }
+  ]
+}
