@@ -1142,7 +1142,7 @@ class GameLoop:
                     print(f"  [HUNT] {side} gains {amount} XP (now {self.gs.get_xp(side)})")
             if trigger == "on_conquer":
                 unit.conquered_turn = self.gs.turn
-                if (id(unit), self.gs.turn) in self.gs.conquer_return and self.choose(
+                if (unit, self.gs.turn) in self.gs.conquer_return and self.choose(
                         "optional:return_to_base", side, [True, False], False, unit.card):
                     self._move_unit_by_effect(unit, None)      # Relentless Pursuit
                     continue

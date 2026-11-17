@@ -26,8 +26,6 @@ from audit_helpers import Scripted, act, card, choices, labels, setup, unit
 
 ROUTES = ["clone", "deepcopy", "loop"]
 
-D68 = pytest.mark.xfail(strict=True, reason="D68: conquer_return keeps id() of the original's unit")
-
 
 def _copy(loop: GameLoop, route: str) -> GameLoop:
     """The game copied and played on: `clone` as the search copies it,
@@ -338,7 +336,6 @@ def test_kennen_pays_to_stun_once_per_combat_in_a_copy(route):
 
 # ------------------------------------------------- D68: conquer_return
 
-@D68
 @pytest.mark.parametrize("route", ROUTES)
 def test_relentless_pursuit_runner_returns_after_conquering_in_a_copy(route):
     """Relentless Pursuit: 'Move a friendly unit. [...] This turn, that unit

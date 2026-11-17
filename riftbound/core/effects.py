@@ -1409,7 +1409,7 @@ def _conquer_return_this_turn(ctx: "EffectContext", spec: Mapping[str, Any]) -> 
     """ 'This turn, that unit has "When I conquer, you may move me to my base"'
     (Relentless Pursuit): the unit the previous instruction moved."""
     for unit in ctx.extra.get("it") or []:
-        ctx.loop.gs.conquer_return.append((id(unit), ctx.loop.gs.turn))
+        ctx.loop.gs.conquer_return.append((unit, ctx.loop.gs.turn))
 
 
 @effect("attach_equipment_to_it")

@@ -190,7 +190,8 @@ class GameState:
     # side -> turn.
     rally_turn: dict = field(default_factory=dict)
     # 'This turn, that unit has "When I conquer, you may move me to my base"'
-    # (Relentless Pursuit): (unit id, turn).
+    # (Relentless Pursuit): (the UnitInPlay, turn); the unit, not its id(), so
+    # that a copy of the game maps it (D68).
     conquer_return: list = field(default_factory=list)
     # "Its controller can't play spells this turn" (Lilting Lullaby): side -> turn.
     cant_play_spells_turn: dict = field(default_factory=dict)
