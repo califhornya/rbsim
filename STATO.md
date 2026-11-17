@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-17 (ban del 13/11 da `gallant-mendel` portate qui; mazzo Evelynn post-ban).
+Aggiornato: 2026-11-17 (banlist completa; mazzo Evelynn post-ban; PR verso main).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -70,7 +70,7 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
 3. Ban del 13/11 (dal 23/11) in `banned_cards.json`; i mazzi caricano con un
    avviso. Toccano Kai'Sa (3 Brynhir) e Kennen (3 Nocturne, 3 Rhasa); GIUDIZI.md
-   (G1, G4, G6, S1) da rivedere. Manca la lista di settembre (12 carte, qui 2).
+   (G1, G4, G6, S1) da rivedere. Ban di marzo-settembre aggiunte (17/11, fonti Riot).
    Post-ban dell'utente: `competitive_evelynn.json` (18 carte da audit).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).

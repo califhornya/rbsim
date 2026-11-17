@@ -35,6 +35,8 @@ def test_banned_cards_listed_and_warned(tmp_path):
     from riftbound.registry.cards_registry import BANNED_CARDS, load_deck_json
 
     assert {"Ekko Recurrent", "Stacked Deck"} <= BANNED_CARDS
+    # 2026-07-24 (the 2026-03-31 bans are not in the corpus, see banned_cards.json).
+    assert {"Stealthy Pursuer", "The Arena's Greatest", "Aspirant's Climb"} <= BANNED_CARDS
     # Bans announced 2026-11-13, effective 2026-11-23 (eight cards, two battlefields).
     assert {"Riven Broken Blade", "Zhonya's Hourglass", "Stellacorn Herder", "Nocturne Horrifying",
             "Rhasa the Sunderer", "Brynhir Thundersong", "Dazzling Aurora", "Baited Hook",

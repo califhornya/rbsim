@@ -1,10 +1,14 @@
 {
   "note": "Cards banned in competitive play. Decks containing them still load (with a warning) so existing training decks keep working until they are rebuilt.",
-  "updated": "2026-11-13",
+  "updated": "2026-11-17",
   "effective": "2026-11-23",
+  "history": "2026-03-31: 4 cards, 3 battlefields; 2026-07-24: Stealthy Pursuer, The Arena's Greatest, Aspirant's Climb; 2026-09-18: Ekko Recurrent, Stacked Deck; 2026-11-13 (effective 11-23): 8 cards, 2 battlefields.",
   "cards": [
     "Ekko Recurrent",
     "Stacked Deck",
+    "Stealthy Pursuer",
+    "The Arena's Greatest",
+    "Aspirant's Climb",
     "Riven Broken Blade",
     "Zhonya's Hourglass",
     "Stellacorn Herder",
@@ -15,5 +19,15 @@
     "Baited Hook",
     "Emperor's Dais",
     "Star Spring"
-  ]
+  ],
+  "not_in_corpus": [
+    "Called Shot",
+    "Draven Vanquisher",
+    "Fight or Flight",
+    "Scrapheap",
+    "Obelisk of Power",
+    "Reaver's Row",
+    "The Dreaming Tree"
+  ],
+  "not_in_corpus_note": "Banned on 2026-03-31; only in the printed reference (piltover_archive.json), not in all_cards.json, so no deck can contain them."
 }
