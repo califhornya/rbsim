@@ -71,8 +71,7 @@ ancora al run 4: non rilanciarlo.
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
 3. Banlist del 23/11: l'utente incolla l'elenco → `banned_cards.json`,
-   ricontrollare i mazzi. Registrato `competitive_evelynn.json` (post-banlist,
-   fuori dal training): gioca, ma 18 carte nuove non confrontate col testo stampato.
+   ricontrollare i mazzi (+ `competitive_evelynn.json`: 18 carte da audit).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
