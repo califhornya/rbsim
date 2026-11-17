@@ -423,3 +423,37 @@ def test_onslaught_is_played_from_the_trash_by_flow():
     a.trash.append(card("Onslaught"))
     a.energy = 4
     assert "Play Onslaught from trash (FLOW)" in _labels(loop)
+
+
+# -- Q6 (owner, 2026-11-17): a gear played from face down is played here ---------------
+
+def test_edge_of_night_from_face_down_at_rakelstake_predicts():
+    """Rakelstake: 'the first time they play a unit or gear here each turn, they
+    [Predict].' Edge of Night played from face down there is played here (the
+    owner's answer to Q6): it predicts, and a unit played there after doesn't."""
+    loop, a, b = setup(active="A")
+    _decks(a, b)
+    bf = loop.gs.battlefields[0]
+    bf.card = card("Rakelstake")
+    bf.add_unit("A", unit("here", 2))
+    hide(loop, "A", 0, "Edge of Night")
+    a.hand.append(card("Gutter Guardian"))
+    seen = choices(loop, {})
+    act(loop, "A", "Play Edge of Night from Hidden @BF0")
+    assert [k for k, _s, _o in seen if k.startswith("predict")] == ["predict_recycle"]
+    act(loop, "A", "Play Gutter Guardian to BF0")
+    assert [k for k, _s, _o in seen if k.startswith("predict")] == ["predict_recycle"]
+
+
+def test_edge_of_night_from_face_down_makes_hold_em_cheaper():
+    """Hold 'Em: 'This costs [2] less if you've played a unit or gear to a
+    battlefield this turn.'"""
+    from audit_helpers import labels
+    loop, a, b = setup(active="A", rich=())
+    loop.gs.battlefields[0].add_unit("A", unit("here", 2))
+    hide(loop, "A", 0, "Edge of Night")
+    a.hand.append(card("Hold 'Em"))
+    a.energy = 1
+    assert not [lb for lb in labels(loop, "A") if "Hold 'Em" in lb]
+    act(loop, "A", "Play Edge of Night from Hidden @BF0")
+    assert [lb for lb in labels(loop, "A") if "Hold 'Em" in lb]

@@ -25,7 +25,7 @@ and golden games, as engine fixtures.
 
 **State (2026-11-17, seventh pass): 58 deviations found, 58 fixed, none open.**
 The seventh pass read the owner's two post-ban decks: D57-D58, see its
-section. Suite: 1783 passed, 5 skipped, no xfail.
+section; the owner answered Q6. Suite: 1786 passed, 5 skipped, no xfail.
 Before it, (2026-11-12, sixth pass): 56 found, 56 fixed.
 The sixth pass re-checked the PARTIAL / GAP rows of `docs/MECHANICS.md` and
 took two Codex review comments: D53-D56, see its section. Suite: 1755
@@ -37,7 +37,7 @@ read the 119 cards of the other eight decks against the printed text and
 played them in the engine (D23-D28; no golden game changed). The second pass
 tested the two suspected deviations the first one left in "Not checked" (D19,
 D20) and fixed the two it met on the way (D21, D22). The owner answered Q1–Q4
-of "Ambiguous rules" (2026-11-11): Q1, Q3 and Q4 changed the engine, Q2 kept
+of "Ambiguous rules" (2026-11-11) and Q6 (2026-11-17): Q1, Q3 and Q4 changed the engine, Q2 kept
 it as it was; Q5 asks nothing. What is still open is in "Not checked"
 (what was not audited, and the leftovers noted under D1, D6 and D9). Two
 things a fix changed outside the engine: `ACTION_DIM` is 319, was 316 (D2:
@@ -820,9 +820,10 @@ decks (with each other, themselves and the precons; `simple_trade` and
   PREDICT a turn per player), Ruin Runner, Onslaught's FLOW.
 - **Seen on the way, a test and not the engine.** The invariant test didn't
   count a DEPLOY gear on a battlefield (The Good Stuff): it looked vanished.
-- **Left open.** Rakelstake and a gear played from face down (Edge of Night
-  in the Evelynn deck): whether it is "played here" is not settled; the engine
-  doesn't count it (Q6).
+- **Q6, answered by the owner (2026-11-17).** A gear played from face down
+  (Edge of Night) is played at its battlefield: it counts for Rakelstake and
+  for Hold 'Em, as a unit from face down already did. The engine counted
+  neither.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
@@ -896,8 +897,9 @@ Q1–Q4 answered by the owner (2026-11-11); each change has a test in
   mistaken for audited rules.
 - **Q6. Rakelstake and a hidden gear.** "The first time they play a unit or
   gear here each turn, they [Predict]." Edge of Night played from face down
-  at Rakelstake attaches to a unit there: played here or not? The engine
-  says not (only units, and DEPLOY gear). Open for the owner.
+  at Rakelstake attaches to a unit there: played here or not? The owner
+  (2026-11-17): played here. The engine now counts it, for Rakelstake and
+  Hold 'Em ("played a unit or gear to a battlefield this turn").
 
 ## Checked and found correct
 

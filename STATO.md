@@ -46,7 +46,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
 - Banlist completa (marzo-novembre). Settimo passaggio (Evelynn, Kha'Zix):
-  D57-D58, 480 partite sotto gli invarianti; Q6 aperta (Rakelstake).
+  D57-D58, 480 partite sotto gli invarianti; Q6 (utente): gear da nascosta = giocata lì.
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
   nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
@@ -71,7 +71,7 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
 3. GIUDIZI.md (G1, G4, G6, S1) usa carte bannate: da rivedere sui mazzi
    nuovi. Script di training e diag puntano ancora a Kai'Sa/Kennen: da
-   spostare su Evelynn/Kha'Zix prima di riallenare. Q6 all'utente.
+   spostare su Evelynn/Kha'Zix prima di riallenare.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
