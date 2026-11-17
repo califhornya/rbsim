@@ -68,8 +68,7 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
    Base (17/11, `handwritten_value.py`, 400 partite): 0,59 contro simple_trade
    (0,50 se gioca Evelynn, 0,69 Kha'Zix), 0,85 contro random.
-0. Sera del 17/11: partita dal vivo su RiftAtlas con l'utente (Evelynn contro
-   un amico): leggere `docs/bot/PARTITA_LIVE.md`.
+0. Sera del 17/11: partita dal vivo su RiftAtlas, vedi `docs/bot/PARTITA_LIVE.md`.
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli su
