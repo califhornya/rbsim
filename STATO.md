@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-17 (banlist completa; mazzi Evelynn e Kha'Zix post-ban; PR #26).
+Aggiornato: 2026-11-17 (settimo passaggio: mazzi Evelynn e Kha'Zix, D57-D58; PR #26).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -17,6 +17,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   Patched Porobot è unità e gear insieme.
 - (Utente, 2026-11-12) Otto mazzi non precon eliminati (con agenti Pyke e
   Diana), correzioni di carte tenute; training sui due mazzi competitive.
+- (Utente, 17/11) Kai'Sa e Kennen non si usano più (ban): i competitive sono
+  Evelynn e Kha'Zix. File vecchi tenuti come fixture (test, golden game).
 - Agente random seminato dal seed della partita; commenti di Codex
   verificati uno per uno. Imitazione di simple_trade scartata (da neofita).
 - Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
@@ -38,14 +40,13 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## Fatto
 - Passaggi 1-4: D1–D49, Q1–Q4, bug del coach (`cc3d776`). Dettagli in AUDIT.md.
-- Quinto passaggio (mazzi competitive, D50-D52, 8 golden game Kai'Sa vs
-  Kennen) e sesto (righe MECHANICS.md, D53-D56 `0b877df` `5ef1d33` `e115324`
-  `56ce034`; sostituzioni §367-373 e layer §475-482 giusti). Dettagli in
-  AUDIT.md.
+- Quinto passaggio (Kai'Sa, Kennen: D50-D52) e sesto (righe MECHANICS.md,
+  D53-D56). Dettagli in AUDIT.md.
 - Punto 3 (BACKLOG O3, `6ebd0e7`): la ricerca fa tutte le scelte del suo
   giocatore (albero, difesa, nascoste, `_Fallback`); PREDICT nell'encoding.
   A/B con lo stesso valutatore, 240 partite: nuova 68,8% contro la vecchia.
-- Ban del 13/11 in `banned_cards.json`; avviso anche per campi e campione.
+- Banlist completa (marzo-novembre). Settimo passaggio (Evelynn, Kha'Zix):
+  D57-D58, 480 partite sotto gli invarianti; Q6 aperta (Rakelstake).
 - Training: due budget di ricerca in self-play, weight decay, misure nuove
   nel log (`fd01c63`); ricerca `backup="best"`; bersaglio della politica dai
   Q (Gumbel "completed Q", costanti di mctx) e `--init` per partire da una rete.
@@ -68,10 +69,9 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
    ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
 2. Giudizi dell'utente da situazioni concrete: `docs/bot/GIUDIZI.md` (primo gruppo fatto).
-3. Ban del 13/11 (dal 23/11) in `banned_cards.json`; i mazzi caricano con un
-   avviso. Toccano Kai'Sa (3 Brynhir) e Kennen (3 Nocturne, 3 Rhasa); GIUDIZI.md
-   (G1, G4, G6, S1) da rivedere. Ban di marzo-settembre aggiunte (17/11, fonti Riot).
-   Post-ban: `competitive_evelynn/khazix.json` (28 carte da audit sul testo).
+3. GIUDIZI.md (G1, G4, G6, S1) usa carte bannate: da rivedere sui mazzi
+   nuovi. Script di training e diag puntano ancora a Kai'Sa/Kennen: da
+   spostare su Evelynn/Kha'Zix prima di riallenare. Q6 all'utente.
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
