@@ -180,6 +180,22 @@ Ogni fase ha il suo branch e la sua PR. Ogni passo è un commit, con test verdi,
 impronta identica e cricchetto rispettato. Ci si può fermare dopo qualsiasi
 passo e il progetto resta coerente.
 
+### Protezione del lavoro
+
+- Punto di partenza: il commit `e72318e` (`main` dopo la PR #28), con il tag
+  `pre-ristrutturazione` se l'utente l'ha creato. Per tornarci:
+  `git checkout e72318e`.
+- `main` cambia solo con il merge della PR di una fase, con test verdi,
+  impronta identica e l'ok dell'utente. Mai push diretti né force push su
+  `main`.
+- Branch corti: una fase, una PR, merge; la fase dopo riparte da `main`.
+  Niente branch lunghi che divergono dal lavoro sul bot e sulle regole, che
+  intanto continua su `main`.
+- Il riferimento dell'impronta si rigenera dal `main` di partenza di ogni fase:
+  se nel frattempo sono entrati fix di regole, il comportamento giusto è
+  cambiato. Una PR di fase in conflitto si riallinea a `main` e si rifà il
+  confronto.
+
 ### Fase 0: reti di sicurezza (prima di toccare il motore)
 
 1. **Impronta delle partite**, `scripts/diag/impronta.py`:
