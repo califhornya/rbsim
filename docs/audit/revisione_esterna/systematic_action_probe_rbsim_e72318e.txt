@@ -1,0 +1,365 @@
+SYSTEMATIC LEGAL-ACTION / OUTCOME PROBE — RBSIM
+17 November 2026
+
+Code reviewed and executed: e72318e0b60956c80228f83d7defd321dfb98950.
+Execution checkout: main at 29003114edc1fef0322ec987367fd3e219073116.
+Verified with git diff: no differences in riftbound/, tests/ or scripts/ between
+these commits. All line references below refer to that identical code.
+Python 3.12.14; PYTHONHASHSEED=0. No simulator code or tests were modified.
+
+RESULT
+
+Measured: 576 complete seeded games, 80,430 decision windows and 309,097
+offered-action trials. Every action in every menu encountered by the observer
+was applied to a separate clone, including unchosen actions and PASS.
+17 contradictions: state changed but the consumed result was noop.
+No acted/kept-without-change, unchanged non-PASS refusal, or exception was found
+in this sample. This is a finite sample, not a correctness guarantee.
+
+| Window | Decisions | Offered actions applied to clones |
+|---|---:|---:|
+| Main / turn_action | 33,726 | 240,830 |
+| Chain / reaction | 34,380 | 48,381 |
+| Showdown | 12,324 | 19,886 |
+
+The observed mismatches comprise these card/window groups:
+
+| Card | Window | Action / handler | Occurrences |
+|---|---|---|---:|
+| Gold | reaction | ABILITY / gear_ability:gain_power_any_domain | 9 |
+| Kai'Sa Daughter of the Void | reaction | ABILITY / ability:add_earmarked_power | 2 |
+| Seal of Discord | reaction | ABILITY / gear_ability:add_power | 4 |
+| Gold | showdown_action | ABILITY / gear_ability:gain_power_any_domain | 1 |
+| Kai'Sa Daughter of the Void | showdown_action | ABILITY / ability:add_earmarked_power | 1 |
+
+Separately, 613 focused corpus-fixture trials found two more failures:
+Detonation Amplifier and The Good Stuff, both GEAR in showdown. A further
+69 base-gear-ability trials found none. One additional focused regression
+demonstrates Teemo Scout / HIDE from Champion Zone in main after Guerilla Warfare.
+These constructed states are deliberately reported separately from seeded-game
+frequencies. The reproduction script exercises all eight card/window cases
+with assertions; repeated reproduction runs are not counted as new discoveries.
+
+HOW THE GAMES WERE SELECTED — MEASURED
+
+The six files under riftbound/data/decks/ are competitive_evelynn,
+competitive_kaisa, competitive_kennen, competitive_khazix, precon_shen and
+precon_zed. I used all 36 ordered pairs, including mirrors, and all four ordered
+agent pairs: random/random, random/simple_trade, simple_trade/random and
+simple_trade/simple_trade. Four repetitions per combination give 576 games.
+Each deck occupies each seat in 96 games; each agent pairing has 144 games.
+No sideboarding. The factory's normal max_turns=40 and battlefield selection
+apply. Four game seeds per combination are derived, in sorted deck order, from
+random.Random(2026111701).randrange(1 << 30); the script contains the exact product
+iteration. The random agents retain the factory's seeded RNG for each seat.
+
+I first used replacement observer agents. A no-audit control exposed four
+different game outcomes caused by that observer arrangement itself. I discarded
+that run for the final measurements and reran all 576 games by decorating methods
+on the original agents. The final run agrees with an uninstrumented replay in
+576/576 comparisons of winner, turns, points_A and points_B. This control does
+not prove complete final-state or decision-trace identity; those were not
+compared. Preliminary-run counts are not pooled into the numbers above.
+
+THE ORACLE AND ITS LIMITS
+
+The independent before/after snapshot walks the model object graph, including
+GameState, players, cards, units, battlefields, chain, counters, dynamic model
+fields, pending triggers, RNG state and units_played/spells_cast. Stable labels
+are assigned to the same objects within a trial, so swapping equal-looking
+cards or units is visible. Object references are retained during each trial to
+prevent Python address reuse from corrupting that comparison. The engine's
+_action_fingerprint is used only to reproduce its own reported result, never as
+the independent progress oracle.
+
+Excluded: agents and their caches, recorder/journal/chooser infrastructure,
+the duplicate Player.battlefields reference injected by GameLoop, Card.uuid
+(fresh-copy bookkeeping), Card.effects (printed immutable text), and absent
+versus empty/default private Card flags. All detected failures also have a
+concrete board, zone or pending_move delta, rather than only a cache change.
+
+Each clone copies GameState and the live loop's pending work/control context
+in one deepcopy graph. In particular _pending_triggers, _task_depth, _flushing,
+_all_pass and declaration/replay context are retained. Constructing a fresh
+GameLoop from a bare gs.clone() would reset this context and misrepresent
+decisions nested inside tasks. The exact copied-field list is in probe.py.
+Agents are removed from the clones, so later responses default to PASS and
+subchoices use the engine's default policies. This is one continuation per
+offered action, not enumeration of all target, optional, mode, or reaction
+continuations. Existing id()-key clone defects are preserved; this probe does
+not repair them. The minimized failures also reproduce directly without a
+clone, so those failures do not depend on those known identity defects.
+
+For main actions, _apply_action returns None. Its effective outcome is the
+_run_main_actions fingerprint guard, including its special ended_move exception
+and passive recomputation. For reactions I record both _reaction_step's result
+and the result actually consumed after the caller's trigger flush and chain
+growth override (7601–7605). For showdown I compare immediately after
+_showdown_step, before the caller's later _open_combat. acted and kept both mean
+an applied action for this progress check; priority correctness between them
+is a separate property, not established here.
+
+PASS is intentionally not required to mutate the model. Main PASS can finish
+pending_move, run its showdown and continue main; reaction/showdown PASS affects
+the caller's local priority/pass counters. Those are valid PASS semantics, not
+false no-ops. Every PASS offer was still cloned and exercised by that window's
+driver semantics. The audit also flags a non-PASS offer that is unchanged and
+refused as noop; none occurred in the final seeded run.
+
+FINDING A — PENDING MOVE SWALLOWS A LEGAL ABILITY
+
+High confidence, measured in seeded games and minimized directly.
+
+_apply_action at loop.py:5500–5503 intercepts every non-joining action while a
+Standard Move is pending, flushes that move and returns before executing the
+chosen action. That is intentional for an ordinary main-phase move declaration.
+But legality.py's reaction/showdown menus still offer activated abilities in
+nested windows with pending_move present. The main-only menu filter at
+legality.py:162–166 does not protect these windows.
+
+_use_ability_now (6774–6777) then compares a partial fingerprint. Clearing
+pending_move and establishing battlefield control are absent from it. If no
+counted quantity changes, it reports False and the step returns noop, even
+though a held move was completed or its marker was consumed. Gold and Seal
+remain unspent; Kai'Sa remains ready and adds no spell power. This is not a
+successful activation mislabeled: the requested activation never runs.
+
+During an already active showdown, _flush_pending_move clears the marker and
+_run_showdown immediately returns because showdown_active is true (7741–7742).
+That alone can produce the discrepancy. Outside that situation, a move's
+showdown can establish control without changing the fingerprint, particularly
+when the battlefield already scored this turn.
+
+Minimal reproduction recipes (all use an action obtained from legal_actions):
+
+1. Reaction, Gold or Seal of Discord: ready Traveling Merchant in A's base,
+   one discardable hand card, the ready gear in base, and a battlefield marked
+   already scored by A this turn. Standard Move Merchant to that battlefield.
+   Its on_move trigger opens a reaction window before pending_move is flushed.
+   Choose the offered gear ability. Result noop; pending_move clears and the
+   battlefield can become held by A; the gear is not used. See
+   reproduce.py:pending_reaction_case('Gold' or 'Seal of Discord').
+2. Showdown, Gold or Kai'Sa: A has a ready Gold or ready Kai'Sa legend, B is
+   active, both players have a unit at BF0, showdown_active=True, BF0 is the
+   showdown, and pending_move=(0,'B'). Choose A's offered ABILITY. Result noop;
+   pending_move becomes None; the source remains ready/unspent. These conditions
+   are reduced from actual sampled nested windows. See pending_showdown_case.
+3. Reaction, Kai'Sa: same reduced showdown state, with an open chain; ask
+   legal_actions(REACTION,'A') and apply that ABILITY. Same result. The original
+   sampled state had a real chain; the small reproduction needs only an open
+   chain item because it never resolves it.
+
+Impact: noop is counted as a pass by _run_chain (7606–7617) and _run_showdown
+(7792–7798), so a real state transition can advance priority/pass accounting or
+end a window. When the move flush changes something the fingerprint does count,
+an interrupted activation can instead report success. This probe's counts are
+only contradictions between progress and acknowledgment, not a count of every
+swallowed activation. They do not estimate match win-rate impact.
+
+FINDING B — DRAWING GEAR FAILS THE HAND-SHRINK SUCCESS TEST
+
+High confidence, measured in focused fixtures and direct minimal reproductions.
+Not reached by any GEAR offer in the final sampled reaction/showdown menus.
+
+Jarvan IV Martial Paragon grants ACTION to friendly DEPLOY gear. In a showdown
+with Jarvan in A's base, an A/B unit at BF0, sufficient normal runes and the gear
+in hand, legal_actions offers GEAR. _showdown_step (7843–7846) executes it but
+requires len(hand) to decrease before returning acted.
+
+Detonation Amplifier: hand [Amplifier] -> [Drawn card]. It deploys, costs energy,
+kills the available friendly 1-Might sacrifice and draws one; the equal final
+hand size makes the step return noop. Reproduction uses six Fury runes.
+
+The Good Stuff: hand [The Good Stuff] -> three drawn cards. It deploys and pays
+its cost, then the default on-play resolution draws three after the attempted
+discard. The final hand is larger, so the step returns noop. Reproduction uses
+six Chaos runes. There is no available card to discard after the gear leaves
+the one-card hand; the engine proceeds with the remaining instructions. This
+test demonstrates the implementation's outcome acknowledgment, not a separate
+rules judgment about that card's effect parsing.
+
+Both are reproduce.py:gear_case(name). The same hand-shrink inference exists in
+_reaction_step at 7641–7644, but I did not find a reaction-speed gear failure in
+the scanned fixtures. Do not promote that static risk into a measured failure.
+
+Impact: the gear and its effects happen, but the showdown caller counts it as
+a pass. A pre-existing consecutive pass can therefore close the window after
+an actual play. The probe does not simulate every subsequent priority choice.
+
+FINDING C — A FREE CHAMPION HIDE ENDS MAIN AS A FALSE NO-OP
+
+High confidence, direct measured regression outside the six-deck trajectory.
+
+Teemo Scout is a registry Champion with HIDDEN. Put it in A's Champion Zone,
+give A control of a battlefield, and set the real state produced by Guerilla
+Warfare's free_hide_this_turn effect. legal_actions offers HIDE('champion', BF0).
+_hide_card returns True, sets champion_A_deployed and adds a facedown card.
+Hand size, resources, unit counts and every other fingerprint quantity stay
+unchanged. _apply_action discards the helper's Boolean; the main guard treats
+the successful hide as a no-op and ends the action phase.
+
+reproduce.py:free_champion_hide_case checks both the clone-based result and the
+actual _run_main_actions: the agent is asked exactly once, although its second
+response would have been PASS. Thus main ends at the guard before another
+decision. The generalized risk concerns other free HIDDEN champion hides too;
+only Teemo Scout is claimed as the additional measured regression here.
+
+EVERY ACTION-OUTCOME INFERENCE SITE FOUND IN THE CODE
+
+Measured static inventory: five success/failure checks plus three closely
+related priority classification checks = eight sites. _action_fingerprint's
+definition is shared, not counted as a ninth call site. This covers the action
+acknowledgment path; ordinary affordability, target and rules predicates are
+not presented as outcome inference.
+
+| Location in loop.py | Inference | Assessment |
+|---|---|---|
+| 8278–8284, _run_main_actions | Partial fingerprint changed, or held move ended | Main success/no-op guard; free champion hide fails it |
+| 6774–6777, _use_ability_now | Partial fingerprint changed | Ability success Boolean; pending-move cases fail it |
+| 7641–7644, _reaction_step GEAR | Hand shrank | Success inferred from net hand size; static risk, no reaction failure measured |
+| 7835–7838, _showdown_step UNIT | Base unit count increased | Success inferred from net bodies; replacement, on-play movement or death can offset it; no failure measured |
+| 7843–7846, _showdown_step GEAR | Hand shrank | Confirmed drawing-gear failures |
+| 7662–7664, _reaction_step ABILITY | Same chain length => kept; changed => acted | Infers priority behavior from net stack length after success check |
+| 7601–7605, _run_chain | Chain grew after trigger flush => force acted | Can override an earlier acknowledgment, including noop; an extra reason to inspect consumed result |
+| 7860–7862, _showdown_step ABILITY | _chained_abilities or spells_cast changed => acted, else kept | Infers focus behavior from execution counters |
+
+The fingerprint (3959–3989) contains hand/deck/trash/banished lengths, base-unit
+and base-gear counts, energy, power pools, total rune count, ready base-unit
+names, base-unit Might sums, tapped base-gear count, legend readiness, two
+earmarked-resource fields, battlefield unit counts/Might sums/ready sums,
+points, chain length and XP. It does not include pending_move, control/contest
+markers, facedowns, champion deployment status, damage, most temporary flags,
+card/unit identity, chain contents or all earmarked resources. These omissions
+are statically verified; not every omission has a measured false-noop here.
+
+Related inference elsewhere — distinct from action acceptance, and not all bugs:
+
+| Location | What is inferred | Verification / confidence |
+|---|---|---|
+| effects.py:120, _deal_damage | Any selected unit no longer locatable => 'if this kills it' reflexive | Static, high; no mismatch measured in this audit |
+| effects.py:816–822, _minefield | Number of selected existing Bombs, counted before kill call => number later replayed | Static, high; not proof of a defect, current kill helper removes that list |
+| effects.py:266–271, _best_mode | A former chain item missing after speculative mode => countered, add its value | Static, high; heuristic valuation rather than step acknowledgment |
+| effects.py:2801–2804, _unit_split_damage | Targets absent from opponent's battlefield units => kills, award XP | Static, high; no rules mismatch verified here |
+| effects.py:3507–3514, _channel_rune | Net rune-count increase < requested => couldn't channel enough, draw fallback | Static, high; _extra_channel runs before the comparison; no failure measured |
+| loop.py:814–819, _board_changed | Set of presence object IDs changed => board changed while declaring | Static, high; local declaration bookkeeping, not step success |
+| loop.py:8437–8448, _record_unit_diffs | Before-unit UUID absent from after lane => record DEATH | Static, high; recorder event inference, not action acceptance |
+| ai/coach.py:485–493, _board_events | Missing unit names plus trash/token observations => death vs left board | Static, high; user-facing narration, not engine truth |
+| ai/coach.py:501–507, _board_events | Deck count decrease plus net new hand names => drawn vs burned | Static, high; narration can lose offsetting transitions, not tested as a rules defect |
+
+AI consumers: ai/heuristics/base_agent.py:192 and :224 use _use_ability_now's
+Boolean to stop/discard speculative Add-resource sequences. Its :190–198 also
+measures net resource gains for affordability, not an independent success
+contract. ai/net_mcts.py:868 and :870 invoke showdown/reaction steps but ignore
+their returned strings in that helper. Those are consequences/consumers of the
+listed checks, not additional independent outcome detectors.
+
+HOW I CHECKED THAT INVENTORY
+
+Repeatable commands from the pinned repo:
+
+  rg -n '_action_fingerprint|_use_ability_now|_reaction_step|_showdown_step' riftbound
+  rg -n 'noop|acted|kept' riftbound/core/loop.py
+  rg -n 'before|after|prev|old|killed|countered|drawn' riftbound/core/loop.py riftbound/core/effects.py riftbound/ai/coach.py
+
+I also parsed every Python file under core/ and ai/ with ast, located calls to
+the four outcome helpers, and inspected comparisons of before/after variables
+and collection lengths. The eight acknowledgment sites are a code inventory;
+the broader related list is an inspected inference inventory, not a formal
+proof that all possible implicit domain assumptions have been enumerated.
+
+WHY THE EXISTING LEGALITY TEST DID NOT ESTABLISH THIS PROPERTY
+
+Measured from tests/test_legality.py: _GAMES contains three games. Its
+_ProbeLoop hooks main _apply_action, compares the engine's own fingerprint,
+and explicitly exempts ABILITY from the progress requirement (around 89–92).
+It does not observe all three window callbacks with an independent model diff.
+Therefore that test cannot rule out the failures above. This is a statement
+about its test oracle and scope, not a claim that the whole suite lacks tests
+of the affected cards.
+
+LIMITS / CONFIDENCE
+
+High: measured counts, the eight minimized failure variants, code locations,
+and the concrete state deltas in the attached records. All minimal reproduction
+assertions passed on the unmodified code. No match-impact percentage is estimated.
+
+Moderate: 'no other mismatches' applies only to the sampled menus and selected
+default continuation. It says nothing about unseen deck/board combinations,
+sideboards, different target choices, training agents, every handler branch,
+or actions legality fails to offer. In particular the seeded games offered no
+GEAR actions in reaction or showdown; the corpus fixtures close that specific
+coverage hole only partially. The 613-card-fixture scan is not 1,098 fully tested
+cards: it selectively exercises gear plays, fast unit plays and activated unit
+sources under one constructed board. The 69 gear-ability checks are another
+single-board supplement, not exhaustive effect coverage.
+
+This property also cannot prove an effect obeys official rules: an incorrectly
+applied effect can still change state and return acted consistently. It does
+not solve cloning identities, serialization, determinism under arbitrary
+policies, event ordering, or a complete legality soundness/completeness proof.
+
+The corrective design implied by the evidence is an explicit application
+result from the execution path (applied, rejected, or ended-pending-move), with
+explicit priority/focus disposition. Card helpers should propagate that result;
+callers should consume it instead of testing net hand size, body counts or a
+partial fingerprint. Preserve a separate loop-termination guard if needed.
+I did not implement that change or regenerate any goldens.
+
+REPRODUCTION COMMANDS
+
+The companion ZIP contains the scripts, raw JSONL, all mismatch deltas, stored
+first-failure states, focused-fixture results and the baseline control. It does
+not contain a copy of the Git repository. From a Python >=3.11 checkout:
+
+  git checkout e72318e0b60956c80228f83d7defd321dfb98950
+  uv sync --frozen
+  export RBSIM_REPO=/absolute/path/to/rbsim
+  export RBSIM_AUDIT_OUT=/absolute/path/to/unpacked/rbsim_action_probe
+  export PYTHONHASHSEED=0
+  uv run python /absolute/path/to/unpacked/rbsim_action_probe/reproduce.py
+  uv run python /absolute/path/to/unpacked/rbsim_action_probe/probe.py --repeats 4 --workers 6 --output final_results.jsonl
+  uv run python /absolute/path/to/unpacked/rbsim_action_probe/baseline.py
+  uv run python /absolute/path/to/unpacked/rbsim_action_probe/supplement.py
+  uv run python /absolute/path/to/unpacked/rbsim_action_probe/gear_abilities.py
+
+For one saved state, pass its path to replay.py. In the JSONL, snapshot paths
+retain their original measurement location; use the same basename under the
+ZIP's cases/ directory. Game decision indices count all three windows together
+within that game. The complete seed, deck names, agent names, side, turn,
+window, source card, offered action and delta accompany every occurrence below.
+
+ALL SEEDED OCCURRENCES — NO SAMPLING WITHIN THE MISMATCH LIST
+
+01. seed=34628096; rep=0; competitive_kennen (simple_trade) vs competitive_kennen (random); decision=236; turn=16; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#120.contested_by: A -> None; Battlefield#120.gained_control: None -> A; Battlefield#120.held_by: None -> A; GameState#0.pending_move: [1, 'A'] -> None
+
+02. seed=1002477127; rep=0; competitive_khazix (random) vs competitive_khazix (simple_trade); decision=79; turn=11; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#118.contested_by: A -> None; GameState#0.pending_move: [1, 'A'] -> None
+
+03. seed=547084716; rep=1; competitive_kennen (random) vs competitive_khazix (simple_trade); decision=138; turn=15; side=B; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#113.contested_by: A -> None; Battlefield#113.gained_control: None -> A; Battlefield#113.held_by: None -> A; GameState#0.pending_move: [0, 'A'] -> None
+
+04. seed=711990826; rep=2; competitive_evelynn (simple_trade) vs competitive_khazix (random); decision=32; turn=6; side=A; window=showdown_action; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [1, 'B'] -> None
+
+05. seed=711990826; rep=2; competitive_evelynn (simple_trade) vs competitive_khazix (random); decision=34; turn=6; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [1, 'B'] -> None
+
+06. seed=711990826; rep=2; competitive_evelynn (simple_trade) vs competitive_khazix (random); decision=36; turn=6; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [1, 'B'] -> None
+
+07. seed=711990826; rep=2; competitive_evelynn (simple_trade) vs competitive_khazix (random); decision=38; turn=6; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [1, 'B'] -> None
+
+08. seed=711990826; rep=2; competitive_evelynn (simple_trade) vs competitive_khazix (random); decision=40; turn=6; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [1, 'B'] -> None; UnitInPlay#117.was_mighty: False -> True
+
+09. seed=247316313; rep=2; competitive_kaisa (simple_trade) vs precon_zed (random); decision=126; turn=12; side=A; window=showdown_action; card=Kai'Sa Daughter of the Void; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [0, 'B'] -> None; UnitInPlay#118.was_mighty: False -> True
+
+10. seed=247316313; rep=2; competitive_kaisa (simple_trade) vs precon_zed (random); decision=128; turn=12; side=A; window=reaction; card=Kai'Sa Daughter of the Void; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [0, 'B'] -> None
+
+11. seed=247316313; rep=2; competitive_kaisa (simple_trade) vs precon_zed (random); decision=130; turn=12; side=A; window=reaction; card=Kai'Sa Daughter of the Void; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=GameState#0.pending_move: [0, 'B'] -> None
+
+12. seed=734019601; rep=2; precon_zed (random) vs competitive_kennen (simple_trade); decision=95; turn=10; side=B; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#113.contested_by: A -> None; Battlefield#113.gained_control: None -> A; Battlefield#113.held_by: None -> A; GameState#0.pending_move: [0, 'A'] -> None
+
+13. seed=30502052; rep=3; competitive_kaisa (random) vs competitive_kennen (random); decision=109; turn=11; side=B; window=reaction; card=Seal of Discord; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#108.contested_by: B -> None; Battlefield#108.gained_control: None -> B; Battlefield#108.held_by: None -> B; GameState#0.pending_move: [0, 'B'] -> None
+
+14. seed=687618061; rep=3; competitive_kennen (simple_trade) vs competitive_kennen (random); decision=164; turn=12; side=A; window=reaction; card=Seal of Discord; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#118.contested_by: A -> None; Battlefield#118.gained_control: None -> A; Battlefield#118.held_by: None -> A; GameState#0.pending_move: [0, 'A'] -> None
+
+15. seed=687618061; rep=3; competitive_kennen (simple_trade) vs competitive_kennen (random); decision=164; turn=12; side=A; window=reaction; card=Gold; action=['ABILITY', 'ACTIVATED', 1]; reported=noop/noop; delta=Battlefield#118.contested_by: A -> None; Battlefield#118.gained_control: None -> A; Battlefield#118.held_by: None -> A; GameState#0.pending_move: [0, 'A'] -> None
+
+16. seed=456635100; rep=3; precon_zed (random) vs competitive_kennen (random); decision=272; turn=19; side=B; window=reaction; card=Seal of Discord; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#116.contested_by: B -> None; Battlefield#116.gained_control: None -> B; Battlefield#116.held_by: None -> B; GameState#0.pending_move: [1, 'B'] -> None
+
+17. seed=456635100; rep=3; precon_zed (random) vs competitive_kennen (random); decision=275; turn=19; side=B; window=reaction; card=Seal of Discord; action=['ABILITY', 'ACTIVATED', 0]; reported=noop/noop; delta=Battlefield#115.contested_by: B -> None; Battlefield#115.gained_control: None -> B; Battlefield#115.held_by: None -> B; GameState#0.pending_move: [1, 'B'] -> None

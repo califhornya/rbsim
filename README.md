@@ -45,7 +45,8 @@ The net uses CUDA when available, else the CPU; all randomness is seedable.
 | `docs/rules/` | Core Rules (revision 2026-10-09) and Tournament Rules as text |
 | `docs/MECHANICS.md` | Rules mechanics, one row each, with status (some rows lag the code: see its header) |
 | `docs/reports/` | Generated reports (coverage, choice audit) |
-| `docs/audit/AUDIT.md` | The rules audit: every deviation found (D1-D58), the owner's rulings (Q1-Q6), what was not checked |
+| `docs/audit/AUDIT.md` | The rules audit: every deviation found (D1-D68; D59-D68 open), the owner's rulings (Q1-Q6), what was not checked. `docs/audit/revisione_esterna/`: the external review behind D59-D68 |
+| `docs/PIANO_MOTORE.md` | The plan for the engine's fixes and structure (not started) |
 | `docs/bot/` | The owner's judgments for the bot (`GIUDIZI.md`) and the scenarios |
 | `docs/archivio/` | Old status notes, issue logs and the closed backlog (A-G, cited in code comments). Not the current state |
 
@@ -60,7 +61,7 @@ stay weak against `simple_trade`.
 
 - A card or rule is done when a test plays the situation and checks what the
   card text / Core Rules say, not when the card "has effects".
-- `tests/golden_games.json` freezes 20 seeded games. Regenerate it
+- `tests/golden_games.json` freezes 28 seeded games (final state only). Regenerate it
   (`RBSIM_REGEN_GOLDEN=1 uv run pytest tests/test_golden_games.py -q`) only for
   an intended rules change, and read the diff.
 - Card text: check `all_cards.json` against the printed text with

@@ -1,0 +1,459 @@
+RIFTBOUND STABLE-IDENTITY DESIGN
+================================
+
+Reviewed revision: 29003114edc1fef0322ec987367fd3e219073116 (main at inspection).
+The engine, tests, and scripts match e72318e. Rules citations use the repository's
+CORE_RULES.md, revision 2026-10-09. This is a design and a read-only audit.
+Commit: https://github.com/califhornya/rbsim/commit/29003114edc1fef0322ec987367fd3e219073116
+Rules: https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md
+
+Recommendation
+
+Make two changes separately. First, fix the three clone-unsafe stores while
+preserving their current live-game meaning. Then implement zone-lifetime
+identity for rule references. The second change addresses an actual opposite
+failure. Riven Deserter's once-per-turn activation remained spent after Temporal
+Breach returned the same backing Card as a new UnitInPlay in the same turn,
+with three ready donors left to pay for it. A clone must keep the mark for the
+same game object. A fresh game object should have its own mark under §124 and
+Riven's printed restriction, read with §377.2.b.
+
+
+1. COMPLETE id() INVENTORY
+--------------------------
+
+Measured 96 executable calls. The 47 in loop.py are close to the estimate of
+48. The other 49 are in effects.py (46), combat.py (1), cards.py (1), and
+ai/heuristics/base_agent.py (1). Text search finds 100 matches because it also
+finds four examples or comments. The appendix lists every executable site.
+
+| Class | Calls | Lifetime and decision |
+|---|---:|---|
+| P1 — once_per_turn_used | 10 | Address used for a key in GameState. The copied dictionary retains the address of the original Card. |
+| P2 — conquer_return | 2 | Address used for a granted-effect subject in GameState. The copied list retains the address of the original UnitInPlay. |
+| P3 — combat_designated | 5 | Address used for membership in a Battlefield set on GameState. The copied set retains original UnitInPlay addresses. |
+| D — copy machinery and declaration scratch | 20 | deepcopy memo, reverse maps, board-presence comparisons, and ghost flags in one speculative pass. The ghost set is built on the branch after copying. The maps translate surviving choices before they are stored. |
+| L — local same-graph lookups | 58 | Target ranking and membership, grouping deaths, cost candidates, ownership or attachment lookup, and combat Might modifiers passed directly into the damage calculation. Safe with respect to cloning while kept this local. |
+| A — agent cache | 1 | The _adds_now resource cache uses the live GameState address as an agent-local discriminator. GameState.clone strips agents. Keep this cache isolated from rules identity. |
+
+P1 has seven distinct key shapes in GameLoop. Preserve the current turn check
+and each suffix in the clone-only change.
+
+| Current address-bearing key | Source and scope | Sites in loop.py |
+|---|---|---|
+| (id(card), instruction_index) | Source of a once-limited triggered instruction | 1684, 1747 |
+| (id(unit.card), "orianna") | Orianna Mechanical Marvel's gear discount | 4204, 4212 |
+| (id(z.card), "double_tokens_once") | Zilean Time Mage's token replacement | 5040 |
+| (id(src), "activated", effect_verb[, copy]) | Activated source, separate Svellsongur copy slot | 5737 |
+| (id(bf.card), side, "bf_ability") | Black Market, separate use per player | 6131, 6630 |
+| (id(dead_unit.card), "sacrifice_instead_of_dying") | Mordekaiser Twice Slain's death replacement | 6915 |
+| (id(bf.card), side, "unit_dies_here") | Black Rose Sanctum, separate per player | 7023 |
+
+P2 is written by effects.py:1412 and read by loop.py:1145. I verified it with
+Relentless Pursuit: cast it as in the existing test, clone after it moves and
+marks the runner, then force the optional return on conquer in each branch.
+The live runner returned and the copied runner did not.
+
+P3 is populated and read across loop.py:7296, 7309, 7325, 7922, and 7925.
+loop.py:7311 is a separate local Might-modifier lookup. Its table is created
+from the units in the current graph and consumed immediately. It belongs to L.
+
+Adjacent identity paths matter to the second change. modes_chosen uses the
+Card object itself as a key, as effects.py:187 shows. It already survives a
+graph copy even though the comment in state.py:158 says id. Its per-object
+lifetime still needs a zone-change test. The Piltovan Forge key at
+loop.py:4281/4286 has only a string and a player. It tracks the player's
+first gear activation and should survive leaving and re-entering play. The
+Irelia declaration path and the AI/card recorder already use Card.uuid for
+correlation. Some copy effects change unit.card to a freshly instantiated
+face, so that UUID alone cannot serve as a rules-object handle.
+
+Repeatable count, run from the repo root at the pinned revision:
+
+    python - <<'PY'
+    import ast
+    from pathlib import Path
+    for path in sorted(Path("riftbound").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        hits = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
+                and isinstance(n.func, ast.Name) and n.func.id == "id"]
+        if hits:
+            print(path, len(hits), sorted(n.lineno for n in hits))
+    PY
+
+State and copy path: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/state.py#L245
+Combat reads: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/loop.py#L7292
+Mode key: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/effects.py#L181
+Existing Relentless Pursuit test: https://github.com/califhornya/rbsim/blob/2900311/tests/test_corpus_spiritforged.py#L557
+
+
+2. WHEN IDENTITY CHANGES UNDER THE RULES
+---------------------------------------
+
+A physical card and the rules object it currently represents have different
+lifetimes. Use the rules object for targeting and per-object usage. Keep a
+separate way to correlate the underlying physical piece through zones.
+
+| Event | Required treatment | CORE_RULES.md |
+|---|---|---|
+| Actual change of zone whose origin or destination is Non-Board | Fresh rules object. This includes deck to hand, hand to trash, trash to deck, play onto the Chain, permanent off the Chain onto the Board, and resolved spell off the Chain into trash. Clear old temporary modifications and statuses. The physical piece and its owner can still be tracked. | §§106–108, 124–124.2, 127.1, 354, 359.2, 359.3.d, 414.1, 417.1, 423.1, 428.1–2, 429.1–2 |
+| Leave and return to the same zone or battlefield | Fresh object even if the same card returns immediately. An older target cannot reacquire it. The old source's once-per-turn use stays with that source incarnation. A per-player restriction still applies according to its wording. | §§124, 359.3.e.2–.4, 371.1, 377.2.b, 383.3.e, 386 |
+| Move battlefield ⇄ base or battlefield ⇄ battlefield, including board-to-board control changes | Same object. Controller and location can make a target valid or invalid independently. If a unit moves to base and back before resolution, it can again meet a battlefield restriction. | §§107, 124, 190.3.a.2, 198.1–.2, 448.1–.3, 359.3.e.2–.3 |
+| Rules action Recall, attach or detach, or a gear becoming a unit gear | Same object while it stays on the Board. Recall relocates to base. Returning a card to hand is a distinct operation. Equipment that detaches when its top-most card leaves remains in its own Board zone. | §§124, 143.5.b, 178, 457–460.1, 718.5–.6.a, 719.3–.5 |
+| Hide a card, play it from facedown, reveal or reorder cards | Hand or Champion Zone to Facedown is a crossing into a Board sub-zone. Facedown to Chain is another crossing. Reveal alone is a state change, and reordering within the same deck does not change zone. | §§107.3, 108.1, 108.3, 124, 354, 422.1, 425.1.a–.2, 811.1.b–.c |
+| Existing object becomes a copy or stops being a copy | Same object with changed copyable traits. Re-check predicates such as type or Might. Preserve that object's identity when the effect starts or ends, even if the engine changes the wrapper or Card used to represent its face. | §§124, 446.1–.2, 479.1.b–.c |
+| Create a copy, or create an ordinary token | Fresh distinct object for every created piece. A Zilean-created copy or new Reflection has its own identity. Copyable characteristics come from the model, including earlier copy-layer traits where applicable. The source's damage, marks and history do not come with them. A Reflection already created keeps its own identity when it takes on traits. | §§180, 185–185.2, 440.1–.2, 446.3, 479.1.b.1–.c |
+| Token moves to a Non-Board Zone other than the Chain | Process the applicable transition/departure, then the token ceases to exist immediately. Later token creation is independent. Death or leaves-board triggers may still need the departing token's information. | §§186–186.1, 383.2.c.3–.3.b, 429.1.a.1.b |
+| Battlefield replaced by Brush, then swapped back | Explicit continuity exception. The replacement token occupies a fresh physical piece but is treated as the same battlefield game object for targeting and references, inheriting statuses and effects. The displaced card goes to Banishment as replaced. Swap-back ends the token and returns the card with current statuses/effects. | §§439.1–.1.a, 439.5–.7.b.1, 199.1 |
+| A play is cancelled, a spell is controlled by another player on the Chain, or Repeat executes again | Undo a cancelled play, including its provisional identity change. Control or new choices on the same Chain Item preserve its identity. Repeat runs instructions again on the same item. A separate ability/cast on the Chain is a distinct item, even with the same physical source. | §§135.2.b.7, 191.5.b, 358.5, 402.1, 752–754, 820.1.d, 820.3.a |
+
+Leaving play also has timing and reference exceptions. Preserve explicitly
+saved pre-transition characteristics for a cost/effect's look-back. Capture
+the departing source and needed characteristics when it triggers. An
+already-created delayed ability can outlive its source. A linked effect can
+refer to the new object in the destination zone when its text calls for it.
+Bind that link to the particular event and destination object, e.g. "the card
+I banished", so a later unrelated visit to that zone cannot satisfy the link.
+Rules §§359.3.e.13–.14, 359.3.f.2–.3, 383.2.c.3, 391.5, 393, 398, 428.3.
+
+Combat needs two concepts. A same-object move out of combat or a change of
+controller can remove or switch designation. A unit already checked for its
+Attack or Defend trigger does not re-check that same role in the same combat.
+A new object arriving mid-combat is eligible for the appropriate designation
+as an arrival. The current set serves both as a membership test and a history
+of units processed by _open_combat. Preserve that behavior in the clone-only
+patch. Test role history and current designation separately if correcting the
+combat model. Rules §§323.2.a–.c, 383.4.e.2.a, 383.4.f.2.a, 466.2.c.3.a,
+468.7.a–.c.
+
+Rules anchors:
+§124: https://github.com/califhornya/rbsim/blob/2900311/docs/rules/CORE_RULES.md#L319
+§359.3.e: https://github.com/califhornya/rbsim/blob/2900311/docs/rules/CORE_RULES.md#L2165
+§439: https://github.com/califhornya/rbsim/blob/2900311/docs/rules/CORE_RULES.md#L3587
+§446: https://github.com/califhornya/rbsim/blob/2900311/docs/rules/CORE_RULES.md#L3773
+§479.1: https://github.com/califhornya/rbsim/blob/2900311/docs/rules/CORE_RULES.md#L4103
+
+
+3. PROPOSED REPRESENTATION AND MIGRATION
+---------------------------------------
+
+A. Clone fidelity, with today's live-object lifetimes
+
+Use graph references in the three stores as the small first fix. The relevant
+Card and UnitInPlay classes have identity equality and hashing (eq=False).
+A copied graph rehashes these keys and reconnects them to the copied card or
+unit. Store the source Card in P1 with its existing discriminator, store the
+marked UnitInPlay and turn in P2, and store the designated UnitInPlay in P3.
+Migrate reads and writes together. This also avoids an address being reused
+after its original object is destroyed. Keep these references bounded by
+their existing turn/combat lifetimes. Retain current-turn marks for queued
+old-source abilities until they have finished using them.
+
+This is a deliberately small bridge. Card references preserve the current
+behavior for a replayed backing Card, including the Riven case above. Keep
+address-based copy memos and ephemeral combat modifier maps. Characterize
+both pickle-based clone and deepcopy declaration before changing any zone
+behavior. The clone boundary remains the GameState graph; a mid-task
+continuation with its Python stack and pending loop work is a different
+problem.
+
+B. Rules lifetimes and value snapshots
+
+1. Represent a rules object with a small immutable, game-scoped ObjectId
+   allocated by a counter on GameState. Use a distinct type/tag so an object
+   target cannot be confused with a mode number, action index, player or
+   location. Preserve these values and the allocator on clone and deepcopy.
+   Allocate on setup/admission, real creation, and a committed zone
+   transition. Keep lookup pure. Use a game-local counter independent of the
+   game RNG; never order actions/targets by ID. Treat IDs allocated on
+   divergent sibling branches as branch-local. Preserve correspondence only
+   for shared-prefix objects, or through the explicit deepcopy back-map.
+   Two branches can legitimately allocate the same serial for different new
+   objects.
+
+2. Hold the current ObjectId on the canonical zone occupant/permanent, not
+   its display name, copied Card face, or throwaway wrapper. A UnitInPlay and
+   its backing physical piece agree on which in-play occurrence they
+   represent. When gear gains or loses a UnitInPlay/DeployedGear wrapper, carry
+   its Board ObjectId through. Preserve the underlying physical piece
+   separately through transitions. Card.uuid already serves diagnostics and
+   some search correlation. Keep that contract and resolve any face-swapping
+   callers explicitly before equating it with a physical piece ID. The same
+   Battlefield object is both a location and a rules object. Keep those
+   references distinguishable and implement §439 continuity explicitly.
+
+3. Freeze the ObjectId at the moment a target, grant, pending trigger, or
+   linked effect is recorded. A reference to a mutable Card that is later
+   consulted for its *current* ID recreates the same bug. Capture chain-item
+   identity independently of its physical source and revalidate target
+   predicates at resolution. For declared choices, lift the object parts
+   into value snapshots while keeping the semantics of ordered choices,
+   tuples, players and destinations. The Gear options in effects.py can
+   include controller/holder metadata; do not use that metadata as the gear's
+   identity. Snapshot the old source and required characteristics before
+   moving it, and point a text-authorized link to the particular destination
+   occurrence if needed. Apply this to the declared-board restoration and
+   "it" paths where an old object is intentionally tracked. Keep temporary
+   ranking/collection comparisons local. For the Irelia cost/target tie,
+   capture the intended unit occurrence in the declaration snapshot.
+
+4. Wire the boundary at actual operations rather than at list removal.
+   The same list operation can implement moving, attaching, killing, or
+   taking control. Start with admission and play, hand/trash/banishment
+   transfers, and the hide path. Unit and gear play currently compress parts
+   of rulebook Chain handling. Record the board occurrence at real entry
+   and distinguish any actual ChainItem without changing finalization order
+   to add identity. Route ordinary moves and recalls through the
+   identity-preserving branch. Cover direct mutations in effects.py,
+   notably _blink_unit, gear returns, conversions, and face copies. For
+   _route_deaths, preserve batched handling and snapshot the departing
+   occurrence after replacement is decided and before zone transfer.
+   On an undone play restore the prior identity and state. Determinize is a
+   new hidden-information hypothesis inside a search branch. Preserve known
+   and public references when resampling and keep internal IDs out of
+   player-visible observations.
+
+5. Key source-bound uses by ObjectId plus the ability/instruction slot. Keep
+   each existing player qualifier where the card text specifies a player,
+   and keep player-only usage independent of any object's lifetime. Preserve
+   the current slots in A. For B use a stable printed/granted slot, including
+   the origin of each granted ability where appropriate. Do not collapse two
+   different abilities just because their effect verb is identical. For
+   Svellsongur, distinguish physical grant sources when moving beyond the
+   current ordinal. A change of available abilities or list order must not
+   rename the remaining use. Preserve already-used entries until the turn
+   ends even when the originating object has left, for pending abilities
+   carrying the old source ID. Maintain player scoping and once-consumption
+   timing while making identity changes.
+
+This ordering lets the three concrete clone failures land without a broad
+zone-routing change. The zone model then fixes cross-zone targeting and
+use/reset behavior under its own targeted tests.
+
+Identity equality: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/cards.py#L13
+Target comparison and remapping: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/loop.py#L435
+Trigger finalization: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/loop.py#L1786
+Face-copy implementation: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/effects.py#L625
+Battlefield replacement: https://github.com/califhornya/rbsim/blob/2900311/riftbound/core/loop.py#L3590
+
+
+4. TESTS TO WRITE, IN ORDER
+--------------------------
+
+1. Three red behavioral reproductions for A, using only public outcomes or
+   the narrow relevant rule entry points.
+
+   a. Black Market. Supply enough Power for two uses, activate once, then
+      fork. In the original and both copied graphs, the active player gets
+      the draw once and cannot immediately repeat. Verify the other player's
+      separate use on their turn. Read the legal menu; don't only inspect a
+      dictionary key.
+   b. Combat. Open combat, copy before the showdown ends, then check that
+      attacker/defender membership and a nonzero Assault/Shield bonus match.
+      Re-enter _open_combat with the same units and verify no duplicate
+      attack/defend triggers. Add a fresh arrival and verify that it alone
+      gets newly designated. A clone can diverge afterward without changing
+      the parent's board.
+   c. Relentless Pursuit. Use its real spell to mark a runner and clone
+      before conquer. Say yes to the triggered return in both worlds and
+      observe the copied runner returning to base. Add a same-name unmarked
+      unit and verify it isn't offered the grant.
+
+2. Exercise both copy routes. Parameterize the three with GameState.clone
+   (pickle path) and a deepcopy with the same agent exclusion used by
+   declarations. Add one normal spell declaration that consults attacker/
+   defender or current Might after copying. Check the before/after declaration
+   trace and ensure the live source graph receives no speculative changes.
+   Characterize a source-bound trigger/replacement, Riven versus her
+   Svellsongur copy, and the per-player battlefield scope. Re-run all 28
+   goldens here before starting B.
+
+3. Write paired lifetime cases for B. With a pending target, move battlefield
+   → base → same battlefield (target can still be valid) versus Temporal
+   Breach (old target must be ignored, even with the same physical card and
+   battlefield). Run a parallel base-gear case using a scripted leave/replay
+   before the older target resolves, where the Python Card can be reused.
+   For Riven Deserter, use the ability, move on the Board and check it stays
+   spent, then banish/replay within the same turn and check the fresh object
+   can use it. Test Mordekaiser's death replaced by heal/exhaust/Recall as
+   the negative control. That is the same object and the replacement use
+   remains spent. Verify independent targets on multi-target resolution too.
+
+4. Add the exceptions and boundary cases. Cover Shady Spectacles copy and
+   revert, a created Reflection or Zilean copy while the model is still in
+   play, two distinct same-name pieces/tokens, token death or banish, and
+   Brush replace/swap-back with an old battlefield reference on the Chain.
+   Include attachment/detachment/type change, hand/Champion Zone → facedown
+   → play, reveal alone, cancelled play, and Repeat versus a separate
+   recast. Cover attached equipment staying on the Board when the host
+   leaves. Assert that copyable traits, identity, and statuses each obey
+   their own rule.
+
+5. Cover references that outlive a mutation. Exercise Deathknell and
+   pre-transition characteristics, pending once-limited triggers from an old
+   source, banished-with links and a second unrelated trip to Banishment.
+   Verify two branches can allocate and execute independently. Verify legal
+   menus don't allocate IDs and deterministic playback preserves chooser
+   ordering, RNG state, and observation privacy. Re-run clone, declared-target,
+   combat, and legality tests with the full suite. Add at least one focused
+   search replay where the compared branch actually exercises the identity
+   fix, beyond the existing golden fixtures.
+
+
+5. GOLDEN GAME FORECAST
+-----------------------
+
+Prediction: zero of the 28 existing end-state signatures should need changing
+for A. I also expect no specific end-state delta for B on the evidence here,
+with lower confidence because B changes how an older reference is resolved.
+I have verified the current baseline only. Preserve the fixtures and
+investigate the first changed decision if any signature moves.
+
+Measured in a read-only Python trace of the 28 fixture specs, running
+tests/test_golden_games.py's _signature against the JSON with
+PYTHONHASHSEED=0. I watched the P1/P2 writes, normal GameState.clone and
+declaration copies, and the P3 reads on copied graphs, mapping copied units
+to their original counterparts. All 28 instrumented runs matched their
+existing signatures. I saw 695 live spell/ability declaration copies and 98
+calls to GameState.clone on live game state. None of the watched live
+address-based once writes or Relentless Pursuit writes fired. A scoreboard-only
+pass therefore says little about those two regressions.
+
+Six games had a total of 31 observed stale designation membership reads.
+They were all _refresh_combat_keywords calls on heuristic Add-probe copies.
+For these reads, the current formula's Assault/Shield plus Might modifier
+would be zero even with valid membership. This supports the zero-delta
+forecast. I would compare the action trace of these six first.
+
+| Fixture IDs | Stale membership reads |
+|---|---:|
+| random:competitive_kennen__vs__simple_trade:competitive_kaisa#1 | 6 |
+| random:competitive_kennen__vs__simple_trade:competitive_kaisa#3 | 5 |
+| simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#0 | 5 |
+| simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#1 | 1 |
+| simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#2 | 7 |
+| simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#3 | 7 |
+
+Three additional checkpoints for B came from observing repeated plays of
+one backing Card in the same turn. Lightning Rush in random Kennen vs
+simple_trade Kai'Sa #0, Death Mark in random Shen vs random Zed #1, and
+Perfect Execution in random Zed vs simple_trade Shen #3. These should have
+distinct Chain lifetimes across plays. The audit did not establish that an
+old target or once mark affects their result. Compare ordered semantic trace
+events and use stable labels across versions instead of comparing raw ID
+numbers. Add the synthetic/focused failing cases to the gate even if every
+existing golden remains byte-identical.
+
+Fixture specs: https://github.com/califhornya/rbsim/blob/2900311/tests/test_golden_games.py#L45
+End-state signature: https://github.com/califhornya/rbsim/blob/2900311/tests/test_golden_games.py#L104
+Heuristic clone caller: https://github.com/califhornya/rbsim/blob/2900311/riftbound/ai/heuristics/base_agent.py#L169
+
+
+6. CONFIDENCE AND LIMITS
+-------------------------
+
+High confidence in the AST inventory and in the zone-lifetime distinctions
+explicitly stated by the cited repository rules. I verified every one of the
+96 sites is present in this appendix. I also checked that Card and UnitInPlay
+reference keys reconnect correctly in both deepcopy and pickle on a small
+object graph. That proves the reference-key bridge is mechanically feasible.
+
+High confidence in the reproduced Black Market/combat defects from the prior
+review and in the Relentless Pursuit and Riven Deserter reproductions added
+here. The latter two probes use the real cards and current rule entry points.
+
+Medium confidence in the detailed ObjectId migration. It is a proposed design;
+its target snapshots, ability-slot provenance, explicit Replace exception and
+zone-transfer wiring need the tests above before it can establish parity.
+No engine or test source changes were made during this task. The proposed fix
+has not been run against the fixtures. The zero-delta golden forecast is a
+prediction supported by the observed baseline paths, with medium confidence
+for the clone-only bridge and lower confidence for the zone-lifetime change.
+PyTorch-dependent neural search behavior remains unverified in this runtime.
+
+APPENDIX — ALL 96 EXECUTABLE CALL SITES
+--------------------------------------
+
+Line numbers are at 2900311. A repeated line within a function denotes
+distinct calls on that line. The classes below match the inventory totals.
+
+P1 — 10 address-based once-per-turn key reads/writes
+riftbound/core/loop.py
+  GameLoop._once_used — 1684 id(card)
+  GameLoop._instruction_runs — 1747 id(card)
+  GameLoop._use_gear_discount — 4204 id(u.card)
+  GameLoop._orianna_discount_ready — 4212 id(u.card)
+  GameLoop._play_token — 5040 id(z.card)
+  GameLoop._once_key — 5737 id(src)
+  GameLoop._ability_usable — 6131 id(entry['bf'].card)
+  GameLoop._apply_activated_ability — 6630 id(bf.card)
+  GameLoop._sacrifice_instead_of_dying — 6915 id(dead_unit.card)
+  GameLoop._route_deaths — 7023 id(bf.card)
+
+P2 — 2 address-based conquer-return reads/writes
+riftbound/core/effects.py
+  _conquer_return_this_turn — 1412 id(unit)
+
+riftbound/core/loop.py
+  GameLoop._scoring_effects — 1145 id(unit)
+
+P3 — 5 address-based combat designation reads/writes
+riftbound/core/loop.py
+  GameLoop._in_combat — 7296 id(unit)
+  GameLoop._refresh_combat_keywords — 7309 id(u)
+  GameLoop._is_attacking — 7325 id(unit)
+  GameLoop._open_combat — 7922 id(u); 7925 id(u)
+
+D — 20 copy/declaration memo, mapping or scratch calls
+riftbound/core/cards.py
+  Card.__deepcopy__ — 44 id(self)
+
+riftbound/core/effects.py
+  _best_mode — 252 id(p.agent)
+
+riftbound/core/loop.py
+  _mapped — 455 id(x)
+  GameLoop._declare_choices — 722 id(p.agent); 724 id(memo); 724 id(memo[id(o)]); 724 id(o); 724 id(o)
+  GameLoop._board_changed — 818 id(x); 819 id(x)
+  GameLoop._restore_declared_board — 827 id(x); 828 id(x); 835 id(x); 837 id(x); 839 id(x)
+  GameLoop._choices_on_board_as_played — 861 id(memo); 861 id(memo[id(o)]); 861 id(o); 861 id(o)
+  GameLoop._is_ghost — 876 id(x)
+
+L — 58 ephemeral same-graph lookups
+riftbound/core/combat.py
+  resolve_might_combat — 363 id(u)
+
+riftbound/core/effects.py
+  _deal_damage — 79 id(u); 81 id(u); 82 id(u)
+  _deal_damage.value — 87 id(u)
+  _set_base_might — 424 id(u)
+  _set_base_might.gain — 428 id(u)
+  _minefield — 809 id(dg.card); 812 id(c)
+  _ready_gear — 2566 id(getattr(g, 'card', g)); 2567 id(e[2]); 2571 id(g); 2572 id(g); 2575 id(g)
+  _disempower_then_kill — 2596 id(u)
+  _disempower_then_kill.value — 2608 id(u)
+  _damage_shield — 2742 id(u)
+  _damage_shield.threatened — 2748 id(u)
+  _unit_split_damage — 2801 id(u); 2802 id(e)
+  _keep_one_kill_rest — 2993 id(where[1])
+  _give_gear_temporary — 3259 id(u); 3261 id(_unit_gear_of(e))
+  _ready_something — 3621 id(x); 3623 id(x); 3629 id(pick)
+  _chose_mine — 3664 id(u); 3665 id(getattr(g, 'card', g)); 3670 id(getattr(x, 'card', x)); 3670 id(x); 3671 id(x)
+  _same_location.spot — 4022 id(where[1])
+  _resolve_targets — 4061 id(u); 4062 id(u); 4063 id(u)
+  _kill_unit — 4516 id(bf)
+  _move_deployed_gear — 5379 id(u)
+  _move_deployed_gear.unit_gear_at — 5382 id(u)
+  _empower_something_here — 5505 id(u.card); 5508 id(c); 5508 id(c); 5520 id(card); 5523 id(card)
+  _empower_something_here.value — 5516 id(card); 5517 id(card)
+
+riftbound/core/loop.py
+  EffectContext.damage_units — 225 id(bf)
+  GameLoop._graceful_discount — 2055 id(u); 2059 id(u)
+  GameLoop._graceful_credit — 2098 id(u); 2108 id(u); 2114 id(u)
+  GameLoop._refresh_combat_keywords — 7311 id(u)
+  GameLoop._combat_might_mods — 8085 id(bf._units_for(defender)[0]); 8090 id(bf._units_for(defender)[0]); 8096 id(fighters[0]); 8096 id(fighters[0]); 8101 id(u); 8101 id(u)
+
+A — 1 agent-local cache identity
+riftbound/ai/heuristics/base_agent.py
+  Agent._adds_may_pay — 125 id(loop.gs)

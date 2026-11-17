@@ -1,0 +1,771 @@
+ACTION OUTCOMES — FIX DESIGN, NOT AN IMPLEMENTATION
+RBSIM, 17 November 2026
+
+Code: e72318e0b60956c80228f83d7defd321dfb98950.
+Read/executed checkout: 29003114edc1fef0322ec987367fd3e219073116.
+The engine, tests, scripts and CORE_RULES.md match between these revisions.
+Rules source: docs/rules/CORE_RULES.md, whose header says revision 2026-10-09.
+The conclusions below use that file, rather than stale rule numbers in code
+comments. I did not independently check a newer official rules release.
+
+No repository source, test or golden fixture was changed. The evidence bundle
+contains baseline reproductions and explicitly labeled in-memory diagnostic
+counterfactuals, not the proposed outcome contract or a production fix.
+
+MAIN DECISION
+
+Separate whether a requested action was committed from what control proceeds
+next. Neither is a question about net hand size, unit count or a fingerprint.
+An action can be applied and then countered, lose its targets, or have its
+effects offset. Ending a held move is not applying the ability chosen before it.
+
+The move defect also requires separating two meanings currently hidden inside
+pending_move: an unfinished selection of a simultaneous group, and an already
+completed move whose showdown is waiting. A valid reaction window is not a
+license to resume choosing members of an unfinished Standard Move.
+
+Confidence labels used throughout:
+H = high, directly measured or directly supported by the cited code/rules.
+M = medium, a proposed design or bounded prediction requiring implementation tests.
+U = not established by these measurements. No bug-frequency or effort estimate
+is implied by a source-site count or a constructed example.
+
+1. THE RULES ANSWER: WHICH WINDOW ACTUALLY EXISTS?
+================================================
+
+1.1 A Standard Move is one action, including all selected movers
+
+Rules 144.1.b–c prohibit a Standard Move during a Closed State, Showdown or
+Combat. Rule 144.3 treats a simultaneous multi-unit Standard Move as one game
+action; 144.3.a gives the common destination and 144.3.c requires simultaneous
+exhaustion costs. Rules 421.3.a–b identify the cost and movement effect.
+
+Consequently, the player chooses the complete group before processing its
+movement-trigger reaction windows. They cannot move Merchant, inspect its
+discard/draw chain and the opponent's responses, then decide that another unit
+was part of the same simultaneous move. That is information unavailable when
+the single group action was declared. H: rules interpretation. The current
+sequential-MOVE interface makes this distinction real, not merely terminology.
+
+Rules 333 and 334.1–2 require completing outstanding tasks before ordinary
+FEPR processing. A move causes a Cleanup (319.8, 455). Its triggers become
+pending chain items (383.3); staging and opening a showdown are different
+steps (323.7–12). In particular, 323.11–12 and 344 require Neutral Open State
+to begin a new showdown/combat. An existing move-trigger chain is Closed State:
+the engine must not open the owed showdown inside it.
+
+1.2 Correct behavior by context
+
+| Actual context | Offer Gold / Seal / Kai'Sa? | Execute when? | Owed showdown |
+|---|---|---|---|
+| Uncommitted move-group selection, no payment prompt | No ordinary reaction/showdown menu exists. Only finish the group selection or choose another member. | Ordinary abilities wait for a real priority window. | Not started from a partially declared group. |
+| Paying a cost during finalization | Add Reactions have a special permission under 430.3 and 445.2.c, even without priority. | Immediately, suspending and resuming the payment task; not after an unrelated showdown. | Payment does not discharge or start the move's showdown. |
+| Reaction to a completed move's triggered-ability chain | Yes, if source, cost and Reaction timing are legal. 312.1, 338.1.a.2. | In this chain window, after the movement action, before its still-staged showdown. | Keep the obligation. Run it only once the chain/tasks finish and opening conditions remain true. |
+| Open showdown after the move | Yes, if the source is usable; these three are Add Reactions. 313.1–4, 347.1, 430.2. | Now. They do not end the move again. | The current showdown continues; do not restart it or discard another battlefield's staged showdown. |
+| Reaction chain inside that showdown | Yes, with legal Reaction timing. | Now, within the chain; Add finalizes/resolves immediately. | Preserve the current showdown frame and any other staged battlefield. |
+| Legacy main-phase non-joining request while a move draft is held | The ordinary main menu should offer only joining the group or finishing it. A compatibility caller may still submit something else. | Finish/commit the move, settle its owed work, then ask again. The old requested ability/card is not executed or automatically replayed. | It remains real work; the result is ENDED_PENDING_MOVE, not APPLIED for the old request. |
+
+The second row is an important exception to any blanket menu ban. Rule 430.3
+even gives an example of moving two units into Mageseeker Investigator's tax:
+Add Reactions may be used despite the absence of a priority window. Kai'Sa's
+added power is spell-only; permission to activate an Add does not make those
+resources legal payment for a movement tax. Keep spending restrictions intact.
+
+Gold, Seal of Discord and Kai'Sa all finalize and resolve their Add immediately
+(337.2, 430.2). Their Add does not itself pass priority or focus (430.2.a).
+Other pending triggered items can still be finalized and determine the next
+priority holder under 337.4. Retaining focus and receiving the next priority
+decision are therefore separate facts.
+
+1.3 What is wrong with simply removing the ability from legal_actions?
+
+It hides the valid action in real reaction/showdown windows, and violates the
+payment exception. It also leaves the erroneous showdown opening/discharge in
+place for other action kinds. Conversely, changing noop to acted after clearing
+pending_move acknowledges a transition but still never activates the source.
+Neither is the fix. H: current code plus the reproductions.
+
+At loop.py:5500–5503, the generic dispatcher ends any pending move and returns
+before activating the selected ability. Its tail at 5695–5696 also flushes a
+pending move for non-MOVE actions. Both are main-declaration policy embedded in
+a dispatcher reused by reaction/showdown execution.
+
+_flush_pending_move clears the only marker before calling _run_showdown.
+_run_showdown then refuses an already active showdown (7741–7742), losing the
+marker, or can open one despite an existing chain. The helper has no chain-empty
+guard. This is why the design must repair ownership of the continuation,
+not merely the Boolean returned by _use_ability_now.
+
+1.4 Minimal state model and recommended migration boundary
+
+Use distinct concepts, with explicit ownership:
+
+- MoveDraft: declaring side, common destination and selected movers with their
+  origins. No reaction opportunity is exposed to uncommitted movement effects.
+- CommittedMove: all legality/payment decisions have succeeded; the cohort is
+  fixed, its exhaustion/movement happens as one operation, then its triggers
+  and cleanup work are processed.
+- StagedShowdown: battlefield, contesting side and which contest/obligation it
+  belongs to. Reuse/enrich the existing staged_showdowns queue rather than
+  inventing a second independent scheduler.
+- Chain/Showdown frame: current priority/focus and the cause of its opening.
+  A staged showdown is consumed when that specific showdown starts, not when
+  any ability is attempted.
+
+Canonical state should have no open MoveDraft inside a normal reaction or
+showdown window. It can have a suspended payment task. Copies must preserve
+these contexts; a fresh GameLoop(gs.clone()) does not currently preserve all
+loop-local pending work. This design does not claim a DTO alone fixes that.
+
+Keep existing tuple spellings and private entry points as adapters during
+migration. Internally route main, reaction, showdown and payment contexts
+explicitly; the main-only move-declaration barrier must not run in the other
+three. Remove both unconditional pending-move flushes from the shared action
+body. Let the owner of move commitment/cleanup schedule the owed showdown.
+
+The group-selection UI/AI boundary needs an explicit choice before commitment:
+either a batch of mover references or a draft-selection decision. Legacy scalar
+MOVE is sufficient to express a single-unit move, not an entire unspecified
+simultaneous group. Do not silently default to moving every ready unit, or let
+old heuristic code select more movers after seeing the triggers. Migrate the
+random/simple_trade group-selection policy deliberately, preserving its RNG
+stream and menu order where the rules permit. Golden changes from this policy
+boundary must be isolated from the outcome-contract change.
+
+This atomic-group correction is a separate rules/timing commit. It is not an
+eight-line mechanical outcome migration. Tests observing partially moved groups
+must move their assertions to the explicit commit boundary; maintaining old
+private names cannot preserve an incorrect intermediate-timing contract.
+
+Compatibility for a legacy state containing pending_move inside a window:
+first identify whether it means an uncommitted draft, an owed future showdown,
+or the showdown already being serviced. Do not erase it unconditionally. A
+different battlefield remains queued; the current one is not reopened. If the
+contesting side has lost all units, re-evaluate 323.7.a, 323.9–10 rather than
+guaranteeing a showdown after every original move. Never nest a new showdown
+while another is ongoing (462).
+
+Confidence M in this state/adapter design; H that the existing single marker
+does not distinguish these cases. Full atomic payment/finalization rollback is
+not implemented or established by the review. Validate before committing and
+apply 358.5 where the process of play requires undo, rather than assuming an
+outcome enum supplies transactionality.
+
+2. EXPLICIT OUTCOME CONTRACT
+============================
+
+2.1 The result describes the request, not net state change
+
+Design vocabulary, not an implementation:
+
+Application = APPLIED | REJECTED | ENDED_PENDING_MOVE | PASSED
+
+APPLIED:
+  The requested legal play/activation/move/hide crossed its commitment point.
+  Its resolution may subsequently be countered, mistarget, do nothing or have
+  offsetting effects. 359.3.e.1 explicitly permits resolution with illegal
+  targets. Do not redefine application as effect success.
+
+REJECTED:
+  The request did not cross that point: wrong window, invalid source/destination,
+  unavailable targets/costs, etc. Return an explicit reason. Admission rejection
+  does not pay the requested action's costs. Do not label a partial execution or
+  swallowed exception a clean rejection. Independently authorized Add payments
+  are separate committed operations and need their own accounting/undo rules.
+
+ENDED_PENDING_MOVE:
+  The main-phase adapter committed/ended the held move instead of executing the
+  newly proposed action. The proposed card/ability remains unplayed/unspent.
+  Drain its legitimate continuations and obtain a fresh decision. Do not treat
+  this as success in a resource-gain probe or as a pass of chain priority.
+
+PASSED:
+  A deliberate pass in the current window. Main PASS ending a move is mapped to
+  ENDED_PENDING_MOVE. Main PASS without one ends acting; reaction PASS passes
+  priority; showdown PASS passes focus. These are different continuations.
+
+Group member selection is a draft choice, not a committed Standard Move. Its
+choice acknowledgment should not be falsely reported as a completed rules
+action. Produce the move action's APPLIED outcome at group commitment.
+
+Separate application from control disposition:
+
+Priority policy:
+  KEEP_CURRENT / TO_CONTROLLER_OF_NEXT_FINALIZED_ITEM / PASS_TO_NEXT / NONE
+Focus policy:
+  KEEP_CURRENT / PASS_AFTER_THIS_CHAIN_CLOSES / PASS_NOW / NONE
+
+The window driver owns the actual priority/focus frame. The result can carry
+the actor, action kind/source reference, explicit commitment/finalization
+receipt, chain-opening cause and rejection reason. A terminal game result is
+orthogonal; a valid action can win immediately.
+
+Record the commitment fact before calling anything that can resolve a chain or
+flush triggers, rather than deciding it after that call returns. Nested actions
+produce separate receipts; never use a mutable global last_action_succeeded
+flag. A replay _Stop can intentionally unwind after commitment but before the
+outer method returns. Its continuation/frame must still retain the committed
+fact. Do not catch that BaseException control signal as a rejection.
+
+Do not make the new object implicitly truthy. In design, __bool__ should reject
+implicit conversion, or the API must otherwise enforce an explicit status test.
+The ordinary truthiness of a dataclass would make REJECTED truthy in the old
+base_agent code. Legacy Boolean/string wrappers must map the enum explicitly.
+
+No global rules-state fingerprint is part of this contract. Keep an independent
+semantic snapshot for tests/diagnostics and a separate bounded-attempt guard for
+a broken agent. APPLIED does not have to imply a net observable difference;
+similarly, PASSED and ENDED_PENDING_MOVE can cause real model transitions.
+
+2.2 Control rules the result must preserve
+
+| Committed request | Priority | Focus / pass sequence |
+|---|---|---|
+| Add ability | Resolves immediately; does not itself pass priority. | Does not itself pass focus. Any prior consecutive-pass streak is broken by the added item/action. |
+| Non-Add activated ability or spell | Finalize, then grant priority to the controller of the next finalized item (337.1.a, 337.4). This is often the same player, not simply the opponent. | If it opened an ordinary player-action chain in a showdown, pass focus only when that chain closes (340.2.a, 346–347). |
+| Unit or gear | Immediate resolution after finalization (337.2). In an existing chain, subsequent priority follows the next finalized item. | In a showdown this is an ordinary played-card continuation: transfer focus once its play/ordinary chain has completed. Trigger subchains must not create an extra transfer or erase the original transfer obligation. Net bodies/cards are irrelevant. |
+| Trigger-origin or Add-origin chain closes | Process outstanding tasks and next eligible items. | Keep focus under 346.1. A reaction added later does not change the cause that opened the chain. |
+| Explicit PASS | Pass priority or focus as appropriate. | Count the pass for the current window. Two legitimate consecutive passes close/resolve it under 339.1 or 348. |
+| REJECTED | No rules-level pass occurred. | Retry or apply an explicit agent error policy; the outcome must not pretend the player passed. |
+
+Important additional live defect found while designing this contract:
+_run_chain's kept branch at 7606–7607 does not reset passes. In a real open
+chain: B passes; A uses Gold; A passes. Current callbacks are B,A,A and the chain
+resolves. The correct opportunity sequence includes B again: B,A,A,B. Rule
+339.1 requires a sequence of passes without another item being added; Add
+abilities finalize/resolve an item immediately (337.2, 430.2), rather than
+preserving an old pass streak. Rule 348 makes the analogous showdown condition
+explicitly depend on no intervening card play or ability activation.
+
+The original showdown kept branch already resets passes. Make both drivers
+consistent from the explicit finalized/application receipt, not from net stack
+growth. H: callback reproduction and rule interpretation. This pass-accounting
+change is a named behavioral fix, separate from merely introducing a result type.
+
+Pending triggers are another reason not to equate KEEP with 'the same player
+will necessarily be the very next decider'. Give _flush_triggers an ordered
+finalization receipt: which items were finalized, which were immediate Adds,
+and which remain for FEPR. The driver applies 337.4 after handling those tasks.
+The requested Add still does not itself transfer focus or priority.
+
+For copying/replay, the continuation needs explicit clone-preserved data:
+window kind, priority holder, consecutive passes, chain-opening cause and the
+focus transfer owed on close, alongside draft/payment/staged-showdown state.
+Move the current two loops' local pass/holder values into a small WindowFrame
+on the copied graph (or equivalent copy-preserved continuation), while keeping
+the loops and initialization rules intact. Reuse existing focus fields through
+aliases rather than maintaining two writable authorities. Scope nested frames
+and restore the suspended parent explicitly. This is a bounded control-state
+extraction, not a promise that the existing bare-state clone is a full snapshot.
+Reading the controller of the actual next chain item is legitimate rules
+logic; guessing which operation happened from its net length is the defect.
+
+2.3 Producers and the exact commitment boundary
+
+| Function/path | What produces the result |
+|---|---|
+| Main adapter / _flush_pending_move | Explicitly returns ENDED_PENDING_MOVE or PASSED; only owns declaration/cleanup work. _flush_pending_move itself returns a move/continuation receipt, not an ability-success Boolean. |
+| _apply_action shared dispatcher | Propagates the selected action family's result. Early invalid branches return REJECTED with a reason. It does not manufacture success from a before/after observation. |
+| UNIT / CHAMPION / GEAR branches | After validation/payment succeeds and the card is committed from its zone into the play procedure, return APPLIED regardless of what its play triggers subsequently do. |
+| SPELL branch | Successful legal finalization onto the chain produces APPLIED. Whether the spell later resolves usefully is separate. |
+| HIDE / HIDDEN_PLAY | Propagate _hide_card / _play_from_hidden's existing explicit success; free champion hiding is therefore APPLIED despite unchanged hand/resources. Champion-Zone HIDDEN permission is explicit in 811.1.b; Guerilla Warfare supplies the cost exception. |
+| MOVE | The committed whole group produces APPLIED; invalid cohorts/payment reject before committing it. Selecting an additional draft member is a separate choice acknowledgment. |
+| _apply_activated_ability | Each successful entry path (equip, flow, banished/trash play, battlefield, gear, unit/legend) propagates an explicit receipt after its own checks/commitment. Every existing bare return must be classified. |
+| _activate | Knows directly whether this is an immediate Add or a non-Add chain item. Produces that classification and any opening-cause information. No _chained_abilities or spells_cast comparison is required. |
+| _play_with_flow, _play_banished, _play_from_zone_now | Propagate whether the alternate-zone play was actually committed, rather than treating an entry dispatch as success. |
+| _use_ability_now | Returns the activation result and recomputes passives at the existing boundary; it performs no main-phase pending-move prelude and no fingerprint comparison. |
+| _reaction_step / _showdown_step | Window adapters validate the context, invoke the family producer and return application plus control policy. They never infer card acceptance from resulting zone counts. |
+
+The existing _as_task/_as_step decorators already return the wrapped method's
+value. Preserve their trigger-flush points in the contract-only migration.
+When fixing move timing, change those points explicitly and test the event
+sequence; do not assume task-depth alone precisely represents every rules task.
+
+For rejected actions, the first migration can retain an explicit legacy
+bot-error fallback that submits a separate PASS, with a bounded attempt count,
+to avoid infinite simulations. That adapter policy must be visible in tests
+and receipts. A human/remote stale request should receive rejection and a fresh
+menu for the same window. Do not hide a policy fallback in REJECTED itself.
+
+Unexpected handler exceptions are not ordinary admission failures. This design
+does not solve the existing partial-mutation/exception-resilience issue by
+renaming it REJECTED, and it does not require rewriting every effect handler to
+return a success Boolean. Most handlers can continue returning None.
+
+2.4 Migrate all eight inference sites, one for one
+
+| # | Current site in loop.py | Replacement | Deliberately preserved |
+|---|---|---|---|
+| 1 | _run_main_actions, 8278–8284: fingerprint or ended_move delta | Switch on APPLIED / REJECTED / ENDED_PENDING_MOVE / PASSED from the main adapter. | Existing passive recomputation, winner check, action ordering, bounded agent guard. |
+| 2 | _use_ability_now, 6774–6777: fingerprint delta | Propagate the selected activation's commitment receipt. ENDED_PENDING_MOVE is not an applied activation. | Ability availability, source selection, costs and Add resource restrictions. |
+| 3 | _reaction_step GEAR, 7641–7644: hand shrank | Propagate committed gear play result. | Reaction/Quick-Draw permission, destination and payment checks. |
+| 4 | _showdown_step UNIT, 7835–7838: base count grew | Propagate committed unit play result. | ACTION/REACTION versus AMBUSH destinations and the existing play procedure. |
+| 5 | _showdown_step GEAR, 7843–7846: hand shrank | Propagate committed gear play result. | Gear play effects, their ordering and timing permissions. |
+| 6 | _reaction_step ABILITY, 7662–7664: same chain length => kept | Use immediate-Add versus finalized-chain-item classification. | FEPR grants priority to the next item's controller; not necessarily the opponent. |
+| 7 | _run_chain, 7601–7605: stack grew after flush => force acted | Consume _flush_triggers' finalization receipt and the current frame/cause. | Trigger batching/order, immediate Add resolution and legal controller priority. |
+| 8 | _showdown_step ABILITY, 7860–7862: counters changed => acted | Use the activation's explicit kind and the cause of the chain opened. | Focus transfers only after the relevant ordinary action chain closes. |
+
+There are five acceptance checks and three continuation classification checks.
+The shared fingerprint definition at 3959–3989 is not a ninth call site.
+Retain counters used for metrics; remove their authority over action outcomes.
+
+A mechanical contract-only SHADOW commit can preserve the existing control
+mappings through adapters and must leave all 28 golden signatures unchanged.
+Produce/compare receipts without executing the action twice; keep the old gate
+authoritative until its deliberate switch. This shadow stage is temporary, not
+a second permanent execution path. Then switch the five acceptance gates and
+the three control-classification gates in separate named commits:
+pending-window execution/scheduling,
+false gear/hide acknowledgments, Add pass streak, and atomic move declaration.
+Do not bury those changes in a GameLoop file split or a wholesale action rewrite.
+
+2.5 Consumers: live, search, replay and coach
+
+| Consumer | Required use of the result |
+|---|---|
+| _run_main_actions | APPLIED continues; ENDED_PENDING_MOVE settles owed work then asks again; PASSED ends acting when no draft is held; REJECTED follows explicit input/agent policy. Do not replay an old hand index/ability index after a showdown. |
+| _run_chain | Explicit PASS increments passes. Any applied/finalized item breaks the old streak, including an immediate Add. Pending finalizations determine priority; REJECTED is not a rules pass. |
+| _run_showdown | APPLIED breaks focus-pass streak; Add keeps focus; ordinary action chain passes focus on close. Preserve _open_combat/cleanup ordering. ENDED_PENDING_MOVE is not a legal normal result here: recover/reject a legacy context without deleting an obligation. |
+| SyncDriver / SessionDriver / RemoteAgent | These run or supply decisions to the live loop. Their source of truth remains the same window driver, not a second success test. Return/notify rejection without consuming a human's priority. |
+| base_agent._all_adds, :192 | Continue resource simulation only for APPLIED Add activations. ENDED_PENDING_MOVE must stop/reject that speculative sequence rather than count completion of a showdown as an Add. |
+| base_agent._first_add, :224 | Expand only a committed Add edge; do not evaluate a different post-showdown board as though that Add occurred. Keep the existing resource-gain heuristic separate from action acceptance. |
+| net_mcts._step, :862–870 | Return and consume the result, rather than ignore _reaction_step/_showdown_step's strings. PASS is a window transition, not merely a no-op followed by an unrelated settlement shortcut. |
+| net_mcts._iterate_now / _choices_ahead | A rejected edge cannot become a valid applied training/search example. Settle from the returned context; preserve focus/priority, pending work and choices. |
+| net_mcts._iterate main path, :721 | Distinguish ending a move from ending the turn. Update/evaluate at the fresh decision, and do not count the proposed unplayed card as a successful play. |
+| net_mcts._settle, :904–912 | Use the same continuation owner to resolve/passes and drain eligible staged showdowns. An all-pass rollout still needs the correct frame and owed work. It is not permission to drop pending_move. |
+| GameLoop.replay_segment, :561–575, and net replay cursor | Replay the application/continuation boundary that the live loop used. Main PASS during a held move is ENDED_PENDING_MOVE, not end-turn. A choice forced on the old path must still be reached on the replayed path or fail explicitly. |
+| ISMCTS :133, :150; Monte Carlo paths inheriting it | Also consume main application/continuation. Existing unconditional PASS-to-_end_turn behavior while a move is held needs a deliberate end-move distinction, not just changing the method name. |
+| coach._choice_preview, :358–390 | Use the appropriate window and the same result. Preview ENDED_PENDING_MOVE as such; do not claim the proposed ability or forced subchoice ran. Current preview calls the main dispatcher unconditionally. |
+| CoachAgent/CoachSession | Publish proposed versus committed actions separately. Its real game thread gets the engine's outcome/event notification; an offered/requested action is not proof it happened. |
+
+The callback/result notification should observe already produced receipts,
+not call legal_actions or rerun effects to reconstruct them. This matters:
+the earlier observer-agent experiment changed four seeded outcomes, so tracing
+on/off equivalence is a real gate, not ceremony.
+
+Keep GameAction/tuple compatibility and current method spellings while callers
+migrate. Existing tests that override _apply_action must return the delegated
+result; merely preserving the method name can otherwise turn a valid result
+into None. Those are mechanical forwarding updates, distinct from rewriting
+tests to assert a new timing rule.
+
+Do not introduce global persistent id()-based keys for the receipts. Ephemeral
+references can live in the current graph, and replay copies must keep shared
+references together. Persistent identity lifetime remains the separate stable-
+identity project. This outcome fix must not accidentally repair or further rely
+on the known id()-key clone defects.
+
+The core/base-agent paths and coach formatting helpers were executed here.
+Neural MCTS/replay integration was inspected, not run with PyTorch: the optional
+neural runtime is still unavailable in this environment. Runtime parity for
+those consumers is U until its integration tests run.
+
+3. RELATED INFERENCES: CONFIRMED DEFECTS VERSUS CURRENTLY SAFE USES
+================================================================
+
+3.1 Results on unmodified code
+
+| Site | Verdict | Reproduction / evidence | Confidence |
+|---|---|---|---|
+| effects._deal_damage :120, 'if killed' from absence | Real rules defect. | Smite marks a 6-Might victim and deals 3; Disintegrate deals the remaining 3. The victim is banished, friendly_unit_died stays false, yet A draws the 'if killed' card. | H |
+| effects._unit_split_damage :2801–2804, kills from absence | Real rules defect. | Same Smite-marked victim; a 3-Might friendly striker plus Alpha Strike banishes it, but A gains 1 XP. | H |
+| effects._channel_rune :3507–3514 | No defect found in the current implementation. | 1,170 fixtures: requested 1/2, 0..12 runes already in play, 0..14 in rune deck, 0/1/2 Seraphic Wyverns. Draw-if-short matched the independent count in all fixtures. | H for this matrix; M for general safety |
+| effects._minefield :816–822 | No defect demonstrated; current precount is consistent. | Three Bombs across two battlefields: three removed and exactly three scheduled for end of turn. Current helper removes that selected present list, and the enclosing task defers its triggers. | H for fixture/code; M for all interactions |
+| effects._best_mode :266–271 | Heuristic inference, no demonstrated current-catalogue defect. | Exercised all 49 mode candidates across 20 mode-bearing effects on a populated board/open chain. No errors; the only removed pre-existing item was Flurry of Feathers' actual counter mode. | H for fixtures; M for generalization |
+| loop._board_changed :814–819 | Harmless for its stated local purpose. | Same unit moved from base to battlefield => false; removed from board => true. This compares object presence while declaring, not all state mutation or action success. | H |
+| loop._record_unit_diffs :8437–8448 | Real recorder defect; not a rules-state mutation. | A combat defender wearing Guardian Angel is healed/recalled alive to base, but the recorder emits its DEATH because it left the battlefield list. | H |
+| coach._board_events death/name counts :485–493 | Real narration defect; not an engine death. | Baited Hook kills Stalwart Poro and plays another same-name Poro from deck. Unit-name counts cancel: no death narration, and the old unit is mislabeled as a deck-to-trash card. | H |
+| coach._board_events draw/burn counts :501–507 | Real narration defect. | Traveling Merchant discards one Stalwart Poro and draws another. Hand names are identical before/after, so the coach says it went from deck to trash and reports no draw. | H |
+
+Correction to the earlier description of Alpha Strike: its survivor lookup
+uses 'anywhere', including base, not just battlefields. Guardian Angel's recall
+is therefore NOT an Alpha Strike counterexample: the negative control awards
+zero XP and the unit remains alive in base. The demonstrated false positive is
+banishment replacing death, not ordinary recall.
+
+The Smite cases violate the repository rules, not just another model observer.
+429.1 defines killing as board-to-trash. 370.1.a.1 explains that replacing a
+death means that kill did not occur; 383.2.c.3.a likewise distinguishes leave-
+board events from death. The victim leaving the board is insufficient evidence
+for a kill-conditioned draw or XP award.
+
+The channel result has a simple current-model explanation. unlock_runes can
+fall short only when the rune deck is empty or its 12-rune in-play cap is hit.
+_extra_channel uses the same deck and cap; it cannot fill the missing amount
+once one of those bounds stopped the first channel. This establishes the
+current numerical fallback, not a new ruling about every possible replacement
+or future channel mechanic. Do not rewrite the fallback simply because it uses
+a before/after count.
+
+The mode fixture is not proof that every future mode's stack removal is a
+counter. It exercises the currently shipped candidates with one context each;
+it does not exhaust conditional targets, nested triggers or custom added cards.
+Leave that heuristic alone in the outcome-contract commit. A future explicit
+CounterReceipt would improve its attribution, but is not required by a proven
+current mode failure here.
+
+Additional recorder gap found while checking the listed recorder path:
+Disintegrate kills an ordinary 2-Might victim correctly and puts it in trash,
+but a real _apply_action/chain execution emits no DEATH record for it. The
+single-target damage_units path does not log it, and _resolve_chain_item takes
+its spell-death 'before' lists after resolving the effects (7720–7722).
+The reproduction demonstrates both wrong positive and missing negative events;
+fixing only the UUID membership comparison cannot repair that pipeline. H.
+
+3.2 Correct repair boundary for these related defects
+
+Do not turn all registry handlers into action-status producers. Add narrow
+operation receipts at authoritative points already present in the engine:
+
+- _route_deaths knows truly_dead after death replacements. Return immutable
+  actual-death facts (with subject/source/operation attribution), rather than
+  making callers discover deaths from the post-resolution board.
+- EffectContext.damage_units aggregates those facts across locations. A target
+  banished instead produces a leave/banish fact, not a kill fact; a unit saved
+  by Guardian Angel produces a recall plus the gear's death, not the unit's.
+- _deal_damage's reflexive draw and _unit_split_damage's XP use actual kills
+  attributed to their instruction/source, restricted to the relevant victims.
+  An unrelated death triggered by the same overall action is not automatically
+  a kill by that damage instruction.
+- A death followed by resurrection still counts as an actual death. A final
+  presence test would miss it; a receipt from the death-routing decision does
+  not. Keep batching, replacement order and trigger timing unchanged while
+  propagating these facts. Source/kind attribution for unit-dealt damage needs
+  its own tests; do not opportunistically change it in the acknowledgment PR.
+- Recorder and coach consume actual kill/draw/discard/burn/recall facts at all
+  turn and resolution boundaries, including events outside discretionary
+  actions. Keep snapshot diffs for turn/score/control display. They are useful
+  observations, not a reconstruction of event causality.
+- Redact opponent draw identities before delivering events to the coach; use
+  counts for hidden draws. Existing opp_discards already solves part of that
+  one case, not same-name cancellation in general.
+
+This needs a bounded event callback/receipt collector, not an event-sourcing
+rewrite or a new persistent log as the rules authority. If an old snapshot has
+no causal facts, render a neutral zone change rather than inventing a death,
+discard or burn. Correct narration/recording does not alter simulator outcomes
+and should land separately from the rules-state fixes. M design, backed by H
+reproductions. Full coverage of every producer/observer remains to be verified.
+
+4. TESTS TO WRITE FIRST, IN ORDER
+================================
+
+These are acceptance-test designs, not tests added to the repository here.
+Keep the supplied baseline repro scripts: they currently assert the bad
+behavior so another reviewer can confirm the diagnosis. New acceptance tests
+should assert the corrected behavior and initially fail.
+
+1. Freeze the oracle and the existing regression examples.
+   Keep the 28 untouched fixtures, the 576-game original probe and its limits.
+   Capture ordered window/choice/cost/zone/chain/pending-work/RNG facts; don't
+   use _action_fingerprint as the expected-progress oracle. Verify that adding
+   the observer changes neither agents nor their decisions. Include a genuine
+   PASS that leaves board state unchanged and a PASS that only ends a move.
+
+2. Establish the request/commitment contract independently of net deltas.
+   Invalid source/window/destination/cost => REJECTED, with the requested card
+   unspent. Successful free champion HIDE => APPLIED and another main decision.
+   Countered or mistargeted spell => the original play remains APPLIED. A unit
+   that enters and dies immediately is still an applied play. The new result
+   cannot be used as an implicit Boolean. ENDED_PENDING_MOVE must not be mapped
+   to a successful Add by any compatibility wrapper.
+
+3. Add the pending-move timing matrix before changing its guard.
+   Gold, Seal of Discord and Kai'Sa; both seats; open showdown, neutral reaction
+   and showdown reaction; same and different owed battlefield. Assert the
+   source is actually consumed/tapped and the right resource (including
+   Kai'Sa's restriction) is added. Assert no premature showdown while a chain
+   exists, no duplicate current showdown, and no lost other-field obligation.
+   When the group truly remains uncommitted, assert that ordinary reaction
+   callbacks cannot occur and that no new members can be chosen after the
+   trigger chain has exposed information.
+
+4. Test the group/payment boundary explicitly.
+   Select Merchant plus another mover before moving/exhausting the cohort.
+   Move all, then expose the Merchant trigger and reaction opportunity. Test
+   same destination, different origins and simultaneous exhaustion costs.
+   Separately test an Add Reaction while paying Mageseeker/Gravity Field costs:
+   resume the same payment task, no priority/focus pass and no premature move
+   showdown. Spell-only Kai'Sa resources cannot pay a movement tax. If triggers
+   remove every mover, cancel the obsolete staged contest; if an effect stages
+   another battlefield, retain it for the next eligible cleanup. Preserve a
+   caller's intentional selection policy; don't default to a different cohort.
+
+5. Replace the three collection-count acceptance checks with commitment tests.
+   Jarvan + Detonation Amplifier: deployed, cost/sacrifice/draw occur, outcome
+   APPLIED despite equal hand size. Jarvan + The Good Stuff: APPLIED despite
+   larger hand. A showdown ACTION unit whose on-play event offsets base count
+   is also APPLIED (a synthetic self-kill fixture is appropriate for the
+   dispatcher contract). Reaction gear still requires real timing permission;
+   don't invent a reaction permission for the two Jarvan-only ACTION examples.
+
+6. Test priority and focus as sequences of deciders, not just return labels.
+   B PASS; A Add; A PASS must give B another opportunity. Add with triggered
+   finalizations must respect their actual controller without passing focus
+   merely because something appeared on the stack. An ordinary chain opened
+   by a player action passes focus when it closes; a trigger-origin chain and
+   an Add-origin chain do not. A card played after one focus pass breaks that
+   streak even if its effects leave no net hand/body increase. Test rejected
+   requests separately from explicit fallback passes and retain a bounded
+   error policy for broken agents.
+
+7. Write operation-receipt tests for the confirmed related rules defects.
+   Smite + Disintegrate: no kill-conditioned draw after banish replacement.
+   Smite + Alpha Strike: no XP for a unit banished instead of dying. Guardian
+   Angel recall stays a negative control. Ordinary real kills still draw/give
+   XP, with correct attribution; an actual death followed by resurrection is
+   counted. Keep the 1,170 channel controls, three-Bomb Minefield control and
+   modal/presence controls to prevent speculative 'cleanup' of safe logic.
+
+8. Integrate live, search and replay before moving engine code.
+   base_agent's copied Add sequence cannot cross a move boundary and pretend
+   it generated resources. net_mcts._step/_settle and main simulation consume
+   exactly the same disposition and owed work. A forced nested choice really
+   must be reached through replay_segment/_Cursor in every supported window;
+   a changed path fails explicitly. Test main PASS-with-draft versus true
+   end-turn in net MCTS, ISMCTS and the coach preview. Run PyTorch tests before
+   claiming neural parity; a static call graph is insufficient.
+
+9. Test observers using the same-name and replacement counterexamples.
+   Guardian Angel's survivor is not logged dead. Ordinary Disintegrate's death
+   is logged. Merchant's old discarded Poro and newly drawn Poro are distinct
+   events. Baited Hook records the old Poro's death and the new one's play.
+   Opponent draws expose counts, not private card names. Observer on/off has
+   identical engine/agent behavior and does not consume RNG.
+
+10. Run the original default suite, the optional neural suite, all goldens and
+    a differential seeded matrix after each named behavior fix. Compare through
+    the first intended divergence; explain it before accepting downstream
+    changes. Do not regenerate fixtures just to get a green suite. Add focused
+    golden decision traces for these regressions: the current 28 terminal
+    signatures are not an adequate gate for this contract.
+
+5. WHICH OF THE 28 GOLDENS SHOULD CHANGE?
+========================================
+
+5.1 Measured bounded counterfactuals — no production fix assumed
+
+I ran all 28 existing signatures unchanged, with non-invasive method-level
+observations, then four separately labeled in-memory diagnostic variants:
+
+A. Bypass the main pending-move intercept only inside an existing chain or
+   showdown, preserving the marker afterward. This isolates ability swallowing;
+   it is NOT a full atomic-move or staged-showdown implementation.
+B. Reset the chain pass streak before continuing after kept.
+C. Treat a main pending-move completion inside _use_ability_now as not being an
+   applied activation for the base-agent Boolean probe.
+D. Combine A+B+C.
+
+All five sets, including the baseline, matched 28/28 existing terminal
+signatures. No fixture was regenerated. This is 140 signature runs for the
+retained experiment, not a claim that the complete unimplemented design has
+been tested. Repeated diagnostic development runs are not pooled into counts.
+
+The baseline observed 122 live pending-move interceptions: 49 UNIT, 38 ABILITY,
+16 SPELL, 12 GEAR and seven non-joining MOVE requests. All were main-context
+compatibility completions, not the nested-window failure. There were zero
+observed live nested pending-ability interceptions among these 28 chosen
+trajectories. Do not misreport those 38 main ABILITY requests as 38 swallowed
+legal reactions. Three additional interceptions occurred in copied main-phase
+Add probes; all originally returned True for a move completion. Variant C
+changed that result without changing the observed terminal signatures.
+
+5.2 One existing golden definitely needs a corrected decision trace
+
+random:competitive_kennen__vs__simple_trade:competitive_kaisa#2
+seed 341913731.
+
+In turns 4, 6 and 8, A activates Seal of Discord after a prior pass. Correcting
+the pass streak gives B the missing next priority opportunity. These agents
+choose PASS in each new opportunity, so the end-state signature remains
+identical. Decision callbacks increase from 74 to 77. The first action-trace
+divergence is callback 32: old B/main MOVE versus corrected B/reaction PASS.
+H for this measured trace difference; no winner/score change was observed.
+
+This is a live-game fix even when an end-state-only golden remains green.
+Its existing terminal JSON should not be arbitrarily rewritten; add a decision-
+trace assertion which captures the three legitimate reaction opportunities.
+
+5.3 Atomic group timing: two concrete review targets, not invented new scores
+
+A second baseline watcher reproduced all 28 signatures and recorded 36 entries
+to _run_chain while a move marker remained held. It found these two fixture
+IDs where additional movers subsequently joined the tracked group after such
+a chain window:
+
+| Fixture | Why its atomic-group trace needs review |
+|---|---|
+| random:precon_zed__vs__simple_trade:precon_shen#3 | Four observed groups. In turn 5 Merchant's trigger window occurs after only Merchant, then Gust Monk joins. Later examples involve Blade Twirler and Pakaa Protector. |
+| simple_trade:competitive_kaisa__vs__simple_trade:competitive_kennen#2 | In turn 15, Nocturne and Merchant have moved; Merchant's trigger chain runs before the two Trifarian Captains join. |
+
+I expect the correct atomic declaration/commit trace to change for these groups.
+I cannot honestly assign either a new final score or assert exactly which
+terminal signatures change without implementing and specifying the migrated
+group-selection policy. They are concrete first comparison targets, not an
+exhaustive list of all potentially affected traces. Fixing when information
+is available can also affect a policy that decided not to add another mover.
+M for timing-trace prediction; U for their final scores and other policy effects.
+
+The rare regression cards Smite, Disintegrate, Alpha Strike, Detonation
+Amplifier, The Good Stuff, Guerilla Warfare/Teemo Scout, Guardian Angel and
+Baited Hook are absent from the registered card sets of these 28 fixtures.
+That is a measured static absence, not a proof that arbitrary generated-card
+paths are unreachable. Recorder/coach narration changes do not affect these
+recorder-free engine signatures. No corrected related-effect implementation
+was run against the 28, so do not call a zero-delta forecast for those fixes
+an empirical result.
+
+5.4 The forecast I would actually sign off
+
+- Contract-only plumbing: expect all 28 terminal fixtures and all valid existing
+  decision traces to stay unchanged. Any drift is a migration failure until
+  explained. M design expectation.
+- The three narrowly isolated semantic changes above: measured zero terminal
+  fixture updates; expect the Seal-of-Discord fixture's decision trace to gain
+  three priority opportunities. H for the bounded experiment.
+- Full atomic-move correction: review the two named fixtures first, but final
+  signature changes remain unverified. Do not guess their new outcomes.
+- Related kill-condition fixes: require the new focused games because the
+  existing registered golden decks do not exercise the demonstrated cards.
+  Narration/recorder fixes require event tests, not terminal-score updates.
+
+The right acceptance gate is the justified change at the first decision or
+rules event, not an arbitrary expectation that 'a live fix must change some
+of the 28 final hashes'. The current goldens demonstrably miss a live priority
+error while preserving every final hash.
+
+6. PHASES, RISKS AND WHAT I WOULD NOT DO
+=======================================
+
+| Phase | Change | Principal risk / gate |
+|---|---|---|
+| 0 | Preserve baselines; write the failing acceptance tests and negative controls. | A circular fingerprint oracle or an intrusive observer hiding the failure. |
+| 1 | Introduce result/operation receipt types in shadow and explicit legacy adapters; prepare producers/callers for the eight gate switches without executing anything twice. | Missing a bare return, treating REJECTED as truthy, losing an overridden method's return or changing a flush boundary. All original goldens stay exact. |
+| 2 | Correct nested-window dispatch and staged-showdown ownership, with main ENDED_PENDING_MOVE kept distinct. | Starting a showdown in Closed State, reopening one, dropping another lane, or consuming the requested ability twice. |
+| 3 | Correct Add pass streak and chain-opening-cause control. | Confusing focus with priority, or passing focus for a trigger-origin chain. Gate on decider sequences. |
+| 4 | Make simultaneous move declaration/commit explicit and migrate group selection. | Letting information from triggers select a cohort; changing policy defaults accidentally; clone/replay losing draft/payment/owed-work state. Separate timing traces and review the two named goldens. |
+| 5 | Propagate actual death facts into conditional effects, then recorder/coach event observers. | Wrong source attribution, replacement/batch ordering, missing events outside actions or exposing hidden draws. Keep these commits separate from outcome plumbing. |
+
+Do not split the 8,448-line loop at the same time, rename all private methods,
+rewrite the registry, invent a general card DSL, repair all identity lifetimes,
+replace the RNG/policy ordering, build an event-sourced engine or tune search
+strength in this change. Do not 'fix' every before/after comparison: channel,
+local presence and the demonstrated mode cases have different, currently
+consistent purposes. Do not replace hand-size checks with another incomplete
+fingerprint as the production success contract.
+
+Unsolved even with this design implemented: complete official-rules coverage,
+all card combinations, generic transaction rollback and exception safety,
+the separate persistent-identity clone defects, neural policy/encoding limits,
+and search strength/performance. Explicit outcomes and causal receipts improve
+the boundary; they do not prove every operation executed the correct rule.
+No performance or implementation-effort estimate is made here.
+
+7. REPRODUCING THIS REVIEW
+==========================
+
+The companion ZIP includes every measuring program from this request, complete
+raw results, source hashes/call sites/rule-line inventory, and the original
+eight action-regression reproductions from the preceding probe.
+
+From a pinned checkout with its Python dependencies installed:
+
+  export RBSIM_REPO=/absolute/path/to/rbsim
+  export RBSIM_DESIGN_OUT=/absolute/path/to/new_results
+  export PYTHONHASHSEED=0
+  uv run python /absolute/path/to/evidence/reproduce_related.py
+  uv run python /absolute/path/to/evidence/related_controls.py
+  uv run python /absolute/path/to/evidence/golden_forecast.py
+  uv run python /absolute/path/to/evidence/golden_move_windows.py
+  uv run python /absolute/path/to/evidence/inventory.py
+
+Run from the repository or use uv run --project /absolute/path/to/rbsim.
+Use a new results directory to preserve the supplied evidence. The forecast
+program temporarily changes methods in its own Python process and restores
+them afterward. Its limited bypass/pass/reset controls are documented in the
+source; they are not a complete fix and never write repository files.
+
+Measured outputs:
+- related_results.json: six confirmed error scenarios plus recall control,
+  pass-sequence counterexample and the 1,170-case channel matrix.
+- related_controls.json: Minefield, local presence and all 49 mode fixtures.
+- golden_forecast.json: five sets of 28 signatures, actions and observed events.
+- golden_move_windows.json: the group-prefix/window evidence and two candidates.
+- source_inventory.json: exact source line locations, consumer calls, 46 rule
+  citation locations and SHA-256 values for the reviewed inputs.
+
+The counterfactual controls cover narrower behavior than the complete design.
+No production result type, live fix, neural parity run or regenerated golden
+is claimed. The repository was checked clean after these experiments.
+
+PRIMARY SOURCES
+
+Rules and numbering used:
+https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md
+Movement/group costs (144): #L755
+Tasks, cleanup and staged showdowns (319–344): #L1578
+Priority/focus and FEPR (337–348): #L1727
+Death replacement (370.1.a.1): #L2352
+Triggered items (383.3): #L2541
+Standard Move (421.3): #L3121
+Kill (429): #L3289
+Add and cost exception (430): #L3335
+Payment exception (445.2.c): #L3767
+
+Code (all at the same pin):
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/core/loop.py#L5463
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/core/loop.py#L6770
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/core/loop.py#L7580
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/core/effects.py#L120
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/core/effects.py#L2801
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/riftbound/ai/coach.py#L448
+https://github.com/califhornya/rbsim/blob/e72318e0b60956c80228f83d7defd321dfb98950/tests/test_golden_games.py#L104
+
+EXACT RULE ANCHORS
+
+144.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L757
+144.1.b. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L761
+144.1.c. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L763
+144.3. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L767
+144.3.c. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L773
+312.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1427
+313.4. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1459
+319.8. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1601
+323.7. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1637
+323.7.a. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1639
+323.8. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1641
+323.9. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1643
+323.10. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1645
+323.11. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1649
+323.12. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1651
+323.13. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1653
+333. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1705
+334.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1711
+334.2. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1713
+335. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1717
+335.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1719
+337.1.a. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1729
+337.2. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1733
+337.4. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1737
+338.1.a.2. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1747
+339.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1765
+340.2.a. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1775
+340.4. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1779
+344. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1797
+345. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1803
+346. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1805
+346.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1807
+347.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1813
+348. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L1825
+358.5. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L2139
+359.3.e.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L2167
+370.1.a.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L2359
+383.3. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L2541
+421.3. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3121
+429.1. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3289
+429.5.c. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3321
+430.2. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3337
+430.2.a. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3339
+430.3. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3343
+431.3. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3365
+445.2.c. https://github.com/califhornya/rbsim/blob/29003114edc1fef0322ec987367fd3e219073116/docs/rules/CORE_RULES.md#L3767
