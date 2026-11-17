@@ -68,15 +68,14 @@ simple_trade è un bot da neofita: 0,72 contro di lui = rete debole.
    (cosa vale cosa, cosa temere da ogni mazzo) come valutazione della
    ricerca che c'è. Prima versione: un'ora con l'utente sui due mazzi; stop
    se non batte nettamente simple_trade o non gioca in modo sensato per lui.
-2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Kai'Sa/Kennen storico; Evelynn e
-   Kha'Zix: primo gruppo (S6-S10) in attesa di risposta.
+2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
+   pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli su
    Evelynn/Kha'Zix solo quando si riallena (consiglio: non prima del bot).
 4. Possono aspettare: sideboard, tempi per turno, carte fuori dai mazzi,
    costruzione del mazzo (§103), regole aperte fuori dai mazzi (AUDIT.md).
 
-Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
-`fresh`/`|v|` (valore sulle partite nuove), `empty_turns` (turni a vuoto).
+Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
@@ -90,6 +89,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max; conta la CPU. Nel log:
 - `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`: self-play e
   training; `scripts/allena.bat` / `allena.command`: lo stesso con doppio clic.
 - `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
+- `riftbound/ai/scenari.py` + `scripts/scenari.py`: scenari dei giudizi (mosse vere).
 - `docs/history/SESSIONE_2026-11-13.md`: il primo training nel dettaglio; `scripts/diag/`: le misure.
 - `riftbound/data/cards/all_cards.json`: dati delle carte;
   `riftbound/data/reference/piltover_archive.json`: testo stampato

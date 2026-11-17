@@ -75,31 +75,28 @@ Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
   nessuno? (Interessa quanto si rischia.)
 
 ## Evelynn e Kha'Zix: primo gruppo (17/11, in attesa di risposta)
-Campi: Evelynn ha Bandle Scouts' Academy, Kha'Zix ha Sandswept Tomb; gli altri
-non contano. Si vince a 8. Nascondere costa [rune] (una runa riciclata) e si
-può solo su un campo che controlli, una carta per campo.
-- S6. Tu Evelynn, primo giocatore, inizio del tuo secondo turno, 0-0, 4 rune
-  (2 Body, 2 Chaos). Bedeviling Stranger (2) in base, giocata al turno 1,
-  pronta. Lui: Traveling Merchant (2) in base, 3 rune. Mano: Pyke Returned,
-  Gutter Guardian, Momentary Companion, Hold 'Em, Star-Crossed. Cosa fai? (Es.
-  Stranger all'Academy, la conquisti; poi Gutter Guardian lì mostrando Pyke
-  dalla mano: la potenza che dà paga il nascondere Pyke all'Academy, che dà un
-  Gold.)
-- S7. Tu Kha'Zix, secondo giocatore, primo turno, 0-0, 3 rune (2 Body, 1
-  Chaos). Lei ha giocato Bedeviling Stranger (2) in base: al suo prossimo
-  turno può portarla all'Academy, conquistarla, nasconderci una carta e
-  prendere un Gold. Mano: Irresistible Faefolk, Traveling Merchant, Reckless
-  Innovator, Void Assault, Punch First. Cosa giochi, pensando al suo turno
-  dopo?
-- S8. Tu Evelynn, suo turno 4, 3-3. All'Academy hai Pyke Returned (3) da solo
-  e Momentary Companion nascosta. Lui muove Kha'Zix Mutating Horror (4) dalla
-  base al tuo campo (se un nemico è solo lì, Kha'Zix prende +2 e 2 XP). Hai 3
-  rune aperte (2 Chaos, 1 Body), in mano Star-Crossed, Gust, Hold 'Em. Cosa
-  fai, e quando?
-- S9. Tu Kha'Zix, tuo turno 5, 5-4 per te. Zed Without a Sound (5) è al suo
-  campo, esaurito: l'ha appena conquistato (Shadow Clone in base). Hai 3 XP,
-  leggenda pronta, 2 rune aperte; in mano Punch First, Traveling Merchant.
-  Lei: Vex Apathetic (4) in base, 5 rune, 3 carte in mano. Spendi 2 XP per
-  riportare Zed in base, 1 XP per dargli il Buff, o li tieni? Perché?
+S6-S9 si giocano sulla pagina degli scenari (`scripts/scenari.bat` o
+`scenari.command`, doppio clic): la posizione è costruita con mosse vere
+(`docs/bot/scenari.json`, controllata da `tests/test_scenari.py`), giochi tu
+il turno e scrivi il perché; le risposte vanno in
+`docs/bot/risposte_scenari.jsonl`. I testi:
+- S6. Sei Evelynn, primo giocatore, all'inizio del tuo secondo turno (0-0).
+  Bedeviling Stranger è in base, pronta; lui ha Traveling Merchant in base.
+  Cosa fai in questo turno, e perché? (È il turno 3 della partita: i turni si
+  contano per giocatore.)
+- S7. Sei Kha'Zix, secondo giocatore, al tuo primo turno (0-0). Lei ha
+  Bedeviling Stranger in base: al suo prossimo turno può portarla all'Academy,
+  conquistarla, nasconderci una carta e prendere un Gold. Cosa giochi,
+  pensando al suo turno dopo? (Turno 2 della partita.)
+- S8. Sei Evelynn, nel suo quarto turno, 3-3. All'Academy hai Pyke da solo e
+  Momentary Companion nascosta; Bedeviling Stranger è in base. Lui ha appena
+  mosso Kha'Zix Mutating Horror dalla base al tuo campo («quando attacco o
+  difendo, se un nemico è solo qui, +2 Might e 2 XP»): tocca a te. Cosa fai, e
+  in che momento? (Turno 8 della partita.)
+- S9. Sei Kha'Zix, al tuo quarto turno, 4-2. Con Grim Resolve Zed ha appena
+  conquistato l'Academy ed è lì esausto (8 di Might fino a fine turno); lo
+  Shadow Clone è in base. Hai 3 XP e la leggenda pronta; lei ha Vex in base e
+  4 carte in mano. Spendi 2 XP per riportare Zed in base, 1 XP per il Buff, o
+  li tieni? Perché? E il resto del turno? (Turno 7 della partita.)
 - S10. Domanda sulle carte, non sulle posizioni: con Evelynn, quali carte di
   Kha'Zix temi di più e come giochi intorno? E con Kha'Zix, quali di Evelynn?
