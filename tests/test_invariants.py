@@ -30,14 +30,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 _DECKS = REPO_ROOT / "riftbound" / "data" / "decks"
 ZED = _DECKS / "precon_zed.json"
 SHEN = _DECKS / "precon_shen.json"
-KAISA = _DECKS / "competitive_kaisa.json"
-KENNEN = _DECKS / "competitive_kennen.json"
+# The owner's post-ban decks (Kai'Sa and Kennen are no longer played, 2026-11-17).
+EVELYNN = _DECKS / "competitive_evelynn.json"
+KHAZIX = _DECKS / "competitive_khazix.json"
 
 _MATCHUPS = [
     ("simple_trade", ZED, "random", SHEN),
     ("random", SHEN, "simple_trade", ZED),
-    ("simple_trade", KAISA, "random", KENNEN),
-    ("random", KENNEN, "simple_trade", KAISA),
+    ("simple_trade", EVELYNN, "random", KHAZIX),
+    ("random", KHAZIX, "simple_trade", EVELYNN),
 ]
 _SEEDS = [1, 7, 42, 99, 100000, 271828]
 
@@ -83,6 +84,10 @@ def _collect(gs) -> list[tuple[int, str, str, str]]:
                 add(g, "gear")
         for fd in bf.facedowns:              # a HIDDEN card hidden here
             add(fd.card, "facedown")
+        for side in ("A", "B"):              # a DEPLOY gear here (The Good Stuff)
+            for dg in bf.gear_for(side):
+                if not dg.is_token:
+                    add(dg.card, "deployed_gear")
     if gs.champion_A is not None and not gs.champion_A_deployed:
         add(gs.champion_A, "champion")
     if gs.champion_B is not None and not gs.champion_B_deployed:
