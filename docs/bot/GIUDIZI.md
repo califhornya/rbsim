@@ -78,17 +78,19 @@ Due campi (il tuo e il suo), effetti dei campi non rilevanti, si vince a 8.
 Campi: Evelynn ha Bandle Scouts' Academy, Kha'Zix ha Sandswept Tomb; gli altri
 non contano. Si vince a 8. Nascondere costa [rune] (una runa riciclata) e si
 può solo su un campo che controlli, una carta per campo.
-- S6. Tu Evelynn, primo giocatore, tuo secondo turno, 4 rune (2 Body, 2
-  Chaos), 0-0. Controlli l'Academy con Bedeviling Stranger (2). Lui ha
-  Traveling Merchant (2) al suo campo e Irresistible Faefolk (1) in base,
-  3 rune. Mano: Pyke Returned, Gutter Guardian, Momentary Companion, Hold 'Em,
-  Star-Crossed. Cosa fai? (Es. Gutter Guardian mostrando Pyke dalla mano: la
-  potenza che dà paga il nascondere Pyke all'Academy, che dà un Gold.)
-- S7. Tu Kha'Zix, secondo giocatore, primo turno, 3 rune (2 Body, 1 Chaos).
-  Lei ha giocato Bedeviling Stranger (2) e controlla l'Academy; al suo turno
-  ci potrà nascondere una carta e prendere un Gold. Mano: Irresistible
-  Faefolk, Traveling Merchant, Reckless Innovator, Void Assault, Punch First.
-  Cosa giochi, e vai subito al suo campo?
+- S6. Tu Evelynn, primo giocatore, inizio del tuo secondo turno, 0-0, 4 rune
+  (2 Body, 2 Chaos). Bedeviling Stranger (2) in base, giocata al turno 1,
+  pronta. Lui: Traveling Merchant (2) in base, 3 rune. Mano: Pyke Returned,
+  Gutter Guardian, Momentary Companion, Hold 'Em, Star-Crossed. Cosa fai? (Es.
+  Stranger all'Academy, la conquisti; poi Gutter Guardian lì mostrando Pyke
+  dalla mano: la potenza che dà paga il nascondere Pyke all'Academy, che dà un
+  Gold.)
+- S7. Tu Kha'Zix, secondo giocatore, primo turno, 0-0, 3 rune (2 Body, 1
+  Chaos). Lei ha giocato Bedeviling Stranger (2) in base: al suo prossimo
+  turno può portarla all'Academy, conquistarla, nasconderci una carta e
+  prendere un Gold. Mano: Irresistible Faefolk, Traveling Merchant, Reckless
+  Innovator, Void Assault, Punch First. Cosa giochi, pensando al suo turno
+  dopo?
 - S8. Tu Evelynn, suo turno 4, 3-3. All'Academy hai Pyke Returned (3) da solo
   e Momentary Companion nascosta. Lui muove Kha'Zix Mutating Horror (4) dalla
   base al tuo campo (se un nemico è solo lì, Kha'Zix prende +2 e 2 XP). Hai 3
