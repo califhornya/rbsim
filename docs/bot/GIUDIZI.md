@@ -119,6 +119,10 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   mette paura e pressione, può tirare via le sue unità dal campo che lei
   vuole tenere, e si concatena con Kha'Zix (un nemico portato da solo dove
   c'è Kha'Zix gli dà +2 e 2 XP).
+- Risposta a S9 (18/11, in chat): "sono a score pari (4)". Riportare in base
+  dai campi quante più unità possibile e giocarne quante più possibile adesso:
+  il turno dopo, con Vex su un campo, le unità giocate sarebbero stordite, e
+  così le si rende scomodo il setup.
 - Risposta a S8 (18/11, in chat): gira Momentary Companion in risposta al
   trigger di Kha'Zix: 7 contro 6 (Pyke 3 + Companion 4, Kha'Zix 4 + 2). Il +2
   lui lo prende comunque (la condizione si guarda quando si innesca), quindi
