@@ -1,14 +1,16 @@
-# Partita dal vivo su RiftAtlas (sera del 17/11)
+# Partite dal vivo su RiftAtlas
 
-Per la sessione che la gioca: questa conversazione non c'è più, qui c'è
-quello che serve.
+Per la sessione che le gioca: le conversazioni precedenti non ci sono più,
+qui c'è quello che serve. Prima partita giocata il 17-18/11: lezioni in
+`docs/bot/GIUDIZI.md` (G8-G15), checklist e note pratiche in fondo.
 
 ## Cosa facciamo
 L'utente e Claude giocano insieme contro un amico (giocatore reale), su
 RiftAtlas, nel browser del PC dell'utente. L'amico sa che è un test con
 Claude. Mazzo dell'utente: Evelynn (`competitive_evelynn.json`). Mazzo
-dell'amico: non noto, probabilmente non Kha'Zix; le sue carte si leggono man
-mano (testo stampato: `riftbound/data/reference/piltover_archive.json`).
+dell'amico (Ksword) il 17/11: Sett, `competitive_sett.json` (la sua lista, con
+il sideboard); un altro mazzo si legge man mano (testo stampato:
+`riftbound/data/reference/piltover_archive.json`).
 
 Serve una sessione sul PC dell'utente (app Claude desktop, con Claude in
 Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.
@@ -62,3 +64,53 @@ Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.
   si guarda quando si innesca, non quando si risolve (§383.2.a.1; es.
   Kha'Zix "se un nemico è solo qui").
 - Il motore conta i turni di entrambi (turno 3 = il tuo secondo, se inizi).
+
+## Checklist (dopo il 17/11)
+- Ogni regola si controlla nel motore o in `docs/rules/CORE_RULES.md` prima di
+  dirla (G8). Mai a memoria, nemmeno se sembra ovvia.
+- In ogni finestra di reazione, prima di approvare: girare la carta coperta?
+  Per la pesca della legend (G9), o perché il campo resterebbe senza unità e
+  la coperta andrebbe persa (G11). E il contrario: tenerla, se non è a rischio.
+- Scarto della legend: tenere la carta che fa pescare (G12).
+- Inizio turno: prima le carte che pescano; Show Off quando c'è (G13).
+- Prima di attaccare: quali carte gratis ha l'avversario (Call to Glory con un
+  buff da spendere, G14)? Quali protezioni vanno tolte prima (The Boss, G15)?
+- I trigger non partono da soli sul simulatore: dopo ogni mossa, controllare
+  esaurimenti (Innovator), Gold, pesche, scarti, danni.
+
+## Note pratiche su RiftAtlas (play.riftatlas.com)
+- Simulatore manuale: esaurimenti, Gold, pesche, scarti e danni vanno fatti a
+  mano. Fa entrare le unità esauste e le esaurisce quando si muovono: con
+  Accelerate vanno preparate a mano.
+- Clic su carta o runa = esaurisci/prepara (due clic, o due persone che
+  cliccano, si annullano). Clic destro su una carta = cimitero; su una runa =
+  riciclala. R = Rewind (annulla l'ultima azione).
+- Mazzo principale: "Main Deck (D)", in basso a destra. In basso a sinistra c'è
+  il mazzo delle rune: cliccarlo canalizza una runa (non pesca).
+- Nascondere: passa sopra la carta in mano, "Set card hidden", trascinala sul
+  campo. Girarla: "Play from Hidden" sulla carta coperta.
+- Gold: "+" della base, "Add Gold token to Base".
+- Showdown: Pass (W), End (Q). Catena: Approve (A), Resolve (S).
+- Non chiudere dialoghi né cliccare mentre l'utente ha il controllo della
+  scheda. Per importare un mazzo: la lista della repo, non quelle salvate.
+
+## Registrazione
+Bozza del nuovo registratore: `scripts/riftatlas/registratore.js` (18/11,
+scritta senza poter aprire RiftAtlas; provata solo su una pagina finta). Da
+provare all'inizio della prossima sessione, prima della partita: capire se la
+partita viaggia su WebSocket e cosa contengono i messaggi (lo stato del tavolo
+già strutturato sarebbe la fonte migliore); se no, istantanea del tavolo
+dall'HTML. Poi uno script in repo che dal file esportato ricostruisce le
+posizioni (per gli scenari).
+Il pannello del log tiene solo gli ultimi ~5 turni. Registratore usato il
+17/11: un MutationObserver su `document.body` che legge il pannello, lo
+divide in blocchi per "TURN n·NOME" e li salva per stanza (riga "ROOM: XXXXX";
+ogni partita di una BO3 ha la sua stanza). Per estrarre il testo: il dump in
+un `<main><article>` in sovrimpressione, poi get_page_text.
+Da salvare in più, a ogni azione (richiesta dell'utente: tutta
+l'informazione pubblica): tavolo con Might, esauste o pronte, buff, equip;
+carte coperte per campo e turno in cui sono state nascoste; controllo dei
+campi e punteggio; rune per dominio, pronte o esaurite; carte in mano e nel
+mazzo (numero); cimiteri; carte rivelate (e da quale effetto); catena con i
+bersagli; trigger della legend già usati. La mano dell'utente a parte, come
+vista privata di chi decide.

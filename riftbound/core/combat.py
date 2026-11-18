@@ -110,6 +110,17 @@ class UnitInPlay:
 
     @property
     def might(self) -> int:
+        return self._might(this_turn=True)
+
+    @property
+    def lasting_might(self) -> int:
+        """Its Might once this turn's bonuses are gone (clear_turn_end_bonuses:
+        "this turn" Might, combat bonuses, a base set this turn). A search that
+        values a position in the middle of a turn reads this one: a "+5 this
+        turn" with nothing to fight is not a gain."""
+        return self._might(this_turn=False)
+
+    def _might(self, this_turn: bool) -> int:
         gear_bonus = sum(
             int(e.get("amount", 0))
             for g in self.gear
@@ -118,9 +129,12 @@ class UnitInPlay:
         )
         # Each Equipment's printed Might bonus ("[might] +2").
         gear_bonus += self.equip_bonus_mult * sum(int(getattr(g, "might", 0) or 0) for g in self.gear)
-        base = self.base_might
-        return max(0, base + self.bonus_might + self.temporary_might + self.combat_might
-                   + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
+        if this_turn:
+            base = self.base_might
+            turn = self.bonus_might + self.temporary_might + self.combat_might
+        else:
+            base, turn = self._printed_might(), 0
+        return max(0, base + turn + self.might_counters + self.aura_might + self.passive_might + gear_bonus)
 
     @property
     def base_might(self) -> int:
@@ -128,6 +142,9 @@ class UnitInPlay:
         effect made it this turn."""
         if self.base_might_override is not None:
             return self.base_might_override
+        return self._printed_might()
+
+    def _printed_might(self) -> int:
         if self.gear_unit and not isinstance(self.card, UnitCard):
             return int(self.card.cost_energy or 0)      # a gear an effect made a unit
         return int(self.card.might or 0)

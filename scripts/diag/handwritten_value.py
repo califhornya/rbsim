@@ -7,17 +7,34 @@ from multiprocessing import Pool
 # The owner's post-ban decks (Kai'Sa and Kennen until 2026-11-17).
 DECKS = [Path("riftbound/data/decks/competitive_evelynn.json"), Path("riftbound/data/decks/competitive_khazix.json")]
 
+def _m(u) -> int:
+    """The Might that lasts past this turn: the search values positions in the
+    middle of a turn, where a "+5 this turn" with nothing to fight is no gain."""
+    return u.might if u.lasting_might is None else u.lasting_might
+
 def table_value(obs) -> float:
     me = obs.viewer
     s = 0.45 * (obs.my_points - obs.opp_points)
     for bf in obs.battlefields:
-        mine = sum(u.might for u in getattr(bf, me)); theirs = sum(u.might for u in getattr(bf, 'B' if me == 'A' else 'A'))
+        mine = sum(_m(u) for u in getattr(bf, me)); theirs = sum(_m(u) for u in getattr(bf, 'B' if me == 'A' else 'A'))
         if bf.controller == me: s += 0.30
         elif bf.controller is not None: s -= 0.30
         s += 0.05 * (mine - theirs)
-    s += 0.03 * (sum(u.might for u in obs.my_base_units) - sum(u.might for u in obs.opp_base_units))
+    s += 0.03 * (sum(_m(u) for u in obs.my_base_units) - sum(_m(u) for u in obs.opp_base_units))
     s += 0.03 * (len(obs.my_hand) - obs.opp_hand_count)
     return math.tanh(s)
+
+def _value():
+    """RBSIM_VALUE=judgment: the value from the user's judgments
+    (riftbound/ai/judgment_value.py); default: table_value."""
+    import os
+    if os.environ.get("RBSIM_VALUE") == "judgment":
+        # RBSIM_W='{"hidden": 0, ...}': other weights, to test one judgment at a time.
+        import json
+        from riftbound.ai import judgment_value as J
+        J.W.update(json.loads(os.environ.get("RBSIM_W", "{}")))
+        return J.judgment_value
+    return table_value
 
 def game(task):
     seed, opponent, seat, iters = task
@@ -26,13 +43,15 @@ def game(task):
     from riftbound.core.game_factory import build_game, make_agent
     from riftbound.core.loop import GameLoop
 
+    value = _value()
+
     class Heur(NetGuidedMCTSAgent):
         def _evaluate(self, clone, side, legal_ga):
             ts = [a.to_engine() for a in legal_ga]
             u = 1.0 / max(1, len(ts))
-            return {t: u for t in ts}, table_value(Observation.from_state(clone, side))
+            return {t: u for t in ts}, value(Observation.from_state(clone, side))
         def _net_value(self, clone, side):
-            return table_value(Observation.from_state(clone, side))
+            return value(Observation.from_state(clone, side))
         _value_only = _net_value
         def _play(self, root, side, point=None):
             import os
@@ -61,6 +80,16 @@ def game(task):
     if opponent == "random":
         from riftbound.ai.search.random_agent import RandomAgent
         them.agent = RandomAgent(them, random.Random(seed))
+    elif opponent == "table":
+        # The same search with table_value: the judgments' value head to head.
+        class Table(Heur):
+            def _evaluate(self, clone, side, legal_ga):
+                ts = [a.to_engine() for a in legal_ga]
+                return {t: 1.0 / max(1, len(ts)) for t in ts}, table_value(Observation.from_state(clone, side))
+            def _net_value(self, clone, side):
+                return table_value(Observation.from_state(clone, side))
+            _value_only = _net_value
+        them.agent = Table(them, None, iterations=iters, rng=random.Random(seed + 1), backup="best")
     else:
         them.agent = make_agent(opponent, them)
     res = GameLoop(gs).start()

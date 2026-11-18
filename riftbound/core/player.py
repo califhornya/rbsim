@@ -72,6 +72,10 @@ class Player:
     name: str
     hp: int = 10  # legacy; not used in VP rules but kept for compatibility
     hand: List[Card] = field(default_factory=list)
+    # Cards in this hand the opponent knows: they came from a public zone (the
+    # board, the trash, a revealed card) or the hand was revealed. Checked by
+    # identity like Deck.known_top (hand_known); determinize keeps them.
+    hand_public: List[Card] = field(default_factory=list)
     deck: Deck = field(default_factory=lambda: Deck([]))
     agent: object = None  # set by CLI after Player creation
     trash: List[Card] = field(default_factory=list)
@@ -345,8 +349,38 @@ class Player:
     def draw(self) -> Optional[Card]:
         card = self.deck.draw()
         if card:
-            self.hand.append(card)
+            self.to_hand(card, public=False)
         return card
+
+    def to_hand(self, card: Card, public: bool = True) -> None:
+        """Put `card` in the hand: `public` when the opponent sees which card
+        it is (returned from the board or the trash, revealed), not when it
+        comes from a hidden zone (drawn, a facedown card)."""
+        self.hand.append(card)
+        if public:
+            self.mark_hand_public([card])
+        else:
+            self.hand_public = [c for c in self.hand_public if c is not card]
+
+    def hand_known(self) -> List[Card]:
+        """The cards still in hand that the opponent knows."""
+        return [c for c in self.hand_public if any(c is h for h in self.hand)]
+
+    def forget_hand_public(self, could_be=None) -> None:
+        """A card left this hand without the opponent seeing which one (hidden
+        facedown, put into the deck): the known cards it could have been are
+        no longer known (`could_be`: which ones; default all). Two revealed
+        HIDDEN cards and one is hidden: neither is known any more."""
+        self.hand_public = [c for c in self.hand_known() if could_be is not None and not could_be(c)]
+
+    def mark_hand_public(self, cards) -> None:
+        """These cards in hand become known to the opponent ("they reveal
+        their hand")."""
+        known = self.hand_known()
+        for card in cards:
+            if any(card is h for h in self.hand) and not any(card is k for k in known):
+                known.append(card)
+        self.hand_public = known
 
     def burn(self, n: int) -> list:
         """Vendetta BURN X: move the top X cards of the Main Deck to the trash.
@@ -379,7 +413,7 @@ class Player:
         for _ in set_aside:
             c = self.deck.draw()
             if c is not None:
-                self.hand.append(c)
+                self.to_hand(c, public=False)
         # 117.3: recycle the set-aside cards to the BOTTOM (front of the list, the
         # opposite end from draw), so they are not the ones just drawn.
         recycled = list(set_aside)

@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-17 notte (fase 1 del piano v2 fatta: D66-D68 corrette; si torna al bot).
+Aggiornato: 2026-11-18 (partite dal vivo su RiftAtlas; determinize corretto).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -22,78 +22,78 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   (piano v2, `docs/PIANO_MOTORE.md`). Sera: strada A, prima il bot: solo la
   fase 1 (D66-D68, le copie: piccola, la partita vera non cambia), poi il bot.
   Fuori perimetro: D59-D65, la struttura, il training.
-- (Utente, 17/11) Il `Result` di una copia (`GameLoop` nuovo) conta
-  `units_played` e `spells_cast` dal punto di copia: lasciato e scritto
-  (nessuno li legge da una copia; la ricerca usa il vincitore).
-- Agente random seminato dal seed della partita; commenti di Codex
-  verificati uno per uno. Imitazione di simple_trade scartata (da neofita).
-- Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
-  §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
-- Scelte nella ricerca: nodi per opzione con chiave (tipo, carta, descrizione),
-  non per indice; prior uguali tra le opzioni.
-- Scelte nascoste: decise quando la partita le chiede, rigiocando il tratto
-  dall'ultima decisione del turno (giornale nel motore).
+- (Utente, 17/11) Il `Result` di una copia conta `units_played` e
+  `spells_cast` dal punto di copia: lasciato (la ricerca usa il vincitore).
+- Flow: solo sconti di aura; altri modificatori §356.3-4 aperti (non nei mazzi).
+- Ricerca: un nodo per opzione con chiave (tipo, carta, descrizione); prior uguali.
+- Scelte nascoste: decise quando servono, rigiocando dall'ultima decisione.
 - (Utente, 13/11) La rete serve come avversario per allenarsi e per misurare
   mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
   Proposte in parole semplici (cosa faccio, quanto costa, cosa sapremo);
   ogni deviazione dal piano concordato detta esplicitamente.
 - Training: più partite e meno esempi per partita invece di più ricerca per
   mossa: il valore ha bisogno di esiti, non di posizioni della stessa partita.
+- (Utente, 18/11) Regole dal motore o da CORE_RULES, mai a memoria; lezioni
+  in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
+- Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
+  determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
 ## Fatto
 - Audit, passaggi 1-7: D1–D58, Q1–Q4 e Q6; dettagli in AUDIT.md.
-- Ricerca (`6ebd0e7`): la ricerca fa tutte le scelte del suo giocatore;
-  A/B, 240 partite: nuova 68,8% contro la vecchia. Banlist completa.
-- Training: due budget di ricerca, weight decay, `backup="best"`, bersaglio
-  della politica dai Q (Gumbel), `--init` (`fd01c63` e seguenti).
-- Pulizia (17/11, PR #28): storico in `docs/archivio/`, tolti i file morti.
+- Ricerca `6ebd0e7` (tutte le scelte, 68,8%); training `fd01c63`+.
 - Revisione esterna (17/11): 7 rapporti in `docs/audit/revisione_esterna/`,
-  D59-D68 in AUDIT (ottavo passaggio); verificati qui sonda sulle azioni,
-  riproduzioni, conteggi, copie piccole, Riven; la suite esegue 200/212 effetti.
-- Fase 1 del piano v2 (17/11): D66-D68 corrette, le tre memorie salvano
-  l'oggetto, non `id()`. Test rossi `f4a9315`, fix `b6e6c76`, `d4bc220`,
-  `ca16a51`; `tests/audit/test_audit_copies.py`: 14 casi × 3 vie di copia.
-  Suite 1831 passed, 6 skipped; identici le 28 golden e lo stato finale di
-  1.440 partite in più. Corretta anche la legend Evelynn (pescava di nuovo in
-  una copia). Sonda grande sulle copie non rifatta (ZIP della revisione).
+  D59-D68 in AUDIT (ottavo passaggio); la suite esegue 200/212 effetti.
+- Fase 1 del piano v2 (17/11): D66-D68 corrette (le memorie salvano l'oggetto,
+  non `id()`), `tests/audit/test_audit_copies.py`; 28 golden identiche.
+- Partite dal vivo su RiftAtlas (17-18/11): partita 1 giocata da Claude
+  (persa), BO3 dall'utente. GIUDIZI G8-G15; checklist e note in PARTITA_LIVE.
+- determinize (18/11, `64f184f`): ridistribuiva tutta la mano avversaria; ora
+  tiene le carte note (rimbalzate, rivelate) e non dipende dall'ordine
+  nascosto. `tests/test_hidden_info.py`, 4 su 5 rossi prima (anche "la
+  ricerca non sbircia"). Suite 1836 passed, 6 skipped; golden identiche.
+- Risposte agli scenari (18/11): opzioni e mano a ogni mossa, mossa scartata,
+  cosa farebbe cambiare scelta, esito a parte (`tests/test_scenari_answers.py`).
+- Risposte dell'utente in chat a S6-S9, S11a/b (`risposte_scenari.jsonl`);
+  teoria dei punti dal web in `docs/bot/TEORIA_PUNTI.md` (pari/dispari).
+- Mazzo Sett di Ksword (`competitive_sett.json`); scenari con cambi di
+  sideboard e `legend_used`; S11a/S11b dal log della G3 (`test_scenari_s11.py`).
 
 ## In corso
-Niente. Training fermo dal 13/11. Contro simple_trade: run 2: 0,52; run 3
-(`backup="best"`): 0,80 alla 10, 0,72 alla 60 (rete 60 contro 10: 0,49 ± 0,07);
-run 4 (`--policy-target q`): 0,68, valore peggiorato (0,70 → 0,84). Rete debole.
+Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
+peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. Sera del 17/11: partita dal vivo su RiftAtlas (`docs/bot/PARTITA_LIVE.md`).
+0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
+   misurata un giudizio alla volta, non rende il bot più forte (testa a testa
+   0,49); più peso alla mano lo peggiora (0,65). Decidere con l'utente la
+   strada: ricerca che gioca anche il turno avversario, o la rete.
+   Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
+   da provare sulla pagina vera in una sessione sul PC dell'utente.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
-   batte nettamente simple_trade o non gioca in modo sensato. Base (17/11,
-   `handwritten_value.py 200 100`, 400 partite): 0,59 contro simple_trade (0,50
-   con Evelynn, 0,69 con Kha'Zix), 0,85 contro random; rifatta prima del fix:
-   identica (misura deterministica). Dopo la fase 1: identica in tutto.
-2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
-   pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
-3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli quando
-   si riallena, e rifare il lanciatore a doppio clic.
-4. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
-5. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
+   batte nettamente simple_trade o non gioca in modo sensato. Base dopo le 3
+   correzioni della ricerca (`handwritten_value.py 200 100`, 20 min): 0,80
+   contro simple_trade, 0,97 contro random (prima 0,58 e 0,86).
+2. Giudizi: `docs/bot/GIUDIZI.md`; S6-S11 risposte (18/11, in chat).
+3. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
+4. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
   controllato; `tests/audit/`: un test per deviazione; `docs/MECHANICS.md`.
+- `docs/bot/`: GIUDIZI, TEORIA_PUNTI, PARTITA_LIVE, scenari.json, partite/.
 - `docs/PIANO_MOTORE.md`: piano v2 (correttezza, poi struttura), con
   l'avanzamento; `docs/audit/revisione_esterna/`: i rapporti (in inglese).
 - `riftbound/core/`: il motore. `loop.py` (turno, chain, showdown, combattimento),
   `effects.py`, `battlefield.py` (Hold / Conquer), `legality.py` (azioni legali).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete; test in
   `tests/test_net_mcts.py`. `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`.
-- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
-- `riftbound/ai/scenari.py` + `scripts/scenari.py`: scenari dei giudizi (mosse vere).
+- `riftbound/ai/coach.py`, `scenari.py` (+ `scripts/`): coach e scenari dei giudizi.
 - `scripts/diag/`: le misure (`handwritten_value.py`: base del bot).
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
-- `riftbound/data/cards/all_cards.json`: dati delle carte;
-  `riftbound/data/reference/piltover_archive.json`: testo stampato
-  (`scripts/piltover_sync.py compare` per le differenze).
+- `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
+  piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).
 - `riftbound/data/decks/`: precon, competitive dell'utente (`scripts/deck_from_txt.py`).
 - `tests/golden_games.json` + `test_golden_games.py`: 28 partite, solo stato
   finale (`RBSIM_REGEN_GOLDEN=1` per rigenerarle). `BACKLOG.md`: voci aperte.

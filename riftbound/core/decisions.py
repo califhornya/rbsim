@@ -130,6 +130,9 @@ class UnitView:
     buffed: bool = False
     empowered: bool = False
     keywords: tuple[str, ...] = ()       # of UNIT_KEYWORDS, in effect now
+    # Might once this turn's bonuses are gone (UnitInPlay.lasting_might); None
+    # when not known (a view built by hand).
+    lasting_might: Optional[int] = None
 
     def to_dict(self) -> dict:
         return {
@@ -248,6 +251,7 @@ class Observation:
             buffed=u.might_counters > 0,
             empowered=bool(getattr(u, "empowered", False)),
             keywords=tuple(k for k in UNIT_KEYWORDS if u.has_keyword(k)),
+            lasting_might=getattr(u, "lasting_might", u.might),
         )
 
     @classmethod

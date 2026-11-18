@@ -481,6 +481,507 @@
         "opp_hand": 4
       },
       "human_from": "main"
+    },
+    {
+      "id": "S11a",
+      "title": "S11a · Evelynn, Rampage dopo Sabotage (G3 turno 7)",
+      "question": "Sei Evelynn, G3 contro il Sett di Ksword, turno 7 della partita (suo), lui avanti 3-2. Al Packed Amphitheater hai Pyke Returned (esausto) e Reckless Innovator, con Bedeviling Stranger coperta (nascosta nel tuo turno, quindi giocabile come reazione). Lui ha giocato Sabotage: ha visto la tua mano e ti ha riciclato Rebuke. Ora gioca Rampage: Sett Kingpin (6) e Pyke si infliggono danni pari alla Might. In mano hai Punch First ×2, Rengar e Hold 'Em, nessuna reazione; 3 energia aperta. Cosa fai prima che Rampage si risolva, e perché? Decidi prima di sapere cosa peschi.",
+      "decks": {
+        "A": "competitive_sett",
+        "B": "competitive_evelynn"
+      },
+      "swaps": {
+        "A": [
+          [
+            "Showstopper",
+            "Sabotage"
+          ],
+          [
+            "Call to Glory",
+            "Decree of Unity"
+          ]
+        ],
+        "B": [
+          [
+            "Switcheroo",
+            "Rebuke"
+          ]
+        ]
+      },
+      "battlefields": {
+        "A": "Packed Amphitheater",
+        "B": "Rakelstake"
+      },
+      "first": "A",
+      "human": "B",
+      "seed": 11,
+      "hands": {
+        "A": [
+          "Irresistible Faefolk",
+          "First Mate",
+          "Pit Rookie",
+          "Rampage",
+          "Sabotage",
+          "Irresistible Faefolk",
+          "Kinkou Initiate",
+          "Ruin Runner"
+        ],
+        "B": [
+          "Reckless Innovator",
+          "K'Sante Courageous",
+          "Pyke Returned",
+          "Punch First",
+          "Rengar Trophy Hunter",
+          "The Good Stuff",
+          "Bedeviling Stranger",
+          "Hold 'Em",
+          "Punch First",
+          "Hold 'Em",
+          "Rebuke",
+          "Star-Crossed"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "ORDER",
+          "ORDER",
+          "BODY",
+          "BODY",
+          "ORDER",
+          "BODY",
+          "BODY"
+        ],
+        "B": [
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "BODY"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Irresistible Faefolk"
+          ]
+        },
+        {
+          "turn": 2,
+          "seat": "B",
+          "main": [
+            "Play Reckless Innovator"
+          ]
+        },
+        {
+          "turn": 3,
+          "seat": "A",
+          "main": [
+            "Move Irresistible Faefolk base→BF0",
+            "PASS",
+            "Play First Mate",
+            "Move Irresistible Faefolk BF0→base"
+          ],
+          "choices": [
+            [
+              "optional:move_unit",
+              "False"
+            ],
+            [
+              "target:ready_unit",
+              "Irresistible Faefolk"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "seat": "B",
+          "main": [
+            "Move Reckless Innovator base→BF0",
+            "PASS",
+            "Play K'Sante Courageous to BF0",
+            "Hide Pyke Returned @BF0"
+          ]
+        },
+        {
+          "turn": 5,
+          "seat": "A",
+          "main": [
+            "Move First Mate base→BF1",
+            "PASS",
+            "Deploy champion Sett Kingpin to BF1",
+            "Play Pit Rookie",
+            "Move Irresistible Faefolk base→BF1",
+            "PASS"
+          ],
+          "choices": [
+            [
+              "predict",
+              "True"
+            ],
+            [
+              "target:buff",
+              "Sett Kingpin"
+            ],
+            [
+              "optional:move_unit",
+              "True"
+            ],
+            [
+              "target:move_unit",
+              "K'Sante Courageous"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "seat": "B",
+          "main": [
+            "Play Pyke Returned from Hidden @BF0",
+            "Gear gain_power_any_domain (Gold)",
+            "Play gear The Good Stuff @BF0",
+            "Hide Bedeviling Stranger @BF0"
+          ],
+          "choices": [
+            [
+              "discard",
+              "Hold 'Em"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "seat": "A",
+          "main": [
+            "Cast Sabotage @BF1",
+            "Cast Rampage @BF1"
+          ],
+          "choices": [
+            [
+              "card",
+              "Rebuke"
+            ],
+            [
+              "optional",
+              "False"
+            ],
+            [
+              "target",
+              "Sett Kingpin"
+            ],
+            [
+              "target",
+              "Pyke Returned"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "seat": "B",
+          "reaction": [
+            "PASS"
+          ]
+        }
+      ],
+      "turn": 7,
+      "expect": {
+        "point": "reaction",
+        "turn": 7,
+        "score": [
+          2,
+          3
+        ],
+        "active": "opp",
+        "hand": [
+          "Hold 'Em",
+          "Punch First",
+          "Punch First",
+          "Rengar Trophy Hunter"
+        ],
+        "me": {
+          "base": [],
+          "Packed Amphitheater": [
+            "Pyke Returned (4) esausta",
+            "Reckless Innovator (3)"
+          ],
+          "Rakelstake": []
+        },
+        "my_facedown": {
+          "Packed Amphitheater": [
+            "Bedeviling Stranger"
+          ]
+        },
+        "opp": {
+          "base": [
+            "Pit Rookie (2)"
+          ],
+          "Rakelstake": [
+            "First Mate (3)",
+            "Irresistible Faefolk (1)",
+            "Sett Kingpin (6)"
+          ]
+        },
+        "controls": {
+          "Packed Amphitheater": "me",
+          "Rakelstake": "opp"
+        },
+        "energy": 3
+      }
+    },
+    {
+      "id": "S11b",
+      "title": "S11b · Come S11a, trigger di Evelynn già usato",
+      "question": "Sei Evelynn, G3 contro il Sett di Ksword, turno 7 della partita (suo), lui avanti 3-2. Al Packed Amphitheater hai Pyke Returned (esausto) e Reckless Innovator, con Bedeviling Stranger coperta (nascosta nel tuo turno, quindi giocabile come reazione). Lui ha giocato Sabotage: ha visto la tua mano e ti ha riciclato Rebuke. Ora gioca Rampage: Sett Kingpin (6) e Pyke si infliggono danni pari alla Might. In mano hai Punch First ×2, Rengar e Hold 'Em, nessuna reazione; 3 energia aperta. Differenza da S11a: supponi di aver già usato in questo turno il trigger di Evelynn, quindi girare una carta coperta non ti fa pescare. Cosa fai prima che Rampage si risolva, e perché? Decidi prima di sapere cosa peschi.",
+      "decks": {
+        "A": "competitive_sett",
+        "B": "competitive_evelynn"
+      },
+      "swaps": {
+        "A": [
+          [
+            "Showstopper",
+            "Sabotage"
+          ],
+          [
+            "Call to Glory",
+            "Decree of Unity"
+          ]
+        ],
+        "B": [
+          [
+            "Switcheroo",
+            "Rebuke"
+          ]
+        ]
+      },
+      "battlefields": {
+        "A": "Packed Amphitheater",
+        "B": "Rakelstake"
+      },
+      "first": "A",
+      "human": "B",
+      "seed": 11,
+      "hands": {
+        "A": [
+          "Irresistible Faefolk",
+          "First Mate",
+          "Pit Rookie",
+          "Rampage",
+          "Sabotage",
+          "Irresistible Faefolk",
+          "Kinkou Initiate",
+          "Ruin Runner"
+        ],
+        "B": [
+          "Reckless Innovator",
+          "K'Sante Courageous",
+          "Pyke Returned",
+          "Punch First",
+          "Rengar Trophy Hunter",
+          "The Good Stuff",
+          "Bedeviling Stranger",
+          "Hold 'Em",
+          "Punch First",
+          "Hold 'Em",
+          "Rebuke",
+          "Star-Crossed"
+        ]
+      },
+      "runes": {
+        "A": [
+          "BODY",
+          "ORDER",
+          "ORDER",
+          "BODY",
+          "BODY",
+          "ORDER",
+          "BODY",
+          "BODY"
+        ],
+        "B": [
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "BODY",
+          "CHAOS",
+          "CHAOS",
+          "BODY"
+        ]
+      },
+      "script": [
+        {
+          "turn": 1,
+          "seat": "A",
+          "main": [
+            "Play Irresistible Faefolk"
+          ]
+        },
+        {
+          "turn": 2,
+          "seat": "B",
+          "main": [
+            "Play Reckless Innovator"
+          ]
+        },
+        {
+          "turn": 3,
+          "seat": "A",
+          "main": [
+            "Move Irresistible Faefolk base→BF0",
+            "PASS",
+            "Play First Mate",
+            "Move Irresistible Faefolk BF0→base"
+          ],
+          "choices": [
+            [
+              "optional:move_unit",
+              "False"
+            ],
+            [
+              "target:ready_unit",
+              "Irresistible Faefolk"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "seat": "B",
+          "main": [
+            "Move Reckless Innovator base→BF0",
+            "PASS",
+            "Play K'Sante Courageous to BF0",
+            "Hide Pyke Returned @BF0"
+          ]
+        },
+        {
+          "turn": 5,
+          "seat": "A",
+          "main": [
+            "Move First Mate base→BF1",
+            "PASS",
+            "Deploy champion Sett Kingpin to BF1",
+            "Play Pit Rookie",
+            "Move Irresistible Faefolk base→BF1",
+            "PASS"
+          ],
+          "choices": [
+            [
+              "predict",
+              "True"
+            ],
+            [
+              "target:buff",
+              "Sett Kingpin"
+            ],
+            [
+              "optional:move_unit",
+              "True"
+            ],
+            [
+              "target:move_unit",
+              "K'Sante Courageous"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "seat": "B",
+          "main": [
+            "Play Pyke Returned from Hidden @BF0",
+            "Gear gain_power_any_domain (Gold)",
+            "Play gear The Good Stuff @BF0",
+            "Hide Bedeviling Stranger @BF0"
+          ],
+          "choices": [
+            [
+              "discard",
+              "Hold 'Em"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "seat": "A",
+          "main": [
+            "Cast Sabotage @BF1",
+            "Cast Rampage @BF1"
+          ],
+          "choices": [
+            [
+              "card",
+              "Rebuke"
+            ],
+            [
+              "optional",
+              "False"
+            ],
+            [
+              "target",
+              "Sett Kingpin"
+            ],
+            [
+              "target",
+              "Pyke Returned"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "seat": "B",
+          "reaction": [
+            "PASS"
+          ]
+        }
+      ],
+      "turn": 7,
+      "legend_used": true,
+      "expect": {
+        "point": "reaction",
+        "turn": 7,
+        "score": [
+          2,
+          3
+        ],
+        "active": "opp",
+        "hand": [
+          "Hold 'Em",
+          "Punch First",
+          "Punch First",
+          "Rengar Trophy Hunter"
+        ],
+        "me": {
+          "base": [],
+          "Packed Amphitheater": [
+            "Pyke Returned (4) esausta",
+            "Reckless Innovator (3)"
+          ],
+          "Rakelstake": []
+        },
+        "my_facedown": {
+          "Packed Amphitheater": [
+            "Bedeviling Stranger"
+          ]
+        },
+        "opp": {
+          "base": [
+            "Pit Rookie (2)"
+          ],
+          "Rakelstake": [
+            "First Mate (3)",
+            "Irresistible Faefolk (1)",
+            "Sett Kingpin (6)"
+          ]
+        },
+        "controls": {
+          "Packed Amphitheater": "me",
+          "Rakelstake": "opp"
+        },
+        "energy": 3
+      }
     }
   ]
 }

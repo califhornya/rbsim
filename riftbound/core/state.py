@@ -277,6 +277,7 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
 
     * the opponent's hand is redealt from their unseen pool (their current hand +
       deck), so it stays the right size but its identities are randomised;
+      the cards the observer knows are in it (``Player.hand_known``) stay;
     * both decks are shuffled (the observer knows neither order).
 
     Mutates and returns ``gs`` (normally a :meth:`GameState.clone`). Card objects
@@ -286,13 +287,23 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     opp = gs.get_player(gs.other(observer))
     other = gs.other(observer)
 
+    # Cards in the opponent's hand the observer knows (returned there from the
+    # board or the trash, revealed: Player.hand_known) stay where they are; only
+    # the other slots are redealt.
+    known = opp.hand_known()
+    slots = [i for i, c in enumerate(opp.hand) if not any(c is k for k in known)]
+
     # The opponent's face-down (Hidden) cards are hidden information too: the
     # observer knows a card is hidden there, but not which. Fold them into the
     # unseen pool and resample, preferring a HIDDEN-keyword identity so the public
     # "a card is hidden here" fact stays consistent.
     opp_facedowns = [(bf, slot) for bf in gs.battlefields
                      for slot, fd in enumerate(bf.facedowns) if fd.owner == other]
-    pool = list(opp.hand) + list(opp.deck.cards) + [bf.facedowns[slot].card for bf, slot in opp_facedowns]
+    pool = [opp.hand[i] for i in slots] + list(opp.deck.cards) + \
+        [bf.facedowns[slot].card for bf, slot in opp_facedowns]
+    # Sorted before the shuffle: the world drawn depends on which cards are
+    # unseen, not on the order they really lie in (the search can't peek).
+    pool.sort(key=_card_key)
     rng.shuffle(pool)
     for bf, slot in opp_facedowns:
         pick = next((c for c in pool if c.has_keyword("HIDDEN")), pool[0] if pool else None)
@@ -302,14 +313,21 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
         fd = bf.facedowns[slot]
         bf.facedowns[slot] = FacedownCard(card=pick, owner=fd.owner, turn_hidden=fd.turn_hidden)
 
-    n_hand = len(opp.hand)
-    opp.hand = pool[:n_hand]
-    opp.deck.cards = pool[n_hand:]
+    hand = list(opp.hand)
+    for j, i in enumerate(slots):
+        hand[i] = pool[j]
+    opp.hand = hand
+    opp.deck.cards = pool[len(slots):]
 
     # The observer's own known top cards (PREDICT) stay where they are.
     k = len(me.deck.known_on_top())
-    below = me.deck.cards[:len(me.deck.cards) - k]
+    below = sorted(me.deck.cards[:len(me.deck.cards) - k], key=_card_key)
     rng.shuffle(below)
     me.deck.cards[:len(below)] = below
     opp.deck.shuffle(rng)
     return gs
+
+
+def _card_key(card) -> tuple:
+    """A sort key that doesn't depend on where the card lies (determinize)."""
+    return (card.name, str(card.category), card.cost_energy or 0, card.might or 0)

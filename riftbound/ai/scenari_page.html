@@ -24,7 +24,7 @@ button { font: inherit; border: 0; border-radius: 8px; padding: 7px 12px; cursor
 button.ghost { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); font-weight: 550; }
 button.gold { background: var(--gold); color: #1d1503; }
 button:disabled { opacity: .5; cursor: default; }
-select, textarea { font: inherit; width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
+select, textarea, input[type=text] { font: inherit; width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--panel2); color: var(--ink); }
 textarea { min-height: 60px; resize: vertical; }
 .muted { color: var(--muted); }
@@ -243,6 +243,10 @@ aside section.grow { flex: 1 1 0; min-height: 150px; overflow-y: auto; }
     <div id="scenwhy" style="display:none">
       <label class="hint" style="display:block;margin-top:8px">Perché (e cosa faresti dopo)</label>
       <textarea id="why" placeholder="Es.: nascondo Pyke perché…" style="margin-top:4px"></textarea>
+      <label class="hint" style="display:block;margin-top:8px">Quale altra prima mossa hai considerato e scartato?</label>
+      <select id="alt" style="margin-top:4px"></select>
+      <label class="hint" style="display:block;margin-top:8px">Cosa ti farebbe cambiare scelta?</label>
+      <input type="text" id="change" placeholder="Es.: se avessi già usato il trigger della legend, passerei" style="margin-top:4px">
       <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center">
         <button class="gold" id="saveAns">Salva risposta</button>
         <button class="ghost" id="restart">Ricomincia</button>
@@ -520,13 +524,27 @@ function renderScen() {
   head.innerHTML = `<h2>${esc(sc.title)}</h2><p class="ctx">${esc(sc.question)}</p>
     ${over ? `<div class="hint" style="margin:6px 0;color:var(--gold)">${r.error ? "Errore: " + esc(r.error) : "Il turno dello scenario è finito: scrivi il perché e salva."}</div>` : ""}
     ${moves.length ? `<div class="hint" style="margin-top:6px">Le tue mosse:<br>${moves.join("<br>")}</div>` : ""}`;
+  renderAlt();
 }
+// The other options of the first decision (the one judged), for "scartata".
+let altKey = null;
+function renderAlt() {
+  const first = (S.moves || []).find((m) => m.move);
+  const opts = first ? (first.options || []).filter((o) => o !== first.move) : [];
+  const key = JSON.stringify(opts);
+  if (key === altKey) return;
+  altKey = key;
+  $("#alt").innerHTML = '<option value="">— nessuna —</option>' +
+    opts.map((o) => `<option>${esc(o)}</option>`).join("");
+}
+function clearAnswer() { $("#why").value = ""; $("#alt").value = ""; $("#change").value = ""; }
 $("#saveAns").onclick = async () => {
   const note = $("#why").value.trim();
   if (!note && !confirm("Salvare senza il perché?")) return;
-  const j = await post("/api/save", { note }); if (j.ok) { $("#why").value = ""; $("#saveOk").textContent = "Salvata, grazie!"; }
+  const j = await post("/api/save", { note, alternative: $("#alt").value, change_if: $("#change").value.trim() });
+  if (j.ok) { clearAnswer(); $("#saveOk").textContent = "Salvata, grazie!"; }
 };
-$("#restart").onclick = () => { if (S.scenario) { $("#saveOk").textContent = ""; post("/api/scenario", { id: S.scenario.id }); } };
+$("#restart").onclick = () => { if (S.scenario) { clearAnswer(); $("#saveOk").textContent = ""; post("/api/scenario", { id: S.scenario.id }); } };
 $("#other").onclick = () => { setupOpen = true; renderModal(); };
 
 function renderCoach() {
@@ -712,7 +730,7 @@ function renderModal() {
     <p class="hint" style="margin-top:-4px">Ogni scenario è una posizione costruita giocando mosse vere dal primo turno. Arrivati al turno dello scenario giochi tu, mossa per mossa; l'avversario passa. Alla fine scrivi il perché e salvi.</p>
     ${list || '<p class="muted">Nessuno scenario in docs/bot/scenari.json.</p>'}
     ${S.scenario ? '<div style="margin-top:14px;text-align:right"><button class="ghost" id="closeSc">Chiudi</button></div>' : ""}</div></div>`;
-  el.querySelectorAll("[data-sc]").forEach((d) => d.onclick = () => { setupOpen = false; $("#why").value = ""; $("#saveOk").textContent = ""; post("/api/scenario", { id: d.dataset.sc }); });
+  el.querySelectorAll("[data-sc]").forEach((d) => d.onclick = () => { setupOpen = false; clearAnswer(); $("#saveOk").textContent = ""; post("/api/scenario", { id: d.dataset.sc }); });
   if ($("#closeSc")) $("#closeSc").onclick = () => { setupOpen = false; renderModal(); };
 }
 let seenResult = null;

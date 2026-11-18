@@ -502,7 +502,7 @@ def _return_gear(ctx: "EffectContext", pick) -> Optional[object]:
     loop._fire_leaves_board(gear, side, loop.gs.battlefields[0])
     if not getattr(gear, "is_token", False):
         gear.empowered = False
-        ap.hand.append(gear)
+        ap.to_hand(gear)
     return gear
 
 
@@ -598,7 +598,7 @@ def _champion_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if isinstance(pick, UnitInPlay):
         _return_unit(ctx, pick, spec)
         return
-    ctx.actor.hand.append(pick)
+    ctx.actor.to_hand(pick)
     if side == "A":
         gs.champion_A_deployed = True
     else:
@@ -784,7 +784,7 @@ def _return_triggering_gear(ctx: "EffectContext", spec: Mapping[str, Any]) -> No
     gear = ctx.extra.get("triggering_card")
     if gear is not None and gear in ctx.actor.trash:
         ctx.actor.trash.remove(gear)
-        ctx.actor.hand.append(gear)
+        ctx.actor.to_hand(gear)
 
 
 @effect("signpost_move")
@@ -859,6 +859,7 @@ def _hostage_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "They reveal their hand. Choose a card revealed this way and banish it.
     When they hold, return it to their hand" (Ashe Focused): the costliest."""
     hand = ctx.opponent.hand
+    ctx.opponent.mark_hand_public(hand)
     if hand:
         card = max(hand, key=_zone_value)
         hand.remove(card)
@@ -874,6 +875,7 @@ def _force_discard_redraw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None
     gs = ctx.loop.gs
     xp = int(spec.get("xp", 2))
     hand = ctx.opponent.hand
+    ctx.opponent.mark_hand_public(hand)
     if hand and gs.get_xp(ctx.actor_side) >= xp:
         gs.add_xp(ctx.actor_side, -xp)
         ctx.loop._discard(ctx.opponent, ctx.loop._discard_choice(ctx.actor_side, ctx.opponent,
@@ -889,6 +891,7 @@ def _pull_unit_from_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     the battlefield where we are strongest, the biggest one we beat there."""
     from .cards import UnitCard
     loop = ctx.loop
+    ctx.opponent.mark_hand_public(ctx.opponent.hand)
     units = [c for c in ctx.opponent.hand if isinstance(c, UnitCard)]
     if not units:
         return
@@ -997,7 +1000,7 @@ def _guess_type_draw(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if isinstance(top, UnitCard):
         deck.insert(0, top)
     else:
-        ctx.actor.hand.append(top)
+        ctx.actor.to_hand(top)
 
 
 @effect("banish_unit")
@@ -1371,7 +1374,7 @@ def _return_self_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     your hand" (Super Mega Death Rocket!, from the trash)."""
     if any(c is ctx.card for c in ctx.actor.trash):
         ctx.actor.trash.remove(ctx.card)
-        ctx.actor.hand.append(ctx.card)
+        ctx.actor.to_hand(ctx.card)
 
 
 @effect("spend_buffs_to_ready")
@@ -2303,6 +2306,7 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         for c in [c for c in hand if not any(c is k for k in kept)]:
             p.hand.remove(c)
             p.deck.cards.insert(0, c)
+        p.forget_hand_public()          # which ones went to the deck isn't seen
 
 
 @effect("twisted_fate_reveal")
@@ -2533,7 +2537,7 @@ def _return_gear_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     ctx.loop._fire_leaves_board(card, side, ctx.loop.gs.battlefields[0])
     if not getattr(card, "is_token", False):
         card.empowered = False
-        owner.hand.append(card)
+        owner.to_hand(card)
 
 
 @effect("give_this_to_opponent")
@@ -2907,6 +2911,7 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, list(hand),
                                max(hand, key=_zone_value), ctx.card)
         hand.remove(card)
+        ctx.actor.forget_hand_public()      # which card went to the deck isn't seen
         where = ctx.loop.choose("deck_position", ctx.actor_side, ["bottom", "top"], "bottom", ctx.card)
         if where == "top":
             ctx.actor.deck.cards.append(card)
@@ -2945,7 +2950,7 @@ def _unit_leaves_to(ctx: "EffectContext", unit, side: str, to: str) -> None:
     owner = loop.gs.get_player(loop._owner_of(unit.card, side))
     unit.card._owner = None
     if to == "hand":
-        owner.hand.append(unit.card)
+        owner.to_hand(unit.card)
     elif to == "deck_bottom":
         owner.deck.cards.insert(0, unit.card)
     else:
@@ -2963,12 +2968,12 @@ def _return_all_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         for gear in list(player.base_gear):
             player.base_gear.remove(gear)
             if not getattr(gear, "is_token", False):
-                player.hand.append(gear)
+                player.to_hand(gear)
         for bf in loop.gs.battlefields:
             for dg in list(bf.gear_for(side)):
                 bf.gear_for(side).remove(dg)
                 if not (dg.is_token or getattr(dg.card, "is_token", False)):
-                    player.hand.append(dg.card)
+                    player.to_hand(dg.card)
 
 
 @effect("keep_one_kill_rest")
@@ -3224,7 +3229,7 @@ def _reveal_play_for(ctx: "EffectContext", spec: Mapping[str, Any], chooser_side
         loop._note_recycled(owner_side)
     for card in revealed:
         if rest == "draw" and owner is chooser:
-            chooser.hand.append(card)
+            chooser.to_hand(card)
         elif rest == "banish":
             owner.banished.append(card)
         elif rest == "trash":
@@ -3377,9 +3382,10 @@ def _reveal_top(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if _zone_card_matches(top, tf):
         if spec.get("to_hand"):
             # "put it in your hand": not a draw (Ravenbloom Conservatory)
-            player.hand.append(player.deck.cards.pop())
+            player.to_hand(player.deck.cards.pop())
         else:
             ctx.draw_cards(1)
+            player.mark_hand_public([top])     # drawn after it was revealed
         return
     if spec.get("otherwise") == "trash":
         player.deck.cards.pop()
@@ -3713,7 +3719,7 @@ def _counter_spell(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     if spec.get("silence"):
         ctx.loop.gs.cant_play_spells_turn[target_item.player] = ctx.loop.gs.turn
     if spec.get("return_to_hand") and not getattr(target_card, "_flow_banish", False):
-        owner.hand.append(target_card)
+        owner.to_hand(target_card)
     else:
         # Played with FLOW, it is banished whichever replacement applies
         # first (§829.1.b.1: it leaves the chain, not by its own execution;
@@ -3814,6 +3820,7 @@ def _recycle_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx._player_for_target(target)
     if player.hand:
         card = player.hand.pop(0)
+        player.forget_hand_public()     # which card went to the deck isn't seen
         # Route card to correct deck by type (Rule 403: RECYCLE)
         if isinstance(card, RuneCard):
             player.rune_deck.cards.append(card)  # Bottom of rune deck
@@ -4764,7 +4771,7 @@ def _return_unit(ctx: "EffectContext", unit, spec: Mapping[str, Any]) -> bool:
         if spec.get("to") == "deck_bottom":
             owner_of.deck.cards.insert(0, unit.card)
         else:
-            owner_of.hand.append(unit.card)
+            owner_of.to_hand(unit.card)
         unit.card._owner = None
     # Recall/bounce is a board exit → leaves_board fires (KNOWN_ISSUES #9).
     ctx.loop._fire_leaves_board(unit.card, side, bf or ctx.battlefield)
@@ -4796,7 +4803,7 @@ def _return_friendly_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
     if len(pick) == 2:
         bf, fd = pick
         bf.facedowns.remove(fd)
-        gs.get_player(loop._owner_of(fd.card, side)).hand.append(fd.card)
+        gs.get_player(loop._owner_of(fd.card, side)).to_hand(fd.card, public=False)
         return
     _s, holder, gear = pick
     card = getattr(gear, "card", gear)
@@ -4809,7 +4816,7 @@ def _return_friendly_to_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -> N
     loop._fire_leaves_board(card, side, holder if isinstance(holder, Battlefield) else gs.battlefields[0])
     if not getattr(card, "is_token", False):
         card.empowered = False
-        gs.get_player(loop._owner_of(card, side)).hand.append(card)
+        gs.get_player(loop._owner_of(card, side)).to_hand(card)
 
 
 def _units_at(ctx: "EffectContext", side: str, where: str) -> list:
@@ -5246,7 +5253,7 @@ def _return_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     for card in picks:
         owner = next(p for p in owners if card in p.trash)
         owner.trash.remove(card)
-        owner.hand.append(card)
+        owner.to_hand(card)
 
 
 @effect("discard_card")
@@ -5260,6 +5267,8 @@ def _discard_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     # reveal their hand. Choose a card from it, and they discard that card"
     # (Mindsplitter): the effect's controller (GameLoop._discard_choice).
     picker = ctx.actor_side if spec.get("chosen_by") == "controller" else side
+    if spec.get("chosen_by") == "controller":
+        player.mark_hand_public(player.hand)
     with ctx.loop._discard_event():
         for _ in range(count):
             if not player.hand:
@@ -5699,7 +5708,7 @@ def _reveal_and_choose(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
             # "You may reveal a unit from among them and draw it": it is revealed
             # (Undertitan's ADD); "Put 1 into your hand" / "choose a card" isn't.
             ctx.loop._note_revealed(ctx.actor_side, [kept])
-        ctx.actor.hand.append(kept)
+        ctx.actor.to_hand(kept, public=bool(spec.get("reveal", not spec.get("must"))))
     if spec.get("rest") == "trash":
         ctx.actor.trash.extend(top)
     else:
@@ -5714,6 +5723,7 @@ def _recycle_from_opponent_hand(ctx: "EffectContext", spec: Mapping[str, Any]) -
     """ "Choose an opponent. They reveal their hand and you choose a Mind card
     from it. They recycle that card" (Decree of Strength): `domain`."""
     opp = ctx.opponent
+    opp.mark_hand_public(opp.hand)
     dom = str(spec.get("domain", "")).upper()
     if spec.get("non_unit"):
         # "Choose a non-unit card from it, and recycle that card" (Sabotage)
@@ -5801,7 +5811,7 @@ def _play_from_zone(ctx: "EffectContext", spec: Mapping[str, Any], zone: str) ->
                 player.deck.cards.insert(0, card)
                 loop._note_recycled(side)
         else:
-            player.hand.append(card)
+            player.to_hand(card)
         played += 1
 
 

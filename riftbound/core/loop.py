@@ -1167,7 +1167,7 @@ class GameLoop:
             for c in back:
                 if c in actor.banished:
                     actor.banished.remove(c)
-                    actor.hand.append(c)
+                    actor.to_hand(c)
         # The scoring player's legends ("When you conquer, ready me": Sett).
         for legend_unit in self._legend_units(side):
             self._resolve_triggered_effects(legend_unit.card, trigger, bf, actor, opponent,
@@ -3670,6 +3670,9 @@ class GameLoop:
                 self.gs.champion_B_deployed = True
         else:
             ap.remove_from_hand(idx)
+            # The opponent sees a card go face down, not which: any known card
+            # that can be hidden may be the one (Player.forget_hand_public).
+            ap.forget_hand_public(lambda c: c.has_keyword("HIDDEN"))
         bf = self.gs.battlefields[lane]
         bf.facedowns.append(FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn))
         if self.verbose:
@@ -3935,7 +3938,7 @@ class GameLoop:
                     ap.base_gear.extend(target.gear)
                     target.gear = []
                     if not target.is_token:
-                        ap.hand.append(target.card)
+                        ap.to_hand(target.card)
                     self._fire_leaves_board(target.card, side, where[1] or self.gs.battlefields[0])
             # "... no more Energy and no more Power than the killed unit"
             # (Heedless Resurrection) reads the unit this cost took.
