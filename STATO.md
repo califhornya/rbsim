@@ -68,14 +68,12 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    Se l'utente vuole: `risposte_scenari.jsonl` con alternative, preferenza,
    perché, esito a parte; registratore con tutta l'info pubblica.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
-   batte nettamente simple_trade o non gioca in modo sensato. Base
-   (`handwritten_value.py 200 100`, 400 partite, 12 min): dopo il fix di
-   determinize 0,58 contro simple_trade (0,57 con Evelynn, 0,59 con Kha'Zix),
-   0,86 contro random; prima 0,59 e 0,85: nel rumore (±0,035).
+   batte nettamente simple_trade o non gioca in modo sensato. Base dopo il fix
+   di determinize (`handwritten_value.py 200 100`, 12 min): 0,58 contro
+   simple_trade, 0,86 contro random (prima 0,59 e 0,85: nel rumore, ±0,035).
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
-3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli quando
-   si riallena, e rifare il lanciatore a doppio clic.
+3. Script di training puntano ancora a Kai'Sa/Kennen: spostarli se si riallena.
 4. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 5. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
@@ -92,8 +90,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
   `effects.py`, `battlefield.py` (Hold / Conquer), `legality.py` (azioni legali).
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete; test in
   `tests/test_net_mcts.py`. `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`.
-- `riftbound/ai/coach.py` + `scripts/coach.py`: il coach e la sua pagina.
-- `riftbound/ai/scenari.py` + `scripts/scenari.py`: scenari dei giudizi (mosse vere).
+- `riftbound/ai/coach.py`, `scenari.py` (+ `scripts/`): coach e scenari dei giudizi.
 - `scripts/diag/`: le misure (`handwritten_value.py`: base del bot).
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
 - `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
