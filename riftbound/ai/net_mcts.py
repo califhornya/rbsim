@@ -384,8 +384,11 @@ class NetGuidedMCTSAgent(Agent):
         self.pass_margin = pass_margin
         self.net = net
         self.iterations = iterations
-        # Showdown / reaction decisions search one ply: a quarter of the budget.
-        self.reaction_iterations = reaction_iterations or max(8, iterations // 4)
+        # Showdown / reaction decisions search one ply, with the turn's budget:
+        # a reaction often has a spell's targets to choose, and with a quarter
+        # of it the targets were nearly the first ones (scenario S11a,
+        # docs/bot/BOT_SCENARI.md).
+        self.reaction_iterations = reaction_iterations or max(8, iterations)
         self.c_puct = c_puct
         self.mulligan_samples = mulligan_samples
         self._rng = rng
@@ -767,9 +770,14 @@ class NetGuidedMCTSAgent(Agent):
         if not candidates:
             return None
         sqrt_total = math.sqrt(max(1, node.N))
+        # An untried move is worth what the position is worth so far (as
+        # _select_option does), not 0: with 0, when the position is already
+        # good (a value near +1) the first move tried is never challenged and
+        # the search passes while ahead (scenario S9, docs/bot/BOT_SCENARI.md).
+        fpu = node.Q if node.N else 0.0
         best, best_val = None, -1e30
         for a, child in candidates:
-            q = child.Q if child.N > 0 else 0.0
+            q = child.Q if child.N > 0 else fpu
             u = self.c_puct * node.P.get(a, 0.0) * sqrt_total / (1 + child.N)
             val = q + u
             if val > best_val:

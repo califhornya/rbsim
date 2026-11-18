@@ -7,15 +7,20 @@ from multiprocessing import Pool
 # The owner's post-ban decks (Kai'Sa and Kennen until 2026-11-17).
 DECKS = [Path("riftbound/data/decks/competitive_evelynn.json"), Path("riftbound/data/decks/competitive_khazix.json")]
 
+def _m(u) -> int:
+    """The Might that lasts past this turn: the search values positions in the
+    middle of a turn, where a "+5 this turn" with nothing to fight is no gain."""
+    return u.might if u.lasting_might is None else u.lasting_might
+
 def table_value(obs) -> float:
     me = obs.viewer
     s = 0.45 * (obs.my_points - obs.opp_points)
     for bf in obs.battlefields:
-        mine = sum(u.might for u in getattr(bf, me)); theirs = sum(u.might for u in getattr(bf, 'B' if me == 'A' else 'A'))
+        mine = sum(_m(u) for u in getattr(bf, me)); theirs = sum(_m(u) for u in getattr(bf, 'B' if me == 'A' else 'A'))
         if bf.controller == me: s += 0.30
         elif bf.controller is not None: s -= 0.30
         s += 0.05 * (mine - theirs)
-    s += 0.03 * (sum(u.might for u in obs.my_base_units) - sum(u.might for u in obs.opp_base_units))
+    s += 0.03 * (sum(_m(u) for u in obs.my_base_units) - sum(_m(u) for u in obs.opp_base_units))
     s += 0.03 * (len(obs.my_hand) - obs.opp_hand_count)
     return math.tanh(s)
 
