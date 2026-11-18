@@ -127,6 +127,14 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   dai campi quante più unità possibile e giocarne quante più possibile adesso:
   il turno dopo, con Vex su un campo, le unità giocate sarebbero stordite, e
   così le si rende scomodo il setup.
+- Risposta a S10 (18/11, in chat). Contro Kha'Zix: temere la sua signature
+  (Void Assault: muove una sua unità, poi una tua), i trick come Punch First
+  (e Rebuke, se la gioca); Rengar, se non lo rispetti, ti fa perdere la
+  partita; Faefolk va tolto il prima possibile, perché ti sposta i pezzi.
+  Contro Evelynn: Vex e i trick di combattimento come quelli di Kha'Zix.
+  Evelynn vince con le coperte che non ti aspetti più le magie dalla mano:
+  senza counter o un piano per ogni evenienza, il combattimento contro di lei
+  probabilmente lo perdi; intanto filtra e pesca con la legend.
 - Teoria dei punti (18/11, `TEORIA_PUNTI.md`, confermata dall'utente):
   Evelynn punta sulla tenuta, fa fatica a fare 2 punti a turno (dispari);
   Kha'Zix può giocare aggressivo e fare 2 punti a turno (pari). Varia molto
