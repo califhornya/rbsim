@@ -56,7 +56,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - determinize (18/11, `64f184f`): ridistribuiva tutta la mano avversaria; ora
   tiene le carte note (rimbalzate, rivelate) e non dipende dall'ordine
   nascosto. `tests/test_hidden_info.py`, 4 su 5 rossi prima (anche "la
-  ricerca non sbircia"). Suite e misura base del bot: da rifare.
+  ricerca non sbircia"). Suite 1836 passed, 6 skipped; golden identiche.
 
 ## In corso
 Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
@@ -68,10 +68,10 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    Se l'utente vuole: `risposte_scenari.jsonl` con alternative, preferenza,
    perché, esito a parte; registratore con tutta l'info pubblica.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
-   batte nettamente simple_trade o non gioca in modo sensato. Base (17/11,
-   `handwritten_value.py 200 100`, 400 partite): 0,59 contro simple_trade (0,50
-   con Evelynn, 0,69 con Kha'Zix), 0,85 contro random; rifatta prima del fix:
-   identica (misura deterministica). Dopo la fase 1: identica in tutto.
+   batte nettamente simple_trade o non gioca in modo sensato. Base
+   (`handwritten_value.py 200 100`, 400 partite, 12 min): dopo il fix di
+   determinize 0,58 contro simple_trade (0,57 con Evelynn, 0,59 con Kha'Zix),
+   0,86 contro random; prima 0,59 e 0,85: nel rumore (±0,035).
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
 3. Script di training e diag puntano ancora a Kai'Sa/Kennen: spostarli quando
