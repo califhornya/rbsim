@@ -2306,6 +2306,7 @@ def _divine_judgment(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         for c in [c for c in hand if not any(c is k for k in kept)]:
             p.hand.remove(c)
             p.deck.cards.insert(0, c)
+        p.forget_hand_public()          # which ones went to the deck isn't seen
 
 
 @effect("twisted_fate_reveal")
@@ -2910,6 +2911,7 @@ def _hand_to_deck_bottom(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
         card = ctx.loop.choose(_kind("card", spec), ctx.actor_side, list(hand),
                                max(hand, key=_zone_value), ctx.card)
         hand.remove(card)
+        ctx.actor.forget_hand_public()      # which card went to the deck isn't seen
         where = ctx.loop.choose("deck_position", ctx.actor_side, ["bottom", "top"], "bottom", ctx.card)
         if where == "top":
             ctx.actor.deck.cards.append(card)
@@ -3818,6 +3820,7 @@ def _recycle_card(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     player = ctx._player_for_target(target)
     if player.hand:
         card = player.hand.pop(0)
+        player.forget_hand_public()     # which card went to the deck isn't seen
         # Route card to correct deck by type (Rule 403: RECYCLE)
         if isinstance(card, RuneCard):
             player.rune_deck.cards.append(card)  # Bottom of rune deck

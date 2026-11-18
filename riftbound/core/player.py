@@ -366,6 +366,13 @@ class Player:
         """The cards still in hand that the opponent knows."""
         return [c for c in self.hand_public if any(c is h for h in self.hand)]
 
+    def forget_hand_public(self, could_be=None) -> None:
+        """A card left this hand without the opponent seeing which one (hidden
+        facedown, put into the deck): the known cards it could have been are
+        no longer known (`could_be`: which ones; default all). Two revealed
+        HIDDEN cards and one is hidden: neither is known any more."""
+        self.hand_public = [c for c in self.hand_known() if could_be is not None and not could_be(c)]
+
     def mark_hand_public(self, cards) -> None:
         """These cards in hand become known to the opponent ("they reveal
         their hand")."""

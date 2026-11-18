@@ -164,3 +164,40 @@ def test_the_search_does_not_peek_at_hidden_order():
     twin = _twin_with_hidden_order_changed(gs)
     assert twin.A.deck.cards[-1].name != gs.A.deck.cards[-1].name
     assert _first_choice(gs) == _first_choice(twin)
+
+
+def test_hiding_one_of_two_known_hidden_cards_forgets_both():
+    """Codex review on PR #32: B's hand was revealed (Pyke Returned and
+    Bedeviling Stranger, both HIDDEN) and B hides one. A can't tell which is
+    still in hand: neither stays known, and determinize allows both."""
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    gs, a, b = _bare_game()
+    pyke, stranger = CARD_REGISTRY["Pyke Returned"].instantiate(), CARD_REGISTRY["Bedeviling Stranger"].instantiate()
+    b.hand, b.deck.cards = [pyke, stranger], []
+    b.mark_hand_public(b.hand)
+    gs.battlefields[1].add_unit("B", UnitInPlay(UnitCard(name="Guard", might=2)))
+    gs.active = "B"
+    gs.free_hide["B"] = gs.turn
+    loop = GameLoop(gs)
+    assert loop._hide_card("B", 0, 1)            # Pyke goes face down
+    assert b.hand_known() == []
+    seen = set()
+    for seed in range(20):
+        c = gs.clone()
+        determinize(c, observer="A", rng=random.Random(seed))
+        seen.add((c.B.hand[0].name, c.battlefields[1].facedowns[0].card.name))
+    assert seen == {("Bedeviling Stranger", "Pyke Returned"), ("Pyke Returned", "Bedeviling Stranger")}
+
+
+def test_hiding_keeps_known_cards_that_cannot_be_hidden():
+    """A known card without HIDDEN can't be the one hidden: it stays known."""
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    gs, a, b = _bare_game()
+    pyke, rampage = CARD_REGISTRY["Pyke Returned"].instantiate(), CARD_REGISTRY["Rampage"].instantiate()
+    b.hand = [pyke, rampage]
+    b.mark_hand_public(b.hand)
+    gs.battlefields[1].add_unit("B", UnitInPlay(UnitCard(name="Guard", might=2)))
+    gs.active = "B"
+    gs.free_hide["B"] = gs.turn
+    assert GameLoop(gs)._hide_card("B", 0, 1)
+    assert [c.name for c in b.hand_known()] == ["Rampage"]

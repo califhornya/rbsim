@@ -3670,6 +3670,9 @@ class GameLoop:
                 self.gs.champion_B_deployed = True
         else:
             ap.remove_from_hand(idx)
+            # The opponent sees a card go face down, not which: any known card
+            # that can be hidden may be the one (Player.forget_hand_public).
+            ap.forget_hand_public(lambda c: c.has_keyword("HIDDEN"))
         bf = self.gs.battlefields[lane]
         bf.facedowns.append(FacedownCard(card=card, owner=side, turn_hidden=self.gs.turn))
         if self.verbose:
