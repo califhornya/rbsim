@@ -119,7 +119,11 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   mette paura e pressione, può tirare via le sue unità dal campo che lei
   vuole tenere, e si concatena con Kha'Zix (un nemico portato da solo dove
   c'è Kha'Zix gli dà +2 e 2 XP).
-- Risposta a S9 (18/11, in chat): "sono a score pari (4)". Riportare in base
+- Risposta a S9 (18/11, in chat): "sono a score pari (4)", cioè un numero
+  pari: "la teoria dei numeri di punti è importantissima in Riftbound" (il
+  punto finale da una conquista vale solo se nel turno si sono segnati tutti i
+  campi, altrimenti si pesca, §473.1.b; quindi conta da che punteggio si parte
+  e quanti punti si fanno per turno: da sviluppare con l'utente). Riportare in base
   dai campi quante più unità possibile e giocarne quante più possibile adesso:
   il turno dopo, con Vex su un campo, le unità giocate sarebbero stordite, e
   così le si rende scomodo il setup.
