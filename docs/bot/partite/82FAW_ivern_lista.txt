@@ -1,0 +1,41 @@
+Legend:
+1 Ivern, Green Father
+
+Champion:
+1 Ivern, Nurturer
+
+MainDeck:
+2 Affectionate Poro
+3 Back Off
+1 Blitzcrank, Impassive
+2 Block
+2 Daisy!
+3 Defy
+1 Disarming Rake
+2 Fallen Feline
+3 Friendship
+2 Frisky Hunter
+3 Iridescent Avian
+1 Ivern, Nurturer
+3 Mutated Mouser
+2 Not So Fast
+3 Raucous Anthem
+3 Stalwart Poro
+3 Trusty Ramhound
+
+Battlefields:
+1 Forbidding Waste
+1 Rockfall Path
+1 Vilemaw's Lair
+
+Runes:
+6 Calm Rune
+6 Order Rune
+
+Sideboard:
+2 Disarming Rake
+1 Grand Strategem
+2 Hush
+2 Janna, Savior
+2 Salvage
+1 Vilemaw
