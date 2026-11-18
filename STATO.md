@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 sera (si passa alla rete: partenza dal bot a mano, sul Mac).
+Aggiornato: 2026-11-19 (D69-D70: copie del campione scelto; mazzo Ivern di 82FAW).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -50,11 +50,10 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   nascosto (`tests/test_hidden_info.py`); tre correzioni della ricerca (bot
   0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
   (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
-- Ricerca che gioca anche il turno avversario (18/11 sera, `docs/bot/
-  TURNO_AVVERSARIO.md`): contro il bot #32, 100 coppie a 0,4 s per mossa:
-  **0,44 ± 0,05**, più debole (rumore del massimo su foglie variabili). Posizione dove prevedere aiuta: s3012 turno 7
-  (Kha'Zix 3-2, Zed a difendere BF0 invece di attaccare BF1), 0,92 contro
-  0,47 su 60 mondi nuovi; anche s3011 (0,63 / 0,42). `docs/bot/posizioni/`.
+- Ricerca che gioca anche il turno avversario (`docs/bot/TURNO_AVVERSARIO.md`):
+  0,44 ± 0,05 contro il bot #32, più debole; aiuta in s3012 t7 e s3011.
+- Audit, nono passaggio (19/11): D69-D70, copie del Chosen Champion: campione
+  + 2 copie nel mazzo, Hallowed Tomb riporta anche una copia; golden identiche.
 
 ## In corso
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
@@ -94,6 +93,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
 - `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
   piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).
-- `riftbound/data/decks/`: precon, competitive dell'utente (`scripts/deck_from_txt.py`).
+- `riftbound/data/decks/`: precon, competitive dell'utente, `competitive_ivern`
+  (82FAW, RiftAtlas); da lista .txt: `scripts/deck_from_txt.py`.
 - `tests/golden_games.json` + `test_golden_games.py`: 28 partite, solo stato
   finale (`RBSIM_REGEN_GOLDEN=1` per rigenerarle). `BACKLOG.md`: voci aperte.

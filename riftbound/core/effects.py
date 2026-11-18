@@ -2118,18 +2118,24 @@ def _recycle_rune(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
 @effect("champion_from_trash")
 def _champion_from_trash(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     """ "You may return your Chosen Champion from your trash to your Champion
-    Zone if it is empty" (Hallowed Tomb)."""
+    Zone if it is empty" (Hallowed Tomb). A copy of the champion in the trash
+    is the Chosen Champion too (§103.3.a.3): the card chosen at deckbuilding
+    if it is there, else a copy, which becomes the champion in the zone."""
     gs = ctx.loop.gs
     side = ctx.actor_side
     champ = gs.champion_A if side == "A" else gs.champion_B
     empty = gs.champion_A_deployed if side == "A" else gs.champion_B_deployed
-    if champ is None or not empty or not any(c is champ for c in ctx.actor.trash):
+    if champ is None or not empty:
         return
-    ctx.actor.trash.remove(champ)
+    copies = [c for c in ctx.actor.trash if c.name == champ.name]
+    if not copies:
+        return
+    back = champ if any(c is champ for c in copies) else copies[0]
+    ctx.actor.trash.remove(back)
     if side == "A":
-        gs.champion_A_deployed = False
+        gs.champion_A, gs.champion_A_deployed = back, False
     else:
-        gs.champion_B_deployed = False
+        gs.champion_B, gs.champion_B_deployed = back, False
 
 
 @effect("units_cost_more_this_turn")
