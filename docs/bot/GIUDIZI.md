@@ -127,6 +127,10 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   dai campi quante più unità possibile e giocarne quante più possibile adesso:
   il turno dopo, con Vex su un campo, le unità giocate sarebbero stordite, e
   così le si rende scomodo il setup.
+- Teoria dei punti (18/11, `TEORIA_PUNTI.md`, confermata dall'utente):
+  Evelynn punta sulla tenuta, fa fatica a fare 2 punti a turno (dispari);
+  Kha'Zix può giocare aggressivo e fare 2 punti a turno (pari). Varia molto
+  da partita a partita.
 - Risposta a S8 (18/11, in chat): gira Momentary Companion in risposta al
   trigger di Kha'Zix: 7 contro 6 (Pyke 3 + Companion 4, Kha'Zix 4 + 2). Il +2
   lui lo prende comunque (la condizione si guarda quando si innesca), quindi

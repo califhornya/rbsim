@@ -50,8 +50,10 @@ sistemare:
 - la minaccia: avversario a 6 o 7, quanti campi controlla, se può segnarli
   tutti nel turno;
 - quante tenute sono in arrivo (campi controllati a fine turno avversario).
-Da chiedere all'utente: Evelynn e Kha'Zix giocano sui pari o sui dispari, e
-quando si cambia piano?
+Risposta dell'utente (18/11): "tutto giusto". Evelynn fa più fatica a fare 2
+punti a turno: è un mazzo che punta molto sulla tenuta (dispari). Kha'Zix
+può giocare aggressivo e tenere la strategia dei 2 punti a turno (pari).
+"Ovviamente non è sempre uguale, ogni game ha varianza alta."
 
 ## Fonti
 - [riftbound.gg, The In-Depth Guide to Scoring](https://riftbound.gg/the-in-depth-guide-to-scoring-in-riftbound/)
