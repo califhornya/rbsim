@@ -282,6 +282,16 @@ modifica): `riftatlas_82FAW_ivern_g1.json`. Giudizi dati dall'utente in chat:
 - G23. Innovator: muoverlo solo per il trigger. Con poche carte in mano e
   molte rune, meglio "paga Chaos e pesca" (Chaos da un Gold) che il Gold
   (turno 10, proposta dell'utente; non giocata, partita interrotta).
+- Il bot a mano sulle stesse posizioni (19/11, `posizione.py`, 2 s, seed
+  0-2, lista di Ivern; BF0 = Academy, BF1 = Forbidding Waste), uguale nei 3 seed:
+  turno 2 (seq 10) Guardian, Innovator ed Evelynn tutte a +0,030, il valore
+  non le distingue (giocato Innovator); turno 4 (seq 27) Innovator a Forbidding
+  Waste come giocato, Rampage a -0,37 (G17); turno 6 inizio (seq 62) Momentary
+  Companion scoperta a Forbidding Waste (+0,54) invece di Boots, Rampage e
+  Academy; turno 6 dopo la conquista (seq 91) nasconde all'Academy o gira
+  la Stranger, Pass ultimo (G20, che Claude aveva dimenticato); turno 8 (seq
+  140) prima gira Companion all'Academy (G22, come giocato); turno 10 (seq 187)
+  Evelynn all'Academy (-0,08).
 - Metodo (utente, turno 7-8): ogni proposta con la logica del bot (valore:
   punti, campi, Might sui campi, carte; GIUDIZI; TEORIA_PUNTI, Evelynn tiene i
   campi) e le regole dal motore o da CORE_RULES. Sul simulatore: pagare le

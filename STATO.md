@@ -55,8 +55,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## In corso
 RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW,
-con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Da fare (dopo):
-bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (giudizi, scenari).
+con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Bot contro i
+turni giocati in 82FAW: d'accordo con G17, G20, G22 (GIUDIZI, 19/11).
 Rete dal bot a mano (`docs/bot/RETE.md`, "Risultati di boot1", Mac 18/11):
 prevede chi vince meglio del valore a mano (0,466 contro 0,559), ma contro il
 bot fa 0,46 ± 0,05 (serviva 0,55): stop. `net_boot.pt` sul Mac; diagnosi proposta.
