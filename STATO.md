@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 sera (si passa alla rete: partenza dal bot a mano, sul Mac).
+Aggiornato: 2026-11-18 sera (rete: divisione delle partite corretta prima del run sul Mac).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -22,10 +22,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   (piano v2, `docs/PIANO_MOTORE.md`). Sera: strada A, prima il bot: solo la
   fase 1 (D66-D68, le copie: piccola, la partita vera non cambia), poi il bot.
   Fuori perimetro: D59-D65, la struttura, il training.
-- (Utente, 17/11) Il `Result` di una copia conta `units_played` e
-  `spells_cast` dal punto di copia: lasciato (la ricerca usa il vincitore).
-- Flow: solo sconti di aura; altri modificatori §356.3-4 aperti (non nei mazzi).
-- Ricerca: un nodo per opzione con chiave (tipo, carta, descrizione); prior uguali.
+- (Utente, 17/11) `Result` di una copia: contatori dal punto di copia, lasciato.
+- Flow: solo sconti di aura (§356.3-4 aperti). Ricerca: un nodo per opzione, prior uguali.
 - Scelte nascoste: decise quando servono, rigiocando dall'ultima decisione.
 - (Utente, 13/11) La rete serve come avversario per allenarsi e per misurare
   mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
@@ -37,6 +35,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   bot migliore, non simple_trade), poi self-play; si allena sul Mac.
 - (Utente, 18/11) Regole dal motore o da CORE_RULES, mai a memoria; lezioni
   in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
+- (gptAstra, 18/11) Rete: per seed, 1.600 allenare / 200 epoca / 200 test, disgiunti,
+  Evelynn metà in A e metà in B (prima: 200 tutte Evelynn in B, usate due volte).
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
   determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
@@ -50,15 +50,15 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   nascosto (`tests/test_hidden_info.py`); tre correzioni della ricerca (bot
   0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
   (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
-- Ricerca che gioca anche il turno avversario (18/11 sera, `docs/bot/
-  TURNO_AVVERSARIO.md`): contro il bot #32, 100 coppie a 0,4 s per mossa:
-  **0,44 ± 0,05**, più debole (rumore del massimo su foglie variabili). Posizione dove prevedere aiuta: s3012 turno 7
-  (Kha'Zix 3-2, Zed a difendere BF0 invece di attaccare BF1), 0,92 contro
-  0,47 su 60 mondi nuovi; anche s3011 (0,63 / 0,42). `docs/bot/posizioni/`.
+- Ricerca che gioca anche il turno avversario (`docs/bot/TURNO_AVVERSARIO.md`):
+  contro il bot #32 **0,44 ± 0,05** (100 coppie, 0,4 s), più debole. Prevedere
+  aiuta in s3012 t7 (Zed difende BF0: 0,92 contro 0,47) e s3011 (`posizioni/`).
 
 ## In corso
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
-(partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
+(partite, allenamento, misure; ~2 ore), branch `claude/vigilant-gates-b95tqx`
+con la divisione corretta (`check_split`, `tests/test_bootstrap_split.py`;
+provata qui in piccolo). In attesa di `runs/boot1/RISULTATI.txt`.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):

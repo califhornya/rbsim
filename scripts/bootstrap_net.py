@@ -8,11 +8,14 @@
    hand-written value of the position (to compare). In --run-dir/data/, one
    file per CHUNK games; launched again it goes on where it stopped. A file
    named STOP in --run-dir stops it (the games under way are lost).
-2. train: the net learns the move (cross-entropy) and the outcome (squared
-   error); a tenth of the games is held out. Keeps the epoch with the best
-   value error on the held-out games: --run-dir/net_boot.pt.
-3. measure: on the held-out games, how well the net and the hand-written
-   value predict the outcome; the first move in five positions whose right
+2. train: the games split by seed into three disjoint groups (group_of):
+   1,600 of 2,000 to train, 200 to choose the epoch, 200 for the final test,
+   Evelynn in A in half of each group and in B in the other half. The net
+   learns the move (cross-entropy) and the outcome (squared error) on the
+   first group; keeps the epoch with the best value error on the second:
+   --run-dir/net_boot.pt. The third is not touched.
+3. measure: on the final-test games, how well the chosen net and the
+   hand-written value predict the outcome; the first move in five positions whose right
    move is known (docs/bot/posizioni/, docs/bot/TURNO_AVVERSARIO.md); pairs
    of games against the hand-written bot at the same CPU time per move; 200
    games against simple_trade as handwritten_value.py plays them (0.80).
@@ -45,6 +48,11 @@ POSITIONS = ROOT / "docs/bot/posizioni"
 MAX_TURNS = 40
 CHUNK = int(os.environ.get("BOOT_CHUNK", "40"))
 SEED0 = 100_000
+# The three groups of games, by seed. Evelynn sits in A in the even seeds and in
+# B in the odd ones (_data_game), so the seeds go by pairs (2k, 2k+1), and of
+# every ten pairs the 9th chooses the epoch and the 10th is the final test.
+TRAIN, VAL, TEST = 0, 1, 2
+GROUP_NAMES = ("allenamento", "scelta dell'epoca", "test finale")
 # Positions with a known right first move (TURNO_AVVERSARIO.md): which of the
 # two saved moves, and in words.
 KNOWN = {
@@ -110,6 +118,42 @@ def _data_game(seed: int) -> dict:
                 rows=rows)
 
 
+def group_of(seed):
+    """TRAIN, VAL or TEST for a seed (or an array of seeds)."""
+    k = (np.asarray(seed) - SEED0) // 2 % 10
+    return np.where(k == 8, VAL, np.where(k == 9, TEST, TRAIN))
+
+
+def check_split(games: list, example_seeds=None) -> list:
+    """The groups as counted from the saved games; raises if a seed is in more
+    than one group, if a group has Evelynn more often in one seat than in the
+    other, or if an example's seed is not one of the games."""
+    seeds = [int(g["seed"]) for g in games]
+    if len(set(seeds)) != len(seeds):
+        raise RuntimeError("divisione: lo stesso seed in più partite")
+    for g in games:
+        if g["eve"] != ("A" if g["seed"] % 2 == 0 else "B"):
+            raise RuntimeError(f"divisione: seed {g['seed']}, Evelynn in {g['eve']}")
+    groups = {gr: {s for s in seeds if int(group_of(s)) == gr} for gr in (TRAIN, VAL, TEST)}
+    if sum(len(v) for v in groups.values()) != len(seeds) or \
+            any(groups[a] & groups[b] for a, b in ((TRAIN, VAL), (TRAIN, TEST), (VAL, TEST))):
+        raise RuntimeError("divisione: un seed in più gruppi")
+    if example_seeds is not None and not set(np.unique(example_seeds).tolist()) <= set(seeds):
+        raise RuntimeError("divisione: esempi di partite che non ci sono")
+    lines = []
+    for gr in (TRAIN, VAL, TEST):
+        eve_a = sum(1 for s in groups[gr] if s % 2 == 0)
+        eve_b = len(groups[gr]) - eve_a
+        if eve_a != eve_b:
+            raise RuntimeError(f"divisione: {GROUP_NAMES[gr]}, Evelynn {eve_a} volte in A e {eve_b} in B")
+        lines.append(f"   {GROUP_NAMES[gr]}: {len(groups[gr])} partite (Evelynn {eve_a} in A, {eve_b} in B), "
+                     f"seed {min(groups[gr], default='-')}-{max(groups[gr], default='-')}")
+    if len(seeds) % 20 == 0 and [len(groups[g]) for g in (TRAIN, VAL, TEST)] != \
+            [len(seeds) * 8 // 10, len(seeds) // 10, len(seeds) // 10]:
+        raise RuntimeError("divisione: conteggi sbagliati")
+    return lines
+
+
 def _write_chunk(path: Path, games: list) -> None:
     rows = [r for g in games for r in g["rows"]]
     np.savez_compressed(
@@ -158,8 +202,9 @@ def _load(run_dir: Path) -> dict:
     files = sorted((run_dir / "data").glob("chunk_*.npz"))
     parts = [np.load(f) for f in files]
     d = {k: np.concatenate([p[k] for p in parts]) for k in ("state", "p", "mask", "z", "turn", "tv", "seed")}
-    d["held"] = (d["seed"] - SEED0) % 10 == 9                 # a tenth of the games
+    d["group"] = group_of(d["seed"])
     games = [g for f in files for g in json.load(open(f.with_suffix(".json")))]
+    d["split"] = check_split(games, d["seed"])
     return d, games
 
 
@@ -181,11 +226,11 @@ def train(args) -> None:
     torch.manual_seed(0)
     torch.set_num_threads(max(1, os.cpu_count() or 1))
     d, games = _load(args.run_dir)
-    tr, he = ~d["held"], d["held"]
-    n_tr, n_he = int(tr.sum()), int(he.sum())
+    tr, he = d["group"] == TRAIN, d["group"] == VAL
     _say(args.run_dir, f"\n== Allenamento ({time.strftime('%d/%m %H:%M')})\n"
-         f"partite {len(games)}, esempi {len(d['z'])}: {n_tr} per allenare, {n_he} tenuti da parte "
-         f"({len({int(s) for s in d['seed'][he]})} partite)")
+         f"partite {len(games)}, esempi {len(d['z'])}, in tre gruppi per seed, disgiunti:\n"
+         + "\n".join(f"{line}, {int((d['group'] == gr).sum())} esempi" for gr, line in enumerate(d["split"])))
+    n_tr = int(tr.sum())
     X = torch.as_tensor(d["state"])
     P = torch.as_tensor(d["p"].astype(np.int64))
     M = torch.as_tensor(np.unpackbits(d["mask"], axis=1)[:, :ACTION_DIM].astype(bool))
@@ -224,14 +269,15 @@ def train(args) -> None:
             sched.step()
         v, ce, acc = evaluate(ihe)
         mse = float(((v - d["z"][he]) ** 2).mean())
-        log.append(dict(epoch=ep, value_held=mse, policy_held=ce, acc_held=acc))
+        log.append(dict(epoch=ep, value_val=mse, policy_val=ce, acc_val=acc))
         print(f"  epoca {ep}: valore {mse:.3f}, politica {ce:.3f}, mossa del bot {acc:.0%}", flush=True)
         if best is None or mse < best[0]:
             best = (mse, ep)
             save_checkpoint(net, args.run_dir / "net_boot.pt")
     with open(args.run_dir / "train.jsonl", "w") as f:
         f.writelines(json.dumps(r) + "\n" for r in log)
-    _say(args.run_dir, f"tenuta l'epoca {best[1]} (errore del valore sulle partite tenute da parte {best[0]:.3f})")
+    _say(args.run_dir, f"tenuta l'epoca {best[1]} (errore del valore sulle partite per scegliere l'epoca "
+                       f"{best[0]:.3f}); quelle del test finale non sono state usate")
 
 
 # --- 3. measure ----------------------------------------------------------------
@@ -310,17 +356,20 @@ def measure(args) -> None:
     run_dir, ckpt = args.run_dir, str(args.run_dir / "net_boot.pt")
     _say(run_dir, f"\n== Misure ({time.strftime('%d/%m %H:%M')}), rete {ckpt}")
 
-    # (1) who wins, predicted on the held-out games
+    # (1) who wins, predicted on the final-test games (neither trained on nor
+    # used to choose the epoch)
     d, games = _load(run_dir)
-    he = d["held"]
+    he = d["group"] == TEST
     net = load_checkpoint(ckpt, device=torch.device("cpu")).eval()
     with torch.no_grad():
         X = torch.as_tensor(d["state"][he])
         v = torch.cat([net(X[i:i + 2048].float())[1].squeeze(1) for i in range(0, len(X), 2048)]).numpy()
     z, tv, turn = d["z"][he].astype(np.float32), d["tv"][he], d["turn"][he]
-    ztr, tvtr = d["z"][~he].astype(np.float32), d["tv"][~he]
+    tr = d["group"] == TRAIN
+    ztr, tvtr = d["z"][tr].astype(np.float32), d["tv"][tr]
     a = float((tvtr * ztr).sum() / max(1e-9, (tvtr * tvtr).sum()))   # the best scale for the hand-written value
-    _say(run_dir, "1. Chi vince, previsto sulle partite tenute da parte (errore quadratico; 1 = non sapere niente):")
+    _say(run_dir, f"1. Chi vince, previsto sul test finale, mai usato prima ({d['split'][TEST].split(': ', 1)[1]}, "
+                  f"{int(he.sum())} esempi; errore quadratico, 1 = non sapere niente):")
     _say(run_dir, f"   rete:                {_value_report(v, z, turn)}")
     _say(run_dir, f"   valore a mano:       {_value_report(tv, z, turn)}")
     _say(run_dir, f"   valore a mano × {a:.2f}: {_value_report(np.clip(a * tv, -1, 1), z, turn)}")

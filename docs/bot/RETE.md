@@ -13,12 +13,19 @@ sul Mac.
    decide, la mossa giocata, chi ha vinto alla fine e il valore a mano della
    posizione (per confrontarlo). Circa 14 esempi a partita (il 13/11 troppi
    esempi della stessa partita facevano memorizzare gli esiti).
-2. **Allenamento**: la rete impara la mossa del bot e chi vince. Una partita
-   su dieci resta fuori. Si tiene l'epoca con l'errore del valore più basso
-   su quelle partite (30 epoche, pochi minuti).
+2. **Allenamento**: le partite si dividono per seed in tre gruppi
+   disgiunti (correzione del 18/11, da gptAstra: prima le 200 partite di
+   verifica avevano tutte Evelynn in B e servivano sia a scegliere l'epoca
+   sia a misurare): 1.600 per allenare, 200 per scegliere l'epoca, 200 per
+   il test finale, in ognuno Evelynn metà delle volte in A e metà in B. La
+   rete impara la mossa del bot e chi vince sulle 1.600; si tiene l'epoca
+   con l'errore del valore più basso sulle 200 della scelta (30 epoche,
+   pochi minuti). I conteggi sono controllati a ogni lettura dei dati
+   (`check_split`, `tests/test_bootstrap_split.py`).
 3. **Misure**, in `runs/boot1/RISULTATI.txt`:
-   1. chi vince, previsto sulle partite tenute fuori: la rete contro il
-      valore a mano, anche per fasi della partita;
+   1. chi vince, previsto sulle 200 partite del test finale (mai usate
+      prima): la rete scelta contro il valore a mano, anche per fasi della
+      partita;
    2. la prima mossa in quattro posizioni dove si sa qual è la giusta
       (`docs/bot/posizioni/`): s3012, dove Zed deve difendere BF0 (il bot a
       mano sbaglia), e tre del turno 3, dove si deve conquistare (il bot a
@@ -35,11 +42,12 @@ Una volta:
 ```
 cd ~/projects/rbsim2026/rbsim
 git fetch origin
-git checkout claude/peaceful-davinci-bdluoi
+git checkout claude/vigilant-gates-b95tqx
 git pull
 uv sync --extra rl
 ```
-Poi doppio clic su `scripts/rete.command`. Rilanciato, riprende: le
+Poi doppio clic su `scripts/rete.command` (o `scripts/rete.command` dal
+Terminale). Rilanciato, riprende: le
 partite salvate restano. Per fermarlo con tutto salvato basta un file
 `STOP` in `runs/boot1`; va cancellato prima di rilanciare. Alla fine
 carica in chat `runs/boot1/RISULTATI.txt` e `runs/boot1/net_boot.pt`.
