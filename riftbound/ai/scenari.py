@@ -321,7 +321,14 @@ def _session_class():
             super()._reset()
             self.scenario: dict | None = None
             self.moves: list = []
+            self.after: list = []      # what happened after the first decision
             self.stop_on_opp_chain = False
+
+        def event(self, who: str, text: str, move: bool = False) -> None:
+            super().event(who, text, move)
+            if getattr(self, "moves", None) and not move:
+                self.after.append({"turn": self.gs.turn if self.gs is not None else 0,
+                                   "who": who, "text": text})
 
         def new_scenario(self, sid: str) -> None:
             from riftbound.core.loop import (
@@ -391,7 +398,11 @@ def _session_class():
                 raise ScenarioOver()
             i = int(answer["action"])
             loop.chooser = _CoachChooser(side, self, loop, loop.chooser)
-            self.moves.append({"turn": self.gs.turn, "point": point.value, "move": infos[i]["text"]})
+            # The options and the hand as they were: what the move was chosen
+            # against, and (next move) what a draw brought.
+            self.moves.append({"turn": self.gs.turn, "point": point.value, "move": infos[i]["text"],
+                               "options": [x["text"] for x in infos],
+                               "hand": [c.name for c in agent.player.hand]})
             if tuples[i] != _PASS:
                 self.event("me", infos[i]["text"], move=True)
             return tuples[i]
@@ -409,14 +420,24 @@ def _session_class():
         def record(self, *a, **k) -> None:
             return None
 
-        def save_answer(self, note: str) -> Path:
+        def save_answer(self, note: str, alternative: str = "", change_if: str = "") -> Path:
+            """One line of risposte_scenari.jsonl. The first move is the decision
+            judged (with the options it was chosen from); `note` is why,
+            `alternative` the move considered and discarded, `change_if` what
+            would change the choice. What happened after the first decision (a
+            draw, the board) is `outcome`, kept apart: the decision is judged on
+            what was known when it was made."""
             if self.scenario is None:
                 raise RuntimeError("nessuno scenario aperto")
+            hand = [c.name for c in self.gs.get_player(self.side).hand] if self.gs is not None else []
             self.answers_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.answers_path, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"time": time.strftime("%Y-%m-%d %H:%M:%S"),
                                      "scenario": self.scenario["id"], "moves": self.moves,
-                                     "note": note}, ensure_ascii=False) + "\n")
+                                     "note": note, "alternative": alternative,
+                                     "change_if": change_if,
+                                     "outcome": {"events": self.after, "hand_at_end": hand}},
+                                    ensure_ascii=False) + "\n")
             self.event("sys", "Risposta salvata")
             return self.answers_path
 

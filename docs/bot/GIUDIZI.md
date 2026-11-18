@@ -85,7 +85,9 @@ S6-S9 si giocano sulla pagina degli scenari (`scripts/scenari.bat` o
 `scenari.command`, doppio clic): la posizione è costruita con mosse vere
 (`docs/bot/scenari.json`, controllata da `tests/test_scenari.py`), giochi tu
 il turno e scrivi il perché; le risposte vanno in
-`docs/bot/risposte_scenari.jsonl`. I testi:
+`docs/bot/risposte_scenari.jsonl` (dal 18/11 anche: le opzioni e la mano a ogni
+mossa, la prima mossa considerata e scartata, cosa farebbe cambiare scelta, e
+a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
 - S6. Sei Evelynn, primo giocatore, all'inizio del tuo secondo turno (0-0).
   Bedeviling Stranger è in base, pronta; lui ha Traveling Merchant in base.
   Cosa fai in questo turno, e perché? (È il turno 3 della partita: i turni si

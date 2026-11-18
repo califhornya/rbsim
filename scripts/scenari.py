@@ -8,7 +8,8 @@ sul tavolo con le immagini delle carte; giochi tu il turno e scrivi il perché.
 Una pagina locale (niente esce dal computer), separata dal coach
 (`scripts/coach.py`, che resta com'è e usa la porta 8765). Gli scenari sono in
 `docs/bot/scenari.json` (come si costruiscono: `riftbound/ai/scenari.py`). Le
-risposte (le mosse e il perché) vanno in `docs/bot/risposte_scenari.jsonl`;
+risposte (le mosse con le opzioni e la mano, il perché, la mossa scartata, cosa
+farebbe cambiare scelta, e a parte l'esito) vanno in `docs/bot/risposte_scenari.jsonl`;
 "Segnala un problema" in `runs/scenari/reports.jsonl`. Non serve la rete.
 
 Le immagini delle carte: quelle del coach (`riftbound/data/card_images`, da
@@ -114,7 +115,8 @@ def main() -> None:
                 elif self.path == "/api/answer":
                     session.answer(body)
                 elif self.path == "/api/save":
-                    session.save_answer(str(body.get("note", "")))
+                    session.save_answer(str(body.get("note", "")), str(body.get("alternative", "")),
+                                        str(body.get("change_if", "")))
                 elif self.path == "/api/report":
                     session.report(str(body.get("note", "")))
                 elif self.path == "/api/abandon":
