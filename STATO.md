@@ -56,8 +56,9 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   e l'inizio del proprio. Contro il bot #32, 100 coppie Evelynn-Kha'Zix a
   0,4 s per mossa: **0,44 ± 0,05**, più debole (54 iterazioni contro 116; su
   1.816 disaccordi la sua mossa vale di più solo in 438: rumore del massimo
-  su foglie variabili). Una posizione dove prevedere aiuta: s3011 turno 7
-  (Kha'Zix 3-2), 0,63 contro 0,42 su 60 mondi nuovi (`docs/bot/posizioni/`).
+  su foglie variabili). Posizione dove prevedere aiuta: s3012 turno 7
+  (Kha'Zix 3-2, Zed a difendere BF0 invece di attaccare BF1), 0,92 contro
+  0,47 su 60 mondi nuovi; anche s3011 (0,63 / 0,42). `docs/bot/posizioni/`.
 
 ## In corso
 Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
@@ -69,7 +70,7 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    0,49); più peso alla mano lo peggiora (0,65). Turno avversario simulato:
    più debole così com'è (0,44). Decidere con l'utente la strada: la rete,
    o il turno avversario con meno rumore (media invece del massimo sulle
-   foglie simulate, o simulazione solo alla radice), o s3011 come scenario.
+   foglie simulate, o simulazione solo alla radice), o s3012 come scenario.
    Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.

@@ -58,7 +58,8 @@ partita da entrambe le parti.
 | s3076 B t5 | 0,29 | 0,46 | −0,17 ± 0,23 |
 | s3037 B t5 | 0,88 | 0,83 | +0,04 ± 0,19 |
 | s3037 B t9, s3066 B t7 | uguali | | 0 |
-| s3012 B t7 | vedi STATO.md | | |
+| **s3012 B t7** | **0,96** | **0,50** | **+0,46 ± 0,20** (24 mondi) |
+| s3012 B t7, 60 mondi nuovi | **0,92** | **0,47** | **+0,45 ± 0,14** (meglio in 29, peggio in 2) |
 | **s3011 B t7** | **0,67** | **0,38** | **+0,29 ± 0,25** (24 mondi) |
 | s3011 B t7, 60 mondi nuovi | **0,63** | **0,42** | **+0,22 ± 0,15** (meglio in 18, peggio in 5) |
 
@@ -66,7 +67,28 @@ Le tre posizioni del turno 3 seguono lo stesso schema: la variante non
 conquista il campo vuoto con un'unità piccola perché prevede che lui se lo
 riprenda. Il riferimento conquista, e ha ragione.
 
-## La posizione nuova: s3011, turno 7, Kha'Zix
+## La posizione nuova: s3012, turno 7, Kha'Zix
+File: `docs/bot/posizioni/s3012_B_t07_05.pkl`. Sei Kha'Zix (posto B), avanti
+3-2, a metà del tuo turno: hai già giocato 3 carte e non hai più energia.
+- BF0 Rakelstake, tuo: due Traveling Merchant (2 e 2, uno esaurito).
+- BF1 Sandswept Tomb, di Evelynn: Reckless Innovator (3), Pyke Returned (3),
+  Evelynn Entrancing (2), pronti: 8 di Might.
+- In base: Zed Without a Sound (5, pronto), Kha'Zix Mutating Horror (4,
+  esaurito). Lei ha Momentary Companion (4) in base, 5 carte, 2 energia.
+
+La mossa è dove mandare Zed. Per il riferimento attaccare BF1 o difendere
+BF0 vale lo stesso (+0,46 tutte e due); sceglie BF1 in 60 mondi su 60: Zed
+muore contro 8 (a volte porta con sé due unità), poi al turno 8 lei tiene
+BF1 e la Companion (4, spesso con Hold 'Em) prende BF0 ai due Merchant (4).
+La variante manda Zed a BF0 in 59 mondi su 60: il campo ha 9 di Might, lei
+non lo attacca, al turno 9 lo tieni tu. **Su 84 mondi: 0,93 contro 0,48.**
+
+L'idea: con l'ultima unità pronta e niente energia, non attaccare un campo
+più forte; mettila sul campo che hai, perché il suo turno dopo non possa
+prenderlo. La valutazione da ferma non vede la differenza perché conta la
+Might sul tavolo e i campi di adesso, non chi attacca dopo.
+
+## Un'altra: s3011, turno 7, Kha'Zix
 File: `docs/bot/posizioni/s3011_B_t07_03.pkl` (`opponent_turn_check.py
 --show` la stampa). Sei Kha'Zix (posto B), avanti 3-2, inizio del Main Phase,
 6 rune, 2 XP, legend pronta. Campi: BF0 Rakelstake vuoto; BF1 Zaun Warrens
