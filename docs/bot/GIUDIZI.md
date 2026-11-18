@@ -240,3 +240,50 @@ Nella G3 i due avevano cambiato carte dal sideboard: entrate Sabotage e
 Decree of Unity (Ksword) e Rebuke (utente); le uscite non si sanno, negli
 scenari escono Showstopper, Call to Glory e Switcheroo (conta solo per le
 carte nascoste nei mazzi).
+
+## Partita dal vivo 18/11 sera: Evelynn contro Ivern (stanza 82FAW)
+Avversario flamingo: legend Ivern, Green Father (Calm/Order; conquistando o
+tenendo può sostituire il campo con Brush, +1 alle unità animali e Ivern),
+campione Ivern, Nurturer (due copie), Stalwart Poro, Iridescent Avian, Trusty
+Ramhound, Mutated Mouser, Defy, Disarming Rake. Gioca l'utente, Claude propone
+e clicca. Interrotta al turno 10, 5-4 per noi. Log: `docs/bot/partite/
+82FAW_ivern_g1_log.md`; registrazione completa (stato del tavolo a ogni
+modifica): `riftatlas_82FAW_ivern_g1.json`. Giudizi dati dall'utente in chat:
+
+- G16. Mulligan da secondi contro un mazzo di unità (turno 1): mano Star-Crossed,
+  Gutter Guardian, Rampage, Switcheroo. Claude: via Rampage ("senza bersagli
+  all'inizio"). Utente: tenere tutto, al massimo via Switcheroo; da secondi
+  lui avrà già unità, Rampage è rimozione. Scelto: via Switcheroo.
+- G17. Sotto una runa Calm aperta c'è Defy (1 + Calm, annulla una magia fino
+  a 4): a lui basta una runa pronta più una Calm esausta da riciclare. Turno
+  4: l'utente ferma Rampage sul Poro; si gioca solo con unità (Innovator a
+  Forbidding Waste, Guardian con Show Off, Stranger nascosta). Turno 6:
+  Rampage su Ivern provata lo stesso ("puoi provare ma gestisci le chain"):
+  Defy, annullata. Rampage va tenuta per il bersaglio grosso (Ivern).
+- G18. Bedeviling Stranger non si gioca scoperta su un campo senza 4 unità:
+  l'effetto va sprecato. Va nascosta (turno 4). Da coperta il suo effetto
+  sceglie solo il campo dove era nascosta (§811.1.d.3; l'utente al turno 7:
+  "lo dovresti già sapere").
+- G19. Da campo a campo serve Ganking (§144.4.c.1). Turno 6 Claude propone
+  Innovator da Forbidding Waste al Brush senza Ganking; l'utente lo ferma.
+  Soluzione: Boots of Swiftness (+2, Ganking) su Innovator.
+- G20. Dopo aver conquistato un campo, nascondere lì una carta Hidden (costa 1
+  potenza, anche da una runa esausta riciclata; all'Academy torna un Gold).
+  Turno 6: Claude chiude il turno senza nascondere Momentary Companion
+  all'Academy; l'utente se ne accorge, rewind chiesto in chat e accettato.
+- G21. Quando il campo si perde comunque, girare la coperta per la pesca della
+  legend (come G9, G11). Turno 7: Ivern a 7 da solo contro Guardian (1, da solo
+  a Forbidding Waste) e Stranger coperta: girata per pescare, scartata la
+  seconda Stranger, tenuta Star-Crossed (d'accordo l'utente).
+- G22. Nel proprio turno, una coperta all'Academy si può girare per 0 per
+  avere il corpo permanente e la pesca (turno 8, Momentary Companion: niente
+  Temporary nel proprio turno); poi si rinasconde un'altra carta (Edge of
+  Night) per il Gold. Prima la pesca, poi il resto (G13).
+- G23. Innovator: muoverlo solo per il trigger. Con poche carte in mano e
+  molte rune, meglio "paga Chaos e pesca" (Chaos da un Gold) che il Gold
+  (turno 10, proposta dell'utente; non giocata, partita interrotta).
+- Metodo (utente, turno 7-8): ogni proposta con la logica del bot (valore:
+  punti, campi, Might sui campi, carte; GIUDIZI; TEORIA_PUNTI, Evelynn tiene i
+  campi) e le regole dal motore o da CORE_RULES. Sul simulatore: pagare le
+  rune prima di giocare la carta; il trigger della legend va trascinato sulla
+  catena prima di pescare.

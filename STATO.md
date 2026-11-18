@@ -22,23 +22,21 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   (piano v2, `docs/PIANO_MOTORE.md`). Sera: strada A, prima il bot: solo la
   fase 1 (D66-D68, le copie: piccola, la partita vera non cambia), poi il bot.
   Fuori perimetro: D59-D65, la struttura, il training.
-- (Utente, 17/11) Il `Result` di una copia conta `units_played` e
-  `spells_cast` dal punto di copia: lasciato (la ricerca usa il vincitore).
-- Flow: solo sconti di aura; altri modificatori §356.3-4 aperti (non nei mazzi).
-- Ricerca: un nodo per opzione con chiave (tipo, carta, descrizione); prior uguali.
-- Scelte nascoste: decise quando servono, rigiocando dall'ultima decisione.
-- (Utente, 13/11) La rete serve come avversario per allenarsi e per misurare
-  mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
-  Proposte in parole semplici (cosa faccio, quanto costa, cosa sapremo);
-  ogni deviazione dal piano concordato detta esplicitamente.
-- Training: più partite e meno esempi per partita invece di più ricerca per
-  mossa: il valore ha bisogno di esiti, non di posizioni della stessa partita.
-- (Utente, 18/11 sera) Rete: parte dalle partite del bot a mano (imita il
-  bot migliore, non simple_trade), poi self-play; si allena sul Mac.
+- (Utente, 17/11) `Result` di una copia: contatori dal punto di copia, lasciato.
+- Flow: solo sconti di aura (§356.3-4 aperti). Ricerca: un nodo per opzione,
+  prior uguali. Scelte nascoste: decise quando servono, rigiocando.
+- (Utente, 13/11) La rete: avversario per allenarsi e per misurare mazzi e
+  matchup. Proposte in parole semplici (cosa faccio, quanto costa, cosa
+  sapremo); ogni deviazione dal piano concordato detta esplicitamente.
+- Training: più partite, meno esempi per partita (il valore vuole esiti).
+- (Utente, 18/11) Rete: imita il bot a mano, poi self-play; sul Mac.
 - (Utente, 18/11) Regole dal motore o da CORE_RULES, mai a memoria; lezioni
   in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
 - RiftAtlas: carte nascoste dell'avversario senza lista = le sue carte viste,
   ripetute (avviso); Might dal motore, il segnalino dei giocatori solo confronto.
+- (gptAstra, 18/11) Rete: seed disgiunti 1.600 / 200 / 200 (allenare, epoca,
+  test), Evelynn metà per lato. (Utente) Mosse della mano dalla carta; "once"
+  della leggenda visibile.
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
   determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
@@ -48,12 +46,10 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   corrette (`tests/audit/test_audit_copies.py`), 28 golden identiche.
 - Partite dal vivo su RiftAtlas (17-18/11): partita 1 giocata da Claude
   (persa), BO3 dall'utente. GIUDIZI G8-G15; checklist e note in PARTITA_LIVE.
-- PR #32 (18/11): determinize tiene le carte note e non dipende dall'ordine
-  nascosto (`tests/test_hidden_info.py`); tre correzioni della ricerca (bot
-  0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
-  (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
-- Ricerca che gioca anche il turno avversario (`docs/bot/TURNO_AVVERSARIO.md`):
-  0,44 ± 0,05 contro il bot #32, più debole; aiuta in s3012 t7 e s3011.
+  18/11 notte: contro Ivern (flamingo, stanza 82FAW), interrotta al turno 10
+  sul 5-4; G16-G23; registrazione e log in `docs/bot/partite/`.
+- PR #32 (18/11): determinize tiene le carte note; bot 0,58 → 0,80 contro
+  simple_trade; S6-S9, S11a/b, TEORIA_PUNTI. Turno avversario: `TURNO_AVVERSARIO.md`.
 - Audit, nono passaggio (19/11): D69-D70, copie del Chosen Champion: campione
   + 2 copie nel mazzo, Hallowed Tomb riporta anche una copia; golden identiche.
 
@@ -62,7 +58,8 @@ RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW
 con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Da fare (dopo):
 bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (giudizi, scenari).
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
-(partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
+(~2 ore), con le correzioni di #36 (`test_bootstrap_split`,
+`test_net_hand_and_legend`). In attesa di `runs/boot1/RISULTATI.txt`.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`judgment_value.py`): non rende il bot più forte
@@ -70,10 +67,12 @@ Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
    o caso peggiore sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
    non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
    se passa, self-play da `net_boot.pt` (lanciatore da preparare).
+   Registratore RiftAtlas usato nella 82FAW (nessun buco; `avversarioScoperto`
+   esclude le carte rivelate).
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
-2. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
-3. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
+2. Piano v2 (fasi 0, 2-6, D59-D65) dopo il bot, se l'utente decide.
+   Possono aspettare: training, sideboard, tempi, carte fuori dai mazzi.
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali
@@ -84,13 +83,11 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
   l'avanzamento; `docs/audit/revisione_esterna/`: i rapporti (in inglese).
 - `riftbound/core/`: il motore. `loop.py` (turno, chain, showdown, combattimento),
   `effects.py`, `battlefield.py` (Hold / Conquer), `legality.py` (azioni legali).
-- `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete; test in
-  `tests/test_net_mcts.py`. `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`.
-- `riftbound/ai/coach.py`, `scenari.py` (+ `scripts/`): coach e scenari dei giudizi.
+- `riftbound/ai/net_mcts.py` (ricerca con la rete), `selfplay.py`, `coach.py`,
+  `scenari.py` (coach e scenari dei giudizi); `scripts/train_selfplay.py`.
 - `riftbound/ai/handwritten.py`: il bot a mano (valore, ricerca a tempo);
   `scripts/bootstrap_net.py` + `scripts/rete.command`: la rete dal bot.
-- `scripts/diag/`: le misure (`handwritten_value.py`: base del bot;
-  `opponent_turn.py` / `opponent_turn_check.py`: turno avversario, posizioni).
+- `scripts/diag/`: le misure (`handwritten_value.py`, `opponent_turn*.py`).
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
 - `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
   piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).

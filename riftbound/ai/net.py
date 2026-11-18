@@ -11,6 +11,11 @@ A dual-head network over the fixed encoding from ``encoding.py``:
     trunk (MLP)  ->  policy head [ACTION_DIM] logits   (masked by legal_mask)
                  +-> value head  [1] in (-1, 1)         (expected game result)
 
+The actions that name a hand slot (playing or hiding a hand card) are scored
+by a pointer head instead: trunk output + that slot's card row -> its lanes'
+logits (encoding.HAND_ACTION_SLOTS). The trunk doesn't see the hand's order
+(rows are pooled), so the preference goes with the card, not with the slot.
+
 Requires PyTorch, which is the optional ``rl`` extra (``uv sync --extra rl``) —
 kept out of the core engine so the light install stays torch-free. Import this
 module only in the RL/training path. It is **CUDA-aware**: ``default_device()``
@@ -33,6 +38,9 @@ import torch.nn.functional as F
 from riftbound.ai.encoding import (
     ACTION_DIM,
     DENSE_DIM,
+    HAND_ACTION_SLOTS,
+    HAND_LANES,
+    HAND_ROWS,
     MAX_TOKENS,
     N_CARD_IDS,
     N_TOKEN_FEATURES,
@@ -60,6 +68,8 @@ class RiftboundNet(nn.Module):
         super().__init__()
         if obs_dim != OBS_DIM:
             raise ValueError(f"a net for another state encoding ({obs_dim} != OBS_DIM {OBS_DIM})")
+        if action_dim != ACTION_DIM:
+            raise ValueError(f"a net for another action space ({action_dim} != ACTION_DIM {ACTION_DIM})")
         self.obs_dim = obs_dim
         self.action_dim = action_dim
         self.hidden = tuple(hidden)
@@ -78,6 +88,10 @@ class RiftboundNet(nn.Module):
         self.trunk = nn.Sequential(*layers)
         self.policy_head = nn.Linear(prev, action_dim)
         self.value_head = nn.Linear(prev, 1)
+        self.hand_head = nn.Sequential(nn.Linear(prev + card_dim, 128), nn.ReLU(),
+                                       nn.Linear(128, HAND_LANES))
+        self.register_buffer("hand_slots", torch.as_tensor(HAND_ACTION_SLOTS.reshape(1, -1)),
+                             persistent=False)
 
     def forward(self, x: "torch.Tensor") -> tuple["torch.Tensor", "torch.Tensor"]:
         """x: [B, OBS_DIM] → (policy_logits [B, ACTION_DIM], value [B, 1] in (-1,1))."""
@@ -91,6 +105,10 @@ class RiftboundNet(nn.Module):
         pooled.scatter_add_(1, zone.unsqueeze(-1).expand(-1, -1, self.card_dim), h)
         z = self.trunk(torch.cat([x[:, :DENSE_DIM], pooled.reshape(b, -1)], dim=1))
         policy_logits = self.policy_head(z)
+        # Hand slot k's actions from the card in row k (pointer head).
+        hand = torch.cat([z.unsqueeze(1).expand(-1, HAND_ROWS, -1), h[:, :HAND_ROWS]], dim=2)
+        policy_logits = policy_logits.scatter(1, self.hand_slots.expand(b, -1),
+                                              self.hand_head(hand).reshape(b, -1))
         value = torch.tanh(self.value_head(z))
         return policy_logits, value
 

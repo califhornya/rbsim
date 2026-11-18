@@ -219,6 +219,11 @@ class Observation:
     opp_legend: Optional[str] = None
     my_legend_ready: bool = False
     opp_legend_ready: bool = False
+    # The legend's "once each turn" ability still free this turn (False: none,
+    # or used): Evelynn Agony's Embrace draws when a card is played from
+    # facedown only the first time each turn (S11a / S11b).
+    my_legend_once_free: bool = False
+    opp_legend_once_free: bool = False
     # Legends Neeko Blending In added: (name, ready).
     my_added_legends: tuple = ()
     opp_added_legends: tuple = ()
@@ -278,6 +283,12 @@ class Observation:
             name = unit.card.name if unit is not None else getattr(card, "name", None)
             return name, bool(unit.ready) if unit is not None else False
 
+        def legend_once_free(side):
+            card = gs.legend_A if side == "A" else gs.legend_B
+            once = [i for i, e in enumerate(getattr(card, "effects", None) or [])
+                    if isinstance(e, dict) and e.get("once_per_turn")]
+            return bool(once) and not any(gs.once_per_turn_used.get((card, i)) == gs.turn for i in once)
+
         def added_legends(side):
             return tuple((lu.card.name, bool(lu.ready)) for lu, _neeko in gs.added_legends[side])
 
@@ -330,6 +341,7 @@ class Observation:
             opp_banished=tuple(c.name for c in opp.banished),
             my_legend=my_leg[0], opp_legend=opp_leg[0],
             my_legend_ready=my_leg[1], opp_legend_ready=opp_leg[1],
+            my_legend_once_free=legend_once_free(viewer), opp_legend_once_free=legend_once_free(other),
             my_added_legends=added_legends(viewer), opp_added_legends=added_legends(other),
             my_champion=champion(viewer), opp_champion=champion(other),
             my_base_gear=tuple(g.name for g in me.base_gear),
@@ -376,6 +388,8 @@ class Observation:
             "opp_banished": list(self.opp_banished),
             "my_legend": self.my_legend, "opp_legend": self.opp_legend,
             "my_legend_ready": self.my_legend_ready, "opp_legend_ready": self.opp_legend_ready,
+            "my_legend_once_free": self.my_legend_once_free,
+            "opp_legend_once_free": self.opp_legend_once_free,
             "my_added_legends": [list(x) for x in self.my_added_legends],
             "opp_added_legends": [list(x) for x in self.opp_added_legends],
             "my_champion": self.my_champion, "opp_champion": self.opp_champion,
