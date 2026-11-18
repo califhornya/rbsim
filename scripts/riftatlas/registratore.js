@@ -56,20 +56,35 @@
         log: Object.fromEntries(Object.entries(rec.log).map(([k, v]) => [k, Object.keys(v).length])),
       };
     },
-    // Carte dell'avversario arrivate scoperte in mano o nel mazzo: devono essere 0
-    // (lo dice il server). Se non lo sono, non si guarda il file: PARTITA_LIVE, regola 4.
+    // Carte dell'avversario arrivate scoperte in mano o nel mazzo senza essere
+    // state rivelate a tutti: devono essere 0 (lo dice il server). Se non lo sono,
+    // non si guarda il file: PARTITA_LIVE, regola 4. Pubbliche, quindi escluse:
+    // quelle in `deckPeek.revealedCardIds` (rivelate dal mazzo, es. Ivern, Nurturer;
+    // arrivano nella stessa modifica) e la mano mentre `handRevealToOpponent` è vero.
     leaks() {
       if (!rec.me) return [];
-      const out = [];
+      const out = [], pub = new Set(), handOpen = {};
+      const board = (pid, f) => {
+        if (!f) return;
+        const dp = f.deckPeek;
+        if (dp && Array.isArray(dp.revealedCardIds)) dp.revealedCardIds.forEach((id) => pub.add(id));
+        if ("handRevealToOpponent" in f) handOpen[pid] = !!f.handRevealToOpponent;
+      };
       const check = (pid, zone, cards) => {
-        if (pid !== rec.me && HIDDEN.has(zone))
-          for (const c of cards || []) if (c && c.isPlaceholder === false) out.push(`${zone}`);
+        if (pid === rec.me || !HIDDEN.has(zone) || (zone === "hand" && handOpen[pid])) return;
+        for (const c of cards || []) if (c && c.isPlaceholder === false && !pub.has(c.id)) out.push(`${zone}:${c.name}`);
       };
       for (const m of rec.net) {
         if (m.type === "authoritative_snapshot")
-          for (const p of m.msg.snapshot.players || []) for (const z of HIDDEN) check(p.id, z, (p.board || {})[z]);
-        if (m.type === "authoritative_patch_commit")
-          for (const o of m.msg.patch.operations) if (o.op === "zone_insert") check(o.playerId, o.zone, o.cards);
+          for (const p of m.msg.snapshot.players || []) {
+            board(p.id, p.board);
+            for (const z of HIDDEN) check(p.id, z, (p.board || {})[z]);
+          }
+        if (m.type === "authoritative_patch_commit") {
+          const ops = m.msg.patch.operations;
+          for (const o of ops) if (o.op === "set_board_fields") board(o.playerId, o.fields);
+          for (const o of ops) if (o.op === "zone_insert") check(o.playerId, o.zone, o.cards);
+        }
       }
       return out;
     },

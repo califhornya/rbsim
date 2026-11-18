@@ -69,8 +69,8 @@ con divisione, mano→mossa e trigger di Evelynn corretti (`tests/test_bootstrap
    delle simulazioni sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
    non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
    se passa, self-play da `net_boot.pt` (lanciatore da preparare).
-   Registratore RiftAtlas usato nella 82FAW (nessun buco). Da fare: parser JSON →
-   posizione del motore (bot sulle posizioni vive); `avversarioScoperto` escluda le rivelate.
+   Registratore RiftAtlas usato nella 82FAW (nessun buco; `avversarioScoperto`
+   esclude le carte rivelate). Parser JSON → posizione del motore: PR #34.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) dopo il bot, se l'utente decide. Possono aspettare: training, sideboard, tempi, carte fuori dai mazzi.
