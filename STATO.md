@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 sera (rete: divisione delle partite corretta prima del run sul Mac).
+Aggiornato: 2026-11-18 sera (rete: divisione, mano e trigger di Evelynn corretti prima del run).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -37,6 +37,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
 - (gptAstra, 18/11) Rete: per seed, 1.600 allenare / 200 epoca / 200 test, disgiunti,
   Evelynn metà in A e metà in B (prima: 200 tutte Evelynn in B, usate due volte).
+- (Utente, 18/11) Rete: mosse delle carte in mano dalla carta (puntatore), "once" della leggenda visibile.
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
   determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
@@ -57,8 +58,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 ## In corso
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
 (partite, allenamento, misure; ~2 ore), branch `claude/vigilant-gates-b95tqx`
-con la divisione corretta (`check_split`, `tests/test_bootstrap_split.py`;
-provata qui in piccolo). In attesa di `runs/boot1/RISULTATI.txt`.
+con divisione, mano→mossa e trigger di Evelynn corretti (`tests/test_bootstrap_split.py`,
+`tests/test_net_hand_and_legend.py`). In attesa di `runs/boot1/RISULTATI.txt`.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
@@ -73,7 +74,6 @@ provata qui in piccolo). In attesa di `runs/boot1/RISULTATI.txt`.
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 3. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
-
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali

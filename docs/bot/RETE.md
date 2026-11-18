@@ -34,6 +34,22 @@ sul Mac.
       (0,4 s);
    4. 200 partite contro simple_trade come `handwritten_value.py` (0,80).
 
+Cosa vede la rete (correzioni del 18/11 sera, prima del run):
+- **La mano e le mosse**: prima la mano era contata per nome (l'ordine non
+  si vedeva) e le mosse di una carta erano indicate dalla posizione nella
+  mano: scambiate due carte, la preferenza restava al posto e passava
+  all'altra carta (S6, Pyke Returned e Gutter Guardian). Ora la mano è una
+  riga per carta, nell'ordine del motore, e le mosse di una carta in mano
+  (giocarla, coprirla) hanno il punteggio calcolato da quella carta: la
+  preferenza segue la carta, nell'allenamento e quando il bot gioca.
+- **Evelynn può ancora pescare**: un valore per giocatore dice se l'abilità
+  "una volta per turno" della leggenda è ancora libera in questo turno
+  (Agony's Embrace pesca quando una carta coperta viene giocata). È l'unica
+  differenza tra S11a e S11b.
+Test: `tests/test_net_hand_and_legend.py` (falliscono 4 su 5 col codice di
+prima). Reti e partite salvate prima non si usano più (input diverso): un
+`runs/boot1` vecchio ferma il run subito, con il messaggio di spostarlo.
+
 Tempi sul Mac (stima da qui: 24 s a partita per core): circa un'ora e
 mezza per le partite, mezz'ora per le misure.
 

@@ -172,6 +172,7 @@ def _write_chunk(path: Path, games: list) -> None:
 def data(args) -> None:
     out = args.run_dir / "data"
     out.mkdir(parents=True, exist_ok=True)
+    _check_width(sorted(out.glob("chunk_*.npz"))[:1])
     n_chunks = math.ceil(args.games / CHUNK)
     todo = [c for c in range(n_chunks) if not (out / f"chunk_{c:04d}.npz").exists()]
     if not todo:
@@ -198,8 +199,19 @@ def data(args) -> None:
                 sys.exit(0)
 
 
+def _check_width(files) -> None:
+    """Chunks saved with another state encoding can't be used: stop at once."""
+    from riftbound.ai.encoding import OBS_DIM
+    for f in files:
+        width = np.load(f)["state"].shape[1]
+        if width != OBS_DIM:
+            sys.exit(f"{f}: partite salvate con un'altra codifica ({width} invece di {OBS_DIM}); "
+                     f"sposta o cancella {f.parent.parent} e rilancia")
+
+
 def _load(run_dir: Path) -> dict:
     files = sorted((run_dir / "data").glob("chunk_*.npz"))
+    _check_width(files)
     parts = [np.load(f) for f in files]
     d = {k: np.concatenate([p[k] for p in parts]) for k in ("state", "p", "mask", "z", "turn", "tv", "seed")}
     d["group"] = group_of(d["seed"])

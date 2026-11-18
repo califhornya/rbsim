@@ -16,9 +16,16 @@ The state vector has two parts: DENSE_DIM scalar features (points, energy, runes
 each battlefield's state...), then MAX_TOKENS rows of TOKEN_WIDTH, one per card
 the viewer can see: (zone, card id, features). A unit's row carries its state
 (Might, damage, ready, stunned, buff, keywords in effect...); a card in a zone
-(hand, trash, deck...) its number of copies; a card the viewer knows is on top
+(trash, deck...) its number of copies; a card the viewer knows is on top
 of their deck (PREDICT) has a row of its own, with its place. The network embeds each card once,
 the same wherever it is, and pools the rows zone by zone (net.py).
+
+The hand is one row per card, in the engine's order, in the table's first
+MAX_HAND rows (HAND_ROWS): the row of hand slot k is row k. The actions that
+name a hand slot (UNIT, SPELL, GEAR, HIDE) are scored by the net from that
+row's card (HAND_ACTION_SLOTS, net.py), so a move's preference goes with the
+card, wherever it sits in the hand (S6: Pyke Returned and Gutter Guardian
+swapped, the same preference for each).
 """
 
 from __future__ import annotations
@@ -77,7 +84,8 @@ MAX_TOKENS = 160
 # Standard Move being declared, the viewer's or the opponent's (§144.3: more
 # units may still join it, its showdown hasn't started).
 _PER_BF_DENSE = 3 + 2 + 2 + 2 + 2 + 2
-DENSE_DIM = 14 + 2 * N_DOM + 1 + N_BF + 2 + 2 * N_DOM + 2 + 2 + 2 + N_BF * _PER_BF_DENSE + 4 + 2 * N_BF
+DENSE_DIM = 14 + 2 * N_DOM + 1 + N_BF + 2 + 2 * N_DOM + 2 + 2 + 2 + 2 + N_BF * _PER_BF_DENSE + 4 + 2 * N_BF
+HAND_ROWS = MAX_HAND        # the token table's first rows: the hand, slot by slot
 
 OBS_DIM = DENSE_DIM + MAX_TOKENS * TOKEN_WIDTH
 
@@ -121,6 +129,8 @@ def _dense(obs: Observation) -> np.ndarray:
     s += [obs.my_rune_domains.get(d, 0) / 12.0 for d in DOMAINS]
     s += [obs.opp_rune_domains.get(d, 0) / 12.0 for d in DOMAINS]
     s += [float(obs.my_legend_ready), float(obs.opp_legend_ready)]
+    # The legend's "once each turn" still free (Evelynn: a card from facedown draws).
+    s += [float(obs.my_legend_once_free), float(obs.opp_legend_once_free)]
     s += [float(obs.my_champion is not None), float(obs.opp_champion is not None)]
     s += [obs.my_cards_played / 5.0, obs.opp_cards_played / 5.0]
     bfs = list(obs.battlefields)
@@ -155,11 +165,16 @@ def _unit_features(u) -> list:
         [float(k in u.keywords) for k in UNIT_KEYWORDS]
 
 
+def _hand_row(name):
+    return (_ZONE["my_hand"], card_id(name), [1.0 / 3.0] + [0.0] * (N_TOKEN_FEATURES - 1))
+
+
 def _tokens(obs: Observation) -> list:
-    """(zone, card id, features) rows, most important first (a full table drops
-    the end: deck, banished)."""
+    """(zone, card id, features) rows after the hand's, most important first (a
+    full table drops the end: deck, banished). A hand beyond MAX_HAND cards: its
+    other cards here, first."""
     me = obs.viewer
-    rows: list = []
+    rows: list = [_hand_row(n) for n in obs.my_hand[HAND_ROWS:]]
 
     def card(zone, name, feats=None):
         rows.append((_ZONE[zone], card_id(name), feats or [1.0 / 3.0] + [0.0] * (N_TOKEN_FEATURES - 1)))
@@ -195,7 +210,6 @@ def _tokens(obs: Observation) -> list:
     for i, bf in enumerate(bfs[:N_BF]):
         if bf.named:
             card(f"battlefield_{i}", bf.named)
-    counted("my_hand", obs.my_hand)
     # Known top of the deck (PREDICT): one row each, the next draw first.
     for rank, name in enumerate(obs.my_deck_top):
         card("my_deck_top", name, [1.0 / 3.0, rank / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))
@@ -219,7 +233,12 @@ def encode_observation(obs: Observation) -> np.ndarray:
     """Fixed-size float32 encoding of an information-set observation: the dense
     features, then the token table (see the module docstring)."""
     table = np.zeros((MAX_TOKENS, TOKEN_WIDTH), dtype=np.float32)
-    for r, (zone, cid, feats) in enumerate(_tokens(obs)[:MAX_TOKENS]):
+    for r, name in enumerate(obs.my_hand[:HAND_ROWS]):
+        zone, cid, feats = _hand_row(name)
+        table[r, 0] = zone
+        table[r, 1] = cid
+        table[r, 2:] = feats
+    for r, (zone, cid, feats) in enumerate(_tokens(obs)[:MAX_TOKENS - HAND_ROWS], HAND_ROWS):
         table[r, 0] = zone
         table[r, 1] = cid
         table[r, 2:] = feats
@@ -258,6 +277,15 @@ _OFF_HIDE = _OFF_MOVE + (N_BF + 1) ** 2 * MAX_MOVERS  # (MAX_HAND + the champion
 _OFF_HIDDEN = _OFF_HIDE + (MAX_HAND + 1) * N_BF    # N_BF * MAX_FACEDOWN
 _OFF_ABIL = _OFF_HIDDEN + N_BF * MAX_FACEDOWN      # ACTIVATED(MAX_ABIL)
 ACTION_DIM = _OFF_ABIL + MAX_ABIL
+# The actions that name a hand slot: HAND_ACTION_SLOTS[k] are hand slot k's, all
+# lanes (UNIT: base and each BF; SPELL, GEAR, HIDE: each BF), in one order. The
+# net scores them from the card in token row k (net.py); HIDE of the champion
+# (its row MAX_HAND) is not a hand card.
+HAND_ACTION_SLOTS = np.asarray(
+    [[_OFF_UNIT + k * (N_BF + 1) + ln for ln in range(N_BF + 1)]
+     + [off + k * N_BF + ln for off in (_OFF_SPELL, _OFF_GEAR, _OFF_HIDE) for ln in range(N_BF)]
+     for k in range(MAX_HAND)], dtype=np.int64)
+HAND_LANES = HAND_ACTION_SLOTS.shape[1]
 
 
 def _location(i, n_bf: int) -> Optional[int]:
