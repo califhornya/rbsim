@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-19 (D69-D70: copie del campione scelto; mazzo Ivern di 82FAW).
+Aggiornato: 2026-11-19 (PR #34-#36 integrate: D69-D70, RiftAtlas → bot, rete).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -37,6 +37,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   bot migliore, non simple_trade), poi self-play; si allena sul Mac.
 - (Utente, 18/11) Regole dal motore o da CORE_RULES, mai a memoria; lezioni
   in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
+- RiftAtlas: carte nascoste dell'avversario senza lista = le sue carte viste,
+  ripetute (avviso); Might dal motore, il segnalino dei giocatori solo confronto.
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
   determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
@@ -56,23 +58,22 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   + 2 copie nel mazzo, Hallowed Tomb riporta anche una copia; golden identiche.
 
 ## In corso
+RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW,
+con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Da fare (dopo):
+bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (giudizi, scenari).
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
 (partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
 
 ## Prossimi passi
-0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
-   misurata un giudizio alla volta, non rende il bot più forte (testa a testa
-   0,49); più peso alla mano lo peggiora (0,65). Turno avversario simulato:
-   più debole così com'è (0,44); scegliere per media o per caso peggiore
-   delle simulazioni sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
+0. Valutazione dai giudizi (`judgment_value.py`): non rende il bot più forte
+   (0,49; più peso alla mano 0,65); turno avversario simulato 0,44, per media
+   o caso peggiore sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
    non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
    se passa, self-play da `net_boot.pt` (lanciatore da preparare).
-   Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 3. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
-
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali
@@ -95,5 +96,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
   piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).
 - `riftbound/data/decks/`: precon, competitive dell'utente, `competitive_ivern`
   (82FAW, RiftAtlas); da lista .txt: `scripts/deck_from_txt.py`.
+- `scripts/riftatlas/`: registratore.js (in pagina), stati.py (registrazione →
+  tavolo), posizione.py (tavolo → GameState → bot); test `test_riftatlas_*`.
 - `tests/golden_games.json` + `test_golden_games.py`: 28 partite, solo stato
   finale (`RBSIM_REGEN_GOLDEN=1` per rigenerarle). `BACKLOG.md`: voci aperte.
