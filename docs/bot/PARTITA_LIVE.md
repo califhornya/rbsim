@@ -105,10 +105,11 @@ posizioni (per gli scenari).
 Fatto (18/11 notte, partita 82FAW): la partita viaggia su WebSocket, stato già
 strutturato. `scripts/riftatlas/stati.py <file> [seq]`: il tavolo pubblico a
 ogni modifica (istantanea + patch in ordine di seq). `scripts/riftatlas/
-posizione.py <file> [seq] [--budget S] [--mazzo-avversario deck.json]`: quel
+posizione.py <file> [seq] [--budget S] [--mazzo-avversario lista.txt]`: quel
 tavolo come GameState del motore e la prima azione del bot a mano, con gli
 avvisi su cosa è stato riempito (carte coperte dell'avversario senza lista:
 le sue carte viste; Might del motore contro il segnalino dei giocatori).
+Lista di Ivern (flamingo) di 82FAW: `docs/bot/partite/82FAW_ivern_lista.txt`.
 Il pannello del log tiene solo gli ultimi ~5 turni. Registratore usato il
 17/11: un MutationObserver su `document.body` che legge il pannello, lo
 divide in blocchi per "TURN n·NOME" e li salva per stanza (riga "ROOM: XXXXX";

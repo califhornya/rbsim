@@ -1,7 +1,7 @@
 """Dal tavolo RiftAtlas a una posizione del motore, e la mossa del bot a mano.
 
 Uso: python scripts/riftatlas/posizione.py <file.json> [seq] [--budget S]
-                                           [--mazzo-avversario deck.json] [--seed N]
+                                           [--mazzo-avversario lista.txt|deck.json] [--seed N]
 
 Prende lo stato ricostruito da `stati.py` a una seq (default: l'ultima) in cui
 chi registra è nel suo Main Phase, ne fa un `GameState` (`riftbound/core/`) e
@@ -12,7 +12,8 @@ Cosa il tavolo non dice, e come si riempie (ogni scelta finisce negli avvisi):
 - le carte coperte di chi registra (mazzo): la sua lista (`decklistRaw` nel
   file) meno le carte viste altrove; l'ordine dal seed;
 - quelle dell'avversario (mano, mazzo, coperte): la sua lista se si passa
-  `--mazzo-avversario` (formato di `riftbound/data/decks`), se no le carte del
+  `--mazzo-avversario` (.txt come lo esporta RiftMana, o .json di
+  `riftbound/data/decks`), se no le carte del
   suo mazzo viste in partita, ripetute fino al numero giusto. La ricerca
   rimescola comunque mano e mazzo avversari (`determinize`): conta di che
   carte è fatto il mucchio, non l'ordine;
