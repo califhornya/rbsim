@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 (partite dal vivo su RiftAtlas; determinize corretto).
+Aggiornato: 2026-11-18 sera (ricerca con il turno avversario: più debole).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -47,16 +47,17 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   non `id()`), `tests/audit/test_audit_copies.py`; 28 golden identiche.
 - Partite dal vivo su RiftAtlas (17-18/11): partita 1 giocata da Claude
   (persa), BO3 dall'utente. GIUDIZI G8-G15; checklist e note in PARTITA_LIVE.
-- determinize (18/11, `64f184f`): ridistribuiva tutta la mano avversaria; ora
-  tiene le carte note (rimbalzate, rivelate) e non dipende dall'ordine
-  nascosto. `tests/test_hidden_info.py`, 4 su 5 rossi prima (anche "la
-  ricerca non sbircia"). Suite 1836 passed, 6 skipped; golden identiche.
-- Risposte agli scenari (18/11): opzioni e mano a ogni mossa, mossa scartata,
-  cosa farebbe cambiare scelta, esito a parte (`tests/test_scenari_answers.py`).
-- Risposte dell'utente in chat a S6-S9, S11a/b (`risposte_scenari.jsonl`);
-  teoria dei punti dal web in `docs/bot/TEORIA_PUNTI.md` (pari/dispari).
-- Mazzo Sett di Ksword (`competitive_sett.json`); scenari con cambi di
-  sideboard e `legend_used`; S11a/S11b dal log della G3 (`test_scenari_s11.py`).
+- PR #32 (18/11): determinize tiene le carte note e non dipende dall'ordine
+  nascosto (`tests/test_hidden_info.py`); tre correzioni della ricerca (bot
+  0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
+  (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
+- Ricerca che gioca anche il turno avversario (18/11 sera, `docs/bot/
+  TURNO_AVVERSARIO.md`): foglie valutate dopo il turno di lui (simple_trade)
+  e l'inizio del proprio. Contro il bot #32, 100 coppie Evelynn-Kha'Zix a
+  0,4 s per mossa: **0,44 ± 0,05**, più debole (54 iterazioni contro 116; su
+  1.816 disaccordi la sua mossa vale di più solo in 438: rumore del massimo
+  su foglie variabili). Una posizione dove prevedere aiuta: s3011 turno 7
+  (Kha'Zix 3-2), 0,63 contro 0,42 su 60 mondi nuovi (`docs/bot/posizioni/`).
 
 ## In corso
 Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
@@ -65,17 +66,15 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
 ## Prossimi passi
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
    misurata un giudizio alla volta, non rende il bot più forte (testa a testa
-   0,49); più peso alla mano lo peggiora (0,65). Decidere con l'utente la
-   strada: ricerca che gioca anche il turno avversario, o la rete.
-   Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
-   da provare sulla pagina vera in una sessione sul PC dell'utente.
-1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
-   batte nettamente simple_trade o non gioca in modo sensato. Base dopo le 3
-   correzioni della ricerca (`handwritten_value.py 200 100`, 20 min): 0,80
-   contro simple_trade, 0,97 contro random (prima 0,58 e 0,86).
-2. Giudizi: `docs/bot/GIUDIZI.md`; S6-S11 risposte (18/11, in chat).
-3. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
-4. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
+   0,49); più peso alla mano lo peggiora (0,65). Turno avversario simulato:
+   più debole così com'è (0,44). Decidere con l'utente la strada: la rete,
+   o il turno avversario con meno rumore (media invece del massimo sulle
+   foglie simulate, o simulazione solo alla radice), o s3011 come scenario.
+   Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
+1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
+   simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
+2. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
+3. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
@@ -90,7 +89,8 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete; test in
   `tests/test_net_mcts.py`. `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`.
 - `riftbound/ai/coach.py`, `scenari.py` (+ `scripts/`): coach e scenari dei giudizi.
-- `scripts/diag/`: le misure (`handwritten_value.py`: base del bot).
+- `scripts/diag/`: le misure (`handwritten_value.py`: base del bot;
+  `opponent_turn.py` / `opponent_turn_check.py`: turno avversario, posizioni).
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
 - `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
   piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).
