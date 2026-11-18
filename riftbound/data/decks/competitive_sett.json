@@ -1,0 +1,106 @@
+{
+  "name": "Sett Kingpin",
+  "legend": "Sett The Boss",
+  "champion": "Sett Kingpin",
+  "runes": [
+    {
+      "domain": "BODY",
+      "count": 7
+    },
+    {
+      "domain": "ORDER",
+      "count": 5
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Monastery of Hirana"
+    },
+    {
+      "name": "Packed Amphitheater"
+    },
+    {
+      "name": "Valley of Idols"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Call to Glory",
+      "count": 3
+    },
+    {
+      "name": "Fiora Victorious",
+      "count": 3
+    },
+    {
+      "name": "First Mate",
+      "count": 3
+    },
+    {
+      "name": "Irresistible Faefolk",
+      "count": 3
+    },
+    {
+      "name": "Kinkou Initiate",
+      "count": 3
+    },
+    {
+      "name": "Pillaged Armory",
+      "count": 3
+    },
+    {
+      "name": "Pit Rookie",
+      "count": 3
+    },
+    {
+      "name": "Punch First",
+      "count": 3
+    },
+    {
+      "name": "Rampage",
+      "count": 3
+    },
+    {
+      "name": "Rengar Trophy Hunter",
+      "count": 3
+    },
+    {
+      "name": "Ruin Runner",
+      "count": 2
+    },
+    {
+      "name": "Showstopper",
+      "count": 3
+    },
+    {
+      "name": "Trifarian Captain",
+      "count": 3
+    },
+    {
+      "name": "Vi Peacekeeper",
+      "count": 1
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Decree of Strength",
+      "count": 2
+    },
+    {
+      "name": "Decree of Unity",
+      "count": 2
+    },
+    {
+      "name": "Repulse",
+      "count": 2
+    },
+    {
+      "name": "Sabotage",
+      "count": 2
+    },
+    {
+      "name": "Salvage",
+      "count": 2
+    }
+  ]
+}

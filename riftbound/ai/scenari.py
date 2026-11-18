@@ -19,6 +19,7 @@ Definizioni in `docs/bot/scenari.json`. Ogni scenario:
   first                        chi comincia ("A" / "B")
   human                        il posto dell'utente
   seed                         l'ordine del resto dei mazzi
+  swaps {"A","B"}              (facoltativo) cambi di sideboard, [esce, entra]
   hands {"A","B"}              le carte in ordine di pesca: le 4 iniziali, poi
                                una per pescata (in cima al mazzo)
   runes {"A","B"}              i domini delle rune in ordine di canalizzazione
@@ -29,6 +30,10 @@ Definizioni in `docs/bot/scenari.json`. Ogni scenario:
   human_from                   "any" (default): l'utente decide dalla prima
                                decisione dopo il copione; "main": dalla prima
                                del suo Main Phase (le altre intanto passano)
+  legend_used                  (facoltativo) true: quando l'utente prende il
+                               posto, le abilità "una volta per turno" della
+                               sua legend risultano già usate in quel turno
+                               (la stessa posizione, senza il trigger)
   expect                       com'è la posizione alla prima decisione
                                dell'utente (controllato dai test)
 """
@@ -88,6 +93,23 @@ def _stack_deck(player, names: list, sid: str) -> None:
     player.deck.cards = cards + list(reversed(picked))     # draw() pops the end
 
 
+def _swap(player, out_name: str, in_name: str, sid: str) -> None:
+    """A sideboard swap: one `out_name` of the Main Deck becomes `in_name`."""
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    i = next((k for k, c in enumerate(player.deck.cards) if c.name == out_name), None)
+    if i is None or in_name not in CARD_REGISTRY:
+        raise ScenarioError(f"{sid}: can't swap {out_name!r} for {in_name!r} in {player.name}'s deck")
+    player.deck.cards[i] = CARD_REGISTRY[in_name].instantiate()
+
+
+def _use_legend(gs, side: str) -> None:
+    """`side`'s legend: its "once each turn" abilities used this turn."""
+    legend = gs.legend_A if side == "A" else gs.legend_B
+    for i, e in enumerate(getattr(legend, "effects", None) or []):
+        if e.get("once_per_turn"):
+            gs.once_per_turn_used[(legend, i)] = gs.turn
+
+
 def _stack_runes(player, domains: list, sid: str) -> None:
     runes = list(player.rune_deck.runes)
     picked = []
@@ -110,6 +132,8 @@ def build_state(sc: dict):
                     bf_a=sc["battlefields"]["A"], bf_b=sc["battlefields"]["B"])
     for side in ("A", "B"):
         p = gs.get_player(side)
+        for out_name, in_name in (sc.get("swaps") or {}).get(side, []):
+            _swap(p, out_name, in_name, sc["id"])
         _stack_deck(p, sc["hands"][side], sc["id"])
         _stack_runes(p, sc["runes"][side], sc["id"])
     for side in ("A", "B"):
@@ -200,6 +224,8 @@ class ScriptedSeat:
         now = self.started or self.sc.get("human_from", "any") != "main" \
             or point == DecisionPoint.TURN_ACTION
         if self.human is not None and gs.turn == turn and not scripted and now:
+            if not self.started and self.sc.get("legend_used"):
+                _use_legend(gs, side)
             self.started = True
             return self.human(self, point, bf_idx)
         return _PASS

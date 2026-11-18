@@ -8,9 +8,9 @@ qui c'è quello che serve. Prima partita giocata il 17-18/11: lezioni in
 L'utente e Claude giocano insieme contro un amico (giocatore reale), su
 RiftAtlas, nel browser del PC dell'utente. L'amico sa che è un test con
 Claude. Mazzo dell'utente: Evelynn (`competitive_evelynn.json`). Mazzo
-dell'amico il 17/11: Sett (legend The Boss, campione Kingpin; Trifarian
-Captain, Call to Glory, Rengar, Rampage, Sabotage); le sue carte si leggono
-man mano (testo stampato: `riftbound/data/reference/piltover_archive.json`).
+dell'amico (Ksword) il 17/11: Sett, `competitive_sett.json` (la sua lista, con
+il sideboard); un altro mazzo si legge man mano (testo stampato:
+`riftbound/data/reference/piltover_archive.json`).
 
 Serve una sessione sul PC dell'utente (app Claude desktop, con Claude in
 Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.

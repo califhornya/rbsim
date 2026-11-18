@@ -129,7 +129,8 @@ finale della G3 in `docs/bot/partite/`. Giudizi dati dall'utente in chat:
   turno avversario poi si scarta 1). Senza risposte in mano, girarla per
   vedere una carta e cercare l'out, anche se il suo effetto non fa niente.
   Esempio: G3 turno 7. Sabotage rivela la mano (Punch First ×2, Rengar,
-  Hold 'Em, Rebuke) e toglie Rebuke, l'unica reazione; poi Rampage su Pyke
+  Hold 'Em, Rebuke) e ricicla Rebuke (Action: nel turno di lui si giocherebbe
+  solo in uno showdown); in mano nessuna reazione. Poi Rampage su Pyke
   a un campo dove l'utente ha altre unità e Bedeviling Stranger coperta.
   L'utente gira la Stranger (nessun bersaglio) solo per pescare: arriva
   Star-Crossed (scarta Hold 'Em), che rimanda in mano il Kingpin e la
@@ -175,5 +176,15 @@ girare la coperta. Se l'unità colpita è sacrificabile e la coperta non è a
 rischio, tenerla per uno showdown dopo può valere di più: rinasconderla costa
 1 potenza nel proprio turno e la carta torna utilizzabile solo dal turno dopo.
 
-Da fare: la coppia di scenari per G3 turno 7 in `scenari.json` (trigger di
-Evelynn disponibile / già usato), dai log dell'utente.
+Scenari da questa sezione (in `scenari.json`, si giocano sulla pagina):
+- S11a. G3 turno 7, ricostruito dal turno 1 con le mosse del log e il mazzo
+  di Ksword (`competitive_sett.json`, la sua lista del 18/11). Rampage in
+  catena (Kingpin 6 contro Pyke), Rebuke riciclata da Sabotage, Stranger
+  coperta, 3 energia aperta: cosa fai, prima di sapere cosa peschi?
+- S11b. La stessa posizione, con il trigger di Evelynn già usato nel turno
+  (girare la Stranger non fa pescare). La differenza tra le due risposte dice
+  quanto vale la pesca e quanto il resto.
+Nella G3 i due avevano cambiato carte dal sideboard: entrate Sabotage e
+Decree of Unity (Ksword) e Rebuke (utente); le uscite non si sanno, negli
+scenari escono Showstopper, Call to Glory e Switcheroo (conta solo per le
+carte nascoste nei mazzi).

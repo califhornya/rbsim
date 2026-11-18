@@ -25,10 +25,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - (Utente, 17/11) Il `Result` di una copia conta `units_played` e
   `spells_cast` dal punto di copia: lasciato (la ricerca usa il vincitore).
 - Flow: solo sconti di aura; altri modificatori §356.3-4 aperti (non nei mazzi).
-- Scelte nella ricerca: nodi per opzione con chiave (tipo, carta, descrizione),
-  non per indice; prior uguali tra le opzioni.
-- Scelte nascoste: decise quando la partita le chiede, rigiocando il tratto
-  dall'ultima decisione del turno (giornale nel motore).
+- Ricerca: un nodo per opzione con chiave (tipo, carta, descrizione); prior uguali.
+- Scelte nascoste: decise quando servono, rigiocando dall'ultima decisione.
 - (Utente, 13/11) La rete serve come avversario per allenarsi e per misurare
   mazzi e matchup. Tetto al training rispettato: run 4 non migliora → stop.
   Proposte in parole semplici (cosa faccio, quanto costa, cosa sapremo);
@@ -56,14 +54,16 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   ricerca non sbircia"). Suite 1836 passed, 6 skipped; golden identiche.
 - Risposte agli scenari (18/11): opzioni e mano a ogni mossa, mossa scartata,
   cosa farebbe cambiare scelta, esito a parte (`tests/test_scenari_answers.py`).
+- Mazzo Sett di Ksword (`competitive_sett.json`); scenari con cambi di
+  sideboard e `legend_used`; S11a/S11b dal log della G3 (`test_scenari_s11.py`).
 
 ## In corso
 Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
 peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. Coppia di scenari G3 turno 7 (trigger di Evelynn libero / già usato) dai
-   log in `docs/bot/partite/`: serve il mazzo Sett, lista di Ksword attesa il 19/11.
+0. S11a/S11b (G3 turno 7, trigger di Evelynn libero / già usato): pronti
+   sulla pagina degli scenari, in attesa delle risposte dell'utente.
    Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
    da provare sulla pagina vera in una sessione sul PC dell'utente.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
