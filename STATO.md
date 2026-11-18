@@ -63,8 +63,9 @@ Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
 peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. S11a/S11b (G3 turno 7, trigger di Evelynn libero / già usato): pronti
-   sulla pagina degli scenari, in attesa delle risposte dell'utente.
+0. Bot negli scenari (`docs/bot/BOT_SCENARI.md`): 3 difetti della ricerca
+   (mosse non provate = 0, reazioni con poche iterazioni, potenziamenti
+   "questo turno" contati) e 3 della valutazione (coperte, mano, punti).
    Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
    da provare sulla pagina vera in una sessione sul PC dell'utente.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
