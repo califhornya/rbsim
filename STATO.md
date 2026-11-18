@@ -57,8 +57,9 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## In corso
 RiftAtlas → bot (18/11 notte): `stati.py` (tavolo a ogni seq) e `posizione.py`
-(GameState + mossa del bot) funzionano su 82FAW. Da fare: lista di Ivern
-(`--mazzo-avversario`), uso dal vivo, posizioni come scenari.
+(GameState + mossa del bot) funzionano su 82FAW. Da fare (utente: dopo):
+bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (dove differisce:
+giudizi e scenari); lista di Ivern (`--mazzo-avversario`); uso dal vivo.
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
 (partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
 
