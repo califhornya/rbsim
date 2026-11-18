@@ -184,6 +184,12 @@ Scenari da questa sezione (in `scenari.json`, si giocano sulla pagina):
 - S11b. La stessa posizione, con il trigger di Evelynn già usato nel turno
   (girare la Stranger non fa pescare). La differenza tra le due risposte dice
   quanto vale la pesca e quanto il resto.
+- Risposte (18/11, in chat; in `risposte_scenari.jsonl`). S11a: gira la
+  Stranger "proprio perché ho 3 energy open": con l'energia per pagarla cerca
+  l'ultima spiaggia, Star-Crossed; senza, "è come aver perso". Vede la pesca
+  e poi decide. S11b: "non posso fare niente": passa e tiene la coperta (il
+  campo ha l'Innovator, non è a rischio). Quindi qui la Stranger girata vale
+  solo per la pesca, e la pesca vale perché c'è l'energia per l'out.
 Nella G3 i due avevano cambiato carte dal sideboard: entrate Sabotage e
 Decree of Unity (Ksword) e Rebuke (utente); le uscite non si sanno, negli
 scenari escono Showstopper, Call to Glory e Switcheroo (conta solo per le
