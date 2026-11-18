@@ -24,6 +24,15 @@ def table_value(obs) -> float:
     s += 0.03 * (len(obs.my_hand) - obs.opp_hand_count)
     return math.tanh(s)
 
+def _value():
+    """RBSIM_VALUE=judgment: the value from the user's judgments
+    (riftbound/ai/judgment_value.py); default: table_value."""
+    import os
+    if os.environ.get("RBSIM_VALUE") == "judgment":
+        from riftbound.ai.judgment_value import judgment_value
+        return judgment_value
+    return table_value
+
 def game(task):
     seed, opponent, seat, iters = task
     from riftbound.ai.net_mcts import NetGuidedMCTSAgent
@@ -31,13 +40,15 @@ def game(task):
     from riftbound.core.game_factory import build_game, make_agent
     from riftbound.core.loop import GameLoop
 
+    value = _value()
+
     class Heur(NetGuidedMCTSAgent):
         def _evaluate(self, clone, side, legal_ga):
             ts = [a.to_engine() for a in legal_ga]
             u = 1.0 / max(1, len(ts))
-            return {t: u for t in ts}, table_value(Observation.from_state(clone, side))
+            return {t: u for t in ts}, value(Observation.from_state(clone, side))
         def _net_value(self, clone, side):
-            return table_value(Observation.from_state(clone, side))
+            return value(Observation.from_state(clone, side))
         _value_only = _net_value
         def _play(self, root, side, point=None):
             import os
@@ -66,6 +77,16 @@ def game(task):
     if opponent == "random":
         from riftbound.ai.search.random_agent import RandomAgent
         them.agent = RandomAgent(them, random.Random(seed))
+    elif opponent == "table":
+        # The same search with table_value: the judgments' value head to head.
+        class Table(Heur):
+            def _evaluate(self, clone, side, legal_ga):
+                ts = [a.to_engine() for a in legal_ga]
+                return {t: 1.0 / max(1, len(ts)) for t in ts}, table_value(Observation.from_state(clone, side))
+            def _net_value(self, clone, side):
+                return table_value(Observation.from_state(clone, side))
+            _value_only = _net_value
+        them.agent = Table(them, None, iterations=iters, rng=random.Random(seed + 1), backup="best")
     else:
         them.agent = make_agent(opponent, them)
     res = GameLoop(gs).start()

@@ -7,6 +7,7 @@ end of that turn. Printed: the bot's moves with their visits, and the position
 after the turn.
 
     PYTHONPATH=. python scripts/diag/scenari_bot.py S11a,S11b,S8 100 3   # ids, iterations, seeds
+    RBSIM_VALUE=judgment PYTHONPATH=. python scripts/diag/scenari_bot.py ...   # the judgments' value
 """
 import random
 import sys
@@ -14,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from handwritten_value import table_value  # noqa: E402
+from handwritten_value import _value  # noqa: E402
 
 from riftbound.ai.coach import action_info  # noqa: E402
 from riftbound.ai.net_mcts import NetGuidedMCTSAgent  # noqa: E402
@@ -26,16 +27,19 @@ from riftbound.core.decisions import DecisionPoint, Observation  # noqa: E402
 from riftbound.core.game_factory import make_agent  # noqa: E402
 from riftbound.core.loop import GameLoop  # noqa: E402
 
+VALUE = _value()
+
 
 class Bot(NetGuidedMCTSAgent):
-    """The search with the hand-written value and uniform priors (as the baseline)."""
+    """The search with the hand-written value (or, with RBSIM_VALUE=judgment,
+    the value from the user's judgments) and uniform priors, as the baseline."""
 
     def _evaluate(self, clone, side, legal_ga):
         ts = [a.to_engine() for a in legal_ga]
-        return {t: 1.0 / max(1, len(ts)) for t in ts}, table_value(Observation.from_state(clone, side))
+        return {t: 1.0 / max(1, len(ts)) for t in ts}, VALUE(Observation.from_state(clone, side))
 
     def _net_value(self, clone, side):
-        return table_value(Observation.from_state(clone, side))
+        return VALUE(Observation.from_state(clone, side))
 
     _value_only = _net_value
 
