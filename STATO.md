@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 sera (rete: divisione, mano e trigger di Evelynn corretti prima del run).
+Aggiornato: 2026-11-18 notte (partita dal vivo contro Ivern registrata; G16-G23).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -47,13 +47,13 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   corrette (`tests/audit/test_audit_copies.py`), 28 golden identiche.
 - Partite dal vivo su RiftAtlas (17-18/11): partita 1 giocata da Claude
   (persa), BO3 dall'utente. GIUDIZI G8-G15; checklist e note in PARTITA_LIVE.
-- PR #32 (18/11): determinize tiene le carte note e non dipende dall'ordine
-  nascosto (`tests/test_hidden_info.py`); tre correzioni della ricerca (bot
-  0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
-  (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
-- Ricerca che gioca anche il turno avversario (`docs/bot/TURNO_AVVERSARIO.md`):
-  contro il bot #32 **0,44 ± 0,05** (100 coppie, 0,4 s), più debole. Prevedere
-  aiuta in s3012 t7 (Zed difende BF0: 0,92 contro 0,47) e s3011 (`posizioni/`).
+  18/11 notte: contro Ivern (flamingo, stanza 82FAW), interrotta al turno 10
+  sul 5-4; G16-G23; registrazione e log in `docs/bot/partite/`.
+- PR #32 (18/11): determinize tiene le carte note (`tests/test_hidden_info.py`);
+  ricerca corretta (bot 0,58 → 0,80 contro simple_trade); risposte S6-S9,
+  S11a/b (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
+- Ricerca col turno avversario (`docs/bot/TURNO_AVVERSARIO.md`): 0,44 ± 0,05
+  contro il bot #32, più debole; aiuta in s3012 t7 e s3011 (`posizioni/`).
 
 ## In corso
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
@@ -69,11 +69,11 @@ con divisione, mano→mossa e trigger di Evelynn corretti (`tests/test_bootstrap
    delle simulazioni sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
    non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
    se passa, self-play da `net_boot.pt` (lanciatore da preparare).
-   Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
+   Registratore RiftAtlas usato nella 82FAW (nessun buco). Da fare: parser JSON →
+   posizione del motore (bot sulle posizioni vive); `avversarioScoperto` escluda le rivelate.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
-2. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
-3. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
+2. Piano v2 (fasi 0, 2-6, D59-D65) dopo il bot, se l'utente decide. Possono aspettare: training, sideboard, tempi, carte fuori dai mazzi.
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
 ## File principali

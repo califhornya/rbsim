@@ -1,0 +1,174 @@
+# Partita dal vivo 18/11 sera, stanza 82FAW (RiftAtlas)
+
+Evelynn (caarati, consigli di Claude) contro Ivern (flamingo). G1 di una BO3,
+interrotta al turno 10 sul 5-4 per noi (l'utente non aveva più tempo).
+Fonte: `riftatlas_82FAW_ivern_g1.json` (registratore, 308 messaggi, nessun buco).
+Log del simulatore in ordine, con il numero della modifica (seq).
+
+- [1] 20:23 flamingo locked in a battlefield.
+- [2] 20:24 Both battlefields are locked. Roll a d20 to decide first player.
+- [2] 20:24 caarati locked in a battlefield.
+- [3] 20:24 flamingo must choose who starts. Both players draw 4 cards once mulligan begins.
+- [3] 20:24 flamingo wins initiative (15 vs 17) and decides who plays first.
+- [3] 20:24 caarati rolled 15. flamingo rolled 17.
+- [4] 20:24 flamingo chose flamingo to take the first turn. Both players now mulligan up to 2 cards.
+- [5] 20:25 flamingo finalized mulligan (0 recycled, 0 redrawn).
+- [6] 20:27 Both mulligans are complete. Starting the game.
+- [6] 20:27 caarati finalized mulligan (1 recycled, 1 redrawn).
+- [7] 20:29 flamingo ended beginning phase.
+- [8] 20:30 flamingo paid 2E — Exhaust 2.
+- [9] 20:30 flamingo played Stalwart Poro from hand to base.
+- [10] 20:30 flamingo ended their turn.
+- [11] 20:31 caarati played Reckless Innovator from hand to base.
+- [12] 20:31 caarati exhausted 1 Chaos rune.
+- [13] 20:31 caarati exhausted 1 Body rune.
+- [14] 20:31 caarati exhausted 1 Body rune.
+- [15] 20:31 caarati ended their turn.
+- [16] 20:31 flamingo ended beginning phase.
+- [17] 20:32 flamingo moved Stalwart Poro to Bandle Scouts' Academy.
+- [18] 20:32 flamingo passed focus at Bandle Scouts' Academy.
+- [19] 20:33 caarati passed focus at Bandle Scouts' Academy.
+- [20] 20:33 flamingo conquered Bandle Scouts' Academy and scored 1.
+- [21] 20:33 flamingo exhausted Ivern, Green Father.
+- [22] 20:33 flamingo replaced Bandle Scouts' Academy with Brush.
+- [25] 20:33 flamingo paid 3E — Exhaust 3.
+- [26] 20:33 flamingo played Iridescent Avian from hand to base.
+- [27] 20:33 flamingo ended their turn.
+- [28] 20:40 caarati moved Reckless Innovator to Forbidding Waste.
+- [29] 20:40 caarati played Gold token to base.
+- [30] 20:40 caarati passed focus at Forbidding Waste.
+- [31] 20:40 flamingo ended showdown responses at Forbidding Waste.
+- [32] 20:41 caarati conquered Forbidding Waste and scored 1.
+- [33] 20:41 caarati revealed Momentary Companion in their hand.
+- [34] 20:41 caarati played Gutter Guardian from hand to Forbidding Waste.
+- [35] 20:41 Approved Gutter Guardian.
+- [36] 20:41 caarati exhausted 1 Chaos rune.
+- [37] 20:41 caarati exhausted 1 Body rune.
+- [38] 20:41 caarati exhausted 1 Body rune.
+- [39] 20:42 Chain resolved: Gutter Guardian.
+- [40] 20:42 caarati adjusted floating power to 1.
+- [42] 20:42 caarati put a hidden card to Forbidding Waste.
+- [43] 20:42 caarati adjusted floating power to 0.
+- [44] 20:42 caarati hid Momentary Companion in their hand.
+- [45] 20:42 caarati ended their turn.
+- [46] 20:42 flamingo scored 1 at turn start. Score: 1 → 2.
+- [46] 20:42 flamingo ended beginning phase.
+- [47] 20:43 flamingo paid 5E / 1P — Exhaust 5 · Recycle 1 Calm rune.
+- [48] 20:43 flamingo moved Ivern, Nurturer to base.
+- [49] 20:43 Approved Ivern, Nurturer.
+- [50] 20:43 flamingo looked at top 1 card(s) of their deck.
+- [51] 20:43 flamingo looked at top 2 card(s) of their deck.
+- [52] 20:43 flamingo looked at top 3 card(s) of their deck.
+- [53] 20:43 flamingo revealed Trusty Ramhound from looked-at deck cards.
+- [54] 20:43 flamingo moved Trusty Ramhound from deck to hand.
+- [55] 20:43 flamingo recycled 2 looked-at cards to bottom of deck in random order.
+- [56] 20:43 flamingo applied buff to Ivern, Nurturer.
+- [58] 20:43 Chain resolved: Ivern, Nurturer.
+- [59] 20:43 flamingo exhausted Iridescent Avian.
+- [60] 20:43 flamingo applied buff to Stalwart Poro.
+- [61] 20:43 flamingo moved Stalwart Poro to base.
+- [62] 20:44 caarati scored 1 at turn start. Score: 1 → 2.
+- [62] 20:44 flamingo ended their turn.
+- [63] 20:47 caarati played Boots of Swiftness from hand to base.
+- [64] 20:47 caarati exhausted 1 Chaos rune.
+- [65] 20:47 caarati exhausted 1 Chaos rune.
+- [66] 20:47 caarati exhausted 1 Chaos rune.
+- [67] 20:47 caarati moved Gold from base to trash.
+- [68] 20:47 caarati adjusted floating power to 1.
+- [69] 20:47 caarati equipped Boots of Swiftness to Reckless Innovator.
+- [70] 20:47 caarati adjusted floating power to 0.
+- [71] 20:48 Played Rampage from hand.
+- [72] 20:48 caarati exhausted Reckless Innovator.
+- [73] 20:48 caarati readied Reckless Innovator.
+- [76] 20:49 caarati exhausted 1 Body rune.
+- [77] 20:49 caarati exhausted 1 Body rune.
+- [78] 20:49 caarati exhausted 1 Chaos rune.
+- [79] 20:49 caarati recycled 1 Body rune.
+- [80] 20:49 flamingo paid 1E / 1P — Exhaust 1 · Recycle 1 Calm rune.
+- [81] 20:49 Played Defy from hand.
+- [82] 20:50 Approved Defy.
+- [83] 20:50 Chain resolved: Defy.
+- [84] 20:50 Approved Rampage.
+- [85] 20:51 Chain resolved: Rampage.
+- [86] 20:52 caarati moved Reckless Innovator to Bandle Scouts' Academy.
+- [87] 20:52 caarati played Gold token to base.
+- [88] 20:52 caarati passed focus at Bandle Scouts' Academy.
+- [89] 20:52 flamingo ended showdown responses at Bandle Scouts' Academy.
+- [90] 20:52 caarati conquered Bandle Scouts' Academy and scored 1.
+- [91] 20:53 caarati restored Bandle Scouts' Academy.
+- [92] 20:53 caarati ended their turn.
+- [93] 20:55 caarati rewound to before their last action.
+- [94] 20:56 caarati recycled 1 Chaos rune.
+- [95] 20:56 caarati adjusted floating power to 1.
+- [97] 20:56 caarati put a hidden card to Bandle Scouts' Academy.
+- [98] 20:56 caarati adjusted floating power to 0.
+- [99] 20:56 caarati played Gold token to base.
+- [100] 20:56 caarati ended their turn.
+- [101] 20:56 flamingo ended beginning phase.
+- [104] 20:57 flamingo exhausted Iridescent Avian.
+- [109] 20:57 flamingo moved Ivern, Nurturer to Forbidding Waste.
+- [110] 20:57 flamingo passed focus at Forbidding Waste.
+- [111] 20:58 caarati revealed Bedeviling Stranger on the board.
+- [112] 20:58 Approved Bedeviling Stranger.
+- [114] 20:58 Approved Evelynn, Agony's Embrace.
+- [115] 20:59 Chain resolved: Evelynn, Agony's Embrace.
+- [116] 20:59 caarati drew 1 card.
+- [117] 20:59 caarati moved Bedeviling Stranger from hand to trash.
+- [118] 21:00 Approved Bedeviling Stranger.
+- [119] 21:01 Chain resolved: Bedeviling Stranger.
+- [120] 21:01 caarati passed focus at Forbidding Waste.
+- [121] 21:01 flamingo conquered Forbidding Waste and scored 1.
+- [122] 21:02 caarati moved Gutter Guardian from Forbidding Waste to trash.
+- [123] 21:02 caarati moved Bedeviling Stranger from Forbidding Waste to trash.
+- [124] 21:02 flamingo exhausted Ivern, Green Father.
+- [125] 21:02 flamingo replaced Forbidding Waste with Brush.
+- [127] 21:02 flamingo moved Stalwart Poro to Forbidding Waste.
+- [128] 21:02 flamingo paid 2E — Exhaust 2.
+- [129] 21:02 flamingo played Mutated Mouser from hand to Forbidding Waste.
+- [134] 21:02 flamingo paid 2E — Exhaust 2.
+- [135] 21:02 flamingo played Trusty Ramhound from hand to Forbidding Waste.
+- [140] 21:02 caarati scored 1 at turn start. Score: 3 → 4.
+- [140] 21:02 flamingo ended their turn.
+- [141] 21:05 caarati revealed Momentary Companion on the board.
+- [142] 21:05 Approved Momentary Companion.
+- [143] 21:05 Chain resolved: Momentary Companion.
+- [144] 21:05 caarati drew 1 card.
+- [145] 21:06 caarati moved Gold from base to trash.
+- [146] 21:06 caarati adjusted floating power to 1.
+- [148] 21:06 caarati put a hidden card to Bandle Scouts' Academy.
+- [149] 21:06 caarati adjusted floating power to 0.
+- [150] 21:06 caarati played Gold token to base.
+- [151] 21:06 caarati played K'Sante, Courageous from hand to Bandle Scouts' Academy.
+- [152] 21:07 caarati exhausted 1 Body rune.
+- [153] 21:07 caarati exhausted 1 Body rune.
+- [154] 21:07 caarati exhausted 1 Body rune.
+- [155] 21:07 caarati exhausted 1 Chaos rune.
+- [156] 21:07 caarati exhausted 1 Chaos rune.
+- [157] 21:07 caarati ended their turn.
+- [159] 21:07 flamingo looked at top 1 card(s) of their deck.
+- [160] 21:07 flamingo looked at top 2 card(s) of their deck.
+- [161] 21:07 flamingo looked at top 3 card(s) of their deck.
+- [162] 21:07 flamingo revealed Stalwart Poro from looked-at deck cards.
+- [163] 21:07 flamingo moved Stalwart Poro from deck to hand.
+- [164] 21:07 flamingo recycled 2 looked-at cards to bottom of deck in random order.
+- [165] 21:07 flamingo applied buff to Mutated Mouser.
+- [167] 21:07 Chain resolved: Ivern, Nurturer.
+- [168] 21:07 flamingo scored 1 at turn start. Score: 3 → 4.
+- [168] 21:07 flamingo ended beginning phase.
+- [169] 21:08 flamingo paid 5E / 1P — Exhaust 5 · Recycle 1 Calm rune.
+- [170] 21:08 flamingo played Ivern, Nurturer from hand to Forbidding Waste.
+- [171] 21:08 flamingo looked at top 1 card(s) of their deck.
+- [172] 21:08 flamingo looked at top 2 card(s) of their deck.
+- [173] 21:08 flamingo looked at top 3 card(s) of their deck.
+- [174] 21:08 flamingo revealed Disarming Rake from looked-at deck cards.
+- [175] 21:08 Approved Ivern, Nurturer.
+- [176] 21:08 flamingo moved Disarming Rake from deck to hand.
+- [177] 21:08 flamingo recycled 2 looked-at cards to bottom of deck in random order.
+- [178] 21:08 Chain resolved: Ivern, Nurturer.
+- [179] 21:08 flamingo exhausted Iridescent Avian.
+- [180] 21:08 flamingo applied buff to Ivern, Nurturer.
+- [183] 21:08 flamingo paid 2E — Exhaust 2.
+- [184] 21:08 flamingo played Stalwart Poro from hand to Forbidding Waste.
+- [187] 21:09 caarati scored 1 at turn start. Score: 4 → 5.
+- [187] 21:09 flamingo ended their turn.
+- [188] 21:11 caarati channeled 1 rune.

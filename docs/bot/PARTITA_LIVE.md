@@ -12,8 +12,9 @@ dell'amico (Ksword) il 17/11: Sett, `competitive_sett.json` (la sua lista, con
 il sideboard); un altro mazzo si legge man mano (testo stampato:
 `riftbound/data/reference/piltover_archive.json`).
 
-Serve una sessione sul PC dell'utente (app Claude desktop, con Claude in
-Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.
+Serve una sessione sul PC o sul Mac dell'utente (app Claude desktop, con
+Claude in Chrome: lì l'utente è già collegato a RiftAtlas), aperta nella
+cartella rbsim aggiornata.
 
 ## Come si gioca (concordato)
 1. Gioca l'utente. Quando chiede, Claude legge il tavolo e propone la mossa
@@ -93,16 +94,37 @@ Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.
 - Showdown: Pass (W), End (Q). Catena: Approve (A), Resolve (S).
 - Non chiudere dialoghi né cliccare mentre l'utente ha il controllo della
   scheda. Per importare un mazzo: la lista della repo, non quelle salvate.
+- (Utente, 18/11) Ogni carta si paga con le rune PRIMA di giocarla (esaurire o
+  riciclare, poi trascinare la carta). Il trigger della legend (pesca di
+  Evelynn) va trascinato a mano sulla catena prima di pescare: il simulatore
+  a volte lo mette da solo, a volte no.
+- Bersagli di una carta in catena: icona a freccia in alto a destra della carta
+  in catena, poi clic sul bersaglio (un clic sul tavolo senza modalità
+  bersaglio esaurisce/prepara la carta). Danni del combattimento e trigger
+  (Gold di Innovator e Academy) vanno applicati a mano; carte morte: clic
+  destro sul tavolo; scarto dalla mano: trascinarla sul cimitero.
 
 ## Registrazione
-Bozza del nuovo registratore: `scripts/riftatlas/registratore.js` (18/11,
-scritta senza poter aprire RiftAtlas; provata solo su una pagina finta). Da
-provare all'inizio della prossima sessione, prima della partita: capire se la
-partita viaggia su WebSocket e cosa contengono i messaggi (lo stato del tavolo
-già strutturato sarebbe la fonte migliore); se no, istantanea del tavolo
-dall'HTML. Poi uno script in repo che dal file esportato ricostruisce le
-posizioni (per gli scenari).
-Il pannello del log tiene solo gli ultimi ~5 turni. Registratore usato il
+Registratore: `scripts/riftatlas/registratore.js`, provato il 18/11 sera da
+Claude in Chrome su due Solo Room (Goldfish): 7 azioni su 7, nessun buco,
+niente token nel file. Come si usa:
+1. Aprire la stanza (Host Room / Join). La pagina `/game` si ricarica: il
+   registratore incollato nella lobby si perde.
+2. Incollarlo nella scheda `/game` subito, PRIMA di scegliere i campi: lo
+   stato intero arriva con gli snapshot della preparazione.
+3. `__rbRec.status()`: `agganciato` true entro ~20 s (primo ping);
+   `buchi` [] ; `avversarioScoperto` 0 (se no, la mano dell'amico arriva
+   scoperta: non si guarda il file, regola 4).
+4. A fine partita `__rbRec.export()` scarica il JSON → `docs/bot/partite/`.
+La partita viaggia su un WebSocket (PartyKit, `.../parties/match/<STANZA>`):
+`authoritative_snapshot` (stato intero), `authoritative_patch_commit`
+(modifiche numerate: zone, campi del giocatore, log), `action_intent` (le
+nostre azioni). Il server copre già le zone nascoste (`isPlaceholder`). Il
+socket dell'account e `resume_game` mandano il token: il registratore salva
+solo i tipi in elenco. Da provare nella partita vera: che la mano dell'amico
+arrivi coperta. Il replay di RiftAtlas non basta: "Replay expired" già il
+giorno dopo. Manca lo script che dal JSON ricostruisce le posizioni.
+Il pannello del log (riserva) tiene solo gli ultimi ~5 turni. Registratore usato il
 17/11: un MutationObserver su `document.body` che legge il pannello, lo
 divide in blocchi per "TURN n·NOME" e li salva per stanza (riga "ROOM: XXXXX";
 ogni partita di una BO3 ha la sua stanza). Per estrarre il testo: il dump in
