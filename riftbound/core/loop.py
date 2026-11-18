@@ -1167,7 +1167,7 @@ class GameLoop:
             for c in back:
                 if c in actor.banished:
                     actor.banished.remove(c)
-                    actor.hand.append(c)
+                    actor.to_hand(c)
         # The scoring player's legends ("When you conquer, ready me": Sett).
         for legend_unit in self._legend_units(side):
             self._resolve_triggered_effects(legend_unit.card, trigger, bf, actor, opponent,
@@ -3935,7 +3935,7 @@ class GameLoop:
                     ap.base_gear.extend(target.gear)
                     target.gear = []
                     if not target.is_token:
-                        ap.hand.append(target.card)
+                        ap.to_hand(target.card)
                     self._fire_leaves_board(target.card, side, where[1] or self.gs.battlefields[0])
             # "... no more Energy and no more Power than the killed unit"
             # (Heedless Resurrection) reads the unit this cost took.
