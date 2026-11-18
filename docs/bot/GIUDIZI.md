@@ -115,6 +115,10 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   carte. Con 1 energia aperta Hold 'Em costa 1 (nel suo turno la Companion
   girata conta come unità giocata su un campo): virtualmente 12. "Se
   l'avversario è bravo mi rispetta e non viene lì dentro."
+- Risposta a S7 (18/11, in chat): "gioco sempre Faefolk, carta fortissima":
+  mette paura e pressione, può tirare via le sue unità dal campo che lei
+  vuole tenere, e si concatena con Kha'Zix (un nemico portato da solo dove
+  c'è Kha'Zix gli dà +2 e 2 XP).
 - Risposta a S8 (18/11, in chat): gira Momentary Companion in risposta al
   trigger di Kha'Zix: 7 contro 6 (Pyke 3 + Companion 4, Kha'Zix 4 + 2). Il +2
   lui lo prende comunque (la condizione si guarda quando si innesca), quindi
