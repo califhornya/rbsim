@@ -36,7 +36,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   ripetute (avviso); Might dal motore, il segnalino dei giocatori solo confronto.
 - (gptAstra, 18/11) Rete: seed disgiunti 1.600 / 200 / 200 (allenare, epoca,
   test), Evelynn metà per lato. (Utente) Mosse della mano dalla carta; "once"
-  della leggenda visibile.
+  della leggenda visibile. (19/11) Domande a GPTAstra in chat, mai nel repo.
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
   determinize ordina il pool prima di mescolare (dipende solo da cosa è nascosto).
 
