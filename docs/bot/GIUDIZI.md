@@ -108,6 +108,11 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   li tieni? Perché? E il resto del turno? (Turno 7 della partita.)
 - S10. Domanda sulle carte, non sulle posizioni: con Evelynn, quali carte di
   Kha'Zix temi di più e come giochi intorno? E con Kha'Zix, quali di Evelynn?
+- Risposta a S8 (18/11, in chat): gira Momentary Companion in risposta al
+  trigger di Kha'Zix: 7 contro 6 (Pyke 3 + Companion 4, Kha'Zix 4 + 2). Il +2
+  lui lo prende comunque (la condizione si guarda quando si innesca), quindi
+  ora o nello showdown cambia poco. Poi aspetta la sua mossa, tenendo
+  Star-Crossed con le rune aperte e la pesca di Evelynn: "non sto male".
 
 ## Partite dal vivo su RiftAtlas (17-18/11)
 Evelynn contro Sett (legend The Boss, Kingpin). Partita 1 (stanza HN5VE):
