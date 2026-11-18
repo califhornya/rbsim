@@ -61,8 +61,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   0,47 su 60 mondi nuovi; anche s3011 (0,63 / 0,42). `docs/bot/posizioni/`.
 
 ## In corso
-Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
-peggiore): rete debole. Dettagli in `docs/archivio/`.
+Niente. Training fermo dal 13/11: rete debole (run 3: 0,72; `docs/archivio/`).
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
