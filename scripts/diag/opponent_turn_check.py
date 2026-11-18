@@ -11,6 +11,7 @@ turn on both players are the reference (ITERS, fixed: a world then plays the
 same way in both arms unless this turn differed).
 
   python scripts/diag/opponent_turn_check.py FILE.pkl [K] [ITERS] [RATIO]
+  (WORLD0=N: worlds N..N+K-1 instead of 0..K-1)
   python scripts/diag/opponent_turn_check.py --show FILE.pkl
 """
 from __future__ import annotations
@@ -85,15 +86,16 @@ def play_on(task):
     from riftbound.core.loop import GameLoop
     from riftbound.core.state import determinize
     path, arm, k, iters, ratio = task
+    w = k + int(os.environ.get("WORLD0", "0"))  # another set of worlds
     d = pickle.load(open(path, "rb"))
     side = d["side"]
     gs = d["state"].clone()
-    gs.rng = random.Random(10_000 + k)
+    gs.rng = random.Random(10_000 + w)
     determinize(gs, observer=side, rng=gs.rng)
     other = gs.other(side)
-    mover = TurnArm(gs.get_player(side), iters, random.Random(20_000 + k), arm == "reply", ratio, gs.turn)
+    mover = TurnArm(gs.get_player(side), iters, random.Random(20_000 + w), arm == "reply", ratio, gs.turn)
     gs.get_player(side).agent = mover
-    gs.get_player(other).agent = Fixed(gs.get_player(other), iters, random.Random(30_000 + k))
+    gs.get_player(other).agent = Fixed(gs.get_player(other), iters, random.Random(30_000 + w))
     res = GameLoop(gs).resume_to_completion()
     return arm, k, 1.0 if res.winner == side else 0.5 if res.winner == "DRAW" else 0.0, mover.first
 
