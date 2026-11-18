@@ -46,7 +46,6 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 - Audit, passaggi 1-7: D1–D58, Q1–Q4 e Q6; dettagli in AUDIT.md.
 - Ricerca (`6ebd0e7`): fa tutte le scelte del suo giocatore (68,8% contro la
   vecchia). Training: `backup="best"`, politica dai Q, `--init` (`fd01c63`+).
-- Pulizia (17/11, PR #28): storico in `docs/archivio/`, tolti i file morti.
 - Revisione esterna (17/11): 7 rapporti in `docs/audit/revisione_esterna/`,
   D59-D68 in AUDIT (ottavo passaggio); la suite esegue 200/212 effetti.
 - Fase 1 del piano v2 (17/11): D66-D68 corrette (le memorie salvano l'oggetto,
@@ -73,7 +72,7 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    simple_trade, 0,86 contro random (prima 0,59 e 0,85: nel rumore, ±0,035).
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
-3. Script di training puntano ancora a Kai'Sa/Kennen: spostarli se si riallena.
+3. Training: script ancora su Kai'Sa/Kennen e lanciatore da rifare, se si riallena.
 4. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 5. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
