@@ -699,15 +699,16 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
       {
         "name": "...",
         "legend": "Vi",          # optional legend name (identity card)
-        "champion": "Vi Destructive",  # chosen champion (goes to Champion Zone, NOT in cards list)
+        "champion": "Vi Destructive",  # chosen champion (goes to the Champion Zone)
         "runes": [{"domain": "FURY", "count": 6}, ...],
-        "cards": [{"name": "...", "count": N}, ...],   # exactly 39 cards
+        "cards": [{"name": "...", "count": N}, ...],   # at least 39 cards, the champion's copies included
         "sideboard": [{"name": "...", "count": N}, ...],  # optional, ≤10 cards
         "sideboard_plans": {"<opponent legend>": {"in": {...}, "out": {...}}}  # optional
       }
     Rules enforced: ≥39 main deck cards, ≤3 copies per named card (main deck and
-    sideboard combined, Tournament Rules 403.3), champion not in cards list,
-    sideboard ≤10 cards (601.1.c.1). The sideboard is read by `load_sideboard_json`.
+    sideboard combined, Tournament Rules 403.3), the Chosen Champion included
+    (§103.3.b.1: the champion and up to 2 more copies), sideboard ≤10 cards
+    (601.1.c.1). The sideboard is read by `load_sideboard_json`.
     Banned cards (BANNED_CARDS) only raise a warning, so older decks still load.
     """
     with path.open("r", encoding="utf-8") as fh:
@@ -745,16 +746,13 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         battlefield_specs.append(bf_spec)
 
     # --- Main deck cards ---
+    # The Chosen Champion is one of the 3 copies of its name (§103.3.b.1): the
+    # cards list may hold up to 2 more, played from hand like any unit.
     cards: list[CardSpec] = []
-    copy_counts: dict[str, int] = {}
+    copy_counts: dict[str, int] = {champion_name: 1} if champion_name else {}
     for entry in data.get("cards", []):
         name = str(entry.get("name", "")).strip()
         count = int(entry.get("count", 1))
-        if name == champion_name:
-            raise ValueError(
-                f"Champion '{champion_name}' must not appear in the cards list — "
-                "it starts in the Champion Zone."
-            )
         spec = CARD_REGISTRY.get(name)
         if spec is None:
             raise ValueError(f"Deck references unknown card '{name}'")
@@ -763,7 +761,9 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         copy_counts[name] = copy_counts.get(name, 0) + count
         if copy_counts[name] > 3:
             raise ValueError(
-                f"Deck has {copy_counts[name]} copies of '{name}' — maximum is 3."
+                f"Deck has {copy_counts[name]} copies of '{name}'"
+                + (" (the Chosen Champion included)" if name == champion_name else "")
+                + " — maximum is 3."
             )
         for _ in range(count):
             cards.append(spec)
@@ -781,7 +781,9 @@ def load_deck_json(path: Path) -> tuple[list[CardSpec], list[tuple[Domain, int]]
         if copy_counts[name] > 3:
             raise ValueError(
                 f"Deck has {copy_counts[name]} copies of '{name}' across main deck "
-                "and sideboard — maximum is 3."
+                "and sideboard"
+                + (", the Chosen Champion included" if name == champion_name else "")
+                + " — maximum is 3."
             )
 
     # --- Runes ---
