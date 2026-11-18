@@ -37,6 +37,7 @@ W = {
     "hidden": 0.15,       # a face-down card
     "out": 0.05,          # a reaction/Action the open runes pay for, up to 2
     "threat": 0.12,       # Faefolk on the board, Vex at a battlefield
+    "plan": 1,            # 0: points count linearly, as in the hand-written value
 }
 
 _OUT_KEYWORDS = ("REACTION", "ACTION", "AMBUSH")
@@ -47,6 +48,8 @@ def _m(u) -> int:
 
 
 def _points(p: int, plan, victory: int) -> float:
+    if not W["plan"]:
+        return float(p)
     if plan == "two" and p % 2 == 1 and p < victory:
         return p - (1 - W["odd"])
     if plan == "hold" and p == victory - 1:

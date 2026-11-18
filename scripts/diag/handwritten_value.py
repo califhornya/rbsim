@@ -29,8 +29,11 @@ def _value():
     (riftbound/ai/judgment_value.py); default: table_value."""
     import os
     if os.environ.get("RBSIM_VALUE") == "judgment":
-        from riftbound.ai.judgment_value import judgment_value
-        return judgment_value
+        # RBSIM_W='{"hidden": 0, ...}': other weights, to test one judgment at a time.
+        import json
+        from riftbound.ai import judgment_value as J
+        J.W.update(json.loads(os.environ.get("RBSIM_W", "{}")))
+        return J.judgment_value
     return table_value
 
 def game(task):
