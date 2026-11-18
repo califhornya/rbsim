@@ -23,7 +23,11 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**State (2026-11-17, eighth pass): 68 deviations found, 61 fixed, 7 open (D59-D65).**
+**State (2026-11-19, ninth pass): 70 deviations found, 63 fixed, 7 open (D59-D65).**
+The ninth pass is the Chosen Champion's copies (D69-D70), met with 82FAW's
+Ivern list on RiftAtlas: the deck now loads as `competitive_ivern.json`.
+Red tests first; golden games identical. Suite: 1860 passed, 5 skipped, no xfail.
+Before it, (2026-11-17, eighth pass): 68 found, 61 fixed, 7 open (D59-D65).
 The eighth pass is an external review of the engine (reports in
 `docs/audit/revisione_esterna/`, checked in this repository as its section
 says): D59-D65 are open and, unlike earlier passes, have no test yet; the
@@ -122,6 +126,8 @@ said.
 | D66 | A copy of the game forgets once-per-turn uses (`once_per_turn_used` keyed by `id()`) | search copies | 3 of 3,123 copy points (Pyke Returned); Black Market constructed | fixed, `b6e6c76` |
 | D67 | A copy of the game forgets who attacks and defends (`combat_designated` keyed by `id()`) | search copies | 58 of 3,123 copy points (Kha'Zix Mutating Horror, Shadow Clone, Twilight Reveler, Kennen) | fixed, `d4bc220` |
 | D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | fixed, `ca16a51` |
+| D69 | The deck loader refuses the Chosen Champion in the Main Deck | §103.3.b.1 | not in these decks; 82FAW's Ivern list (champion + 1) didn't load | fixed, `e2d6b2e` |
+| D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -929,6 +935,40 @@ again in a copy after a second play from face down. Left as it is (owner,
 and `spells_cast` from the copy point (comment in `GameLoop.__init__`); no
 one reads them from a copy, the search reads the winner. Not rerun here: the
 reviewer's 3,123-point copy probe (its scripts are not in the repository).
+
+## Deviations, ninth pass (2026-11-19): copies of the Chosen Champion
+
+On RiftAtlas (2026-11-18) the opponent, 82FAW, played Ivern with Ivern,
+Nurturer as Chosen Champion and one more copy in the MainDeck
+(`docs/bot/partite/82FAW_ivern_lista.txt`). `load_deck_json` refused the
+list, so `scripts/deck_from_txt.py` couldn't import it. Read: §103.3.a.3
+(any Champion Unit with the champion's name is the Chosen Champion, wherever
+it is, "for any game rules and effects"), §103.3.b / §103.3.b.1 (3 copies,
+the champion included: the Volibear example). Tests in
+`tests/audit/test_audit_chosen_champion.py`, red first (`e6e7457`).
+
+- **D69.** "Champion ... must not appear in the cards list": the loader
+  allowed no copy of the champion in the Main Deck. Now the champion is 1 of
+  the 3 copies of its name, main deck and sideboard combined (Tournament
+  Rules 403.3): champion + 2 in the Main Deck loads, a fourth copy anywhere
+  is refused. 82FAW's list is `riftbound/data/decks/competitive_ivern.json`
+  (`deck_from_txt.py` on the .txt; a test keeps them equal).
+- **D70.** Hallowed Tomb: "you may return your Chosen Champion from your
+  trash to your Champion Zone if it is empty". It looked for the card chosen
+  at deckbuilding only: with the champion on the board and a copy in the
+  trash it returned nothing. Now the chosen card if it is in the trash, else
+  a copy, which becomes the card in the Champion Zone. In the printed text
+  of the corpus only two cards name the Chosen Champion or the Champion
+  Zone: Hallowed Tomb and Teemo, Swift Scout.
+- **Read, played and found right.** A copy drawn and played from hand is a
+  unit like any other: paid from hand, "when you play me" (Ivern: look at 3,
+  draw the Poro, buff), the champion stays in its zone (`champion_X_deployed`
+  untouched) and is still offered; then both on the board. In 20 whole games
+  Ivern-Evelynn (`simple_trade`) the copy is played from hand in 5. Teemo,
+  Swift Scout's "a Teemo unit you own ... from your Champion Zone or the
+  board" already takes copies on the board (it asks for the name, not the
+  champion). Sideboarding (`core/match.py`) swaps the champion with a copy by
+  name: unchanged.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
