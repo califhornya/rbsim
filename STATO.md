@@ -63,8 +63,8 @@ Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
 peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. Log dell'utente (partita 1, BO3, foto, patch) in `docs/bot/partite/`; poi
-   la coppia di scenari G3 turno 7 (trigger di Evelynn libero / già usato).
+0. Coppia di scenari G3 turno 7 (trigger di Evelynn libero / già usato) dai
+   log in `docs/bot/partite/`: serve un mazzo Sett (lista di Ksword o ricostruita).
    Se l'utente vuole: `risposte_scenari.jsonl` con alternative, preferenza,
    perché, esito a parte; registratore con tutta l'info pubblica.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non

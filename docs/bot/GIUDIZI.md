@@ -111,8 +111,8 @@ il turno e scrivi il perché; le risposte vanno in
 Evelynn contro Sett (legend The Boss, Kingpin). Partita 1 (stanza HN5VE):
 gioca Claude, l'utente corregge; persa, concessa sul 3-5 al turno 9. BO3:
 gioca l'utente; G1 (FC3TX) interrotta al turno 6, G2 (VZUFX) vinta, G3
-(TYASM) finita sul 7-7 al turno 15. I log turno per turno sono dell'utente
-(da mettere in `docs/bot/partite/`). Giudizi confermati dall'utente in chat:
+(TYASM) finita sul 7-7 al turno 15. Log turno per turno e foto del tavolo
+finale della G3 in `docs/bot/partite/`. Giudizi dati dall'utente in chat:
 
 - G8. Regole sempre dal motore o da `docs/rules/CORE_RULES.md`, mai a
   memoria. Errori fatti a memoria: Deploy si gioca su qualsiasi campo
@@ -126,17 +126,19 @@ gioca l'utente; G1 (FC3TX) interrotta al turno 6, G2 (VZUFX) vinta, G3
   (legend: la prima carta giocata da coperta nel turno fa pescare 1; nel
   turno avversario poi si scarta 1). Senza risposte in mano, girarla per
   vedere una carta e cercare l'out, anche se il suo effetto non fa niente.
-  Esempio: G3 turno 7. Sabotage toglie all'utente Rebuke, l'unica reazione;
-  poi Rampage su Pyke a un campo dove l'utente ha altre unità e Bedeviling
-  Stranger coperta. L'utente gira la Stranger (nessun bersaglio) solo per
-  pescare: arriva Star-Crossed, che rimanda in mano il Kingpin e la
-  Stranger stessa (rinascosta dopo). Rampage va a vuoto, Pyke resta.
+  Esempio: G3 turno 7. Sabotage rivela la mano (Punch First ×2, Rengar,
+  Hold 'Em, Rebuke) e toglie Rebuke, l'unica reazione; poi Rampage su Pyke
+  a un campo dove l'utente ha altre unità e Bedeviling Stranger coperta.
+  L'utente gira la Stranger (nessun bersaglio) solo per pescare: arriva
+  Star-Crossed (scarta Hold 'Em), che rimanda in mano il Kingpin e la
+  Stranger stessa, rinascosta al turno 8. Rampage va a vuoto, Pyke resta.
 - G10. Lo stesso in generale: una carta vale per tutto quello che mette in
   moto (trigger di altri pezzi, il corpo come bersaglio o costo, carte
   viste), non solo per il suo testo. Esempi: Fizz rigioca Star-Crossed e
   rimanda in mano se stesso (G3 turno 12); Innovator riportato in base solo
-  per il Gold (G3 turno 10); Trifarian Captain come ricerca nel mazzo; The Good Stuff
-  (Deploy) su un campo che cadrà vale comunque "scarta 1, pesca 3";
+  per il Gold (G3 turno 10); Trifarian Captain come ricerca nel mazzo; una
+  gear Deploy su un campo che cadrà vale comunque per l'effetto all'ingresso
+  (The Good Stuff: "scarta 1, pesca 3"; Pillaged Armory: il buff);
   Discipline (Reaction, +2 Might, pesca 1) giocata solo per pescare quando
   il +2 non serve, anche su un'unità nemica se è l'unico bersaglio.
 - G11. Una rimozione che lascia un campo senza tue unità fa perdere anche la
@@ -153,15 +155,18 @@ gioca l'utente; G1 (FC3TX) interrotta al turno 6, G2 (VZUFX) vinta, G3
   inizio turno), poi il resto; Gutter Guardian sempre con Show Off se c'è
   una carta Hidden da mostrare (partita 1 turno 9, tutte e due mancate).
 - G14. Le carte gratis dell'avversario contano: Call to Glory costa 0 se
-  spende un buff. Partita 1 turno 5: Innovator (3) mosso contro Trifarian
-  Captain buffato; Call to Glory gratis porta il Captain a 4 e Innovator
-  muore (in più Claude aveva dimenticato il Gold dell'Innovator mosso).
+  spende un buff, su qualsiasi sua unità. Un'unità piccola non è un
+  bersaglio sicuro se lui ha un buff in giro. Partita 1 turno 5: Innovator
+  (3) mosso contro Trifarian Captain (1, il suo buff già speso al turno 4);
+  Call to Glory gratis spendendo il buff del Kingpin: Captain a 4, Innovator
+  muore (e Claude aveva dimenticato il Gold dell'Innovator mosso).
 - G15. Prima togli la protezione, poi colpisci. G2 turno 5: Innovator dalla
-  base al campo del Kingpin (muovere esaurisce: Gold). Nello showdown, con
-  la priorità, Switcheroo tra Innovator e Kingpin: Kingpin 3, Innovator 8,
-  il campo si pulisce. The Boss salva il Kingpin in base, ancora 3 (gli
-  effetti "questo turno" seguono l'unità). Rampage lo uccide: Innovator,
-  ancora 8 e curato dalla cleanup del combattimento, fa il danno.
+  base alla Valley of Idols, contro Captain e Kingpin (muovere esaurisce:
+  Gold). Nello showdown, con la priorità, Switcheroo tra Innovator e
+  Kingpin: Kingpin 3, Innovator 8, il campo si pulisce. The Boss salva il
+  Kingpin in base (spende il suo buff, la legend si esaurisce), ma resta 3
+  (gli effetti "questo turno" seguono l'unità). Rampage lo uccide:
+  Innovator, ancora 8 e curato dalla cleanup del combattimento, fa il danno.
 
 Dalla revisione esterna (GPT, 18/11), da tenere: considerare anche quando NON
 girare la coperta. Se l'unità colpita è sacrificabile e la coperta non è a
