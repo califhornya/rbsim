@@ -37,3 +37,20 @@ Della valutazione (dai giudizi dell'utente):
    l'utente ne tiene una pronta.
 6. I punti contano in modo lineare (`TEORIA_PUNTI.md`); Faefolk e le altre
    minacce di S10 non hanno un valore proprio.
+
+## Dopo le tre correzioni della ricerca (18/11)
+Commit "Search: three faults found in the user's scenarios",
+`tests/test_search_fixes.py`. Negli scenari: S11a come l'utente (gira la
+Stranger, Star-Crossed sul Kingpin, Pyke vive); S9 non passa più (gioca
+Kha'Zix, usa la legend); niente più potenziamenti a vuoto (S6, S7, S8). Restano
+i difetti della valutazione: S11b gira la Stranger, S8 spende Gust e
+Star-Crossed, S7 non gioca Faefolk, S6 gioca la Companion scoperta e nasconde
+Evelynn invece di Pyke scoperto e Companion coperta.
+
+Misura base (`handwritten_value.py 200 100`, 400 partite, 20 minuti):
+contro simple_trade 0,80 (prima 0,58; Evelynn 0,82, Kha'Zix 0,78), contro
+random 0,97 (prima 0,86); turni vuoti 3% (prima 11%). Non misurato quale
+delle tre pesi di più. La stessa ricerca ha prodotto le partite del training
+della rete (13/11): è possibile che questi difetti spieghino parte della rete
+debole (da verificare, non misurato).
+

@@ -63,15 +63,15 @@ Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
 peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. Bot negli scenari (`docs/bot/BOT_SCENARI.md`): 3 difetti della ricerca
-   (mosse non provate = 0, reazioni con poche iterazioni, potenziamenti
-   "questo turno" contati) e 3 della valutazione (coperte, mano, punti).
+0. Valutazione dai giudizi (coperte, carte in mano, punti pari/dispari,
+   minacce): i 3 difetti della ricerca sono corretti (`BOT_SCENARI.md`); poi
+   di nuovo scenari S6-S11 e misura base.
    Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
    da provare sulla pagina vera in una sessione sul PC dell'utente.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
-   batte nettamente simple_trade o non gioca in modo sensato. Base dopo il fix
-   di determinize (`handwritten_value.py 200 100`, 12 min): 0,58 contro
-   simple_trade, 0,86 contro random (prima 0,59 e 0,85: nel rumore, ±0,035).
+   batte nettamente simple_trade o non gioca in modo sensato. Base dopo le 3
+   correzioni della ricerca (`handwritten_value.py 200 100`, 20 min): 0,80
+   contro simple_trade, 0,97 contro random (prima 0,58 e 0,86).
 2. Giudizi: `docs/bot/GIUDIZI.md`; S6-S11 risposte (18/11, in chat).
 3. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 4. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
