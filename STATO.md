@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-19 (PR #34-#36 integrate: D69-D70, RiftAtlas → bot, rete).
+Aggiornato: 2026-11-19 (risultati di boot1: stop alla misura 3).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -57,16 +57,18 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW,
 con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Da fare (dopo):
 bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (giudizi, scenari).
-Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
-(~2 ore), con le correzioni di #36 (`test_bootstrap_split`,
-`test_net_hand_and_legend`). In attesa di `runs/boot1/RISULTATI.txt`.
+Rete dal bot a mano (`docs/bot/RETE.md`, sezione "Risultati di boot1"):
+girata sul Mac il 18/11. Prevede chi vince meglio del valore a mano (0,466
+contro 0,559) ma contro il bot fa 0,46 ± 0,05 (serviva 0,55): stop per la
+regola concordata. `net_boot.pt` resta sul Mac (`runs/` non è nel repo).
+Proposta all'utente, in attesa: una misura di diagnosi prima di decidere.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`judgment_value.py`): non rende il bot più forte
    (0,49; più peso alla mano 0,65); turno avversario simulato 0,44, per media
-   o caso peggiore sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
-   non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
-   se passa, self-play da `net_boot.pt` (lanciatore da preparare).
+   o caso peggiore sbaglia 5-6 posizioni su 7. Deciso: la rete. boot1:
+   misura 1 passa, misura 3 no (0,46) → stop; decisione dell'utente su
+   diagnosi, self-play comunque, o tornare al bot a mano / piano v2.
    Registratore RiftAtlas usato nella 82FAW (nessun buco; `avversarioScoperto`
    esclude le carte rivelate).
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro

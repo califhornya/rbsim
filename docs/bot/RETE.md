@@ -79,3 +79,26 @@ carica in chat `runs/boot1/RISULTATI.txt` e `runs/boot1/net_boot.pt`.
 
 Provato qui in piccolo (20 partite, 3 epoche, misure ridotte): la catena
 gira dall'inizio alla fine.
+
+## Risultati di boot1 (Mac, 18/11 20:39): stop per la regola concordata
+2.000 partite, 28.919 esempi; tenuta l'epoca 13 (errore 0,447 sulle 200
+della scelta). Il bot contro se stesso: Evelynn vince 1.386 su 2.000 (0,69).
+1. Chi vince (test finale, errore quadratico, 1 = non sapere niente):
+   rete 0,466, valore a mano 0,559 (× 1,10: 0,553). Per fasi, turni 1-4 /
+   5-8 / 9+: rete 0,514 / 0,396 / 0,485, a mano 0,761 / 0,516 / 0,516.
+   **Passa**, meglio in ogni fase.
+2. Posizioni note: rete giusta 24/24 in s3012, s3090, s3076; 17/24 in s3048
+   (7 volte BF1 invece di BF0, 0,90 contro 0,97). Il bot a mano 24/24 in tutte.
+3. Contro il bot a mano, 100 coppie, 0,4 s per mossa: rete 0,460 ± 0,053
+   (95%), cioè tra 0,41 e 0,51: **non passa** (serviva 0,55), ma non si
+   distingue da 0,50. Con Evelynn 0,63 (il bot fa 0,69), con Kha'Zix 0,29
+   (0,31). Iterazioni per decisione: rete 94, bot 114.
+4. Contro simple_trade: rete 0,86, il bot a mano 0,80 (differenza dentro
+   l'errore di due misure da 200 partite).
+
+Lettura: la rete prevede meglio chi vince, ma gioca come il bot. La ricerca
+è la stessa (`backup="best"`); cambiano solo i prior (della rete invece che
+uguali) e il valore. Possibili cause, da misurare: i prior imitano il bot e
+spingono la ricerca sulle mosse che lui giocherebbe comunque; il valore è
+più preciso sulle posizioni delle partite del bot, non per forza nel
+distinguere le opzioni di una stessa decisione; il 18% di iterazioni in meno.
