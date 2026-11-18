@@ -40,8 +40,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## Fatto
 - Audit, passaggi 1-7: D1–D58, Q1–Q4 e Q6; dettagli in AUDIT.md.
-- Ricerca (`6ebd0e7`): fa tutte le scelte del suo giocatore (68,8% contro la
-  vecchia). Training: `backup="best"`, politica dai Q, `--init` (`fd01c63`+).
+- Ricerca `6ebd0e7` (tutte le scelte, 68,8%); training `fd01c63`+.
 - Revisione esterna (17/11): 7 rapporti in `docs/audit/revisione_esterna/`,
   D59-D68 in AUDIT (ottavo passaggio); la suite esegue 200/212 effetti.
 - Fase 1 del piano v2 (17/11): D66-D68 corrette (le memorie salvano l'oggetto,
