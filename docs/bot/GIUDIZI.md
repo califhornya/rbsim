@@ -116,7 +116,9 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   Seguiti (in chat). S8.1, lui Punch First su Kha'Zix (11 contro 7):
   Star-Crossed rimanda in mano Kha'Zix, "fortuna perché spreca Punch First".
   S8.2, lui Rengar con Ambush (12 contro 7): Star-Crossed rimanda in mano
-  Rengar, non Kha'Zix: "Kha'Zix lo voglio uccidere, più scomodo". S8.3 era
+  Rengar, non Kha'Zix: "Kha'Zix lo voglio uccidere, più scomodo". In tutti e
+  due l'unità amica rimandata in mano è la Stranger dalla base (confermato),
+  così all'Academy restano 7 contro 6; senza quel bersaglio "dipende". S8.3 era
   una domanda sbagliata di Claude: a 7 contro 6 Kha'Zix assegna 6 danni e la
   Companion muore nel combattimento (Pyke ha Backline, §826.3: il danno
   letale va prima alle altre unità), non a inizio turno per Temporary.
