@@ -72,8 +72,7 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    batte nettamente simple_trade o non gioca in modo sensato. Base dopo il fix
    di determinize (`handwritten_value.py 200 100`, 12 min): 0,58 contro
    simple_trade, 0,86 contro random (prima 0,59 e 0,85: nel rumore, ±0,035).
-2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
-   pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
+2. Giudizi: `docs/bot/GIUDIZI.md`; S6-S11 risposte (18/11, in chat).
 3. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
 4. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
