@@ -54,6 +54,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   ricerca non sbircia"). Suite 1836 passed, 6 skipped; golden identiche.
 - Risposte agli scenari (18/11): opzioni e mano a ogni mossa, mossa scartata,
   cosa farebbe cambiare scelta, esito a parte (`tests/test_scenari_answers.py`).
+- Risposte dell'utente in chat a S6-S9, S11a/b (`risposte_scenari.jsonl`);
+  teoria dei punti dal web in `docs/bot/TEORIA_PUNTI.md` (pari/dispari).
 - Mazzo Sett di Ksword (`competitive_sett.json`); scenari con cambi di
   sideboard e `legend_used`; S11a/S11b dal log della G3 (`test_scenari_s11.py`).
 
@@ -81,8 +83,7 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
   controllato; `tests/audit/`: un test per deviazione; `docs/MECHANICS.md`.
-- `docs/bot/`: GIUDIZI (giudizi dell'utente), PARTITA_LIVE (partite su
-  RiftAtlas), scenari.json. `riftbound/core/state.py`: clone, determinize.
+- `docs/bot/`: GIUDIZI, TEORIA_PUNTI, PARTITA_LIVE, scenari.json, partite/.
 - `docs/PIANO_MOTORE.md`: piano v2 (correttezza, poi struttura), con
   l'avanzamento; `docs/audit/revisione_esterna/`: i rapporti (in inglese).
 - `riftbound/core/`: il motore. `loop.py` (turno, chain, showdown, combattimento),
