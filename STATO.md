@@ -56,9 +56,9 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   0,44 ± 0,05 contro il bot #32, più debole; aiuta in s3012 t7 e s3011.
 
 ## In corso
-RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW.
-Da fare (utente: dopo): bot contro le mosse dell'utente nei suoi 5 turni di
-82FAW (dove differisce: giudizi, scenari); lista di Ivern; uso dal vivo.
+RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW,
+con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Da fare (dopo):
+bot contro le mosse dell'utente nei suoi 5 turni di 82FAW (giudizi, scenari).
 Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
 (partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
 

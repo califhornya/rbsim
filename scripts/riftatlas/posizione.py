@@ -141,7 +141,10 @@ class _Costruttore:
     def _lista(self, p: dict) -> tuple[list[str], Counter]:
         """(carte del mazzo principale, rune per dominio) della lista di p."""
         if p["id"] != self.partita.me and self.mazzo_avversario:
-            specs, rune, *_ = load_deck_json(Path(self.mazzo_avversario))
+            path = Path(self.mazzo_avversario)
+            if path.suffix.lower() == ".txt":
+                return self._lista_txt(path)
+            specs, rune, *_ = load_deck_json(path)
             return [s.name for s in specs], Counter({d: n for d, n in rune})
         sez = (p.get("deck") or {}).get("sections")
         if not sez:
@@ -158,6 +161,32 @@ class _Costruttore:
             d = dominio_runa(voce)
             if d is not None:
                 rune[d] += int(voce.get("count", 1))
+        return carte, rune
+
+    def _lista_txt(self, path: Path) -> tuple[list[str], Counter]:
+        """Una lista come la esporta RiftMana ("MainDeck:", "Runes:", righe
+        "N Nome"). Letta qui e non con `load_deck_json`, che rifiuta copie del
+        campione scelto nel mazzo principale (§103.3.b.1 le permette)."""
+        carte, rune, sezione = [], Counter(), None
+        for riga in path.read_text(encoding="utf-8").splitlines():
+            riga = riga.strip()
+            if riga.endswith(":"):
+                sezione = riga[:-1].strip().lower()
+                continue
+            m = re.match(r"(\d+)\s+(.+)", riga)
+            if not m:
+                continue
+            n, nome = int(m.group(1)), m.group(2).strip()
+            if sezione == "maindeck":
+                k = nome_motore({"name": nome})
+                if k is None:
+                    self.avvisi.append(f"{path.name}: {nome!r} sconosciuta al motore")
+                else:
+                    carte += [k] * n
+            elif sezione in ("runes", "rune pool"):
+                d = dominio_runa({"name": nome})
+                if d is not None:
+                    rune[d] += n
         return carte, rune
 
     def coperte(self, p: dict, n: int, note: list[str]):

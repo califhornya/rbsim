@@ -55,3 +55,18 @@ def test_il_bot_propone_una_mossa_legale(pos):
     prop = posizione.proponi(pos, budget=0.2, seed=1)
     assert prop.etichetta in prop.legali
     assert prop.alternative and prop.alternative[0][0] == prop.etichetta
+
+
+def test_con_la_lista_di_ivern():
+    """La lista di flamingo (dall'utente, 18/11): mano e mazzo di Ivern sono
+    la lista meno le 7 carte del mazzo viste (5 unità sul Brush, Iridescent
+    Avian in base, Defy nel cimitero). Ivern Nurturer è anche nel mazzo
+    principale, oltre al campione scelto (§103.3.b.1)."""
+    lista = ROOT / "docs" / "bot" / "partite" / "82FAW_ivern_lista.txt"
+    pos = posizione.costruisci(stati.carica(FILE), 188, mazzo_avversario=lista)
+    assert not [a for a in pos.avvisi if "flamingo:" in a]
+    from collections import Counter
+    nascoste = Counter(c.name for c in pos.gs.B.hand + pos.gs.B.deck.cards)
+    assert sum(nascoste.values()) == 32
+    assert (nascoste["Stalwart Poro"], nascoste["Ivern Nurturer"], nascoste["Defy"],
+            nascoste["Iridescent Avian"], nascoste["Back Off"]) == (1, 0, 2, 2, 3)

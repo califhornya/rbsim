@@ -30,6 +30,10 @@ testo della carta o le Core Rules. Le voci nuove vanno qui.
       interni del motore e scrivono nello stato; fase 6 del piano.
 
 ## Carte e regole
+- [ ] `load_deck_json` rifiuta il campione scelto anche nel mazzo principale;
+      §103.3.b.1 permette fino a 3 copie, campione compreso (la lista di Ivern
+      di 82FAW ne ha una in più: `docs/bot/partite/82FAW_ivern_lista.txt`). Da
+      vedere anche §103.3.a.3: quelle copie contano come Chosen Champion.
 - [ ] Il resto del corpus: letto per classi (AUDIT, quarto passaggio); carta per
       carta solo le carte dei mazzi in uso.
 - [ ] Flow: i modificatori di costo §356.3-4 diversi dalle aure di sconto
