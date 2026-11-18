@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-18 sera (ricerca con il turno avversario: più debole).
+Aggiornato: 2026-11-18 sera (si passa alla rete: partenza dal bot a mano, sul Mac).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -33,6 +33,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   ogni deviazione dal piano concordato detta esplicitamente.
 - Training: più partite e meno esempi per partita invece di più ricerca per
   mossa: il valore ha bisogno di esiti, non di posizioni della stessa partita.
+- (Utente, 18/11 sera) Rete: parte dalle partite del bot a mano (imita il
+  bot migliore, non simple_trade), poi self-play; si allena sul Mac.
 - (Utente, 18/11) Regole dal motore o da CORE_RULES, mai a memoria; lezioni
   in GIUDIZI.md sempre con partita e turno (i principi da soli non si capiscono).
 - Mano nota: carte per identità (`Player.hand_public`, come `Deck.known_top`);
@@ -40,11 +42,8 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## Fatto
 - Audit, passaggi 1-7: D1–D58, Q1–Q4 e Q6; dettagli in AUDIT.md.
-- Ricerca `6ebd0e7` (tutte le scelte, 68,8%); training `fd01c63`+.
-- Revisione esterna (17/11): 7 rapporti in `docs/audit/revisione_esterna/`,
-  D59-D68 in AUDIT (ottavo passaggio); la suite esegue 200/212 effetti.
-- Fase 1 del piano v2 (17/11): D66-D68 corrette (le memorie salvano l'oggetto,
-  non `id()`), `tests/audit/test_audit_copies.py`; 28 golden identiche.
+- Revisione esterna (17/11): D59-D68 in AUDIT; fase 1 del piano v2: D66-D68
+  corrette (`tests/audit/test_audit_copies.py`), 28 golden identiche.
 - Partite dal vivo su RiftAtlas (17-18/11): partita 1 giocata da Claude
   (persa), BO3 dall'utente. GIUDIZI G8-G15; checklist e note in PARTITA_LIVE.
 - PR #32 (18/11): determinize tiene le carte note e non dipende dall'ordine
@@ -52,24 +51,23 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   0,58 → 0,80 contro simple_trade); risposte a S6-S9, S11a/b
   (`risposte_scenari.jsonl`), TEORIA_PUNTI, mazzo Sett di Ksword.
 - Ricerca che gioca anche il turno avversario (18/11 sera, `docs/bot/
-  TURNO_AVVERSARIO.md`): foglie valutate dopo il turno di lui (simple_trade)
-  e l'inizio del proprio. Contro il bot #32, 100 coppie Evelynn-Kha'Zix a
-  0,4 s per mossa: **0,44 ± 0,05**, più debole (54 iterazioni contro 116; su
-  1.816 disaccordi la sua mossa vale di più solo in 438: rumore del massimo
-  su foglie variabili). Posizione dove prevedere aiuta: s3012 turno 7
+  TURNO_AVVERSARIO.md`): contro il bot #32, 100 coppie a 0,4 s per mossa:
+  **0,44 ± 0,05**, più debole (rumore del massimo su foglie variabili). Posizione dove prevedere aiuta: s3012 turno 7
   (Kha'Zix 3-2, Zed a difendere BF0 invece di attaccare BF1), 0,92 contro
   0,47 su 60 mondi nuovi; anche s3011 (0,63 / 0,42). `docs/bot/posizioni/`.
 
 ## In corso
-Niente. Training fermo dal 13/11: rete debole (run 3: 0,72; `docs/archivio/`).
+Rete dal bot a mano (`docs/bot/RETE.md`): `scripts/rete.command` sul Mac
+(partite, allenamento, misure; ~2 ore). In attesa di `runs/boot1/RISULTATI.txt`.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
    misurata un giudizio alla volta, non rende il bot più forte (testa a testa
    0,49); più peso alla mano lo peggiora (0,65). Turno avversario simulato:
    più debole così com'è (0,44); scegliere per media o per caso peggiore
-   delle simulazioni sbaglia 5-6 posizioni su 7 (anche il valore dopo il
-   turno di lui è sbagliato). Decidere con l'utente: la rete, o s3012 scenario.
+   delle simulazioni sbaglia 5-6 posizioni su 7. Deciso: la rete. Stop se
+   non prevede l'esito meglio del valore a mano o non fa 0,55 contro il bot;
+   se passa, self-play da `net_boot.pt` (lanciatore da preparare).
    Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
@@ -89,6 +87,8 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
 - `riftbound/ai/net_mcts.py`: la ricerca guidata dalla rete; test in
   `tests/test_net_mcts.py`. `riftbound/ai/selfplay.py` + `scripts/train_selfplay.py`.
 - `riftbound/ai/coach.py`, `scenari.py` (+ `scripts/`): coach e scenari dei giudizi.
+- `riftbound/ai/handwritten.py`: il bot a mano (valore, ricerca a tempo);
+  `scripts/bootstrap_net.py` + `scripts/rete.command`: la rete dal bot.
 - `scripts/diag/`: le misure (`handwritten_value.py`: base del bot;
   `opponent_turn.py` / `opponent_turn_check.py`: turno avversario, posizioni).
   `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
