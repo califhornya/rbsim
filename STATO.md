@@ -63,7 +63,7 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
 0. Coppia di scenari G3 turno 7 (trigger di Evelynn libero / già usato) dai
-   log in `docs/bot/partite/`: serve un mazzo Sett (lista di Ksword o ricostruita).
+   log in `docs/bot/partite/`: serve il mazzo Sett, lista di Ksword attesa il 19/11.
    Se l'utente vuole: `risposte_scenari.jsonl` con alternative, preferenza,
    perché, esito a parte; registratore con tutta l'info pubblica.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non
