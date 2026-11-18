@@ -24,8 +24,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   Fuori perimetro: D59-D65, la struttura, il training.
 - (Utente, 17/11) Il `Result` di una copia conta `units_played` e
   `spells_cast` dal punto di copia: lasciato (la ricerca usa il vincitore).
-- Flow: costo alternativo con i soli sconti di aura; gli altri modificatori
-  §356.3-4 lasciati aperti perché nessuno è nei quattro mazzi.
+- Flow: solo sconti di aura; altri modificatori §356.3-4 aperti (non nei mazzi).
 - Scelte nella ricerca: nodi per opzione con chiave (tipo, carta, descrizione),
   non per indice; prior uguali tra le opzioni.
 - Scelte nascoste: decise quando la partita le chiede, rigiocando il tratto
