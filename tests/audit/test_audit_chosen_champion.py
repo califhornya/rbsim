@@ -151,3 +151,45 @@ def test_hallowed_tomb_still_returns_nothing_with_the_champion_zone_full():
     loop._fire_scoring_trigger("on_hold", loop.gs.battlefields[0], "A")
     assert a.trash == [copy] and loop.gs.champion_A is champion
 
+
+
+# -- The deck: competitive_ivern, 82FAW's list ---------------------------------------
+
+DECKS = ROOT / "riftbound" / "data" / "decks"
+
+
+def test_competitive_ivern_is_82faws_list():
+    """`competitive_ivern.json` is `scripts/deck_from_txt.py` on the .txt: 40
+    cards with the champion (one more Ivern, Nurturer in the Main Deck), 12
+    runes, 3 battlefields, 10 in the sideboard."""
+    data = json.loads((DECKS / "competitive_ivern.json").read_text(encoding="utf-8"))
+    assert data == _ivern_list()
+    cards, runes, champion, _legend, battlefields = load_deck_json(DECKS / "competitive_ivern.json")
+    assert len(cards) + 1 == 40 and champion is not None and champion.name == IVERN
+    assert sum(n for _, n in runes) == 12 and len(battlefields) == 3
+    assert sum(c["count"] for c in data["sideboard"]) == 10
+
+
+def test_ivern_plays_its_champion_copy_from_hand_in_whole_games():
+    """Twenty seeded games, Ivern against Evelynn, `simple_trade` on both sides:
+    they all end, and in some of them the copy in the Main Deck is drawn and
+    played from hand while the Chosen Champion is another card."""
+    from riftbound.core.game_factory import build_game
+    from riftbound.core.loop import GameLoop
+
+    copies_played = 0
+    for seed in range(20):
+        gs = build_game(game_seed=seed, deck_a_path=DECKS / "competitive_ivern.json",
+                        deck_b_path=DECKS / "competitive_evelynn.json",
+                        ai_a="simple_trade", ai_b="simple_trade")
+        loop = GameLoop(gs)
+        play_unit = loop._play_unit
+
+        def spy(c, side, *args, _play=play_unit, _gs=gs, **kw):
+            nonlocal copies_played
+            if side == "A" and c.name == IVERN and c is not _gs.champion_A:
+                copies_played += 1
+            return _play(c, side, *args, **kw)
+        loop._play_unit = spy
+        assert loop.start().winner in ("A", "B", "DRAW")
+    assert copies_played >= 1
