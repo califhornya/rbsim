@@ -113,6 +113,14 @@ a parte l'esito, cioè cosa è successo dopo la prima decisione). I testi:
   lui lo prende comunque (la condizione si guarda quando si innesca), quindi
   ora o nello showdown cambia poco. Poi aspetta la sua mossa, tenendo
   Star-Crossed con le rune aperte e la pesca di Evelynn: "non sto male".
+  Seguiti (in chat). S8.1, lui Punch First su Kha'Zix (11 contro 7):
+  Star-Crossed rimanda in mano Kha'Zix, "fortuna perché spreca Punch First".
+  S8.2, lui Rengar con Ambush (12 contro 7): Star-Crossed rimanda in mano
+  Rengar, non Kha'Zix: "Kha'Zix lo voglio uccidere, più scomodo". S8.3 era
+  una domanda sbagliata di Claude: a 7 contro 6 Kha'Zix assegna 6 danni e la
+  Companion muore nel combattimento (Pyke ha Backline, §826.3: il danno
+  letale va prima alle altre unità), non a inizio turno per Temporary.
+  Ancora G8: il combattimento si calcola, non si immagina.
 
 ## Partite dal vivo su RiftAtlas (17-18/11)
 Evelynn contro Sett (legend The Boss, Kingpin). Partita 1 (stanza HN5VE):
