@@ -95,6 +95,13 @@ Chrome o il browser dell'app), aperta nella cartella rbsim aggiornata.
   scheda. Per importare un mazzo: la lista della repo, non quelle salvate.
 
 ## Registrazione
+Bozza del nuovo registratore: `scripts/riftatlas/registratore.js` (18/11,
+scritta senza poter aprire RiftAtlas; provata solo su una pagina finta). Da
+provare all'inizio della prossima sessione, prima della partita: capire se la
+partita viaggia su WebSocket e cosa contengono i messaggi (lo stato del tavolo
+già strutturato sarebbe la fonte migliore); se no, istantanea del tavolo
+dall'HTML. Poi uno script in repo che dal file esportato ricostruisce le
+posizioni (per gli scenari).
 Il pannello del log tiene solo gli ultimi ~5 turni. Registratore usato il
 17/11: un MutationObserver su `document.body` che legge il pannello, lo
 divide in blocchi per "TURN n·NOME" e li salva per stanza (riga "ROOM: XXXXX";
