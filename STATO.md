@@ -67,9 +67,9 @@ Niente. Training fermo dal 13/11: rete debole (run 3: 0,72; `docs/archivio/`).
 0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
    misurata un giudizio alla volta, non rende il bot più forte (testa a testa
    0,49); più peso alla mano lo peggiora (0,65). Turno avversario simulato:
-   più debole così com'è (0,44). Decidere con l'utente la strada: la rete,
-   o il turno avversario con meno rumore (media invece del massimo sulle
-   foglie simulate, o simulazione solo alla radice), o s3012 come scenario.
+   più debole così com'è (0,44); scegliere per media o per caso peggiore
+   delle simulazioni sbaglia 5-6 posizioni su 7 (anche il valore dopo il
+   turno di lui è sbagliato). Decidere con l'utente: la rete, o s3012 scenario.
    Registratore RiftAtlas: bozza in `scripts/riftatlas/`, da provare sul PC.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.

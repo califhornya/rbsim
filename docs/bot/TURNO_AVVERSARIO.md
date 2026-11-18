@@ -120,3 +120,24 @@ Limiti: il resto della partita lo gioca il riferimento (debole: 0,80 contro
 simple_trade); la variante prevede l'avversario come simple_trade. La
 posizione non è ancora uno scenario della pagina (`scenari.json`): per
 farlo serve il copione dal turno 1.
+
+## Supporre che lui abbia sempre la carta peggiore? (domanda dell'utente)
+Sulle 7 posizioni con un esito chiaro, ognuna delle due mosse è giocata da
+sola, poi c'è il turno di lui (simple_trade) su 32 mondi; il criterio sceglie
+la mossa (script di prova, non nel repo):
+
+| Criterio | Mosse giuste |
+|---|---|
+| media dei mondi | 2 su 7 |
+| media del quarto peggiore | 3 su 7 |
+| il mondo peggiore ("ha sempre la carta") | 1 su 7 |
+
+In 4 posizioni (le tre del turno 3 e s3012) i tre criteri danno gli stessi
+numeri: la minaccia è sul tavolo, non in mano, quindi la mano supposta non
+conta. Dove la mano conta (s3029, s3076 t5, s3011) il mondo peggiore sbaglia
+tutte e tre. Le 7 posizioni sono state scelte perché questo filtro preferiva
+la mossa della variante, quindi la media sbaglia per costruzione dove il
+riferimento aveva ragione. Resta il fatto che il filtro, cioè una mossa sola
+e poi il turno di simple_trade valutato con `table_value`, sbaglia 5 volte su 7.
+L'errore non è solo rumore: è il valore dopo il turno di lui (al turno 3 non
+premia abbastanza il punto preso subito).
