@@ -74,9 +74,8 @@ peggiore): rete debole. Dettagli in `docs/archivio/`.
    simple_trade, 0,86 contro random (prima 0,59 e 0,85: nel rumore, ±0,035).
 2. Giudizi dell'utente: `docs/bot/GIUDIZI.md`. Evelynn e Kha'Zix: S6-S9 sulla
    pagina degli scenari (`scripts/scenari.bat`), S10 in chat; in attesa.
-3. Training: script ancora su Kai'Sa/Kennen e lanciatore da rifare, se si riallena.
-4. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
-5. Possono aspettare: sideboard, tempi per turno, carte e regole fuori dai mazzi.
+3. Piano v2, fasi 0 e 2-6 (D59-D65, struttura): dopo il bot, se l'utente decide.
+4. Possono aspettare: training (script su Kai'Sa/Kennen), sideboard, tempi per turno, carte e regole fuori dai mazzi.
 
 Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
 
