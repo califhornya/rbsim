@@ -58,3 +58,19 @@ def test_vista_pubblica_non_svela_le_coperte(partita):
     assert "coperta (Edge of Night)" in testo_io
     assert "Edge of Night" not in testo_altro
     assert "Punteggio: caarati 5 – flamingo 4" in testo_io
+
+
+def test_formato_della_prima_bozza(tmp_path):
+    """La bozza di `registratore.js` salvava solo la stringa ricevuta (`data`),
+    senza `me`: si legge lo stesso, chi registra dal `viewer` della stanza."""
+    import json
+    d = json.loads(FILE.read_text(encoding="utf-8"))
+    bozza = {"started": d["started"], "saved": d["saved"], "log": d["log"],
+             "net": [{"t": m["t"], "dir": m["dir"], "url": m["url"], "data": json.dumps(m["msg"])}
+                     for m in d["net"]]}
+    f = tmp_path / "bozza.json"
+    f.write_text(json.dumps(bozza), encoding="utf-8")
+    p = stati.carica(f)
+    assert (p.me, p.room, p.ultima_seq) == (IO, "82FAW", 188)
+    t = stati.stato_a(p)
+    assert (t.player(IO)["board"]["score"], t.player(IVERN)["board"]["score"]) == (5, 4)

@@ -165,16 +165,49 @@ class Partita:
         return self.patches[-1]["sequence"] if self.patches else self.snapshot["sequence"]
 
 
+def _messaggi(net: list) -> list[dict]:
+    """I messaggi del server, decodificati. Due formati del registratore: quello
+    usato dal vivo (18/11) tiene il messaggio già letto (`type`, `msg`); la
+    prima bozza solo la stringa ricevuta (`data`)."""
+    out = []
+    for m in net:
+        msg = m.get("msg")
+        if msg is None and isinstance(m.get("data"), str):
+            try:
+                msg = json.loads(m["data"])
+            except ValueError:
+                continue
+        if isinstance(msg, dict):
+            out.append({"dir": m.get("dir"), "type": msg.get("type"), "msg": msg})
+    return out
+
+
+def _chi_registra(d: dict, messaggi: list[dict]) -> str:
+    """Il giocatore che registra: `me` nel file, se no il `viewer` della
+    stanza o chi manda le azioni."""
+    if d.get("me"):
+        return d["me"]
+    for m in messaggi:
+        viewer = (m["msg"].get("sessionDoc") or {}).get("viewer") or {}
+        if m["type"] == "room_shell_sync" and viewer.get("playerId"):
+            return viewer["playerId"]
+    for m in messaggi:
+        if m["dir"] == "out" and m["msg"].get("actorPlayerId"):
+            return m["msg"]["actorPlayerId"]
+    return ""
+
+
 def carica(path: str | Path) -> Partita:
     d = json.loads(Path(path).read_text(encoding="utf-8"))
-    snaps = [m["msg"] for m in d["net"] if m.get("type") == "authoritative_snapshot"]
+    net = _messaggi(d["net"])
+    snaps = [m["msg"] for m in net if m["type"] == "authoritative_snapshot"]
     if not snaps:
         raise ValueError("nessun authoritative_snapshot nel file")
     if len(snaps) > 1:  # una riconnessione: si riparte dall'ultima
         snaps.sort(key=lambda s: s["sequence"])
     snap = snaps[-1]
-    patches = sorted((m["msg"] for m in d["net"]
-                      if m.get("type") == "authoritative_patch_commit"
+    patches = sorted((m["msg"] for m in net
+                      if m["type"] == "authoritative_patch_commit"
                       and m["msg"]["sequence"] > snap["sequence"]),
                      key=lambda p: p["sequence"])
     atteso = snap["sequence"]
@@ -183,7 +216,8 @@ def carica(path: str | Path) -> Partita:
             raise ValueError(f"buco nelle patch: seq {p['sequence']} parte da "
                              f"{p['baseSequence']}, atteso {atteso}")
         atteso = p["sequence"]
-    return Partita(me=d.get("me", ""), room=d.get("room", ""), snapshot=snap, patches=patches)
+    return Partita(me=_chi_registra(d, net), room=d.get("room") or snap.get("gameInstanceId", ""),
+                   snapshot=snap, patches=patches)
 
 
 def iniziale(partita: Partita) -> Tavolo:

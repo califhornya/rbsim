@@ -13,6 +13,7 @@ import posizione  # noqa: E402
 import stati  # noqa: E402
 
 FILE = ROOT / "docs" / "bot" / "partite" / "riftatlas_82FAW_ivern_g1.json"
+IO = "plr_7e9d652d"
 
 
 @pytest.fixture(scope="module")
@@ -70,3 +71,46 @@ def test_con_la_lista_di_ivern():
     assert sum(nascoste.values()) == 32
     assert (nascoste["Stalwart Poro"], nascoste["Ivern Nurturer"], nascoste["Defy"],
             nascoste["Iridescent Avian"], nascoste["Back Off"]) == (1, 0, 2, 2, 3)
+
+
+def test_carte_giocate_a_meta_turno():
+    """Seq 151, turno 8 di caarati: Momentary Companion scoperta (seq 141) e
+    K'Sante dalla mano, entrambe all'Academy; il Gold token e la carta
+    nascosta (seq 148) non contano come giocate."""
+    pos = posizione.costruisci(stati.carica(FILE), 151)
+    gs = pos.gs
+    assert [c.name for c in gs.played_cards_this_turn["A"]] == ["Momentary Companion",
+                                                                "K'Sante Courageous"]
+    assert gs.cards_played_this_turn == {"A": 2, "B": 0}
+    assert gs.battlefields[0].plays_here == {"A": (8, 2)}
+    assert any(a.startswith("a metà turno") for a in pos.avvisi)
+    # La carta giocata è quella sul campo, non una copia.
+    assert gs.played_cards_this_turn["A"][1] is gs.battlefields[0].units_A[0].card
+
+
+def test_coperta_ricoperta_riparte_dal_turno_nuovo():
+    """Edge of Night, coperta al turno 8, torna in mano al turno 11 e si copre
+    di nuovo al 12: può essere giocata dal turno dopo il 12, non dal 9."""
+    import dataclasses
+    p = stati.carica(FILE)
+    t = stati.stato_a(p)
+    io = IO
+    eon = next(c["id"] for c in t.zona(io, "battlefieldA") if c.get("hidden"))
+    extra = [
+        {"baseSequence": 188, "sequence": 189, "patch": {"operations": [
+            {"op": "set_room_fields", "fields": {"turnNumber": 11}},
+            {"op": "zone_move", "cardId": eon, "from": {"playerId": io, "zone": "battlefieldA"},
+             "to": {"playerId": io, "zone": "hand", "index": 0}},
+            {"op": "unset_card_fields", "playerId": io, "zone": "hand", "cardId": eon,
+             "fields": ["hidden"]}]}},
+        {"baseSequence": 189, "sequence": 190, "patch": {"operations": [
+            {"op": "set_room_fields", "fields": {"turnNumber": 12}},
+            {"op": "patch_card_fields", "playerId": io, "zone": "hand", "cardId": eon,
+             "fields": {"hidden": True}},
+            {"op": "zone_move", "cardId": eon, "from": {"playerId": io, "zone": "hand"},
+             "to": {"playerId": io, "zone": "battlefieldA", "index": 3}}]}},
+    ]
+    p2 = dataclasses.replace(p, patches=p.patches + extra)
+    gs = posizione.costruisci(p2, 190).gs
+    assert [(f.card.name, f.turn_hidden) for f in gs.battlefields[0].facedowns] == [("Edge of Night", 12)]
+

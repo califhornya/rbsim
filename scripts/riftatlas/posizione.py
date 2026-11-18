@@ -41,7 +41,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import stati  # noqa: E402
 from riftbound.ai.handwritten import HandwrittenAgent  # noqa: E402
 from riftbound.core.battlefield import Battlefield, FacedownCard  # noqa: E402
-from riftbound.core.cards import GearCard  # noqa: E402
+from riftbound.core.cards import GearCard, SpellCard, UnitCard  # noqa: E402
 from riftbound.core.combat import UnitInPlay  # noqa: E402
 from riftbound.core.decisions import DecisionPoint  # noqa: E402
 from riftbound.core.enums import Domain  # noqa: E402
@@ -89,11 +89,18 @@ class _Costruttore:
         # Il tavolo alla seq, il turno in cui ogni coperta è arrivata sul
         # campo, e le carte dell'avversario viste in tutta la partita.
         self.turno_coperta: dict[str, int] = {}
+        self._coperte_prima: set = set()
         self.viste: dict[str, dict[str, str]] = {}   # pid -> id carta -> nome motore
+        # Le carte giocate nel turno in corso: (pid, id RiftAtlas, carta, zona
+        # di arrivo se un campo), per i contatori "questo turno" del motore.
+        self.giocate: list[tuple] = []
+        self._turno_giocate = None
+        self.per_id: dict = {}   # id RiftAtlas -> carta del motore costruita
         fine = partita.ultima_seq if seq is None else seq
         tavolo = None
-        for s, t in stati.stati(partita):
+        for i, (s, t) in enumerate(stati.stati(partita)):
             self._osserva(t)
+            self._giocate(t, partita.patches[i - 1] if i else None)
             if s == fine:
                 tavolo = t
                 break
@@ -105,11 +112,14 @@ class _Costruttore:
 
     def _osserva(self, t: stati.Tavolo) -> None:
         turno = t.room.get("turnNumber") or 0
+        # Il turno dell'ultima volta che ogni carta è diventata coperta su un
+        # campo (una carta scoperta e ricoperta riparte da capo).
+        ora = {c["id"] for p in t.players for zona in stati.ZONE_CAMPI
+               for c in p["board"].get(zona) or [] if stati.nascosta(c)}
+        for cid in ora - self._coperte_prima:
+            self.turno_coperta[cid] = turno
+        self._coperte_prima = ora
         for p in t.players:
-            for zona in stati.ZONE_CAMPI:
-                for c in p["board"].get(zona) or []:
-                    if stati.nascosta(c):
-                        self.turno_coperta.setdefault(c["id"], turno)
             for zona, carte in p["board"].items():
                 if not isinstance(carte, list):
                     continue
@@ -125,6 +135,44 @@ class _Costruttore:
             if pid and c.get("source") == "mainDeck" and nome_motore(c):
                 self.viste.setdefault(pid, {})[c.get("id")] = nome_motore(c)
 
+    def _giocate(self, t: stati.Tavolo, patch: dict | None) -> None:
+        """Le carte giocate da `patch` (dal log di RiftAtlas non si ricava:
+        si guardano le operazioni). Giocare: dalla mano o dalla zona del
+        campione a base o campo, scoperta; una spell dalla mano sulla catena;
+        una coperta che si scopre per andare sulla catena. Non contano: i
+        token, nascondere una carta, le abilità e i trigger messi in catena."""
+        turno = t.room.get("turnNumber")
+        if turno != self._turno_giocate:
+            self.giocate, self._turno_giocate = [], turno
+        if patch is None:
+            return
+        ops = patch["patch"]["operations"]
+        board = ("base",) + stati.ZONE_CAMPI
+        da_mano = {o["playerId"] for o in ops
+                   if o["op"] == "zone_remove" and o["zone"] in ("hand", "champion")}
+        scoperte = {o["cardId"] for o in ops
+                    if o["op"] == "unset_card_fields" and "hidden" in o["fields"]}
+
+        def nota(pid, c, zona, rid):
+            if c.get("source") in ("mainDeck", "champion") and not stati.nascosta(c):
+                self.giocate.append((c.get("ownerPlayerId") or pid, rid, c,
+                                     zona if zona in stati.ZONE_CAMPI else None))
+
+        for o in ops:
+            if o["op"] == "zone_move" and o["from"]["zone"] in ("hand", "champion") \
+                    and o["to"]["zone"] in board:
+                dst = t.zona(o["to"]["playerId"], o["to"]["zone"])
+                c = next((x for x in dst if x["id"] == o["cardId"]), o.get("card") or {})
+                nota(o["from"]["playerId"], c, o["to"]["zone"], o["cardId"])
+            elif o["op"] == "zone_insert" and o["zone"] in board and o["playerId"] in da_mano:
+                for c in o["cards"]:
+                    nota(o["playerId"], c, o["zone"], c.get("id"))
+            elif o["op"] == "chain_insert":
+                for e in o["entries"]:
+                    da = e.get("fromZone")
+                    if da == "hand" or (da in stati.ZONE_CAMPI and e.get("sourceCardId") in scoperte):
+                        nota(e.get("byPlayerId"), e.get("card") or {}, da, e.get("sourceCardId"))
+
     # ------------------------------------------------------------ carte
 
     def carta(self, c: dict):
@@ -137,6 +185,8 @@ class _Costruttore:
             card.is_token = True
         if isinstance(card, GearCard):
             card.tapped = bool(c.get("exhausted"))
+        if c.get("id"):
+            self.per_id[c["id"]] = card
         return card
 
     def _lista(self, p: dict) -> tuple[list[str], Counter]:
@@ -269,11 +319,37 @@ class _Costruttore:
             for fd in bf.facedowns:
                 if fd.owner != chi:
                     self.avvisi.append(f"{nome}: coperta di {fd.owner} su un campo che non controlla")
+        self._storia_del_turno(gs)
         loop = GameLoop(gs)
         loop._recompute_passives()
         self._confronta_might(gs, campi)
         nomi = {self.lato[p["id"]]: p["name"] for p in giocatori}
         return Posizione(gs=gs, side=side, seq=t.seq, avvisi=self.avvisi, nomi=nomi)
+
+    def _storia_del_turno(self, gs: GameState) -> None:
+        """I contatori "questo turno" del motore (LEGION, "la seconda carta",
+        lo sconto di un campo alla prima carta giocata lì) dalle carte giocate
+        nel turno in corso, come li tiene `GameLoop._count_card_played`."""
+        if not self.giocate:
+            return
+        nomi = []
+        for pid, rid, c, zona in self.giocate:
+            s = self.lato.get(pid)
+            card = self.per_id.get(rid) or self.carta(c)
+            if s is None or card is None:
+                continue
+            nomi.append(card.name)
+            gs.played_cards_this_turn[s].append(card)
+            gs.cards_played_this_turn[s] += 1
+            if isinstance(card, SpellCard):
+                gs.spells_played_this_turn[s] += 1
+            if zona is not None and isinstance(card, (UnitCard, GearCard)):
+                bf = gs.battlefields[stati.ZONE_CAMPI.index(zona)]
+                t0, n = bf.plays_here.get(s, (-1, 0))
+                bf.plays_here[s] = (gs.turn, (n if t0 == gs.turn else 0) + 1)
+        self.avvisi.append(f"a metà turno: le carte già giocate ({', '.join(nomi)}) sono "
+                           "contate; il resto dello stato del turno (Potere speso, "
+                           "pescate, unità morte, abilità una volta per turno) no")
 
     def _giocatore(self, gs: GameState, p: dict, campi) -> None:
         s = self.lato[p["id"]]
