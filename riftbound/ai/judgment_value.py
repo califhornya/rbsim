@@ -14,8 +14,13 @@ docs/bot/GIUDIZI.md, TEORIA_PUNTI.md and BOT_SCENARI.md say it missed:
   pieces), Vex Apathetic at a battlefield (it stuns what you play) (S7, S9, S10);
 - Might that lasts past this turn (UnitInPlay.lasting_might).
 
-The weights are a first guess, to be checked on the scenarios
-(`scripts/diag/scenari_bot.py`) and the baseline (`handwritten_value.py`).
+The weights were a first guess, measured one judgment at a time on the
+baseline (`handwritten_value.py`, docs/bot/BOT_SCENARI.md): hidden cards,
+points by plan and threats change nothing against simple_trade; more weight
+on cards in hand made the bot worse, so it stays as before and the outs are
+off. As they are, the judgments make the bot play closer to the user in some
+scenarios (S7, S11b) but not stronger (0.49 head to head against the
+hand-written value).
 """
 from __future__ import annotations
 
@@ -33,9 +38,9 @@ W = {
     "control": 0.30,      # a battlefield controlled
     "might_bf": 0.05,     # Might at a battlefield, per point of difference
     "might_base": 0.03,   # Might in base
-    "hand": 0.06,         # a card in hand
+    "hand": 0.03,         # a card in hand (0.06 made the bot hoard: 0.65, BOT_SCENARI.md)
     "hidden": 0.15,       # a face-down card
-    "out": 0.05,          # a reaction/Action the open runes pay for, up to 2
+    "out": 0.0,           # a reaction/Action the open runes pay for, up to 2 (0.05: 0.76)
     "threat": 0.12,       # Faefolk on the board, Vex at a battlefield
     "plan": 1,            # 0: points count linearly, as in the hand-written value
 }

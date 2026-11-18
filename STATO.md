@@ -63,9 +63,10 @@ Niente. Training fermo dal 13/11 (run 3: 0,72 contro simple_trade; run 4
 peggiore): rete debole. Dettagli in `docs/archivio/`.
 
 ## Prossimi passi
-0. Valutazione dai giudizi (coperte, carte in mano, punti pari/dispari,
-   minacce): i 3 difetti della ricerca sono corretti (`BOT_SCENARI.md`); poi
-   di nuovo scenari S6-S11 e misura base.
+0. Valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11):
+   misurata un giudizio alla volta, non rende il bot più forte (testa a testa
+   0,49); più peso alla mano lo peggiora (0,65). Decidere con l'utente la
+   strada: ricerca che gioca anche il turno avversario, o la rete.
    Registratore RiftAtlas (sì dell'utente, 18/11): bozza in `scripts/riftatlas/`,
    da provare sulla pagina vera in una sessione sul PC dell'utente.
 1. Bot con i giudizi dell'utente come valutazione della ricerca; stop se non

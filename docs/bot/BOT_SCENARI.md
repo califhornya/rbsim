@@ -54,3 +54,25 @@ delle tre pesi di più. La stessa ricerca ha prodotto le partite del training
 della rete (13/11): è possibile che questi difetti spieghino parte della rete
 debole (da verificare, non misurato).
 
+## La valutazione dai giudizi (`riftbound/ai/judgment_value.py`, 18/11)
+Un giudizio alla volta sopra la valutazione scritta a mano, 200 partite contro
+simple_trade (`RBSIM_VALUE=judgment RBSIM_W=...`); riferimento 0,80:
+| Variante | Contro simple_trade |
+|---|---|
+| nessuna aggiunta (controllo) | 0,80 (identica: la misura regge) |
+| carte coperte (0,15) | 0,80 |
+| punti per piano (pari/dispari) | 0,79 |
+| minacce (Faefolk, Vex a un campo) | 0,78 |
+| carte in mano 0,06 + uscite 0,05 | 0,62 |
+| solo carte in mano 0,06 | 0,65 |
+| solo uscite 0,05 | 0,76 |
+| coperte + punti + minacce (v2) | 0,76; testa a testa contro la vecchia 0,49 |
+| tutto (v1) | 0,67; testa a testa 0,42 |
+Pesi lasciati in v2. Negli scenari v2 gioca come l'utente in S7 (Faefolk) e
+S11b (tiene la coperta); non in S11a (non gira la Stranger: la pesca non ha
+valore per una valutazione statica), S8 (Star-Crossed subito invece della
+Companion), S6 e S9 a metà.
+Lettura: i giudizi riguardano soprattutto il turno avversario (uscite,
+coperte che reagiscono, minacce), che la ricerca non gioca mai: valuta la
+posizione a fine del proprio turno. Un peso fisso è un sostituto rozzo.
+

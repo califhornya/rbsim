@@ -34,8 +34,11 @@ def test_a_hidden_card_is_worth_more_than_its_body_on_the_board():
     assert judgment_value(hidden) > judgment_value(flipped) > judgment_value(_obs())
 
 
-def test_an_out_the_open_runes_pay_for_counts():
-    """S8, S11a: Star-Crossed with 3 energy and a Chaos rune open is an out."""
+def test_an_out_the_open_runes_pay_for_counts(monkeypatch):
+    """S8, S11a: Star-Crossed with 3 energy and a Chaos rune open is an out
+    (the weight is 0 by default: measured, BOT_SCENARI.md)."""
+    from riftbound.ai import judgment_value as J
+    monkeypatch.setitem(J.W, "out", 0.05)
     hand = ("Star-Crossed", "Rengar Trophy Hunter")
     paid = _obs(my_hand=hand, my_energy=3, my_rune_domains={"CHAOS": 1})
     unpaid = _obs(my_hand=hand, my_energy=3, my_rune_domains={"BODY": 1})
@@ -43,15 +46,15 @@ def test_an_out_the_open_runes_pay_for_counts():
 
 
 def test_points_by_the_deck_plan():
-    """TEORIA_PUNTI.md: Kha'Zix (two a turn) loses little going 5 -> 4; Evelynn
-    (hold) gains more at 7."""
-    kz = dict(my_legend="Kha'Zix Voidreaver", opp_legend="Evelynn Agony's Embrace", opp_points=5)
-    step_even = judgment_value(_obs(my_points=6, **kz)) - judgment_value(_obs(my_points=5, **kz))
-    step_odd = judgment_value(_obs(my_points=5, **kz)) - judgment_value(_obs(my_points=4, **kz))
-    assert step_even > step_odd
-    ev = dict(opp_points=6)
-    assert judgment_value(_obs(my_points=7, **ev)) - judgment_value(_obs(my_points=6, **ev)) > \
-        judgment_value(_obs(my_points=6, **ev)) - judgment_value(_obs(my_points=5, **ev))
+    """TEORIA_PUNTI.md: for Kha'Zix (two a turn) an odd point counts half; for
+    Evelynn (hold) 7 counts half a point more."""
+    from riftbound.ai.judgment_value import _points
+    assert [_points(p, "two", 8) for p in (4, 5, 6, 7)] == [4, 4.5, 6, 6.5]
+    assert [_points(p, "hold", 8) for p in (5, 6, 7)] == [5, 6, 7.5]
+    assert _points(5, None, 8) == 5
+    kz = dict(my_legend="Kha'Zix Voidreaver", opp_legend="Evelynn Agony's Embrace", opp_points=4)
+    assert judgment_value(_obs(my_points=5, **kz)) - judgment_value(_obs(my_points=4, **kz)) < \
+        judgment_value(_obs(my_points=6, **kz)) - judgment_value(_obs(my_points=5, **kz))
 
 
 def test_the_threats_the_user_named():
