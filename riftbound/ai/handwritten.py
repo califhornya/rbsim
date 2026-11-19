@@ -66,9 +66,10 @@ class HandwrittenAgent(_Budget, NetGuidedMCTSAgent):
     name = "handwritten"
 
     def __init__(self, player, iterations: int = 100, rng: Optional[random.Random] = None,
-                 budget: Optional[float] = None, advance_forced_move: bool = False):
+                 budget: Optional[float] = None, advance_forced_move: bool = False,
+                 tie_break: str = "first"):
         super().__init__(player, None, iterations=iterations, rng=rng, backup="best",
-                         advance_forced_move=advance_forced_move)
+                         advance_forced_move=advance_forced_move, tie_break=tie_break)
         self.budget = budget
         self.main_iters: list = []
 

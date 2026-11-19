@@ -67,6 +67,20 @@ def predict(net, vec, mask):
 
 _PASS: Action = ("PASS", None, None)
 _MAX_TURN_ACTIONS = 30
+_TIE = 1e-9
+
+
+def _break_tie(items: list, key):
+    """tie_break="mean": among the visited children level in Q with `key` (the
+    max), the highest W/N, then the most visits, then the first in order."""
+    top = dict(items)[key].Q
+    level = [(k, c) for k, c in items if c.N > 0 and c.Q >= top - _TIE]
+    if len(level) < 2:
+        return key
+    best_mean = max(c.W / c.N for _, c in level)
+    level = [(k, c) for k, c in level if c.W / c.N >= best_mean - _TIE]
+    most = max(c.N for _, c in level)
+    return next(k for k, c in level if c.N == most)
 
 # Choices the search leaves to the baseline (GameLoop.choose kinds, by prefix).
 UNSEARCHED_CHOICES: tuple = ()
@@ -360,8 +374,18 @@ class NetGuidedMCTSAgent(Agent):
                  noise_frac: float = 0.25, temperature_moves: int = 10,
                  pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
                  full_fraction: float = 1.0, backup: str = "best",
-                 policy_target: str = "visits", advance_forced_move: bool = False):
+                 policy_target: str = "visits", advance_forced_move: bool = False,
+                 tie_break: str = "first"):
         super().__init__(player)
+        # The root's move under backup="best" among children whose Q is level
+        # (within _TIE): "first", the first in legal order (as before); "mean",
+        # the highest W/N (the mean of what came back through that branch),
+        # then the most visits, then the first. With the hand-written value a
+        # quarter of the decisions are such ties (19/11), and in s3012 the last
+        # digit of Q chose between defending and attacking (W/N: 0.445 / 0.414).
+        if tie_break not in ("first", "mean"):
+            raise ValueError(f"tie_break {tie_break!r}")
+        self.tie_break = tie_break
         # A move declared by this player whose only way on is the PASS that
         # closes it (no other unit can join): with this set, the search closes
         # it at once (showdown, conquest) instead of valuing the half-declared
@@ -604,6 +628,8 @@ class NetGuidedMCTSAgent(Agent):
             # The line worth the most: the visits follow the priors more than
             # the values (differences of a few points against c_puct's term).
             key = max(items, key=lambda kv: kv[1].Q)[0]
+            if self.tie_break == "mean":
+                key = _break_tie(items, key)
         else:
             key = self.prefer_pass(root, max(items, key=lambda kv: kv[1].N)[0])
         child = root.children[key]

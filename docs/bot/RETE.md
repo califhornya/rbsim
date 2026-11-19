@@ -137,7 +137,12 @@ Disegno della revisione esterna, regola fissata dall'utente prima del lancio.
 - Posizioni: s3012 e s3076 24/24 per entrambi; s3090 candidato 0/24 (24 volte
   Rampage @BF0), s3048 2/24 (Rampage @BF1 o @BF0); il bot 24/24.
 - Lettura: da solo il valore di boot1 gioca molto peggio di `table_value`
-  (0,30); lo 0,46 della rete completa veniva dai prior che imitano il bot.
+  (0,30); lo 0,46 della rete completa veniva probabilmente dai prior che
+  imitano il bot (seed e `--avanza` diversi: non misurato a parità).
+- La misura 1 non era una buona soglia: `table_value` con quattro costanti
+  (mazzo × chi comincia, stimate sulle 1.600 partite) fa 0,426, meglio della
+  rete, con lo stesso ordine tra le mosse. Prevedere l'esito non dice se una
+  mossa è meglio di un'altra.
   Prevede chi vince meglio, ma ordina male le mosse di una stessa decisione.
   `--avanza` non era la spiegazione: tolto lo stato a metà movimento,
   l'ibrido sceglie comunque Rampage invece di conquistare.
