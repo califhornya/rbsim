@@ -54,23 +54,21 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   + 2 copie nel mazzo, Hallowed Tomb riporta anche una copia; golden identiche.
 
 ## In corso
-RiftAtlas → bot (18/11 notte): `stati.py` e `posizione.py` funzionano su 82FAW,
-con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Bot contro i
-turni giocati in 82FAW: d'accordo con G17, G20, G22 (GIUDIZI, 19/11).
+RiftAtlas → bot: `stati.py` e `posizione.py` funzionano su 82FAW (lista di Ivern
+in `docs/bot/partite/`); il bot d'accordo con G17, G20, G22 (GIUDIZI, 19/11).
 Rete dal bot a mano: **chiusa** (19/11, `docs/bot/RETE.md`). Prevede chi vince
 meglio (0,466 contro 0,559) ma ordina male le mosse: completa 0,46, solo il
 suo valore con prior uguali 0,296 ± 0,038 contro il bot (arena, 230 coppie).
 Spareggio del bot (19/11): nel 24% delle decisioni le prime due mosse hanno lo
 stesso Q (s3012: decide l'ultima cifra). Opzione `tie_break="mean"` (W/N più
 alto), arena pronta: `scripts/spareggio.command` (800 coppie, ≥ 0,52 e IC > 0,50).
-Bot contro se stesso, 2.000 partite: Evelynn 92% se comincia, 46% se no.
+Bot contro se stesso: Evelynn 92% se comincia, 46% se no; matchup divisi così.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`judgment_value.py`): non rende il bot più forte
    (0,49; più peso alla mano 0,65); turno avversario simulato 0,44, per media
-   o caso peggiore sbaglia 5-6 posizioni su 7. Rete chiusa. Ora: arena dello
-   spareggio; poi, se serve, il vero PASS di fine turno fatto proseguire fino
-   alla prima scelta avversaria. Matchup sempre divisi per chi comincia.
+   o caso peggiore sbaglia 5-6 posizioni su 7. Rete chiusa. Ora lo spareggio;
+   poi, se serve, il vero PASS di fine turno fino alla prima scelta avversaria.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) dopo il bot, se l'utente decide.
