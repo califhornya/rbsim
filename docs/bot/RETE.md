@@ -129,3 +129,15 @@ Disegno della revisione esterna, regola fissata dall'utente prima del lancio.
   (qui l'attacco, sul Mac la difesa).
 - Lancio: `scripts/arena.command` (circa mezz'ora); risultato in
   `runs/boot1/ARENA.txt`.
+
+### Esito (Mac, 19/11 01:34, con `--avanza`): non promosso, boot1 chiuso
+- Punteggio **0,296 ± 0,038** (95%, 230 medie di coppia: 0,258-0,333);
+  vinte 136, perse 324. Con Evelynn 0,339 ± 0,061 (il bot contro se stesso
+  0,69), con Kha'Zix 0,252 ± 0,056 (0,31). Iterazioni: candidato 91, bot 118.
+- Posizioni: s3012 e s3076 24/24 per entrambi; s3090 candidato 0/24 (24 volte
+  Rampage @BF0), s3048 2/24 (Rampage @BF1 o @BF0); il bot 24/24.
+- Lettura: da solo il valore di boot1 gioca molto peggio di `table_value`
+  (0,30); lo 0,46 della rete completa veniva dai prior che imitano il bot.
+  Prevede chi vince meglio, ma ordina male le mosse di una stessa decisione.
+  `--avanza` non era la spiegazione: tolto lo stato a metà movimento,
+  l'ibrido sceglie comunque Rampage invece di conquistare.
