@@ -115,7 +115,7 @@ Disegno della revisione esterna, regola fissata dall'utente prima del lancio.
 - Regola: punteggio osservato ≥ 0,55 → ibrido promosso, il self-play parte
   da lui con i prior uguali (da attivare in `selfplay.py`); sotto → boot1
   chiuso con questa ricerca.
-- `--avanza` (proposta di Claude, da scegliere prima del lancio): per
+- `--avanza` (proposta di Claude; lanciata questa, 19/11, ed è quella che decide): per
   entrambi, il PASS forzato che chiude un movimento (nessun'altra unità può
   unirsi) si gioca subito, invece di valutare il movimento dichiarato a metà.
   Il bot non cerca e non registra le decisioni con una sola azione, quindi la
