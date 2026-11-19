@@ -66,8 +66,9 @@ class HandwrittenAgent(_Budget, NetGuidedMCTSAgent):
     name = "handwritten"
 
     def __init__(self, player, iterations: int = 100, rng: Optional[random.Random] = None,
-                 budget: Optional[float] = None):
-        super().__init__(player, None, iterations=iterations, rng=rng, backup="best")
+                 budget: Optional[float] = None, advance_forced_move: bool = False):
+        super().__init__(player, None, iterations=iterations, rng=rng, backup="best",
+                         advance_forced_move=advance_forced_move)
         self.budget = budget
         self.main_iters: list = []
 
@@ -86,7 +87,21 @@ class NetAgent(_Budget, NetGuidedMCTSAgent):
     name = "net"
 
     def __init__(self, player, net, iterations: int = 100, rng: Optional[random.Random] = None,
-                 budget: Optional[float] = None):
-        super().__init__(player, net, iterations=iterations, rng=rng, backup="best")
+                 budget: Optional[float] = None, advance_forced_move: bool = False):
+        super().__init__(player, net, iterations=iterations, rng=rng, backup="best",
+                         advance_forced_move=advance_forced_move)
         self.budget = budget
         self.main_iters: list = []
+
+
+class NetValueAgent(NetAgent):
+    """The hybrid of the boot1 arena (19/11): the hand-written bot's search
+    (equal priors over the legal actions at every expansion) with the net's
+    value instead of `table_value`, in the main turn, in showdowns and
+    reactions, and for the mulligan."""
+    name = "net_value"
+
+    def _evaluate(self, clone, side, legal_ga):
+        ts = [a.to_engine() for a in legal_ga]
+        u = 1.0 / max(1, len(ts))
+        return {t: u for t in ts}, self._value_only(clone, side)

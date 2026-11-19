@@ -102,3 +102,30 @@ uguali) e il valore. Possibili cause, da misurare: i prior imitano il bot e
 spingono la ricerca sulle mosse che lui giocherebbe comunque; il valore è
 più preciso sulle posizioni delle partite del bot, non per forza nel
 distinguere le opzioni di una stessa decisione; il 18% di iterazioni in meno.
+
+## Arena di boot1 (19/11): la prova che decide
+Disegno della revisione esterna, regola fissata dall'utente prima del lancio.
+- Candidato: `NetValueAgent` (`riftbound/ai/handwritten.py`), la ricerca del
+  bot a mano (prior uguali) con il valore di boot1, anche negli showdown,
+  nelle reazioni e nel mulligan. Avversario: il bot a mano. Per entrambi
+  backup best, mossa col Q massimo, 0,4 s di CPU per mossa.
+- 230 coppie di seed nuovi (7000-7229), ogni seed giocato due volte a posti
+  scambiati. Si riportano il punteggio, l'IC 95% sulle medie di coppia, il
+  punteggio con ciascun mazzo e le iterazioni per decisione.
+- Regola: punteggio osservato ≥ 0,55 → ibrido promosso, il self-play parte
+  da lui con i prior uguali (da attivare in `selfplay.py`); sotto → boot1
+  chiuso con questa ricerca.
+- `--avanza` (proposta di Claude, da scegliere prima del lancio): per
+  entrambi, il PASS forzato che chiude un movimento (nessun'altra unità può
+  unirsi) si gioca subito, invece di valutare il movimento dichiarato a metà.
+  Il bot non cerca e non registra le decisioni con una sola azione, quindi la
+  rete quello stato non l'ha mai visto; in s3090, s3076 e s3048 entrambe le
+  mosse di Evelynn ci passano. Revisione: in s3048 la rete vale -0,37 prima
+  del PASS e +0,84 dopo; senza `--avanza` l'ibrido fa 0/24 in s3090 e s3048.
+  Il bot a mano, con e senza: stesse scelte nelle quattro posizioni (24
+  mondi). Test: `tests/test_advance_forced_move.py`.
+- s3012 non dice niente sul bot a mano: le due mosse di Zed hanno lo stesso Q
+  fino all'ultima cifra (0,4621171572600096 e ...097), decide l'arrotondamento
+  (qui l'attacco, sul Mac la difesa).
+- Lancio: `scripts/arena.command` (circa mezz'ora); risultato in
+  `runs/boot1/ARENA.txt`.

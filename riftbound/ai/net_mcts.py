@@ -360,8 +360,15 @@ class NetGuidedMCTSAgent(Agent):
                  noise_frac: float = 0.25, temperature_moves: int = 10,
                  pass_margin: float = 0.02, fast_iterations: Optional[int] = None,
                  full_fraction: float = 1.0, backup: str = "best",
-                 policy_target: str = "visits"):
+                 policy_target: str = "visits", advance_forced_move: bool = False):
         super().__init__(player)
+        # A move declared by this player whose only way on is the PASS that
+        # closes it (no other unit can join): with this set, the search closes
+        # it at once (showdown, conquest) instead of valuing the half-declared
+        # move as a leaf. The real game never asks such a decision (one legal
+        # action), so a net learned from real decisions never saw that state
+        # (boot1, s3048: -0.37 before the PASS, +0.84 after; 19/11).
+        self.advance_forced_move = advance_forced_move
         # What a recorded example's policy is: the root's visit shares
         # (AlphaZero) or "q", the policy improved by the search's values
         # (improved_policy).
@@ -696,6 +703,19 @@ class NetGuidedMCTSAgent(Agent):
             if not legal_ga:
                 value = self._net_value(clone, side)
                 break
+
+            if self.advance_forced_move and len(legal_ga) == 1 and legal_ga[0].kind == "PASS" \
+                    and clone.pending_move is not None and clone.pending_move[1] == side:
+                # The forced PASS that closes the move: played as the tree's PASS
+                # child would be, without a node and without valuing the state.
+                tree = _TreeChooser(self, side, node, path)
+                loop.chooser = tree
+                loop._apply_action(clone.get_player(side), _PASS, cards_played_this_turn=cpt)
+                loop.chooser = None
+                loop._recompute_passives()
+                cpt += 1
+                node = tree.node
+                continue
 
             if not node.expanded:
                 priors, v = self._evaluate(clone, side, legal_ga)

@@ -59,14 +59,14 @@ con la lista di Ivern (`docs/bot/partite/82FAW_ivern_lista.txt`). Bot contro i
 turni giocati in 82FAW: d'accordo con G17, G20, G22 (GIUDIZI, 19/11).
 Rete dal bot a mano (`docs/bot/RETE.md`, "Risultati di boot1", Mac 18/11):
 prevede chi vince meglio del valore a mano (0,466 contro 0,559), ma contro il
-bot fa 0,46 ± 0,05 (serviva 0,55): stop. `net_boot.pt` sul Mac; diagnosi proposta.
+bot fa 0,46 ± 0,05 (serviva 0,55). Arena dell'ibrido pronta: `scripts/arena.command`.
 
 ## Prossimi passi
 0. Valutazione dai giudizi (`judgment_value.py`): non rende il bot più forte
    (0,49; più peso alla mano 0,65); turno avversario simulato 0,44, per media
    o caso peggiore sbaglia 5-6 posizioni su 7. Deciso: la rete. boot1:
-   misura 1 passa, misura 3 no (0,46) → stop; decisione dell'utente su
-   diagnosi, self-play comunque, o tornare al bot a mano / piano v2.
+   misura 1 passa, misura 3 no (0,46). Arena (RETE.md, 19/11): valore di
+   boot1 + prior uguali, ≥ 0,55 → self-play dall'ibrido; sotto → boot1 chiuso.
    Registratore RiftAtlas usato nella 82FAW (nessun buco; `avversarioScoperto`
    esclude le carte rivelate).
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro

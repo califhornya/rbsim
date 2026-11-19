@@ -306,7 +306,7 @@ def _net(path: str):
 
 
 def _first_move(task):
-    from riftbound.ai.handwritten import HandwrittenAgent, NetAgent
+    from riftbound.ai.handwritten import HandwrittenAgent, NetAgent, NetValueAgent
     from riftbound.core.loop import GameLoop
     from riftbound.core.state import determinize
     name, who, w, ckpt = task
@@ -317,7 +317,13 @@ def _first_move(task):
     determinize(gs, observer=side, rng=gs.rng)
     p = gs.get_player(side)
     rng = random.Random(20_000 + w)
-    p.agent = NetAgent(p, _net(ckpt), rng=rng) if who == "net" else HandwrittenAgent(p, rng=rng)
+    adv = who.endswith("+avanza")            # arena(): the forced PASS of a move played at once
+    if who == "net":
+        p.agent = NetAgent(p, _net(ckpt), rng=rng)
+    elif who.startswith("hybrid"):           # the arena's candidate
+        p.agent = NetValueAgent(p, _net(ckpt), rng=rng, advance_forced_move=adv)
+    else:
+        p.agent = HandwrittenAgent(p, rng=rng, advance_forced_move=adv)
     GameLoop(gs)                       # binds the agent to the game
     return name, who, p.agent.decide_action(gs.get_player(gs.other(side)), d["cards_played"])
 
@@ -338,6 +344,27 @@ def _h2h_game(task):
     net, hw = gs.get_player(net_seat).agent, gs.get_player(gs.other(net_seat)).agent
     s = 1.0 if res.winner == net_seat else 0.5 if res.winner == "DRAW" else 0.0
     return seed, net_seat, s, net.main_iters, hw.main_iters
+
+
+def _arena_game(task):
+    # As _h2h_game, the candidate being the hybrid (NetValueAgent); `advance`
+    # goes to both, so the two searches stay the same.
+    from riftbound.ai.handwritten import HandwrittenAgent, NetValueAgent
+    from riftbound.core.game_factory import build_game
+    from riftbound.core.loop import GameLoop
+    seed, cand_seat, budget, ckpt, advance = task
+    gs = build_game(game_seed=seed, deck_a_path=EVE, deck_b_path=KHA, ai_a=None, ai_b=None,
+                    max_turns=MAX_TURNS)
+    for seat in ("A", "B"):
+        p = gs.get_player(seat)
+        rng = random.Random(seed * 2 + (seat == "B"))
+        p.agent = NetValueAgent(p, _net(ckpt), rng=rng, budget=budget, advance_forced_move=advance) \
+            if seat == cand_seat else \
+            HandwrittenAgent(p, rng=rng, budget=budget, advance_forced_move=advance)
+    res = GameLoop(gs).start()
+    cand, hw = gs.get_player(cand_seat).agent, gs.get_player(gs.other(cand_seat)).agent
+    s = 1.0 if res.winner == cand_seat else 0.5 if res.winner == "DRAW" else 0.0
+    return seed, cand_seat, s, res.winner, cand.main_iters, hw.main_iters
 
 
 def _st_game(task):
@@ -436,9 +463,97 @@ def measure(args) -> None:
                   f"rete {sum(st) / len(st):.2f} (il bot a mano fa 0,80)")
 
 
+# --- the boot1 arena (19/11, docs/bot/RETE.md) ------------------------------------
+
+# New seeds: measure 3 used 3000-3099, measure 4 1000-1199, the data 100000-101999.
+ARENA_SEED0 = 7000
+ARENA_THRESHOLD = 0.55
+
+
+def _mean_ci(xs: list) -> tuple[float, float]:
+    m = sum(xs) / len(xs)
+    sd = math.sqrt(sum((x - m) ** 2 for x in xs) / max(1, len(xs) - 1))
+    return m, 1.96 * sd / math.sqrt(len(xs))
+
+
+def arena(args) -> None:
+    """The hybrid (boot1's value, equal priors) against the hand-written bot,
+    the rule fixed before the run: an observed score of 0.55 or more promotes
+    it, below that boot1 is closed with this search. In --run-dir/ARENA.txt."""
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    from riftbound.core.loop import GameLoop
+    run_dir, ckpt = args.run_dir, str(args.run_dir / "net_boot.pt")
+    if not Path(ckpt).exists():
+        raise SystemExit(f"Manca {ckpt}: l'arena usa la rete di boot1.")
+
+    def say(text: str) -> None:
+        print(text, flush=True)
+        with open(run_dir / "ARENA.txt", "a") as f:
+            f.write(text + "\n")
+
+    suffix = "+avanza" if args.avanza else ""
+    say(f"\n== Arena boot1 ({time.strftime('%d/%m %H:%M')}), rete {ckpt}")
+    say("candidato: valore di boot1 + prior uguali; avversario: il bot a mano; per entrambi backup "
+        "best e mossa col Q massimo"
+        + ("; per entrambi il PASS forzato che chiude un movimento si gioca subito (--avanza)"
+           if args.avanza else ""))
+    say(f"regola fissata prima: punteggio osservato >= {ARENA_THRESHOLD:.2f} -> si promuove l'ibrido; "
+        f"sotto -> boot1 chiuso con questa ricerca")
+
+    # 0. only to read the result: the known positions, as measure 2
+    say(f"0. (solo informativo) prima mossa nelle posizioni note ({args.worlds} mondi, 100 iterazioni):")
+    tasks = [(n, who + suffix, w, ckpt) for n in KNOWN for who in ("hybrid", "bot")
+             for w in range(args.worlds)]
+    with Pool(args.workers, initializer=_init) as pool:
+        moves = pool.map(_first_move, tasks)
+    for name, (right_key, words) in KNOWN.items():
+        pos = pickle.load(open(POSITIONS / f"{name}.pkl", "rb"))
+        labels = {a.to_engine(): a.label for a in
+                  legal_actions(GameLoop(pos["state"].clone()), DecisionPoint.TURN_ACTION, pos["side"])}
+        line = f"   {name}: giusta {words}"
+        for who, words_who in (("hybrid", "candidato"), ("bot", "bot a mano")):
+            got = [m for n, w_, m in moves if n == name and w_ == who + suffix]
+            top = Counter(labels.get(m, str(m)) for m in got).most_common(2)
+            line += f"\n      {words_who}: giusta in {sum(m == pos[right_key] for m in got)}/{len(got)} " \
+                    f"({'; '.join(f'{k}x {m}' for m, k in top)})"
+        say(line)
+
+    # 1. the arena: per seed both games, the candidate once in each seat
+    seeds = range(ARENA_SEED0, ARENA_SEED0 + args.pairs)
+    say(f"1. Contro il bot a mano: {args.pairs} coppie, seed {seeds[0]}-{seeds[-1]}, "
+        f"{args.budget} s di CPU per mossa ciascuno")
+    tasks = [(s, seat, args.budget, ckpt, args.avanza) for s in seeds for seat in ("A", "B")]
+    t0, rows = time.time(), []
+    with Pool(args.workers, initializer=_init) as pool:
+        for r in pool.imap_unordered(_arena_game, tasks):
+            rows.append(r)
+            if len(rows) % 46 == 0:
+                print(f"   ... {len(rows)}/{len(tasks)} partite, {(time.time() - t0) / 60:.0f} min", flush=True)
+    pairs: dict = {}
+    for seed, _, sc, _, _, _ in rows:
+        pairs.setdefault(seed, []).append(sc)
+    m, h = _mean_ci([sum(v) / 2 for v in pairs.values()])
+    ea, ha = _mean_ci([r[2] for r in rows if r[1] == "A"])
+    eb, hb = _mean_ci([r[2] for r in rows if r[1] == "B"])
+    w = sum(r[2] == 1.0 for r in rows)
+    dr = sum(r[2] == 0.5 for r in rows)
+    ci = [x for r in rows for x in r[4]]
+    hi = [x for r in rows for x in r[5]]
+    say(f"   punteggio {m:.3f} +- {h:.3f} (95%, sulle {len(pairs)} medie di coppia: {m - h:.3f}-{m + h:.3f}); "
+        f"vinte {w}, perse {len(rows) - w - dr}, pari {dr}")
+    say(f"   con Evelynn {ea:.3f} +- {ha:.3f}, con Kha'Zix {eb:.3f} +- {hb:.3f} "
+        f"(il bot contro se stesso: Evelynn 0,69, Kha'Zix 0,31)")
+    say(f"   iterazioni per decisione del turno: candidato {sum(ci) / max(1, len(ci)):.0f}, "
+        f"bot {sum(hi) / max(1, len(hi)):.0f}; {(time.time() - t0) / 60:.0f} min")
+    verdict = "PROMOSSO: il self-play parte dall'ibrido, con i prior uguali" if m >= ARENA_THRESHOLD \
+        else "NON PROMOSSO: boot1 chiuso con questa ricerca"
+    say(f"   Esito: {verdict} ({m:.3f} contro la soglia {ARENA_THRESHOLD:.2f})")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("step", choices=("data", "train", "measure", "all"))
+    ap.add_argument("step", choices=("data", "train", "measure", "all", "arena"))
     ap.add_argument("--run-dir", type=Path, required=True)
     ap.add_argument("--games", type=int, default=2000)
     ap.add_argument("--keep", type=float, default=0.3, help="Share of the decisions that become examples")
@@ -450,7 +565,13 @@ def main() -> None:
     ap.add_argument("--pairs", type=int, default=100)
     ap.add_argument("--budget", type=float, default=0.4)
     ap.add_argument("--st-games", type=int, default=200)
+    ap.add_argument("--avanza", action="store_true",
+                    help="arena: both agents play the forced PASS that closes a move at once "
+                         "(advance_forced_move) instead of valuing the half-declared move")
     args = ap.parse_args()
+    if args.step == "arena":
+        arena(args)
+        return
     args.run_dir.mkdir(parents=True, exist_ok=True)
     if args.step in ("data", "all"):
         data(args)
