@@ -183,3 +183,24 @@ questa ricetta si ferma.
   mosse che valgono uguale: nel pilota il bot e la sua alternativa valgono in
   media uguale). Con 3.000 posizioni il segnale delle differenze è piccolo
   rispetto al rumore delle etichette a 8 mondi.
+- Revisione esterna sui log: il rumore degli 8 mondi spiega circa il 27%
+  dell'errore sulle differenze (0,031 su 0,115); predire sempre "sorelle
+  uguali" fa 0,097, meglio di table_value e del residuo. Il 98% del
+  miglioramento sul risultato è la parte comune alle sorelle: la rete impara
+  quanto è buona la posizione di partenza, non la mossa. Passo 2 chiuso.
+
+## Ultime prove di forza (20/11): tempo e orizzonte
+`scripts/forza.command` (`scripts/diag/arena_bot.py`), contro il bot a mano a
+0,4 s, regola per ciascuna: >= 0,52 e limite inferiore > 0,50.
+- tempo: lo stesso bot a 0,8 s, 200 coppie (seed 13000-13199). Se vince
+  netto, un avversario più forte subito (più lento).
+- orizzonte (`riftbound/ai/horizon.py`, disegno della revisione): quando le
+  due mosse migliori sono vicine (Q a 0,02, almeno 4 visite), ciascuna si
+  gioca in 2 mondi appaiati oltre la fine del turno fino alla prima azione
+  dell'avversario; si cambia mossa se il vantaggio medio supera 0,02. 800
+  coppie (seed 14000-14799). Deviazione: metà del tempo alla ricerca e metà
+  allo sguardo (la revisione diceva 0,30 + 0,10 s: in s3012 lo sguardo
+  scadeva in 10 casi su 12; con metà e metà, 3 su 12, e difende in 6 su 12).
+Se anche queste restano sotto soglia: il lavoro sulla forza si ferma, il bot
+a mano è lo strumento (sparring, matchup per chi comincia, revisione delle
+partite vere).

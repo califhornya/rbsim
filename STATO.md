@@ -70,8 +70,8 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 ## Prossimi passi
 0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
    correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
-   Bot contro alternativa 0,59. Passo 2 (Mac 20/11, 7 ore): G = +0,000 ±
-   0,011, non passa: la ricetta si ferma (RETE.md). Da decidere con l'utente.
+   Passo 2 (Mac 20/11): G = +0,000 ± 0,011, chiuso. Ultime prove di forza:
+   `scripts/forza.command` (tempo 0,8 s; orizzonte oltre il turno), RETE.md.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide; poi sideboard, tempi.
