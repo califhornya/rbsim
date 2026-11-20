@@ -68,10 +68,10 @@ Dichiarazioni (copia del gioco): 31% del tempo senza profiler, sempre vuote
 il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 
 ## Prossimi passi
-0. Pilota del passo 2: `scripts/pilota.command`, lanciato sul Mac il 20/11
-   (2-3 ore), risultato in runs/pilota/RISULTATO.txt. Stop: etichette instabili
-   su mondi nuovi; rete che passa la soglia offline ma perde l'arena; curva
-   piatta a 15.000-30.000 partite.
+0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
+   correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
+   Da fare: verifica per coppia (bot contro alternativa); poche radici dal
+   turno 9 (7): campionare tra le decisioni raggiunte. Poi dati del passo 2.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide; poi sideboard, tempi.
