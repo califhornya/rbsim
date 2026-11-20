@@ -75,8 +75,7 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    il bot a mano è lo strumento. Da decidere con l'utente come usarlo.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
-2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide; poi sideboard, tempi.
-Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_turns`.
+2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide. Macchine: Mac M1 Max, PC Ryzen.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
