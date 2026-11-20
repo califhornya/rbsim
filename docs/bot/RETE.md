@@ -169,3 +169,17 @@ risultato di ogni sorella e la differenza tra sorelle). Regola fissata prima:
 sulle 400 di prova, G >= +0,02 punti vittoria per radice e limite inferiore
 sopra 0 -> arena (800 coppie, >= 0,52 e limite inferiore > 0,50); altrimenti
 questa ricetta si ferma.
+
+### Esito (Mac, 20/11, 7 ore): non passa, la ricetta si ferma
+- 1.600 radici (turni 1-19, mediana 9), 28.272 partite forzate (2,9 s).
+- Allenamento: sulle 200 dell'epoca l'errore sul risultato scende da 0,449
+  (table_value) a 0,316, quello sulle differenze tra sorelle solo da 0,115 a
+  0,108; tenuta l'epoca 9 di 200 (poi peggiora subito).
+- Soglia sulle 400 di prova: scelte diverse in 318; **G = +0,000 ± 0,011**
+  (IC -0,011 - +0,011); meglio il nuovo valore in 60, il bot in 71, uguali
+  nelle altre.
+- Lettura: come boot1, impara chi vince ma quasi non impara a ordinare le
+  mosse; cambia la scelta nell'80% delle posizioni senza effetto (spesso tra
+  mosse che valgono uguale: nel pilota il bot e la sua alternativa valgono in
+  media uguale). Con 3.000 posizioni il segnale delle differenze è piccolo
+  rispetto al rumore delle etichette a 8 mondi.
