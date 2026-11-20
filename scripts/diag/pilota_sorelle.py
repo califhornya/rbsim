@@ -268,6 +268,20 @@ def report(run_dir: Path, roots: dict, rows: list, say) -> None:
     say(f"1. Si ripetono? Differenze tra sorelle, 8 mondi W1 contro 8 nuovi W2, {CHEAP} iterazioni: "
         f"{len(pr)} coppie, correlazione {r:.2f} (IC 95% {lo:.2f}-{hi:.2f})")
     say(f"   con |differenza| >= 3/8 in W1: stesso verso in W2 in {same}/{len(clear)}")
+    # By pair: the move at random is often easy to tell from the others; the
+    # pair that matters for choosing is the bot's move against its alternative.
+    for a, b in ((0, 1), (0, 2), (1, 2)):
+        sel = []
+        for i in roots:
+            p1, p2 = _pairs(_means(rows, i, "W1", CHEAP)), _pairs(_means(rows, i, "W2", CHEAP))
+            if (a, b) in p1 and (a, b) in p2:
+                sel.append((p1[(a, b)], p2[(a, b)]))
+        if len(sel) >= 3:
+            cl = [(x, y) for x, y in sel if abs(x) >= 0.375]
+            sm = sum((x > 0 and y > 0) or (x < 0 and y < 0) for x, y in cl)
+            say(f"   {KINDS[a]} contro {KINDS[b]}: {len(sel)} coppie, correlazione "
+                f"{_corr([x for x, _ in sel], [y for _, y in sel]):.2f}; con |differenza| >= 3/8: "
+                f"stesso verso in {sm}/{len(cl)}; differenza media {sum(x + y for x, y in sel) / (2 * len(sel)):+.3f}")
     if r > 0:
         for target in (0.5, 0.7):
             n = 8 * (target / (1 - target)) * ((1 - r) / r)
