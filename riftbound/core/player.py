@@ -26,10 +26,25 @@ class Rune:
 @dataclass
 class RuneDeck:
     runes: List[Rune]
+    # How many runes on top nobody has seen: their order is secret (§108.5.d),
+    # so the search reshuffles them (state.determinize). The ones below came
+    # back by recycling, to the bottom, in an order both players saw. None
+    # (states saved before 20/11): all of them.
+    unseen: Optional[int] = None
+
+    def __post_init__(self) -> None:
+        if self.unseen is None:
+            self.unseen = len(self.runes)
+
+    def top_seen(self) -> None:
+        """The top rune leaves the deck or is revealed."""
+        if self.unseen:
+            self.unseen -= 1
 
     def draw(self) -> Optional[Rune]:
         if not self.runes:
             return None
+        self.top_seen()
         return self.runes.pop(0)
 
     def recycle(self, rune: Rune) -> None:

@@ -2327,6 +2327,7 @@ def _twisted_fate_reveal(ctx: "EffectContext", spec: Mapping[str, Any]) -> None:
     runes = ctx.actor.rune_deck.runes
     if not runes:
         return
+    ctx.actor.rune_deck.top_seen()
     rune = runes.pop(0)
     runes.append(rune)
     if rune.domain in (Domain.FURY, Domain.MIND, Domain.ORDER):

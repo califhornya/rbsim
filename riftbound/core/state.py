@@ -325,6 +325,17 @@ def determinize(gs: "GameState", observer: str, rng: random.Random) -> "GameStat
     rng.shuffle(below)
     me.deck.cards[:len(below)] = below
     opp.deck.shuffle(rng)
+
+    # Both rune decks: the order of the runes nobody has seen is secret
+    # (§108.5.d); the recycled ones below them stay as they came back.
+    # (Before 20/11 the search knew the real next runes, its own and the
+    # opponent's.)
+    for p in (me, opp):
+        rd = p.rune_deck
+        n = len(rd.runes) if rd.unseen is None else min(rd.unseen, len(rd.runes))
+        head = sorted(rd.runes[:n], key=lambda r: r.domain.name)
+        rng.shuffle(head)
+        rd.runes[:n] = head
     return gs
 
 
