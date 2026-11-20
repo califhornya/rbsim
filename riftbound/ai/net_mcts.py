@@ -859,14 +859,20 @@ class NetGuidedMCTSAgent(Agent):
         if n == 0:
             return []
         from riftbound.core.state import determinize
+        # The worlds first (the deck's order is hidden: determinize reshuffles
+        # it, the hand stays), the same ones for every choice; then the cards
+        # go back in each and the replacements come from that world's deck.
+        # (Before 20/11 the mulligan was played on the real deck and only then
+        # determinized: the replacements were the real next cards.)
+        worlds = [self._rng.randrange(1 << 30) for _ in range(max(1, self.mulligan_samples))]
         out = []
         for combo in (list(c) for r in range(3) for c in itertools.combinations(range(n), r)):
             vals = []
-            for _ in range(max(1, self.mulligan_samples)):
+            for seed in worlds:
                 clone = self.gs.clone()
-                clone.rng = random.Random(self._rng.randrange(1 << 30))
-                clone.get_player(side).mulligan(combo, clone.rng)
+                clone.rng = random.Random(seed)
                 determinize(clone, observer=side, rng=clone.rng)
+                clone.get_player(side).mulligan(combo, clone.rng)
                 vals.append(self._value_only(clone, side))
             out.append((combo, sum(vals) / len(vals)))
         return out
