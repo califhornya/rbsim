@@ -53,7 +53,7 @@ class _Budget:
         t0, n = time.process_time(), 0
         while n < 1 or time.process_time() - t0 < self.budget:
             if point == DecisionPoint.TURN_ACTION:
-                self._iterate(root, side, cards_played)
+                self._iterate(root, side, cards_played, legal)
             else:
                 self._iterate_now(root, side, point, legal, bf_idx)
             n += 1

@@ -64,9 +64,15 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
     gs = loop.gs
     side = ap.name
     n_bf = len(gs.battlefields)
-    base_index = n_bf
 
     actions: list[GameAction] = [GameAction.pass_()]
+
+    # A move being declared (§144.3): more units may join it, to the same
+    # battlefield; PASS ends it. Only those are built (the rest would be
+    # filtered out below anyway, in this same order).
+    pending = gs.pending_move
+    if pending is not None and pending[1] == side:
+        return actions + _move_actions(loop, ap, only_dst=pending[0])
 
     # --- plays from hand (same cost the engine charges: GameLoop._effective_cost) ---
     for idx, card in enumerate(ap.hand):
@@ -109,34 +115,7 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
                 actions.append(GameAction("CHAMPION", None, 0, dst,
                                           f"Deploy champion {champ.name} to BF{dst}"))
 
-    # --- movement (illegal during showdown or an open chain), one action per
-    # ready unit; consecutive moves to one battlefield go together (§144.3) ---
-    if not gs.showdown_active and not gs.chain:
-        def where(loc):
-            return "base" if loc == base_index else f"BF{loc}"
-        for src in range(n_bf + 1):
-            units = ap.base_units if src == base_index else gs.battlefields[src]._units_for(side)
-            for ui, u in enumerate(units):
-                if not u.ready or u.cant_move_turn == gs.turn:
-                    continue
-                for dst in range(n_bf + 1):
-                    if dst == src:
-                        continue
-                    # bf→bf needs GANKING (§144.4.c), or the Baron Pit.
-                    if src != base_index and dst != base_index and \
-                            not loop._can_move_bf_to_bf(u, gs.battlefields[dst]):
-                        continue
-                    if dst == base_index and not loop._can_move_to_base(
-                            u, None if src == base_index else gs.battlefields[src]):
-                        continue      # "can't move to base" (Vilemaw's Lair, Sentry)
-                    if not loop._can_pay_generic_power(ap, loop._group_move_toll(side, dst)):
-                        continue      # Mageseeker Investigator
-                    joining = gs.pending_move is not None and gs.pending_move == (dst, side)
-                    if dst != base_index and not joining and \
-                            not loop._can_pay_move_tax(side, gs.battlefields[dst]):
-                        continue      # Gravity Field's tax
-                    actions.append(GameAction.move(
-                        src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
+    actions += _move_actions(loop, ap)
 
     # --- HIDDEN keyword (Open State only) ---
     if not gs.showdown_active and not gs.chain:
@@ -164,6 +143,46 @@ def _turn_actions(loop: "GameLoop", ap) -> list[GameAction]:
         actions = [a for a in actions
                    if a.kind == "PASS" or (a.kind == "MOVE" and a.dst_lane == pending[0])]
     return actions
+
+
+def _move_actions(loop: "GameLoop", ap, only_dst=None) -> list[GameAction]:
+    """Movement (illegal during showdown or an open chain), one action per ready
+    unit; consecutive moves to one battlefield go together (§144.3). With
+    `only_dst`, only the moves there (the units joining a declared move)."""
+    gs = loop.gs
+    side = ap.name
+    n_bf = len(gs.battlefields)
+    base_index = n_bf
+    out: list[GameAction] = []
+    if gs.showdown_active or gs.chain:
+        return out
+
+    def where(loc):
+        return "base" if loc == base_index else f"BF{loc}"
+    for src in range(n_bf + 1):
+        units = ap.base_units if src == base_index else gs.battlefields[src]._units_for(side)
+        for ui, u in enumerate(units):
+            if not u.ready or u.cant_move_turn == gs.turn:
+                continue
+            for dst in range(n_bf + 1):
+                if dst == src or (only_dst is not None and dst != only_dst):
+                    continue
+                # bf→bf needs GANKING (§144.4.c), or the Baron Pit.
+                if src != base_index and dst != base_index and \
+                        not loop._can_move_bf_to_bf(u, gs.battlefields[dst]):
+                    continue
+                if dst == base_index and not loop._can_move_to_base(
+                        u, None if src == base_index else gs.battlefields[src]):
+                    continue      # "can't move to base" (Vilemaw's Lair, Sentry)
+                if not loop._can_pay_generic_power(ap, loop._group_move_toll(side, dst)):
+                    continue      # Mageseeker Investigator
+                joining = gs.pending_move is not None and gs.pending_move == (dst, side)
+                if dst != base_index and not joining and \
+                        not loop._can_pay_move_tax(side, gs.battlefields[dst]):
+                    continue      # Gravity Field's tax
+                out.append(GameAction.move(
+                    src, dst, f"Move {u.card.name} {where(src)}→{where(dst)}", unit=ui))
+    return out
 
 
 def _ability_actions(loop: "GameLoop", ap, side: str) -> list[GameAction]:

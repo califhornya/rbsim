@@ -597,7 +597,7 @@ class NetGuidedMCTSAgent(Agent):
                           and self._rng.random() >= self.full_fraction)
         if point == DecisionPoint.TURN_ACTION:
             for _ in range(self.iterations if self._full else self.fast_iterations):
-                self._iterate(root, side, cards_played)
+                self._iterate(root, side, cards_played, legal)
         else:
             n = self.reaction_iterations if self._full else max(4, self.fast_iterations // 4)
             for _ in range(n):
@@ -700,7 +700,11 @@ class NetGuidedMCTSAgent(Agent):
             "player": side,
         })
 
-    def _iterate(self, root: _Node, side: str, cards_played: int) -> None:
+    def _iterate(self, root: _Node, side: str, cards_played: int, root_legal: Optional[list] = None) -> None:
+        """One simulation of the turn. `root_legal`: the root's menu, the same in
+        every determinized world (the player's own options don't depend on what
+        is hidden from them; tests/test_search_speedups.py), reused at the
+        first step instead of rebuilt."""
         from riftbound.core.loop import GameLoop
         from riftbound.core.state import determinize
         clone = self.gs.clone()
@@ -725,7 +729,8 @@ class NetGuidedMCTSAgent(Agent):
                 value = self._net_value(clone, side)   # opponent to move → net estimate
                 break
 
-            legal_ga = legal_actions(loop, DecisionPoint.TURN_ACTION, side)
+            legal_ga = root_legal if node is root and root_legal is not None \
+                else legal_actions(loop, DecisionPoint.TURN_ACTION, side)
             if not legal_ga:
                 value = self._net_value(clone, side)
                 break
