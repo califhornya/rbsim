@@ -66,6 +66,9 @@ ZONES: tuple[str, ...] = (
     "my_base_gear", "opp_base_gear",
     *(f"{w}_deployed_bf{i}" for w in ("my", "opp") for i in range(N_BF)),
     *(f"battlefield_{i}" for i in range(N_BF)),
+    # The viewer's own facedown cards, battlefield by battlefield (20/11; at the
+    # end so the zones before keep their index; nets saved before don't load).
+    *(f"my_facedown_bf{i}" for i in range(N_BF)),
 )
 _ZONE = {z: i for i, z in enumerate(ZONES)}
 N_ZONES = len(ZONES)
@@ -210,6 +213,12 @@ def _tokens(obs: Observation) -> list:
     for i, bf in enumerate(bfs[:N_BF]):
         if bf.named:
             card(f"battlefield_{i}", bf.named)
+    # Our facedown cards, where they are and in which slot (HIDDEN_PLAY names
+    # the slot): §128.4, we may look at them.
+    for i, bf in enumerate(bfs[:N_BF]):
+        for slot, name in enumerate(bf.my_facedown):
+            if name:
+                card(f"my_facedown_bf{i}", name, [1.0 / 3.0, slot / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))
     # Known top of the deck (PREDICT): one row each, the next draw first.
     for rank, name in enumerate(obs.my_deck_top):
         card("my_deck_top", name, [1.0 / 3.0, rank / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))

@@ -156,6 +156,11 @@ class BattlefieldView:
     scored_A: bool = False
     scored_B: bool = False
     facedowns: tuple[str, ...] = ()
+    # The viewer's own facedown cards, by name, slot by slot as `facedowns`
+    # (None where the card is the opponent's): its controller may look at it
+    # (§128.4). Before 20/11 the viewer didn't know which of its cards was
+    # hidden where.
+    my_facedown: tuple[Optional[str], ...] = ()
 
     def to_dict(self) -> dict:
         return {
@@ -168,6 +173,7 @@ class BattlefieldView:
             "scored_A": self.scored_A,
             "scored_B": self.scored_B,
             "facedowns": list(self.facedowns),
+            "my_facedown": list(self.my_facedown),
         }
 
 
@@ -275,6 +281,8 @@ class Observation:
                 scored_A=bool(bf.scored_this_turn_A),
                 scored_B=bool(bf.scored_this_turn_B),
                 facedowns=tuple(fd.owner for fd in bf.facedowns),
+                my_facedown=tuple(fd.card.name if fd.owner == viewer else None
+                                  for fd in bf.facedowns),
             )
 
         def legend(side):
