@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-20 (piano "forza": velocità, mulligan e rune corretti).
+Aggiornato: 2026-11-20 (tempo e orizzonte sotto soglia: lavoro sulla forza fermo).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -70,8 +70,9 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 ## Prossimi passi
 0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
    correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
-   Passo 2 (Mac 20/11): G = +0,000 ± 0,011, chiuso. Ultime prove di forza:
-   `scripts/forza.command` (tempo 0,8 s; orizzonte oltre il turno), RETE.md.
+   Passo 2: G = +0,000 ± 0,011, chiuso. Tempo 0,8 s: 0,472 ± 0,033;
+   orizzonte: 0,490 ± 0,014: nessuna passa. Lavoro sulla forza fermo (RETE.md);
+   il bot a mano è lo strumento. Da decidere con l'utente come usarlo.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide; poi sideboard, tempi.

@@ -204,3 +204,17 @@ questa ricetta si ferma.
 Se anche queste restano sotto soglia: il lavoro sulla forza si ferma, il bot
 a mano è lo strumento (sparring, matchup per chi comincia, revisione delle
 partite vere).
+
+### Esito (Mac, 20/11): nessuna delle due passa; il lavoro sulla forza si ferma
+- tempo: **0,472 ± 0,033** (0,440-0,505); 342 iterazioni per decisione
+  contro 176. Pensare il doppio non fa giocare meglio: la ricerca è satura,
+  il limite è il valore e l'orizzonte di un turno, non le iterazioni.
+- orizzonte: **0,490 ± 0,014** (0,476-0,504); finaliste in 16.270 decisioni
+  su 32.566, confronti 15.230, tempo scaduto 1.040, mossa cambiata in 473
+  (1,5%). s3012: difende in 19 su 24 (il bot sul Mac 24 su 24).
+- In entrambe Evelynn vince ~0,92 quando comincia e ~0,45-0,50 quando
+  comincia Kha'Zix: il dato del matchup regge con piloti diversi.
+Bilancio: boot1, spareggio, passo 2, tempo e orizzonte, cinque prove con
+regola fissata prima, nessuna sopra il bot a mano. Restano: le correzioni
+(mulligan, rune, carte coperte), la ricerca 1,16×, gli strumenti (arene,
+pilota) e il bot a mano come strumento.
