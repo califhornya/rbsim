@@ -103,10 +103,10 @@ class Reply(Ref):
         self.disagreements = 0
         self.compared = 0
 
-    def _iterate(self, root, side, cards_played):
+    def _iterate(self, root, side, cards_played, *rest):
         self._in_turn_tree = True
         try:
-            super()._iterate(root, side, cards_played)
+            super()._iterate(root, side, cards_played, *rest)
         finally:
             self._in_turn_tree = False
 

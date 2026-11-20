@@ -62,10 +62,10 @@ class TurnArm(Fixed):
         self.iterations = self.reaction_iterations = self.v_iters if self._now() else self.base
         return super().search(point, legal, cards_played=cards_played, bf_idx=bf_idx)
 
-    def _iterate(self, root, side, cards_played):
+    def _iterate(self, root, side, cards_played, *rest):
         self._in_turn_tree = self._now()
         try:
-            super()._iterate(root, side, cards_played)
+            super()._iterate(root, side, cards_played, *rest)
         finally:
             self._in_turn_tree = False
 

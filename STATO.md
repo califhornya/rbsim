@@ -65,7 +65,7 @@ sorelle (pilota 128 radici) e rete che li impara; 3) self-play grande (tappe a
 corretti mulligan e ordine delle rune (la ricerca vedeva carte e rune nascoste).
 
 ## Prossimi passi
-0. Pilota del passo 2 (da preparare, sul Mac); copia di _declare_choices saltata
+0. Pilota del passo 2: `scripts/pilota.command` (Mac, 2-3 ore); copia di _declare_choices saltata
    dove non ci sono scelte (fino a 1,8×); carte coperte proprie per campo nella
    rete (prima di allenarla). Stop: etichette instabili su mondi nuovi; rete
    che passa la soglia offline ma perde l'arena; curva piatta a 15.000-30.000.
