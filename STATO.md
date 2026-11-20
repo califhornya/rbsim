@@ -62,13 +62,16 @@ partite; il motore dà la runa in più a chi è secondo, §487.7). Matchup divis
 Piano "forza" (20/11, con GPTAstra): 1) velocità; 2) dati di confronto tra mosse
 sorelle (pilota 128 radici) e rete che li impara; 3) self-play grande (tappe a
 5.000 / 15.000 / 30.000 partite). Fatto: ricerca 1,16× (mosse identiche);
-corretti mulligan e ordine delle rune (la ricerca vedeva carte e rune nascoste).
+corretti mulligan e ordine delle rune (la ricerca vedeva carte e rune nascoste);
+la rete vede le proprie coperte per campo (boot1 non si carica più).
+Dichiarazioni (copia del gioco): 31% del tempo senza profiler, sempre vuote
+il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 
 ## Prossimi passi
-0. Pilota del passo 2: `scripts/pilota.command` (Mac, 2-3 ore); copia di _declare_choices saltata
-   dove non ci sono scelte (fino a 1,8×); carte coperte proprie per campo nella
-   rete (prima di allenarla). Stop: etichette instabili su mondi nuovi; rete
-   che passa la soglia offline ma perde l'arena; curva piatta a 15.000-30.000.
+0. Pilota del passo 2: `scripts/pilota.command`, lanciato sul Mac il 20/11
+   (2-3 ore), risultato in runs/pilota/RISULTATO.txt. Stop: etichette instabili
+   su mondi nuovi; rete che passa la soglia offline ma perde l'arena; curva
+   piatta a 15.000-30.000 partite.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) dopo il bot, se l'utente decide.
@@ -85,12 +88,10 @@ Macchine: PC Windows (Ryzen 7 7800X3D) o Mac M1 Max. Log: `fresh`/`|v|`, `empty_
   `effects.py`, `battlefield.py` (Hold / Conquer), `legality.py` (azioni legali).
 - `riftbound/ai/net_mcts.py` (ricerca con la rete), `selfplay.py`, `coach.py`,
   `scenari.py` (coach e scenari dei giudizi); `scripts/train_selfplay.py`.
-- `riftbound/ai/handwritten.py`: il bot a mano (valore, ricerca a tempo);
-  `scripts/bootstrap_net.py` + `scripts/rete.command`: la rete dal bot.
-- `scripts/diag/`: le misure (`handwritten_value.py`, `opponent_turn*.py`).
-  `docs/archivio/`: storico (training del 13/11, BACKLOG A-G, piano v1).
-- `riftbound/data/cards/all_cards.json`: dati; `riftbound/data/reference/
-  piltover_archive.json`: testo stampato (`scripts/piltover_sync.py compare`).
+- `riftbound/ai/handwritten.py`: il bot a mano; `scripts/bootstrap_net.py`: boot1.
+- `scripts/diag/`: misure (`handwritten_value.py`, `arena_spareggio.py`,
+  `pilota_sorelle.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
+- `riftbound/data/cards/all_cards.json`, `data/reference/piltover_archive.json`.
 - `riftbound/data/decks/`: precon, competitive dell'utente, `competitive_ivern`
   (82FAW, RiftAtlas); da lista .txt: `scripts/deck_from_txt.py`.
 - `scripts/riftatlas/`: registratore.js (in pagina), stati.py (registrazione →
