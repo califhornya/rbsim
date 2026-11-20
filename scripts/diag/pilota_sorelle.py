@@ -162,16 +162,25 @@ def _root(i: int):
 
 
 def _continue(task):
+    root_path, i, j, wset, k, iters = task
+    d = pickle.load(open(root_path, "rb"))
+    base, _ = WORLDS[wset]
+    out = play_forced(d, d["siblings"][j], base + i * 64 + k, iters)
+    out.update({"i": i, "j": j, "set": wset, "k": k, "it": iters})
+    return out
+
+
+def play_forced(d: dict, forced, w: int, iters: int) -> dict:
+    """In world `w` of root `d` (determinize from the decider's view, seed w),
+    the decider plays `forced` (its inner choices: the baseline), then both
+    hand-written bots (`iters` iterations, seeds from w) to the end:
+    {"score": 1 / 0.5 / 0 for the decider, "cpu": s} or {"score": None, "err"}."""
     from riftbound.ai.handwritten import HandwrittenAgent
     from riftbound.core.decisions import DecisionPoint
     from riftbound.core.legality import legal_actions
     from riftbound.core.loop import GameLoop
     from riftbound.core.state import determinize
-    root_path, i, j, wset, k, iters = task
-    d = pickle.load(open(root_path, "rb"))
-    side, forced = d["side"], d["siblings"][j]
-    base, _ = WORLDS[wset]
-    w = base + i * 64 + k
+    side = d["side"]
     gs = d["state"].clone()
     gs.rng = random.Random(w)
     determinize(gs, observer=side, rng=gs.rng)
@@ -200,9 +209,8 @@ def _continue(task):
         res = GameLoop(gs).resume_to_completion()
         s = 1.0 if res.winner == side else 0.5 if res.winner == "DRAW" else 0.0
     except RuntimeError as e:
-        return {"i": i, "j": j, "set": wset, "k": k, "it": iters, "score": None, "err": str(e)}
-    return {"i": i, "j": j, "set": wset, "k": k, "it": iters, "score": s,
-            "cpu": round(time.process_time() - t0, 2)}
+        return {"score": None, "err": str(e)}
+    return {"score": s, "cpu": round(time.process_time() - t0, 2)}
 
 
 # ----------------------------------------------------------------- the report

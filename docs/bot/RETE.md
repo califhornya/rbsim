@@ -146,3 +146,26 @@ Disegno della revisione esterna, regola fissata dall'utente prima del lancio.
   Prevede chi vince meglio, ma ordina male le mosse di una stessa decisione.
   `--avanza` non era la spiegazione: tolto lo stato a metà movimento,
   l'ibrido sceglie comunque Rampage invece di conquistare.
+
+## Passo 2 (20/11): un valore che impara a confrontare le mosse
+Piano con la revisione esterna: 1) velocità, 2) dati di confronto tra mosse
+sorelle e un valore che li impara, 3) self-play grande (tappe a 5.000 /
+15.000 / 30.000 partite). Prima, corretto ciò che la ricerca vedeva di troppo
+o di meno: mulligan e ordine delle rune (`test_mulligan_hidden.py`,
+`test_determinize_runes.py`), le proprie carte coperte nella rete
+(`test_net_own_facedowns.py`); ricerca 1,16× a mosse identiche.
+
+Pilota (`scripts/diag/pilota_sorelle.py`, Mac 20/11, 95 radici): le
+differenze tra sorelle si ripetono su 8 mondi nuovi (correlazione 0,73, IC
+0,60-0,83; bot contro la sua alternativa 0,59, differenza media -0,001: il
+bot e la sua seconda scelta valgono in media uguale); 32 iterazioni bastano
+(perdita -0,015 ± 0,021). Poche radici dal turno 9: ora si sceglie tra le
+decisioni raggiunte, per terzi della partita.
+
+Passo 2 (`scripts/passo2.py`, `scripts/passo2.command`): 1.000 / 200 / 400
+radici (seed 40000-41599), etichette a 8 mondi e 32 iterazioni, il valore
+`riftbound/ai/residual.py` (table_value + correzione che parte da zero: il
+risultato di ogni sorella e la differenza tra sorelle). Regola fissata prima:
+sulle 400 di prova, G >= +0,02 punti vittoria per radice e limite inferiore
+sopra 0 -> arena (800 coppie, >= 0,52 e limite inferiore > 0,50); altrimenti
+questa ricetta si ferma.
