@@ -74,9 +74,8 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    (21/11) Piano per la forza: `docs/PIANO_FORZA.md`. Prova A pronta
    (`scripts/prova_a.command`); prova B: una rete senza ricerca gioca ~0,2 s a
    partita (100 volte meno del bot): PPO possibile già in Python.
-1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
-   simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
-2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide. Macchine: Mac M1 Max, PC Ryzen.
+1. Bot a mano (`handwritten_value.py 200 100`): 0,80 contro simple_trade, 0,97 random.
+2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
