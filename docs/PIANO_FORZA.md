@@ -132,3 +132,9 @@ contro il bot a mano.
   e fa meglio di lei contro simple_trade. La rete iniziale (pesi casuali) fa
   ~0,13 contro simple_trade: il segnale che conta è quella misura, poi il bot
   a mano.
+- 21/11, prima tappa sul Mac (`runs/ppo1`, 8 processi, **7 minuti**): contro
+  simple_trade 0,065 (iniziale) -> 0,425 (1.024 partite) -> 0,515 -> 0,595
+  -> 0,535 -> **0,665** (5.056); contro la rete iniziale 0,910 ± 0,028. Per
+  la regola della tappa 5.000 impara (la riga non era stampata: le partite
+  vanno a blocchi di 64, corretto). Per confronto, il bot a mano fa 0,80
+  contro simple_trade. Arena contro il bot a mano: `scripts/arena_ppo.command`.

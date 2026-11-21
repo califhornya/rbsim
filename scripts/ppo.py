@@ -238,10 +238,11 @@ def main() -> None:
                 f"opzioni sconosciute {counts['opzioni sconosciute']})")
             st["misure"].append(measure(f"{st['partite']} partite"))
             last = st["misure"][-1]
-            if st["partite"] in (5000, 15000, 30000):
+            crossed = [m for m in (5000, 15000, 30000) if st["partite"] - len(games) < m <= st["partite"]]
+            if crossed:
                 ok = last["iniziale"] >= 0.52 and last["iniziale"] - last["ic"] > 0.50 and \
                     last["simple_trade"] > base_st
-                say(f"   Regola a {st['partite']}: {'IMPARA' if ok else 'NON ANCORA'} (contro l'iniziale "
+                say(f"   Regola alla tappa {crossed[0]}: {'IMPARA' if ok else 'NON ANCORA'} (contro l'iniziale "
                     f"{last['iniziale']:.3f}, limite inferiore {last['iniziale'] - last['ic']:.3f}; contro "
                     f"simple_trade {last['simple_trade']:.3f}, all'inizio {base_st:.3f})")
         state_path.write_text(json.dumps(st))

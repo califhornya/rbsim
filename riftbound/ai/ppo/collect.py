@@ -20,7 +20,7 @@ MAX_TURNS = 40
 def play(seed: int, nets: dict, learners: dict, sample: bool = True, starter: Optional[str] = None,
          deck_a: Path = EVE, deck_b: Path = KHA, opponent: Optional[str] = None) -> dict:
     """One game. nets: {"A": net, "B": net} (a seat with net None plays
-    `opponent`, a heuristic agent: "simple_trade", "random"); learners: which
+    `opponent`: "simple_trade", "random", or "bot", the hand-written bot); learners: which
     seats record examples. -> {"winner", "z": {seat: +1/-1/0}, "records":
     {seat: [...]}, "counts": Counter, "turns"}."""
     from riftbound.ai.ppo.agent import PPOAgent, PPOChooser
@@ -31,7 +31,12 @@ def play(seed: int, nets: dict, learners: dict, sample: bool = True, starter: Op
     records = {"A": [], "B": []}
     for seat in ("A", "B"):
         p = gs.get_player(seat)
-        if nets.get(seat) is None:
+        if nets.get(seat) is None and opponent == "bot":
+            # The hand-written bot, 0.4 s of CPU per move; its choosers go on top
+            # of PPOChooser and pass it the other side's choices (_Fallback).
+            from riftbound.ai.handwritten import HandwrittenAgent
+            p.agent = HandwrittenAgent(p, rng=random.Random(seed * 2 + (seat == "B")), budget=0.4)
+        elif nets.get(seat) is None:
             p.agent = make_agent(opponent or "simple_trade", p)
             if hasattr(p.agent, "rng"):
                 p.agent.rng = random.Random(seed * 2 + (seat == "B"))
