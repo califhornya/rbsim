@@ -85,3 +85,26 @@ Regole di stop per ogni fase: quelle della revisione (in sintesi sopra).
   successiva (table_value) o a fine partita. In prova sulle posizioni note,
   la prima sbaglia le conquiste del turno 3 (come il tentativo del 18/11), la
   seconda ne prende 3 su 4; s3012 giusto per entrambe.
+- 21/11, prova A sul Mac (sviluppo, 128 radici):
+  - alla decisione successiva: sceglie diversamente dal bot in 36; **G =
+    +0,007 ± 0,012** (-0,005 - +0,019); meglio A in 9, il bot in 6.
+  - a fine partita: diversamente in 27; **G = +0,006 ± 0,013** (-0,007 -
+    +0,019); meglio A in 11, il bot in 6.
+  Per la regola si chiude (limite superiore sotto +0,02): guardare tutto il
+  turno avversario, anche con 5-30 volte il tempo, sposta poco, sempre nello
+  stesso verso (come le sorelle del passo 2: +0,008 per radice).
+- 21/11, prova B sul Mac (un core): 120 ms a partita, 8,4 partite/s, 579
+  decisioni con scelta al secondo; la rete 0,41 ms a decisione (24%). Opzioni
+  senza indice: 654 su 23.423 (2,8%); scelte interne al baseline: 39,7 a
+  partita. Con 8 core ~65 partite/s: 100.000 partite in meno di mezz'ora di
+  simulazione.
+
+## Decisione (21/11)
+Per la regola della revisione (il port si finanzia se una delle due prove
+mostra valore e la velocità la frena): A non mostra un valore misurabile, B
+non è frenata dalla velocità. **Rust rimandato; prossima strada: una rete che
+impara giocando contro sé stessa (PPO), in Python.** Prima: ogni opzione
+legale indicabile dalla rete, le scelte interne (bersagli, modi, "puoi",
+mulligan) decise dalla rete, due controllori per il self-play; poi pilota a
+5.000 / 15.000 / 30.000 partite con arene contro avversari congelati e
+contro il bot a mano.

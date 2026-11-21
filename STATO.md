@@ -71,9 +71,9 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
    correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
    Passo 2 chiuso; tempo 0,472, orizzonte 0,490: la ricerca attuale è satura.
-   (21/11) Piano per la forza: `docs/PIANO_FORZA.md`. Prova A pronta
-   (`scripts/prova_a.command`); prova B: una rete senza ricerca gioca ~0,2 s a
-   partita (100 volte meno del bot): PPO possibile già in Python.
+   (21/11) `docs/PIANO_FORZA.md`: prova A chiusa (G +0,007 e +0,006, limite
+   superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
+   Rust rimandato; prossima strada: PPO in Python (prima codifica e scelte).
 1. Bot a mano (`handwritten_value.py 200 100`): 0,80 contro simple_trade, 0,97 random.
 2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide.
 
