@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-20 (tempo e orizzonte sotto soglia: lavoro sulla forza fermo).
+Aggiornato: 2026-11-21 (piano per la forza; mazzo Rengar).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -70,9 +70,9 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 ## Prossimi passi
 0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
    correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
-   Passo 2: G = +0,000 ± 0,011, chiuso. Tempo 0,8 s: 0,472 ± 0,033;
-   orizzonte: 0,490 ± 0,014: nessuna passa. Lavoro sulla forza fermo (RETE.md);
-   il bot a mano è lo strumento. Da decidere con l'utente come usarlo.
+   Passo 2 chiuso; tempo 0,472, orizzonte 0,490: la ricerca attuale è satura.
+   (21/11) Piano per la forza: `docs/PIANO_FORZA.md`. Prima le prove A (turno
+   avversario intero, tempo abbondante) e B (rete senza ricerca), poi Rust.
 1. Base del bot (`handwritten_value.py 200 100`, 20 min): 0,80 contro
    simple_trade, 0,97 contro random. Giudizi: `docs/bot/GIUDIZI.md`.
 2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide. Macchine: Mac M1 Max, PC Ryzen.
@@ -91,8 +91,8 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 - `scripts/diag/`: misure (`handwritten_value.py`, `arena_spareggio.py`,
   `pilota_sorelle.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
 - `riftbound/data/cards/all_cards.json`, `data/reference/piltover_archive.json`.
-- `riftbound/data/decks/`: precon, competitive dell'utente, `competitive_ivern`
-  (82FAW, RiftAtlas); da lista .txt: `scripts/deck_from_txt.py`.
+- `riftbound/data/decks/`: precon, competitive (Evelynn, Kha'Zix, Ivern, Sett, Rengar del 21/11)
+  e i vecchi come fixture; da lista .txt: `scripts/deck_from_txt.py`.
 - `scripts/riftatlas/`: registratore.js (in pagina), stati.py (registrazione →
   tavolo), posizione.py (tavolo → GameState → bot); test `test_riftatlas_*`.
 - `tests/golden_games.json` + `test_golden_games.py`: 28 partite, solo stato

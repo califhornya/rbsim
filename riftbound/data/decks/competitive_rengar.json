@@ -1,0 +1,118 @@
+{
+  "name": "Rengar Trophy Hunter",
+  "legend": "Rengar Pridestalker",
+  "champion": "Rengar Trophy Hunter",
+  "runes": [
+    {
+      "domain": "BODY",
+      "count": 8
+    },
+    {
+      "domain": "FURY",
+      "count": 4
+    }
+  ],
+  "battlefields": [
+    {
+      "name": "Seat of Power"
+    },
+    {
+      "name": "Sunken Temple"
+    },
+    {
+      "name": "Hunters' Circle"
+    }
+  ],
+  "cards": [
+    {
+      "name": "Noxus Hopeful",
+      "count": 3
+    },
+    {
+      "name": "First Mate",
+      "count": 3
+    },
+    {
+      "name": "Pit Rookie",
+      "count": 3
+    },
+    {
+      "name": "Punch First",
+      "count": 3
+    },
+    {
+      "name": "Inferna",
+      "count": 3
+    },
+    {
+      "name": "Grim Apothecary",
+      "count": 3
+    },
+    {
+      "name": "Kinkou Initiate",
+      "count": 3
+    },
+    {
+      "name": "Irresistible Faefolk",
+      "count": 3
+    },
+    {
+      "name": "Sabotage",
+      "count": 2
+    },
+    {
+      "name": "Thrill of the Hunt",
+      "count": 2
+    },
+    {
+      "name": "Rampage",
+      "count": 2
+    },
+    {
+      "name": "Elnuk Herd",
+      "count": 2
+    },
+    {
+      "name": "Ferrous Forerunner",
+      "count": 1
+    },
+    {
+      "name": "Kai'Sa Survivor",
+      "count": 3
+    },
+    {
+      "name": "Nidalee Cat Form",
+      "count": 2
+    },
+    {
+      "name": "Pyke Dockside Butcher",
+      "count": 1
+    }
+  ],
+  "sideboard": [
+    {
+      "name": "Ferrous Forerunner",
+      "count": 2
+    },
+    {
+      "name": "Brittle Steel",
+      "count": 2
+    },
+    {
+      "name": "Decree of Strength",
+      "count": 2
+    },
+    {
+      "name": "Bilgewater Tracker",
+      "count": 2
+    },
+    {
+      "name": "Sabotage",
+      "count": 1
+    },
+    {
+      "name": "Rampage",
+      "count": 1
+    }
+  ]
+}
