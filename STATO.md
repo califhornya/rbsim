@@ -75,8 +75,7 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
    Rust rimandato. PPO (`riftbound/ai/ppo/`): 5.000 partite in 7 min, contro
    simple_trade 0,065 -> 0,665. Avanti a 30.000, poi `scripts/arena_ppo.command`.
-1. Bot a mano (`handwritten_value.py 200 100`): 0,80 contro simple_trade, 0,97 random.
-2. Piano v2 (fasi 0, 2-6, D59-D65) se l'utente decide.
+1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
 - `docs/audit/AUDIT.md`: deviazioni, stato, domande aperte, cosa non è stato
