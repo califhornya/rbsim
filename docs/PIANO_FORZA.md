@@ -69,3 +69,19 @@ Poi, se almeno una delle due mostra valore e la velocità la limita:
    solo con un miglioramento ripetuto con un secondo seed di allenamento.
 
 Regole di stop per ogni fase: quelle della revisione (in sintesi sopra).
+
+## Avanzamento
+- 21/11, prova B, prima misura (`scripts/diag/rete_veloce.py`, Linux, un
+  core, rete a pesi casuali che gioca senza ricerca): 190-230 ms a partita,
+  4-5 partite al secondo per core, 300-480 decisioni con scelta al secondo;
+  la rete (osservazione, codifica, inferenza) è il 37-40% del tempo, ~1 ms a
+  decisione. Una partita costa ~100 volte meno di una del bot a 0,4 s per
+  mossa: 100.000 partite sono ore, non settimane, anche in Python.
+  Da sistemare per PPO: opzioni legali senza indice nella codifica (488 su
+  11.987 in una prova, 0 nell'altra) e scelte interne lasciate al baseline
+  (~37 a partita: bersagli, modi, "you may").
+- 21/11, prova A pronta (`scripts/diag/prova_a.py`, `scripts/prova_a.command`):
+  due varianti sul gruppo di sviluppo, valutazione alla nostra decisione
+  successiva (table_value) o a fine partita. In prova sulle posizioni note,
+  la prima sbaglia le conquiste del turno 3 (come il tentativo del 18/11), la
+  seconda ne prende 3 su 4; s3012 giusto per entrambe.

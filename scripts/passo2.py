@@ -71,8 +71,8 @@ def _root(task):
     from riftbound.core.game_factory import build_game
     from riftbound.core.legality import legal_actions
     from riftbound.core.loop import GameLoop
-    split, i = task
-    seed = _seed(split, i)
+    split, i, *rest = task              # (split, i[, seed]): other scripts pass their own seed
+    seed = rest[0] if rest else _seed(split, i)
     rng = random.Random(seed)
     starter = "a" if i % 2 == 0 else "b"
     side = "A" if (i // 2) % 2 == 0 else "B"
