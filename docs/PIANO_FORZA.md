@@ -108,3 +108,27 @@ legale indicabile dalla rete, le scelte interne (bersagli, modi, "puoi",
 mulligan) decise dalla rete, due controllori per il self-play; poi pilota a
 5.000 / 15.000 / 30.000 partite con arene contro avversari congelati e
 contro il bot a mano.
+
+## Il pilota PPO (21/11, disegno della revisione esterna)
+- `riftbound/ai/ppo/`: `features.py` (ogni domanda e ogni opzione descritte:
+  mosse del turno, reazioni, showdown, mulligan come un menu di sottoinsiemi,
+  ogni GameLoop.choose: bersagli, "you may", ordini, destinazioni, trigger,
+  gear...), `model.py` (lo stato come la rete attuale, un punteggio per ogni
+  opzione, softmax sul menu, valore dal lato di chi decide), `agent.py` (la
+  rete decide ogni scelta vera; le dichiarazioni sulla copia contano una
+  volta; lo stato è sempre quello reale), `collect.py` (due agenti, una
+  traiettoria per posto, ricompensa finale, GAE gamma 1 lambda 0,98),
+  `train.py` (PPO). L'osservazione ora ha la catena in ordine e le carte
+  avversarie note in mano.
+- Copertura sui cinque mazzi (50 partite): 26.853 opzioni, nessuna senza
+  descrizione, nessuna domanda sconosciuta; le euristiche danno solo il
+  suggerimento iniziale, decide la rete. Test: `tests/test_ppo.py` (copertura,
+  rapporto PPO 1 prima del primo aggiornamento, segno dei ritorni, nessuna
+  dipendenza dall'ordine delle carte nascoste).
+- `scripts/ppo.py` / `scripts/ppo.command`: aggiornamenti da 64 partite (prima
+  tutte contro se stessa, poi 80% / 20% contro le ultime versioni salvate),
+  misure ogni 1.000 partite a scelta deterministica; regola alle tappe 5.000
+  / 15.000 / 30.000: batte la rete iniziale (>= 0,52, limite inferiore > 0,50)
+  e fa meglio di lei contro simple_trade. La rete iniziale (pesi casuali) fa
+  ~0,13 contro simple_trade: il segnale che conta è quella misura, poi il bot
+  a mano.

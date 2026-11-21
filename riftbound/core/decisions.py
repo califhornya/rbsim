@@ -248,6 +248,13 @@ class Observation:
     # showdown hasn't started, §144.3). None: no move held.
     my_held_move: Optional[int] = None
     opp_held_move: Optional[int] = None
+    # The chain in order, bottom first (the last one resolves first), each
+    # (whether it is the viewer's, its card): public (21/11, for the net's
+    # reactions: my_chain / opp_chain lose the order).
+    chain: tuple = ()
+    # The opponent's cards still in hand that the viewer knows (revealed,
+    # returned to hand from the board: Player.hand_known), by name.
+    opp_hand_known: tuple[str, ...] = ()
 
     @staticmethod
     def _uview(u) -> "UnitView":
@@ -360,6 +367,8 @@ class Observation:
             opp_cards_played=int(gs.cards_played_this_turn.get(other, 0)),
             my_held_move=held[0] if held is not None and held[1] == viewer else None,
             opp_held_move=held[0] if held is not None and held[1] == other else None,
+            chain=tuple((i.player == viewer, i.card.name) for i in gs.chain),
+            opp_hand_known=tuple(c.name for c in opp.hand_known()),
         )
 
     def to_dict(self) -> dict:

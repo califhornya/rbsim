@@ -69,6 +69,9 @@ ZONES: tuple[str, ...] = (
     # The viewer's own facedown cards, battlefield by battlefield (20/11; at the
     # end so the zones before keep their index; nets saved before don't load).
     *(f"my_facedown_bf{i}" for i in range(N_BF)),
+    # The chain in order (21/11): a row per item, its owner and depth from the
+    # top; the opponent's cards the viewer knows are still in hand.
+    "chain_order", "opp_hand_known",
 )
 _ZONE = {z: i for i, z in enumerate(ZONES)}
 N_ZONES = len(ZONES)
@@ -219,6 +222,10 @@ def _tokens(obs: Observation) -> list:
         for slot, name in enumerate(bf.my_facedown):
             if name:
                 card(f"my_facedown_bf{i}", name, [1.0 / 3.0, slot / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))
+    # The chain in order: [1/3, is it ours, depth from the top / 3].
+    for depth, (mine, name) in enumerate(reversed(obs.chain)):
+        card("chain_order", name, [1.0 / 3.0, float(mine), depth / 3.0] + [0.0] * (N_TOKEN_FEATURES - 3))
+    counted("opp_hand_known", obs.opp_hand_known)
     # Known top of the deck (PREDICT): one row each, the next draw first.
     for rank, name in enumerate(obs.my_deck_top):
         card("my_deck_top", name, [1.0 / 3.0, rank / 3.0] + [0.0] * (N_TOKEN_FEATURES - 2))
