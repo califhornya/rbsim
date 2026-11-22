@@ -138,3 +138,15 @@ contro il bot a mano.
   la regola della tappa 5.000 impara (la riga non era stampata: le partite
   vanno a blocchi di 64, corretto). Per confronto, il bot a mano fa 0,80
   contro simple_trade. Arena contro il bot a mano: `scripts/arena_ppo.command`.
+- 21/11, fino a 30.016 partite (36 min): contro simple_trade 0,72 a 7.000,
+  poi piatta (0,63-0,75; 0,680 a 15.040, 0,705 a 30.016); contro la rete
+  iniziale 0,99 (ancora satura: non misura più). Regola alle tappe 15.000 e
+  30.000: impara (come scritta; ma un'ancora satura non distingue i
+  progressi). **Contro il bot a mano: 0,425 ± 0,044** (0,381-0,469), senza
+  nessuna ricerca; Evelynn che comincia 0,71 (il bot contro se stesso 0,92),
+  Evelynn con Kha'Zix che comincia 0,33 (0,45), Kha'Zix con Evelynn che
+  comincia 0,12 (0,08), Kha'Zix che comincia 0,54 (0,55).
+- 22/11, preparate: incroci tra checkpoint 5.000 / 15.000 / 30.000
+  (`scripts/diag/incroci_ppo.py`) e il bot a mano con i prior della rete PPO
+  (`riftbound/ai/ppo/prior_bot.py`, arena contro il bot a mano):
+  `scripts/dopo_ppo.command`.

@@ -73,8 +73,8 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    Passo 2 chiuso; tempo 0,472, orizzonte 0,490: la ricerca attuale è satura.
    (21/11) `docs/PIANO_FORZA.md`: prova A chiusa (G +0,007 e +0,006, limite
    superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
-   Rust rimandato. PPO (`riftbound/ai/ppo/`): 5.000 partite in 7 min, contro
-   simple_trade 0,065 -> 0,665. Avanti a 30.000, poi `scripts/arena_ppo.command`.
+   PPO (`riftbound/ai/ppo/`): 30.000 partite in 36 min; contro simple_trade
+   ~0,70 (piatta da 7.000), contro il bot a mano 0,425. `scripts/dopo_ppo.command`.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali

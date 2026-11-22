@@ -38,7 +38,10 @@ REF_BUDGET = 0.4
 CANDIDATES = {
     "tempo": "il bot a mano con 0,8 s di CPU per mossa",
     "orizzonte": "il bot che guarda oltre la fine del turno (riftbound/ai/horizon.py), 0,4 s per mossa",
+    "prior_ppo": "il bot a mano con i prior della rete PPO (riftbound/ai/ppo/prior_bot.py), 0,4 s per mossa",
 }
+PPO_CKPT = ROOT / "runs/ppo1/corrente.pt"
+_PPO: dict = {}
 
 
 def _make(name, p, rng):
@@ -48,6 +51,14 @@ def _make(name, p, rng):
     if name == "orizzonte":
         from riftbound.ai.horizon import HorizonAgent
         return HorizonAgent(p, rng=rng, budget=REF_BUDGET)
+    if name == "prior_ppo":
+        import torch
+        from riftbound.ai.ppo.model import load
+        from riftbound.ai.ppo.prior_bot import PPOPriorAgent
+        torch.set_num_threads(1)
+        if "net" not in _PPO:
+            _PPO["net"] = load(os.environ.get("PPO_CKPT", str(PPO_CKPT)))
+        return PPOPriorAgent(p, _PPO["net"], rng=rng, budget=REF_BUDGET)
     return HandwrittenAgent(p, rng=rng, budget=REF_BUDGET)
 
 
@@ -93,7 +104,8 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
     name = args.candidato
-    seed0 = args.seed0 if args.seed0 is not None else {"tempo": 13_000, "orizzonte": 14_000}[name]
+    seed0 = args.seed0 if args.seed0 is not None else {"tempo": 13_000, "orizzonte": 14_000,
+                                                       "prior_ppo": 15_000}[name]
     out = args.out or ROOT / f"runs/arena_{name}/ARENA.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
 
