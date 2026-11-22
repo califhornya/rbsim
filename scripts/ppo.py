@@ -170,6 +170,8 @@ def main() -> None:
     ap.add_argument("--assegnazione", choices=("bilanciata", "vecchia"), default="bilanciata")
     ap.add_argument("--archivio", choices=("recenti", "misto"), default="recenti")
     ap.add_argument("--lr", type=float, default=3e-4)
+    ap.add_argument("--lr-finale", type=float, default=None,
+                    help="lr a fine allenamento (--partite): scende in linea retta da --lr; default costante")
     ap.add_argument("--lam", type=float, default=0.98)
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     args = ap.parse_args()
@@ -254,7 +256,8 @@ def main() -> None:
 
     if not st["fatto_pannello_iniziale"]:
         say(f"\n== PPO ({time.strftime('%d/%m %H:%M')}) {run.name}: seme {args.seme}, assegnazione "
-            f"{args.assegnazione}, archivio {args.archivio}, {args.workers} processi, "
+            f"{args.assegnazione}, archivio {args.archivio}, lr {args.lr}"
+            + (f" -> {args.lr_finale}" if args.lr_finale is not None else "") + f", {args.workers} processi, "
             f"{args.per_aggiornamento} partite per aggiornamento; ancore: {', '.join(anchor_blobs) or 'nessuna'}")
         log(panel("rete iniziale", with_bot=False))
         st["fatto_pannello_iniziale"] = True
@@ -273,6 +276,10 @@ def main() -> None:
         info = [o for _, out in res for o in out]
         t_col = time.time() - t1
         torch.manual_seed(args.seme * 100_003 + st["aggiornamenti"])
+        if args.lr_finale is not None:
+            frac = min(1.0, st["partite"] / max(1, args.partite))
+            for group in opt.param_groups:
+                group["lr"] = args.lr + (args.lr_finale - args.lr) * frac
         t1 = time.time()
         stats = update(net, opt, recs)
         t_upd = time.time() - t1

@@ -176,6 +176,26 @@ contro il bot a mano.
   Notte (`scripts/notte_ricetta.command`): sfida 15.040 contro 30.016 (400
   coppie, seed 16000-16399, la solita regola); ricetta bilanciata contro
   vecchia, semi 1 e 2, 20.000 partite; incroci finali.
+- 22/11, la notte (Mac):
+  - sfida prior 15.040 contro prior 30.016: **0,512 ± 0,025** (0,487-0,538):
+    non promosso, il campione resta il 30.016.
+  - ricetta, 20.000 partite, 39 minuti ciascuna; celle contro l'archivio:
+    bilanciata ~900 ciascuna, vecchia solo Aa e Bb (il difetto). Incroci
+    finali: bilanciata contro vecchia **0,698** col seme 1, **0,470** col
+    seme 2 (0,442-0,498); bilanciata s2 contro bilanciata s1 0,383: la
+    varianza tra semi è grande. Pannello (media delle ancore del pilota):
+    tutte le corse oscillano di ~0,1 tra tappe e finiscono tra 0,42 e 0,53;
+    picchi a metà corsa (bilanciata s2 0,589 a 14.000, poi 0,432). Allarme
+    bot a mano (32 coppie, +-0,10): bilanciata s1 0,484 e 0,516; le altre
+    0,28-0,44.
+  - Lettura: la correzione è giusta ma il suo effetto non si vede in modo
+    stabile; il problema che domina è l'instabilità dell'allenamento (lr
+    costante). Si confrontano ora le corse sulla media delle ultime tappe
+    (`scripts/diag/riassunto_ppo.py`), non sulla sola rete finale.
+  - Seconda notte (`scripts/notte_ricetta2.command`): controllo (bilanciata)
+    contro nuova (bilanciata + lr da 3e-4 a 1e-4 + archivio misto), semi 3 e
+    4. Deviazione detta: due cambi insieme (la revisione li proponeva uno
+    alla volta), per non spendere due notti; se la nuova vince, si separano.
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
