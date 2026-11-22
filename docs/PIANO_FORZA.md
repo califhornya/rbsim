@@ -224,6 +224,21 @@ contro il bot a mano.
 - 22/11, arena prior nuova s3 contro prior 30.016: **0,501 ± 0,023**
   (0,479-0,524): non promosso, il campione resta il 30.016. Una rete pura un
   po' migliore non rende migliore il bot che la usa come guida.
+- 22/11, pilota di distillazione (Mac, ~1 ora):
+  - margine del maestro: bot con prior 30.016 contro la rete 30.016 da sola
+    **0,698 ± 0,041** (0,656-0,739, 200 coppie): c'è molto da imparare.
+  - accordo col maestro sullo sviluppo (400 radici): partenza 0,468 (mosse),
+    0,372 (scelte interne); studente "mossa" 0,655 / 0,427; studente
+    "interne" 0,637 / 0,561. L'imitazione funziona.
+  - subito dopo, contro la partenza: mossa 0,475 (0,437-0,513), interne
+    0,497 (0,461-0,534); interne contro mossa 0,560 (0,523-0,597).
+  - dopo lo stesso PPO (5.000 partite, seme 5): mossa contro controllo
+    0,485; **interne contro controllo 0,535 ± 0,040 (0,495-0,575)**; interne
+    contro mossa 0,507.
+  - Regola: margine sì, studente dopo il PPO no (limite inferiore 0,495):
+    **non si sale a 10.000 radici.** Copiare le scelte del maestro alza
+    l'accordo ma non la forza della rete da sola; con anche bersagli e modi va
+    meglio che con la sola mossa (0,560), al limite della soglia dopo il PPO.
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela

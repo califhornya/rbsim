@@ -74,7 +74,8 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    **Bot a mano + prior PPO: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
    Sfide prior 15k 0,512 e nuova s3 0,501: il campione resta il 30k. Ricette (due notti): nessuna
    regola soddisfatta, varianza tra semi dominante; migliore rete: ricetta2/nuova_s3.
-   Distillazione pronta: `scripts/distilla.command`; poi Rengar (ramo a parte).
+   Distillazione: maestro 0,698 sullo studente; studente "interne" dopo PPO 0,535
+   (lim. inf. 0,495): non si sale a 10.000. Prossimo: Rengar (ramo a parte).
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
