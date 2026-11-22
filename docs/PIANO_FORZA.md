@@ -150,3 +150,14 @@ contro il bot a mano.
   (`scripts/diag/incroci_ppo.py`) e il bot a mano con i prior della rete PPO
   (`riftbound/ai/ppo/prior_bot.py`, arena contro il bot a mano):
   `scripts/dopo_ppo.command`.
+- 22/11, sul Mac:
+  - incroci (200 coppie): 15.040 contro 5.056 **0,552 ± 0,041** (0,512-0,593);
+    30.016 contro 5.056 0,532 ± 0,039 (0,494-0,571); 30.016 contro 15.040
+    **0,453 ± 0,038** (0,415-0,490). Migliora fino a ~15.000 partite, poi
+    peggiora: la ricetta va corretta prima di allenare di più.
+  - **il bot a mano con i prior della rete PPO (checkpoint 30.016) contro il
+    bot a mano: 0,540 ± 0,027** (0,513-0,567, 400 coppie): **PROMOSSO**, la
+    prima prova che supera la regola. Evelynn che comincia 0,880, Evelynn con
+    Kha'Zix che comincia 0,525, Kha'Zix con Evelynn che comincia 0,145,
+    Kha'Zix che comincia 0,610; iterazioni 169 contro 182; turni passati
+    subito 0,7% contro 1,8%.
