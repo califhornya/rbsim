@@ -258,3 +258,21 @@ contro il bot a mano.
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
   0,8 / 0,2, non sul PASS di fine turno); Rengar (50% Evelynn-Kha'Zix, 25% e
   25% con Rengar), poi Ivern e Sett.
+- 22/11, replica col seme 6: interne + PPO contro controllo **0,428 ±
+  0,024** (0,404-0,453; 0,500 se comincia Evelynn, 0,357 se Kha'Zix). Non si
+  replica, anzi va al contrario: **la prova di distillazione si chiude.**
+  Su questa scala, come per le ricette, l'effetto del seme supera quello
+  cercato. Il campione resta il bot con prior 30.016; prossimo: Rengar.
+- 22/11, ramo a tre mazzi (`scripts/ppo.py --mazzi ekr`,
+  `scripts/rengar.command`): ciclo fisso di 4 partite (EK, EK, ER, KR), chi
+  comincia alternato entro il matchup; contro l'archivio le quattro celle
+  posto x chi comincia bilanciate entro il matchup. Quattro reti da
+  ckpt_030016, 20.032 partite, semi 7 e 8: `ekr` e il controllo `ek`.
+  Pannello su EK, ER, KR (simple_trade per mazzo, coppie contro 30.016).
+  Verifica (`scripts/diag/verifica_mazzi.py`, aperture 9.000.000+): EK 2.000
+  coppie, ER e KR 1.000, contro la partenza; regole fissate prima: Rengar
+  entra se su ER e KR insieme >= 0,52, limite inferiore > 0,50 e differenza
+  col controllo con limite inferiore > 0; EK tiene se la differenza appaiata
+  ha limite inferiore > -0,03. Riferimenti della revisione (30.016 contro
+  simple_trade, 100 coppie): con Kha'Zix contro Rengar 0,26, con Rengar
+  contro Kha'Zix 0,70.

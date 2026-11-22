@@ -14,6 +14,10 @@ ROOT = Path(__file__).resolve().parents[3]
 DECKS = ROOT / "riftbound/data/decks"
 EVE = DECKS / "competitive_evelynn.json"
 KHA = DECKS / "competitive_khazix.json"
+RENGAR = DECKS / "competitive_rengar.json"
+# Matchups by letters: the first deck sits in A, the second in B.
+DECK_OF = {"E": EVE, "K": KHA, "R": RENGAR}
+DECK_NAME = {"E": "Evelynn", "K": "Kha'Zix", "R": "Rengar"}
 MAX_TURNS = 40
 
 

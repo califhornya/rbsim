@@ -93,9 +93,52 @@ def test_archive_games_balance_seat_and_starter():
             return 0
 
     for start in (0, 64, 128):
-        new = Counter((seat, starter) for _, starter, _, seat in
+        new = Counter((seat, starter) for _, starter, _, seat, _ in
                       m.batch_games(start, 64, 1, ["ckpt"], Always(), "bilanciata"))
         assert new == {("A", "a"): 16, ("A", "b"): 16, ("B", "a"): 16, ("B", "b"): 16}
-        old = Counter((seat, starter) for _, starter, _, seat in
+        old = Counter((seat, starter) for _, starter, _, seat, _ in
                       m.batch_games(start, 64, 0, ["ckpt"], Always(), "vecchia"))
         assert set(old) == {("A", "a"), ("B", "b")}
+
+
+def test_three_deck_mix_balanced_within_matchup():
+    """--mazzi ekr (22/11): 50/25/25 over Evelynn-Kha'Zix, Evelynn-Rengar,
+    Kha'Zix-Rengar; who starts alternates within each matchup in self-play,
+    and against the archive the four cells are balanced within each matchup.
+    "ek" keeps the old games exactly."""
+    import importlib.util
+    import random
+    from collections import Counter
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "ppo_script", Path(__file__).resolve().parents[1] / "scripts/ppo.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    class Never:                      # every game against itself
+        def random(self):
+            return 1.0
+
+        def randrange(self, n):
+            return 0
+
+    class Always(Never):              # every game against the archive
+        def random(self):
+            return 0.0
+
+        def choice(self, xs):
+            return xs[0]
+
+    games = [g for start in range(0, 256, 64) for g in m.batch_games(start, 64, 7, [], Never(), mazzi="ekr")]
+    assert Counter(g[4] for g in games) == {"EK": 128, "ER": 64, "KR": 64}
+    assert Counter((g[4], g[1]) for g in games) == {("EK", "a"): 64, ("EK", "b"): 64, ("ER", "a"): 32,
+                                                    ("ER", "b"): 32, ("KR", "a"): 32, ("KR", "b"): 32}
+    games = [g for start in range(0, 256, 64) for g in m.batch_games(start, 64, 7, ["c"], Always(), mazzi="ekr")]
+    cells = Counter((g[4], g[3], g[1]) for g in games)
+    for mu, n in (("EK", 32), ("ER", 16), ("KR", 16)):
+        assert all(cells[(mu, seat, stt)] == n for seat in "AB" for stt in "ab")
+    # "ek": as before the option, starter by the game's index in self-play.
+    a = m.batch_games(64, 64, 1, ["c", "d"], random.Random(3))
+    assert all(g[4] == "EK" for g in a)
+    assert [g[1] for g in a if g[2] == "self"] == ["a" if (g[0] - 1_000_000) % 2 == 0 else "b"
+                                                 for g in a if g[2] == "self"]

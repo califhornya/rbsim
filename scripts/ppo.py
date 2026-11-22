@@ -3,7 +3,9 @@
 della revisione esterna).
 
 Una rete (riftbound/ai/ppo/) che gioca senza ricerca decide ogni scelta vera
-e impara giocando contro se stessa, Evelynn (A) contro Kha'Zix (B).
+e impara giocando contro se stessa, Evelynn (A) contro Kha'Zix (B); con
+--mazzi ekr (22/11) a ciclo fisso metà Evelynn-Kha'Zix, un quarto Evelynn-
+Rengar e un quarto Kha'Zix-Rengar, chi comincia alternato entro il matchup.
 
 Ogni aggiornamento: --per-aggiornamento partite con i pesi congelati, chi
 comincia alternato. All'inizio tutte contro se stessa (entrambi i posti
@@ -26,7 +28,10 @@ alto, su aperture di misura mai usate per allenare:
     30.016 del pilota in runs/ppo1); media a pesi uguali, IC 95% sui seed;
   - --st-partite partite contro simple_trade, per continuità;
   - ogni --allarme-bot partite, 32 coppie contro il bot a mano (allarme per
-    cali ampi, IC ~ +-0,10).
+    cali ampi, IC ~ +-0,10);
+  - per gli altri matchup di --pannello-mazzi (ER, KR): --st-partite contro
+    simple_trade e --coppie-ancora coppie contro l'ultima ancora, per mazzo
+    pilotato dalla rete.
 Tutto anche in tappe.jsonl (KL, clip, entropia per famiglia di menu, misure).
 
 Riprende dall'ultimo checkpoint; un file STOP nella cartella lo ferma.
@@ -52,6 +57,12 @@ sys.path.insert(0, str(ROOT))
 
 TRAIN_SEED0, EVAL_SEED0 = 1_000_000, 2_000_000
 PILOT_ANCHORS = ("ckpt_005056.pt", "ckpt_015040.pt", "ckpt_030016.pt")
+# The training mix, one cycle: the first deck of a matchup sits in A (letters
+# as in collect.DECK_OF). "ekr": 50% Evelynn-Kha'Zix, 25% Evelynn-Rengar, 25%
+# Kha'Zix-Rengar (revisione esterna, 21-22/11).
+MAZZI = {"ek": ("EK",), "ekr": ("EK", "EK", "ER", "KR")}
+# Measuring openings per matchup, disjoint (offsets from EVAL_SEED0).
+PANEL_SEEDS = {"EK": (0, 500_000), "ER": (100_000, 600_000), "KR": (200_000, 700_000)}
 _NETS: dict = {}
 
 
@@ -82,13 +93,21 @@ def _blob(net) -> bytes:
 
 
 def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random,
-                assegnazione: str = "bilanciata", archivio: str = "recenti") -> list:
-    """The games of one update: (seed, starter, opponent, learner seat).
-    opponent "self" (both seats learn, learner seat None) or a checkpoint key."""
+                assegnazione: str = "bilanciata", archivio: str = "recenti", mazzi: str = "ek") -> list:
+    """The games of one update: (seed, starter, opponent, learner seat, matchup).
+    opponent "self" (both seats learn, learner seat None) or a checkpoint key.
+    The matchup follows the cycle of MAZZI[mazzi] by the game's number; who
+    starts alternates within each matchup, and against the archive the four
+    cells (seat x starter) are balanced within each matchup."""
     out = []
-    k = rng.randrange(4) if assegnazione == "bilanciata" else 0   # across batches too
+    cycle = MAZZI[mazzi]
+    # One offset per matchup, across batches too ("ek": the same draws as before).
+    ks = {mu: rng.randrange(4) if assegnazione == "bilanciata" else 0 for mu in dict.fromkeys(cycle)}
     for g in range(n):
         seed = TRAIN_SEED0 + seme * 10_000_000 + start + g
+        i = start + g
+        mu = cycle[i % len(cycle)]
+        nth = (i // len(cycle)) * cycle.count(mu) + cycle[:i % len(cycle)].count(mu)
         if archive and rng.random() < 0.2:
             recent, older = archive[-5:], archive[:-5]
             pool = older if archivio == "misto" and older and rng.random() < 0.5 else recent
@@ -96,58 +115,66 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
             if assegnazione == "vecchia":
                 # The pilot's: seat by the game's index, starter by the seed's
                 # parity; with batches of 64 they always matched.
-                out.append((seed, "a" if seed % 2 == 0 else "b", key, "A" if g % 2 == 0 else "B"))
+                out.append((seed, "a" if seed % 2 == 0 else "b", key, "A" if g % 2 == 0 else "B", mu))
             else:
-                out.append((seed, "a" if k % 2 == 0 else "b", key, "A" if k % 4 < 2 else "B"))
-            k += 1
+                k = ks[mu]
+                out.append((seed, "a" if k % 2 == 0 else "b", key, "A" if k % 4 < 2 else "B", mu))
+                ks[mu] += 1
         else:
-            out.append((seed, "a" if g % 2 == 0 else "b", "self", None))
+            out.append((seed, "a" if nth % 2 == 0 else "b", "self", None, mu))
     return out
 
 
 def _collect(task):
     """A chunk of training games: (games, weights, snapshots {key: blob}, lam)."""
-    from riftbound.ai.ppo.collect import gae, play
+    from riftbound.ai.ppo.collect import DECK_OF, gae, play
     games, cur, snaps, lam = task
     me = _net(cur[1], cur[0])
     recs, out = [], []
-    for seed, starter, opp, seat in games:
+    for seed, starter, opp, seat, mu in games:
         if opp == "self":
             nets, learners = {"A": me, "B": me}, {"A": True, "B": True}
         else:
             nets = {seat: me, ("B" if seat == "A" else "A"): _net(snaps[opp], opp)}
             learners = {seat: True}
-        g = play(seed, nets, learners, sample=True, starter=starter)
+        g = play(seed, nets, learners, sample=True, starter=starter, deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
         for s, rs in g["records"].items():
             if rs:
                 gae(rs, g["z"][s], gamma=1.0, lam=lam)
                 recs += rs
-        cell = None if opp == "self" else f"{seat}{starter}"
-        out.append({"winner": g["winner"], "turns": g["turns"], "counts": dict(g["counts"]), "cell": cell})
+        cell = None if opp == "self" else ("" if mu == "EK" else f"{mu} ") + f"{seat}{starter}"
+        out.append({"winner": g["winner"], "turns": g["turns"], "counts": dict(g["counts"]), "cell": cell,
+                    "matchup": mu})
     return recs, out
 
 
 def _eval(task):
     """Measuring games, the highest score: (games [(seed, cand seat, starter,
-    opponent kind, key)], cand, anchors {key: blob})."""
-    from riftbound.ai.ppo.collect import play
+    opponent kind, key, matchup)], cand, anchors {key: blob})."""
+    from riftbound.ai.ppo.collect import DECK_OF, play
     games, cand, anchors = task
     me = _net(cand[1], cand[0])
     out = []
-    for seed, seat, starter, kind, key in games:
+    for seed, seat, starter, kind, key, mu in games:
         other = "B" if seat == "A" else "A"
         if kind == "ancora":
             nets, opp = {seat: me, other: _net(anchors[key], key)}, None
         else:
             nets, opp = {seat: me, other: None}, kind
-        g = play(seed, nets, {}, sample=False, starter=starter, opponent=opp)
-        out.append((kind, key, seed, seat, starter, 1.0 if g["winner"] == seat else 0.5 if g["winner"] == "DRAW" else 0.0))
+        g = play(seed, nets, {}, sample=False, starter=starter, opponent=opp,
+                 deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
+        out.append((kind, key, seed, seat, starter, 1.0 if g["winner"] == seat else 0.5 if g["winner"] == "DRAW" else 0.0,
+                    mu))
     return out
 
 
 def _chunks(xs: list, n: int) -> list:
     k = max(1, math.ceil(len(xs) / n))
     return [xs[i:i + k] for i in range(0, len(xs), k)]
+
+
+def _mean(xs: list) -> float:
+    return sum(xs) / len(xs) if xs else float("nan")
 
 
 def _ci(xs: list) -> tuple:
@@ -174,12 +201,19 @@ def main() -> None:
     ap.add_argument("--lr-finale", type=float, default=None,
                     help="lr a fine allenamento (--partite): scende in linea retta da --lr; default costante")
     ap.add_argument("--lam", type=float, default=0.98)
+    ap.add_argument("--mazzi", choices=tuple(MAZZI), default="ek",
+                    help="ek: solo Evelynn-Kha'Zix; ekr: 50%% Evelynn-Kha'Zix, 25%% Evelynn-Rengar, 25%% Kha'Zix-Rengar")
+    ap.add_argument("--pannello-mazzi", nargs="*", choices=tuple(PANEL_SEEDS), default=None,
+                    help="i matchup del pannello (default: quelli di --mazzi); EK sempre")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     args = ap.parse_args()
 
     import torch
+    from riftbound.ai.ppo.collect import DECK_NAME
     from riftbound.ai.ppo.model import PPONet, load, save
     from riftbound.ai.ppo.train import update
+    panel_matchups = list(dict.fromkeys(["EK"] + (args.pannello_mazzi if args.pannello_mazzi is not None
+                                                  else list(MAZZI[args.mazzi]))))
     torch.set_num_threads(max(1, args.workers))
     run = args.run_dir
     run.mkdir(parents=True, exist_ok=True)
@@ -212,18 +246,30 @@ def main() -> None:
     rng = random.Random(args.seme * 1_000_003 + st["partite"])
     pool = Pool(args.workers, initializer=_init)
 
+    extra = [mu for mu in panel_matchups if mu != "EK"]
+    last_anchor = list(anchor_blobs)[-1] if anchor_blobs else None
+
     def panel(tag: str, with_bot: bool) -> dict:
         cand = (f"misura{st['partite']}", _blob(net))
-        games = [(EVAL_SEED0 + k, "A" if k % 4 < 2 else "B", "a" if k % 2 == 0 else "b", "simple_trade", "")
+        games = [(EVAL_SEED0 + k, "A" if k % 4 < 2 else "B", "a" if k % 2 == 0 else "b", "simple_trade", "", "EK")
                  for k in range(args.st_partite)]
         for key in anchor_blobs:
-            games += [(EVAL_SEED0 + 500_000 + k, seat, "a" if k % 2 == 0 else "b", "ancora", key)
+            games += [(EVAL_SEED0 + 500_000 + k, seat, "a" if k % 2 == 0 else "b", "ancora", key, "EK")
                       for k in range(args.coppie_ancora) for seat in ("A", "B")]
         if with_bot:
-            games += [(EVAL_SEED0 + 900_000 + k, seat, "a" if k % 2 == 0 else "b", "bot", "")
+            games += [(EVAL_SEED0 + 900_000 + k, seat, "a" if k % 2 == 0 else "b", "bot", "", "EK")
                       for k in range(32) for seat in ("A", "B")]
-        rows = [r for out in pool.map(_eval, [(c, cand, anchor_blobs) for c in _chunks(games, args.workers * 3)])
-                for r in out]
+        # The other matchups: simple_trade, and pairs against the last anchor.
+        for mu in extra:
+            s0, a0 = PANEL_SEEDS[mu]
+            games += [(EVAL_SEED0 + s0 + k, "A" if k % 4 < 2 else "B", "a" if k % 2 == 0 else "b", "simple_trade",
+                       "", mu) for k in range(args.st_partite)]
+            if last_anchor:
+                games += [(EVAL_SEED0 + a0 + k, seat, "a" if k % 2 == 0 else "b", "ancora", last_anchor, mu)
+                          for k in range(args.coppie_ancora) for seat in ("A", "B")]
+        allrows = [r for out in pool.map(_eval, [(c, cand, anchor_blobs) for c in _chunks(games, args.workers * 3)])
+                   for r in out]
+        rows = [r[:6] for r in allrows if r[6] == "EK"]
         res = {"partite": st["partite"], "tappa": tag}
         stx = [r[5] for r in rows if r[0] == "simple_trade"]
         res["simple_trade"] = sum(stx) / len(stx) if stx else None
@@ -253,10 +299,32 @@ def main() -> None:
             res["bot"], res["ic bot"] = m, h
             line += f"; bot a mano {m:.3f} +- {h:.3f}"
         say(line)
+        for mu in extra:
+            mrows = [r for r in allrows if r[6] == mu]
+            names = {"A": DECK_NAME[mu[0]], "B": DECK_NAME[mu[1]]}
+            first = {"a": names["A"], "b": names["B"]}
+            stx = [r[5] for r in mrows if r[0] == "simple_trade"]
+            out = {"simple_trade": sum(stx) / max(1, len(stx))}
+            text = f"      {names['A']}-{names['B']}: simple_trade {out['simple_trade']:.3f} ("
+            text += "; ".join(f"con {names[seat]} " + ", ".join(
+                f"comincia {first[stt]} {_mean([r[5] for r in mrows if r[0] == 'simple_trade' and r[3] == seat and r[4] == stt]):.2f}"
+                for stt in ("a", "b")) for seat in ("A", "B")) + ")"
+            if last_anchor:
+                per_seed: dict = {}
+                for r in mrows:
+                    if r[0] == "ancora":
+                        per_seed.setdefault(r[2], []).append(r[5])
+                m, h = _ci([sum(v) / len(v) for v in per_seed.values()])
+                out[last_anchor], out["ic"] = m, h
+                text += f"; contro {last_anchor} {m:.3f} +- {h:.3f} (" + ", ".join(
+                    f"con {names[seat]} {_mean([r[5] for r in mrows if r[0] == 'ancora' and r[3] == seat]):.2f}"
+                    for seat in ("A", "B")) + ")"
+            res[mu] = out
+            say(text)
         return res
 
     if not st["fatto_pannello_iniziale"]:
-        say(f"\n== PPO ({time.strftime('%d/%m %H:%M')}) {run.name}: seme {args.seme}, assegnazione "
+        say(f"\n== PPO ({time.strftime('%d/%m %H:%M')}) {run.name}: mazzi {args.mazzi}, seme {args.seme}, assegnazione "
             f"{args.assegnazione}, archivio {args.archivio}, lr {args.lr}"
             + (f" -> {args.lr_finale}" if args.lr_finale is not None else "") + f", {args.workers} processi, "
             f"{args.per_aggiornamento} partite per aggiornamento; ancore: {', '.join(anchor_blobs) or 'nessuna'}")
@@ -268,7 +336,7 @@ def main() -> None:
     while st["partite"] < args.partite:
         cur = (f"w{st['aggiornamenti']}", _blob(net))
         games = batch_games(st["partite"], args.per_aggiornamento, args.seme, st["archivio"], rng,
-                            args.assegnazione, args.archivio)
+                            args.assegnazione, args.archivio, args.mazzi)
         snaps = {g[2]: (run / f"{g[2]}.pt").read_bytes() for g in games if g[2] != "self"}
         snap_blobs = {k: _blob(load(io.BytesIO(v))) for k, v in snaps.items()}
         t1 = time.time()
@@ -290,6 +358,8 @@ def main() -> None:
         for o in info:
             if o["cell"]:
                 st["celle"][o["cell"]] = st["celle"].get(o["cell"], 0) + 1
+            st.setdefault("matchup", {})
+            st["matchup"][o["matchup"]] = st["matchup"].get(o["matchup"], 0) + 1
         print(f"   partite {st['partite']}: {len(recs)} esempi; kl {stats['kl']:+.4f}, clip "
               f"{stats['clipfrac']:.2f}, entropia {stats['entropia']:.3f}, errore valore "
               f"{stats['errore valore']:.3f}; raccolta {t_col:.0f} s, aggiornamento {t_upd:.0f} s", flush=True)
@@ -304,6 +374,7 @@ def main() -> None:
             for o in info:
                 counts.update(o["counts"])
             say(f"Tappa {st['partite']} partite ({(time.time() - t0) / 60:.0f} min da questo lancio); "
+                f"matchup {dict(sorted(st['matchup'].items()))}; "
                 f"contro l'archivio, celle posto x chi comincia: {dict(sorted(st['celle'].items()))}")
             row = panel(f"{st['partite']} partite", with_bot=bot)
             row.update({k: v for k, v in stats.items()})
