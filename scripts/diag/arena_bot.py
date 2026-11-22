@@ -44,7 +44,7 @@ PPO_CKPT = ROOT / "runs/ppo1/corrente.pt"
 _PPO: dict = {}
 
 
-def _make(name, p, rng):
+def _make(name, p, rng, ckpt=None):
     from riftbound.ai.handwritten import HandwrittenAgent
     if name == "tempo":
         return HandwrittenAgent(p, rng=rng, budget=2 * REF_BUDGET)
@@ -56,21 +56,23 @@ def _make(name, p, rng):
         from riftbound.ai.ppo.model import load
         from riftbound.ai.ppo.prior_bot import PPOPriorAgent
         torch.set_num_threads(1)
-        if "net" not in _PPO:
-            _PPO["net"] = load(os.environ.get("PPO_CKPT", str(PPO_CKPT)))
-        return PPOPriorAgent(p, _PPO["net"], rng=rng, budget=REF_BUDGET)
+        path = ckpt or os.environ.get("PPO_CKPT", str(PPO_CKPT))
+        if path not in _PPO:                     # one net per checkpoint file
+            _PPO[path] = load(path)
+        return PPOPriorAgent(p, _PPO[path], rng=rng, budget=REF_BUDGET)
     return HandwrittenAgent(p, rng=rng, budget=REF_BUDGET)
 
 
 def _game(task):
     from riftbound.core.game_factory import build_game
     from riftbound.core.loop import GameLoop
-    seed, starter, cand_seat, name = task
+    seed, starter, cand_seat, name, ckpt, opp, opp_ckpt = task
     gs = build_game(game_seed=seed, deck_a_path=B.EVE, deck_b_path=B.KHA, ai_a=None, ai_b=None,
                     max_turns=B.MAX_TURNS, first_player=starter)
     for seat in ("A", "B"):
         p = gs.get_player(seat)
-        p.agent = _make(name if seat == cand_seat else "bot", p, random.Random(seed * 2 + (seat == "B")))
+        rng = random.Random(seed * 2 + (seat == "B"))
+        p.agent = _make(name, p, rng, ckpt) if seat == cand_seat else _make(opp, p, rng, opp_ckpt)
     res = GameLoop(gs).start()
     cand, bot = gs.get_player(cand_seat).agent, gs.get_player(gs.other(cand_seat)).agent
     s = 1.0 if res.winner == cand_seat else 0.5 if res.winner == "DRAW" else 0.0
@@ -97,6 +99,9 @@ def _first_move(task):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--candidato", choices=tuple(CANDIDATES), required=True)
+    ap.add_argument("--ckpt", default=None, help="prior_ppo: il checkpoint PPO del candidato")
+    ap.add_argument("--avversario", choices=("bot", "prior_ppo"), default="bot")
+    ap.add_argument("--ckpt-avversario", default=None, help="prior_ppo: il checkpoint dell'avversario")
     ap.add_argument("--pairs", type=int, default=800)
     ap.add_argument("--seed0", type=int, default=None)
     ap.add_argument("--worlds", type=int, default=24)
@@ -106,7 +111,8 @@ def main() -> None:
     name = args.candidato
     seed0 = args.seed0 if args.seed0 is not None else {"tempo": 13_000, "orizzonte": 14_000,
                                                        "prior_ppo": 15_000}[name]
-    out = args.out or ROOT / f"runs/arena_{name}/ARENA.txt"
+    tag = name if args.avversario == "bot" else f"{name}_{Path(args.ckpt or '').stem}_contro_{Path(args.ckpt_avversario or '').stem}"
+    out = args.out or ROOT / f"runs/arena_{tag}/ARENA.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
 
     def say(text: str) -> None:
@@ -115,7 +121,15 @@ def main() -> None:
             f.write(text + "\n")
 
     say(f"\n== Arena: {name} ({time.strftime('%d/%m %H:%M')})")
-    say(f"candidato: {CANDIDATES[name]}; avversario: il bot a mano, {REF_BUDGET} s per mossa")
+    import hashlib
+
+    def sha(path):
+        return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16] if path and Path(path).exists() else "-"
+    opp_words = "il bot a mano" if args.avversario == "bot" else \
+        f"il bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {sha(args.ckpt_avversario)})"
+    cand_ck = args.ckpt or os.environ.get("PPO_CKPT", str(PPO_CKPT)) if name == "prior_ppo" else None
+    say(f"candidato: {CANDIDATES[name]}" + (f", {cand_ck} (sha256 {sha(cand_ck)})" if cand_ck else "")
+        + f"; avversario: {opp_words}, {REF_BUDGET} s per mossa")
     say(f"regola fissata prima: punteggio >= {THRESHOLD:.2f} e limite inferiore dell'IC 95% per coppia "
         f"> {LOWER:.2f} -> promosso")
 
@@ -142,7 +156,8 @@ def main() -> None:
 
     seeds = range(seed0, seed0 + args.pairs)
     say(f"1. {args.pairs} coppie, seed {seeds[0]}-{seeds[-1]} (pari: comincia Evelynn, dispari: Kha'Zix)")
-    tasks = [(s, "a" if s % 2 == 0 else "b", seat, name) for s in seeds for seat in ("A", "B")]
+    tasks = [(s, "a" if s % 2 == 0 else "b", seat, name, args.ckpt, args.avversario, args.ckpt_avversario)
+             for s in seeds for seat in ("A", "B")]
     t0, rows = time.time(), []
     with Pool(args.workers, initializer=B._init) as pool:
         for r in pool.imap_unordered(_game, tasks):

@@ -54,6 +54,17 @@ def update(net, opt, recs: list, epochs: int = 4, minibatch: int = 512, clip: fl
     t["adv"] = (adv - adv.mean()) / (adv.std() + 1e-8)
     n = len(recs)
     stats = {"kl": 0.0, "clipfrac": 0.0, "entropia": 0.0, "errore valore": 0.0, "passi": 0}
+    # Entropy per family of menu (normalised by log of the menu's size), on the
+    # batch as collected: main, reaction, showdown, mulligan, inner choices.
+    with torch.no_grad():
+        _, _, ent0 = evaluate(net, t)
+        size = t["omask"].sum(1).clamp(min=2).float()
+        norm = ent0 / torch.log(size)
+        fam = t["q"].clamp(max=4)
+        for k, name in enumerate(("main", "reaction", "showdown", "mulligan", "interne")):
+            sel = fam == k
+            if sel.any():
+                stats[f"entropia {name}"] = float(norm[sel].mean())
     net.train()
     for _ in range(epochs):
         perm = torch.randperm(n)
@@ -77,4 +88,5 @@ def update(net, opt, recs: list, epochs: int = 4, minibatch: int = 512, clip: fl
                 stats["passi"] += 1
     net.eval()
     k = max(1, stats.pop("passi"))
-    return {key: val / k for key, val in stats.items()}
+    return {key: (val / k if key in ("kl", "clipfrac", "entropia", "errore valore") else val)
+            for key, val in stats.items()}

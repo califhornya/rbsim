@@ -37,6 +37,11 @@ def _net(path):
     return _NETS[path]
 
 
+def _label(path) -> str:
+    p = Path(path)
+    return f"{p.parent.name}/{p.stem}"
+
+
 def _game(task):
     from riftbound.ai.ppo.collect import play
     seed, seat, new, old = task
@@ -73,7 +78,7 @@ def main() -> None:
         ps = [sum(v) / 2 for v in by.values()]
         m = sum(ps) / len(ps)
         h = 1.96 * math.sqrt(sum((x - m) ** 2 for x in ps) / max(1, len(ps) - 1)) / math.sqrt(len(ps))
-        say(f"   {Path(new).stem} contro {Path(old).stem}: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f})")
+        say(f"   {_label(new)} contro {_label(old)}: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f})")
     say(f"   ({(time.time() - t0) / 60:.0f} min)")
 
 

@@ -68,13 +68,12 @@ Dichiarazioni (copia del gioco): 31% del tempo senza profiler, sempre vuote
 il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 
 ## Prossimi passi
-0. Pilota (Mac 20/11, 73 min, 95 radici): passa. Differenze tra sorelle W1/W2
-   correlate 0,73 (0,60-0,83); 32 iterazioni bastano (perdita -0,015 ± 0,021).
-   Passo 2 chiuso; tempo 0,472, orizzonte 0,490: la ricerca attuale è satura.
+0. Pilota sorelle passa (0,73); passo 2, tempo 0,472, orizzonte 0,490 chiusi.
    (21/11) `docs/PIANO_FORZA.md`: prova A chiusa (G +0,007 e +0,006, limite
    superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
    PPO: 30.000 partite in 36 min, da sola 0,425 contro il bot (meglio a 15.000).
    **Bot a mano + prior PPO: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
+   Difetto nel training corretto; notte: `scripts/notte_ricetta.command`.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali

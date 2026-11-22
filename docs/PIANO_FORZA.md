@@ -161,3 +161,23 @@ contro il bot a mano.
     Kha'Zix che comincia 0,525, Kha'Zix con Evelynn che comincia 0,145,
     Kha'Zix che comincia 0,610; iterazioni 169 contro 182; turni passati
     subito 0,7% contro 1,8%.
+- 22/11, secondo giro della revisione: il campione di sparring resta il bot
+  con prior 30.016 (sha256 f4f6ec4f...); il 15.040 (27eeb548...) riferimento
+  della rete pura. Difetto trovato: contro l'archivio chi impara cominciava
+  sempre (posto per parità dell'indice, chi comincia per parità del seed,
+  coincidenti con blocchi da 64). Il calo 30.016 contro 15.040 si replica
+  (0,4575 su 200 nuove aperture); l'entropia media non crolla (0,695 contro
+  0,699), la mossa migliore cambia nel 52,6% dei menu.
+  Fatto: `scripts/ppo.py` con assegnazione bilanciata (e la vecchia per
+  confronto), --seme, --archivio recenti/misto, pannello per tappa (ancore
+  congelate, simple_trade, bot a mano ogni 5.000), tappe.jsonl con KL, clip,
+  entropia per famiglia di menu; arena tra due bot con prior PPO
+  (`arena_bot.py --avversario prior_ppo`, impronte dei pesi).
+  Notte (`scripts/notte_ricetta.command`): sfida 15.040 contro 30.016 (400
+  coppie, seed 16000-16399, la solita regola); ricetta bilanciata contro
+  vecchia, semi 1 e 2, 20.000 partite; incroci finali.
+  Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
+  vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
+  maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
+  0,8 / 0,2, non sul PASS di fine turno); Rengar (50% Evelynn-Kha'Zix, 25% e
+  25% con Rengar), poi Ivern e Sett.

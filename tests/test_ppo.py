@@ -69,3 +69,33 @@ def test_the_state_doesnt_see_the_order_of_hidden_cards():
     random.Random(3).shuffle(other.A.rune_deck.runes)
     assert np.array_equal(encode_observation(Observation.from_state(gs, "A")),
                           encode_observation(Observation.from_state(other, "A")))
+
+
+def test_archive_games_balance_seat_and_starter():
+    """The pilot's defect (revisione esterna, 22/11): against an archived
+    checkpoint the learner always started. Now the four cells are balanced."""
+    import importlib.util
+    from collections import Counter
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "ppo_script", Path(__file__).resolve().parents[1] / "scripts/ppo.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    class Always:                     # every game against the archive
+        def random(self):
+            return 0.0
+
+        def choice(self, xs):
+            return xs[0]
+
+        def randrange(self, n):
+            return 0
+
+    for start in (0, 64, 128):
+        new = Counter((seat, starter) for _, starter, _, seat in
+                      m.batch_games(start, 64, 1, ["ckpt"], Always(), "bilanciata"))
+        assert new == {("A", "a"): 16, ("A", "b"): 16, ("B", "a"): 16, ("B", "b"): 16}
+        old = Counter((seat, starter) for _, starter, _, seat in
+                      m.batch_games(start, 64, 0, ["ckpt"], Always(), "vecchia"))
+        assert set(old) == {("A", "a"), ("B", "b")}
