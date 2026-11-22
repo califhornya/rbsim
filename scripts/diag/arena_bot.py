@@ -39,6 +39,7 @@ CANDIDATES = {
     "tempo": "il bot a mano con 0,8 s di CPU per mossa",
     "orizzonte": "il bot che guarda oltre la fine del turno (riftbound/ai/horizon.py), 0,4 s per mossa",
     "prior_ppo": "il bot a mano con i prior della rete PPO (riftbound/ai/ppo/prior_bot.py), 0,4 s per mossa",
+    "rete_ppo": "la rete PPO da sola, senza ricerca (la mossa col punteggio più alto)",
 }
 PPO_CKPT = ROOT / "runs/ppo1/corrente.pt"
 _PPO: dict = {}
@@ -51,6 +52,15 @@ def _make(name, p, rng, ckpt=None):
     if name == "orizzonte":
         from riftbound.ai.horizon import HorizonAgent
         return HorizonAgent(p, rng=rng, budget=REF_BUDGET)
+    if name == "rete_ppo":
+        import torch
+        from riftbound.ai.ppo.agent import PPOAgent
+        from riftbound.ai.ppo.model import load
+        torch.set_num_threads(1)
+        path = ckpt or os.environ.get("PPO_CKPT", str(PPO_CKPT))
+        if path not in _PPO:
+            _PPO[path] = load(path)
+        return PPOAgent(p, _PPO[path], sample=False, seed=rng.randrange(1 << 30))
     if name == "prior_ppo":
         import torch
         from riftbound.ai.ppo.model import load
@@ -73,11 +83,15 @@ def _game(task):
         p = gs.get_player(seat)
         rng = random.Random(seed * 2 + (seat == "B"))
         p.agent = _make(name, p, rng, ckpt) if seat == cand_seat else _make(opp, p, rng, opp_ckpt)
-    res = GameLoop(gs).start()
+    from riftbound.ai.ppo.agent import PPOChooser
+    loop = GameLoop(gs)
+    loop.chooser = PPOChooser(gs)       # a PPO net's own choices; bots' choosers go on top
+    res = loop.start()
     cand, bot = gs.get_player(cand_seat).agent, gs.get_player(gs.other(cand_seat)).agent
     s = 1.0 if res.winner == cand_seat else 0.5 if res.winner == "DRAW" else 0.0
-    return (seed, starter, cand_seat, s, cand.main_iters, bot.main_iters,
-            (cand.empty_turns, cand.turns), (bot.empty_turns, bot.turns), dict(getattr(cand, "stats", {})))
+    return (seed, starter, cand_seat, s, getattr(cand, "main_iters", []), getattr(bot, "main_iters", []),
+            (getattr(cand, "empty_turns", 0), getattr(cand, "turns", 0)),
+            (getattr(bot, "empty_turns", 0), getattr(bot, "turns", 0)), dict(getattr(cand, "stats", {})))
 
 
 def _first_move(task):
@@ -100,7 +114,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--candidato", choices=tuple(CANDIDATES), required=True)
     ap.add_argument("--ckpt", default=None, help="prior_ppo: il checkpoint PPO del candidato")
-    ap.add_argument("--avversario", choices=("bot", "prior_ppo"), default="bot")
+    ap.add_argument("--avversario", choices=("bot", "prior_ppo", "rete_ppo"), default="bot")
     ap.add_argument("--ckpt-avversario", default=None, help="prior_ppo: il checkpoint dell'avversario")
     ap.add_argument("--pairs", type=int, default=800)
     ap.add_argument("--seed0", type=int, default=None)
@@ -110,7 +124,7 @@ def main() -> None:
     args = ap.parse_args()
     name = args.candidato
     seed0 = args.seed0 if args.seed0 is not None else {"tempo": 13_000, "orizzonte": 14_000,
-                                                       "prior_ppo": 15_000}[name]
+                                                       "prior_ppo": 15_000, "rete_ppo": 18_000}[name]
     tag = name if args.avversario == "bot" else f"{name}_{Path(args.ckpt or '').stem}_contro_{Path(args.ckpt_avversario or '').stem}"
     out = args.out or ROOT / f"runs/arena_{tag}/ARENA.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -126,7 +140,8 @@ def main() -> None:
     def sha(path):
         return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16] if path and Path(path).exists() else "-"
     opp_words = "il bot a mano" if args.avversario == "bot" else \
-        f"il bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {sha(args.ckpt_avversario)})"
+        (f"il bot a mano con i prior PPO di " if args.avversario == "prior_ppo" else "la rete PPO da sola, ") \
+        + f"{args.ckpt_avversario} (sha256 {sha(args.ckpt_avversario)})"
     cand_ck = args.ckpt or os.environ.get("PPO_CKPT", str(PPO_CKPT)) if name == "prior_ppo" else None
     say(f"candidato: {CANDIDATES[name]}" + (f", {cand_ck} (sha256 {sha(cand_ck)})" if cand_ck else "")
         + f"; avversario: {opp_words}, {REF_BUDGET} s per mossa")

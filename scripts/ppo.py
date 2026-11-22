@@ -167,6 +167,7 @@ def main() -> None:
     ap.add_argument("--st-partite", type=int, default=200)
     ap.add_argument("--allarme-bot", type=int, default=5000, help="ogni quante partite 32 coppie col bot (0: mai)")
     ap.add_argument("--seme", type=int, default=0)
+    ap.add_argument("--init", default=None, help="pesi di partenza (un checkpoint PPO); default casuali dal seme")
     ap.add_argument("--assegnazione", choices=("bilanciata", "vecchia"), default="bilanciata")
     ap.add_argument("--archivio", choices=("recenti", "misto"), default="recenti")
     ap.add_argument("--lr", type=float, default=3e-4)
@@ -203,7 +204,7 @@ def main() -> None:
          "celle": {}, "opzioni": vars(args) | {"run_dir": str(run)}}
     if not (run / "iniziale.pt").exists():
         torch.manual_seed(args.seme)
-        save(PPONet(), run / "iniziale.pt")
+        save(load(args.init) if args.init else PPONet(), run / "iniziale.pt")
     net = load(run / "corrente.pt") if (run / "corrente.pt").exists() else load(run / "iniziale.pt")
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
     if (run / "ottimizzatore.pt").exists():

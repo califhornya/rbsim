@@ -205,6 +205,22 @@ contro il bot a mano.
   La rete finale migliore fra le otto corse è nuova s3 (pannello 0,594 alla
   fine, in salita; batte le altre tre di questa notte negli incroci; allarme
   bot a mano 0,531 e 0,594, 32 coppie +-0,10).
+- 22/11, terzo giro della revisione: chiusa la messa a punto di PPO su
+  Evelynn-Kha'Zix (la bilanciata resta il controllo; niente corse corte con
+  eliminazione: nuova s3 era 7ª-8ª fino a 16.000 e 1ª a 20.032). La
+  selezione tra otto con una sola conferma su seed nuovi è corretta (arena
+  s3 contro il campione, 400 coppie, seed 17000-17399, sha256 932c1d83...).
+  Distillazione: la revisione ha interrogato due volte il maestro su 64
+  radici: cambia la mossa dello studente in 33, le due ricerche concordano
+  in 62; copiare solo la prima mossa: G = +0,0039 (-0,0176 - +0,0234).
+  Pilota (`scripts/distilla.py`, `scripts/distilla.command`): margine del
+  maestro sullo studente (200 coppie); 2.000 + 400 radici etichettate (mossa
+  e scelte interne del piano del maestro, menu dinamico PPO); due studenti
+  (solo mossa / mossa + interne) contro la partenza; stesso budget PPO
+  (5.000 partite, seme 5) a studenti e controllo; incroci. Regola fissata
+  prima: 10.000 radici se il maestro batte lo studente e uno studente dopo
+  il PPO batte il controllo (>= 0,52, limite inferiore > 0,50). Rengar dopo,
+  in un ramo separato (50/25/25).
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
