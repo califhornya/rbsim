@@ -72,7 +72,7 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    (21/11) `docs/PIANO_FORZA.md`: prova A chiusa (G +0,007 e +0,006, limite
    superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
    **Bot a mano + prior PPO: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
-   Sfida prior 15k: 0,512, campione resta 30k. Ricette (due notti): nessuna
+   Sfide prior 15k 0,512 e nuova s3 0,501: il campione resta il 30k. Ricette (due notti): nessuna
    regola soddisfatta, varianza tra semi dominante; migliore rete: ricetta2/nuova_s3.
    Distillazione pronta: `scripts/distilla.command`; poi Rengar (ramo a parte).
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.

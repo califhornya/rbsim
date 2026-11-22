@@ -221,6 +221,9 @@ contro il bot a mano.
   prima: 10.000 radici se il maestro batte lo studente e uno studente dopo
   il PPO batte il controllo (>= 0,52, limite inferiore > 0,50). Rengar dopo,
   in un ramo separato (50/25/25).
+- 22/11, arena prior nuova s3 contro prior 30.016: **0,501 ± 0,023**
+  (0,479-0,524): non promosso, il campione resta il 30.016. Una rete pura un
+  po' migliore non rende migliore il bot che la usa come guida.
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
