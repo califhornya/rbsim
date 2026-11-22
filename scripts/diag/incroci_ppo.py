@@ -54,6 +54,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("ckpts", nargs="+")
     ap.add_argument("--pairs", type=int, default=200)
+    ap.add_argument("--seed0", type=int, default=SEED0)
+    ap.add_argument("--regola", action="store_true",
+                    help="per ogni incrocio la soglia del progetto: >= 0,52 e limite inferiore > 0,50")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--out", type=Path, default=ROOT / "runs/ppo1/INCROCI.txt")
     args = ap.parse_args()
@@ -64,9 +67,10 @@ def main() -> None:
         with open(args.out, "a") as f:
             f.write(text + "\n")
 
-    say(f"\n== Incroci tra checkpoint PPO ({time.strftime('%d/%m %H:%M')}), {args.pairs} coppie per incrocio")
+    say(f"\n== Incroci tra checkpoint PPO ({time.strftime('%d/%m %H:%M')}), {args.pairs} coppie per incrocio, "
+        f"seed {args.seed0}-{args.seed0 + args.pairs - 1}, piloti scambiati, mossa col punteggio più alto")
     t0 = time.time()
-    tasks = [(SEED0 + k, seat, new, old) for old, new in itertools.combinations(args.ckpts, 2)
+    tasks = [(args.seed0 + k, seat, new, old) for old, new in itertools.combinations(args.ckpts, 2)
              for k in range(args.pairs) for seat in ("A", "B")]
     with Pool(args.workers, initializer=_init) as pool:
         rows = pool.map(_game, tasks, chunksize=16)
@@ -78,7 +82,15 @@ def main() -> None:
         ps = [sum(v) / 2 for v in by.values()]
         m = sum(ps) / len(ps)
         h = 1.96 * math.sqrt(sum((x - m) ** 2 for x in ps) / max(1, len(ps) - 1)) / math.sqrt(len(ps))
-        say(f"   {_label(new)} contro {_label(old)}: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f})")
+        cells = []
+        for parity, who in ((0, "comincia Evelynn"), (1, "comincia Kha'Zix")):
+            xs = [sum(v) / 2 for seed, v in by.items() if seed % 2 == parity]
+            cells.append(f"{who} {sum(xs) / max(1, len(xs)):.3f}")
+        verdict = ""
+        if args.regola:
+            verdict = "; regola: " + ("SÌ" if m >= 0.52 and m - h > 0.50 else "no")
+        say(f"   {_label(new)} contro {_label(old)}: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f}); "
+            + ", ".join(cells) + verdict)
     say(f"   ({(time.time() - t0) / 60:.0f} min)")
 
 

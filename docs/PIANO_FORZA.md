@@ -239,6 +239,20 @@ contro il bot a mano.
     **non si sale a 10.000 radici.** Copiare le scelte del maestro alza
     l'accordo ma non la forza della rete da sola; con anche bersagli e modi va
     meglio che con la sola mossa (0,560), al limite della soglia dopo il PPO.
+- 22/11, quarto giro della revisione: i due checkpoint finali del seme 5 su
+  600 aperture nuove (8.510.000-8.510.599): interne + PPO contro controllo
+  **0,546** (0,522-0,570; 0,548 se comincia Evelynn, 0,543 se Kha'Zix).
+  Bersaglio visite contro azione (stesse etichette): 0,499 (0,472-0,526); le
+  visite seguono spesso la preferenza della rete di partenza (151 contro 55
+  radici). Prior dello studente "interne" contro prior 30.016 nella ricerca,
+  effetto locale su 96 radici: 0,000 (-0,012 - +0,013): niente arena.
+  Richiesta: replica col seme PPO 6 (`scripts/replica_s6.command`): due
+  reti, 5.056 partite, da studente_interne.pt e da ckpt_030016.pt; 600
+  coppie senza ricerca, seed 8.600.000-8.600.599; regola >= 0,52 e limite
+  inferiore > 0,50. Poi, se serve: distillazione di turni interi giocati dal
+  maestro (prima la misura a/b/c sul margine del resto del turno; al
+  massimo 2.000 chiamate di ricerca); il raccoglitore registra la
+  provenienza dell'etichetta (piano, ripiego, default) e il contesto "made".
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
