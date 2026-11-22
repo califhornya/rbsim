@@ -69,8 +69,7 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
-   (21/11) `docs/PIANO_FORZA.md`: prova A chiusa (G +0,007 e +0,006, limite
-   superiore sotto 0,02); prova B: rete senza ricerca 120 ms a partita sul Mac.
+   (21/11) `docs/PIANO_FORZA.md`: prova A chiusa; rete senza ricerca 120 ms a partita.
    **Bot a mano + prior PPO: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
    Sfide prior 15k 0,512 e nuova s3 0,501: il campione resta il 30k. Ricette (due notti): nessuna
    regola soddisfatta, varianza tra semi dominante; migliore rete: ricetta2/nuova_s3.
