@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-22 (distillazione chiusa; ramo a tre mazzi con Rengar).
+Aggiornato: 2026-11-22 (Rengar entra nel training; arena sui tre matchup).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -72,8 +72,9 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
    **Bot a mano + prior PPO 30.016: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
    Sfide (prior 15k 0,512, nuova s3 0,501), ricette (due notti), distillazione
    (seme 5 0,546, replica seme 6 0,428): chiuse, la varianza tra semi domina.
-   **Ora: Rengar** (`scripts/rengar.command`, ~2 ore): 4 reti da 30.016, semi 7
-   e 8, tre mazzi (50/25/25) contro controllo a due; verifica con regole fissate.
+   **Rengar (22/11): entra, EK tiene** (verifica: Rengar +0,127 sul controllo, EK
+   +0,025; due semi d'accordo). Ora: arena sui tre matchup, prior ekr_s8 contro
+   il campione (`scripts/arena_rengar.command`, ~2,5 ore). Poi Ivern, poi Sett.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
@@ -88,7 +89,7 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
   `scenari.py` (coach e scenari dei giudizi); `scripts/train_selfplay.py`.
 - `riftbound/ai/handwritten.py`: il bot a mano; `scripts/bootstrap_net.py`: boot1.
 - `scripts/ppo.py` (PPO, `--mazzi ekr`), `riftbound/ai/ppo/`; `scripts/diag/`: misure
-  (`arena_bot.py`, `incroci_ppo.py`, `verifica_mazzi.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
+  (`arena_bot.py`, `arena_mazzi.py`, `incroci_ppo.py`, `verifica_mazzi.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
 - `riftbound/data/cards/all_cards.json`, `data/reference/piltover_archive.json`.
 - `riftbound/data/decks/`: precon, competitive (Evelynn, Kha'Zix, Ivern, Sett, Rengar del 21/11)
   e i vecchi come fixture; da lista .txt: `scripts/deck_from_txt.py`.

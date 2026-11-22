@@ -276,3 +276,20 @@ contro il bot a mano.
   ha limite inferiore > -0,03. Riferimenti della revisione (30.016 contro
   simple_trade, 100 coppie): con Kha'Zix contro Rengar 0,26, con Rengar
   contro Kha'Zix 0,70.
+- 22/11, ramo a tre mazzi, risultati (Mac; verifica 20 min, 39.200 partite):
+  contro la partenza 30.016, prova (ekr) / controllo (ek):
+  Evelynn-Kha'Zix 0,585 / 0,560, differenza **+0,025** (+0,013 - +0,038);
+  Evelynn-Rengar 0,601 / 0,473, **+0,128**; Kha'Zix-Rengar 0,622 / 0,496,
+  **+0,126**; Rengar insieme 0,612 (lim. inf. 0,602), +0,127 (+0,114 -
+  +0,140). Per seme: +0,103 (s7) e +0,150 (s8) su Rengar, +0,043 e +0,008 su
+  EK. Testa a testa ekr contro ek: EK 0,568 / 0,500, ER 0,598 / 0,602, KR
+  0,621 / 0,690. **Rengar entra: SÌ; Evelynn-Kha'Zix tiene: SÌ** (anzi
+  migliora). Il primo effetto che si replica sui due semi. Cella più debole:
+  la rete con Kha'Zix contro Rengar di simple_trade, 0,22 → 0,37 (s7) e
+  0,42 (s8); con Rengar contro Kha'Zix 0,79-0,87.
+  Prossimo: arena sui tre matchup (`scripts/diag/arena_mazzi.py`,
+  `scripts/arena_rengar.command`): bot a mano con prior ekr_s8 (media più
+  alta nella verifica, 0,613 contro 0,593) contro il campione (prior
+  30.016), 600 coppie EK, 400 ER, 400 KR, seed 30.000/31.000/32.000; regole
+  fissate prima: Rengar (ER e KR) >= 0,52 e lim. inf. > 0,50, EK lim. inf.
+  > 0,47; entrambe -> promosso. Poi Ivern.

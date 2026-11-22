@@ -76,8 +76,10 @@ def _make(name, p, rng, ckpt=None):
 def _game(task):
     from riftbound.core.game_factory import build_game
     from riftbound.core.loop import GameLoop
-    seed, starter, cand_seat, name, ckpt, opp, opp_ckpt = task
-    gs = build_game(game_seed=seed, deck_a_path=B.EVE, deck_b_path=B.KHA, ai_a=None, ai_b=None,
+    from riftbound.ai.ppo.collect import DECK_OF
+    seed, starter, cand_seat, name, ckpt, opp, opp_ckpt = task[:7]
+    mu = task[7] if len(task) > 7 else "EK"      # matchup letters (arena_mazzi.py)
+    gs = build_game(game_seed=seed, deck_a_path=DECK_OF[mu[0]], deck_b_path=DECK_OF[mu[1]], ai_a=None, ai_b=None,
                     max_turns=B.MAX_TURNS, first_player=starter)
     for seat in ("A", "B"):
         p = gs.get_player(seat)
