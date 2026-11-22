@@ -196,6 +196,15 @@ contro il bot a mano.
     contro nuova (bilanciata + lr da 3e-4 a 1e-4 + archivio misto), semi 3 e
     4. Deviazione detta: due cambi insieme (la revisione li proponeva uno
     alla volta), per non spendere due notti; se la nuova vince, si separano.
+- 22/11, seconda notte (Mac, 20.000 partite per corsa): media del pannello
+  dalle 14.000 partite: controllo s3 0,517, nuova s3 0,513; controllo s4
+  0,512, nuova s4 0,555. Incroci finali: nuova contro controllo 0,623 (s3),
+  0,490 (s4). **La regola non è soddisfatta: la nuova ricetta non diventa
+  standard.** La varianza tra semi resta più grande degli effetti cercati;
+  tutte le ricette finiscono intorno a 0,50-0,55 contro le ancore del pilota.
+  La rete finale migliore fra le otto corse è nuova s3 (pannello 0,594 alla
+  fine, in salita; batte le altre tre di questa notte negli incroci; allarme
+  bot a mano 0,531 e 0,594, 32 coppie +-0,10).
   Poi, nell'ordine della revisione: archivio misto (10% recenti, 10%
   vecchi), decadimento del lr; distillazione della ricerca (10.000 radici,
   maestro il bot con prior 30.016); valore PPO alle foglie (prova G, miscela
