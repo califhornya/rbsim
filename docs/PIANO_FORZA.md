@@ -293,3 +293,9 @@ contro il bot a mano.
   30.016), 600 coppie EK, 400 ER, 400 KR, seed 30.000/31.000/32.000; regole
   fissate prima: Rengar (ER e KR) >= 0,52 e lim. inf. > 0,50, EK lim. inf.
   > 0,47; entrambe -> promosso. Poi Ivern.
+- 23/11, arena sui tre matchup (156 min): bot con prior ekr_s8 contro il
+  campione (prior 30.016): Evelynn-Kha'Zix **0,515 ± 0,022** (0,493-0,537),
+  Evelynn-Rengar 0,544 ± 0,029, Kha'Zix-Rengar 0,539 ± 0,028; Rengar insieme
+  **0,541 ± 0,020** (0,521-0,561). **PROMOSSO**: il campione è il bot a mano
+  con i prior di `runs/rengar/ekr_s8/corrente.pt` (sha256 24807b53fdc49e49).
+  Prossimo: Ivern (miscela a quattro mazzi da decidere con la revisione).

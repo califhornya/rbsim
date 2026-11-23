@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-22 (Rengar entra nel training; arena sui tre matchup).
+Aggiornato: 2026-11-23 (campione: bot a mano + prior a tre mazzi ekr_s8).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -69,12 +69,13 @@ il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
-   **Bot a mano + prior PPO 30.016: 0,540 ± 0,027, PROMOSSO** (22/11, PIANO_FORZA.md).
+   Bot a mano + prior PPO 30.016: 0,540 ± 0,027, promosso il 22/11 (PIANO_FORZA.md).
    Sfide (prior 15k 0,512, nuova s3 0,501), ricette (due notti), distillazione
    (seme 5 0,546, replica seme 6 0,428): chiuse, la varianza tra semi domina.
    **Rengar (22/11): entra, EK tiene** (verifica: Rengar +0,127 sul controllo, EK
-   +0,025; due semi d'accordo). Ora: arena sui tre matchup, prior ekr_s8 contro
-   il campione (`scripts/arena_rengar.command`, ~2,5 ore). Poi Ivern, poi Sett.
+   +0,025). **Arena (23/11): prior ekr_s8 PROMOSSO**, Rengar 0,541 ± 0,020, EK
+   0,515 ± 0,022. Campione: bot a mano + prior `runs/rengar/ekr_s8/corrente.pt`.
+   Prossimo: Ivern (miscela a quattro mazzi), poi Sett.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
