@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-23 (Ivern e Sett entrano; difetto cache PPO corretto; arena finale).
+Aggiornato: 2026-11-23 sera (giocate della 35.010: Switcheroo D71 proposto; arena finale).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -51,16 +51,16 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 
 ## In corso
 RiftAtlas → bot: `stati.py`, `posizione.py` su 82FAW; bot d'accordo con G17, G20, G22.
-Rete dal bot a mano: **chiusa** (19/11, `docs/bot/RETE.md`). Prevede chi vince
-meglio (0,466 contro 0,559) ma ordina male le mosse: completa 0,46, solo il
-suo valore con prior uguali 0,296 ± 0,038 contro il bot (arena, 230 coppie).
-Spareggio (`tie_break="mean"`, W/N tra i Q pari, 24% delle decisioni): arena
-19/11, 800 coppie: 0,483 ± 0,013, peggio; non promosso, il bot resta com'è.
+Rete dal bot a mano: chiusa (19/11, `docs/bot/RETE.md`: completa 0,46 contro il
+bot). Spareggio (`tie_break="mean"`): 0,483 ± 0,013, non promosso.
 Chi comincia decide: Evelynn vince ~91% se comincia, ~45% se no (arena e 2.000
 partite; il motore dà la runa in più a chi è secondo, §487.7). Matchup divisi così.
 Piano "forza" (20/11, `docs/PIANO_FORZA.md`): ricerca 1,16×; corretti mulligan e
 ordine delle rune (la ricerca vedeva carte nascoste); poi PPO a più mazzi.
 Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
+Giocate (23/11 sera, `docs/bot/GIOCATE.md`, controllo di Astra sulla 35.010):
+Switcheroo: 4 deviazioni (D71 proposto, non applicato); il 98% su Valley è della
+rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan e rilevatori: in corso.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
@@ -74,6 +74,7 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
    A) EI contro ekri_s10; se passa, B) ekris_s12 contro ekr_s8 sui dieci matchup.
    (23/11) Corretto il difetto della cache in `ppo.py` (pannelli e archivio; le
    verifiche e le arene no). Poi: scelta della tappa, lr 1e-4 contro 3e-4.
+   Ad arena finita, sul Mac: i comandi di GIOCATE.md §6; poi D71 se l'utente decide.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
@@ -88,7 +89,8 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
   `scenari.py` (coach e scenari dei giudizi); `scripts/train_selfplay.py`.
 - `riftbound/ai/handwritten.py`: il bot a mano; `scripts/bootstrap_net.py`: boot1.
 - `scripts/ppo.py` (PPO, `--mazzi ekr`), `riftbound/ai/ppo/`; `scripts/diag/`: misure
-  (`arena_bot.py`, `arena_mazzi.py`, `incroci_ppo.py`, `verifica_mazzi.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
+  (`arena_bot.py`, `arena_mazzi.py`, `incroci_ppo.py`, `verifica_mazzi.py`; `giocate.py`,
+  `mulligan_mano.py`, `switcheroo_casi.py`: GIOCATE.md); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
 - `riftbound/data/decks/`: precon, competitive (Evelynn, Kha'Zix, Ivern, Sett, Rengar del 21/11)
   e i vecchi come fixture; da lista .txt: `scripts/deck_from_txt.py`.
 - `scripts/riftatlas/`: registratore.js (in pagina), stati.py (registrazione →
