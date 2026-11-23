@@ -72,8 +72,8 @@ rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 see
    A) EI contro ekri_s10; se passa, B) ekris_s12 contro ekr_s8 sui dieci matchup.
    (23/11) Corretto il difetto della cache in `ppo.py` (pannelli e archivio; le
    verifiche e le arene no). Poi: scelta della tappa, lr 1e-4 contro 3e-4.
-   **Riallineare** la sessione delle arene (ramo `claude/rbsim2026-boot1-results-373ku0`, fermo a
-   01d4cb0): merge di `claude/wonderful-mendel-eii7zu` (avanti veloce, +3 commit), poi `git pull` sul Mac.
+   Ramo di lavoro unico: `claude/rbsim2026-boot1-results-373ku0` (23/11, unito con le giocate);
+   sul Mac `git pull`. Fase A dell'arena: EI 0,524 (lim. inf. 0,507), passa: B in corso.
    Ad arena finita, sul Mac: GIOCATE.md §6; poi D71 se l'utente decide.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
