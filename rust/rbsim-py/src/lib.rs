@@ -10,6 +10,9 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 
 use rbsim_core::agent::{Agent, Chooser};
+use rbsim_core::agents::{RandomAgent, SideChooser, SimpleTradeAgent};
+
+mod ppo;
 use rbsim_core::game::Game as CoreGame;
 use rbsim_core::registry::Registry as CoreRegistry;
 use rbsim_core::trace::{ReplayAgent, ReplayChooser, Sink, TraceAgent, TraceChooser};
@@ -21,6 +24,14 @@ fn perr(e: EngineError) -> PyErr {
 
 fn serr(e: String) -> PyErr {
     PyRuntimeError::new_err(e)
+}
+
+fn seat_of(seat: &str) -> PyResult<Side> {
+    match seat {
+        "A" => Ok(Side::A),
+        "B" => Ok(Side::B),
+        _ => Err(serr(format!("seat {seat}"))),
+    }
 }
 
 #[pyclass(unsendable)]
@@ -43,6 +54,7 @@ impl Registry {
 #[pyclass(unsendable)]
 struct Game {
     g: CoreGame,
+    ppo: [Option<Rc<RefCell<ppo::PpoAgent>>>; 2],
     sink: Option<Sink>,
     winner: Option<String>,
     turns: i64,
@@ -56,7 +68,7 @@ impl Game {
         let a = rbsim_core::setup::load_deck(deck_a_json).map_err(serr)?;
         let b = rbsim_core::setup::load_deck(deck_b_json).map_err(serr)?;
         let g = rbsim_core::setup::build_game(reg.reg.clone(), seed, &a, &b, first_player, max_turns).map_err(serr)?;
-        Ok(Game { g, sink: None, winner: None, turns: 0 })
+        Ok(Game { g, ppo: [None, None], sink: None, winner: None, turns: 0 })
     }
 
     /// A game from a canonical tree (canon.canonical_state), RNG seeded with `seed`.
@@ -64,7 +76,7 @@ impl Game {
     fn from_canonical(reg: &Registry, tree_json: &str, seed: i64) -> PyResult<Game> {
         let tree: serde_json::Value = serde_json::from_str(tree_json).map_err(|e| serr(e.to_string()))?;
         let gs = rbsim_core::import::from_canonical(reg.reg.clone(), &tree, seed as i128).map_err(serr)?;
-        Ok(Game { g: CoreGame::new(gs), sink: None, winner: None, turns: 0 })
+        Ok(Game { g: CoreGame::new(gs), ppo: [None, None], sink: None, winner: None, turns: 0 })
     }
 
     /// The state, raw (canon.py's RawDumper format), as JSON.
@@ -94,6 +106,52 @@ impl Game {
             self.g.chooser = Some(c);
         }
         Ok(())
+    }
+
+    /// A Rust agent for seat "A" / "B": "simple_trade" or "random" (its
+    /// generator seeded with `seed`, as random.Random(seed)).
+    fn set_agent(&mut self, seat: &str, kind: &str, seed: i64) -> PyResult<()> {
+        let s = match seat {
+            "A" => Side::A,
+            "B" => Side::B,
+            _ => return Err(serr(format!("seat {seat}"))),
+        };
+        let a: Rc<RefCell<dyn Agent>> = match kind {
+            "simple_trade" => Rc::new(RefCell::new(SimpleTradeAgent::default())),
+            "random" => Rc::new(RefCell::new(RandomAgent::new(seed as i128))),
+            _ => return Err(serr(format!("agent {kind}"))),
+        };
+        self.g.agents[s.idx()] = Some(a);
+        self.g.gs.players[s.idx()].has_agent = true;
+        Ok(())
+    }
+
+    /// A PPO agent for seat "A" / "B": Rust builds each question, `ask`
+    /// (riftbound/rs/agent_rs.AskPPO) answers it.
+    fn set_ppo_agent(&mut self, seat: &str, ask: Py<PyAny>) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let a = Rc::new(RefCell::new(ppo::PpoAgent::new(ask, s)));
+        self.ppo[s.idx()] = Some(a.clone());
+        let d: Rc<RefCell<dyn Agent>> = a;
+        self.g.agents[s.idx()] = Some(d);
+        self.g.gs.players[s.idx()].has_agent = true;
+        Ok(())
+    }
+
+    /// The loop's chooser: each choice to the agent of the side making it
+    /// (py: PPOChooser).
+    fn set_side_chooser(&mut self) {
+        let c: Rc<RefCell<dyn Chooser>> = Rc::new(RefCell::new(SideChooser));
+        self.g.chooser = Some(c);
+    }
+
+    /// A PPO seat's counts (py: PPOAgent.counts), {} for another seat.
+    fn counts(&self, seat: &str) -> PyResult<std::collections::BTreeMap<String, i64>> {
+        let s = seat_of(seat)?;
+        Ok(match &self.ppo[s.idx()] {
+            Some(a) => a.borrow().counts.clone(),
+            None => Default::default(),
+        })
     }
 
     /// Trace the game (trace_py's events, raw dumps), from now on.

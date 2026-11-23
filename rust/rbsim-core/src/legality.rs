@@ -22,7 +22,7 @@ impl Game {
     }
 
     /// py: _affordable(loop, ap, card, lane=None, dst=None)
-    fn affordable(&mut self, ap: Side, card: CardId, lane: Option<i64>, dst: Option<i64>) -> R<bool> {
+    pub fn affordable(&mut self, ap: Side, card: CardId, lane: Option<i64>, dst: Option<i64>) -> R<bool> {
         let (e, p) = self.effective_cost(card, ap, lane)?;
         let e = (e - self.destination_discount(card, dst, ap)?).max(0);
         let l = if self.gs.is_spell(card) { lane } else { None };

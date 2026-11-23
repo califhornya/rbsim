@@ -57,6 +57,9 @@ pub struct Game {
     pub lookahead: bool,
     /// On a declaration's copy: the real game (for what the real players see).
     pub real: Option<*const GameState>,
+    /// The real game, mutable, on a declaration's copy: what a PPO agent's
+    /// observation reads (and notes control on, as Python's does).
+    pub real_game: Option<*mut Game>,
     /// Arena sizes of the real game when this copy was made (objects created
     /// on the copy after that are foreign to the real game).
     pub copied_at: Option<(usize, usize, usize)>,
@@ -121,6 +124,7 @@ impl Game {
             dry_run: false,
             lookahead: false,
             real: None,
+            real_game: None,
             copied_at: None,
             spell_energy_paid: None,
             spell_power_paid: None,

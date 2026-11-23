@@ -74,6 +74,8 @@ pub struct Inst {
 pub struct Registry {
     pub cards: Vec<CardSpec>,
     pub by_name: HashMap<String, usize>,
+    /// py: encoding._CARD_INDEX: a name's place in sorted(CARD_REGISTRY).
+    pub vocab: HashMap<String, usize>,
 }
 
 fn s_opt(v: &Value) -> Option<String> {
@@ -90,6 +92,14 @@ fn strs(v: &Value) -> Vec<String> {
 }
 
 impl Registry {
+    /// py: encoding.card_id(name): 1-based; UNKNOWN_CARD if not in the vocabulary.
+    pub fn card_id(&self, name: Option<&str>) -> i64 {
+        match name.filter(|n| !n.is_empty()).and_then(|n| self.vocab.get(n)) {
+            Some(&i) => i as i64 + 1,
+            None => self.vocab.len() as i64 + 1,
+        }
+    }
+
     pub fn from_json(text: &str) -> Result<Registry, String> {
         let root: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
         let mut cards = Vec::new();
@@ -165,7 +175,10 @@ impl Registry {
             by_name.insert(name, cards.len());
             cards.push(spec);
         }
-        Ok(Registry { cards, by_name })
+        let mut names: Vec<&String> = by_name.keys().collect();
+        names.sort();
+        let vocab = names.iter().enumerate().map(|(i, n)| ((*n).clone(), i)).collect();
+        Ok(Registry { cards, by_name, vocab })
     }
 
     pub fn get(&self, name: &str) -> Option<&CardSpec> {

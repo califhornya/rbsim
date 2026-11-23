@@ -124,6 +124,11 @@ impl Game {
     /// py: _cleanup_hidden_cards
     pub fn cleanup_hidden_cards(&mut self) -> R<()> {
         for i in 0..self.gs.battlefields.len() {
+            // py: bf.control() inside the comprehension: noted only if there
+            // are facedown cards here.
+            if self.gs.battlefields[i].facedowns.is_empty() {
+                continue;
+            }
             let ctl = self.gs.battlefields[i].control();
             let gone: Vec<Facedown> =
                 self.gs.battlefields[i].facedowns.iter().filter(|fd| ctl != Some(fd.owner)).cloned().collect();

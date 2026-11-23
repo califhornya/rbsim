@@ -251,14 +251,19 @@ pub struct ReplayChooser {
 }
 
 impl Chooser for ReplayChooser {
-    fn choose(&mut self, _g: &mut Game, kind: &str, _side: Side, options: &[Opt], _default: usize, _source: Option<CardId>)
+    fn choose(&mut self, g: &mut Game, kind: &str, _side: Side, options: &[Opt], _default: usize, _source: Option<CardId>)
               -> R<Option<usize>> {
         let e = self.events.pop_front().ok_or_else(|| EngineError::Agent(format!("replay: no more choices, wanted {kind}")))?;
         if e["kind"] != kind {
             return Err(EngineError::Agent(format!("replay: choice {kind}, trace has {}", e["kind"])));
         }
         if e["options"].as_array().map(|a| a.len()) != Some(options.len()) {
-            return Err(EngineError::Agent(format!("replay: choice {kind}: {} options, trace {}", options.len(), e["options"])));
+            let names: Vec<String> = options.iter().map(|o| match o {
+                Opt::Unit(u) => format!("unit {}@{:?}", g.gs.name(g.gs.unit(*u).card), g.locate_unit(*u)),
+                Opt::Card(c) => format!("card {}", g.gs.name(*c)),
+                x => format!("{x:?}"),
+            }).collect();
+            return Err(EngineError::Agent(format!("replay: choice {kind}: {} options {names:?}, trace {}", options.len(), e["options"])));
         }
         if e["by"] == "agent" {
             Ok(e["chosen"].as_u64().map(|x| x as usize))

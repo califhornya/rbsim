@@ -89,21 +89,22 @@ impl Game {
         Ok(if conditional.is_empty() { true } else { conditional.iter().any(|&b| b) })
     }
 
-    /// A copy of this game for a declaration (py: deepcopy with agents
-    /// replaced by _ModeAsker): no chooser of its own yet, dry run.
+    /// A copy of this game for a declaration (py: GameLoop(gs2) on a
+    /// deepcopy of the state, agents replaced by _ModeAsker): the loop's own
+    /// state is fresh (no _choices_noted, _replay, _in_many... of this
+    /// loop); no chooser of its own yet.
     fn declaration_copy(&self) -> Game {
-        let mut g2 = self.clone();
-        g2.loop_id = new_loop_id();
+        let mut g2 = Game::new(self.gs.clone());
         g2.real = Some(self.real.unwrap_or(&self.gs as *const GameState));
         g2.copied_at = Some((self.gs.cards.len(), self.gs.units.len(), self.gs.dgear.len()));
-        g2.chooser = None;
-        // _ModeAsker: only decide_mode, for the players that have an agent.
+        // _ModeAsker for the players whose agent has decide_mode; None for the others.
         for s in Side::BOTH {
             if let Some(a) = self.agents[s.idx()].clone() {
-                g2.agents[s.idx()] = Some(std::rc::Rc::new(std::cell::RefCell::new(ModeAsker { inner: a })));
+                if a.borrow().has("decide_mode") {
+                    g2.agents[s.idx()] = Some(std::rc::Rc::new(std::cell::RefCell::new(ModeAsker { inner: a })));
+                }
             }
         }
-        g2.journal = None;
         g2
     }
 
@@ -128,6 +129,7 @@ impl Game {
             crate::not_ported!("_declare_choices", "Irelia Graceful owed choice");
         }
         let mut g2 = self.declaration_copy();
+        g2.real_game = Some(self.real_game.unwrap_or(self as *mut Game));
         g2.dry_run = true;
         // The copy's chooser: only declared choices of this spell are the real
         // player's (through this loop's chooser), the rest are the baseline.

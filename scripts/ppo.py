@@ -150,9 +150,23 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
     return out
 
 
+def _play(seed, nets, learners, **kw):
+    """collect.play on the engine RBSIM_MOTORE names (--motore): "rust" plays
+    the Evelynn-Kha'Zix games on the Rust engine (riftbound/rs/collect_rs.py,
+    the same examples bit for bit); the other matchups and the games against
+    the hand-written bot stay on the Python engine (not ported yet)."""
+    from riftbound.ai.ppo.collect import EVE, KHA
+    ek = {Path(kw.get("deck_a", EVE)), Path(kw.get("deck_b", KHA))} <= {Path(EVE), Path(KHA)}
+    if os.environ.get("RBSIM_MOTORE", "python") == "rust" and ek and kw.get("opponent") != "bot":
+        from riftbound.rs.collect_rs import play
+    else:
+        from riftbound.ai.ppo.collect import play
+    return play(seed, nets, learners, **kw)
+
+
 def _collect(task):
     """A chunk of training games: (games, weights, snapshots {key: blob}, lam)."""
-    from riftbound.ai.ppo.collect import DECK_OF, gae, play
+    from riftbound.ai.ppo.collect import DECK_OF, gae
     games, cur, snaps, lam = task
     me = _net(cur[1], ("learner", cur[0]))
     recs, out = [], []
@@ -163,7 +177,7 @@ def _collect(task):
             archived = _net(snaps[opp], ("archive", opp))
             nets = {seat: me, ("B" if seat == "A" else "A"): archived}
             learners = {seat: True}
-        g = play(seed, nets, learners, sample=True, starter=starter, deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
+        g = _play(seed, nets, learners, sample=True, starter=starter, deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
         for s, rs in g["records"].items():
             if rs:
                 gae(rs, g["z"][s], gamma=1.0, lam=lam)
@@ -177,7 +191,7 @@ def _collect(task):
 def _eval(task):
     """Measuring games, the highest score: (games [(seed, cand seat, starter,
     opponent kind, key, matchup)], cand, anchors {key: blob})."""
-    from riftbound.ai.ppo.collect import DECK_OF, play
+    from riftbound.ai.ppo.collect import DECK_OF
     games, cand, anchors = task
     me = _net(cand[1], ("panel", cand[0]))
     out = []
@@ -188,7 +202,7 @@ def _eval(task):
             nets, opp = {seat: me, other: frozen}, None
         else:
             nets, opp = {seat: me, other: None}, kind
-        g = play(seed, nets, {}, sample=False, starter=starter, opponent=opp,
+        g = _play(seed, nets, {}, sample=False, starter=starter, opponent=opp,
                  deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
         out.append((kind, key, seed, seat, starter, 1.0 if g["winner"] == seat else 0.5 if g["winner"] == "DRAW" else 0.0,
                     mu))
@@ -238,7 +252,14 @@ def main() -> None:
     ap.add_argument("--pannello-mazzi", nargs="*", choices=tuple(PANEL_SEEDS), default=None,
                     help="i matchup del pannello (default: quelli di --mazzi); EK sempre")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
+    ap.add_argument("--motore", choices=("python", "rust"), default="python",
+                    help="motore delle partite Evelynn-Kha'Zix (rust: estensione riftbound_rs)")
     args = ap.parse_args()
+    # The workers read the engine from the environment (_play).
+    os.environ["RBSIM_MOTORE"] = args.motore
+    if args.motore == "rust":
+        import riftbound_rs  # noqa: F401  (the extension must be there: no silent fallback)
+        print("motore: Rust per le partite Evelynn-Kha'Zix; altri mazzi e bot su Python")
 
     import torch
     from riftbound.ai.ppo.collect import DECK_NAME
