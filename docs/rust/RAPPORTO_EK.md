@@ -39,6 +39,7 @@ Tutti i campioni qui sotto sono giocati con la build finale. Su questi campioni:
 | **semi tenuti da parte** (usati solo alla fine) | 900001–900040 | vedi sotto |
 | casi Gold D59, D59b, D62 (`docs/rust/CONSEGNA1.md`) | 3 posizioni | tracce identiche |
 | `pytest tests/rust` (carica davvero l'estensione) | 15 test | verdi |
+| suite Python completa (`pytest -q`, golden comprese, con `tests/rust`) | 1.963 test | verdi |
 
 Esempi PPO bit per bit significa che coincidono `x`, `q`, `src`, `ctx`, `otype`, `ocards`, `ofeats`, `a`, `logp`, `v`, `seat` e `turn` di ogni esempio, oltre a esito, turni e conteggi.
 
