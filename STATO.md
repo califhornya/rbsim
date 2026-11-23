@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-23 sera (giocate della 35.010: Switcheroo D71 proposto; arena finale).
+Aggiornato: 2026-11-23 sera (campione a cinque mazzi: prior ekris_s12).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -64,16 +64,15 @@ rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 see
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
    Bot a mano + prior PPO 30.016: 0,540 ± 0,027, promosso il 22/11 (PIANO_FORZA.md).
    Sfide, ricette, distillazione (s5 0,546, s6 0,428): chiuse, varianza tra semi.
-   **Rengar (22/11): entra** (+0,127). **Arena: prior ekr_s8 PROMOSSO** (Rengar 0,541,
-   EK 0,515). Campione: bot a mano + prior `runs/rengar/ekr_s8/ckpt_020032.pt`.
+   **Rengar (22/11): entra** (+0,127); arena: prior ekr_s8 promosso (Rengar 0,541).
    **Ivern (23/11): entra** (Δ +0,244), i tre vecchi tengono. Partenza Sett: ekri_s10.
-   **Sett (23/11): entra** (Δ +0,162); vecchi: 5 su 6 tengono, EI incerto (-0,032),
-   semi molto discordi. **Ora: arena finale** (`scripts/arena_finale.command`, ~9,5 ore):
-   A) EI contro ekri_s10; se passa, B) ekris_s12 contro ekr_s8 sui dieci matchup.
-   (23/11) Corretto il difetto della cache in `ppo.py` (pannelli e archivio; le
-   verifiche e le arene no). Poi: scelta della tappa, lr 1e-4 contro 3e-4.
+   **Sett (23/11): entra** (Δ +0,162). **Arena finale (server): PROMOSSO.** Campione:
+   bot a mano + prior `runs/sett/ekris_s12/ckpt_040000.pt` (cinque mazzi): storici
+   0,539 / 0,537 / 0,518, blocco Ivern 0,581, blocco Sett 0,540 contro ekr_s8.
+   Corretto il difetto della cache in `ppo.py`. Poi: `scripts/prova_smt.sh` (arene a
+   64 processi?), scelta della tappa, lr 1e-4 contro 3e-4.
    Ramo di lavoro unico: `claude/rbsim2026-boot1-results-373ku0` (23/11, unito con le giocate);
-   sul Mac `git pull`. Fase A dell'arena: EI 0,524 (lim. inf. 0,507), passa: B in corso.
+   sul Mac `git pull`. Fase A (Mac): EI 0,524, passa; fase B sul server (Cherry, EPYC 32 core).
    Ad arena finita, sul Mac: GIOCATE.md §6; poi D71 se l'utente decide.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 

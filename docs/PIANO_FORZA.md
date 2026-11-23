@@ -413,3 +413,12 @@ contro il bot a mano.
   possono usare un processo per thread. (Il raddoppio del tempo, 20/11, non
   aveva aiutato: 0,472.) `arena_mazzi.py`: --budget-candidato,
   --budget-avversario, --tenuta, iterazioni per decisione nel rapporto.
+- 23/11, arena finale, fase B (server, 32 processi, 135 min): bot con prior
+  ekris_s12/ckpt_040000 (sha256 f8d8469b506dfc1d) contro il campione (prior
+  ekr_s8/ckpt_020032, sha256 87bfcd4decf9d1d3): EK **0,539 ± 0,019**
+  (0,520-0,559), ER **0,537 ± 0,019** (0,518-0,556), KR **0,518 ± 0,019**
+  (0,499-0,537); EI 0,548, KI 0,618, RI 0,575, blocco Ivern **0,581 ±
+  0,018** (0,563-0,598); ES 0,542, KS 0,542, RS 0,544, IS 0,534, blocco Sett
+  **0,540 ± 0,017** (0,523-0,558). **PROMOSSO**: il campione è il bot a mano
+  con i prior di `runs/sett/ekris_s12/ckpt_040000.pt`, a cinque mazzi; sopra
+  il vecchio anche nei tre matchup storici.
