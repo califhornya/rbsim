@@ -45,7 +45,8 @@ PPO_CKPT = ROOT / "runs/ppo1/corrente.pt"
 _PPO: dict = {}
 
 
-def _make(name, p, rng, ckpt=None):
+def _make(name, p, rng, ckpt=None, budget=None):
+    """budget: CPU seconds per move for the bots that search (default REF_BUDGET)."""
     from riftbound.ai.handwritten import HandwrittenAgent
     if name == "tempo":
         return HandwrittenAgent(p, rng=rng, budget=2 * REF_BUDGET)
@@ -69,8 +70,8 @@ def _make(name, p, rng, ckpt=None):
         path = ckpt or os.environ.get("PPO_CKPT", str(PPO_CKPT))
         if path not in _PPO:                     # one net per checkpoint file
             _PPO[path] = load(path)
-        return PPOPriorAgent(p, _PPO[path], rng=rng, budget=REF_BUDGET)
-    return HandwrittenAgent(p, rng=rng, budget=REF_BUDGET)
+        return PPOPriorAgent(p, _PPO[path], rng=rng, budget=budget or REF_BUDGET)
+    return HandwrittenAgent(p, rng=rng, budget=budget or REF_BUDGET)
 
 
 def _game(task):
@@ -79,12 +80,13 @@ def _game(task):
     from riftbound.ai.ppo.collect import DECK_OF
     seed, starter, cand_seat, name, ckpt, opp, opp_ckpt = task[:7]
     mu = task[7] if len(task) > 7 else "EK"      # matchup letters (arena_mazzi.py)
+    b_cand, b_opp = (task[8], task[9]) if len(task) > 9 else (None, None)
     gs = build_game(game_seed=seed, deck_a_path=DECK_OF[mu[0]], deck_b_path=DECK_OF[mu[1]], ai_a=None, ai_b=None,
                     max_turns=B.MAX_TURNS, first_player=starter)
     for seat in ("A", "B"):
         p = gs.get_player(seat)
         rng = random.Random(seed * 2 + (seat == "B"))
-        p.agent = _make(name, p, rng, ckpt) if seat == cand_seat else _make(opp, p, rng, opp_ckpt)
+        p.agent = _make(name, p, rng, ckpt, b_cand) if seat == cand_seat else _make(opp, p, rng, opp_ckpt, b_opp)
     from riftbound.ai.ppo.agent import PPOChooser
     loop = GameLoop(gs)
     loop.chooser = PPOChooser(gs)       # a PPO net's own choices; bots' choosers go on top

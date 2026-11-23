@@ -401,3 +401,15 @@ contro il bot a mano.
   cinque mazzi come prior è anzi un po' meglio della intermedia. Fase B
   avviata alle 17:00 (le partite con Ivern sono più lente: ~5,7 coppie al
   minuto contro ~9 di Rengar; stima ~10 ore).
+- 23/11, server (Cherry Servers, AMD EPYC 9354P, 32 core / 64 thread): fase B
+  dell'arena rifatta da capo lì, un processo per core (32), ~70 partite al
+  minuto (Mac: ~18 con 8 processi; per processo uguale, ~2,2: il budget è a
+  tempo di CPU, `time.process_time`, quindi una CPU più veloce non accorcia
+  le arene, dà solo più iterazioni). Prova da fare ad arena finita
+  (`scripts/prova_smt.sh`): un processo per thread raddoppia le partite al
+  minuto ma riduce le iterazioni per mossa (fattore f misurato); il campione
+  a 0,4 x f s contro il campione a 0,4 s, 100 coppie per matchup sui dieci,
+  regola fissata prima: a pesi uguali limite inferiore > 0,47 -> le arene
+  possono usare un processo per thread. (Il raddoppio del tempo, 20/11, non
+  aveva aiutato: 0,472.) `arena_mazzi.py`: --budget-candidato,
+  --budget-avversario, --tenuta, iterazioni per decisione nel rapporto.

@@ -64,10 +64,16 @@ def main() -> None:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--righe", type=Path, default=None, help="default: --out con estensione .jsonl")
     ap.add_argument("--esito-positivo", default="PROMOSSO", help="la parola dell'esito quando le regole passano")
+    ap.add_argument("--esito-negativo", default=None, help="e quando non passano (default: non + la positiva)")
+    ap.add_argument("--tenuta", nargs="*", default=[],
+                    help="blocchi (matchup separati da virgole) che, a pesi uguali, devono avere limite inferiore > 0,47")
+    ap.add_argument("--budget-candidato", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
+    ap.add_argument("--budget-avversario", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     args = ap.parse_args()
     from riftbound.ai.ppo.collect import DECK_NAME
     blocks = [b.split(",") for b in args.blocchi]
-    mus = list(dict.fromkeys(args.vecchi + [mu for b in blocks for mu in b]))
+    holds = [b.split(",") for b in args.tenuta]
+    mus = list(dict.fromkeys(args.vecchi + [mu for b in blocks + holds for mu in b]))
     if any(mu not in ORDER for mu in mus):
         sys.exit(f"matchup sconosciuto; quelli noti: {' '.join(ORDER)}")
     pairs = {mu: 800 if mu in args.vecchi else 300 for mu in mus}
@@ -87,31 +93,42 @@ def main() -> None:
     say(f"\n== Arena su {len(mus)} matchup ({time.strftime('%d/%m %H:%M')})")
     say(f"candidato: il bot a mano con i prior PPO di {args.ckpt} (sha256 {_sha(args.ckpt)}); avversario: il "
         f"bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {_sha(args.ckpt_avversario)}); "
-        f"{A.REF_BUDGET} s per mossa")
+        f"{args.budget_candidato or A.REF_BUDGET} s per mossa al candidato, "
+        f"{args.budget_avversario or A.REF_BUDGET} s all'avversario; {args.workers} processi")
     say(f"regole fissate prima: ciascuno di {' '.join(args.vecchi) or '-'} limite inferiore > 0,47; ciascun blocco "
         f"({'; '.join(' '.join(b) for b in blocks) or '-'}), a pesi uguali, >= 0,52 e limite inferiore > 0,50; "
+        + (f"ciascun blocco di tenuta ({'; '.join(' '.join(b) for b in holds)}), a pesi uguali, limite inferiore "
+           f"> 0,47; " if holds else "") +
         f"tutte -> {args.esito_positivo.lower()}")
     say("   " + "; ".join(f"{mu} {pairs[mu]} coppie, seed {s0[mu]}-{s0[mu] + pairs[mu] - 1}" for mu in mus))
 
-    tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu)
+    tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu,
+              args.budget_candidato, args.budget_avversario)
              for mu in mus for s in range(s0[mu], s0[mu] + pairs[mu]) for seat in ("A", "B")]
     rows: list = []
     if righe.exists():
         for line in open(righe):
             r = json.loads(line)
-            if r["ckpt"] == args.ckpt and r["avversario"] == args.ckpt_avversario:
+            if r["ckpt"] == args.ckpt and r["avversario"] == args.ckpt_avversario and \
+                    r.get("budget_c") == args.budget_candidato and r.get("budget_a") == args.budget_avversario:
                 rows.append((r["seed"], r["starter"], r["seat"], r["score"], r["mu"]))
     done = {(r[0], r[2], r[4]) for r in rows}
     todo = [t for t in tasks if (t[0], t[2], t[7]) not in done]
     if rows:
         say(f"   ripresa: {len(rows)} partite già giocate, {len(todo)} da giocare")
     t0 = time.time()
+    iters: dict = {"candidato": [], "avversario": []}      # this launch's games only
     with Pool(args.workers, initializer=B._init) as pool, open(righe, "a") as f:
         for task, r in zip(todo, pool.imap(A._game, todo)):
             mu = task[7]
             rows.append((r[0], r[1], r[2], r[3], mu))
-            f.write(json.dumps({"ckpt": args.ckpt, "avversario": args.ckpt_avversario, "seed": r[0],
-                                "starter": r[1], "seat": r[2], "score": r[3], "mu": mu}) + "\n")
+            iters["candidato"] += r[4]
+            iters["avversario"] += r[5]
+            row = {"ckpt": args.ckpt, "avversario": args.ckpt_avversario, "seed": r[0],
+                   "starter": r[1], "seat": r[2], "score": r[3], "mu": mu}
+            if args.budget_candidato is not None or args.budget_avversario is not None:
+                row |= {"budget_c": args.budget_candidato, "budget_a": args.budget_avversario}
+            f.write(json.dumps(row) + "\n")
             f.flush()
             if len(rows) % 100 == 0:
                 print(f"   ... {len(rows)}/{len(tasks)} partite, {(time.time() - t0) / 60:.0f} min", flush=True)
@@ -146,10 +163,19 @@ def main() -> None:
         say(f"   blocco {' '.join(b)} a pesi uguali: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f})")
         verdicts.append(f"blocco {' '.join(b)}: {'SÌ' if good else 'no'} (punteggio {m:.3f}, limite inferiore "
                         f"{m - h:.3f})")
+    for b in holds:
+        m, h = _block([est[mu] for mu in b])
+        good = m - h > 0.47
+        ok &= good
+        say(f"   tenuta {' '.join(b)} a pesi uguali: {m:.3f} +- {h:.3f} ({m - h:.3f}-{m + h:.3f})")
+        verdicts.append(f"tenuta {' '.join(b)}: {'SÌ' if good else 'no'} (limite inferiore {m - h:.3f}, soglia 0,47)")
     for v in verdicts:
         say(f"   {v}")
+    for who, xs in iters.items():
+        if xs:
+            say(f"   {who}: {sum(xs) / len(xs):.0f} iterazioni per decisione del turno (partite di questo lancio)")
     say(f"   {(time.time() - t0) / 60:.0f} min da questo lancio")
-    say(f"   Esito: {args.esito_positivo if ok else 'non ' + args.esito_positivo.lower()}")
+    say(f"   Esito: {args.esito_positivo if ok else (args.esito_negativo or 'non ' + args.esito_positivo.lower())}")
 
 
 if __name__ == "__main__":
