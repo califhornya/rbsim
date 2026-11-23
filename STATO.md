@@ -64,8 +64,7 @@ sorelle (pilota 128 radici) e rete che li impara; 3) self-play grande (tappe a
 5.000 / 15.000 / 30.000 partite). Fatto: ricerca 1,16× (mosse identiche);
 corretti mulligan e ordine delle rune (la ricerca vedeva carte e rune nascoste);
 la rete vede le proprie coperte per campo (boot1 non si carica più).
-Dichiarazioni (copia del gioco): 31% del tempo senza profiler, sempre vuote
-il 12%: saltarle darebbe al massimo 1,14×; rimandato. La leva vera: iterazioni.
+Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
