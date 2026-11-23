@@ -41,6 +41,8 @@ pub struct Card {
     pub spent: Option<i64>,
     pub hidden_bf: Option<usize>,
     pub temporary: Option<bool>,
+    pub empowered: Option<bool>,
+    pub flow_banish: Option<bool>,
 }
 
 impl Card {
@@ -69,6 +71,8 @@ impl Card {
             spent: None,
             hidden_bf: None,
             temporary: None,
+            empowered: None,
+            flow_banish: None,
         }
     }
 }
@@ -224,7 +228,7 @@ pub struct Battlefield {
     pub contested_this_turn: bool,
     pub scored_this_turn: [bool; 2],
     pub first_unit_here: [bool; 2],
-    pub plays_here: PyDict<Side, (i64, Vec<CardId>)>,
+    pub plays_here: PyDict<Side, (i64, i64)>,
     pub last_controller: Option<Side>,
     pub held_by: Option<Side>,
     pub gained_control: Option<Side>,
@@ -819,7 +823,34 @@ pub struct Ability {
     pub rest: Vec<(usize, Spec)>,
     pub bf: Option<usize>,
     pub flags: Option<Flags>,
-    pub other: PyDict<String, Value>,
+    pub trigger: Option<String>,
+    pub additional: bool,
+    pub once: bool,
+    pub cond_extra: Option<Extra>,
+    pub cost: Option<Value>,
+    /// Other keys of the dict (activated abilities): name -> value.
+    pub other: PyDict<String, XVal>,
+}
+
+impl Ability {
+    pub fn new(kind: &str) -> Ability {
+        Ability {
+            eff: None,
+            kind: kind.to_string(),
+            energy: 0,
+            extra: Extra::default(),
+            target: None,
+            rest: Vec::new(),
+            bf: None,
+            flags: None,
+            trigger: None,
+            additional: false,
+            once: false,
+            cond_extra: None,
+            cost: None,
+            other: PyDict::new(),
+        }
+    }
 }
 
 /// A trigger's / effect's context dict (py: context_extra / ctx.extra).
@@ -840,6 +871,42 @@ pub enum XVal {
     Str(String),
     None,
     Json(Value),
+    List(Vec<XVal>),
+}
+
+impl Extra {
+    pub fn get(&self, k: &str) -> Option<&XVal> {
+        self.items.get(&k.to_string())
+    }
+    pub fn set(&mut self, k: &str, v: XVal) {
+        self.items.set(k.to_string(), v);
+    }
+    pub fn bf(&self, k: &str) -> Option<usize> {
+        match self.get(k) {
+            Some(XVal::Bf(b)) => Some(*b),
+            _ => None,
+        }
+    }
+    pub fn unit(&self, k: &str) -> Option<UnitId> {
+        match self.get(k) {
+            Some(XVal::Unit(u)) => Some(*u),
+            _ => None,
+        }
+    }
+    pub fn card(&self, k: &str) -> Option<CardId> {
+        match self.get(k) {
+            Some(XVal::Card(c)) => Some(*c),
+            _ => None,
+        }
+    }
+    /// dict(a, **b)
+    pub fn merged(&self, b: &Extra) -> Extra {
+        let mut out = self.clone();
+        for (k, v) in b.items.iter() {
+            out.items.set(k.clone(), v.clone());
+        }
+        out
+    }
 }
 
 /// A card's play flags (py: GameLoop._card_flags: kicker paid, SHOW OFF, ...).
@@ -945,8 +1012,8 @@ pub struct GameState {
     pub next_card_discounts: [Vec<Value>; 2],
     pub delayed_effects: Vec<Value>,
     pub delayed_main: Vec<Value>,
-    /// (source card, key) -> turn. The key is the effect index or another tag.
-    pub once_per_turn_used: PyDict<(CardId, OnceKey), i64>,
+    /// key -> turn: (source card, effect index or tag), or (tag, side).
+    pub once_per_turn_used: PyDict<OnceK, i64>,
     pub xp_gained_turn: PyDict<Side, i64>,
     pub no_spell_damage_turn: i64,
     pub decree_turn: i64,
@@ -984,7 +1051,14 @@ pub struct GameState {
     pub hold_points_this_turn: [i64; 2],
 }
 
-/// The second part of a once_per_turn_used key.
+/// A once_per_turn_used key.
+#[derive(Clone, Debug, PartialEq)]
+pub enum OnceK {
+    Card(CardId, OnceKey),
+    Named(String, Side),
+}
+
+/// The second part of a (card, ...) once_per_turn_used key.
 #[derive(Clone, Debug, PartialEq)]
 pub enum OnceKey {
     Idx(i64),

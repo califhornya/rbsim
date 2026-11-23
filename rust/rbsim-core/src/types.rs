@@ -151,6 +151,9 @@ pub enum EngineError {
     Ignored(String),
     Agent(String),
     Invalid(String),
+    /// What raises an exception in Python (caught by the engine's
+    /// `except Exception` around a handler or a declaration).
+    Py(String),
 }
 
 impl std::fmt::Display for EngineError {
@@ -160,6 +163,7 @@ impl std::fmt::Display for EngineError {
             EngineError::Ignored(s) => write!(f, "Ignored: {s}"),
             EngineError::Agent(s) => write!(f, "Agent: {s}"),
             EngineError::Invalid(s) => write!(f, "Invalid: {s}"),
+            EngineError::Py(s) => write!(f, "Py: {s}"),
         }
     }
 }
@@ -171,4 +175,12 @@ macro_rules! not_ported {
     ($at:expr, $($arg:tt)*) => {
         return Err($crate::types::EngineError::NotPorted { at: $at.to_string(), what: format!($($arg)*) })
     };
+}
+
+impl EngineError {
+    /// Caught by Python's `except Exception` (a handler, a declaration):
+    /// everything but NotPorted and agent failures.
+    pub fn swallowable(&self) -> bool {
+        !matches!(self, EngineError::NotPorted { .. } | EngineError::Agent(_))
+    }
 }

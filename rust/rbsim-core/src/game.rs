@@ -60,6 +60,12 @@ pub struct Game {
     /// Arena sizes of the real game when this copy was made (objects created
     /// on the copy after that are foreign to the real game).
     pub copied_at: Option<(usize, usize, usize)>,
+    pub spell_energy_paid: Option<i64>,
+    pub spell_power_paid: Option<i64>,
+    pub resolving_item: Option<CardId>,
+    pub choices_noted: bool,
+    pub discard_depth: i64,
+    pub discard_sides: Vec<Side>,
 }
 
 /// A journal entry (py: ("decision", ...), ("choice", side, kind, n, idx)).
@@ -114,6 +120,12 @@ impl Game {
             lookahead: false,
             real: None,
             copied_at: None,
+            spell_energy_paid: None,
+            spell_power_paid: None,
+            resolving_item: None,
+            choices_noted: false,
+            discard_depth: 0,
+            discard_sides: Vec::new(),
         }
     }
 

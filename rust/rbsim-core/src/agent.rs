@@ -126,9 +126,11 @@ pub trait Agent {
         let _ = (g, kind, side, options, default, source);
         Ok(None)
     }
-    /// Only answers decide_mode (py: _ModeAsker on a declaration's copy).
-    fn mode_only(&self) -> bool {
-        false
+    /// py: hasattr(agent, method) — the engine skips (or defaults) a
+    /// decision the agent has no method for.
+    fn has(&self, method: &str) -> bool {
+        let _ = method;
+        true
     }
 }
 
