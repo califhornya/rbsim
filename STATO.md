@@ -50,8 +50,7 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
   simple_trade; S6-S9, S11a/b, TEORIA_PUNTI, `TURNO_AVVERSARIO.md`.
 
 ## In corso
-RiftAtlas → bot: `stati.py` e `posizione.py` funzionano su 82FAW (lista di Ivern
-in `docs/bot/partite/`); il bot d'accordo con G17, G20, G22 (GIUDIZI, 19/11).
+RiftAtlas → bot: `stati.py`, `posizione.py` su 82FAW; bot d'accordo con G17, G20, G22.
 Rete dal bot a mano: **chiusa** (19/11, `docs/bot/RETE.md`). Prevede chi vince
 meglio (0,466 contro 0,559) ma ordina male le mosse: completa 0,46, solo il
 suo valore con prior uguali 0,296 ± 0,038 contro il bot (arena, 230 coppie).
