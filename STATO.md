@@ -13,59 +13,48 @@ esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
 ## Decisioni prese
 - Rust identico a `6427b90`, deviazioni note comprese (D59, D62, Switcheroo/D71):
   una correzione = fix Python separato + stesso cambio in Rust.
-- Traduzione fedele, funzione per funzione (ogni fn Rust cita la py); sincrono a
-  callback (trait Agent con `has()` = hasattr, Chooser); arene di id, copie Clone;
-  `not_ported!` = errore identificabile, mai inghiottito.
-- MT19937 compatibile con `random.Random`; carte dal `CARD_REGISTRY` esportato
-  (`rust/data/registry.json`); confine PyO3 (`riftbound_rs`): Rust calcola
-  osservazione, menu, descrittori; Python fa forward e campionamento.
-- Prima integrazione = raccolta PPO (`docs/rust/F0_MISURE.md`): guadagno sul ciclo
-  leggibile; arena dopo (serve budget ridotto validato in forza).
-- Dump Rust con chiavi nell'ordine dei campi Python (`preserve_order`): gli id
-  canonici delle copie dipendono dall'ordine di prima vista.
-- Sviluppo nel container; misure ufficiali sul Mac con un lanciatore unico.
-- Q1–Q4, D27 (utente); competitive: Evelynn, Kha'Zix, Rengar, Ivern, Sett.
+- Traduzione fedele, funzione per funzione; sincrono a callback (Agent con `has()` =
+  hasattr, Chooser); arene di id; `not_ported!` = errore identificabile.
+- Confine PPO: Rust costruisce domanda (osservazione e turno del gioco reale,
+  descrittori, contesto), Python (`AskPPO`) forward + campionamento + record.
+- Prima integrazione = raccolta PPO (F0); `ppo.py --motore rust`: EK su Rust, altri
+  matchup e bot su Python (dichiarato all'avvio). Default resta python.
+- Copia di dichiarazione = loop nuovo (come `GameLoop(gs2)`); `bf.control()` muta
+  lo stato: chiamato negli stessi punti (anche l'osservazione PPO).
+- Sideboard EK (4 verbi) non portata: non entra in partita.
 
 ## Fatto
-- F0: misure Python provvisorie (container 4 core, pesi dal seme 1). PPO EK: ciclo
-  10,7 s (raccolta 5,3 + aggiornamento 5,2); raccolta un core 319 ms/partita:
-  motore 43%, rete 24%, legali 18%, osservazione 11% → tetto ~1,6× sul ciclo.
-  Arena: 14,8 s/partita a 50 iterazioni (motore e ricerca 86%).
-- F1: traccia Python (`trace_py.py`: agenti, chooser, rng; copie mappate al gioco
-  reale), dump canonico, comparatore alla prima differenza (`diff_trace.py`).
-- Motore Rust (`rust/rbsim-core`, ~30 moduli): stato, setup, turno, catena,
-  showdown, combattimento, legalità, costi, passivi, effetti EK, dichiarazioni
-  su copia, import da stato canonico, replay e traccia.
-- Replay differenziale: 20/20 partite EK self-play (semi 1000001–1000020, rete dal
-  seme 1) identiche evento per evento (stato, menu, scelte, estrazioni).
-- F2 prima consegna (`docs/rust/CONSEGNA1.md`): D59, D59b, D62 con Gold, tracce
-  identiche; Rust riproduce D59 (Gold non eseguito, movimento chiuso nella
-  finestra; pass o "kept" secondo l'impronta) e D62 (B senza priorità). Segmento
-  su un core ×13,6–17,5 (2–4 ms Python, 0,1–0,3 ms Rust), senza rete.
+- F0 misure Python; F1 traccia/canon/comparatore; motore Rust (`rust/rbsim-core`).
+- F2 consegna Gold (`docs/rust/CONSEGNA1.md`): D59, D59b, D62 identiche.
+- F3 `docs/rust/INVENTARIO_EK.md`: 46 carte, 34 verbi, tutti quelli in partita portati.
+- F4 agenti Rust random e simple_trade; partite autonome identiche.
+- F5 osservazione, codifica, descrittori in Rust; PPO su Rust (`collect_rs.play`),
+  esempi identici bit per bit a `collect.play`.
+- F6 (`docs/rust/RAPPORTO_EK.md`): build finale, zero divergenze su replay 40/40,
+  autonome 300/300, PPO 251/251; semi tenuti 900001–900040 tutti identici.
+  Misure: raccolta su un core ×2,9; ciclo PPO 4 processi 10,2 → 6,5 s (×1,57),
+  1.000 partite 2,7 → 1,7 min. Rust: 84% della raccolta è ora il forward torch.
+- Errori Rust trovati e corretti: ordine chiavi del dump, cleanup_hidden_cards,
+  copia di dichiarazione.
 
 ## In corso
-F4: partite autonome dai semi con agenti Rust (simple_trade, random) per
-verificare il consumo di casualità senza replay; più semi e modo PPO contro
-simple_trade nel replay.
+Chiusura EK: manca la prova con `ckpt_020032.pt` (sul Mac:
+`bash scripts/rust/confronto_mac.command <ckpt>`, oppure caricato in chat).
 
 ## Prossimi passi
-1. F3 `docs/rust/INVENTARIO_EK.md` (verbi, trigger, carte esercitate).
-2. F5: osservazione/codifica/descrittori in Rust, agente PPO con `ask`/`priors`,
-   `riftbound/rs/collect_rs.py`, `ppo.py --motore rust`, record identici.
-3. F6: semi tenuti da parte 900001–900040, casi rari mirati, misure senza traccia,
-   `docs/rust/RAPPORTO_EK.md`, `scripts/rust/confronto_mac.command`, prova con
-   `ckpt_020032.pt` (caricato in chat o sul Mac).
-4. Dopo EK (decide Matteo): arena su Rust, Rengar, Ivern, Sett.
+1. Prova col checkpoint allenato; misure ufficiali sul Mac.
+2. Decide Matteo: arena su Rust (copie con scelta pendente, `priors`, budget ridotto
+   validato a posti scambiati), oppure Rengar/Ivern/Sett per il PPO multi-mazzo.
+3. Ciclo PPO oltre ×1,6: aggiornamento (71%) e forward a batch 1 (fuori dal motore).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs` = metodi di GameLoop,
-  `effects*.rs`, `legality.rs`, `dump.rs`, `import.rs`, `trace.rs`, `rng.rs`).
-- `rust/rbsim-py/`: estensione `riftbound_rs` (`maturin develop --release`).
-- `rust/PORTING_NOTE.md`: convenzioni del porting.
-- `riftbound/rs/`: `canon.py`, `trace_py.py`, `export_registry.py`, `rust_bridge.py`.
-- `scripts/rust/`: `diff_trace.py` (replay differenziale), `consegna1.py` (D59/D62),
-  `bench_ppo_*.py`, `bench_arena_fisso.py`, `partite_ek.py`, `copertura_funzioni.py`.
+  `effects*.rs`, `legality.rs`, `agents.rs` random/simple_trade/SideChooser,
+  `obs.rs` osservazione+codifica, `features.rs` descrittori, `dump.rs`, `trace.rs`).
+- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO di confine).
+- `riftbound/rs/`: `canon.py`, `trace_py.py`, `rust_bridge.py`, `agent_rs.py`, `collect_rs.py`.
+- `scripts/rust/`: `diff_trace.py`, `autonome.py`, `parita_ppo.py`, `consegna1.py`,
+  `inventario.py`, `bench_raccolta.py`, `bench_ppo_ciclo.py`, `confronto_mac.command`.
 - `tests/rust/`: parità (richiede l'estensione, non salta).
-- `docs/rust/`: `F0_MISURE.md`, `CONSEGNA1.md`, `consegna1/` (tracce), `misure/`.
+- `docs/RUST.md` (contratti, uso), `docs/rust/` (rapporti, misure, tracce).
 - `riftbound/core/`: motore Python di riferimento (non si modifica).
-- `docs/audit/AUDIT.md`: deviazioni; `tests/audit/audit_helpers.py`.
