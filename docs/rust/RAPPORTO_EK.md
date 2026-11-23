@@ -36,6 +36,8 @@ Tutti i campioni qui sotto sono giocati con la build finale. Su questi campioni:
 | replay di partite PPO tracciate, evento per evento (stato canonico, finestra, menu, azione, scelte interne, estrazioni casuali) | semi 1000001–1000040 | 40/40 identiche |
 | partite autonome dai semi, senza decisioni né estrazioni registrate: simple_trade nei due posti | semi 201–500 | 300/300 |
 | esempi PPO bit per bit (`collect.play` contro `collect_rs.play`), self-play | semi 151–400, più 59 | 251/251 |
+| esempi PPO bit per bit, PPO contro random | semi 1–100 | 100/100 |
+| partite autonome simple_trade contro random | semi 1–150 | 150/150 |
 | **semi tenuti da parte** (usati solo alla fine) | 900001–900040 | vedi sotto |
 | casi Gold D59, D59b, D62 (`docs/rust/CONSEGNA1.md`) | 3 posizioni | tracce identiche |
 | `pytest tests/rust` (carica davvero l'estensione) | 15 test | verdi |
@@ -51,7 +53,7 @@ Semi tenuti da parte (900001–900040, mai usati prima), build finale; risultati
 | autonome random contro random | 40/40 identiche |
 | esempi PPO bit per bit, self-play | 40/40 |
 | esempi PPO bit per bit, PPO contro simple_trade | 40/40 |
-| replay tracciato di partite PPO self-play | REPLAY_TENUTI |
+| replay tracciato di partite PPO self-play | 40/40 identiche |
 
 Prima della build finale, le stesse prove avevano coperto:
 - 400 partite random contro random;
