@@ -137,6 +137,16 @@ def test_three_deck_mix_balanced_within_matchup():
     cells = Counter((g[4], g[3], g[1]) for g in games)
     for mu, n in (("EK", 32), ("ER", 16), ("KR", 16)):
         assert all(cells[(mu, seat, stt)] == n for seat in "AB" for stt in "ab")
+    # "ekri" (23/11): 6 EK, 3 ER, 3 KR, 4 EI, 4 KI, 4 RI every 24 games.
+    games = [g for start in range(0, 768, 64) for g in m.batch_games(start, 64, 9, [], Never(), mazzi="ekri")]
+    assert Counter(g[4] for g in games) == {"EK": 192, "ER": 96, "KR": 96, "EI": 128, "KI": 128, "RI": 128}
+    assert all(sum(g[1] == "a" for g in games if g[4] == mu) * 2 == n
+               for mu, n in Counter(g[4] for g in games).items())
+    games = [g for start in range(0, 768, 64) for g in m.batch_games(start, 64, 9, ["c"], Always(), mazzi="ekri")]
+    cells = Counter((g[4], g[3], g[1]) for g in games)
+    for mu in ("EK", "ER", "KR", "EI", "KI", "RI"):    # 64 is not a multiple of 24: at most 1 per batch off
+        xs = [cells[(mu, seat, stt)] for seat in "AB" for stt in "ab"]
+        assert max(xs) - min(xs) <= 12
     # "ek": as before the option, starter by the game's index in self-play.
     a = m.batch_games(64, 64, 1, ["c", "d"], random.Random(3))
     assert all(g[4] == "EK" for g in a)

@@ -1,28 +1,32 @@
 #!/usr/bin/env python
-"""Verifica del ramo a tre mazzi (22/11, docs/PIANO_FORZA.md; disegno della
-revisione esterna): le reti allenate anche su Rengar (--prova) contro quelle
-allenate solo su Evelynn-Kha'Zix (--controllo), stessi pesi di partenza e
-stessi semi PPO, accoppiate per ordine (stesso seme).
+"""Verifica di un mazzo nuovo nel training (22-23/11, docs/PIANO_FORZA.md;
+disegno della revisione esterna): le reti allenate anche sui matchup nuovi
+(--prova) contro quelle allenate solo sui vecchi (--controllo), stessi pesi
+di partenza e stessa ricetta, accoppiate per ordine (stesso seme PPO).
 
-Ogni rete gioca contro un'ancora congelata (--ancora, di default la partenza
-30.016) sulle stesse aperture nuove, due partite per seed con i piloti
-scambiati, mossa col punteggio più alto, chi comincia alternato:
-  EK  Evelynn-Kha'Zix  --coppie-ek seed da 9.000.000
-  ER  Evelynn-Rengar   --coppie-rengar seed da 9.100.000
-  KR  Kha'Zix-Rengar   --coppie-rengar seed da 9.200.000
-Per seed: media delle reti di un gruppo; differenza appaiata prova -
-controllo con IC 95% sui seed (la varianza tra semi PPO si vede solo nelle
-righe per seme). Poi, per matchup, prova contro controllo testa a testa
-(--coppie-testa, seed da 9.300.000).
+Ogni rete gioca contro la stessa ancora congelata (--ancora, obbligatoria)
+sulle stesse aperture nuove, due partite per seed con i piloti scambiati,
+mossa col punteggio più alto, chi comincia alternato (seed pari: il primo
+mazzo del matchup). --coppie seed per matchup, da --seed0 + 100.000 x
+l'indice del matchup in ORDER; il testa a testa prova contro controllo da
+--seed0 + 2.000.000.
+
+Δ = punteggio della prova meno quello del controllo, entrambi contro
+l'ancora, appaiato per apertura; i semi PPO a pesi uguali, e anche uno per
+uno (gli IC sulle aperture descrivono i checkpoint misurati, non la
+variabilità tra allenamenti).
 
 Regole fissate prima:
-  Rengar entra se, su ER e KR insieme, la prova contro l'ancora fa >= 0,52
-    con limite inferiore > 0,50, e la differenza prova - controllo ha
+  il mazzo nuovo entra se, sulla media a pesi uguali dei matchup --nuovi,
+    la prova contro l'ancora fa >= 0,52 con limite inferiore > 0,50 e Δ ha
     limite inferiore > 0;
-  Evelynn-Kha'Zix tiene se la differenza appaiata su EK ha limite
-    inferiore > -0,03 (tolleranza di 3 punti).
+  i vecchi tengono se, su ciascuno dei matchup --vecchi, Δ ha limite
+    inferiore > -0,03.
+(Rengar, 22/11: vecchio EK, nuovi ER e KR insieme sulle aperture; seed da
+9.000.000.)
 
-  uv run --extra rl python scripts/diag/verifica_mazzi.py --prova a.pt b.pt --controllo c.pt d.pt
+  uv run --extra rl python scripts/diag/verifica_mazzi.py --prova a.pt b.pt --controllo c.pt d.pt \\
+      --ancora e.pt --vecchi EK ER KR --nuovi EI KI RI --out runs/ivern/VERIFICA.txt
 """
 from __future__ import annotations
 
@@ -37,8 +41,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-SEED0 = {"EK": 9_000_000, "ER": 9_100_000, "KR": 9_200_000}
-HEAD0 = 9_300_000
+ORDER = ("EK", "ER", "KR", "EI", "KI", "RI", "ES", "KS", "RS", "IS")
 _NETS: dict = {}
 
 
@@ -69,6 +72,11 @@ def _ci(xs: list) -> tuple:
     return m, 1.96 * sd / math.sqrt(len(xs))
 
 
+def _block(parts: list) -> tuple:
+    """Equal-weight mean of independent estimates (m, h): h adds in quadrature."""
+    return sum(m for m, _ in parts) / len(parts), math.sqrt(sum(h * h for _, h in parts)) / len(parts)
+
+
 def _label(path) -> str:
     p = Path(path)
     return f"{p.parent.name}/{p.stem}"
@@ -78,12 +86,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--prova", nargs="+", required=True)
     ap.add_argument("--controllo", nargs="+", required=True)
-    ap.add_argument("--ancora", default=str(ROOT / "runs/ppo1/ckpt_030016.pt"))
-    ap.add_argument("--coppie-ek", type=int, default=2000)
-    ap.add_argument("--coppie-rengar", type=int, default=1000)
-    ap.add_argument("--coppie-testa", type=int, default=600)
+    ap.add_argument("--ancora", required=True)
+    ap.add_argument("--vecchi", nargs="+", choices=ORDER, default=["EK", "ER", "KR"])
+    ap.add_argument("--nuovi", nargs="+", choices=ORDER, default=["EI", "KI", "RI"])
+    ap.add_argument("--coppie", type=int, default=1000, help="per matchup")
+    ap.add_argument("--coppie-testa", type=int, default=400, help="per matchup e seme; 0: niente")
+    ap.add_argument("--seed0", type=int, default=10_000_000)
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-    ap.add_argument("--out", type=Path, default=ROOT / "runs/rengar/VERIFICA.txt")
+    ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     if len(args.prova) != len(args.controllo):
         sys.exit("--prova e --controllo: stesso numero di reti (accoppiate per seme)")
@@ -95,80 +105,89 @@ def main() -> None:
         with open(args.out, "a") as f:
             f.write(text + "\n")
 
-    pairs = {"EK": args.coppie_ek, "ER": args.coppie_rengar, "KR": args.coppie_rengar}
+    mus = list(dict.fromkeys(args.vecchi + args.nuovi))
+    s0 = {mu: args.seed0 + 100_000 * ORDER.index(mu) for mu in mus}
+    h0 = {mu: args.seed0 + 2_000_000 + 100_000 * ORDER.index(mu) for mu in mus}
     nets = args.prova + args.controllo
-    tasks = [("ancora", mu, SEED0[mu] + k, seat, c, args.ancora)
-             for mu in pairs for c in nets for k in range(pairs[mu]) for seat in ("A", "B")]
-    tasks += [("testa", mu, HEAD0 + 100_000 * i + k, seat, p, c)
-              for i, mu in enumerate(pairs) for p, c in zip(args.prova, args.controllo)
+    tasks = [("ancora", mu, s0[mu] + k, seat, c, args.ancora)
+             for mu in mus for c in nets for k in range(args.coppie) for seat in ("A", "B")]
+    tasks += [("testa", mu, h0[mu] + k, seat, p, c) for mu in mus for p, c in zip(args.prova, args.controllo)
               for k in range(args.coppie_testa) for seat in ("A", "B")]
-    say(f"\n== Verifica dei tre mazzi ({time.strftime('%d/%m %H:%M')}): ancora {_label(args.ancora)}; "
+    say(f"\n== Verifica dei mazzi ({time.strftime('%d/%m %H:%M')}): ancora {_label(args.ancora)}; "
         f"prova {', '.join(map(_label, args.prova))}; controllo {', '.join(map(_label, args.controllo))}; "
-        f"coppie EK {args.coppie_ek}, ER e KR {args.coppie_rengar}, testa a testa {args.coppie_testa}; "
-        f"{len(tasks)} partite")
+        f"vecchi {' '.join(args.vecchi)}, nuovi {' '.join(args.nuovi)}; {args.coppie} coppie per matchup "
+        f"(seed da {args.seed0} + 100.000 x indice), testa a testa {args.coppie_testa}; {len(tasks)} partite")
     t0 = time.time()
     with Pool(args.workers, initializer=_init) as pool:
         rows = pool.map(_game, tasks, chunksize=16)
 
-    # pair[(net, mu)][seed] = the pair's score against the anchor.
-    pair: dict = {}
-    seat_of: dict = {}
+    pair: dict = {}                      # (net, mu) -> seed -> [two scores]
+    cell: dict = {}                      # (net, mu, seat, seed parity) -> scores
+    head: dict = {}                      # (prova net, mu) -> seed -> [two scores]
     for tag, mu, seed, seat, c, s in rows:
         if tag == "ancora":
             pair.setdefault((c, mu), {}).setdefault(seed, []).append(s)
-            seat_of.setdefault((c, mu, seat, seed % 2), []).append(s)
+            cell.setdefault((c, mu, seat, seed % 2), []).append(s)
+        else:
+            head.setdefault((c, mu), {}).setdefault(seed, []).append(s)
 
-    def group(cs: list, mus: tuple) -> dict:
-        """Per (mu, seed): the group's mean pair score."""
-        out = {}
-        for mu in mus:
-            for seed in pair[(cs[0], mu)]:
-                out[(mu, seed)] = sum(sum(pair[(c, mu)][seed]) / 2 for c in cs) / len(cs)
-        return out
+    def ps(c, mu) -> dict:
+        return {seed: sum(v) / 2 for seed, v in pair[(c, mu)].items()}
 
-    names = lambda mu: (DECK_NAME[mu[0]], DECK_NAME[mu[1]])  # noqa: E731
-    for mu in pairs:
-        a, b = names(mu)
+    def group(cs, mu) -> list:
+        per = [ps(c, mu) for c in cs]
+        return [sum(p[seed] for p in per) / len(per) for seed in per[0]]
+
+    def delta(cs_p, cs_c, mu) -> list:
+        gp, gc = group(cs_p, mu), group(cs_c, mu)
+        return [a - b for a, b in zip(gp, gc)]
+
+    est: dict = {}
+    for mu in mus:
+        a, b = DECK_NAME[mu[0]], DECK_NAME[mu[1]]
         say(f"   {a}-{b}, contro l'ancora:")
         for c in nets:
-            m, h = _ci([sum(v) / 2 for v in pair[(c, mu)].values()])
+            m, h = _ci(list(ps(c, mu).values()))
             cells = []
             for seat, deck in (("A", a), ("B", b)):
                 for par, who in ((0, a), (1, b)):
-                    xs = seat_of.get((c, mu, seat, par), [])
+                    xs = cell.get((c, mu, seat, par), [])
                     cells.append(f"con {deck}, comincia {who} {sum(xs) / max(1, len(xs)):.2f}")
             say(f"      {_label(c)}: {m:.3f} +- {h:.3f}; " + "; ".join(cells))
+        est[mu] = {"prova": _ci(group(args.prova, mu)), "controllo": _ci(group(args.controllo, mu)),
+                   "delta": _ci(delta(args.prova, args.controllo, mu)),
+                   "semi": [_ci(delta([p], [c], mu)) for p, c in zip(args.prova, args.controllo)]}
+
+    def line(title: str, e: dict) -> str:
+        (mp, hp), (mc, hc), (md, hd) = e["prova"], e["controllo"], e["delta"]
+        semi = ", ".join(f"{_label(p)} - {_label(c)} {m:+.3f} +- {h:.3f}"
+                         for (p, c), (m, h) in zip(zip(args.prova, args.controllo), e["semi"]))
+        signs = {m > 0 for m, _ in e["semi"] if m != 0}
+        return (f"   {title}: prova {mp:.3f} +- {hp:.3f}, controllo {mc:.3f} +- {hc:.3f}; Δ {md:+.3f} +- {hd:.3f} "
+                f"({md - hd:+.3f} - {md + hd:+.3f}); per seme: {semi}" + ("; SEMI DISCORDI" if len(signs) > 1 else ""))
 
     verdicts = []
-    for mus, title in ((("EK",), "Evelynn-Kha'Zix"), (("ER",), "Evelynn-Rengar"), (("KR",), "Kha'Zix-Rengar"),
-                       (("ER", "KR"), "Rengar (ER e KR insieme)")):
-        gp, gc = group(args.prova, mus), group(args.controllo, mus)
-        mp, hp = _ci(list(gp.values()))
-        mc, hc = _ci(list(gc.values()))
-        md, hd = _ci([gp[k] - gc[k] for k in gp])
-        per = []
-        for p, c in zip(args.prova, args.controllo):
-            xs = [sum(pair[(p, mu)][s]) / 2 - sum(pair[(c, mu)][s]) / 2 for mu in mus for s in pair[(p, mu)]]
-            per.append(f"{_label(p)} - {_label(c)} {sum(xs) / len(xs):+.3f}")
-        say(f"   {title}: prova {mp:.3f} +- {hp:.3f}, controllo {mc:.3f} +- {hc:.3f}; differenza "
-            f"{md:+.3f} +- {hd:.3f} ({md - hd:+.3f} - {md + hd:+.3f}); per seme: " + ", ".join(per))
-        if mus == ("EK",):
-            verdicts.append(f"Evelynn-Kha'Zix tiene: {'SÌ' if md - hd > -0.03 else 'no'} "
-                            f"(limite inferiore della differenza {md - hd:+.3f}, soglia -0,03)")
-        if mus == ("ER", "KR"):
-            ok = mp >= 0.52 and mp - hp > 0.50 and md - hd > 0
-            verdicts.append(f"Rengar entra: {'SÌ' if ok else 'no'} (prova {mp:.3f}, limite inferiore "
-                            f"{mp - hp:.3f}; differenza col controllo, limite inferiore {md - hd:+.3f})")
+    for mu in args.vecchi:
+        say(line(f"vecchio {DECK_NAME[mu[0]]}-{DECK_NAME[mu[1]]}", est[mu]))
+        md, hd = est[mu]["delta"]
+        verdicts.append(f"{DECK_NAME[mu[0]]}-{DECK_NAME[mu[1]]} tiene: {'SÌ' if md - hd > -0.03 else 'no'} "
+                        f"(limite inferiore di Δ {md - hd:+.3f}, soglia -0,03)")
+    for mu in args.nuovi:
+        say(line(f"nuovo {DECK_NAME[mu[0]]}-{DECK_NAME[mu[1]]}", est[mu]))
+    blk = {k: _block([est[mu][k] for mu in args.nuovi]) for k in ("prova", "controllo", "delta")}
+    blk["semi"] = [_block([est[mu]["semi"][i] for mu in args.nuovi]) for i in range(len(args.prova))]
+    say(line(f"nuovi a pesi uguali ({' '.join(args.nuovi)})", blk))
+    (mp, hp), (md, hd) = blk["prova"], blk["delta"]
+    ok = mp >= 0.52 and mp - hp > 0.50 and md - hd > 0
+    verdicts.insert(0, f"il mazzo nuovo entra: {'SÌ' if ok else 'no'} (prova {mp:.3f}, limite inferiore "
+                       f"{mp - hp:.3f}; Δ col controllo, limite inferiore {md - hd:+.3f})")
 
-    for i, mu in enumerate(pairs):
-        a, b = names(mu)
-        for p, c in zip(args.prova, args.controllo):
-            by: dict = {}
-            for tag, mu_, seed, seat, cand, s in rows:
-                if tag == "testa" and mu_ == mu and cand == p and HEAD0 + 100_000 * i <= seed < HEAD0 + 100_000 * (i + 1):
-                    by.setdefault(seed, []).append(s)
-            m, h = _ci([sum(v) / 2 for v in by.values()])
-            say(f"   testa a testa {a}-{b}: {_label(p)} contro {_label(c)} {m:.3f} +- {h:.3f}")
+    if args.coppie_testa:
+        for mu in mus:
+            for p, c in zip(args.prova, args.controllo):
+                m, h = _ci([sum(v) / 2 for v in head[(p, mu)].values()])
+                say(f"   testa a testa {DECK_NAME[mu[0]]}-{DECK_NAME[mu[1]]}: {_label(p)} contro {_label(c)} "
+                    f"{m:.3f} +- {h:.3f}")
     for v in verdicts:
         say(f"   {v}")
     say(f"   ({(time.time() - t0) / 60:.0f} min)")

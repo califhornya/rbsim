@@ -299,3 +299,22 @@ contro il bot a mano.
   **0,541 ± 0,020** (0,521-0,561). **PROMOSSO**: il campione è il bot a mano
   con i prior di `runs/rengar/ekr_s8/corrente.pt` (sha256 24807b53fdc49e49).
   Prossimo: Ivern (miscela a quattro mazzi da decidere con la revisione).
+- 23/11, quinto giro della revisione (Ivern, poi Sett): Ivern adesso, da
+  `runs/rengar/ekr_s8/ckpt_020032.pt`, semi 9 e 10, 30.016 partite; prova
+  `--mazzi ekri` (ciclo di 24: 6 EK, 3 ER, 3 KR, 4 EI, 4 KI, 4 RI, Ivern in
+  B; 5.000 partite per matchup nuovo, come Rengar), controllo `ekr`. Pannello
+  sui sei matchup contro ekr_s8. Verifica (`verifica_mazzi.py`, generale:
+  --vecchi / --nuovi, ancora obbligatoria) sui checkpoint finali (scelta
+  fissata prima), contro ekr_s8, 1.000 coppie per matchup, seed da
+  10.000.000; regole: Ivern entra se la media a pesi uguali di EI, KI, RI fa
+  >= 0,52, limite inferiore > 0,50, e Δ sul controllo limite inferiore > 0;
+  i vecchi tengono se Δ ha limite inferiore > -0,03 su **ciascuno** di EK,
+  ER, KR (un buco su un solo matchup conta per lo sparring). Semi riportati
+  anche uno per uno. Partenza di ekr_s8 contro simple_trade (revisione, 200
+  aperture): la rete con Ivern / con l'altro mazzo: EI 0,525 / 0,540, KI
+  0,605 / 0,310, RI 0,335 / 0,365. Poi Sett dal checkpoint a quattro mazzi
+  (controllo: quattro mazzi dalla stessa partenza); ekr_s8 resta il
+  campione fino a un'arena finale sui dieci matchup (blocchi Ivern e Sett
+  separati, >= 0,52 e lim. inf. > 0,50 ciascuno; ogni vecchio lim. inf. >
+  0,47; coppie fissate prima per la tolleranza: ~800 per vecchio, ±0,02).
+  `scripts/ivern.command`.

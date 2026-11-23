@@ -5,7 +5,8 @@ della revisione esterna).
 Una rete (riftbound/ai/ppo/) che gioca senza ricerca decide ogni scelta vera
 e impara giocando contro se stessa, Evelynn (A) contro Kha'Zix (B); con
 --mazzi ekr (22/11) a ciclo fisso metà Evelynn-Kha'Zix, un quarto Evelynn-
-Rengar e un quarto Kha'Zix-Rengar, chi comincia alternato entro il matchup.
+Rengar e un quarto Kha'Zix-Rengar, chi comincia alternato entro il matchup;
+con --mazzi ekri (23/11) anche Ivern (vedi MAZZI).
 
 Ogni aggiornamento: --per-aggiornamento partite con i pesi congelati, chi
 comincia alternato. All'inizio tutte contro se stessa (entrambi i posti
@@ -60,9 +61,18 @@ PILOT_ANCHORS = ("ckpt_005056.pt", "ckpt_015040.pt", "ckpt_030016.pt")
 # The training mix, one cycle: the first deck of a matchup sits in A (letters
 # as in collect.DECK_OF). "ekr": 50% Evelynn-Kha'Zix, 25% Evelynn-Rengar, 25%
 # Kha'Zix-Rengar (revisione esterna, 21-22/11).
-MAZZI = {"ek": ("EK",), "ekr": ("EK", "EK", "ER", "KR")}
-# Measuring openings per matchup, disjoint (offsets from EVAL_SEED0).
-PANEL_SEEDS = {"EK": (0, 500_000), "ER": (100_000, 600_000), "KR": (200_000, 700_000)}
+# "ekri" (23/11): the old three 2:1:1 on half the games, Evelynn-Ivern,
+# Kha'Zix-Ivern, Rengar-Ivern a sixth each (cycle of 24: 6 EK, 3 ER, 3 KR,
+# 4 EI, 4 KI, 4 RI); Ivern in B.
+MAZZI = {"ek": ("EK",), "ekr": ("EK", "EK", "ER", "KR"),
+         "ekri": ("EK", "EI", "ER", "KI", "EK", "RI", "KR", "EI", "EK", "KI", "ER", "RI",
+                  "EK", "EI", "KR", "KI", "EK", "RI", "ER", "EI", "EK", "KI", "KR", "RI")}
+# Measuring openings per matchup, disjoint (offsets from EVAL_SEED0):
+# simple_trade, pairs against the anchor.
+PANEL_SEEDS = {"EK": (0, 500_000), "ER": (100_000, 600_000), "KR": (200_000, 700_000),
+               "EI": (300_000, 310_000), "KI": (320_000, 330_000), "RI": (340_000, 350_000),
+               "ES": (360_000, 370_000), "KS": (380_000, 390_000), "RS": (400_000, 410_000),
+               "IS": (420_000, 430_000)}
 _NETS: dict = {}
 
 
@@ -202,7 +212,8 @@ def main() -> None:
                     help="lr a fine allenamento (--partite): scende in linea retta da --lr; default costante")
     ap.add_argument("--lam", type=float, default=0.98)
     ap.add_argument("--mazzi", choices=tuple(MAZZI), default="ek",
-                    help="ek: solo Evelynn-Kha'Zix; ekr: 50%% Evelynn-Kha'Zix, 25%% Evelynn-Rengar, 25%% Kha'Zix-Rengar")
+                    help="ek: solo Evelynn-Kha'Zix; ekr: 50%% Evelynn-Kha'Zix, 25%% Evelynn-Rengar, 25%% Kha'Zix-Rengar; "
+                         "ekri: i tre di ekr 2:1:1 sulla metà, Evelynn-, Kha'Zix-, Rengar-Ivern un sesto ciascuno")
     ap.add_argument("--pannello-mazzi", nargs="*", choices=tuple(PANEL_SEEDS), default=None,
                     help="i matchup del pannello (default: quelli di --mazzi); EK sempre")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))

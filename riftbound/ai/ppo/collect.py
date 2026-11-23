@@ -16,8 +16,9 @@ EVE = DECKS / "competitive_evelynn.json"
 KHA = DECKS / "competitive_khazix.json"
 RENGAR = DECKS / "competitive_rengar.json"
 # Matchups by letters: the first deck sits in A, the second in B.
-DECK_OF = {"E": EVE, "K": KHA, "R": RENGAR}
-DECK_NAME = {"E": "Evelynn", "K": "Kha'Zix", "R": "Rengar"}
+DECK_OF = {"E": EVE, "K": KHA, "R": RENGAR, "I": DECKS / "competitive_ivern.json",
+           "S": DECKS / "competitive_sett.json"}
+DECK_NAME = {"E": "Evelynn", "K": "Kha'Zix", "R": "Rengar", "I": "Ivern", "S": "Sett"}
 MAX_TURNS = 40
 
 

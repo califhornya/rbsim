@@ -24,8 +24,11 @@ for seme in 7 8; do
         --partite 20032 --tappa 5000 --allarme-bot 0 --seme "$seme" --workers "$workers" || exit 1
   done
 done
+# (Il 22/11 con la prima versione dello script, commit 23fc0d2: EK 2.000
+# coppie, Rengar sulle aperture insieme, testa a testa da 9.300.000.)
 caffeinate -i uv run --extra rl python scripts/diag/verifica_mazzi.py \
     --prova "$R/ekr_s7/corrente.pt" "$R/ekr_s8/corrente.pt" \
     --controllo "$R/ek_s7/corrente.pt" "$R/ek_s8/corrente.pt" \
+    --ancora runs/ppo1/ckpt_030016.pt --vecchi EK --nuovi ER KR --seed0 9000000 \
     --out "$R/VERIFICA.txt" --workers "$workers"
 read -r -p "Fatto. Premi Invio per chiudere."
