@@ -31,9 +31,11 @@ def _plain(v):
 
 
 def _spec(es) -> dict:
+    from riftbound.rs.canon import spec_ref
     d = {f.name: _plain(getattr(es, f.name)) for f in dataclasses.fields(es)}
     d["to_dict"] = _plain(es.to_dict())
     d["merged"] = _plain(es.merged_params())
+    d["spec_ref"] = spec_ref(es)          # how the canonical dump names it
     return d
 
 

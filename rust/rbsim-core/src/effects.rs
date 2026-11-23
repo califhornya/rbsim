@@ -1172,7 +1172,23 @@ impl Game {
                 if in_base { None } else { Some(ctx.bf) }
             }
             "moved_from" => ctx.extra.bf("moved_from"),
-            "choose" | "enemy_occupied" => not_ported!("_play_token", "location {location}"),
+            "choose" => {
+                let mut options: Vec<Opt> = vec![Opt::None];
+                for b in 0..self.gs.battlefields.len() {
+                    if self.gs.battlefields[b].control() == Some(side) {
+                        options.push(Opt::Bf(b));
+                    }
+                }
+                if options.len() > 1 {
+                    match self.choose("token_location", side, &options, Opt::None, Some(ctx.card))? {
+                        Opt::Bf(b) => Some(b),
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            }
+            "enemy_occupied" => not_ported!("_play_token", "location {location}"),
             _ => None,
         };
         let might = sget(spec, "might").map(py_int);

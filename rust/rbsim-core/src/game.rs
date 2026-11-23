@@ -66,6 +66,8 @@ pub struct Game {
     pub choices_noted: bool,
     pub discard_depth: i64,
     pub discard_sides: Vec<Side>,
+    /// The pending triggers a trigger_order choice is about (for the trace).
+    pub trigger_menu: Vec<PendingTrigger>,
 }
 
 /// A journal entry (py: ("decision", ...), ("choice", side, kind, n, idx)).
@@ -126,6 +128,7 @@ impl Game {
             choices_noted: false,
             discard_depth: 0,
             discard_sides: Vec::new(),
+            trigger_menu: Vec::new(),
         }
     }
 

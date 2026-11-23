@@ -469,7 +469,10 @@ impl Game {
                     let mut mine: Vec<PendingTrigger> = batch.iter().filter(|p| p.side == side).cloned().collect();
                     if mine.len() > 1 {
                         let opts: Vec<Opt> = (0..mine.len()).map(Opt::Trigger).collect();
-                        let got = self.choose_many("trigger_order", side, &opts, &opts.clone(), None, None, None)?;
+                        self.trigger_menu = mine.clone();
+                        let got = self.choose_many("trigger_order", side, &opts, &opts.clone(), None, None, None);
+                        self.trigger_menu.clear();
+                        let got = got?;
                         mine = got
                             .iter()
                             .map(|o| match o {

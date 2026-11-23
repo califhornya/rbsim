@@ -1,6 +1,7 @@
 //! rbsim-core: the Riftbound engine ported from the Python reference
 //! (riftbound/core at 6427b90). See rust/PORTING_NOTE.md.
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
+#![recursion_limit = "512"]
 
 pub mod types;
 pub mod rng;
@@ -32,3 +33,8 @@ pub mod lp_showdown;
 pub mod lp_main;
 pub mod effects_core;
 pub mod effects;
+pub mod legality;
+pub mod dump;
+pub mod setup;
+pub mod trace;
+pub mod import;

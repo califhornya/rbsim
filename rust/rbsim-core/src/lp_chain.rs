@@ -222,8 +222,95 @@ impl Game {
         if self.declare_board.is_none() || ctx.card != d.card || !self.board_changed() {
             return Ok(None);
         }
-        let _ = (es, run, i);
-        crate::not_ported!("_choices_on_board_as_played", "a declaration after the board changed")
+        let mut g3 = self.clone();
+        g3.loop_id = new_loop_id();
+        let ghosts = g3.restore_declared_board()?;
+        g3.ghost_ids = Some(ghosts);
+        g3.declaring = Some(Declaring { card: ctx.card, choices: Declared::default() });
+        g3.replay = None;
+        g3.slot = Some([run, i, 0]);
+        let mut ctx3 = ctx.clone();
+        match g3.run_effect(&es.effect, &mut ctx3, &es.merged) {
+            Ok(()) => {}
+            Err(e) if e.swallowable() => {}
+            Err(e) => return Err(e),
+        }
+        let d = g3.declaring.take().unwrap().choices;
+        Ok(Some(self.map_back(&g3, d)))
+    }
+
+    /// py: _restore_declared_board — what left the board since the spell was
+    /// played goes back (last), what came goes; returns what went back.
+    pub fn restore_declared_board(&mut self) -> R<Vec<Obj>> {
+        let now: Vec<Obj> = self.presence_lists().into_iter().flat_map(|(_, l)| l).collect();
+        let board = self.declare_board.clone().unwrap();
+        let then: Vec<Obj> = board.iter().flat_map(|(_, l)| l.iter().copied()).collect();
+        let mut back_in: Vec<Obj> = Vec::new();
+        for (key, before) in &board {
+            for &x in before {
+                if !now.contains(&x) {
+                    let present = self.presence_list_get(key).map_or(true, |l| l.contains(&x));
+                    if self.presence_list_get(key).is_none() {
+                        continue;
+                    }
+                    if !present {
+                        self.presence_list_push(key, x)?;
+                        back_in.push(x);
+                    }
+                }
+            }
+        }
+        let keys: Vec<PresenceKey> = self.presence_lists().into_iter().map(|(k, _)| k).collect();
+        for k in keys {
+            let l = self.presence_list_get(&k).unwrap();
+            let kept: Vec<Obj> = l.into_iter().filter(|x| then.contains(x)).collect();
+            self.presence_list_set(&k, kept)?;
+        }
+        Ok(back_in)
+    }
+
+    fn presence_list_get(&self, key: &PresenceKey) -> Option<Vec<Obj>> {
+        let gs = &self.gs;
+        Some(match key {
+            PresenceKey::Chain => (0..gs.chain.len()).map(Obj::Chain).collect(),
+            PresenceKey::Worn(u) => gs.unit(*u).gear.iter().map(|&c| Obj::Card(c)).collect(),
+            PresenceKey::Base(s) => gs.player(*s).base_units.iter().map(|&u| Obj::Unit(u)).collect(),
+            PresenceKey::BaseGear(s) => gs.player(*s).base_gear.iter().map(|&c| Obj::Card(c)).collect(),
+            PresenceKey::Units(j, s) => gs.battlefields.get(*j)?.units_for(*s).iter().map(|&u| Obj::Unit(u)).collect(),
+            PresenceKey::Gear(j, s) => gs.battlefields.get(*j)?.gear[s.idx()].iter().map(|&g| Obj::Gear(g)).collect(),
+        })
+    }
+
+    fn presence_list_push(&mut self, key: &PresenceKey, x: Obj) -> R<()> {
+        match (key, x) {
+            (PresenceKey::Worn(u), Obj::Card(c)) => self.gs.unit_mut(*u).gear.push(c),
+            (PresenceKey::Base(s), Obj::Unit(u)) => self.gs.player_mut(*s).base_units.push(u),
+            (PresenceKey::BaseGear(s), Obj::Card(c)) => self.gs.player_mut(*s).base_gear.push(c),
+            (PresenceKey::Units(j, s), Obj::Unit(u)) => self.gs.battlefields[*j].units_for_mut(*s).push(u),
+            (PresenceKey::Gear(j, s), Obj::Gear(g)) => self.gs.battlefields[*j].gear[s.idx()].push(g),
+            _ => crate::not_ported!("_restore_declared_board", "a chain item back on the chain"),
+        }
+        Ok(())
+    }
+
+    fn presence_list_set(&mut self, key: &PresenceKey, v: Vec<Obj>) -> R<()> {
+        let cards = |v: &[Obj]| v.iter().filter_map(|o| if let Obj::Card(c) = o { Some(*c) } else { None }).collect::<Vec<_>>();
+        let units = |v: &[Obj]| v.iter().filter_map(|o| if let Obj::Unit(u) = o { Some(*u) } else { None }).collect::<Vec<_>>();
+        match key {
+            PresenceKey::Chain => {
+                if v.len() != self.gs.chain.len() {
+                    crate::not_ported!("_restore_declared_board", "a chain item that came since");
+                }
+            }
+            PresenceKey::Worn(u) => self.gs.unit_mut(*u).gear = cards(&v),
+            PresenceKey::Base(s) => self.gs.player_mut(*s).base_units = units(&v),
+            PresenceKey::BaseGear(s) => self.gs.player_mut(*s).base_gear = cards(&v),
+            PresenceKey::Units(j, s) => *self.gs.battlefields[*j].units_for_mut(*s) = units(&v),
+            PresenceKey::Gear(j, s) => {
+                self.gs.battlefields[*j].gear[s.idx()] = v.iter().filter_map(|o| if let Obj::Gear(g) = o { Some(*g) } else { None }).collect()
+            }
+        }
+        Ok(())
     }
 
     /// py: _run_chain(caster)

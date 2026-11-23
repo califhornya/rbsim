@@ -59,11 +59,13 @@ def _digest_array(x) -> str:
 
 
 class Trace:
-    def __init__(self, gs, loop, *, with_obs: bool = True, with_state: bool = True):
+    def __init__(self, gs, loop, *, with_obs: bool = True, with_state: bool = True, keep_states: bool = False):
         self.gs, self.loop = gs, loop
         self.events: list = []
         self.canon = Canon()
         self.with_obs, self.with_state = with_obs, with_state
+        self.keep_states = keep_states
+        self.states: dict = {}          # digest -> full canonical tree (keep_states)
         self.n = 0
 
     # -- helpers ----------------------------------------------------------
@@ -82,7 +84,10 @@ class Trace:
         root["$rng"] = rng_digest(self.gs.rng)
         tree = self.canon.canonical({"root": root, "objs": d.objs}, dumper_keep=d.keep)
         self.last_state = tree
-        return hashlib.sha256(json.dumps(tree, sort_keys=True).encode()).hexdigest()[:16]
+        h = hashlib.sha256(json.dumps(tree, sort_keys=True).encode()).hexdigest()[:16]
+        if self.keep_states:
+            self.states[h] = tree
+        return h
 
     def obs(self, seat: str) -> Optional[str]:
         if not self.with_obs:
@@ -113,10 +118,78 @@ def _menu(loop, point, seat):
     return legal_actions(loop, point, seat)
 
 
-def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True) -> Trace:
+_COPY_BACK: dict = {}      # id(copied GameState) -> {id(copy object): original object}
+_DEEPCOPY = None
+
+
+def _hook_deepcopy() -> None:
+    """Record, for each deepcopy of a GameState (a declaration's copy, a
+    mode's lookahead), the map from the copy's objects back to the originals
+    (as GameLoop._declare_choices' `back`): a choice made on a copy is traced
+    with the real game's objects, as the Rust engine (one arena) has them."""
+    global _DEEPCOPY
+    import copy as _copy
+    if _DEEPCOPY is not None:
+        return
+    _DEEPCOPY = _copy.deepcopy
+
+    def deepcopy(x, memo=None, _nil=[]):
+        from riftbound.core.loop import GameLoop
+        from riftbound.core.state import GameState
+        if memo is None:
+            memo = {}
+        out = _DEEPCOPY(x, memo)
+        srcs = x if isinstance(x, tuple) else (x,)
+        dsts = out if isinstance(out, tuple) else (out,)
+        for src, dst in zip(srcs, dsts):
+            g_src = src.gs if isinstance(src, GameLoop) else src
+            g_dst = dst.gs if isinstance(dst, GameLoop) else dst
+            if isinstance(g_src, GameState) and isinstance(g_dst, GameState):
+                back = {id(memo[id(o)]): o for o in memo.get(id(memo), []) if id(o) in memo}
+                outer = _COPY_BACK.get(id(g_src))
+                if outer is not None:         # a copy of a copy: through to the real game
+                    back = {k: outer[0].get(id(v), v) for k, v in back.items()}
+                _COPY_BACK[id(g_dst)] = (back, g_dst)
+        return out
+    _copy.deepcopy = deepcopy
+
+
+def _unhook_deepcopy() -> None:
+    global _DEEPCOPY
+    import copy as _copy
+    if _DEEPCOPY is not None:
+        _copy.deepcopy = _DEEPCOPY
+        _DEEPCOPY = None
+    _COPY_BACK.clear()
+
+
+def _to_real(o, gs_of_loop):
+    """An option of a choice made on a copy of the game, as the real game's object."""
+    entry = _COPY_BACK.get(id(gs_of_loop))
+    if entry is None:
+        return o
+    back = entry[0]
+    if isinstance(o, tuple):
+        return tuple(_to_real(x, gs_of_loop) for x in o)
+    if o is None or isinstance(o, (bool, int, str)):
+        return o
+    return back.get(id(o), o)
+
+
+def _to_real_any(o):
+    """An object passed to an agent from a copy of the game (decide_mode on a
+    declaration's copy), as the real game's object."""
+    for back, _g in _COPY_BACK.values():
+        if id(o) in back:
+            return back[id(o)]
+    return o
+
+
+def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True, keep_states: bool = False) -> Trace:
     """Wrap the seats' agents, the loop's chooser and the game's RNG."""
     from riftbound.core.decisions import DecisionPoint
-    tr = Trace(gs, loop, with_obs=with_obs, with_state=with_state)
+    tr = Trace(gs, loop, with_obs=with_obs, with_state=with_state, keep_states=keep_states)
+    _hook_deepcopy()
     gs.rng = recording_rng(gs.rng, tr.events)
 
     for seat in ("A", "B"):
@@ -153,7 +226,7 @@ def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True) -> T
                 win = tr.window()
                 st = tr.state()
                 out = orig(*a, **kw)
-                args = [tr.option(x) if not isinstance(x, (int, str, bool, type(None))) else x for x in a]
+                args = [tr.option(_to_real_any(x)) if not isinstance(x, (int, str, bool, type(None))) else x for x in a]
                 tr.add({"k": name, "seat": seat, "win": win, "state": st, "args": args,
                         "out": out if isinstance(out, (int, bool, type(None))) else list(out)})
                 return out
@@ -168,8 +241,10 @@ def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True) -> T
         class _Chooser:
             def __call__(self, lp, kind, side, options, default, source):
                 st = tr.state()
-                opts = [tr.option(o) for o in options]
-                src = tr.option(source) if source is not None else None
+                real = [_to_real(o, lp.gs) for o in options] if lp is not loop else options
+                opts = [tr.option(o) for o in real]
+                src_real = _to_real(source, lp.gs) if lp is not loop and source is not None else source
+                src = tr.option(src_real) if src_real is not None else None
                 i = inner(lp, kind, side, options, default, source)
                 tr.add({"k": "choice", "seat": side, "kind": kind, "options": opts, "default": default,
                         "chosen": default if i is None else int(i), "by": "base" if i is None else "agent",
@@ -183,7 +258,7 @@ def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True) -> T
 
 
 def traced_game(seed: int, deck_a, deck_b, agents: dict, *, starter: str = "a", max_turns: int = 40,
-                chooser: str = "ppo", with_obs: bool = True, with_state: bool = True):
+                chooser: str = "ppo", with_obs: bool = True, with_state: bool = True, keep_states: bool = False):
     """A game with `agents` {"A": factory(player), "B": ...}, traced. ->
     (result, Trace)."""
     from riftbound.ai.ppo.agent import PPOChooser
@@ -197,9 +272,12 @@ def traced_game(seed: int, deck_a, deck_b, agents: dict, *, starter: str = "a", 
     loop = GameLoop(gs)
     if chooser == "ppo":
         loop.chooser = PPOChooser(gs)
-    tr = instrument(gs, loop, with_obs=with_obs, with_state=with_state)
+    tr = instrument(gs, loop, with_obs=with_obs, with_state=with_state, keep_states=keep_states)
     tr.add({"k": "start", "seed": seed, "starter": starter, "state": tr.state()})
-    res = loop.start()
+    try:
+        res = loop.start()
+    finally:
+        _unhook_deepcopy()
     tr.add({"k": "end", "winner": res.winner, "turns": gs.turn, "points": [gs.points_A, gs.points_B],
             "state": tr.state()})
     return res, tr

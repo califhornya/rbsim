@@ -25,8 +25,10 @@ pub struct EffectSpec {
     pub params: Map<String, Value>,
     pub to_dict: Map<String, Value>,
     pub merged: Map<String, Value>,
-    /// (card name, index) in the registry, for the dump; None for a spec made in play.
+    /// (card name, index) in the registry; None for a spec made in play.
     pub origin: Option<(String, usize)>,
+    /// How the canonical dump names it (canon.spec_ref).
+    pub spec_ref: String,
 }
 
 pub type Spec = Rc<EffectSpec>;
@@ -117,6 +119,7 @@ impl Registry {
                                 to_dict: obj(&e["to_dict"]),
                                 merged: obj(&e["merged"]),
                                 origin: Some((name.clone(), i)),
+                                spec_ref: e["spec_ref"].as_str().unwrap_or("").to_string(),
                             })
                         })
                         .collect()

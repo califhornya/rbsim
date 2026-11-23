@@ -13,6 +13,8 @@ const LOWER: u32 = 0x7fff_ffff;
 pub struct PyRandom {
     mt: [u32; N],
     mti: usize,
+    /// When set (tracing the real game), every _randbelow(n) -> r.
+    pub log: Option<Vec<(u64, u64)>>,
 }
 
 impl PyRandom {
@@ -28,7 +30,7 @@ impl PyRandom {
             key.push((n & 0xffff_ffff) as u32);
             n >>= 32;
         }
-        let mut r = PyRandom { mt: [0; N], mti: N + 1 };
+        let mut r = PyRandom { mt: [0; N], mti: N + 1, log: None };
         r.init_by_array(&key);
         r
     }
@@ -130,6 +132,9 @@ impl PyRandom {
         while r >= n {
             r = self.getrandbits(k);
         }
+        if let Some(l) = self.log.as_mut() {
+            l.push((n, r));
+        }
         r
     }
 
@@ -156,6 +161,15 @@ impl PyRandom {
         let a = (self.genrand_u32() >> 5) as f64;
         let b = (self.genrand_u32() >> 6) as f64;
         (a * 67_108_864.0 + b) / 9_007_199_254_740_992.0
+    }
+
+    /// canon.rng_digest: sha256 of json.dumps(getstate()[1])[:16].
+    pub fn digest(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let words = self.state_words();
+        let text = format!("[{}]", words.iter().map(|w| w.to_string()).collect::<Vec<_>>().join(", "));
+        let h = Sha256::digest(text.as_bytes());
+        hex::encode(h)[..16].to_string()
     }
 
     /// The state as CPython's getstate()[1]: 624 words then the index.
