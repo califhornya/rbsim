@@ -38,6 +38,7 @@ Tutti i campioni qui sotto sono giocati con la build finale. Su questi campioni:
 | esempi PPO bit per bit (`collect.play` contro `collect_rs.play`), self-play | semi 151–400, più 59 | 251/251 |
 | esempi PPO bit per bit, PPO contro random | semi 1–100 | 100/100 |
 | partite autonome simple_trade contro random | semi 1–150 | 150/150 |
+| partite autonome random contro random | semi 1–200 | 200/200 |
 | **semi tenuti da parte** (usati solo alla fine) | 900001–900040 | vedi sotto |
 | casi Gold D59, D59b, D62 (`docs/rust/CONSEGNA1.md`) | 3 posizioni | tracce identiche |
 | `pytest tests/rust` (carica davvero l'estensione) | 15 test | verdi |
