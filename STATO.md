@@ -60,7 +60,7 @@ ordine delle rune (la ricerca vedeva carte nascoste); poi PPO a più mazzi.
 Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 Giocate (23/11 sera, `docs/bot/GIOCATE.md`, controllo di Astra sulla 35.010):
 Switcheroo: 4 deviazioni (D71 proposto, non applicato); il 98% su Valley è della
-rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan e rilevatori: in corso.
+rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 seed; rilevatori in corso.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.

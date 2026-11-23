@@ -88,10 +88,15 @@ quattro carte in cima; le pescate di rimpiazzo dalla cima e le rimandate in
 fondo, §117); nessun pilota conosce l'ordine (la ricerca determinizza).
 Avversario e pilota: il bot a mano a 0,4 s per mossa da entrambi i lati (non
 il campione: qui non ci sono i pesi). Chi comincia: alternato per seed. Seed
-da 700.000, 300 previsti (1.200 partite, ~9 ore qui con 4 processi).
-Parziale a 22 seed: RS 0,59, S 0,36, R 0,73, - 0,59; differenze da RS con IC
-95% di ±0,22-0,27: **nessuna conclusione**. La deviazione standard della
-differenza appaiata è ~0,53 a seed: per ±0,05 servono ~430 seed per braccio.
+da 700.000.
+Fermata a 40 seed (160 partite, decisione dell'utente: non vale 8 ore qui).
+Sett: RS 0,45, S 0,30, R 0,73, - 0,60. Differenze da RS (IC 95%, appaiate):
+S -0,15 ± 0,13, R +0,28 ± 0,20, - +0,15 ± 0,18. Con il bot a mano come pilota,
+rimandare solo Rampage (tenere Showstopper) sembra meglio della scelta della
+rete, tenere Rampage peggio: il contrario dell'ipotesi su Rampage. Tre
+confronti senza correzione (con Bonferroni R resta sopra RS di poco: ±0,24);
+indizio da confermare, non risultato. La deviazione standard della
+differenza appaiata è ~0,6 a seed: per ±0,05 servono ~500 seed.
 Limiti: un'unica mano; il valore di un mulligan dipende da come il pilota
 gioca dopo (qui il bot a mano: la risposta vale per lui, non per un umano né
 per la rete); 0,4 s a tempo, quindi la forza dipende dal carico della

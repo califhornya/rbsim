@@ -76,8 +76,9 @@ testo della carta o le Core Rules. Le voci nuove vanno qui.
       campione (mosse con p < 0,10, Switcheroo fuori dallo showdown o a vuoto).
 - [ ] La rete non lega Switcheroo al combattimento in corso (98% su Valley):
       se la misura lo conferma, è un limite del training (scelte interne rare).
-- [ ] Mulligan di Sett a mano fissata: inconcluso a 22 seed; servono ~430 seed
-      per ±0,05; meglio sul Mac con il campione come pilota.
+- [ ] Mulligan di Sett a mano fissata: a 40 seed, bot a mano pilota, rimandare
+      solo Rampage +0,28 ± 0,20 sulla scelta della rete (indizio); ~500 seed per
+      ±0,05, sul Mac con il campione come pilota.
 - [ ] Nessuna misura contro un umano: un pannello di errori evidenti dalle
       partite dell'utente, GIUDIZI e scenari sul campione, partite vere registrate.
 
