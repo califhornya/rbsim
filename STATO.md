@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-23 (Ivern e Sett entrano; arena finale a cinque mazzi).
+Aggiornato: 2026-11-23 (Ivern e Sett entrano; difetto cache PPO corretto; arena finale).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -58,11 +58,8 @@ Spareggio (`tie_break="mean"`, W/N tra i Q pari, 24% delle decisioni): arena
 19/11, 800 coppie: 0,483 ± 0,013, peggio; non promosso, il bot resta com'è.
 Chi comincia decide: Evelynn vince ~91% se comincia, ~45% se no (arena e 2.000
 partite; il motore dà la runa in più a chi è secondo, §487.7). Matchup divisi così.
-Piano "forza" (20/11, con GPTAstra): 1) velocità; 2) dati di confronto tra mosse
-sorelle (pilota 128 radici) e rete che li impara; 3) self-play grande (tappe a
-5.000 / 15.000 / 30.000 partite). Fatto: ricerca 1,16× (mosse identiche);
-corretti mulligan e ordine delle rune (la ricerca vedeva carte e rune nascoste);
-la rete vede le proprie coperte per campo (boot1 non si carica più).
+Piano "forza" (20/11, `docs/PIANO_FORZA.md`): ricerca 1,16×; corretti mulligan e
+ordine delle rune (la ricerca vedeva carte nascoste); poi PPO a più mazzi.
 Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 
 ## Prossimi passi
@@ -73,8 +70,10 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
    EK 0,515). Campione: bot a mano + prior `runs/rengar/ekr_s8/ckpt_020032.pt`.
    **Ivern (23/11): entra** (Δ +0,244), i tre vecchi tengono. Partenza Sett: ekri_s10.
    **Sett (23/11): entra** (Δ +0,162); vecchi: 5 su 6 tengono, EI incerto (-0,032),
-   semi molto discordi. **Ora: arena finale** (`scripts/arena_finale.command`, ~8 ore):
-   prior ekris_s12 contro il campione ekr_s8 sui dieci matchup.
+   semi molto discordi. **Ora: arena finale** (`scripts/arena_finale.command`, ~9,5 ore):
+   A) EI contro ekri_s10; se passa, B) ekris_s12 contro ekr_s8 sui dieci matchup.
+   (23/11) Corretto il difetto della cache in `ppo.py` (pannelli e archivio; le
+   verifiche e le arene no). Poi: scelta della tappa, lr 1e-4 contro 3e-4.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
@@ -90,7 +89,6 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 - `riftbound/ai/handwritten.py`: il bot a mano; `scripts/bootstrap_net.py`: boot1.
 - `scripts/ppo.py` (PPO, `--mazzi ekr`), `riftbound/ai/ppo/`; `scripts/diag/`: misure
   (`arena_bot.py`, `arena_mazzi.py`, `incroci_ppo.py`, `verifica_mazzi.py`); `scripts/*.command`: lanciatori Mac. `docs/archivio/`: storico.
-- `riftbound/data/cards/all_cards.json`, `data/reference/piltover_archive.json`.
 - `riftbound/data/decks/`: precon, competitive (Evelynn, Kha'Zix, Ivern, Sett, Rengar del 21/11)
   e i vecchi come fixture; da lista .txt: `scripts/deck_from_txt.py`.
 - `scripts/riftatlas/`: registratore.js (in pagina), stati.py (registrazione →

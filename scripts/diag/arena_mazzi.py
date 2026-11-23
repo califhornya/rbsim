@@ -63,6 +63,7 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--righe", type=Path, default=None, help="default: --out con estensione .jsonl")
+    ap.add_argument("--esito-positivo", default="PROMOSSO", help="la parola dell'esito quando le regole passano")
     args = ap.parse_args()
     from riftbound.ai.ppo.collect import DECK_NAME
     blocks = [b.split(",") for b in args.blocchi]
@@ -89,7 +90,7 @@ def main() -> None:
         f"{A.REF_BUDGET} s per mossa")
     say(f"regole fissate prima: ciascuno di {' '.join(args.vecchi) or '-'} limite inferiore > 0,47; ciascun blocco "
         f"({'; '.join(' '.join(b) for b in blocks) or '-'}), a pesi uguali, >= 0,52 e limite inferiore > 0,50; "
-        f"tutte -> promosso")
+        f"tutte -> {args.esito_positivo.lower()}")
     say("   " + "; ".join(f"{mu} {pairs[mu]} coppie, seed {s0[mu]}-{s0[mu] + pairs[mu] - 1}" for mu in mus))
 
     tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu)
@@ -148,7 +149,7 @@ def main() -> None:
     for v in verdicts:
         say(f"   {v}")
     say(f"   {(time.time() - t0) / 60:.0f} min da questo lancio")
-    say(f"   Esito: {'PROMOSSO' if ok else 'non promosso'}")
+    say(f"   Esito: {args.esito_positivo if ok else 'non ' + args.esito_positivo.lower()}")
 
 
 if __name__ == "__main__":

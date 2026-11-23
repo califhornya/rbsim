@@ -84,7 +84,7 @@ def _init():
     torch.set_num_threads(1)
 
 
-def _net(blob: bytes, key: str):
+def _net(blob: bytes, key: tuple[str, str]):
     from riftbound.ai.ppo.model import PPONet
     import torch
     if key not in _NETS:
@@ -103,6 +103,18 @@ def _blob(net) -> bytes:
     torch.save({"state_dict": net.state_dict(), "hidden": net.hidden, "card_dim": net.card_dim,
                 "opt_dim": net.opt_dim}, buf)
     return buf.getvalue()
+
+
+def _load_anchors(paths) -> dict[str, bytes]:
+    from riftbound.ai.ppo.model import load
+
+    files = list(dict.fromkeys(Path(path).resolve() for path in paths))
+    stem_counts = Counter(path.stem for path in files)
+    anchors = {}
+    for path in files:
+        label = path.stem if stem_counts[path.stem] == 1 else str(path)
+        anchors[label] = _blob(load(path))
+    return anchors
 
 
 def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random,
@@ -142,13 +154,14 @@ def _collect(task):
     """A chunk of training games: (games, weights, snapshots {key: blob}, lam)."""
     from riftbound.ai.ppo.collect import DECK_OF, gae, play
     games, cur, snaps, lam = task
-    me = _net(cur[1], cur[0])
+    me = _net(cur[1], ("learner", cur[0]))
     recs, out = [], []
     for seed, starter, opp, seat, mu in games:
         if opp == "self":
             nets, learners = {"A": me, "B": me}, {"A": True, "B": True}
         else:
-            nets = {seat: me, ("B" if seat == "A" else "A"): _net(snaps[opp], opp)}
+            archived = _net(snaps[opp], ("archive", opp))
+            nets = {seat: me, ("B" if seat == "A" else "A"): archived}
             learners = {seat: True}
         g = play(seed, nets, learners, sample=True, starter=starter, deck_a=DECK_OF[mu[0]], deck_b=DECK_OF[mu[1]])
         for s, rs in g["records"].items():
@@ -166,12 +179,13 @@ def _eval(task):
     opponent kind, key, matchup)], cand, anchors {key: blob})."""
     from riftbound.ai.ppo.collect import DECK_OF, play
     games, cand, anchors = task
-    me = _net(cand[1], cand[0])
+    me = _net(cand[1], ("panel", cand[0]))
     out = []
     for seed, seat, starter, kind, key, mu in games:
         other = "B" if seat == "A" else "A"
         if kind == "ancora":
-            nets, opp = {seat: me, other: _net(anchors[key], key)}, None
+            frozen = _net(anchors[key], ("anchor", key))
+            nets, opp = {seat: me, other: frozen}, None
         else:
             nets, opp = {seat: me, other: None}, kind
         g = play(seed, nets, {}, sample=False, starter=starter, opponent=opp,
@@ -248,7 +262,7 @@ def main() -> None:
 
     anchors = args.ancore if args.ancore is not None else \
         [str(ROOT / "runs/ppo1" / a) for a in PILOT_ANCHORS if (ROOT / "runs/ppo1" / a).exists()]
-    anchor_blobs = {Path(a).stem: _blob(load(a)) for a in anchors}
+    anchor_blobs = _load_anchors(anchors)
 
     state_path = run / "stato.json"
     st = json.loads(state_path.read_text()) if state_path.exists() else \
@@ -378,6 +392,8 @@ def main() -> None:
                 st["celle"][o["cell"]] = st["celle"].get(o["cell"], 0) + 1
             st.setdefault("matchup", {})
             st["matchup"][o["matchup"]] = st["matchup"].get(o["matchup"], 0) + 1
+        with open(run / "aggiornamenti.jsonl", "a") as f:     # every update (revisione, 23/11)
+            f.write(json.dumps({"partite": st["partite"], "esempi": len(recs)} | stats, default=float) + "\n")
         print(f"   partite {st['partite']}: {len(recs)} esempi; kl {stats['kl']:+.4f}, clip "
               f"{stats['clipfrac']:.2f}, entropia {stats['entropia']:.3f}, errore valore "
               f"{stats['errore valore']:.3f}; raccolta {t_col:.0f} s, aggiornamento {t_upd:.0f} s", flush=True)

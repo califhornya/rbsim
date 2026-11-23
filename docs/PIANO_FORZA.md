@@ -364,3 +364,33 @@ contro il bot a mano.
   250 per ES, KS, RS, IS; seed da 40.000 + 1.000 x indice; regole: ciascuno
   dei tre storici lim. inf. > 0,47; blocco Ivern e blocco Sett a pesi
   uguali >= 0,52 e lim. inf. > 0,50; tutte -> promosso.
+- 23/11, sesto giro della revisione:
+  - **Difetto in `scripts/ppo.py`** (trovato dalla revisione, patch sua):
+    la cache delle reti nei processi indicizzava ancore e archivio col solo
+    nome (`ckpt_030016`): un'ancora esterna e un checkpoint della corsa con
+    lo stesso nome si scambiavano i pesi, nel pannello o come avversario
+    d'archivio, secondo l'ordine delle chiamate. Coinvolti: tutte le corse
+    con le ancore del pilota (ckpt_005056, 015040, 030016 di runs/ppo1:
+    ricette, distillazione, Rengar), Ivern (ckpt_020032), Sett
+    (ckpt_020032, 030016). Pannello EI del controllo s11 a 40.000: 0,672
+    nel log, 0,539 rigiocato. **Non coinvolti**: verifiche
+    (`verifica_mazzi.py`), incroci, arene (caricano per percorso): le
+    promozioni e le regole decise restano. Corretto con chiavi distinte
+    (rete in allenamento, archivio, candidato del pannello, ancore; ancore
+    omonime per percorso) e tre test.
+  - Sett: la regola sui vecchi resta fallita su EI (Δ -0,032, -0,051 -
+    -0,012). Candidato fissato ora: ekris_s12/ckpt_040000. Arena in due
+    fasi (`scripts/arena_finale.command`): A) EI con ricerca contro il bot
+    con prior ekri_s10, 800 coppie, seed 53.000+, passa se lim. inf. >
+    0,47, altrimenti il campione resta ekr_s8; B) se A passa, le 4.300
+    coppie contro ekr_s8 già fissate. ~9 ore e mezza.
+  - Instabilità: sul controllo s12 il pannello rigiocato sceglie la tappa
+    25.024; su 640 aperture nuove 0,492 contro 0,420 della finale, +0,072
+    (+0,040 - +0,104). Per le prossime corse: misurare ogni 5.000 partite
+    dalla 20.000 (64-128 coppie per matchup contro un'ancora esplicita,
+    stesse aperture, rapporto per vecchio matchup), la partenza tra le
+    opzioni, criterio di scelta fissato prima, stesso diritto a prova e
+    controllo, soglie formali solo nella verifica su aperture nuove. Primo
+    esperimento: lr 1e-4 costante contro 3e-4 costante, semi appaiati, un
+    solo parametro cambiato. KL e clip registrati a ogni aggiornamento
+    (`aggiornamenti.jsonl`) prima di decidere uno stop sulla KL.

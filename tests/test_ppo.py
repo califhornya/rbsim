@@ -158,3 +158,56 @@ def test_three_deck_mix_balanced_within_matchup():
     assert all(g[4] == "EK" for g in a)
     assert [g[1] for g in a if g[2] == "self"] == ["a" if (g[0] - 1_000_000) % 2 == 0 else "b"
                                                  for g in a if g[2] == "self"]
+
+
+@pytest.fixture
+def ppo_worker(monkeypatch):
+    from scripts import ppo
+
+    monkeypatch.setattr(ppo, "_NETS", {})
+    return ppo
+
+
+@pytest.mark.parametrize("panel_first", [False, True])
+def test_archive_and_anchor_with_same_name_keep_their_weights(ppo_worker, monkeypatch, panel_first):
+    from riftbound.ai.ppo import collect
+
+    worker = ppo_worker
+    model = PPONet(hidden=8, card_dim=4, opt_dim=8)
+    with torch.no_grad():
+        model.q_embed.weight[0, 0] = 1.0
+        archive = worker._blob(model)
+        model.q_embed.weight[0, 0] = 2.0
+        anchor = worker._blob(model)
+    name = "ckpt_030016"
+    observed = []
+
+    def capture_opponent(seed, nets, learners, **kwargs):
+        observed.append(nets["B"].q_embed.weight[0, 0].item())
+        return {"winner": "A", "records": {}, "turns": 0, "counts": {}}
+
+    monkeypatch.setattr(collect, "play", capture_opponent)
+    train = ([(42, "a", name, "A", "EI")], ("w1", archive), {name: archive}, 0.98)
+    panel = ([(42, "A", "a", "ancora", name, "EI")], ("misura1", archive), {name: anchor})
+    calls = [(worker._collect, train), (worker._eval, panel)]
+    for call, args in reversed(calls) if panel_first else calls:
+        call(args)
+    assert observed == ([2.0, 1.0] if panel_first else [1.0, 2.0])
+
+
+def test_homonymous_external_anchors_both_reach_the_panel(ppo_worker, tmp_path):
+    from riftbound.ai.ppo.model import save
+
+    model = PPONet(hidden=8, card_dim=4, opt_dim=8)
+    paths = [tmp_path / label / "ckpt_030016.pt" for label in ("ivern", "sett")]
+    paths.append(tmp_path / "ckpt_020032.pt")
+    for marker, path in enumerate(paths):
+        path.parent.mkdir(exist_ok=True)
+        with torch.no_grad():
+            model.q_embed.weight[0, 0] = marker
+        save(model, path)
+    anchors = ppo_worker._load_anchors(paths)
+    assert list(anchors) == [str(paths[0]), str(paths[1]), "ckpt_020032"]
+    for marker, (key, blob) in enumerate(anchors.items()):
+        cached = ppo_worker._net(blob, ("anchor", key))
+        assert cached.q_embed.weight[0, 0].item() == marker
