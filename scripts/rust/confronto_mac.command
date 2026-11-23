@@ -6,6 +6,7 @@
 # Prerequisiti: il worktree del ramo claude/peaceful-lamport-gynyab, uv, una
 # toolchain Rust (https://rustup.rs). Niente training, niente Cherry: misura e basta.
 # Uscite: docs/rust/misure/mac_*.json e un riassunto a schermo.
+# SOLO_CICLO=1 salta parità e raccolta su un core (già fatte) e misura solo il ciclo.
 set -euo pipefail
 CKPT="${1:-}"
 # The checkpoint by absolute path (it may sit in another checkout, e.g. ../rbsim/runs/...).
@@ -37,12 +38,15 @@ python -m pytest -q tests/rust 2>&1 | tail -1
 INIT=()
 if [ -f "$CKPT" ]; then INIT=(--init "$CKPT"); echo "checkpoint: $CKPT"; else echo "checkpoint assente ($CKPT): pesi dal seme 1"; fi
 
+if [ "${SOLO_CICLO:-0}" != "1" ]; then
 echo "== parità degli esempi PPO col checkpoint (Python contro Rust)"
 python scripts/rust/parita_ppo.py --semi 1-20 ${INIT[@]+"${INIT[@]}"} --out "$OUT/mac_parita_$STAMP.json" | tail -1
 
 echo "== raccolta su un core, ordine alternato (self-play e contro simple_trade)"
 python scripts/rust/bench_raccolta.py --semi 1-100 ${INIT[@]+"${INIT[@]}"} --out "$OUT/mac_raccolta_self_$STAMP.json" | grep -E '"rapporto_totale"|"totale_s"'
 python scripts/rust/bench_raccolta.py --semi 1-100 --avversario simple_trade ${INIT[@]+"${INIT[@]}"} --out "$OUT/mac_raccolta_st_$STAMP.json" | grep -E '"rapporto_totale"|"totale_s"'
+
+fi
 
 echo "== ciclo PPO completo (raccolta + aggiornamento), motori alternati"
 W=$(( $(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null || sysctl -n hw.ncpu) ))

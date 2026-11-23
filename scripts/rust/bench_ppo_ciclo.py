@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 import platform
@@ -23,14 +22,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+# scripts/ppo.py as the module "ppo", importable by the pool's workers too:
+# on macOS they start by spawn and re-import what they run (P._init,
+# P._collect) by module name; this line runs in them as well.
+sys.path.append(str(ROOT / "scripts"))
 
 
 def _ppo():
-    spec = importlib.util.spec_from_file_location("ppo_script", ROOT / "scripts/ppo.py")
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ppo_script"] = mod
-    spec.loader.exec_module(mod)
-    return mod
+    import ppo
+    return ppo
 
 
 def main() -> None:
