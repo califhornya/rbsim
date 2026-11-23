@@ -35,3 +35,6 @@ dev = [
     "pytest>=9.0.3",
 ]
 # no special config needed, this just keeps uv happy
+
+[tool.setuptools.packages.find]
+include = ["riftbound*"]
