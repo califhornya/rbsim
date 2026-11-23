@@ -17,7 +17,8 @@
 # Si può fermare e rilanciare: riprende dalle partite già giocate.
 # Risultati: runs/sett/ARENA_EI.txt e runs/sett/ARENA.txt
 cd "$(dirname "$0")/.." || exit 1
-workers=$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null)
+# WORKERS=6 scripts/arena_finale.command: meno processi, Mac più fresco, più lento.
+workers=${WORKERS:-$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null)}
 case "$workers" in ''|*[!0-9]*) workers=4 ;; esac
 CAND=runs/sett/ekris_s12/ckpt_040000.pt
 INTER=runs/ivern/ekri_s10/ckpt_030016.pt
