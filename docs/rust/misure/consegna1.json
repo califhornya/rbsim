@@ -1,0 +1,583 @@
+{
+ "cosa": "consegna1 (D59, D62 con Gold)",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": "3.13.18",
+ "casi": {
+  "D59": {
+   "eventi": 10,
+   "identiche": true,
+   "errore_rust": null,
+   "prima_differenza": null,
+   "osservazioni_python": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": [
+     0,
+     "A"
+    ],
+    "gold_eseguito": false,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "showdown_action"
+    ],
+    "prossima_reazione_a": "A",
+    "finestra_conta_un_pass": false,
+    "showdown_nella_finestra": true
+   },
+   "osservazioni_rust": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": [
+     0,
+     "A"
+    ],
+    "gold_eseguito": false,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "showdown_action"
+    ],
+    "prossima_reazione_a": "A",
+    "finestra_conta_un_pass": false,
+    "showdown_nella_finestra": true
+   },
+   "decisioni_python": [
+    [
+     "A",
+     "turn_action",
+     "Move Traveling Merchant base\u2192BF0",
+     0,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     [
+      0,
+      "A"
+     ]
+    ],
+    [
+     "A",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "decisioni_rust": [
+    [
+     "A",
+     "turn_action",
+     "Move Traveling Merchant base\u2192BF0",
+     0,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     [
+      0,
+      "A"
+     ]
+    ],
+    [
+     "A",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "stato_finale_python": {
+    "turno": 3,
+    "punti": [
+     0,
+     1
+    ],
+    "gold_A_in_base": [
+     "Gold"
+    ],
+    "pending_move": null
+   },
+   "tempi": {
+    "ripetizioni": 300,
+    "python_caricamento": {
+     "mediana_ms": 0.5457,
+     "min_ms": 0.3818,
+     "max_ms": 2.8637,
+     "dev_std_ms": 0.2019
+    },
+    "python_segmento": {
+     "mediana_ms": 4.1241,
+     "min_ms": 3.0272,
+     "max_ms": 7.2934,
+     "dev_std_ms": 0.8426
+    },
+    "rust_caricamento": {
+     "mediana_ms": 0.3307,
+     "min_ms": 0.246,
+     "max_ms": 0.5553,
+     "dev_std_ms": 0.0704
+    },
+    "rust_segmento": {
+     "mediana_ms": 0.2862,
+     "min_ms": 0.2133,
+     "max_ms": 3.1497,
+     "dev_std_ms": 0.176
+    },
+    "rapporto_segmento": 14.41
+   }
+  },
+  "D59b": {
+   "eventi": 9,
+   "identiche": true,
+   "errore_rust": null,
+   "prima_differenza": null,
+   "osservazioni_python": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": [
+     0,
+     "A"
+    ],
+    "gold_eseguito": false,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "showdown_action"
+    ],
+    "prossima_reazione_a": "B",
+    "finestra_conta_un_pass": true,
+    "showdown_nella_finestra": true
+   },
+   "osservazioni_rust": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": [
+     0,
+     "A"
+    ],
+    "gold_eseguito": false,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "showdown_action"
+    ],
+    "prossima_reazione_a": "B",
+    "finestra_conta_un_pass": true,
+    "showdown_nella_finestra": true
+   },
+   "decisioni_python": [
+    [
+     "A",
+     "turn_action",
+     "Move Traveling Merchant base\u2192BF0",
+     0,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     [
+      0,
+      "A"
+     ]
+    ],
+    [
+     "A",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "decisioni_rust": [
+    [
+     "A",
+     "turn_action",
+     "Move Traveling Merchant base\u2192BF0",
+     0,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     [
+      0,
+      "A"
+     ]
+    ],
+    [
+     "A",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "showdown_action",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "stato_finale_python": {
+    "turno": 3,
+    "punti": [
+     1,
+     0
+    ],
+    "gold_A_in_base": [
+     "Gold"
+    ],
+    "pending_move": null
+   },
+   "tempi": {
+    "ripetizioni": 300,
+    "python_caricamento": {
+     "mediana_ms": 0.4204,
+     "min_ms": 0.3543,
+     "max_ms": 1.6996,
+     "dev_std_ms": 0.1807
+    },
+    "python_segmento": {
+     "mediana_ms": 2.6178,
+     "min_ms": 2.3363,
+     "max_ms": 4.1408,
+     "dev_std_ms": 0.4705
+    },
+    "rust_caricamento": {
+     "mediana_ms": 0.2531,
+     "min_ms": 0.2249,
+     "max_ms": 0.7347,
+     "dev_std_ms": 0.0599
+    },
+    "rust_segmento": {
+     "mediana_ms": 0.1925,
+     "min_ms": 0.1733,
+     "max_ms": 0.4574,
+     "dev_std_ms": 0.0438
+    },
+    "rapporto_segmento": 13.6
+   }
+  },
+  "D62": {
+   "eventi": 8,
+   "identiche": true,
+   "errore_rust": null,
+   "prima_differenza": null,
+   "osservazioni_python": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": null,
+    "gold_eseguito": true,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "reaction"
+    ],
+    "prossima_reazione_a": "A",
+    "finestra": [
+     [
+      "B",
+      "Pass"
+     ],
+     [
+      "A",
+      "Gear gain_power_any_domain (Gold)"
+     ],
+     [
+      "A",
+      "Pass"
+     ]
+    ],
+    "B_di_nuovo_priorita_dopo_gold": false
+   },
+   "osservazioni_rust": {
+    "gold_scelto_da": "A",
+    "finestra_gold": "reaction",
+    "movimento_in_sospeso_alla_scelta": null,
+    "gold_eseguito": true,
+    "movimento_dopo": null,
+    "decisione_dopo": [
+     "A",
+     "reaction"
+    ],
+    "prossima_reazione_a": "A",
+    "finestra": [
+     [
+      "B",
+      "Pass"
+     ],
+     [
+      "A",
+      "Gear gain_power_any_domain (Gold)"
+     ],
+     [
+      "A",
+      "Pass"
+     ]
+    ],
+    "B_di_nuovo_priorita_dopo_gold": false
+   },
+   "decisioni_python": [
+    [
+     "B",
+     "turn_action",
+     "Cast Punch First @BF0",
+     0,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "decisioni_rust": [
+    [
+     "B",
+     "turn_action",
+     "Cast Punch First @BF0",
+     0,
+     null
+    ],
+    [
+     "B",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Gear gain_power_any_domain (Gold)",
+     1,
+     null
+    ],
+    [
+     "A",
+     "reaction",
+     "Pass",
+     1,
+     null
+    ],
+    [
+     "B",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ],
+    [
+     "A",
+     "turn_action",
+     "Pass",
+     0,
+     null
+    ]
+   ],
+   "stato_finale_python": {
+    "turno": 3,
+    "punti": [
+     0,
+     0
+    ],
+    "gold_A_in_base": [],
+    "pending_move": null
+   },
+   "tempi": {
+    "ripetizioni": 300,
+    "python_caricamento": {
+     "mediana_ms": 0.407,
+     "min_ms": 0.3422,
+     "max_ms": 11.7892,
+     "dev_std_ms": 0.6896
+    },
+    "python_segmento": {
+     "mediana_ms": 2.1327,
+     "min_ms": 1.9681,
+     "max_ms": 9.5081,
+     "dev_std_ms": 0.6698
+    },
+    "rust_caricamento": {
+     "mediana_ms": 0.2476,
+     "min_ms": 0.225,
+     "max_ms": 1.2255,
+     "dev_std_ms": 0.0832
+    },
+    "rust_segmento": {
+     "mediana_ms": 0.1219,
+     "min_ms": 0.1106,
+     "max_ms": 2.2514,
+     "dev_std_ms": 0.1249
+    },
+    "rapporto_segmento": 17.5
+   }
+  }
+ },
+ "commit": "45414de",
+ "comando": "python scripts/rust/consegna1.py --ripetizioni 300"
+}

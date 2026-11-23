@@ -125,6 +125,30 @@ impl Game {
         Ok((r.winner_name().to_string(), r.turns))
     }
 
+    /// A segment of a position (consegna1.segment_py): `turns` times the
+    /// active player's actions, the end of the turn, the next turn's
+    /// beginning. -> the winner if the game ended in it.
+    fn run_segment(&mut self, turns: i64) -> PyResult<Option<String>> {
+        let r = (|| -> Result<Option<String>, EngineError> {
+            for _ in 0..turns {
+                if let Some(res) = self.g.run_main_actions()? {
+                    return Ok(Some(res.winner_name().to_string()));
+                }
+                if let Some(res) = self.g.end_turn()? {
+                    return Ok(Some(res.winner_name().to_string()));
+                }
+                if let Some(res) = self.g.begin_turn()? {
+                    return Ok(Some(res.winner_name().to_string()));
+                }
+            }
+            Ok(None)
+        })();
+        if let Some(s) = self.sink.clone() {
+            self.g.drain_rng(&s);
+        }
+        r.map_err(perr)
+    }
+
     /// The trace's events (JSON list).
     fn events(&self) -> String {
         match &self.sink {
