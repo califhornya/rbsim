@@ -394,3 +394,10 @@ contro il bot a mano.
     esperimento: lr 1e-4 costante contro 3e-4 costante, semi appaiati, un
     solo parametro cambiato. KL e clip registrati a ogni aggiornamento
     (`aggiornamenti.jsonl`) prima di decidere uno stop sulla KL.
+- 23/11, arena finale, fase A (141 min): bot con prior ekris_s12 contro bot
+  con prior ekri_s10, Evelynn-Ivern, 800 coppie: **0,524 ± 0,017**
+  (0,507-0,541; con Evelynn 0,90 / 0,26, con Ivern 0,22 / 0,71 secondo chi
+  comincia): **PASSA**. Con la ricerca la perdita su EI non c'è: la rete a
+  cinque mazzi come prior è anzi un po' meglio della intermedia. Fase B
+  avviata alle 17:00 (le partite con Ivern sono più lente: ~5,7 coppie al
+  minuto contro ~9 di Rengar; stima ~10 ore).
