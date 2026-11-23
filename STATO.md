@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-23 (campione ekr_s8; Ivern nel training).
+Aggiornato: 2026-11-23 (campione ekr_s8; Ivern entra; Sett nel training).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -73,8 +73,9 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
    **Rengar (22/11): entra, EK tiene** (verifica: Rengar +0,127 sul controllo, EK
    +0,025). **Arena (23/11): prior ekr_s8 PROMOSSO**, Rengar 0,541 ± 0,020, EK
    0,515 ± 0,022. Campione: bot a mano + prior `runs/rengar/ekr_s8/corrente.pt`.
-   **Ora: Ivern** (`scripts/ivern.command`, ~4 ore): 4 reti da ekr_s8, semi 9 e 10,
-   quattro mazzi contro controllo a tre; poi Sett; arena finale sui dieci matchup.
+   **Ivern (23/11): entra** (Δ +0,244 sul controllo), i tre vecchi tengono.
+   **Ora: Sett** (`scripts/sett.command`, ~4 ore) da ekri_s10, semi 11 e 12; poi
+   arena finale sui dieci matchup contro il campione ekr_s8.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali

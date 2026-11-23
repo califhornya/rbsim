@@ -6,7 +6,7 @@ Una rete (riftbound/ai/ppo/) che gioca senza ricerca decide ogni scelta vera
 e impara giocando contro se stessa, Evelynn (A) contro Kha'Zix (B); con
 --mazzi ekr (22/11) a ciclo fisso metà Evelynn-Kha'Zix, un quarto Evelynn-
 Rengar e un quarto Kha'Zix-Rengar, chi comincia alternato entro il matchup;
-con --mazzi ekri (23/11) anche Ivern (vedi MAZZI).
+con --mazzi ekri (23/11) anche Ivern, con ekris anche Sett (vedi MAZZI).
 
 Ogni aggiornamento: --per-aggiornamento partite con i pesi congelati, chi
 comincia alternato. All'inizio tutte contro se stessa (entrambi i posti
@@ -67,6 +67,9 @@ PILOT_ANCHORS = ("ckpt_005056.pt", "ckpt_015040.pt", "ckpt_030016.pt")
 MAZZI = {"ek": ("EK",), "ekr": ("EK", "EK", "ER", "KR"),
          "ekri": ("EK", "EI", "ER", "KI", "EK", "RI", "KR", "EI", "EK", "KI", "ER", "RI",
                   "EK", "EI", "KR", "KI", "EK", "RI", "ER", "EI", "EK", "KI", "KR", "RI")}
+# "ekris" (23/11): half the games the "ekri" cycle, half Evelynn-, Kha'Zix-,
+# Rengar-, Ivern-Sett an eighth each (Sett in B); cycle of 48, alternating.
+MAZZI["ekris"] = tuple(mu for pair in zip(MAZZI["ekri"], ("ES", "KS", "RS", "IS") * 6) for mu in pair)
 # Measuring openings per matchup, disjoint (offsets from EVAL_SEED0):
 # simple_trade, pairs against the anchor.
 PANEL_SEEDS = {"EK": (0, 500_000), "ER": (100_000, 600_000), "KR": (200_000, 700_000),
@@ -203,6 +206,9 @@ def main() -> None:
     ap.add_argument("--coppie-ancora", type=int, default=64)
     ap.add_argument("--st-partite", type=int, default=200)
     ap.add_argument("--allarme-bot", type=int, default=5000, help="ogni quante partite 32 coppie col bot (0: mai)")
+    ap.add_argument("--pannello-ogni", type=int, default=None,
+                    help="ogni quante partite il pannello (default --tappa; checkpoint e archivio restano a ogni "
+                         "--tappa; alla fine sempre)")
     ap.add_argument("--seme", type=int, default=0)
     ap.add_argument("--init", default=None, help="pesi di partenza (un checkpoint PPO); default casuali dal seme")
     ap.add_argument("--assegnazione", choices=("bilanciata", "vecchia"), default="bilanciata")
@@ -213,7 +219,8 @@ def main() -> None:
     ap.add_argument("--lam", type=float, default=0.98)
     ap.add_argument("--mazzi", choices=tuple(MAZZI), default="ek",
                     help="ek: solo Evelynn-Kha'Zix; ekr: 50%% Evelynn-Kha'Zix, 25%% Evelynn-Rengar, 25%% Kha'Zix-Rengar; "
-                         "ekri: i tre di ekr 2:1:1 sulla metà, Evelynn-, Kha'Zix-, Rengar-Ivern un sesto ciascuno")
+                         "ekri: i tre di ekr 2:1:1 sulla metà, Evelynn-, Kha'Zix-, Rengar-Ivern un sesto ciascuno; "
+                         "ekris: ekri sulla metà, Evelynn-, Kha'Zix-, Rengar-, Ivern-Sett un ottavo ciascuno")
     ap.add_argument("--pannello-mazzi", nargs="*", choices=tuple(PANEL_SEEDS), default=None,
                     help="i matchup del pannello (default: quelli di --mazzi); EK sempre")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
@@ -387,7 +394,11 @@ def main() -> None:
             say(f"Tappa {st['partite']} partite ({(time.time() - t0) / 60:.0f} min da questo lancio); "
                 f"matchup {dict(sorted(st['matchup'].items()))}; "
                 f"contro l'archivio, celle posto x chi comincia: {dict(sorted(st['celle'].items()))}")
-            row = panel(f"{st['partite']} partite", with_bot=bot)
+            ogni = args.pannello_ogni or args.tappa
+            if st["partite"] // ogni > prev // ogni or st["partite"] >= args.partite or bot:
+                row = panel(f"{st['partite']} partite", with_bot=bot)
+            else:
+                row = {"partite": st["partite"], "tappa": f"{st['partite']} partite (senza pannello)"}
             row.update({k: v for k, v in stats.items()})
             log(row)
         state_path.write_text(json.dumps(st))

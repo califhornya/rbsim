@@ -318,3 +318,27 @@ contro il bot a mano.
   separati, >= 0,52 e lim. inf. > 0,50 ciascuno; ogni vecchio lim. inf. >
   0,47; coppie fissate prima per la tolleranza: ~800 per vecchio, ±0,02).
   `scripts/ivern.command`.
+- 23/11, Ivern, risultati (Mac; quattro corse da 42-46 min, verifica 26 min,
+  57.600 partite), contro ekr_s8, prova (ekri) / controllo (ekr):
+  nuovi a pesi uguali **0,712 / 0,468, Δ +0,244** (+0,233 - +0,254; s9
+  +0,236, s10 +0,252): EI +0,236, KI +0,239, RI +0,256. **Ivern entra.**
+  Vecchi, Δ: EK -0,006 (lim. inf. -0,023), ER +0,009 (-0,010), KR +0,006
+  (-0,013): **tengono tutti e tre**; semi discordi su tutti e tre, ampio su
+  KR (s9 +0,052, s10 -0,041 ± 0,027). Testa a testa EK ekri_s10 contro
+  ekr_s10 0,439 ± 0,031. Il guadagno viene soprattutto dalla rete che
+  pilota Ivern (il controllo con Ivern 0,07-0,37 contro l'ancora); con
+  l'altro mazzo contro l'Ivern dell'ancora prova e controllo quasi uguali
+  (0,6-0,9 entrambi). Contro simple_trade, la rete con Kha'Zix contro Ivern
+  resta debole (0,38 / 0,24 s9, 0,52 / 0,40 s10; partenza 0,31). Rispetto a
+  ekr_s8, EK non sale (prova 0,484, controllo 0,490): continuare da ekr_s8
+  non migliora EK, su nessuna delle due miscele.
+  Partenza per Sett: **ekri_s10/ckpt_030016** (sopra ekri_s9 contro l'ancora
+  in tutti e sei i matchup; media 0,638 contro 0,594). Sett (`--mazzi
+  ekris`, `scripts/sett.command`): metà la miscela ekri, un ottavo ciascuno
+  ES, KS, RS, IS (Sett in B), 40.000 partite (5.000 per matchup nuovo, come
+  Rengar e Ivern), semi 11 e 12, controllo ekri; pannello solo a 0, 20.000 e
+  alla fine (`--pannello-ogni`, il pannello a dieci matchup costa ~3.400
+  partite). Verifica contro ekri_s10, 1.000 coppie per matchup, seed da
+  13.000.000; Sett entra se la media a pesi uguali di ES, KS, RS, IS fa >=
+  0,52, lim. inf. > 0,50, Δ lim. inf. > 0; i sei vecchi tengono ciascuno
+  con Δ lim. inf. > -0,03. Poi l'arena finale contro ekr_s8.
