@@ -1,0 +1,526 @@
+{
+ "cosa": "bench_raccolta (un core, ordine alternato, senza tracce)",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": {
+  "totale_s": 16.39,
+  "mediana_ms": 254.95,
+  "dev_std_ms": 100.25,
+  "min_ms": 109.69,
+  "max_ms": 585.03
+ },
+ "torch": "2.13.0+cu130",
+ "thread_torch": 1,
+ "pesi": "PPONet() dal seme 1",
+ "pesi_sha256_16": "02c45ba0d9b97266",
+ "avversario": "self-play",
+ "semi": "1-60",
+ "partite": 60,
+ "caricamento_s": 1.422,
+ "rust": {
+  "totale_s": 5.623,
+  "mediana_ms": 85.23,
+  "dev_std_ms": 32.09,
+  "min_ms": 45.95,
+  "max_ms": 200.28
+ },
+ "rust_rete": {
+  "totale_s": 4.722,
+  "mediana_ms": 71.3,
+  "dev_std_ms": 27.21,
+  "min_ms": 38.39,
+  "max_ms": 170.04
+ },
+ "rust_motore_e_confine": {
+  "totale_s": 0.901,
+  "mediana_ms": 14.21,
+  "dev_std_ms": 5.01,
+  "min_ms": 7.56,
+  "max_ms": 30.24
+ },
+ "rapporto_totale": 2.91,
+ "esempi": 5491,
+ "partite_grezze": [
+  {
+   "seme": 1,
+   "python": 0.26641,
+   "python_esempi": 95,
+   "rust": 0.1019,
+   "rust_rete": 0.08485,
+   "rust_esempi": 95
+  },
+  {
+   "seme": 2,
+   "rust": 0.059,
+   "rust_rete": 0.04935,
+   "rust_esempi": 64,
+   "python": 0.16779,
+   "python_esempi": 64
+  },
+  {
+   "seme": 3,
+   "python": 0.21586,
+   "python_esempi": 76,
+   "rust": 0.069,
+   "rust_rete": 0.05821,
+   "rust_esempi": 76
+  },
+  {
+   "seme": 4,
+   "rust": 0.12234,
+   "rust_rete": 0.10552,
+   "rust_esempi": 109,
+   "python": 0.31746,
+   "python_esempi": 109
+  },
+  {
+   "seme": 5,
+   "python": 0.21891,
+   "python_esempi": 70,
+   "rust": 0.09332,
+   "rust_rete": 0.07831,
+   "rust_esempi": 70
+  },
+  {
+   "seme": 6,
+   "rust": 0.14411,
+   "rust_rete": 0.12128,
+   "rust_esempi": 117,
+   "python": 0.44165,
+   "python_esempi": 117
+  },
+  {
+   "seme": 7,
+   "python": 0.56917,
+   "python_esempi": 152,
+   "rust": 0.20028,
+   "rust_rete": 0.17004,
+   "rust_esempi": 152
+  },
+  {
+   "seme": 8,
+   "rust": 0.12591,
+   "rust_rete": 0.10802,
+   "rust_esempi": 89,
+   "python": 0.25316,
+   "python_esempi": 89
+  },
+  {
+   "seme": 9,
+   "python": 0.29099,
+   "python_esempi": 81,
+   "rust": 0.11114,
+   "rust_rete": 0.09432,
+   "rust_esempi": 81
+  },
+  {
+   "seme": 10,
+   "rust": 0.07451,
+   "rust_rete": 0.06315,
+   "rust_esempi": 75,
+   "python": 0.1979,
+   "python_esempi": 75
+  },
+  {
+   "seme": 11,
+   "python": 0.58503,
+   "python_esempi": 133,
+   "rust": 0.16485,
+   "rust_rete": 0.13869,
+   "rust_esempi": 133
+  },
+  {
+   "seme": 12,
+   "rust": 0.11645,
+   "rust_rete": 0.09813,
+   "rust_esempi": 119,
+   "python": 0.32053,
+   "python_esempi": 119
+  },
+  {
+   "seme": 13,
+   "python": 0.25674,
+   "python_esempi": 84,
+   "rust": 0.08136,
+   "rust_rete": 0.06831,
+   "rust_esempi": 84
+  },
+  {
+   "seme": 14,
+   "rust": 0.13119,
+   "rust_rete": 0.11072,
+   "rust_esempi": 140,
+   "python": 0.38853,
+   "python_esempi": 140
+  },
+  {
+   "seme": 15,
+   "python": 0.1593,
+   "python_esempi": 54,
+   "rust": 0.05427,
+   "rust_rete": 0.04487,
+   "rust_esempi": 54
+  },
+  {
+   "seme": 16,
+   "rust": 0.10128,
+   "rust_rete": 0.08504,
+   "rust_esempi": 102,
+   "python": 0.31252,
+   "python_esempi": 102
+  },
+  {
+   "seme": 17,
+   "python": 0.50176,
+   "python_esempi": 164,
+   "rust": 0.16379,
+   "rust_rete": 0.13818,
+   "rust_esempi": 164
+  },
+  {
+   "seme": 18,
+   "rust": 0.0771,
+   "rust_rete": 0.06381,
+   "rust_esempi": 78,
+   "python": 0.21918,
+   "python_esempi": 78
+  },
+  {
+   "seme": 19,
+   "python": 0.26347,
+   "python_esempi": 96,
+   "rust": 0.1064,
+   "rust_rete": 0.08976,
+   "rust_esempi": 96
+  },
+  {
+   "seme": 20,
+   "rust": 0.11909,
+   "rust_rete": 0.10095,
+   "rust_esempi": 109,
+   "python": 0.33395,
+   "python_esempi": 109
+  },
+  {
+   "seme": 21,
+   "python": 0.32319,
+   "python_esempi": 120,
+   "rust": 0.1295,
+   "rust_rete": 0.10884,
+   "rust_esempi": 120
+  },
+  {
+   "seme": 22,
+   "rust": 0.0755,
+   "rust_rete": 0.06303,
+   "rust_esempi": 71,
+   "python": 0.23434,
+   "python_esempi": 71
+  },
+  {
+   "seme": 23,
+   "python": 0.29148,
+   "python_esempi": 84,
+   "rust": 0.07875,
+   "rust_rete": 0.06548,
+   "rust_esempi": 84
+  },
+  {
+   "seme": 24,
+   "rust": 0.0953,
+   "rust_rete": 0.08094,
+   "rust_esempi": 88,
+   "python": 0.26653,
+   "python_esempi": 88
+  },
+  {
+   "seme": 25,
+   "python": 0.17067,
+   "python_esempi": 52,
+   "rust": 0.05476,
+   "rust_rete": 0.04614,
+   "rust_esempi": 52
+  },
+  {
+   "seme": 26,
+   "rust": 0.10326,
+   "rust_rete": 0.08114,
+   "rust_esempi": 85,
+   "python": 0.32956,
+   "python_esempi": 85
+  },
+  {
+   "seme": 27,
+   "python": 0.42017,
+   "python_esempi": 95,
+   "rust": 0.10482,
+   "rust_rete": 0.08684,
+   "rust_esempi": 95
+  },
+  {
+   "seme": 28,
+   "rust": 0.14136,
+   "rust_rete": 0.11894,
+   "rust_esempi": 148,
+   "python": 0.3744,
+   "python_esempi": 148
+  },
+  {
+   "seme": 29,
+   "python": 0.33496,
+   "python_esempi": 116,
+   "rust": 0.10842,
+   "rust_rete": 0.09147,
+   "rust_esempi": 116
+  },
+  {
+   "seme": 30,
+   "rust": 0.06885,
+   "rust_rete": 0.0577,
+   "rust_esempi": 75,
+   "python": 0.19009,
+   "python_esempi": 75
+  },
+  {
+   "seme": 31,
+   "python": 0.19282,
+   "python_esempi": 72,
+   "rust": 0.06902,
+   "rust_rete": 0.0572,
+   "rust_esempi": 72
+  },
+  {
+   "seme": 32,
+   "rust": 0.06673,
+   "rust_rete": 0.05628,
+   "rust_esempi": 73,
+   "python": 0.19865,
+   "python_esempi": 73
+  },
+  {
+   "seme": 33,
+   "python": 0.24343,
+   "python_esempi": 96,
+   "rust": 0.08805,
+   "rust_rete": 0.07355,
+   "rust_esempi": 96
+  },
+  {
+   "seme": 34,
+   "rust": 0.11056,
+   "rust_rete": 0.09282,
+   "rust_esempi": 117,
+   "python": 0.33541,
+   "python_esempi": 117
+  },
+  {
+   "seme": 35,
+   "python": 0.19922,
+   "python_esempi": 72,
+   "rust": 0.06772,
+   "rust_rete": 0.05577,
+   "rust_esempi": 72
+  },
+  {
+   "seme": 36,
+   "rust": 0.0625,
+   "rust_rete": 0.05283,
+   "rust_esempi": 69,
+   "python": 0.18632,
+   "python_esempi": 69
+  },
+  {
+   "seme": 37,
+   "python": 0.14117,
+   "python_esempi": 49,
+   "rust": 0.05113,
+   "rust_rete": 0.04305,
+   "rust_esempi": 49
+  },
+  {
+   "seme": 38,
+   "rust": 0.06701,
+   "rust_rete": 0.05606,
+   "rust_esempi": 71,
+   "python": 0.20039,
+   "python_esempi": 71
+  },
+  {
+   "seme": 39,
+   "python": 0.20441,
+   "python_esempi": 75,
+   "rust": 0.06993,
+   "rust_rete": 0.05968,
+   "rust_esempi": 75
+  },
+  {
+   "seme": 40,
+   "rust": 0.10655,
+   "rust_rete": 0.08955,
+   "rust_esempi": 114,
+   "python": 0.30194,
+   "python_esempi": 114
+  },
+  {
+   "seme": 41,
+   "python": 0.26969,
+   "python_esempi": 74,
+   "rust": 0.06659,
+   "rust_rete": 0.05592,
+   "rust_esempi": 74
+  },
+  {
+   "seme": 42,
+   "rust": 0.07086,
+   "rust_rete": 0.05993,
+   "rust_esempi": 77,
+   "python": 0.20906,
+   "python_esempi": 77
+  },
+  {
+   "seme": 43,
+   "python": 0.41347,
+   "python_esempi": 124,
+   "rust": 0.11592,
+   "rust_rete": 0.09723,
+   "rust_esempi": 124
+  },
+  {
+   "seme": 44,
+   "rust": 0.08242,
+   "rust_rete": 0.06904,
+   "rust_esempi": 93,
+   "python": 0.25205,
+   "python_esempi": 93
+  },
+  {
+   "seme": 45,
+   "python": 0.14323,
+   "python_esempi": 51,
+   "rust": 0.04595,
+   "rust_rete": 0.03839,
+   "rust_esempi": 51
+  },
+  {
+   "seme": 46,
+   "rust": 0.06606,
+   "rust_rete": 0.05592,
+   "rust_esempi": 72,
+   "python": 0.2053,
+   "python_esempi": 72
+  },
+  {
+   "seme": 47,
+   "python": 0.3305,
+   "python_esempi": 120,
+   "rust": 0.1138,
+   "rust_rete": 0.09394,
+   "rust_esempi": 120
+  },
+  {
+   "seme": 48,
+   "rust": 0.0623,
+   "rust_rete": 0.05151,
+   "rust_esempi": 66,
+   "python": 0.17021,
+   "python_esempi": 66
+  },
+  {
+   "seme": 49,
+   "python": 0.18502,
+   "python_esempi": 70,
+   "rust": 0.06731,
+   "rust_rete": 0.05637,
+   "rust_esempi": 70
+  },
+  {
+   "seme": 50,
+   "rust": 0.07119,
+   "rust_rete": 0.06011,
+   "rust_esempi": 77,
+   "python": 0.20123,
+   "python_esempi": 77
+  },
+  {
+   "seme": 51,
+   "python": 0.30463,
+   "python_esempi": 84,
+   "rust": 0.09927,
+   "rust_rete": 0.08432,
+   "rust_esempi": 84
+  },
+  {
+   "seme": 52,
+   "rust": 0.07511,
+   "rust_rete": 0.06266,
+   "rust_esempi": 81,
+   "python": 0.23585,
+   "python_esempi": 81
+  },
+  {
+   "seme": 53,
+   "python": 0.19113,
+   "python_esempi": 57,
+   "rust": 0.07815,
+   "rust_rete": 0.06511,
+   "rust_esempi": 57
+  },
+  {
+   "seme": 54,
+   "rust": 0.05715,
+   "rust_rete": 0.04835,
+   "rust_esempi": 41,
+   "python": 0.10969,
+   "python_esempi": 41
+  },
+  {
+   "seme": 55,
+   "python": 0.28658,
+   "python_esempi": 107,
+   "rust": 0.09972,
+   "rust_rete": 0.08363,
+   "rust_esempi": 107
+  },
+  {
+   "seme": 56,
+   "rust": 0.11032,
+   "rust_rete": 0.09312,
+   "rust_esempi": 119,
+   "python": 0.3116,
+   "python_esempi": 119
+  },
+  {
+   "seme": 57,
+   "python": 0.46287,
+   "python_esempi": 174,
+   "rust": 0.16165,
+   "rust_rete": 0.135,
+   "rust_esempi": 174
+  },
+  {
+   "seme": 58,
+   "rust": 0.09799,
+   "rust_rete": 0.08251,
+   "rust_esempi": 104,
+   "python": 0.26391,
+   "python_esempi": 104
+  },
+  {
+   "seme": 59,
+   "python": 0.17688,
+   "python_esempi": 67,
+   "rust": 0.06305,
+   "rust_rete": 0.05283,
+   "rust_esempi": 67
+  },
+  {
+   "seme": 60,
+   "rust": 0.08139,
+   "rust_rete": 0.06733,
+   "rust_esempi": 84,
+   "python": 0.24813,
+   "python_esempi": 84
+  }
+ ],
+ "versione_python": "3.13.18"
+}

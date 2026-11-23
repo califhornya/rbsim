@@ -66,8 +66,8 @@ def main() -> None:
     torch.manual_seed(args.seme_rete)
     net = PPONet().eval()
     if args.init:
-        sd = torch.load(args.init, map_location="cpu", weights_only=False)
-        net.load_state_dict(sd.get("net", sd) if isinstance(sd, dict) else sd)
+        from riftbound.ai.ppo.model import load
+        net = load(args.init).eval()
     seeds = []
     for s in args.semi:
         a, _, b = s.partition("-")
