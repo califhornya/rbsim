@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-23 (campione ekr_s8; Ivern entra; Sett nel training).
+Aggiornato: 2026-11-23 (Ivern e Sett entrano; arena finale a cinque mazzi).
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -69,12 +69,12 @@ Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
    Bot a mano + prior PPO 30.016: 0,540 ± 0,027, promosso il 22/11 (PIANO_FORZA.md).
    Sfide, ricette, distillazione (s5 0,546, s6 0,428): chiuse, varianza tra semi.
-   **Rengar (22/11): entra, EK tiene** (verifica: Rengar +0,127 sul controllo, EK
-   +0,025). **Arena (23/11): prior ekr_s8 PROMOSSO**, Rengar 0,541 ± 0,020, EK
-   0,515 ± 0,022. Campione: bot a mano + prior `runs/rengar/ekr_s8/corrente.pt`.
-   **Ivern (23/11): entra** (Δ +0,244 sul controllo), i tre vecchi tengono.
-   **Ora: Sett** (`scripts/sett.command`, ~4 ore) da ekri_s10, semi 11 e 12; poi
-   arena finale sui dieci matchup contro il campione ekr_s8.
+   **Rengar (22/11): entra** (+0,127). **Arena: prior ekr_s8 PROMOSSO** (Rengar 0,541,
+   EK 0,515). Campione: bot a mano + prior `runs/rengar/ekr_s8/ckpt_020032.pt`.
+   **Ivern (23/11): entra** (Δ +0,244), i tre vecchi tengono. Partenza Sett: ekri_s10.
+   **Sett (23/11): entra** (Δ +0,162); vecchi: 5 su 6 tengono, EI incerto (-0,032),
+   semi molto discordi. **Ora: arena finale** (`scripts/arena_finale.command`, ~8 ore):
+   prior ekris_s12 contro il campione ekr_s8 sui dieci matchup.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali

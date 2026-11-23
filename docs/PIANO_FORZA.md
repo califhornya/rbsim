@@ -342,3 +342,25 @@ contro il bot a mano.
   13.000.000; Sett entra se la media a pesi uguali di ES, KS, RS, IS fa >=
   0,52, lim. inf. > 0,50, Δ lim. inf. > 0; i sei vecchi tengono ciascuno
   con Δ lim. inf. > -0,03. Poi l'arena finale contro ekr_s8.
+- 23/11, Sett, risultati (Mac; corse da 54-58 min, verifica 40 min, 88.000
+  partite), contro ekri_s10: nuovi a pesi uguali **0,621 / 0,459, Δ
+  +0,162** (+0,152 - +0,171; s11 +0,117, s12 +0,207): ES +0,122, KS +0,142,
+  RS +0,178, IS +0,204. **Sett entra.** Vecchi, Δ (lim. inf.): EK +0,002
+  (-0,016), ER +0,021 (+0,002), KR +0,028 (+0,008), **EI -0,032 (-0,051)**,
+  KI +0,056 (+0,038), RI +0,061 (+0,041): EI non certificato (l'IC
+  attraversa -0,03), gli altri cinque tengono. Semi discordi su tutti e sei
+  i vecchi, di molto: s11 da -0,04 a -0,165 (EI), s12 da +0,06 a +0,175.
+  Contro la partenza, media sui dieci matchup: ekris_s11 0,546, ekris_s12
+  0,568, ekri_s11 0,541, **ekri_s12 0,417** (sotto la partenza in tutti e
+  dieci, anche nei quattro con Sett che non allena). Una corsa da 40.000
+  partite può perdere ~8 punti ovunque: la varianza tra corse domina i Δ per
+  seme. ekris_s12 è sopra la partenza in tutti e dieci (vecchi 0,505-0,587,
+  EI 0,587). Deviazione dalla regola (EI): si va all'arena finale con
+  ekris_s12 (media più alta, criterio dei passi precedenti), perché la
+  perdita sul checkpoint intermedio, misurata sulla rete scelta, non c'è.
+  Arena finale (`scripts/arena_finale.command`, ~8 ore, riprende se
+  interrotta): bot con prior ekris_s12/ckpt_040000 contro il campione
+  (prior ekr_s8/ckpt_020032); 800 coppie EK, ER, KR; 300 per EI, KI, RI;
+  250 per ES, KS, RS, IS; seed da 40.000 + 1.000 x indice; regole: ciascuno
+  dei tre storici lim. inf. > 0,47; blocco Ivern e blocco Sett a pesi
+  uguali >= 0,52 e lim. inf. > 0,50; tutte -> promosso.

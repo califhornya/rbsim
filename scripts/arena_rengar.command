@@ -11,6 +11,9 @@
 cd "$(dirname "$0")/.." || exit 1
 workers=$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null)
 case "$workers" in ''|*[!0-9]*) workers=4 ;; esac
+# (Il 22/11 con la prima versione dello script, commit 23fc0d2: ER e KR
+# insieme sulle coppie.)
 caffeinate -i uv run --extra rl python scripts/diag/arena_mazzi.py --ckpt runs/rengar/ekr_s8/corrente.pt \
-    --ckpt-avversario runs/ppo1/ckpt_030016.pt --out runs/rengar/ARENA.txt --workers "$workers"
+    --ckpt-avversario runs/ppo1/ckpt_030016.pt --vecchi EK --blocchi ER,KR --coppie EK=600 ER=400 KR=400 \
+    --seed0 30000 --out runs/rengar/ARENA.txt --workers "$workers"
 read -r -p "Fatto. Premi Invio per chiudere."
