@@ -56,3 +56,6 @@ riftbound/data/card_images_piltover/
 *.log
 scripts/review_needed.txt
 scripts/suggested_vocab.txt
+
+# Rust
+rust/target/

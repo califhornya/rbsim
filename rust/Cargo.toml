@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = ["rbsim-core", "rbsim-py"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = false
+
+[profile.dev]
+opt-level = 1

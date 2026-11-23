@@ -33,7 +33,8 @@ from typing import Any, Optional
 # Printed card text and static card data: never changed in play, left out of
 # the dump (the name identifies the card). `uuid` is random (uuid4).
 CARD_STATIC = frozenset({"uuid", "tags", "keywords", "effects", "category", "cost_energy", "cost_power",
-                         "cost_power_domain", "domain", "might", "also_gear"})
+                         "cost_power_domain", "domain", "might", "also_gear", "damage", "flow_cost",
+                         "repeat_cost", "grants_tags"})
 # Not game state: the agent and the RNG object (the RNG's state goes in "$rng").
 SKIP_FIELDS = {"Player": frozenset({"agent"}), "GameState": frozenset({"rng"})}
 
@@ -97,7 +98,10 @@ class RawDumper:
         for k in names + sorted(extra):
             if k in skip or (card and k in CARD_STATIC):
                 continue
-            out[k] = self.value(getattr(obj, k))
+            v = getattr(obj, k)
+            if v is None and card and k in extra:
+                continue      # a card's dynamic attribute set to None reads as absent (getattr(c, k, None))
+            out[k] = self.value(v)
         return out
 
     def value(self, v: Any):
