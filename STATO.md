@@ -53,14 +53,12 @@ Documento di riferimento: `docs/audit/AUDIT.md` (l'intestazione riassume lo stat
 RiftAtlas → bot: `stati.py`, `posizione.py` su 82FAW; bot d'accordo con G17, G20, G22.
 Rete dal bot a mano: chiusa (19/11, `docs/bot/RETE.md`: completa 0,46 contro il
 bot). Spareggio (`tie_break="mean"`): 0,483 ± 0,013, non promosso.
-Chi comincia decide: Evelynn vince ~91% se comincia, ~45% se no (arena e 2.000
-partite; il motore dà la runa in più a chi è secondo, §487.7). Matchup divisi così.
+Chi comincia decide (Evelynn ~91% se comincia, ~45% se no): matchup divisi così.
 Piano "forza" (20/11, `docs/PIANO_FORZA.md`): ricerca 1,16×; corretti mulligan e
 ordine delle rune (la ricerca vedeva carte nascoste); poi PPO a più mazzi.
-Dichiarazioni: 31% del tempo, saltarle al massimo 1,14×; rimandato.
 Giocate (23/11 sera, `docs/bot/GIOCATE.md`, controllo di Astra sulla 35.010):
 Switcheroo: 4 deviazioni (D71 proposto, non applicato); il 98% su Valley è della
-rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 seed; rilevatori in corso.
+rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 seed, rilevatori a 28 partite: fermati.
 
 ## Prossimi passi
 0. Sorelle, passo 2, tempo, orizzonte chiusi. PPO: da sola 0,425 contro il bot.
@@ -74,7 +72,9 @@ rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 see
    A) EI contro ekri_s10; se passa, B) ekris_s12 contro ekr_s8 sui dieci matchup.
    (23/11) Corretto il difetto della cache in `ppo.py` (pannelli e archivio; le
    verifiche e le arene no). Poi: scelta della tappa, lr 1e-4 contro 3e-4.
-   Ad arena finita, sul Mac: i comandi di GIOCATE.md §6; poi D71 se l'utente decide.
+   **Riallineare** la sessione delle arene (ramo `claude/rbsim2026-boot1-results-373ku0`, fermo a
+   01d4cb0): merge di `claude/wonderful-mendel-eii7zu` (avanti veloce, +3 commit), poi `git pull` sul Mac.
+   Ad arena finita, sul Mac: GIOCATE.md §6; poi D71 se l'utente decide.
 1. Bot a mano: 0,80 contro simple_trade, 0,97 random. 2. Piano v2 (D59-D65) se l'utente decide.
 
 ## File principali
