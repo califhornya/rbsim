@@ -1,0 +1,84 @@
+{
+ "cosa": "bench_arena_fisso",
+ "motore": "python",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": "3.13.18",
+ "torch": "2.13.0+cu130",
+ "thread_torch": 1,
+ "processi": 1,
+ "mazzi": "EK",
+ "bot": "PPOPriorAgent (stesso checkpoint nei due posti)",
+ "pesi": "PPONet() dal seme 1",
+ "pesi_sha256_16": "02c45ba0d9b97266",
+ "lavoro": {
+  "budget_cpu_s": 0.4
+ },
+ "semi": [
+  40000,
+  40001
+ ],
+ "partite": 4,
+ "totale_s": 93.953,
+ "mediana_parete_s": 22.354,
+ "minimo_parete_s": 21.489,
+ "massimo_parete_s": 27.745,
+ "quote": {
+  "motore e ricerca": 0.8704,
+  "osservazione": 0.0651,
+  "rete": 0.0571,
+  "descrittori": 0.0073
+ },
+ "chiamate": {
+  "osservazione": 36829,
+  "descrittori": 43944,
+  "rete": 6643,
+  "partita": 4
+ },
+ "partite_dettaglio": [
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 15,
+   "parete_s": 27.745,
+   "cpu_s": 27.446,
+   "ricerche": 67,
+   "iter_medie_principali": 95.6
+  },
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 15,
+   "parete_s": 22.339,
+   "cpu_s": 22.086,
+   "ricerche": 54,
+   "iter_medie_principali": 103.4
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 14,
+   "parete_s": 21.489,
+   "cpu_s": 21.291,
+   "ricerche": 52,
+   "iter_medie_principali": 128.7
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 22.369,
+   "cpu_s": 22.092,
+   "ricerche": 54,
+   "iter_medie_principali": 127.0
+  }
+ ]
+}

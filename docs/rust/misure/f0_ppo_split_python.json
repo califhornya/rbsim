@@ -1,0 +1,44 @@
+{
+ "cosa": "bench_ppo_split",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": "3.13.18",
+ "torch": "2.13.0+cu130",
+ "thread_torch": 1,
+ "processi": 1,
+ "mazzi": "EK",
+ "seme": 1,
+ "pesi": "PPONet() dal seme 1",
+ "pesi_sha256_16": "02c45ba0d9b97266",
+ "partite": 32,
+ "primo": 0,
+ "totale_s": 10.222,
+ "ms_a_partita": 319.44,
+ "partite_ora_un_core": 11270,
+ "decisioni_registrate": 3148,
+ "turni_medi": 17.41,
+ "quote": {
+  "motore": 0.4308,
+  "rete": 0.2398,
+  "legali": 0.1849,
+  "osservazione": 0.1109,
+  "descrittori": 0.0332,
+  "gae": 0.0002
+ },
+ "secondi": {
+  "descrittori": 0.339,
+  "osservazione": 1.134,
+  "rete": 2.451,
+  "legali": 1.89,
+  "gae": 0.002,
+  "motore": 4.404
+ },
+ "chiamate": {
+  "descrittori": 21983,
+  "osservazione": 6296,
+  "rete": 3148,
+  "legali": 4491,
+  "partita": 32,
+  "gae": 64
+ }
+}
