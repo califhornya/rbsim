@@ -422,3 +422,12 @@ contro il bot a mano.
   **0,540 ± 0,017** (0,523-0,558). **PROMOSSO**: il campione è il bot a mano
   con i prior di `runs/sett/ekris_s12/ckpt_040000.pt`, a cinque mazzi; sopra
   il vecchio anche nei tre matchup storici.
+- 23/11, prova un processo per thread (server, `scripts/prova_smt.sh`, 26
+  min): iterazioni per decisione del campione 151,5 con 32 processi, 93 con
+  64 (f = 0,61; sul Mac ~170). Campione a 0,246 s contro campione a 0,4 s,
+  100 coppie per matchup sui dieci: a pesi uguali **0,484 ± 0,014**
+  (0,470-0,498): la regola (limite inferiore > 0,47) passa **per un
+  soffio**. Le iterazioni in meno indeboliscono il bot in modo misurabile ma
+  piccolo (~1,6 punti; l'IC sta tutto sotto 0,50). Decisione per regola: le
+  arene possono usare un processo per thread (~2x più veloci), sempre lo
+  stesso numero di processi dentro una stessa arena.

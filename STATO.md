@@ -69,8 +69,8 @@ rete, l'arena sceglie campo e bersagli con la ricerca. Mulligan fermato a 40 see
    **Sett (23/11): entra** (Δ +0,162). **Arena finale (server): PROMOSSO.** Campione:
    bot a mano + prior `runs/sett/ekris_s12/ckpt_040000.pt` (cinque mazzi): storici
    0,539 / 0,537 / 0,518, blocco Ivern 0,581, blocco Sett 0,540 contro ekr_s8.
-   Corretto il difetto della cache in `ppo.py`. Poi: `scripts/prova_smt.sh` (arene a
-   64 processi?), scelta della tappa, lr 1e-4 contro 3e-4.
+   Corretto il difetto della cache in `ppo.py`. Arene a 64 processi sul server: 0,484
+   (lim. inf. 0,470), passa per un soffio (~1,6 punti). Poi: scelta della tappa, lr.
    Ramo di lavoro unico: `claude/rbsim2026-boot1-results-373ku0` (23/11, unito con le giocate);
    sul Mac `git pull`. Fase A (Mac): EI 0,524, passa; fase B sul server (Cherry, EPYC 32 core).
    Ad arena finita, sul Mac: GIOCATE.md §6; poi D71 se l'utente decide.
