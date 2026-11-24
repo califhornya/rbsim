@@ -27,10 +27,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
 - Etichette dei `repr` Python: in Rust testo diverso con la stessa uguaglianza (carte per `uuid`).
 - Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
+- Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
+- Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
+  (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
 
 ## Fatto
 - Porting EK (`docs/rust/RAPPORTO_EK.md`); ricerca dell'arena in Rust (`docs/rust/RAPPORTO_ARENA.md`),
   verificata sul Mac col campione (20/20 a 50 iterazioni; Rust ×14,6 a partita).
+- 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie, semi 70000–70799): bot Rust a
+  0,030 s contro Python a 0,400 s = 0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**.
+  1.600 partite verificate; 2 divergenze nelle ricerche spiegate (etichette Python dipendenti
+  dall'ordine di un insieme, corrette in `net_mcts._label`). Partita Rust a 0,03 s: 2,36 s.
 - 24/11 tappa Rengar (`docs/rust/RAPPORTO_RENGAR.md`): verbi `ready_unit`, `blink_unit`, `deal_damage`,
   `kill_gear`; tre condizioni e una quantità; `_kicker_paid`/`_showed_off` a tre stati (assente, None, bool).
   Parità ER/KR/EK nei due posti: autonome, replay, PPO bit per bit, arena (mano e prior), 7 posizioni mirate;
@@ -40,15 +47,14 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Script di parità con `--matchup` e `--posti`; difetto dello strumento di traccia (`_to_real_any`) corretto.
 
 ## In corso
-- Prova di forza a budget ridotto (Astra, sessione separata): arena mista a passo comune
-  (`scripts/rust/arena_mista*.py`, `docs/rust/RAPPORTO_ARENA.md`; non toccati qui).
 - Verifica Rengar col checkpoint vero sul Mac: `bash scripts/rust/rengar_mac.command` (da lanciare).
 
 ## Prossimi passi
 1. `rengar_mac.command` sul Mac col campione (PPO bit per bit ER/KR/EK, arena col prior ER/KR).
-2. Ivern (EI, KI, RI, mix `ekri`): inventario (`inventario.py --liste I --matchup EI KI RI Ei Ki Ri`),
+2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
+   --budget-avversario 0.03`); budget da ricontrollare su ER/KR prima di usarlo lì.
+3. Ivern (EI, KI, RI, mix `ekri`): inventario (`inventario.py --liste I --matchup EI KI RI Ei Ki Ri`),
    porting, parità, posizioni mirate, semi tenuti da parte; poi Sett. Aggiungere a `mazzi.FUORI`.
-3. Esito della prova mista; se promosso, arene su Rust a 0,030 s.
 4. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
 
 ## File principali

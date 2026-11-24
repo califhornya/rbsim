@@ -27,6 +27,5 @@ git log --oneline -1
 (cd rust/rbsim-py && maturin develop --release 2>&1 | tail -1)
 python -m pytest -q tests/rust 2>&1 | tail -1
 caffeinate -i python scripts/rust/arena_mista.py --ckpt "$CKPT" --coppie 800 --seed0 70000 \
-  --budget-rust 0.030 --budget-python 0.400 --workers "$workers" --out runs/budget/ARENA_MISTA.txt \
-  --spiegata 70113:A
+  --budget-rust 0.030 --budget-python 0.400 --workers "$workers" --out runs/budget/ARENA_MISTA.txt
 read -r -p "Fatto. Premi Invio per chiudere."
