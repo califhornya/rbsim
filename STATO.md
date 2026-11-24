@@ -1,7 +1,7 @@
 # STATO
 
-Aggiornato: 2026-11-24 (sera). Ramo di lavoro `rust` (default su GitHub; sessione su
-`claude/clever-mendel-vdxw9k`, PR verso `rust`). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-24 (sera). Ramo di lavoro `rust` (default su GitHub; tappa Rengar su
+`claude/clever-mendel-vdxw9k`, PR verso `rust` da unire). `main` resta fermo al 19/11.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -33,8 +33,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   verificata sul Mac col campione (20/20 a 50 iterazioni; Rust ×14,6 a partita).
 - 24/11 tappa Rengar (`docs/rust/RAPPORTO_RENGAR.md`): verbi `ready_unit`, `blink_unit`, `deal_damage`,
   `kill_gear`; tre condizioni e una quantità; `_kicker_paid`/`_showed_off` a tre stati (assente, None, bool).
-  Parità ER/KR/EK nei due posti: autonome, replay, PPO bit per bit, arena (mano e prior), 7 posizioni mirate,
-  semi tenuti da parte; zero divergenze inspiegate, nessun NotPorted. Inventario `docs/rust/INVENTARIO_RENGAR.md`.
+  Parità ER/KR/EK nei due posti: autonome, replay, PPO bit per bit, arena (mano e prior), 7 posizioni mirate;
+  semi tenuti da parte 2.000/2.000 (`docs/rust/misure/tenuti_rengar_*.json`); zero divergenze inspiegate, nessun
+  NotPorted. Suite Python 1.952 verdi, `tests/rust` 49 verdi. Inventario `docs/rust/INVENTARIO_RENGAR.md`.
 - Perimetro esteso: `arena_rs.COPERTI = ("EK", "ER", "KR")`, `ppo._motore` e `arena_mazzi.py` lo seguono.
 - Script di parità con `--matchup` e `--posti`; difetto dello strumento di traccia (`_to_real_any`) corretto.
 
