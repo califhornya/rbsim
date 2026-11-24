@@ -144,6 +144,68 @@ impl Game {
             "blink_unit" => self.fx_blink_unit(ctx, spec),
             "deal_damage" => self.fx_deal_damage(ctx, spec),
             "kill_gear" => self.fx_kill_gear(ctx, spec),
+            "counter_spell" => self.fx_counter_spell(ctx, spec),
+            "dig" | "reveal_and_choose" => self.fx_dig(ctx, spec),
+            "name_spell" => {
+                // "Name a spell" (Fallen Feline): baseline, the costliest spell in the
+                // opponent's trash (they play it again), else none.
+                let trash = self.gs.player(ctx.opponent).trash.clone();
+                let mut best: Option<CardId> = None;
+                for c in trash.into_iter().filter(|&c| self.gs.is_spell(c)) {
+                    if best.map_or(true, |b| self.zone_value(c) > self.zone_value(b)) {
+                        best = Some(c);
+                    }
+                }
+                if let Some(b) = best {
+                    let n = self.gs.name(b).to_string();
+                    self.gs.card_mut(ctx.card).named_spell = Some(n);
+                }
+                Ok(())
+            }
+            "ready_units" => self.fx_ready_units(ctx, spec),
+            "green_father_brush" => {
+                // "When you conquer or hold, you may exhaust me to replace that
+                // battlefield with a Brush battlefield token" (Ivern Green Father).
+                let (bf, side) = (ctx.bf, ctx.actor);
+                let Some(legend) = self.find_unit_by_card(ctx.card) else { return Ok(()) };
+                if !self.gs.unit(legend).ready {
+                    return Ok(());
+                }
+                if self.gs.battlefields[bf].card.map_or(false, |c| self.gs.name(c) == "Brush") {
+                    return Ok(());
+                }
+                let helps = self.brush_helps(bf, side);
+                if self.choose("optional:green_father_brush", side, &[Opt::Bool(true), Opt::Bool(false)], Opt::Bool(helps), Some(ctx.card))?
+                    != Opt::Bool(true)
+                {
+                    return Ok(());
+                }
+                self.exhaust(legend, None, None)?;
+                self.replace_battlefield(bf, "Brush")
+            }
+            "brush_swap_back" => {
+                // "When you score here, you may replace this with the battlefield it replaced" (Brush).
+                let (bf, side) = (ctx.bf, ctx.actor);
+                if self.gs.battlefields[bf].replaced.is_none() || self.gs.battlefields[bf].card != Some(ctx.card) {
+                    return Ok(());
+                }
+                let pick = !self.brush_helps(bf, side);
+                if self.choose("optional:brush_swap_back", side, &[Opt::Bool(true), Opt::Bool(false)], Opt::Bool(pick), Some(ctx.card))?
+                    == Opt::Bool(true)
+                {
+                    self.swap_back_battlefield(bf)?;
+                }
+                Ok(())
+            }
+            "heal_unit" => {
+                let mut s2 = spec.clone();
+                s2.insert("target".into(), Value::String(sstr(spec, "target", "actor")));
+                let prefer = |g: &Game, u: UnitId| (g.gs.unit(u).damage == 0) as i64;
+                for u in self.resolve_targets(ctx, &s2, "none", Some(&prefer))? {
+                    self.gs.unit_mut(u).damage = 0;
+                }
+                Ok(())
+            }
             other => {
                 if exists(other) {
                     not_ported!("effects", "handler {other}");
@@ -795,6 +857,164 @@ impl Game {
 
     /// py: _kill_gear — "Kill all gear" by default; one gear (enemy first) with a
     /// target_filter, a single scope or a chooser target.
+    /// py: _ready_units — "Ready your units" (Raucous Anthem): wherever they are.
+    fn fx_ready_units(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let target = sstr(spec, "target", "actor");
+        if sget(spec, "amount").is_some() && CHOOSER_TARGETS.contains(&target.as_str()) {
+            not_ported!("_ready_units", "Ready up to N units");
+        }
+        if matches!(target.as_str(), "all_friendly_units_anywhere" | "your_units" | "all_enemy_units_anywhere") {
+            let side = if target == "all_enemy_units_anywhere" { ctx.opponent } else { ctx.actor };
+            let units = if side == ctx.actor { self.ctx_friendly_units(ctx) } else { self.friendly_units_of(side) };
+            for u in units {
+                if !self.gs.unit(u).ready && self.can_ready(u) {
+                    self.gs.unit_mut(u).ready = true;
+                    self.fire_readied(u, side)?;
+                }
+            }
+            return Ok(());
+        }
+        not_ported!("_ready_units", "ctx.ready_units(target={target})")
+    }
+
+    /// py: _reveal_and_choose ("dig") — look at the top N cards, you may put
+    /// one matching the filter into your hand, the rest to the bottom (or the
+    /// trash). Baseline: the mightiest. `if_kept_tag` + `then`: a reflexive
+    /// "Then if you revealed a Bird, Cat, Dog, or Poro, BUFF a friendly unit"
+    /// (Ivern Nurturer).
+    fn fx_dig(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let amount = match spec.get("amount") {
+            Some(v) => py_int(v),
+            None => spec.get("count").map(py_int).unwrap_or(1),
+        };
+        let side = ctx.actor;
+        let len = self.gs.player(side).deck.cards.len();
+        let n = amount.min(len as i64).max(0) as usize;
+        if n == 0 {
+            return Ok(());
+        }
+        let mut top: Vec<CardId> = self.gs.player_mut(side).deck.cards.split_off(len - n);
+        let gone = self.offer_reveal_from_top(side, &top)?;
+        top.retain(|c| !gone.contains(c));
+        if top.is_empty() {
+            return Ok(());
+        }
+        let tf = spec.get("target_filter").filter(|v| truthy(Some(v))).or_else(|| spec.get("reveal_filter"));
+        let legacy = spec.get("filter");
+        let mut zs = Map::new();
+        let tfv = match (tf, legacy) {
+            (Some(t @ Value::Object(_)), _) => t.clone(),
+            (_, Some(l @ Value::Object(_))) => l.clone(),
+            _ => Value::Object(Map::new()),
+        };
+        zs.insert("target_filter".into(), tfv);
+        zs.insert("filter".into(), match legacy {
+            Some(l @ Value::String(_)) => l.clone(),
+            _ => Value::Null,
+        });
+        let keepable: Vec<CardId> = top.iter().copied().filter(|&c| self.zone_effect_card_ok(c, &zs)).collect();
+        let must = truthy(spec.get("must"));
+        let mut kept: Option<CardId> = None;
+        if !keepable.is_empty()
+            && (must
+                || self.choose("optional:keep", side, &[Opt::Bool(true), Opt::Bool(false)], Opt::Bool(true), Some(ctx.card))?
+                    == Opt::Bool(true))
+        {
+            let mut best = keepable[0];
+            for &c in &keepable[1..] {
+                if self.gs.might(c).unwrap_or(0) > self.gs.might(best).unwrap_or(0) {
+                    best = c;
+                }
+            }
+            let kind = format!("keep:{}", sstr(spec, "effect", "?"));
+            let opts: Vec<Opt> = keepable.iter().map(|&c| Opt::Card(c)).collect();
+            let Opt::Card(k) = self.choose(&kind, side, &opts, Opt::Card(best), Some(ctx.card))? else {
+                unreachable!("dig kept a non-card")
+            };
+            let at = top.iter().position(|&c| c == k).unwrap();
+            top.remove(at);
+            let reveal = match spec.get("reveal") {
+                Some(v) => truthy(Some(v)),
+                None => !must,
+            };
+            if reveal {
+                self.note_revealed(side, &[k])?;
+            }
+            self.gs.player_mut(side).to_hand(k, reveal);
+            kept = Some(k);
+        }
+        if spec.get("rest").and_then(|v| v.as_str()) == Some("trash") {
+            self.gs.player_mut(side).trash.extend(top);
+        } else {
+            self.gs.player_mut(side).deck.cards.splice(0..0, top); // the rest to the bottom
+        }
+        let tags: Vec<String> = match spec.get("if_kept_tag") {
+            Some(Value::Array(a)) => a.iter().map(py_str).collect(),
+            _ => Vec::new(),
+        };
+        if let Some(k) = kept {
+            if self.gs.tags(k).iter().any(|t| tags.contains(t)) && truthy(spec.get("then")) {
+                let then = spec["then"].clone();
+                self.reflexive(ctx, &then, None)?; // "... do this: BUFF a friendly unit"
+            }
+        }
+        Ok(())
+    }
+
+    /// py: _note_revealed(side, cards) — "As I'm revealed from your deck" (Undertitan).
+    pub fn note_revealed(&mut self, side: Side, cards: &[CardId]) -> R<()> {
+        for &c in cards {
+            let mut ex = Extra::default();
+            ex.set("battlefield", XVal::Bf(0));
+            self.resolve_triggered_effects(c, "on_revealed", 0, side, Some(ex))?;
+        }
+        Ok(())
+    }
+
+    /// py: _counter_spell — "Counter a spell": one on the chain, chosen as it
+    /// is played (a target, §355). Baseline: the opponent's latest, else the latest.
+    fn fx_counter_spell(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let items = self.counter_targets(ctx, spec);
+        if items.is_empty() {
+            return Ok(());
+        }
+        let enemy: Vec<usize> = items.iter().copied().filter(|&i| self.gs.chain[i].player != ctx.actor).collect();
+        let pick = self.gs.chain[*if enemy.is_empty() { &items } else { &enemy }.last().unwrap()].uid;
+        let opts: Vec<Opt> = items.iter().map(|&i| Opt::Chain(self.gs.chain[i].uid)).collect();
+        let Opt::Chain(uid) = self.choose("target:counter_spell", ctx.actor, &opts, Opt::Chain(pick), Some(ctx.card))? else {
+            unreachable!("counter_spell chose a non-chain option")
+        };
+        let i = self.gs.chain_pos(uid).expect("the countered item is on the chain");
+        let item = self.gs.chain[i].clone();
+        if item.ability.is_some() {
+            let it = self.gs.chain.remove(i); // an ability: no card to put anywhere
+            self.gs.chain_gone.push(it);
+            return Ok(());
+        }
+        ctx.extra.set("countered_energy", XVal::Int(self.gs.cost_energy(item.card))); // Riposte
+        let owner = item.owner.unwrap_or(item.player);
+        let controller = item.player;
+        let tax = sget(spec, "unless_pays").map(py_int).unwrap_or(0);
+        if tax != 0 && self.gs.player(controller).energy() >= tax {
+            let e = self.gs.player(controller).energy();
+            self.gs.player_mut(controller).set_energy(e - tax); // "unless its controller pays [2]": they do
+            return Ok(());
+        }
+        let it = self.gs.chain.remove(i);
+        self.gs.chain_gone.push(it);
+        if truthy(sget(spec, "silence")) {
+            let t = self.gs.turn;
+            self.gs.cant_play_spells_turn.set(item.player, t);
+        }
+        if truthy(sget(spec, "return_to_hand")) && !self.gs.card(item.card).flow_banish.unwrap_or(false) {
+            self.gs.player_mut(owner).to_hand(item.card, true);
+        } else {
+            // Played with FLOW, it is banished whichever replacement applies first (§829.1.b.1).
+            self.spell_to_trash(owner, item.card)?;
+        }
+        Ok(())
+    }
+
     fn fx_kill_gear(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
         let tf = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned().unwrap_or(Value::Object(Map::new()));
         let scope = sstr(spec, "scope", "").to_lowercase();

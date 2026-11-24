@@ -184,7 +184,7 @@ impl Game {
         let r: R<()> = (|| {
             if self.gs.is_spell(card) {
                 self.spell_played(card, side, "facedown")?;
-                self.put_on_chain(ChainItem {
+                self.put_on_chain(ChainItem { uid: 0,
                     player: side,
                     card,
                     bf_idx: lane,
@@ -206,8 +206,49 @@ impl Game {
         Ok(true)
     }
 
-    /// py: _set_battlefield_card / _replace_battlefield (not in EK)
-    pub fn replace_battlefield(&mut self, _bf: usize, token_name: &str) -> R<()> {
-        not_ported!("_replace_battlefield", "battlefield token {token_name}")
+    /// py: _brush_helps(bf, side) — baseline for Brush (Ivern Green Father):
+    /// `side` has a unit here the Brush gives +1 [might].
+    pub fn brush_helps(&self, bf: usize, side: Side) -> bool {
+        const BRUSH_TAGS: [&str; 5] = ["Bird", "Cat", "Dog", "Poro", "Ivern"];
+        self.gs.battlefields[bf].units_for(side).iter().any(|&u| self.gs.unit_tags(u).iter().any(|t| BRUSH_TAGS.contains(&t.as_str())))
+    }
+
+    /// py: _set_battlefield_card(bf, card) — `bf` becomes `card` (§439): the
+    /// same battlefield, only its abilities change ("Increase the points needed
+    /// to win": Aspirant's Climb).
+    pub fn set_battlefield_card(&mut self, bf: usize, card: CardId) -> R<()> {
+        let plus = |g: &Game, c: Option<CardId>| -> i64 {
+            match c {
+                Some(c) => g.gs.spec(c).effects.iter().filter(|es| es.effect == "victory_score_plus")
+                    .map(|es| es.params.get("amount").map(crate::cards::py_int).unwrap_or(1)).sum(),
+                None => 0,
+            }
+        };
+        let old = self.gs.battlefields[bf].card;
+        self.gs.victory_score += plus(self, Some(card)) - plus(self, old);
+        self.gs.battlefields[bf].card = Some(card);
+        self.recompute_passives()
+    }
+
+    /// py: _replace_battlefield(bf, token_name) — a battlefield token replaces
+    /// `bf` (§439); a token replaced stops existing, the card it had replaced
+    /// stays the one to swap back to (§439.7.b.1).
+    pub fn replace_battlefield(&mut self, bf: usize, token_name: &str) -> R<()> {
+        if let Some(c) = self.gs.battlefields[bf].card {
+            if !matches!(self.gs.name(c), "Brush" | "Baron Pit") {
+                self.gs.battlefields[bf].replaced = Some(c);
+            }
+        }
+        let Some(i) = self.gs.reg.index(token_name) else { not_ported!("_replace_battlefield", "unknown token {token_name}") };
+        let card = self.gs.new_card(i as u32);
+        self.set_battlefield_card(bf, card)
+    }
+
+    /// py: _swap_back_battlefield(bf) — the token swaps back to the card it replaced (§439.7.b).
+    pub fn swap_back_battlefield(&mut self, bf: usize) -> R<()> {
+        if let Some(card) = self.gs.battlefields[bf].replaced.take() {
+            self.set_battlefield_card(bf, card)?;
+        }
+        Ok(())
     }
 }

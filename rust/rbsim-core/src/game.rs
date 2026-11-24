@@ -344,7 +344,7 @@ impl Game {
                 _ => None,
             },
             Opt::Unit(u) => self.locate_unit(*u).map(|(s, _)| s),
-            Opt::Chain(i) => self.gs.chain.get(*i).map(|c| c.player),
+            Opt::Chain(uid) => self.gs.chain_pos(*uid).map(|i| self.gs.chain[i].player),
             _ => None,
         }
     }

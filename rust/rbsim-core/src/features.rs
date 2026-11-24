@@ -268,8 +268,9 @@ pub fn describe_choice(g: &Game, side: Side, kind: &str, option: &Opt) -> Descri
             let ctrl = bf.controller();
             d.owner(1, ctrl.map(|c| c == side));
         }
-        Opt::Chain(i) => {
+        Opt::Chain(uid) => {
             d = Descriptor::new("chain_item");
+            let i = &g.gs.chain_pos(*uid).expect("a chain option off the chain");
             let it = &g.gs.chain[*i];
             d.cards[1] = reg.card_id(Some(g.gs.name(it.card)));
             d.owner(1, Some(it.player == side));

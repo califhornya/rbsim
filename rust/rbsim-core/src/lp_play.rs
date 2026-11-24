@@ -181,7 +181,7 @@ impl Game {
     /// py: _cast_spell_now
     pub fn cast_spell_now(&mut self, card: CardId, side: Side, lane: usize, from_zone: &str) -> R<()> {
         self.spell_played(card, side, from_zone)?;
-        self.put_on_chain(ChainItem { player: side, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
+        self.put_on_chain(ChainItem { uid: 0, player: side, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
         self.run_chain(side)
     }
 

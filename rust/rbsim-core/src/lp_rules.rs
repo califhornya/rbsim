@@ -33,8 +33,14 @@ impl Game {
                 return Ok(true);
             }
         }
-        if self.gs.is_spell(card) && !self.units_at_battlefields_with(side.other(), "name_spell").is_empty() {
-            not_ported!("_play_forbidden", "name_spell (Fallen Feline)");
+        if self.gs.is_spell(card) {
+            // "While I'm at a battlefield, opponents can't play spells with that name" (Fallen Feline)
+            let name = self.gs.name(card).to_string();
+            for u in self.units_at_battlefields_with(side.other(), "name_spell") {
+                if self.gs.card(self.gs.ucard(u)).named_spell.as_deref() == Some(name.as_str()) {
+                    return Ok(true);
+                }
+            }
         }
         Ok(false)
     }

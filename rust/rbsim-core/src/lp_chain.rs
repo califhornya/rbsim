@@ -15,7 +15,11 @@ use crate::types::*;
 
 impl Game {
     /// py: _put_on_chain(item)
-    pub fn put_on_chain(&mut self, item: ChainItem) -> R<()> {
+    pub fn put_on_chain(&mut self, mut item: ChainItem) -> R<()> {
+        if item.uid == 0 {
+            item.uid = self.gs.chain_uid;
+            self.gs.chain_uid += 1;
+        }
         self.gs.chain.push(item);
         let idx = self.gs.chain.len() - 1;
         let declared = self.declare_choices(idx)?;
@@ -158,12 +162,15 @@ impl Game {
     /// copy created after it was made are foreign (they match nothing here).
     pub fn map_back(&self, _g2: &Game, d: Declared) -> Declared {
         let (nc, nu, ng) = (self.gs.cards.len(), self.gs.units.len(), self.gs.dgear.len());
-        fn m(o: Opt, nc: usize, nu: usize, ng: usize) -> Opt {
+        let nch = self.gs.chain_uid;
+        let mb = |o: Opt| -> Opt { m(o, nc, nu, ng, nch) };
+        fn m(o: Opt, nc: usize, nu: usize, ng: usize, nch: usize) -> Opt {
             match o {
+                Opt::Chain(c) if c >= nch => Opt::Str(format!("$foreign-chain-{c}")),
                 Opt::Unit(u) if u.i() >= nu => Opt::Str(format!("$foreign-unit-{}", u.0)),
                 Opt::Card(c) if c.i() >= nc => Opt::Str(format!("$foreign-card-{}", c.0)),
                 Opt::Gear(g) if g.i() >= ng => Opt::Str(format!("$foreign-gear-{}", g.0)),
-                Opt::Tuple(v) => Opt::Tuple(v.into_iter().map(|x| m(x, nc, nu, ng)).collect()),
+                Opt::Tuple(v) => Opt::Tuple(v.into_iter().map(|x| m(x, nc, nu, ng, nch)).collect()),
                 o => o,
             }
         }
@@ -173,8 +180,8 @@ impl Game {
                 .into_iter()
                 .map(|(k, (kind, n, got))| {
                     let got = match got {
-                        Chosen::One(o) => Chosen::One(m(o, nc, nu, ng)),
-                        Chosen::Many(v) => Chosen::Many(v.into_iter().map(|o| m(o, nc, nu, ng)).collect()),
+                        Chosen::One(o) => Chosen::One(mb(o)),
+                        Chosen::Many(v) => Chosen::Many(v.into_iter().map(mb).collect()),
                     };
                     (k, (kind, n, got))
                 })
@@ -185,7 +192,7 @@ impl Game {
     /// py: _presence_lists
     pub fn presence_lists(&self) -> Vec<(PresenceKey, Vec<Obj>)> {
         let gs = &self.gs;
-        let mut out: Vec<(PresenceKey, Vec<Obj>)> = vec![(PresenceKey::Chain, (0..gs.chain.len()).map(Obj::Chain).collect())];
+        let mut out: Vec<(PresenceKey, Vec<Obj>)> = vec![(PresenceKey::Chain, gs.chain.iter().map(|c| Obj::Chain(c.uid)).collect())];
         let mut units: Vec<UnitId> = Vec::new();
         for (j, bf) in gs.battlefields.iter().enumerate() {
             out.push((PresenceKey::Units(j, Side::A), bf.units[0].iter().map(|&u| Obj::Unit(u)).collect()));
@@ -274,7 +281,7 @@ impl Game {
     fn presence_list_get(&self, key: &PresenceKey) -> Option<Vec<Obj>> {
         let gs = &self.gs;
         Some(match key {
-            PresenceKey::Chain => (0..gs.chain.len()).map(Obj::Chain).collect(),
+            PresenceKey::Chain => gs.chain.iter().map(|c| Obj::Chain(c.uid)).collect(),
             PresenceKey::Worn(u) => gs.unit(*u).gear.iter().map(|&c| Obj::Card(c)).collect(),
             PresenceKey::Base(s) => gs.player(*s).base_units.iter().map(|&u| Obj::Unit(u)).collect(),
             PresenceKey::BaseGear(s) => gs.player(*s).base_gear.iter().map(|&c| Obj::Card(c)).collect(),
@@ -372,7 +379,7 @@ impl Game {
                         if self.spell_has_targets(card, side, lane)? && self.pay_card(side, card, e, p, Some(lane as i64))? {
                             self.gs.player_mut(side).hand.remove(i as usize);
                             self.spell_played(card, side, "hand")?;
-                            self.put_on_chain(ChainItem { player: side, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
+                            self.put_on_chain(ChainItem { uid: 0, player: side, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
                             return Ok("acted");
                         }
                     }
@@ -422,6 +429,11 @@ impl Game {
     /// py: _resolve_chain
     pub fn resolve_chain(&mut self) -> R<()> {
         let Some(item) = self.gs.chain.pop() else { return Ok(()) };
+        if self.gs.chain.is_empty() {
+            self.gs.chain_gone.clear();
+        } else {
+            self.gs.chain_gone.push(item.clone());
+        }
         self.task_depth += 1;
         let r = self.resolve_item(item);
         self.task_depth -= 1;

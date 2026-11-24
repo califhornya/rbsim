@@ -196,7 +196,7 @@ impl Game {
         ab.energy = energy;
         ab.extra = extra.unwrap_or_default();
         ab.target = target;
-        let item = ChainItem { player: side, card: source, bf_idx, declared: None, choices_noted: false, owner: None, ability: Some(ab) };
+        let item = ChainItem { uid: 0, player: side, card: source, bf_idx, declared: None, choices_noted: false, owner: None, ability: Some(ab) };
         if eff.as_ref().map_or(false, |e| is_add_verb(&e.effect)) {
             return self.resolve_ability(item);
         }

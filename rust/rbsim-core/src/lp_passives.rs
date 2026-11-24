@@ -166,9 +166,14 @@ impl Game {
         }
         for i in 0..self.gs.battlefields.len() {
             for side in Side::BOTH {
-                for &v in self.gs.battlefields[i].units_for(side) {
+                for v in self.gs.battlefields[i].units_for(side).clone() {
                     if self.has_effect(self.gs.ucard(v), "weaker_enemies_no_damage") {
-                        not_ported!("_recompute_passives", "weaker_enemies_no_damage (Vilemaw)");
+                        // "Enemy units here with less Might than me don't deal combat damage" (Vilemaw)
+                        for e in self.gs.battlefields[i].units_for(side.other()).clone() {
+                            if self.gs.unit_might(e) < self.gs.unit_might(v) {
+                                self.gs.unit_mut(e).no_combat_damage = true;
+                            }
+                        }
                     }
                 }
             }
