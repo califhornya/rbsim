@@ -58,8 +58,13 @@ def deck_path(code: str) -> Path:
     text = json.dumps(with_sideboard(base, FUORI[up]), indent=1, ensure_ascii=False) + "\n"
     path = OUT_DIR / f"{Path(DECK_OF[up]).stem}_sideboard.json"
     if not path.exists() or path.read_text() != text:
+        import os
+        import tempfile
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
+        fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")      # atomic: processes in parallel
+        with os.fdopen(fd, "w") as fh:
+            fh.write(text)
+        os.replace(tmp, path)
     return path
 
 
