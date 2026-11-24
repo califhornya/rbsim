@@ -79,7 +79,7 @@ def main() -> None:
     ap.add_argument("--budget-candidato", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--budget-avversario", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
-                    help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: EK, ER, KR, EI, KI, RI, riconosciuti dal contenuto delle "
+                    help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: i cinque mazzi fra loro, riconosciuti dal contenuto delle "
                          "liste) giocano su Rust (riftbound/rs/arena_rs.py), gli altri su Python")
     args = ap.parse_args()
     from riftbound.ai.ppo.collect import DECK_NAME

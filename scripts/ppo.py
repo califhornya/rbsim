@@ -153,7 +153,7 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
 def _motore(kw: dict) -> str:
     """The engine a game of collect.play with these arguments goes to: Rust
     for the matchups the Rust engine covers (riftbound/rs/arena_rs.COPERTI:
-    Evelynn, Kha'Zix, Rengar and Ivern among them; the lists recognised by
+    the five lists Evelynn, Kha'Zix, Rengar, Ivern and Sett among them; the lists recognised by
     their content, not their path: riftbound/provenienza.py) when --motore
     rust, Python otherwise (and for the games against the hand-written bot)."""
     from riftbound.ai.ppo.collect import EVE, KHA

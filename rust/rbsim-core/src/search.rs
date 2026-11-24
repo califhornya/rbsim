@@ -253,12 +253,32 @@ fn trigger_repr(gs: &GameState, p: &PendingTrigger) -> String {
             bf_repr(gs, p.bf), p.specs, extra, p.additional, flags, p.once, p.replay)
 }
 
+/// py: repr / str of a plain value (a dict of str keys: `{'energy': 3, 'buffs': 1}`).
+fn py_repr(v: &serde_json::Value) -> String {
+    use serde_json::Value as V;
+    fn s_repr(s: &str) -> String {
+        if s.contains('\'') && !s.contains('"') {
+            format!("\"{s}\"")
+        } else {
+            format!("'{}'", s.replace('\\', "\\\\").replace('\'', "\\'"))
+        }
+    }
+    match v {
+        V::Null => "None".into(),
+        V::Bool(b) => (if *b { "True" } else { "False" }).into(),
+        V::Number(n) => n.to_string(),
+        V::String(s) => s_repr(s),
+        V::Array(a) => format!("[{}]", a.iter().map(py_repr).collect::<Vec<_>>().join(", ")),
+        V::Object(m) => format!("{{{}}}", m.iter().map(|(k, x)| format!("{}: {}", s_repr(k), py_repr(x))).collect::<Vec<_>>().join(", ")),
+    }
+}
+
 /// py: str(getattr(x, "name", x)) for a tuple's first element.
 fn name_of(g: &Game, x: &Opt) -> String {
     match x {
         Opt::Card(c) => g.gs.name(*c).to_string(),
         Opt::Str(s) => s.clone(),
-        Opt::Json(v) => v.to_string(),
+        Opt::Json(v) => py_repr(v),
         Opt::Int(i) => i.to_string(),
         Opt::Bool(b) => (if *b { "True" } else { "False" }).into(),
         Opt::None => "None".into(),
@@ -320,7 +340,7 @@ pub fn describe_option(g: &Game, side: Side, kind: &str, o: &Opt, foreign: bool)
         Opt::Domain(d) => d.name().to_string(),
         Opt::Side(s) => s.name().to_string(),
         Opt::Str(s) => s.clone(),
-        Opt::Json(v) => v.to_string(),
+        Opt::Json(v) => py_repr(v),
         Opt::None => "None".to_string(),
         Opt::NoMore => "no more".to_string(),
         Opt::Gear(gid) => dgear_repr(gs, *gid),
