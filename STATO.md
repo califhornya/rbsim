@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-24 (pomeriggio). Ramo di lavoro `rust` (default su GitHub; sessione su
+Aggiornato: 2026-11-24 (sera). Ramo di lavoro `rust` (default su GitHub; sessione su
 `claude/magical-allen-m3o90h`). `main` resta fermo al 19/11.
 
 ## Sigle
@@ -41,27 +41,24 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 - Mac (M1 Max, campione `ekris_s12/ckpt_040000.pt`): parità 20/20 a 50 iterazioni; tempo per
   partita a lavoro fisso Python 8,6–8,8 s, Rust 0,61 s (×14,6). Tappa A verificata.
 - `arena_mazzi.py --motore rust`, `arena_rs.game`, `tests/rust/test_arena_rs.py`.
+- 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie, semi 70000–70799): bot Rust a
+  0,030 s contro Python a 0,400 s = 0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**.
+  1.600 partite verificate; 2 divergenze nelle ricerche spiegate in automatico (etichette Python
+  dipendenti dall'ordine di un insieme, corrette in `net_mcts._label`). Partita Rust a 0,03 s: 2,36 s.
 
 ## In corso
-- Prova di forza a budget ridotto (Astra, 24/11): arena mista a passo comune, Rust 0,030 s
-  contro Python 0,400 s, 800 coppie, semi 70000–70799, promosso se lim. inf. > 0,47
-  (`bash scripts/rust/arena_mista.command` sul Mac, 2-3 ore).
-- Rengar nel motore Rust (in parallelo, come dice Astra).
-
-- Divergenza del seme 70113 spiegata: chiavi della ricerca Python dipendenti dall'ordine di un
-  insieme (indirizzi di memoria); correzione minima in `net_mcts._label` (regola del congelamento),
-  Rust già deterministico. Rilancio dell'arena con `--spiegata 70113:A` (riprende).
-- Divergenze successive gestite dall'arena: quelle solo nelle ricerche si rigiocano a fine arena
-  coi conteggi registrati (identiche ora = spiegate, `.spiegate.json`); quelle di partita si
-  rigiocano al rilancio; solo quelle che restano vanno guardate.
+- Rengar nel motore Rust: sessione separata (scheda "Portare Rengar nel motore Rust").
 
 ## Decisioni prese il 24/11 pomeriggio
 - Budget: metodo (a) di Astra; verifica esatta con due copie a passo comune (niente import
   di posizioni); l'importatore completo seguirà le esigenze dei test.
+- Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano a fine arena coi conteggi
+  registrati (identiche ora = spiegate, legate a impronta e configurazione); quelle di partita si
+  rigiocano al rilancio; solo quelle che restano vanno guardate.
 
 ## Prossimi passi
-1. Esito della prova mista; se promosso, arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust
-   --budget-candidato 0.03 --budget-avversario 0.03`).
+1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
+   --budget-avversario 0.03`); gli altri matchup restano su Python a 0,4 s finché non sono portati.
 2. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo; budget da
    ricontrollare sui nuovi matchup.
 3. Rete del prior in Rust o a batch (ora è il collo di bottiglia dell'arena).
