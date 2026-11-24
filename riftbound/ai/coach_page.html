@@ -535,6 +535,7 @@ function renderCoach() {
   if (p.type === "choice") {
     el.innerHTML = `<h2>Scegli tu</h2><div class="what" style="font-weight:750;font-size:15px">${esc(p.question)}</div>
       ${p.source ? `<p class="ctx">Per: ${esc(p.source)}</p>` : ""}
+      ${p.context ? `<p class="ctx">${esc(p.context)}</p>` : ""}
       ${p.seen ? `<p class="ctx">Le carte che hai guardato:</p>${seenRow(p.seen)}` : ""}
       ${p.options.map((opt, k) => `<div class="opt" data-opt="${k}"><span class="nb">${k + 1}</span><span class="t">${esc(opt.text)}</span>${k === p.default ? '<span class="tag">scelta automatica</span>' : ""}</div>`).join("")}
       <p class="hint" style="margin-top:8px">${p.options.some((x) => x.ref) ? "Puoi anche cliccare sul tavolo la carta che lampeggia." : ""}</p>`;

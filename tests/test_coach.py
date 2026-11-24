@@ -584,3 +584,39 @@ def test_the_coach_sees_the_cards_trifarian_captain_looks_at(tmp_path):
     notice = _play_trifarian_captain(session)[0]
     assert notice["type"] == "notice" and notice["own"] and \
         notice["cards"] == ["Fiora Victorious", "Fiora Victorious", "Showstopper", "Rampage"]
+
+
+def test_the_coach_picks_which_unit_sett_the_boss_saves(tmp_path):
+    """Two buffed units of the coach die together: the engine offers Sett The
+    Boss's save to each in turn; the page asks once which one to save."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import legend, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="B")
+    scripted(loop, a, b)
+    boss = legend(loop, "A", "Sett The Boss")
+    rookie, fiora = unit("Pit Rookie"), unit("Fiora Victorious")
+    for u in (rookie, fiora):
+        u.might_counters = 1
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._route_deaths,
+                            args=([(rookie, "A"), (fiora, "A")], loop.gs.battlefields[0]),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    p = session.pending
+    assert p["question"] == "Quale unità salvare?" and p["source"] == "Sett The Boss"
+    assert [o["text"] for o in p["options"]] == [
+        "Salva Pit Rookie (Might 3)", "Salva Fiora Victorious (Might 5)", "Non salvare nessuna"]
+    session.answer({"option": 1})                     # the second one the engine meets
+    game.join(timeout=10)
+    assert [u.card.name for u in a.base_units] == ["Fiora Victorious"] and not boss.ready
+    assert [c.name for c in a.trash] == ["Pit Rookie"] and session.pending is None

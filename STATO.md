@@ -68,7 +68,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `allenatore.bat` con `--extra rl` (il campione anche da `../rbsim/runs/`). Immagini: copia locale, se no
   Piltover Archive in cache (`riftbound/ai/card_images.py`, stessa cartella degli scenari), campi
   raddrizzati in orizzontale; chi inizia nel mulligan, nel turno e nel registro; le carte guardate in cima al mazzo
-  (Trifarian Captain, Predict) con la scelta o da sole. `tests/test_coach.py` 20 verdi; pagina provata con Playwright.
+  (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. `tests/test_coach.py` 21 verdi; Playwright.
 
 ## In corso
 - Pagina col campione pronta per la PR verso `rust`; Matteo ci gioca sul Mac: difetti in `AUDIT.md`

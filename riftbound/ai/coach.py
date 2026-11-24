@@ -625,6 +625,9 @@ def _card_texts(obs: Optional[dict], extras: Optional[dict] = None) -> dict:
 
 # -- the coached seat ------------------------------------------------------------
 
+_UNASKED = object()
+
+
 class _CoachChooser:
     """While a move the coach picked resolves: its player's choices (any kind
     with more than one option) are asked to the coach."""
@@ -633,6 +636,10 @@ class _CoachChooser:
         self.me, self.session, self.loop, self.previous = me, session, loop, previous
 
     def __call__(self, loop, kind, side, options, default, source):
+        if side == self.me and kind == "optional:sett_save":
+            pick = self.session.ask_save(getattr(source, "name", None))
+            if pick is not None:
+                return pick
         if side == self.me and len(options) > 1:
             gs = loop.gs
             described = [{"text": option_text(gs, side, o), "ref": option_ref(gs, side, o)}
@@ -830,6 +837,9 @@ class CoachSession:
         self._opponent = None               # the other seat's agent
         self.looked: Optional[list] = None  # the coach's last look at their deck's top, not yet shown
         self._seen: Optional[list] = None   # ... and the last one shown with a choice
+        self._dying: list = []              # the coach's units dying together (_route_deaths)
+        self._replacing = None              # the one whose death may be replaced now
+        self._save_pick = _UNASKED          # the one the coach saves (ask_save)
 
     # -- what a game can have ------------------------------------------------------
 
@@ -938,31 +948,87 @@ class CoachSession:
         return "Inizi tu" if self.info["you_start"] else \
             "Inizia l'avversario: al tuo primo turno canalizzi una runa in più"
 
+    def _watch(self, loop) -> None:
+        """What the page needs from the real game loop, without changing its
+        rules: the opponent's discards, the coach's looks at the top of their
+        deck, the units dying together (Sett The Boss saves one), the choices."""
+        opp = self.gs.get_player(self.gs.other(self.side))
+        me = self.gs.get_player(self.side)
+
+        def discard(player, card, _inner=loop._discard):
+            # A discard is public (the card goes to the trash face up).
+            if player is opp and card in player.hand:
+                self.opp_discards.append(card.name)
+            return _inner(player, card)
+        loop._discard = discard
+
+        def look(player, cards, _inner=loop._offer_reveal_from_top):
+            # The coach looks at the top of their own deck (Trifarian
+            # Captain's dig, Predict...): they see the cards, with the
+            # choice that follows, or alone when there is none.
+            if player is me and cards:
+                self._looked([c.name for c in cards])
+            return _inner(player, cards)
+        loop._offer_reveal_from_top = look
+
+        def route_deaths(ordered, *a, _inner=loop._route_deaths, **k):
+            # Units dying together: the engine offers each a replacement in
+            # turn ("you may ... instead"); the coach picks one (ask_save).
+            kept = (self._dying, self._save_pick)
+            self._dying, self._save_pick = [u for u, s in ordered if s == self.side], _UNASKED
+            try:
+                return _inner(ordered, *a, **k)
+            finally:
+                self._dying, self._save_pick = kept
+        loop._route_deaths = route_deaths
+
+        def replace_death(dead_unit, *a, _inner=loop._try_replace_death, **k):
+            kept, self._replacing = self._replacing, dead_unit
+            try:
+                return _inner(dead_unit, *a, **k)
+            finally:
+                self._replacing = kept
+        loop._try_replace_death = replace_death
+        loop.on_choice = self._log_choice
+
+    def ask_save(self, source: Optional[str]) -> Optional[int]:
+        """Sett The Boss ("If a buffed unit you control would die, you may pay
+        [rune], exhaust me, and spend its buff to heal it ... instead"), asked
+        once for the units dying together: which one to save. The engine's
+        yes/no for each unit in turn follows the pick. None: not a death the
+        page saw (the generic question)."""
+        unit = self._replacing
+        if unit is None or not self._dying:
+            return None
+        if self._save_pick is _UNASKED:
+            cands = [u for u in self._dying if u.might_counters > 0]
+            if not any(u is unit for u in cands):
+                cands.insert(0, unit)
+            names = [u.card.name for u in cands]
+            texts = [f"{n} (Might {u.might})" + (f" n°{names[:i].count(n) + 1}" if names.count(n) > 1 else "")
+                     for i, (n, u) in enumerate(zip(names, cands))]
+            dying = ", ".join(u.card.name for u in self._dying)
+            options = [{"text": f"Salva {t}", "ref": None} for t in texts] + \
+                      [{"text": "Non salvare nessuna", "ref": None}]
+            answer = self._wait({
+                "type": "choice", "kind": "sett_save", "question": "Quale unità salvare?",
+                "source": source, "default": 0, "options": options,
+                "context": f"Muoiono: {dying}. Ne puoi salvare una: paghi 1 Power, la leggenda si "
+                           "esaurisce, l'unità spende il suo buff, si cura, si esaurisce e torna in base."})
+            pick = int(answer.get("option", 0)) if answer else 0
+            pick = pick if 0 <= pick < len(options) else len(cands)
+            self._save_pick = cands[pick] if pick < len(cands) else None
+            self.event("me", f"{source + ': ' if source else ''}" + (
+                f"salvi {texts[pick]}" if pick < len(cands) else "non salvi nessuna unità"), move=True)
+        return 0 if self._save_pick is unit else 1
+
     def _run(self) -> None:
         from riftbound.core.loop import GameLoop
         log = _thread_log()
         log.sinks[threading.get_ident()] = self.log
         try:
             self.loop = GameLoop(self.gs, verbose=True)
-            opp = self.gs.get_player(self.gs.other(self.side))
-
-            def discard(player, card, _inner=self.loop._discard):
-                # A discard is public (the card goes to the trash face up).
-                if player is opp and card in player.hand:
-                    self.opp_discards.append(card.name)
-                return _inner(player, card)
-            self.loop._discard = discard
-            me = self.gs.get_player(self.side)
-
-            def look(player, cards, _inner=self.loop._offer_reveal_from_top):
-                # The coach looks at the top of their own deck (Trifarian
-                # Captain's dig, Predict...): they see the cards, with the
-                # choice that follows, or alone when there is none.
-                if player is me and cards:
-                    self._looked([c.name for c in cards])
-                return _inner(player, cards)
-            self.loop._offer_reveal_from_top = look
-            self.loop.on_choice = self._log_choice
+            self._watch(self.loop)
             result = self.loop.start()
             self.result = {"winner": result.winner, "turns": result.turns,
                            "you_won": result.winner == self.side}
