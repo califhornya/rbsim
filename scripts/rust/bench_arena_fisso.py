@@ -46,6 +46,8 @@ def main() -> None:
     ap.add_argument("--ckpt", default=None)
     ap.add_argument("--seme", type=int, default=1, help="senza --ckpt: PPONet() dal seme")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--motore", choices=("python", "rust"), default="python",
+                    help="rust: la ricerca su riftbound_rs (riftbound/rs/arena_rs.py), il prior in Python")
     args = ap.parse_args()
     assert (args.iterazioni is None) != (args.budget is None), "--iterazioni oppure --budget"
 
@@ -77,6 +79,8 @@ def main() -> None:
             return self
 
     tnet = TimedNet()
+    if args.motore == "rust":
+        return rust_bench(args, net, T, torch)
     games = []
     for k in range(args.coppie):
         seed = args.seed0 + k
@@ -119,6 +123,53 @@ def main() -> None:
         "cpu": platform.processor() or platform.machine(), "python": sys.version.split()[0],
         "torch": torch.__version__, "thread_torch": 1, "processi": 1, "mazzi": "EK",
         "bot": "PPOPriorAgent (stesso checkpoint nei due posti)",
+        "pesi": args.ckpt or f"PPONet() dal seme {args.seme}", "pesi_sha256_16": weights_sha(net),
+        "lavoro": {"iterazioni": args.iterazioni} if args.iterazioni else {"budget_cpu_s": args.budget},
+        "semi": [args.seed0, args.seed0 + args.coppie - 1], "partite": len(rows),
+        "totale_s": round(total, 3), "mediana_parete_s": statistics.median(walls),
+        "minimo_parete_s": min(walls), "massimo_parete_s": max(walls),
+        "quote": {k: round(v / total, 4) for k, v in sorted(T.tot.items(), key=lambda kv: -kv[1])},
+        "chiamate": T.calls, "partite_dettaglio": rows,
+    }
+    print(json.dumps({k: v for k, v in out.items() if k != "partite_dettaglio"}, indent=1))
+    if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).write_text(json.dumps(out, indent=1) + "\n")
+
+
+def rust_bench(args, net, T, torch) -> None:
+    """The same games on the Rust engine: the search in Rust, the prior's
+    forward and softmax in Python (timed as "rete")."""
+    from riftbound.ai.ppo.collect import EVE, KHA, MAX_TURNS
+    from riftbound.rs import rust_bridge as rb
+    from riftbound.rs.arena_rs import make_probs
+    probs = T.wrap("rete", make_probs(net))
+    rows = []
+    t_all = time.perf_counter()
+    for k in range(args.coppie):
+        seed = args.seed0 + k
+        starter = "a" if seed % 2 == 0 else "b"
+        for cand in ("A", "B"):
+            g = rb.build(seed, EVE, KHA, starter, MAX_TURNS)
+            for seat in ("A", "B"):
+                g.set_search_agent(seat, args.iterazioni or 100, seed * 2 + (seat == "B"), args.budget, probs, False)
+            g.set_side_chooser()
+            w0, c0 = time.perf_counter(), time.process_time()
+            winner, turns = T.wrap("partita", g.start)()
+            w, c = time.perf_counter() - w0, time.process_time() - c0
+            iters = list(g.search_stats("A")[0]) + list(g.search_stats("B")[0])
+            rows.append({"seme": seed, "comincia": starter, "candidato": cand, "vincitore": winner, "turni": turns,
+                         "parete_s": round(w, 3), "cpu_s": round(c, 3),
+                         "iter_medie_principali": round(statistics.mean(iters), 1) if iters else args.iterazioni})
+            print(json.dumps(rows[-1]), flush=True)
+    total = time.perf_counter() - t_all
+    T.tot["motore e ricerca"] = T.tot.pop("partita", 0.0)
+    walls = [r["parete_s"] for r in rows]
+    out = {
+        "cosa": "bench_arena_fisso", "motore": "rust", "macchina": platform.node(),
+        "cpu": platform.processor() or platform.machine(), "python": sys.version.split()[0],
+        "torch": torch.__version__, "thread_torch": 1, "processi": 1, "mazzi": "EK",
+        "bot": "PPOPriorAgent su Rust (stesso checkpoint nei due posti)",
         "pesi": args.ckpt or f"PPONet() dal seme {args.seme}", "pesi_sha256_16": weights_sha(net),
         "lavoro": {"iterazioni": args.iterazioni} if args.iterazioni else {"budget_cpu_s": args.budget},
         "semi": [args.seed0, args.seed0 + args.coppie - 1], "partite": len(rows),

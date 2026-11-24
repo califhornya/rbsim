@@ -76,6 +76,9 @@ pub struct UnitView {
     pub buffed: bool,
     pub empowered: bool,
     pub keywords: Vec<&'static str>,
+    /// py: UnitView.lasting_might (UnitInPlay.lasting_might): what the search's
+    /// table_value reads.
+    pub lasting_might: i64,
 }
 
 /// py: decisions.BattlefieldView
@@ -169,6 +172,7 @@ impl Observation {
             buffed: x.might_counters > 0,
             empowered: x.empowered,
             keywords: UNIT_KEYWORDS.iter().copied().filter(|k| gs.unit_has_keyword(u, k)).collect(),
+            lasting_might: gs.unit_lasting_might(u),
         }
     }
 

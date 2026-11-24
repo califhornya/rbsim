@@ -62,7 +62,26 @@ Rust costruisce la domanda, Python decide.
 - Il contesto `made` (scelte già fatte nella stessa domanda) ha come chiave il loop, il tipo di scelta e la sorgente: in Rust un `loop_id` unico, in Python gli oggetti stessi (fix `f8a50e4`; prima `id()`, che dipendeva dal riuso degli indirizzi).
 - Verifica del ciclo intero, col pool e l'aggiornamento: `scripts/rust/parita_ciclo.py --motore python|rust` dà gli stessi hash di esempi e pesi a ogni ciclo.
 
-### Errori
+#### Ricerca dell'arena (tappa A)
+- `rbsim-core/src/search.rs` è il port di `net_mcts.py` + `handwritten.py` + `ppo/prior_bot.py` come li usa
+  l'arena: backup "best", la mossa col Q più alto, `table_value` alle foglie, nessuna esplorazione né record.
+- Copie: `search_copy` = `gs.clone()` senza agenti, generatore nuovo dal seme dell'agente, `determinize`
+  dal punto di vista del giocatore, loop nuovo. La ripresa da una scelta pendente usa `segment` (lo stato
+  all'ultima decisione principale) e il `journal` del loop reale (`replay_segment`, `Cursor`).
+- Le scelte sul loop reale passano da un solo chooser `Layers` (py: `_Plan` → `_Fallback` → `PPOChooser`),
+  messo sopra quello che c'era alla prima decisione di un agente di ricerca.
+- Le chiavi delle scelte sono `(tipo, carta sorgente, etichetta)` come `_choice_keys`. Dove Python usa il
+  `repr` di un oggetto (trigger, equipaggiamenti, carte coperte) Rust costruisce un testo diverso con la stessa
+  uguaglianza: le carte per `uuid` (nuovo a ogni creazione, conservato dalle copie, come `uuid4`). Su una copia
+  di dichiarazione `replay_values` etichetta le opzioni sul loop reale, come Python (unità non trovate,
+  campo di battaglia → `ValueError`).
+- Prior PPO: Rust costruisce osservazione, descrittori del menu e contesto; Python (`arena_rs.make_probs`)
+  fa forward e softmax.
+- Uso: `arena_mazzi.py --motore rust` (i matchup coperti, riconosciuti dal contenuto delle liste, su Rust;
+  gli altri su Python); in codice `riftbound.rs.arena_rs.game(task)` = `arena_bot._game(task)`.
+- Chiavi di ripresa dell'arena: checkpoint (percorso e hash), budget, motore, regole.
+
+## Errori
 - Un ramo non portato dà `EngineError::NotPorted{dove, cosa}`, che risale sempre.
 - Le eccezioni che Python ignora (`except Exception` nelle dichiarazioni, `_Ignored`) sono ignorate allo stesso modo.
 
@@ -75,10 +94,12 @@ Rust costruisce la domanda, Python decide.
 | `scripts/rust/parita_ppo.py --semi A-B [--avversario X] [--init ckpt]` | Esempi PPO bit per bit. |
 | `scripts/rust/consegna1.py` | Casi Gold D59, D59b e D62. |
 | `scripts/rust/inventario.py` | Carte, verbi e stato del porting (`docs/rust/INVENTARIO_EK.md`). |
+| `scripts/rust/arena_parita.py --semi A-B --bot mano\|prior [--iterazioni 50] [--ckpt f.pt]` | Partite dell'arena a lavoro fisso: traccia della partita reale e ogni ricerca (menu, prior, visite, Q e W, mossa, nodi, mulligan). |
 
 ## Misure
 - `scripts/rust/bench_raccolta.py`: raccolta su un core in ordine alternato. Separa il tempo della rete dal resto.
 - `scripts/rust/bench_ppo_ciclo.py --motore python|rust`: il ciclo PPO completo.
+- `scripts/rust/bench_arena_fisso.py --motore python|rust --iterazioni 50`: l'arena a lavoro fisso, tempo per partita.
 - `scripts/rust/confronto_mac.command`: tutto in sequenza sul Mac, con il checkpoint.
 
 I risultati vanno in `docs/rust/misure/`. Il resoconto è in `docs/rust/RAPPORTO_EK.md`.
@@ -86,4 +107,4 @@ I risultati vanno in `docs/rust/misure/`. Il resoconto è in `docs/rust/RAPPORTO
 ## Non ancora portato
 - Gli altri mazzi.
 - I verbi delle carte di sideboard EK: `counter_spell`, `kill_gear`, `prevent_spell_damage_this_turn`, `banish_self_and_gear`. Non entrano nelle partite.
-- Il bot a mano (`HandwrittenAgent`) e la ricerca dell'arena.
+- Gli altri bot (`HorizonAgent`, `NetAgent`, il coach) e l'esplorazione della ricerca (rumore, temperatura).

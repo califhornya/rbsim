@@ -42,6 +42,9 @@ pub struct Game {
     pub chooser: Option<Rc<RefCell<dyn Chooser>>>,
     pub agents: Agents,
     pub journal: Option<Vec<JEntry>>,
+    /// py: GameLoop.segment — the latest main-phase decision (the game as it
+    /// was made, side, action, cards played); replay_segment plays it again.
+    pub segment: Option<Rc<Segment>>,
     pub slot: Option<[i64; 3]>,
     pub declaring: Option<Declaring>,
     pub replay: Option<Declaring>,
@@ -71,6 +74,15 @@ pub struct Game {
     pub discard_sides: Vec<Side>,
     /// The pending triggers a trigger_order choice is about (for the trace).
     pub trigger_menu: Vec<PendingTrigger>,
+}
+
+/// py: the `segment` tuple (gs.clone(), side, action, cards_played).
+#[derive(Clone)]
+pub struct Segment {
+    pub gs: GameState,
+    pub side: Side,
+    pub action: crate::agent::Action,
+    pub cards_played: i64,
 }
 
 /// A journal entry (py: ("decision", ...), ("choice", side, kind, n, idx)).
@@ -110,6 +122,7 @@ impl Game {
             chooser: None,
             agents: [None, None],
             journal: None,
+            segment: None,
             slot: None,
             declaring: None,
             replay: None,

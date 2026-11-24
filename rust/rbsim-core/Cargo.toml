@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+libc = "0.2"
 hex = "0.4.3"
 regex = "1.13.2"
 serde = { version = "1.0.229", features = ["derive"] }

@@ -163,12 +163,30 @@ impl Game {
         Ok(self.result_now())
     }
 
-    /// py: _open_segment (search journal only)
+    /// py: _open_segment — a main-phase decision made: the journal starts again from it.
     pub fn open_segment(&mut self, side: Side, act: &Action, cards_played: i64) {
         if self.journal.is_some() {
-            let _ = (side, act, cards_played);
+            let mut gs = self.gs.clone();
+            gs.rng.log = None;
+            self.segment = Some(std::rc::Rc::new(Segment { gs, side, action: act.clone(), cards_played }));
             self.journal = Some(Vec::new());
         }
+    }
+
+    /// py: replay_segment — on a copy of `segment`'s game (its own loop, agents
+    /// that answer from the journal): what the main loop does with that
+    /// decision, up to the next one.
+    pub fn replay_segment(&mut self) -> R<()> {
+        let seg = self.segment.clone().expect("replay_segment without a segment");
+        if seg.action.kind == AKind::Pass && self.gs.pending_move.is_none() {
+            self.flush_pending_move()?;
+            if self.victory().is_none() && self.end_turn()?.is_none() && self.gs.turn <= self.gs.max_turns {
+                self.begin_turn()?;
+            }
+            return Ok(());
+        }
+        self.apply_action(seg.side, &seg.action, seg.cards_played)?;
+        self.recompute_passives()
     }
 
     /// py: _end_turn

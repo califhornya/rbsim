@@ -43,11 +43,17 @@ pub struct Card {
     pub temporary: Option<bool>,
     pub empowered: Option<bool>,
     pub flow_banish: Option<bool>,
+    /// py: Card.uuid (uuid4 at creation, kept by every copy of the game): what
+    /// a card's repr names it by (the search's trigger labels).
+    pub uuid: u64,
 }
+
+static CARD_UUIDS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 
 impl Card {
     pub fn new(spec: u32) -> Card {
         Card {
+            uuid: CARD_UUIDS.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
             spec,
             tapped: false,
             might_override: None,

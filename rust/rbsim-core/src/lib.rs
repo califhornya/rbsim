@@ -41,3 +41,4 @@ pub mod import;
 pub mod agents;
 pub mod obs;
 pub mod features;
+pub mod search;
