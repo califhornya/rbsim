@@ -172,7 +172,7 @@ Apple M1 Max, 8 processi, campione `ekris_s12/ckpt_040000.pt` in entrambi i post
 
 **Cosa ti permette di fare:** le arene Evelynn–Kha'Zix possono girare su Rust a 0,03 s per mossa, senza
 perdere forza rispetto al bot Python a 0,4 s:
-- circa 2,4 s per partita invece di circa 28 s, cioè circa 12 volte più veloci;
+- circa 2,4 s per partita invece di almeno 30 s, cioè circa 12 volte più veloci;
 - per giocare contro il bot, il bot risponde in 0,03 s per decisione.
 
 - **800 coppie complete su 800**, 1.600 partite verificate a ogni passo.
@@ -200,7 +200,9 @@ Le celle riflettono il vantaggio di Evelynn nel matchup e si compensano a posti 
 
   A 0,03 s Rust fa almeno lo stesso lavoro di Python a 0,4 s in ogni tipo di ricerca.
 - **Tempo reale per partita sul percorso Rust di produzione**, entrambi a 0,03 s, un processo:
-  mediana 2,36 s. Un'arena Python a 0,4 s costa circa 28 s per partita, quindi circa 12 volte di più.
+  mediana 2,36 s. In questa prova ogni bot fa in media 37,5 ricerche a partita (59.972 ricerche del lato
+  Python in 1.600 partite): con due bot Python a 0,4 s una partita costa almeno 2 × 37,5 × 0,4 = 30 s di
+  sole ricerche, quindi circa 12 volte di più.
 - Il budget validato vale per Evelynn–Kha'Zix: va ricontrollato sui matchup successivi (Rengar, Ivern, Sett).
 
 ## Da fare (in ordine)
