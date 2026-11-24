@@ -533,3 +533,54 @@ def test_the_opponents_that_arent_there_are_refused(tmp_path):
     session = CoachSession(tmp_path / "net.pt", tmp_path / "coach", campione_path=_campione(tmp_path))
     st = session.state()
     assert [o["id"] for o in st["opponents"]] == ["campione", "net", "simple_trade"] and st["advice"]
+
+
+def _play_trifarian_captain(session: CoachSession, timeout: float = 60.0) -> list:
+    """Answer PASS (or the default) until the coach may play Trifarian Captain,
+    play it, then collect the questions up to the next turn action."""
+    played, shown, end = False, [], time.time() + timeout
+    while time.time() < end:
+        st = session.state()
+        if st["status"] == "over":
+            break
+        p = st["pending"]
+        if st["status"] != "waiting" or not p:
+            time.sleep(0.003)
+            continue
+        if p["type"] == "decision":
+            i = next((k for k, a in enumerate(p["actions"]) if "Trifarian Captain" in a["text"]), None)
+            if i is not None and not played:
+                played = True
+                session.answer({"action": i})
+                continue
+            if played and p["point"] == "turn_action":
+                break
+            session.answer({"action": next(k for k, a in enumerate(p["actions"]) if a["kind"] == "PASS")})
+            continue
+        if played:
+            shown.append(p)
+        session.answer({"option": p["default"]} if p["type"] == "choice"
+                       else {"return": []} if p["type"] == "mulligan" else {"ok": True})
+    session.abandon()
+    assert played
+    return shown
+
+
+def test_the_coach_sees_the_cards_trifarian_captain_looks_at(tmp_path):
+    """'Look at the top 4 cards ... you may reveal a unit or gear ... and draw
+    it. Recycle the rest.' The page shows the four cards with the choice, and
+    alone when none may be taken (seeds of competitive_sett, simple_trade)."""
+    sett = REPO / "riftbound" / "data" / "decks" / "competitive_sett.json"
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(sett, sett, seat="A", opponent="simple_trade", seed=2)
+    shown = _play_trifarian_captain(session)
+    seen = ["Rampage", "Kinkou Initiate", "Pit Rookie", "Showstopper"]
+    assert [(p["question"], p.get("seen")) for p in shown[:2]] == [
+        ("Prendere una delle carte guardate?", seen), ("Quale carta tenere?", seen)]
+    assert "Guardi le prime 4 carte del mazzo: " + ", ".join(seen) in [e["text"] for e in session.state()["events"]]
+    # None of the four may be taken: shown alone, held until seen.
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(sett, sett, seat="A", opponent="simple_trade", seed=20)
+    notice = _play_trifarian_captain(session)[0]
+    assert notice["type"] == "notice" and notice["own"] and \
+        notice["cards"] == ["Fiora Victorious", "Fiora Victorious", "Showstopper", "Rampage"]

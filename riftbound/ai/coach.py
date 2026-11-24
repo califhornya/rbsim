@@ -141,7 +141,8 @@ _SHORT = {"target": "bersaglio", "mode": "effetto", "equip": "su", "combat_damag
           "battlefield": "campo", "tag": "tag", "facedown_trash": "nel cimitero"}
 _OPTIONAL = {"accelerate": "Pagare ACCELERATE? (l'unità entra pronta)",
              "additional_cost": "Pagare il costo aggiuntivo?", "SHOW OFF": "Usare SHOW OFF?",
-             "enter_ready": "Far entrare l'unità pronta?"}
+             "enter_ready": "Far entrare l'unità pronta?",
+             "keep": "Prendere una delle carte guardate?"}
 
 
 def question(kind: str) -> str:
@@ -711,6 +712,7 @@ class CoachAgent(NetGuidedMCTSAgent):
         return "È il tuo turno: puoi giocare carte, spostare unità, usare abilità o passare."
 
     def _coached(self, point: DecisionPoint, cards_played: int = 0, bf_idx: Optional[int] = None):
+        self.session.show_looked()
         self._ensure_rng()
         if point == DecisionPoint.TURN_ACTION:
             self._release_forced()
@@ -826,6 +828,8 @@ class CoachSession:
         self.opp_discards: list = []        # since the last snapshot (its hand is hidden)
         self.stop_on_opp_chain = True       # hold the board on each opponent spell (notice_chain)
         self._opponent = None               # the other seat's agent
+        self.looked: Optional[list] = None  # the coach's last look at their deck's top, not yet shown
+        self._seen: Optional[list] = None   # ... and the last one shown with a choice
 
     # -- what a game can have ------------------------------------------------------
 
@@ -948,6 +952,16 @@ class CoachSession:
                     self.opp_discards.append(card.name)
                 return _inner(player, card)
             self.loop._discard = discard
+            me = self.gs.get_player(self.side)
+
+            def look(player, cards, _inner=self.loop._offer_reveal_from_top):
+                # The coach looks at the top of their own deck (Trifarian
+                # Captain's dig, Predict...): they see the cards, with the
+                # choice that follows, or alone when there is none.
+                if player is me and cards:
+                    self._looked([c.name for c in cards])
+                return _inner(player, cards)
+            self.loop._offer_reveal_from_top = look
             self.loop.on_choice = self._log_choice
             result = self.loop.start()
             self.result = {"winner": result.winner, "turns": result.turns,
@@ -990,7 +1004,29 @@ class CoachSession:
     def _finishing(self) -> str:
         return self._FINISHING if self.advice else self._LEFT
 
+    def _looked(self, names: list) -> None:
+        self.show_looked()                 # an earlier look nobody showed yet
+        self.looked, self._seen = names, None
+        n = len(names)
+        self.event("me", ("Guardi la prima carta del mazzo: " if n == 1 else
+                          f"Guardi le prime {n} carte del mazzo: ") + ", ".join(names))
+
+    def _take_looked(self) -> Optional[list]:
+        names, self.looked = self.looked, None
+        return names
+
+    def show_looked(self) -> None:
+        """The cards the coach looked at with no choice after them (a dig
+        with none they may take): held on the board until seen."""
+        names = self._take_looked()
+        if not names or len(names) < 2:
+            return
+        self._wait({"type": "notice", "own": True, "cards": names, "card": names[0],
+                    "context": f"Hai guardato le prime {len(names)} carte del mazzo: nessuna "
+                               "si poteva prendere."})
+
     def _opponent_turn(self) -> None:
+        self.show_looked()
         changed = self._snapshot()
         self.status = "thinking"
         self.activity = self._finishing() if self.autoplay else "L'avversario sta giocando…"
@@ -1012,6 +1048,8 @@ class CoachSession:
         """GameLoop.on_choice: a spell's targets are told as it goes on the
         chain, other choices as they are made."""
         head = kind.partition(":")[0]
+        if side == self.side and n_options:
+            self.looked = None             # the choice after the look was made
         if head not in self._PUBLIC_CHOICES or not n_options or self.gs is None:
             return
         mine = side == self.side
@@ -1101,8 +1139,16 @@ class CoachSession:
 
     def ask_choice(self, kind: str, side: str, options: list, default: int,
                    source: Optional[str]) -> int:
-        answer = self._wait({"type": "choice", "kind": kind, "question": question(kind),
-                             "options": options, "default": default, "source": source})
+        request = {"type": "choice", "kind": kind, "question": question(kind),
+                   "options": options, "default": default, "source": source}
+        seen = self._take_looked()
+        if seen:
+            self._seen = seen
+        elif kind.startswith("keep"):
+            seen = self._seen               # "Quale carta tenere?" after "Prendere ...?"
+        if seen:
+            request["seen"] = seen          # the cards looked at, the choice is about them
+        answer = self._wait(request)
         if not answer:
             return default
         pick = int(answer.get("option", default))

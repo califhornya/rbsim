@@ -168,6 +168,8 @@ aside h2 { margin: 0 0 8px; font-size: 11.5px; letter-spacing: .07em; text-trans
 .best { border: 1px solid color-mix(in srgb, var(--gold) 50%, transparent); background: color-mix(in srgb, var(--gold) 8%, transparent);
   border-radius: 12px; padding: 10px; display: grid; grid-template-columns: auto 1fr; gap: 10px; }
 .best .thumb { width: 58px; height: 81px; }
+.seen { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.seen .thumb { width: 58px; height: 81px; }
 .best .what { font-weight: 700; font-size: 14.5px; }
 .best .why { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
 .best button { margin-top: 8px; width: 100%; }
@@ -419,6 +421,8 @@ function actionsBySrc() {
   p.actions.forEach((a, i) => { if (a.src) (out[a.src] = out[a.src] || []).push(i); });
   return out;
 }
+// Cards looked at (the top of the deck): thumbnails, the name and text on hover.
+function seenRow(names) { return `<div class="seen">${names.map((n) => `<div class="thumb" title="${esc(n + "\n" + (card(n).text || ""))}">${face(n)}</div>`).join("")}</div>`; }
 function oppName(id) { const o = (S.opponents || []).find((x) => x.id === id); return o ? o.name : ({ campione: "Il campione", net: "La rete", simple_trade: "Bot semplice" })[id] || id || ""; }
 function suggOf(i) { return (S.pending.suggestions || []).findIndex((s) => s.action === i); }
 function pct(w) { const p = Math.round(w * 100); return p < 1 ? "meno dell'1%" : p > 99 ? "più del 99%" : p + "%"; }
@@ -531,6 +535,7 @@ function renderCoach() {
   if (p.type === "choice") {
     el.innerHTML = `<h2>Scegli tu</h2><div class="what" style="font-weight:750;font-size:15px">${esc(p.question)}</div>
       ${p.source ? `<p class="ctx">Per: ${esc(p.source)}</p>` : ""}
+      ${p.seen ? `<p class="ctx">Le carte che hai guardato:</p>${seenRow(p.seen)}` : ""}
       ${p.options.map((opt, k) => `<div class="opt" data-opt="${k}"><span class="nb">${k + 1}</span><span class="t">${esc(opt.text)}</span>${k === p.default ? '<span class="tag">scelta automatica</span>' : ""}</div>`).join("")}
       <p class="hint" style="margin-top:8px">${p.options.some((x) => x.ref) ? "Puoi anche cliccare sul tavolo la carta che lampeggia." : ""}</p>`;
     el.querySelectorAll("[data-opt]").forEach((d) => {
@@ -544,11 +549,11 @@ function renderCoach() {
   if (p.type === "notice") {
     const c = card(p.card);
     el.innerHTML = `<h2>Guarda</h2><p class="ctx">${esc(p.context)}</p>
-      <div class="best"><div class="thumb">${face(p.card)}</div><div><div class="what">${esc(p.card)}</div>
-        <div class="why" style="white-space:pre-line">${esc(c.text || "")}</div></div></div>
+      ${p.cards ? seenRow(p.cards) : `<div class="best"><div class="thumb">${face(p.card)}</div><div><div class="what">${esc(p.card)}</div>
+        <div class="why" style="white-space:pre-line">${esc(c.text || "")}</div></div></div>`}
       <button class="gold" style="width:100%;margin-top:8px" id="noticeOk">Continua</button>
-      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="noticeQuiet"> Non fermarti più sulle magie dell'avversario in questa partita</label>`;
-    $("#noticeOk").onclick = () => send({ ok: true, quiet: $("#noticeQuiet").checked });
+      ${p.own ? "" : `<label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="noticeQuiet"> Non fermarti più sulle magie dell'avversario in questa partita</label>`}`;
+    $("#noticeOk").onclick = () => send({ ok: true, quiet: !!($("#noticeQuiet") && $("#noticeQuiet").checked) });
     return;
   }
   if (p.type === "mulligan") {

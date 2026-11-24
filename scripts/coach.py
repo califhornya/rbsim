@@ -118,7 +118,8 @@ def main() -> None:
                 body = json.loads(self.rfile.read(length) or b"{}")
                 if self.path == "/api/new":
                     session.new_game(Path(body["deck_mine"]), Path(body["deck_opp"]),
-                                     seat=body.get("seat", "A"), opponent=body.get("opponent"))
+                                     seat=body.get("seat", "A"), opponent=body.get("opponent"),
+                                     seed=body.get("seed"))
                 elif self.path == "/api/answer":
                     session.answer(body)
                 elif self.path == "/api/report":
