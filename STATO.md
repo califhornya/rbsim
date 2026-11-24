@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-24. Ramo di lavoro `rust` (default su GitHub; sessione su
+Aggiornato: 2026-11-24 (pomeriggio). Ramo di lavoro `rust` (default su GitHub; sessione su
 `claude/magical-allen-m3o90h`). `main` resta fermo al 19/11.
 
 ## Sigle
@@ -38,10 +38,12 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
   (rete casuale) 20/20 + 10/10; ogni ricerca identica (menu, prior, visite, Q, mossa).
   Tempo per partita col prior: Python 11–12 s, Rust 1,3–1,4 s (×8,5); senza prior ×28.
   Su Rust il 63% è il forward della rete (batch 1, Python).
+- Mac (M1 Max, campione `ekris_s12/ckpt_040000.pt`): parità 20/20 a 50 iterazioni; tempo per
+  partita a lavoro fisso Python 8,6–8,8 s, Rust 0,61 s (×14,6). Tappa A verificata.
 - `arena_mazzi.py --motore rust`, `arena_rs.game`, `tests/rust/test_arena_rs.py`.
 
 ## In corso
-Niente: tappa A chiusa in container, manca la verifica sul Mac col campione.
+Niente: tappa A chiusa e verificata sul Mac; in attesa della decisione sotto.
 
 ## Decisioni da prendere (Matteo)
 - Forza a budget ridotto: una partita mista Python/Rust non si può ancora giocare
@@ -50,11 +52,10 @@ Niente: tappa A chiusa in container, manca la verifica sul Mac col campione.
   sul Mac (parità esatta a lavoro fisso); soglia: limite inferiore > 0,47.
 
 ## Prossimi passi
-1. Sul Mac: `bash scripts/rust/arena_mac.command` (parità col campione, 20 semi, e tempi).
-2. Prova di forza a budget ridotto (dopo la decisione sopra).
-3. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo.
-4. Rete del prior in Rust o a batch (ora è il collo di bottiglia dell'arena).
-5. Partita interattiva contro il bot su Rust (oggi il coach usa Python).
+1. Prova di forza a budget ridotto (dopo la decisione sopra).
+2. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo.
+3. Rete del prior in Rust o a batch (ora è il collo di bottiglia dell'arena).
+4. Partita interattiva contro il bot su Rust (oggi il coach usa Python).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`,

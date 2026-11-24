@@ -93,9 +93,22 @@ dato differenze.
 - Il prossimo guadagno per l'arena col prior è quindi la rete, non il motore.
 - Misure in `docs/rust/misure/arena_fisso_*.json` (questa macchina; sul Mac: `scripts/rust/arena_mac.command`).
 
+## Sul Mac col campione (24/11, `scripts/rust/arena_mac.command`)
+Apple M1 Max, checkpoint `runs/sett/ekris_s12/ckpt_040000.pt`.
+- `tests/rust`: 19 passati.
+- **Parità col checkpoint vero**: bot col prior, 50 iterazioni, semi 40000–40019 a posti scambiati:
+  **20/20 partite identiche**.
+- Tempo a lavoro fisso (50 iterazioni, 4 coppie, un processo):
+
+| motore | totale 8 partite | mediana per partita |
+|---|---|---|
+| Python | 67,8 s / 69,1 s | 8,60 s / 8,79 s |
+| Rust | 4,64 s / 4,69 s | 0,61 s / 0,61 s |
+
+Sul Mac Rust è circa **14,6 volte** più veloce a parità di lavoro (8,5 su questa macchina): il forward
+della rete costa meno sull'M1 e pesa meno sul totale.
+
 ## Da fare (in ordine)
-1. **Sul Mac**: `scripts/rust/arena_mac.command`, con il campione. Ripete la parità col checkpoint vero
-   e le misure.
-2. **Forza a budget ridotto**: decisione di metodo aperta. Vedi STATO.md, "Decisioni da prendere".
-3. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.
-4. **Giocare contro il bot su Rust**: oggi la partita interattiva (coach) usa il motore Python.
+1. **Forza a budget ridotto**: decisione di metodo aperta. Vedi STATO.md, "Decisioni da prendere".
+2. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.
+3. **Giocare contro il bot su Rust**: oggi la partita interattiva (coach) usa il motore Python.
