@@ -1,7 +1,7 @@
 # STATO
 
-Aggiornato: 2026-11-24 (notte). Ramo di lavoro `rust` (default su GitHub; tappa Rengar unita, PR 43;
-tappa Ivern su `claude/vibrant-johnson-k8ovzv`). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-24 (notte). Ramo di lavoro `rust` (default su GitHub; Rengar PR 43 e Ivern PR 44 unite;
+tappa Sett su `claude/vibrant-johnson-k8ovzv`). `main` resta fermo al 19/11.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -52,14 +52,16 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Perimetro: `COPERTI` con EI, KI, RI. Divergenze: scelta sulla pila per indice, dump dell'elemento scelto,
   replay senza l'effetto dell'osservazione PPO (strumento). Semi tenuti da parte 3.120/3.120 con EK/ER/KR di
   nuovo (`docs/rust/misure/tenuti_ivern_*.json`), 720 partite d'arena e 53.355 ricerche confrontate.
+  Mac col campione: esempi PPO 240/240, arena col prior EI/KI/RI 60/60 (6.120 ricerche), Rust ×15 a partita.
 
 ## In corso
-- Ivern pronta per la PR verso `rust` (suite Python 1.952 verdi); poi `ivern_mac.command` sul Mac.
+- Tappa Sett: inventario (`inventario.py --liste S --matchup ES KS RS IS Es Ks Rs Is`).
 
 ## Prossimi passi
-1. `ivern_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su EI, KI, RI). Poi Sett.
+1. Sett (ES, KS, RS, IS, mix `ekris`): porting, parità, posizioni mirate, semi tenuti da parte,
+   verifica sul Mac; aggiungere a `arena_rs.COPERTI`. Con Sett i cinque mazzi sono tutti su Rust.
 2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
-   --budget-avversario 0.03`); budget da ricontrollare su ER/KR prima di usarlo lì.
+   --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
 
 ## File principali

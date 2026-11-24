@@ -1,12 +1,13 @@
 # Rapporto Ivern: il mazzo di Ivern nel motore Rust
 
-Ramo `claude/vibrant-johnson-k8ovzv`, verso `rust`. Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
+Ramo `claude/vibrant-johnson-k8ovzv`, unito in `rust` (PR 44). Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
 (congelato, `docs/audit/AUDIT.md`). Il motore Python non è stato toccato.
 
 **Tappa Ivern raggiunta.** La lista competitiva di Ivern con la sua sideboard gioca su Rust. Sui matchup EI, KI e RI
 nei due posti le partite sono identiche a quelle Python: partite autonome, esempi PPO bit per bit, replay e arena a
 lavoro fisso, ricerche comprese. Zero divergenze inspiegate, nessun `NotPorted`. EK, ER e KR restano identici.
 EI, KI e RI vanno su Rust nell'arena e nel training (`arena_rs.COPERTI`, `ppo._motore`).
+Verificata anche sul Mac col checkpoint del campione: 240/240 partite con esempi PPO identici, 60/60 d'arena.
 
 ## Cosa è stato portato
 Inventario: `docs/rust/INVENTARIO_IVERN.md` (`scripts/rust/inventario.py --liste I --matchup EI KI RI Ei Ki Ri`).
@@ -149,14 +150,24 @@ Nessun caso di regole ambigue. Le deviazioni note (D59, D62, D71) restano come s
 - `scripts/ppo.py` `_motore` e `scripts/diag/arena_mazzi.py --motore rust` seguono lo stesso perimetro.
 
 ## Col checkpoint vero (sul Mac)
-Il checkpoint del campione non è nel repository: qui le prove PPO e quelle col prior usano reti dal seme. Sul Mac:
+Il checkpoint del campione non è nel repository: qui le prove PPO e quelle col prior usano reti dal seme.
+Sul Mac (M1 Max, 24/11, commit `286417f`, campione `ekris_s12/ckpt_040000.pt`):
 
 ```bash
 bash scripts/rust/ivern_mac.command ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
 ```
 
-Esempi PPO bit per bit su EI, KI e RI (self-play e contro simple_trade, semi 1–20) e arena col prior a 50 iterazioni
-(semi 40000–40009). Uscite: `docs/rust/misure/mac_ivern_*.json`.
+Uscite: `docs/rust/misure/mac_ivern_*_20261124_2015.json`.
+
+| Prova (semi, nei due posti) | EI | KI | RI |
+|---|---|---|---|
+| Esempi PPO bit per bit, self-play (1–20) | 40/40 | 40/40 | 40/40 |
+| Esempi PPO bit per bit, contro simple_trade (1–20) | 40/40 | 40/40 | 40/40 |
+| Arena col prior, 50 iterazioni (40000–40009): partite identiche | 20/20 | 20/20 | 20/20 |
+| Ricerche confrontate, tutte identiche | 2.177 | 1.997 | 1.946 |
+| Tempo per partita d'arena, Python / Rust | 19,5 / 1,29 s (×15,1) | 20,1 / 1,24 s (×16,3) | 18,5 / 1,27 s (×14,5) |
+
+Nessun errore Rust. Sugli esempi PPO Rust è ×4,0–5,8: conta anche il forward della rete, che resta in Python.
 
 ## Comandi esatti
 
@@ -173,5 +184,4 @@ bash scripts/rust/tenuti_ivern.sh 4        # i semi tenuti da parte, tutte le pr
 ```
 
 ## Cosa vale fare dopo
-1. Lanciare `ivern_mac.command` sul Mac, col campione.
-2. Sett (ES, KS, RS, IS e il mix `ekris`), con lo stesso metodo.
+1. Sett (ES, KS, RS, IS e il mix `ekris`), con lo stesso metodo.
