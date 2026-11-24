@@ -101,6 +101,14 @@ def main() -> None:
            f"> 0,47; " if holds else "") +
         f"tutte -> {args.esito_positivo.lower()}")
     say("   " + "; ".join(f"{mu} {pairs[mu]} coppie, seed {s0[mu]}-{s0[mu] + pairs[mu] - 1}" for mu in mus))
+    from riftbound.ai.ppo.collect import DECK_OF
+    from riftbound.provenienza import provenienza, registra
+    registra(args.out.parent, provenienza(
+        motore={mu: "python" for mu in mus}, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})},
+        checkpoint={"candidato": args.ckpt, "avversario": args.ckpt_avversario},
+        arena=str(args.out), budget={"candidato": args.budget_candidato or A.REF_BUDGET,
+                                     "avversario": args.budget_avversario or A.REF_BUDGET}))
+    say(f"   provenienza in {args.out.parent / 'provenienza.jsonl'} (motore Python per tutti i matchup)")
 
     tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu,
               args.budget_candidato, args.budget_avversario)

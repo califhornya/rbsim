@@ -1,75 +1,61 @@
 # STATO
 
-Aggiornato: 2026-11-24. Ramo `rust` (ex `claude/peaceful-lamport-gynyab`): la linea
-di lavoro. Contiene anche tutto il ramo dei training (`rbsim2026-boot1-results`, unito
-il 24/11). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-24. Ramo di lavoro `rust` (default su GitHub; sessione su
+`claude/magical-allen-m3o90h`). `main` resta fermo al 19/11.
 
-## Obiettivo
-Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
-carte; su quello, una rete allenata in self-play. Riferimento: `docs/audit/AUDIT.md`.
-**Questo ramo**: porting del motore in Rust per tappe (mandato di Matteo del 23/11),
-primo traguardo una partita Evelynn–Kha'Zix (EK) completa con un checkpoint
-esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
+## Sigle
+- EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
+- PPO = la rete allenata giocando contro sé stessa; "prior" = le sue preferenze sulle mosse.
+- Bot a mano = la ricerca (MCTS: prova molte continuazioni) con una valutazione scritta a mano.
+- Campione = il bot a mano guidato dai prior di `ekris_s12/ckpt_040000.pt`.
+- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte.
+
+## Obiettivo (Matteo, 24/11)
+Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi
+sono la prima tappa verificabile. Si tengono i checkpoint. Obiettivo pratico: un
+avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 
 ## Decisioni prese
-- Rust identico a `6427b90`, deviazioni note comprese (D59, D62, Switcheroo/D71):
-  una correzione = fix Python separato + stesso cambio in Rust.
-- Traduzione fedele, funzione per funzione; sincrono a callback (Agent con `has()` =
-  hasattr, Chooser); arene di id; `not_ported!` = errore identificabile.
-- Confine PPO: Rust costruisce domanda (osservazione e turno del gioco reale,
-  descrittori, contesto), Python (`AskPPO`) forward + campionamento + record.
-- Prima integrazione = raccolta PPO (F0); `ppo.py --motore rust`: EK su Rust, altri
-  matchup e bot su Python (dichiarato all'avvio). Default resta python.
-- Copia di dichiarazione = loop nuovo (come `GameLoop(gs2)`); `bf.control()` muta
-  lo stato: chiamato negli stessi punti (anche l'osservazione PPO).
-- Sideboard EK (4 verbi) non portata: non entra in partita.
-- Errore Python dimostrato (contesto `made` di `PPOAgent.inner` legato a `id()`):
-  test che fallisce + fix in commit separati (`9275f8f`, `f8a50e4`); Rust invariato.
-- (Utente, 24/11) `main` resta fermo; si lavora su `rust`. Rami dei training e
-  intermedi (`wonderful-mendel`, `rbsim2026-boot1-results`) uniti qui e cancellati.
+- (24/11, Astra/Matteo) Python congelato: regole `6427b90`, agente PPO con `f8a50e4`.
+  Fine del doppio fix: un difetto nuovo si corregge una volta, in Rust (AUDIT.md,
+  "The Python engine is frozen").
+- Ogni run registra regole, commit, motore per matchup, liste per contenuto,
+  registro carte, checkpoint (`provenienza.jsonl`). Liste EK riconosciute dal contenuto.
+- Ordine: prima l'arena EK su Rust (ricerca del bot a mano + prior PPO), poi
+  Rengar, Ivern, Sett con sideboard e test, poi il resto del catalogo.
+- Fix di `made`: già sul ramo dei training (unito in `rust`). Per confronti sensibili
+  con `PPOAgent.inner`, rivalutare i due checkpoint con la stessa versione.
+- Rust identico a Python, deviazioni note comprese (D59, D62, D71); traduzione fedele.
+- Confine PPO: Rust costruisce la domanda, Python forward + campionamento.
 
 ## Fatto
-- F0 misure Python; F1 traccia/canon/comparatore; motore Rust (`rust/rbsim-core`).
-- F2 consegna Gold (`docs/rust/CONSEGNA1.md`): D59, D59b, D62 identiche.
-- F3 `docs/rust/INVENTARIO_EK.md`: 46 carte, 34 verbi, tutti quelli in partita portati.
-- F4 agenti Rust random e simple_trade; partite autonome identiche.
-- F5 osservazione, codifica, descrittori in Rust; PPO su Rust (`collect_rs.play`),
-  esempi identici bit per bit a `collect.play`.
-- F6 (`docs/rust/RAPPORTO_EK.md`): build finale, zero divergenze su replay 40/40,
-  autonome 300/300, PPO 251/251; semi tenuti 900001–900040 tutti identici.
-  Misure: raccolta su un core ×2,9; ciclo PPO 4 processi 10,2 → 6,5 s (×1,57),
-  1.000 partite 2,7 → 1,7 min. Rust: 84% della raccolta è ora il forward torch.
-- Errori Rust trovati e corretti: ordine chiavi del dump, cleanup_hidden_cards,
-  copia di dichiarazione.
-- Mac (23/11, `ckpt_020032.pt`): parità esempi 20/20 → traguardo EK raggiunto.
-  Raccolta un core ×4,2 (self) e ×5,2 (contro simple_trade); ciclo 8 processi
-  5,02 → 3,84 s (×1,31): 1.000 partite 1,31 → 1,00 min; aggiornamento 80% del ciclo Rust.
-- Dopo il fix di `made`: ciclo col pool identico Python/Rust (hash esempi e pesi).
-- Training (fino al 23/11, `docs/PIANO_FORZA.md`): campione = bot a mano + prior
-  `runs/sett/ekris_s12/ckpt_040000.pt` (cinque mazzi), promosso: storici 0,539 / 0,537 /
-  0,518, Ivern 0,581, Sett 0,540 contro ekr_s8. Arena a 64 processi: 0,484 (lim. inf.
-  0,470), passa per un soffio.
+- Porting EK chiuso (`docs/rust/RAPPORTO_EK.md`): replay 40/40, autonome 300/300,
+  PPO 251/251 bit per bit; Mac: ciclo PPO 1.000 partite 1,31 → 1,00 min.
+- Training: campione promosso (arena 0,484, lim. inf. 0,470).
+- 24/11: `riftbound/provenienza.py`; `ppo.py` (instradamento per contenuto,
+  provenienza a ogni lancio), `arena_mazzi.py` (provenienza); AUDIT.md e RUST.md.
 
 ## In corso
-Niente: traguardo EK chiuso, in attesa della decisione sul passo successivo.
+Tappa A: ricerca del bot a mano in Rust per l'arena EK.
+Ti permetterà: partite d'arena (e poi contro di te) più veloci a parità di forza.
+Pezzi: copia e ripresa da scelta pendente (journal/segment), determinizzazione,
+etichette delle opzioni, PUCT/backup best, piani di scelta, mulligan, prior PPO
+calcolato su tutto il menu (forward in Python).
 
 ## Prossimi passi
-1. Decide Matteo: arena su Rust (copie con scelta pendente, `priors`, budget ridotto
-   validato a posti scambiati), oppure Rengar/Ivern/Sett per il PPO multi-mazzo.
-   Il fix di `made` vale già per i training: sono sullo stesso ramo.
-2. Ciclo PPO oltre ×1,3 (Mac): aggiornamento (80% del ciclo Rust) e forward a batch 1
-   (fuori dal motore).
-3. Dal ramo dei training, aperti: scelta della tappa, lr; GIOCATE.md §6; D71 se
-   l'utente decide. Sul Mac: `git fetch && git checkout rust`.
+1. Parità a 50 iterazioni (semi appaiati): menu, prior, visite, mossa, traccia; tempo per partita.
+2. Sul Mac col campione: stessa parità; poi budget Rust ridotto contro Python a 0,4 s
+   (tolleranza fissata prima, lim. inf. 0,47).
+3. Rengar, Ivern, Sett (+ sideboard), con le interazioni coi mazzi già ammessi.
+4. Rifiuto prima della partita di liste fuori copertura (carta/meccanica mancante).
 
 ## File principali
-- `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs` = metodi di GameLoop,
-  `effects*.rs`, `legality.rs`, `agents.rs` random/simple_trade/SideChooser,
-  `obs.rs` osservazione+codifica, `features.rs` descrittori, `dump.rs`, `trace.rs`).
+- `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`,
+  `agents.rs`, `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`).
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO di confine).
-- `riftbound/rs/`: `canon.py`, `trace_py.py`, `rust_bridge.py`, `agent_rs.py`, `collect_rs.py`.
-- `scripts/rust/`: `diff_trace.py`, `autonome.py`, `parita_ppo.py`, `consegna1.py`,
-  `inventario.py`, `bench_raccolta.py`, `bench_ppo_ciclo.py`, `confronto_mac.command`.
-- `tests/rust/`: parità (richiede l'estensione, non salta).
-- `docs/RUST.md` (contratti, uso), `docs/rust/` (rapporti, misure, tracce).
-- `riftbound/core/`: motore Python di riferimento (non si modifica).
+- `riftbound/rs/`: ponte Python (`canon.py`, `trace_py.py`, `rust_bridge.py`, `agent_rs.py`, `collect_rs.py`).
+- `riftbound/ai/net_mcts.py`, `handwritten.py`, `ppo/prior_bot.py`: la ricerca da portare.
+- `riftbound/provenienza.py`: provenienza delle run.
+- `scripts/rust/`: verifiche e misure; `tests/rust/`: parità.
+- `docs/RUST.md`, `docs/rust/`, `docs/PIANO_FORZA.md`, `docs/audit/AUDIT.md`.
+- `riftbound/core/`: motore Python di riferimento (congelato).

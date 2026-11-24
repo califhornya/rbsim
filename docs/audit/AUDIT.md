@@ -63,6 +63,27 @@ their games short, so the counts are an order of magnitude, not what a trained
 agent will see; where an agent could look for the situation on purpose it is
 said.
 
+## The Python engine is frozen (2026-11-24)
+
+The rules of reference are the Python engine at `6427b90`; the PPO agent's
+version is the one with `f8a50e4` (the `made` context of `PPOAgent.inner`
+keyed by the objects). The double fix of the EK porting (a fix in Python, the
+same change in Rust) ends here. Every run records the rules, the commit, the
+engine each matchup played on, the lists (by content), the card registry and
+the checkpoints (`riftbound/provenienza.py`, `provenienza.jsonl` in the run).
+
+From now on:
+- **An ordinary defect** goes here with a minimal position, the rule or the
+  card text, the outcome seen and the one expected. It is fixed once, in
+  Rust, as soon as Rust runs that flow. If it changes materially the actions,
+  the training data or a promotion decision under way, only the exposed run
+  is suspended or moved to the corrected path; if that run must go on on
+  Python, the minimal fix goes there too and is checked on both engines.
+- **An intentional correction** keeps the historical comparison and adds a
+  Rust test with the outcome the rules prescribe, at the first transition
+  that must change (e.g. an ability chosen while a move is pending: does it
+  resolve? A game with the same winner can still have lost that choice).
+
 ## Status
 
 | # | Deviation | § / card | Zed vs Shen | Status |

@@ -1,7 +1,11 @@
 # Motore Rust (porting, primo traguardo EK)
 
-Riferimento: il motore Python a `6427b90`, che resta la verità e non si modifica.
+Riferimento: il motore Python a `6427b90`, congelato il 24/11 (agente PPO: quello con `f8a50e4`).
 Rust ne è una traduzione fedele, funzione per funzione, deviazioni note comprese (D59, D62, Switcheroo).
+Il doppio fix (Python + Rust) è finito con la consegna EK: un difetto nuovo si corregge una volta, in Rust,
+secondo la procedura di `docs/audit/AUDIT.md` ("The Python engine is frozen").
+Ogni run registra in `provenienza.jsonl` regole, commit, motore di ciascun matchup, liste (per contenuto),
+registro delle carte e checkpoint (`riftbound/provenienza.py`). Le liste EK si riconoscono dal contenuto.
 Perimetro attuale: Evelynn contro Kha'Zix, con i mazzi competitivi e i rispettivi campi, leggende e token.
 Il motore Rust si sceglie in modo esplicito. Il default resta Python.
 
