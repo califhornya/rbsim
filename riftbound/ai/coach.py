@@ -920,10 +920,19 @@ class CoachSession:
                      "started": time.strftime("%Y-%m-%d %H:%M:%S")}
         if opponent == "campione":
             self.info.update(campione=str(self.campione_path), budget=self.budget)
+        # Who starts (a coin flip of the seed): the mulligan depends on it.
+        self.info["you_start"] = gs.active == seat
+        self.event("sys", self._starter_text())
         self.status = "thinking"
         self.activity = "La partita sta iniziando…"
         self._thread = threading.Thread(target=self._run, name="rbsim-coach", daemon=True)
         self._thread.start()
+
+    def _starter_text(self) -> str:
+        if "you_start" not in self.info:
+            return ""
+        return "Inizi tu" if self.info["you_start"] else \
+            "Inizia l'avversario: al tuo primo turno canalizzi una runa in più"
 
     def _run(self) -> None:
         from riftbound.core.loop import GameLoop
@@ -1076,7 +1085,8 @@ class CoachSession:
                                                           for i, n in enumerate(hand)],
                              "suggestions": suggestions, "max": 2,
                              "context": "La tua mano iniziale: puoi rimandare in fondo al mazzo "
-                                        "fino a 2 carte e pescarne altrettante."})
+                                        "fino a 2 carte e pescarne altrettante."
+                                        + (f" {self._starter_text()}." if self._starter_text() else "")})
         if "suggestion" in answer:
             back = suggestions[int(answer["suggestion"])]["return"]
         elif "return" in answer:

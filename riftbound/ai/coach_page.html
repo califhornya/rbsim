@@ -71,6 +71,10 @@ textarea { min-height: 60px; resize: vertical; }
 .face { width: 100%; height: 100%; border-radius: 7px; overflow: hidden; background: #222a33; position: relative;
   box-shadow: 0 2px 6px rgba(0,0,0,.5); }
 .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Battlefields are landscape: an image scanned upright (Piltover Archive's) is turned back. */
+.face.wide { container-type: size; }
+.face.wide.upright img { position: absolute; top: 50%; left: 50%; width: 100cqh; height: 100cqw;
+  transform: translate(-50%, -50%) rotate(90deg); }
 .face .ph { display: none; position: absolute; inset: 0; padding: 6px; flex-direction: column; gap: 3px;
   font-size: 11px; line-height: 1.2; background: linear-gradient(160deg, #2b3440, #1a2028); }
 .face.noimg .ph { display: flex; }
@@ -276,7 +280,7 @@ const card = (name) => (S && S.cards && S.cards[name]) || {};
 function face(name, extra = "") {
   const c = card(name), src = c.img ? `/img/${c.img}.webp` : null;
   const ph = `<div class="ph"><b>${esc(name)}</b><span>${esc(TYPES[c.type] || c.type || "")}${c.cost != null ? " · costo " + c.cost : ""}</span>${c.might != null ? `<span>Might ${c.might}</span>` : ""}</div>`;
-  return `<div class="face ${src ? "" : "noimg"} ${extra}">${src ? `<img src="${src}" alt="" draggable="false" onerror="this.parentNode.classList.add('noimg');this.remove()">` : ""}${ph}</div>`;
+  return `<div class="face ${src ? "" : "noimg"} ${extra}">${src ? `<img src="${src}" alt="" draggable="false" onload="if(this.naturalHeight>this.naturalWidth)this.parentNode.classList.add('upright')" onerror="this.parentNode.classList.add('noimg');this.remove()">` : ""}${ph}</div>`;
 }
 const back = () => `<div class="face"><img src="/img/back.webp" alt="" draggable="false" onerror="this.remove()"></div>`;
 
@@ -339,7 +343,7 @@ function renderTable() {
       <div class="row">${theirs.map((u, j) => unitSlot(u, `unit:opp:${i}:${j}`, "opp")).join("")}${go}</div>
       <div class="bfmid">
         <div class="bfinfo l"><span class="name">${esc(bfName(o, i))}</span>${ctrl}${o.showdown_bf === i ? '<span class="sd">SHOWDOWN IN CORSO</span>' : ""}${moving}</div>
-        <div class="bfcard" data-ref="bfcard:${i}">${bf.named ? face(bf.named) : ""}</div>
+        <div class="bfcard" data-ref="bfcard:${i}">${bf.named ? face(bf.named, "wide") : ""}</div>
         <div class="bfinfo"><span class="mt opp">Avversario ⚔ ${sum(theirs, "opp")}</span><span class="mt me">Tu ⚔ ${sum(mine, "me")}</span><div class="bfx">${fd}</div></div>
       </div>
       <div class="row">${mine.map((u, j) => unitSlot(u, `unit:me:${i}:${j}`, "me")).join("")}${gm}</div>
@@ -479,6 +483,7 @@ function renderSide() {
       <div class="muted">su ${o.victory_score}</div>
       <div><div class="n opp">${o.opp_points}</div><div class="who">Avversario</div></div></div>
       <div class="turnline">${S.pending && S.pending.type === "mulligan" ? "Prima della partita: mulligan"
+          + (S.info && S.info.you_start != null ? (S.info.you_start ? " · inizi tu" : " · inizia l'avversario") : "")
         : `Turno ${o.turn} · ${o.active === me ? "tocca a te" : "tocca all'avversario"}`}${alert ? `<span class="alert">${alert}</span>` : ""}</div>`;
   } else $("#score").innerHTML = '<div class="muted">Nessuna partita in corso.</div>';
   renderCoach();
@@ -665,7 +670,7 @@ function showPreview(el) {
   if (r.pile === "trash") lines.push("In cima al cimitero. Clicca per vederlo tutto.");
   const head = r.name ? `<b>${esc(r.name)}</b><div class="hint">${esc(TYPES[c.type] || c.type || "")}${c.cost != null ? " · costo " + c.cost : ""}</div>` : "";
   pv.className = "preview" + (r.wide ? " wide" : "");
-  pv.innerHTML = `${r.name ? face(r.name) : back()}
+  pv.innerHTML = `${r.name ? face(r.name, r.wide ? "wide" : "") : back()}
     <div class="info">${head}${lines.map((l) => `<div class="st">${l}</div>`).join("")}</div>
     ${u && u.gear && u.gear.length ? `<div class="gears">${u.gear.map((g) => face(g)).join("")}</div>` : ""}`;
   pv.style.display = "block";
