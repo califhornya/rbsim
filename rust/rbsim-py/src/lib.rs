@@ -180,6 +180,24 @@ impl Game {
         })
     }
 
+    /// Diagnosis: dump the copy of search `k` (0-based), simulation `j`, at every step.
+    fn set_search_debug(&mut self, seat: &str, k: usize, j: usize) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        if let Some(c) = &self.search[s.idx()] {
+            c.borrow_mut().debug = Some((k, j));
+        }
+        Ok(())
+    }
+
+    /// The dumps of set_search_debug (JSON list).
+    fn search_debug(&self, seat: &str) -> PyResult<String> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => serde_json::Value::Array(c.borrow().debug_out.clone()).to_string(),
+            None => "[]".into(),
+        })
+    }
+
     /// A search seat's (iterations of each main-turn search under a budget,
     /// empty turns, turns).
     fn search_stats(&self, seat: &str) -> PyResult<(Vec<usize>, i64, i64)> {

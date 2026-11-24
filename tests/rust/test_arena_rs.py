@@ -89,6 +89,14 @@ def test_arena_mista_verdict_needs_the_whole_sample():
     assert AM.valuta(good + [row(2, "A", 1.0), div], range(1, 3), 2, 0.47)["esito"] == "SOSPESO"
     assert AM.valuta(good + [row(2, "A", 1.0), row(2, "B", 1.0, divergenza=[{}])], range(1, 3), 2,
                      0.47)["esito"] == "SOSPESO"
+    # An explained divergence only in the searches' numbers counts; one in the trace does not.
+    only_search = row(2, "B", 1.0, divergenza=[{"ricerca": {}}])
+    rows = good + [row(2, "A", 1.0), only_search]
+    assert AM.valuta(rows, range(1, 3), 2, 0.47)["esito"] == "SOSPESO"
+    assert AM.valuta(rows, range(1, 3), 2, 0.47, frozenset({(2, "B")}))["esito"] == "PROMOSSO"
+    in_trace = row(2, "B", 1.0, divergenza=[{"traccia": {}}])
+    assert AM.valuta(good + [row(2, "A", 1.0), in_trace], range(1, 3), 2, 0.47,
+                     frozenset({(2, "B")}))["esito"] == "SOSPESO"
 
 
 def test_arena_mista_lockstep_mismatch_is_a_divergence(monkeypatch):

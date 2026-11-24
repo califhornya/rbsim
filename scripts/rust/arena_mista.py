@@ -293,15 +293,24 @@ def _pct(xs: list, q: float) -> float:
     return xs[min(len(xs) - 1, int(q * (len(xs) - 1) + 0.5))]
 
 
-def valuta(rows: list, seeds, coppie: int, soglia: float) -> dict:
-    """The verdict on the prescribed sample: SOSPESO while any game diverged or
-    any of the 2 x coppie games is missing (failed games are replayed on the
-    next launch); else PROMOSSO when the lower bound of the 95% CI on the
-    pairs' means, before rounding, is above `soglia`."""
+def _explained(r: dict, spiegate: set) -> bool:
+    """A divergence reproduced and explained (arena_mista_riprova.py identical
+    with the current code), only in the searches' numbers: the two copies
+    played the same game, which counts."""
+    return (r["seed"], r["rust_seat"]) in spiegate and "score" in r and \
+        all(set(d) == {"ricerca"} for d in r.get("divergenza", []))
+
+
+def valuta(rows: list, seeds, coppie: int, soglia: float, spiegate: frozenset = frozenset()) -> dict:
+    """The verdict on the prescribed sample: SOSPESO while any game diverged
+    (unless explained: `spiegate`, (seed, rust seat)) or any of the 2 x coppie
+    games is missing (failed games are replayed on the next launch); else
+    PROMOSSO when the lower bound of the 95% CI on the pairs' means, before
+    rounding, is above `soglia`."""
     seeds = set(seeds)
     rows = [r for r in rows if r["seed"] in seeds]
-    div = [r for r in rows if "divergenza" in r]
-    valid = [r for r in rows if "score" in r and "divergenza" not in r]
+    div = [r for r in rows if "divergenza" in r and not _explained(r, spiegate)]
+    valid = [r for r in rows if "score" in r and ("divergenza" not in r or _explained(r, spiegate))]
     expected = {(s, seat) for s in seeds for seat in ("A", "B")}
     missing = expected - {(r["seed"], r["rust_seat"]) for r in rows}
     by: dict = {}
@@ -328,8 +337,12 @@ def main() -> None:
                     help="niente traccia né confronto delle ricerche (resta il controllo dell'identità a ogni scambio)")
     ap.add_argument("--tempo-produzione", type=int, default=4,
                     help="partite tutte su Rust, entrambi i bot a --budget-rust, per il tempo reale per partita")
+    ap.add_argument("--spiegata", action="append", default=[], metavar="SEME:POSTO",
+                    help="una divergenza riprodotta e spiegata (arena_mista_riprova.py), solo nei numeri delle "
+                         "ricerche: la partita conta; per esempio --spiegata 70113:A")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
+    spiegate = frozenset((int(x.split(":")[0]), x.split(":")[1]) for x in args.spiegata)
     from riftbound.provenienza import REGOLE_PYTHON, file_sha, provenienza, registra
     args.out.parent.mkdir(parents=True, exist_ok=True)
     righe = args.out.with_suffix(".jsonl")
@@ -383,7 +396,9 @@ def main() -> None:
                 say(f"   DIVERGENZA seme {r['seed']} posto Rust {r['rust_seat']}: {json.dumps(r['divergenza'])[:600]}")
             if len(rows) % 100 == 0:
                 print(f"   ... {len(rows)}/{2 * args.coppie} partite, {(time.time() - t0) / 60:.0f} min", flush=True)
-    ver = valuta(rows, seeds, args.coppie, args.soglia)
+    ver = valuta(rows, seeds, args.coppie, args.soglia, spiegate)
+    if spiegate:
+        say("   divergenze spiegate (contano): " + ", ".join(f"seme {s} posto Rust {p}" for s, p in sorted(spiegate)))
     div, missing, pairs, complete = ver["divergenti"], ver["mancanti"], ver["coppie"], ver["completo"]
     if not pairs:
         say(f"   nessuna coppia completa; divergenti {len(div)}, mancanti o in errore {len(missing)}")

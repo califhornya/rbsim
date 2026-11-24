@@ -138,6 +138,24 @@ Lo script riporta anche le iterazioni per tipo di ricerca (media, P10, mediana, 
 partita sul percorso Rust di produzione, con entrambi i bot a 0,030 s.
 Il budget validato andrà ricontrollato sui matchup successivi.
 
+### Divergenza del seme 70113 (Mac, 24/11): spiegata e corretta
+- **Cosa:** una partita su ~220 ha dato una ricerca con numeri interni diversi nei due motori (il bot "Python",
+  turno 15). Albero, visite, Q e mossa uguali; la partita è rimasta identica.
+- **Riproduzione** (`scripts/rust/arena_mista_riprova.py`, conteggi registrati, checkpoint del campione): 4 simulazioni
+  su 57 valutano diversamente la stessa posizione finale (0,955 contro 0,565). Passo per passo, le copie sono
+  uguali fino al combattimento; lì una scelta interna della ricerca ("optional:give_temporary_assault" di un
+  token Shadow Clone) va in modo diverso.
+- **Causa: Python.** L'etichetta di un'opzione "ordine dei trigger" è il `repr` del trigger, che contiene il campo
+  di battaglia e il suo insieme `combat_designated`. Python stampa un insieme nell'ordine degli indirizzi di
+  memoria: su ogni copia la stessa opzione ha una chiave diversa e la ricerca apre nodi nuovi a caso. Rust
+  (insieme ordinato) li riunisce. È il caso segnalato sopra come "non confrontabile".
+- **Correzione minima anche in Python** (regola del congelamento: una prova che deve continuare su Python):
+  `net_mcts._label` stampa gli insiemi in ordine (`_stable_repr`), identico al `repr` in tutto il resto. Cambia
+  solo questi casi, dove prima decideva l'indirizzo di memoria. Test: `tests/test_search_labels.py` (fallisce
+  senza la correzione). Con la correzione il seme 70113 rigiocato è identico, traccia e ricerche.
+- **Conseguenza per la prova**: la partita 70113 conta (`--spiegata 70113:A`); le partite già giocate restano
+  valide, il bot Python è lo stesso salvo questi casi rari. Dal rilancio vale la correzione.
+
 ## Da fare (in ordine)
 1. **Forza a budget ridotto**: `bash scripts/rust/arena_mista.command` sul Mac.
 2. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.
