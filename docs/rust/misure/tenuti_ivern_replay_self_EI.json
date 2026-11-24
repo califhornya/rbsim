@@ -1,0 +1,1442 @@
+[
+ {
+  "seed": 900001,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 176,
+  "t_py_traced": 0.613,
+  "t_rs_traced": 0.34
+ },
+ {
+  "seed": 900001,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 153,
+  "t_py_traced": 0.489,
+  "t_rs_traced": 0.192
+ },
+ {
+  "seed": 900002,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 138,
+  "t_py_traced": 0.524,
+  "t_rs_traced": 0.16
+ },
+ {
+  "seed": 900002,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 136,
+  "t_py_traced": 0.405,
+  "t_rs_traced": 0.161
+ },
+ {
+  "seed": 900003,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 203,
+  "t_py_traced": 0.572,
+  "t_rs_traced": 0.253
+ },
+ {
+  "seed": 900003,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 240,
+  "t_py_traced": 0.795,
+  "t_rs_traced": 0.337
+ },
+ {
+  "seed": 900004,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 279,
+  "t_py_traced": 1.1,
+  "t_rs_traced": 0.404
+ },
+ {
+  "seed": 900004,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   22
+  ],
+  "rs": [
+   "B",
+   22
+  ],
+  "rust_error": null,
+  "events": 300,
+  "t_py_traced": 1.074,
+  "t_rs_traced": 0.438
+ },
+ {
+  "seed": 900005,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 193,
+  "t_py_traced": 0.59,
+  "t_rs_traced": 0.234
+ },
+ {
+  "seed": 900005,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 125,
+  "t_py_traced": 0.45,
+  "t_rs_traced": 0.182
+ },
+ {
+  "seed": 900006,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   24
+  ],
+  "rs": [
+   "B",
+   24
+  ],
+  "rust_error": null,
+  "events": 327,
+  "t_py_traced": 1.074,
+  "t_rs_traced": 0.486
+ },
+ {
+  "seed": 900006,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 199,
+  "t_py_traced": 0.667,
+  "t_rs_traced": 0.256
+ },
+ {
+  "seed": 900007,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 232,
+  "t_py_traced": 0.864,
+  "t_rs_traced": 0.312
+ },
+ {
+  "seed": 900007,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   11
+  ],
+  "rs": [
+   "B",
+   11
+  ],
+  "rust_error": null,
+  "events": 102,
+  "t_py_traced": 0.267,
+  "t_rs_traced": 0.114
+ },
+ {
+  "seed": 900008,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 237,
+  "t_py_traced": 0.669,
+  "t_rs_traced": 0.312
+ },
+ {
+  "seed": 900008,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   23
+  ],
+  "rs": [
+   "A",
+   23
+  ],
+  "rust_error": null,
+  "events": 239,
+  "t_py_traced": 0.765,
+  "t_rs_traced": 0.329
+ },
+ {
+  "seed": 900009,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 212,
+  "t_py_traced": 0.799,
+  "t_rs_traced": 0.267
+ },
+ {
+  "seed": 900009,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 212,
+  "t_py_traced": 0.658,
+  "t_rs_traced": 0.288
+ },
+ {
+  "seed": 900010,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 132,
+  "t_py_traced": 0.566,
+  "t_rs_traced": 0.17
+ },
+ {
+  "seed": 900010,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 220,
+  "t_py_traced": 0.682,
+  "t_rs_traced": 0.289
+ },
+ {
+  "seed": 900011,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 163,
+  "t_py_traced": 0.548,
+  "t_rs_traced": 0.228
+ },
+ {
+  "seed": 900011,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   22
+  ],
+  "rs": [
+   "A",
+   22
+  ],
+  "rust_error": null,
+  "events": 262,
+  "t_py_traced": 0.856,
+  "t_rs_traced": 0.379
+ },
+ {
+  "seed": 900012,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 171,
+  "t_py_traced": 0.668,
+  "t_rs_traced": 0.217
+ },
+ {
+  "seed": 900012,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   21
+  ],
+  "rs": [
+   "A",
+   21
+  ],
+  "rust_error": null,
+  "events": 229,
+  "t_py_traced": 0.744,
+  "t_rs_traced": 0.299
+ },
+ {
+  "seed": 900013,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 194,
+  "t_py_traced": 0.694,
+  "t_rs_traced": 0.238
+ },
+ {
+  "seed": 900013,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 227,
+  "t_py_traced": 0.67,
+  "t_rs_traced": 0.296
+ },
+ {
+  "seed": 900014,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 117,
+  "t_py_traced": 0.376,
+  "t_rs_traced": 0.146
+ },
+ {
+  "seed": 900014,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 222,
+  "t_py_traced": 0.709,
+  "t_rs_traced": 0.303
+ },
+ {
+  "seed": 900015,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 166,
+  "t_py_traced": 0.682,
+  "t_rs_traced": 0.206
+ },
+ {
+  "seed": 900015,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 147,
+  "t_py_traced": 0.446,
+  "t_rs_traced": 0.192
+ },
+ {
+  "seed": 900016,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   11
+  ],
+  "rs": [
+   "A",
+   11
+  ],
+  "rust_error": null,
+  "events": 115,
+  "t_py_traced": 0.345,
+  "t_rs_traced": 0.132
+ },
+ {
+  "seed": 900016,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   11
+  ],
+  "rs": [
+   "A",
+   11
+  ],
+  "rust_error": null,
+  "events": 117,
+  "t_py_traced": 0.383,
+  "t_rs_traced": 0.159
+ },
+ {
+  "seed": 900017,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   20
+  ],
+  "rs": [
+   "A",
+   20
+  ],
+  "rust_error": null,
+  "events": 209,
+  "t_py_traced": 0.74,
+  "t_rs_traced": 0.265
+ },
+ {
+  "seed": 900017,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 175,
+  "t_py_traced": 0.61,
+  "t_rs_traced": 0.203
+ },
+ {
+  "seed": 900018,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 210,
+  "t_py_traced": 0.604,
+  "t_rs_traced": 0.266
+ },
+ {
+  "seed": 900018,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 193,
+  "t_py_traced": 0.748,
+  "t_rs_traced": 0.249
+ },
+ {
+  "seed": 900019,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 266,
+  "t_py_traced": 0.835,
+  "t_rs_traced": 0.355
+ },
+ {
+  "seed": 900019,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 223,
+  "t_py_traced": 0.651,
+  "t_rs_traced": 0.287
+ },
+ {
+  "seed": 900020,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 177,
+  "t_py_traced": 0.486,
+  "t_rs_traced": 0.205
+ },
+ {
+  "seed": 900020,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 234,
+  "t_py_traced": 0.757,
+  "t_rs_traced": 0.304
+ },
+ {
+  "seed": 900021,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 165,
+  "t_py_traced": 0.5,
+  "t_rs_traced": 0.202
+ },
+ {
+  "seed": 900021,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 136,
+  "t_py_traced": 0.443,
+  "t_rs_traced": 0.16
+ },
+ {
+  "seed": 900022,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   22
+  ],
+  "rs": [
+   "B",
+   22
+  ],
+  "rust_error": null,
+  "events": 293,
+  "t_py_traced": 0.889,
+  "t_rs_traced": 0.375
+ },
+ {
+  "seed": 900022,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 177,
+  "t_py_traced": 0.57,
+  "t_rs_traced": 0.219
+ },
+ {
+  "seed": 900023,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 187,
+  "t_py_traced": 0.674,
+  "t_rs_traced": 0.234
+ },
+ {
+  "seed": 900023,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 219,
+  "t_py_traced": 0.686,
+  "t_rs_traced": 0.274
+ },
+ {
+  "seed": 900024,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 256,
+  "t_py_traced": 0.878,
+  "t_rs_traced": 0.31
+ },
+ {
+  "seed": 900024,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 266,
+  "t_py_traced": 0.824,
+  "t_rs_traced": 0.355
+ },
+ {
+  "seed": 900025,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 245,
+  "t_py_traced": 0.729,
+  "t_rs_traced": 0.308
+ },
+ {
+  "seed": 900025,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 154,
+  "t_py_traced": 0.544,
+  "t_rs_traced": 0.183
+ },
+ {
+  "seed": 900026,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 176,
+  "t_py_traced": 0.509,
+  "t_rs_traced": 0.213
+ },
+ {
+  "seed": 900026,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   20
+  ],
+  "rs": [
+   "B",
+   20
+  ],
+  "rust_error": null,
+  "events": 274,
+  "t_py_traced": 0.903,
+  "t_rs_traced": 0.355
+ },
+ {
+  "seed": 900027,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 170,
+  "t_py_traced": 0.46,
+  "t_rs_traced": 0.197
+ },
+ {
+  "seed": 900027,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 147,
+  "t_py_traced": 0.525,
+  "t_rs_traced": 0.174
+ },
+ {
+  "seed": 900028,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 148,
+  "t_py_traced": 0.461,
+  "t_rs_traced": 0.187
+ },
+ {
+  "seed": 900028,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   24
+  ],
+  "rs": [
+   "B",
+   24
+  ],
+  "rust_error": null,
+  "events": 245,
+  "t_py_traced": 0.749,
+  "t_rs_traced": 0.349
+ },
+ {
+  "seed": 900029,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 150,
+  "t_py_traced": 0.404,
+  "t_rs_traced": 0.186
+ },
+ {
+  "seed": 900029,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 213,
+  "t_py_traced": 0.596,
+  "t_rs_traced": 0.269
+ },
+ {
+  "seed": 900030,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 167,
+  "t_py_traced": 0.478,
+  "t_rs_traced": 0.197
+ },
+ {
+  "seed": 900030,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 268,
+  "t_py_traced": 1.09,
+  "t_rs_traced": 0.382
+ },
+ {
+  "seed": 900031,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 119,
+  "t_py_traced": 0.329,
+  "t_rs_traced": 0.133
+ },
+ {
+  "seed": 900031,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 146,
+  "t_py_traced": 0.441,
+  "t_rs_traced": 0.177
+ },
+ {
+  "seed": 900032,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 205,
+  "t_py_traced": 0.679,
+  "t_rs_traced": 0.267
+ },
+ {
+  "seed": 900032,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 226,
+  "t_py_traced": 0.835,
+  "t_rs_traced": 0.282
+ },
+ {
+  "seed": 900033,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 201,
+  "t_py_traced": 0.646,
+  "t_rs_traced": 0.271
+ },
+ {
+  "seed": 900033,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 176,
+  "t_py_traced": 0.554,
+  "t_rs_traced": 0.221
+ },
+ {
+  "seed": 900034,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 191,
+  "t_py_traced": 0.585,
+  "t_rs_traced": 0.24
+ },
+ {
+  "seed": 900034,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 246,
+  "t_py_traced": 1.083,
+  "t_rs_traced": 0.384
+ },
+ {
+  "seed": 900035,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   22
+  ],
+  "rs": [
+   "A",
+   22
+  ],
+  "rust_error": null,
+  "events": 277,
+  "t_py_traced": 0.861,
+  "t_rs_traced": 0.36
+ },
+ {
+  "seed": 900035,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 250,
+  "t_py_traced": 0.915,
+  "t_rs_traced": 0.316
+ },
+ {
+  "seed": 900036,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 229,
+  "t_py_traced": 0.856,
+  "t_rs_traced": 0.298
+ },
+ {
+  "seed": 900036,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 201,
+  "t_py_traced": 0.604,
+  "t_rs_traced": 0.238
+ },
+ {
+  "seed": 900037,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   11
+  ],
+  "rs": [
+   "B",
+   11
+  ],
+  "rust_error": null,
+  "events": 108,
+  "t_py_traced": 0.297,
+  "t_rs_traced": 0.122
+ },
+ {
+  "seed": 900037,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 128,
+  "t_py_traced": 0.321,
+  "t_rs_traced": 0.14
+ },
+ {
+  "seed": 900038,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 217,
+  "t_py_traced": 0.755,
+  "t_rs_traced": 0.312
+ },
+ {
+  "seed": 900038,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 159,
+  "t_py_traced": 0.681,
+  "t_rs_traced": 0.198
+ },
+ {
+  "seed": 900039,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 217,
+  "t_py_traced": 0.694,
+  "t_rs_traced": 0.271
+ },
+ {
+  "seed": 900039,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   23
+  ],
+  "rs": [
+   "B",
+   23
+  ],
+  "rust_error": null,
+  "events": 190,
+  "t_py_traced": 0.716,
+  "t_rs_traced": 0.226
+ },
+ {
+  "seed": 900040,
+  "matchup": "EI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   21
+  ],
+  "rs": [
+   "A",
+   21
+  ],
+  "rust_error": null,
+  "events": 267,
+  "t_py_traced": 0.75,
+  "t_rs_traced": 0.332
+ },
+ {
+  "seed": 900040,
+  "matchup": "IE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 301,
+  "t_py_traced": 1.003,
+  "t_rs_traced": 0.468
+ }
+]
