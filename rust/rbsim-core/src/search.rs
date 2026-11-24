@@ -32,6 +32,16 @@ pub type CKey = (String, String, String);
 
 // ------------------------------------------------------------- value ---
 
+/// What table_value reads, for a diagnosis.
+pub fn obs_summary(o: &Observation) -> Value {
+    let us = |v: &Vec<crate::obs::UnitView>| -> Vec<Value> {
+        v.iter().map(|u| json!([u.name, u.might, u.lasting_might])).collect()
+    };
+    json!({"points": [o.my_points, o.opp_points], "hand": [o.my_hand.len(), o.opp_hand_count],
+           "bfs": o.battlefields.iter().map(|b| json!([b.controller.map(|s| s.name()), us(&b.a), us(&b.b)])).collect::<Vec<_>>(),
+           "base": [us(&o.my_base_units), us(&o.opp_base_units)]})
+}
+
 /// py: handwritten.table_value
 pub fn table_value(o: &Observation) -> f64 {
     let me = o.viewer;
@@ -462,6 +472,8 @@ struct TreeChooser {
     node: usize,
     path: Vec<usize>,
     c_puct: f64,
+    /// Diagnosis: each choice met, with the node's options and statistics.
+    dbg: Option<Vec<Value>>,
 }
 
 impl Chooser for TreeChooser {
@@ -480,6 +492,15 @@ impl Chooser for TreeChooser {
             }
         }
         let i = t.select_option(self.node, &keys, default, self.c_puct);
+        if let Some(d) = self.dbg.as_mut() {
+            let node = &t.nodes[self.node];
+            let opts: Vec<Value> = node.choices.iter().map(|(k, c, p)| {
+                let x = &t.nodes[*c];
+                json!([k.0, k.2.chars().take(60).collect::<String>(), x.n, x.q, p])
+            }).collect();
+            d.push(json!({"kind": kind, "n": options.len(), "default": default, "pick": i,
+                          "node_n": node.n, "node_q": node.q, "choices": opts}));
+        }
         self.node = t.choice(self.node, &keys[i]).unwrap();
         self.path.push(self.node);
         Ok(Some(i))
@@ -759,6 +780,14 @@ pub struct SearchCore {
     /// The arena in step with a Python copy (None: the agent's own budget).
     pub lockstep: Option<Box<dyn Lockstep>>,
     searches: usize,
+    /// With `log`: the value each simulation of the current search backed up.
+    vals: Vec<f64>,
+    /// Diagnosis: (search, simulation) whose copy is dumped at every step
+    /// into `debug_out` (raw states, the leaf's observation and value).
+    pub debug: Option<(usize, usize)>,
+    pub debug_out: Vec<Value>,
+    cur_search: usize,
+    sim: usize,
     me_ref: Option<Weak<RefCell<SearchCore>>>,
 }
 
@@ -799,6 +828,11 @@ impl SearchCore {
             log: None,
             lockstep: None,
             searches: 0,
+            vals: Vec::new(),
+            debug: None,
+            debug_out: Vec::new(),
+            cur_search: 0,
+            sim: 0,
             me_ref: None,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
@@ -919,6 +953,8 @@ impl SearchCore {
         tree.borrow_mut().add();
         let turn = point == Point::TurnAction;
         let info = json!({"seat": self.side.name(), "k": self.searches, "point": point.name(), "turn": g.gs.turn});
+        self.cur_search = self.searches;
+        self.sim = 0;
         self.searches += 1;
         let fixed = match self.lockstep.as_mut() {
             Some(l) => l.before(&info)?,
@@ -974,6 +1010,12 @@ impl SearchCore {
         let side = self.side;
         let seed = self.seed();
         let mut c = search_copy(&g.gs, side, seed);
+        let dbg = self.debug == Some((self.cur_search, self.sim));
+        self.sim += 1;
+        if dbg {
+            self.debug_out.push(json!({"step": "inizio", "seed": seed, "state": c.raw_dump()}));
+            c.journal = Some(Vec::new());
+        }
         let mut node = 0usize;
         let mut path = vec![0usize];
         let mut cpt = cards_played;
@@ -1017,7 +1059,7 @@ impl SearchCore {
                 break;
             }
             let tc = Rc::new(RefCell::new(TreeChooser { tree: tree.clone(), me: side, node, path: Vec::new(),
-                                                         c_puct: self.c_puct }));
+                                                         c_puct: self.c_puct, dbg: if dbg { Some(Vec::new()) } else { None } }));
             let dyn_tc: Rc<RefCell<dyn Chooser>> = tc.clone();
             c.chooser = Some(dyn_tc);
             let r = c.apply_action(side, &key, cpt);
@@ -1025,11 +1067,25 @@ impl SearchCore {
             r?;
             c.recompute_passives()?;
             cpt += 1;
+            if dbg {
+                let j: Vec<String> = c.journal.replace(Vec::new()).unwrap_or_default().iter().map(|e| format!("{e:?}")).collect();
+                let tree_choices = tc.borrow_mut().dbg.take().unwrap_or_default();
+                self.debug_out.push(json!({"step": steps, "action": action_list(&key), "state": c.raw_dump(), "journal": j,
+                                           "tree": tree_choices}));
+            }
             let t = tc.borrow();
             path.extend(t.path.iter().copied());
             node = t.node;
         }
+        if dbg {
+            let mut gs = c.gs.clone();
+            let o = Observation::from_state(&mut gs, side);
+            self.debug_out.push(json!({"step": "fine", "value": value, "obs": obs_summary(&o), "state": c.raw_dump()}));
+        }
         tree.borrow_mut().backup(&path, value);
+        if self.log.is_some() {
+            self.vals.push(value);
+        }
         Ok(())
     }
 
@@ -1075,13 +1131,16 @@ impl SearchCore {
             let mut t = tree.borrow_mut();
             self.expand(&mut t, 0, priors, v);
             t.backup(&[0], v);
+            if self.log.is_some() {
+                self.vals.push(v);
+            }
             return Ok(());
         }
         let pick = tree.borrow().puct_select(0, legal, self.c_puct);
         let Some(ci) = pick else { return Ok(()) };
         let (key, child) = tree.borrow().nodes[0].children[ci].clone();
         let tc = Rc::new(RefCell::new(TreeChooser { tree: tree.clone(), me: side, node: child, path: Vec::new(),
-                                                     c_puct: self.c_puct }));
+                                                     c_puct: self.c_puct, dbg: None }));
         let dyn_tc: Rc<RefCell<dyn Chooser>> = tc.clone();
         c.chooser = Some(dyn_tc);
         let r = self.step(&mut c, point, &key, bf_idx).and_then(|_| Self::settle(&mut c));
@@ -1094,6 +1153,9 @@ impl SearchCore {
             None => state_value(&mut c.gs, side),
         };
         tree.borrow_mut().backup(&path, value);
+        if self.log.is_some() {
+            self.vals.push(value);
+        }
         Ok(())
     }
 
@@ -1173,7 +1235,8 @@ impl SearchCore {
             .map(|(a, c)| { let n = &t.nodes[*c]; json!([action_list(a), n.n, n.q, n.w, sub(t, *c, 3)]) }).collect();
         log.push(json!({"k": "search", "seat": self.side.name(), "point": point.name(), "turn": g.gs.turn,
                         "menu": legal.iter().map(action_list).collect::<Vec<_>>(), "value": root.value,
-                        "P": p, "children": ch, "action": action_list(chosen), "nodes": t.nodes.len()}));
+                        "P": p, "children": ch, "action": action_list(chosen), "nodes": t.nodes.len(),
+                        "vals": std::mem::take(&mut self.vals)}));
     }
 
     /// py: replay_values — each option of the real loop's choice, its segment

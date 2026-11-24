@@ -62,7 +62,7 @@ def hook_python(log: list) -> None:
             "menu": [_alist(a) for a in legal], "value": root.value,
             "P": [[list(a), p] for a, p in root.P.items()],
             "children": [[list(a), c.N, c.Q, c.W, _sub(c, 3)] for a, c in root.children.items()],
-            "action": list(key), "nodes": _count(root)})
+            "action": list(key), "nodes": _count(root), "vals": self.__dict__.pop("_vals", [])})
         return key
 
     def decide_mulligan(self):
@@ -75,6 +75,13 @@ def hook_python(log: list) -> None:
                               "values": [[c, v] for c, v in rows], "chosen": best_combo})
         return best_combo
 
+    backup = M.NetGuidedMCTSAgent._backup
+
+    def _backup(self, path, value):
+        self.__dict__.setdefault("_vals", []).append(value)
+        return backup(self, path, value)
+
+    M.NetGuidedMCTSAgent._backup = _backup
     M.NetGuidedMCTSAgent._conclude = _conclude
     M.NetGuidedMCTSAgent.decide_mulligan = decide_mulligan
     M.NetGuidedMCTSAgent._parita = True

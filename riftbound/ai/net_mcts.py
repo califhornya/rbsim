@@ -36,6 +36,7 @@ choice ahead (_choices_ahead).
 
 from __future__ import annotations
 
+import dataclasses
 import itertools
 import math
 import random
@@ -90,10 +91,32 @@ def _searchable(kind: str, side: str, me: str, n: int) -> bool:
     return side == me and n > 1 and not (UNSEARCHED_CHOICES and kind.startswith(UNSEARCHED_CHOICES))
 
 
+def _stable_repr(x) -> str:
+    """repr(x) with every set's elements in sorted order. A set's repr follows
+    the elements' memory addresses: a battlefield's `combat_designated` in a
+    trigger's repr made the same option a different key on each copy of the
+    game (fix of 24/11, docs/rust/RAPPORTO_ARENA.md)."""
+    if dataclasses.is_dataclass(x) and not isinstance(x, type):
+        return f"{type(x).__qualname__}(" + ", ".join(
+            f"{f.name}={_stable_repr(getattr(x, f.name))}" for f in dataclasses.fields(x) if f.repr) + ")"
+    if isinstance(x, (set, frozenset)):
+        return "{" + ", ".join(sorted(_stable_repr(v) for v in x)) + "}" if x else repr(x)
+    if isinstance(x, list):
+        return "[" + ", ".join(_stable_repr(v) for v in x) + "]"
+    if isinstance(x, tuple):
+        return "(" + ", ".join(_stable_repr(v) for v in x) + ("," if len(x) == 1 else "") + ")"
+    if isinstance(x, dict):
+        return "{" + ", ".join(f"{_stable_repr(k)}: {_stable_repr(v)}" for k, v in x.items()) + "}"
+    return repr(x)
+
+
 def _label(loop, side: str, option, i: int) -> str:
     """An option's description, the same on every copy of the game (an object
-    without one is named by its place among the options)."""
+    without one is named by its place among the options; an object's repr
+    with its sets in sorted order)."""
     text = describe_option(loop, side, option)
+    if "combat_designated={" in text:
+        text = _stable_repr(option[0] if isinstance(option, tuple) and option else option)
     return f"{type(option).__name__} #{i}" if " at 0x" in text else text
 
 

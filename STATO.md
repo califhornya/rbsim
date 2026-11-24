@@ -48,6 +48,10 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
   (`bash scripts/rust/arena_mista.command` sul Mac, 2-3 ore).
 - Rengar nel motore Rust (in parallelo, come dice Astra).
 
+- Divergenza del seme 70113 spiegata: chiavi della ricerca Python dipendenti dall'ordine di un
+  insieme (indirizzi di memoria); correzione minima in `net_mcts._label` (regola del congelamento),
+  Rust già deterministico. Rilancio dell'arena con `--spiegata 70113:A` (riprende).
+
 ## Decisioni prese il 24/11 pomeriggio
 - Budget: metodo (a) di Astra; verifica esatta con due copie a passo comune (niente import
   di posizioni); l'importatore completo seguirà le esigenze dei test.
