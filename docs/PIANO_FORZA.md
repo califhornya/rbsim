@@ -413,3 +413,21 @@ contro il bot a mano.
   possono usare un processo per thread. (Il raddoppio del tempo, 20/11, non
   aveva aiutato: 0,472.) `arena_mazzi.py`: --budget-candidato,
   --budget-avversario, --tenuta, iterazioni per decisione nel rapporto.
+- 23/11, arena finale, fase B (server, 32 processi, 135 min): bot con prior
+  ekris_s12/ckpt_040000 (sha256 f8d8469b506dfc1d) contro il campione (prior
+  ekr_s8/ckpt_020032, sha256 87bfcd4decf9d1d3): EK **0,539 ± 0,019**
+  (0,520-0,559), ER **0,537 ± 0,019** (0,518-0,556), KR **0,518 ± 0,019**
+  (0,499-0,537); EI 0,548, KI 0,618, RI 0,575, blocco Ivern **0,581 ±
+  0,018** (0,563-0,598); ES 0,542, KS 0,542, RS 0,544, IS 0,534, blocco Sett
+  **0,540 ± 0,017** (0,523-0,558). **PROMOSSO**: il campione è il bot a mano
+  con i prior di `runs/sett/ekris_s12/ckpt_040000.pt`, a cinque mazzi; sopra
+  il vecchio anche nei tre matchup storici.
+- 23/11, prova un processo per thread (server, `scripts/prova_smt.sh`, 26
+  min): iterazioni per decisione del campione 151,5 con 32 processi, 93 con
+  64 (f = 0,61; sul Mac ~170). Campione a 0,246 s contro campione a 0,4 s,
+  100 coppie per matchup sui dieci: a pesi uguali **0,484 ± 0,014**
+  (0,470-0,498): la regola (limite inferiore > 0,47) passa **per un
+  soffio**. Le iterazioni in meno indeboliscono il bot in modo misurabile ma
+  piccolo (~1,6 punti; l'IC sta tutto sotto 0,50). Decisione per regola: le
+  arene possono usare un processo per thread (~2x più veloci), sempre lo
+  stesso numero di processi dentro una stessa arena.

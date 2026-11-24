@@ -1,7 +1,8 @@
 # STATO
 
-Aggiornato: 2026-11-23. Ramo `claude/peaceful-lamport-gynyab`, porting Rust;
-base `6427b90` (punta di `claude/rbsim2026-boot1-results-373ku0`, il ramo dei training).
+Aggiornato: 2026-11-24. Ramo `rust` (ex `claude/peaceful-lamport-gynyab`): la linea
+di lavoro. Contiene anche tutto il ramo dei training (`rbsim2026-boot1-results`, unito
+il 24/11). `main` resta fermo al 19/11.
 
 ## Obiettivo
 Motore Riftbound fedele a `docs/rules/CORE_RULES.md` e al testo stampato delle
@@ -24,6 +25,8 @@ esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
 - Sideboard EK (4 verbi) non portata: non entra in partita.
 - Errore Python dimostrato (contesto `made` di `PPOAgent.inner` legato a `id()`):
   test che fallisce + fix in commit separati (`9275f8f`, `f8a50e4`); Rust invariato.
+- (Utente, 24/11) `main` resta fermo; si lavora su `rust`. Rami dei training e
+  intermedi (`wonderful-mendel`, `rbsim2026-boot1-results`) uniti qui e cancellati.
 
 ## Fatto
 - F0 misure Python; F1 traccia/canon/comparatore; motore Rust (`rust/rbsim-core`).
@@ -42,16 +45,22 @@ esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
   Raccolta un core ×4,2 (self) e ×5,2 (contro simple_trade); ciclo 8 processi
   5,02 → 3,84 s (×1,31): 1.000 partite 1,31 → 1,00 min; aggiornamento 80% del ciclo Rust.
 - Dopo il fix di `made`: ciclo col pool identico Python/Rust (hash esempi e pesi).
+- Training (fino al 23/11, `docs/PIANO_FORZA.md`): campione = bot a mano + prior
+  `runs/sett/ekris_s12/ckpt_040000.pt` (cinque mazzi), promosso: storici 0,539 / 0,537 /
+  0,518, Ivern 0,581, Sett 0,540 contro ekr_s8. Arena a 64 processi: 0,484 (lim. inf.
+  0,470), passa per un soffio.
 
 ## In corso
 Niente: traguardo EK chiuso, in attesa della decisione sul passo successivo.
 
 ## Prossimi passi
-1. Portare il fix di `made` sul ramo dei training (decide Matteo).
-2. Decide Matteo: arena su Rust (copie con scelta pendente, `priors`, budget ridotto
+1. Decide Matteo: arena su Rust (copie con scelta pendente, `priors`, budget ridotto
    validato a posti scambiati), oppure Rengar/Ivern/Sett per il PPO multi-mazzo.
-3. Ciclo PPO oltre ×1,3 (Mac): aggiornamento (80% del ciclo Rust) e forward a batch 1
+   Il fix di `made` vale già per i training: sono sullo stesso ramo.
+2. Ciclo PPO oltre ×1,3 (Mac): aggiornamento (80% del ciclo Rust) e forward a batch 1
    (fuori dal motore).
+3. Dal ramo dei training, aperti: scelta della tappa, lr; GIOCATE.md §6; D71 se
+   l'utente decide. Sul Mac: `git fetch && git checkout rust`.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs` = metodi di GameLoop,
