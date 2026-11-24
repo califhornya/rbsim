@@ -52,6 +52,15 @@ def _block(parts: list) -> tuple:
     return sum(m for m, _ in parts) / len(parts), sum(h * h for _, h in parts) ** 0.5 / len(parts)
 
 
+def _game(job):
+    """A game on the engine its matchup plays on (--motore)."""
+    engine, task = job
+    if engine == "rust":
+        from riftbound.rs.arena_rs import game
+        return game(task)
+    return A._game(task)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ckpt", required=True, help="i prior PPO del candidato")
@@ -69,6 +78,9 @@ def main() -> None:
                     help="blocchi (matchup separati da virgole) che, a pesi uguali, devono avere limite inferiore > 0,47")
     ap.add_argument("--budget-candidato", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--budget-avversario", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
+    ap.add_argument("--motore", choices=("python", "rust"), default="python",
+                    help="rust: i matchup coperti dal motore Rust (oggi EK, riconosciuti dal contenuto delle "
+                         "liste) giocano su Rust (riftbound/rs/arena_rs.py), gli altri su Python")
     args = ap.parse_args()
     from riftbound.ai.ppo.collect import DECK_NAME
     blocks = [b.split(",") for b in args.blocchi]
@@ -101,6 +113,22 @@ def main() -> None:
            f"> 0,47; " if holds else "") +
         f"tutte -> {args.esito_positivo.lower()}")
     say("   " + "; ".join(f"{mu} {pairs[mu]} coppie, seed {s0[mu]}-{s0[mu] + pairs[mu] - 1}" for mu in mus))
+    from riftbound.ai.ppo.collect import DECK_OF
+    from riftbound.provenienza import REGOLE_PYTHON, file_sha, provenienza, registra
+    if args.motore == "rust":
+        import riftbound_rs  # noqa: F401  (the extension must be there: no silent fallback)
+        from riftbound.rs.arena_rs import coperto
+        motore = {mu: "rust" if coperto(mu) else "python" for mu in mus}
+    else:
+        motore = {mu: "python" for mu in mus}
+    sha_c, sha_a = file_sha(args.ckpt), file_sha(args.ckpt_avversario)
+    registra(args.out.parent, provenienza(
+        motore=motore, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})},
+        checkpoint={"candidato": args.ckpt, "avversario": args.ckpt_avversario},
+        arena=str(args.out), budget={"candidato": args.budget_candidato or A.REF_BUDGET,
+                                     "avversario": args.budget_avversario or A.REF_BUDGET}))
+    say(f"   provenienza in {args.out.parent / 'provenienza.jsonl'}; motore: "
+        + ", ".join(f"{mu} {m}" for mu, m in motore.items()))
 
     tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu,
               args.budget_candidato, args.budget_avversario)
@@ -109,8 +137,13 @@ def main() -> None:
     if righe.exists():
         for line in open(righe):
             r = json.loads(line)
+            # Only comparable results: same checkpoints (path and, when recorded, hash),
+            # budgets, engine and rules (rows before 24/11 have neither: Python, 6427b90).
             if r["ckpt"] == args.ckpt and r["avversario"] == args.ckpt_avversario and \
-                    r.get("budget_c") == args.budget_candidato and r.get("budget_a") == args.budget_avversario:
+                    r.get("budget_c") == args.budget_candidato and r.get("budget_a") == args.budget_avversario and \
+                    r.get("motore", "python") == motore.get(r["mu"], "python") and \
+                    r.get("regole", REGOLE_PYTHON) == REGOLE_PYTHON and \
+                    r.get("sha_c", sha_c) == sha_c and r.get("sha_a", sha_a) == sha_a:
                 rows.append((r["seed"], r["starter"], r["seat"], r["score"], r["mu"]))
     done = {(r[0], r[2], r[4]) for r in rows}
     todo = [t for t in tasks if (t[0], t[2], t[7]) not in done]
@@ -119,13 +152,14 @@ def main() -> None:
     t0 = time.time()
     iters: dict = {"candidato": [], "avversario": []}      # this launch's games only
     with Pool(args.workers, initializer=B._init) as pool, open(righe, "a") as f:
-        for task, r in zip(todo, pool.imap(A._game, todo)):
+        for task, r in zip(todo, pool.imap(_game, [(motore[t[7]], t) for t in todo])):
             mu = task[7]
             rows.append((r[0], r[1], r[2], r[3], mu))
             iters["candidato"] += r[4]
             iters["avversario"] += r[5]
             row = {"ckpt": args.ckpt, "avversario": args.ckpt_avversario, "seed": r[0],
-                   "starter": r[1], "seat": r[2], "score": r[3], "mu": mu}
+                   "starter": r[1], "seat": r[2], "score": r[3], "mu": mu, "motore": motore[mu],
+                   "regole": REGOLE_PYTHON, "sha_c": sha_c, "sha_a": sha_a}
             if args.budget_candidato is not None or args.budget_avversario is not None:
                 row |= {"budget_c": args.budget_candidato, "budget_a": args.budget_avversario}
             f.write(json.dumps(row) + "\n")

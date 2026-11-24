@@ -13,6 +13,8 @@ use rbsim_core::agent::{Agent, Chooser};
 use rbsim_core::agents::{RandomAgent, SideChooser, SimpleTradeAgent};
 
 mod ppo;
+mod search_py;
+use rbsim_core::search::{Layers, SearchAgent, SearchCore};
 use rbsim_core::game::Game as CoreGame;
 use rbsim_core::registry::Registry as CoreRegistry;
 use rbsim_core::trace::{ReplayAgent, ReplayChooser, Sink, TraceAgent, TraceChooser};
@@ -58,6 +60,10 @@ struct Game {
     sink: Option<Sink>,
     winner: Option<String>,
     turns: i64,
+    /// The search agents (py: HandwrittenAgent / PPOPriorAgent) and their
+    /// shared choosers on the real loop.
+    search: [Option<Rc<RefCell<SearchCore>>>; 2],
+    layers: Option<Rc<RefCell<Layers>>>,
 }
 
 #[pymethods]
@@ -68,7 +74,7 @@ impl Game {
         let a = rbsim_core::setup::load_deck(deck_a_json).map_err(serr)?;
         let b = rbsim_core::setup::load_deck(deck_b_json).map_err(serr)?;
         let g = rbsim_core::setup::build_game(reg.reg.clone(), seed, &a, &b, first_player, max_turns).map_err(serr)?;
-        Ok(Game { g, ppo: [None, None], sink: None, winner: None, turns: 0 })
+        Ok(Game { g, ppo: [None, None], sink: None, winner: None, turns: 0, search: [None, None], layers: None })
     }
 
     /// A game from a canonical tree (canon.canonical_state), RNG seeded with `seed`.
@@ -76,7 +82,7 @@ impl Game {
     fn from_canonical(reg: &Registry, tree_json: &str, seed: i64) -> PyResult<Game> {
         let tree: serde_json::Value = serde_json::from_str(tree_json).map_err(|e| serr(e.to_string()))?;
         let gs = rbsim_core::import::from_canonical(reg.reg.clone(), &tree, seed as i128).map_err(serr)?;
-        Ok(Game { g: CoreGame::new(gs), ppo: [None, None], sink: None, winner: None, turns: 0 })
+        Ok(Game { g: CoreGame::new(gs), ppo: [None, None], sink: None, winner: None, turns: 0, search: [None, None], layers: None })
     }
 
     /// The state, raw (canon.py's RawDumper format), as JSON.
@@ -136,6 +142,50 @@ impl Game {
         self.g.agents[s.idx()] = Some(d);
         self.g.gs.players[s.idx()].has_agent = true;
         Ok(())
+    }
+
+    /// A search agent for seat "A" / "B" (py: HandwrittenAgent(p, iterations,
+    /// rng=random.Random(seed), budget); with `probs`, PPOPriorAgent: the net's
+    /// softmax over each menu, see search_py.rs). `log`: one row per searched
+    /// decision (search_log).
+    #[pyo3(signature = (seat, iterations, seed, budget=None, probs=None, log=false))]
+    fn set_search_agent(&mut self, seat: &str, iterations: usize, seed: i64, budget: Option<f64>,
+                        probs: Option<Py<PyAny>>, log: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let layers = self.layers.get_or_insert_with(|| Rc::new(RefCell::new(Layers::default()))).clone();
+        let prior: Option<Box<dyn rbsim_core::search::Prior>> =
+            probs.map(|p| Box::new(search_py::PyPrior { probs: p }) as Box<dyn rbsim_core::search::Prior>);
+        let core = SearchCore::new(s, iterations, seed as i128, budget, prior, layers);
+        if log {
+            core.borrow_mut().log = Some(Vec::new());
+        }
+        self.search[s.idx()] = Some(core.clone());
+        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(SearchAgent { core }));
+        self.g.agents[s.idx()] = Some(a);
+        self.g.gs.players[s.idx()].has_agent = true;
+        Ok(())
+    }
+
+    /// A search seat's rows (JSON list), [] for another seat.
+    fn search_log(&self, seat: &str) -> PyResult<String> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => serde_json::Value::Array(c.borrow().log.clone().unwrap_or_default()).to_string(),
+            None => "[]".into(),
+        })
+    }
+
+    /// A search seat's (iterations of each main-turn search under a budget,
+    /// empty turns, turns).
+    fn search_stats(&self, seat: &str) -> PyResult<(Vec<usize>, i64, i64)> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => {
+                let c = c.borrow();
+                (c.main_iters.clone(), c.empty_turns, c.turns)
+            }
+            None => (Vec::new(), 0, 0),
+        })
     }
 
     /// The loop's chooser: each choice to the agent of the side making it
@@ -221,8 +271,15 @@ impl Game {
     }
 }
 
+/// How many search agents are alive (a finished, dropped game frees its own).
+#[pyfunction]
+fn live_search_agents() -> i64 {
+    rbsim_core::search::live_cores()
+}
+
 #[pymodule]
 fn riftbound_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(live_search_agents, m)?)?;
     m.add_class::<Registry>()?;
     m.add_class::<Game>()?;
     Ok(())

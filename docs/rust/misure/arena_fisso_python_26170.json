@@ -1,0 +1,128 @@
+{
+ "cosa": "bench_arena_fisso",
+ "motore": "python",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": "3.13.18",
+ "torch": "2.13.0+cu130",
+ "thread_torch": 1,
+ "processi": 1,
+ "mazzi": "EK",
+ "bot": "PPOPriorAgent (stesso checkpoint nei due posti)",
+ "pesi": "PPONet() dal seme 1",
+ "pesi_sha256_16": "02c45ba0d9b97266",
+ "lavoro": {
+  "iterazioni": 50
+ },
+ "semi": [
+  40000,
+  40003
+ ],
+ "partite": 8,
+ "totale_s": 88.758,
+ "mediana_parete_s": 11.4205,
+ "minimo_parete_s": 8.465,
+ "massimo_parete_s": 12.983,
+ "quote": {
+  "motore e ricerca": 0.8486,
+  "rete": 0.0884,
+  "osservazione": 0.053,
+  "descrittori": 0.0098
+ },
+ "chiamate": {
+  "osservazione": 37410,
+  "descrittori": 91888,
+  "rete": 11028,
+  "partita": 8
+ },
+ "partite_dettaglio": [
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 11.68,
+   "cpu_s": 11.652,
+   "ricerche": 68,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 11.194,
+   "cpu_s": 11.18,
+   "ricerche": 68,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 8.465,
+   "cpu_s": 8.433,
+   "ricerche": 61,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 9.842,
+   "cpu_s": 9.807,
+   "ricerche": 61,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 12.983,
+   "cpu_s": 12.919,
+   "ricerche": 64,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 12.049,
+   "cpu_s": 12.021,
+   "ricerche": 64,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 18,
+   "parete_s": 10.885,
+   "cpu_s": 10.879,
+   "ricerche": 65,
+   "iter_medie_principali": null
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 18,
+   "parete_s": 11.647,
+   "cpu_s": 11.559,
+   "ricerche": 65,
+   "iter_medie_principali": null
+  }
+ ]
+}

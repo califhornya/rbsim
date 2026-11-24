@@ -150,14 +150,23 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
     return out
 
 
+def _motore(kw: dict) -> str:
+    """The engine a game of collect.play with these arguments goes to: Rust
+    for Evelynn-Kha'Zix (the lists recognised by their content, not their
+    path: riftbound/provenienza.py) when --motore rust, Python otherwise."""
+    from riftbound.ai.ppo.collect import EVE, KHA
+    from riftbound.provenienza import lista_sha
+    ek = {lista_sha(kw.get("deck_a", EVE)), lista_sha(kw.get("deck_b", KHA))} <= {lista_sha(EVE), lista_sha(KHA)}
+    rust = os.environ.get("RBSIM_MOTORE", "python") == "rust" and ek and kw.get("opponent") != "bot"
+    return "rust" if rust else "python"
+
+
 def _play(seed, nets, learners, **kw):
     """collect.play on the engine RBSIM_MOTORE names (--motore): "rust" plays
     the Evelynn-Kha'Zix games on the Rust engine (riftbound/rs/collect_rs.py,
     the same examples bit for bit); the other matchups and the games against
     the hand-written bot stay on the Python engine (not ported yet)."""
-    from riftbound.ai.ppo.collect import EVE, KHA
-    ek = {Path(kw.get("deck_a", EVE)), Path(kw.get("deck_b", KHA))} <= {Path(EVE), Path(KHA)}
-    if os.environ.get("RBSIM_MOTORE", "python") == "rust" and ek and kw.get("opponent") != "bot":
+    if _motore(kw) == "rust":
         from riftbound.rs.collect_rs import play
     else:
         from riftbound.ai.ppo.collect import play
@@ -297,6 +306,16 @@ def main() -> None:
     if (run / "ottimizzatore.pt").exists():
         opt.load_state_dict(torch.load(run / "ottimizzatore.pt"))
     rng = random.Random(args.seme * 1_000_003 + st["partite"])
+    from riftbound.ai.ppo.collect import DECK_OF
+    from riftbound.provenienza import REGOLE_PYTHON, provenienza, registra
+    mus = list(dict.fromkeys(list(MAZZI[args.mazzi]) + panel_matchups))
+    motori = {mu: _motore({"deck_a": DECK_OF[mu[0]], "deck_b": DECK_OF[mu[1]]}) for mu in mus} | {"bot": "python"}
+    registra(run, provenienza(
+        motore=motori, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})},
+        checkpoint={"init": args.init, "corrente": run / "corrente.pt" if (run / "corrente.pt").exists() else None}
+        | {f"ancora {a}": a for a in anchors}, partite=st["partite"], opzioni=vars(args) | {"run_dir": str(run)}))
+    say(f"provenienza.jsonl: regole {REGOLE_PYTHON}, motore "
+        + ", ".join(f"{mu} {m}" for mu, m in motori.items()))
     pool = Pool(args.workers, initializer=_init)
 
     extra = [mu for mu in panel_matchups if mu != "EK"]

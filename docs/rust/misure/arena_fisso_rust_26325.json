@@ -1,0 +1,116 @@
+{
+ "cosa": "bench_arena_fisso",
+ "motore": "rust",
+ "macchina": "vm",
+ "cpu": "x86_64",
+ "python": "3.13.18",
+ "torch": "2.13.0+cu130",
+ "thread_torch": 1,
+ "processi": 1,
+ "mazzi": "EK",
+ "bot": "PPOPriorAgent su Rust (stesso checkpoint nei due posti)",
+ "pesi": "PPONet() dal seme 1",
+ "pesi_sha256_16": "02c45ba0d9b97266",
+ "lavoro": {
+  "iterazioni": 50
+ },
+ "semi": [
+  40000,
+  40003
+ ],
+ "partite": 8,
+ "totale_s": 11.679,
+ "mediana_parete_s": 1.387,
+ "minimo_parete_s": 1.102,
+ "massimo_parete_s": 1.853,
+ "quote": {
+  "rete": 0.6385,
+  "motore e ricerca": 0.356
+ },
+ "chiamate": {
+  "rete": 11028,
+  "partita": 8
+ },
+ "partite_dettaglio": [
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 1.853,
+   "cpu_s": 1.847,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 1.744,
+   "cpu_s": 1.726,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 1.102,
+   "cpu_s": 1.101,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 1.166,
+   "cpu_s": 1.166,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 1.29,
+   "cpu_s": 1.29,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 1.451,
+   "cpu_s": 1.445,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 18,
+   "parete_s": 1.685,
+   "cpu_s": 1.683,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 18,
+   "parete_s": 1.323,
+   "cpu_s": 1.321,
+   "iter_medie_principali": 50
+  }
+ ]
+}

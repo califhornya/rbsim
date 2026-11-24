@@ -309,6 +309,7 @@ name = "rbsim-core"
 version = "0.1.0"
 dependencies = [
  "hex",
+ "libc",
  "regex",
  "serde",
  "serde_json",
