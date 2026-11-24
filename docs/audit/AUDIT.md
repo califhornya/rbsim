@@ -23,7 +23,7 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**After the freeze (2026-11-24):** D72-D74 found in games in the coach page, open, to fix in Rust
+**After the freeze (2026-11-24):** D72-D75 found in games in the coach page, open, to fix in Rust
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -156,6 +156,7 @@ From now on:
 | D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | open, to fix in Rust |
 | D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | open, to fix in Rust |
 | D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | open, to fix in Rust |
+| D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | open, to fix in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1099,6 +1100,32 @@ engine is frozen"): written here, fixed once in Rust.
   move to "my location", where the default is right.
 - **Fix (Rust).** `where: anywhere` for both effects of Pillaged Armory. Red
   test first with the position above.
+
+### D75. Sett Kingpin's Might from buffed friendly units never applies
+
+- **Card.** Sett Kingpin (champion, Might 5): "TANK ... I get +1 [Might] for
+  each buffed friendly unit at my battlefield." No "other": a buffed Kingpin
+  counts itself (the cards that leave themselves out say "another" or
+  "other", e.g. Wraith of Echoes, the "Other friendly units ..." examples of
+  §478). A buffed Kingpin alone: 5 + 1 (its buff) + 1 = 7.
+- **Seen.** In the coach page (24/11, Sett against Sett): a buffed Kingpin
+  at 6.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `unit`):
+  A's Sett Kingpin at BF0 with a buff, `_recompute_passives()`: Might 6
+  (expected 7). With a buffed Pit Rookie there too: still 6 (expected 8).
+- **Engine.** The card's effect is `grant_temporary_might_per_friendly`,
+  `trigger: passive`, `target_filter: {is_buffed: true, exclude_self: true}`.
+  `loop.py:_apply_passive_grant` folds only some verbs into
+  `passive_might`; this one is "safely ignored", so the passive never
+  applies (`docs/rust/RAPPORTO_SETT.md` already counted 0 executions). The
+  handler in `effects.py` would count every friendly unit, not the buffed
+  ones, and as temporary Might. `exclude_self` disagrees with the text.
+- **Weight.** Every Sett deck: the Kingpin is its champion, and Sett buffs
+  (Sett Brawler, Pit Rookie, Pillaged Armory, Call to Glory). In combat it
+  is 1 Might or more short; the champion's priors were trained this way.
+- **Fix (Rust).** A continuous +1 per buffed friendly unit at the Kingpin's
+  battlefield, itself included (none in base), recomputed with the other
+  passives. Red test first with the position above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
