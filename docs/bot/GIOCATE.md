@@ -161,3 +161,31 @@ Astra conta 71 scelte con la stessa regola: una scelta a opzione unica non conta
 Lo script `giocate.py` è collaudato qui con reti finte (riproduzione
 identica due volte, anche con il journal acceso; il passaggio al bot): con
 le reti vere non è stato eseguito.
+
+## 7. Il campione nella pagina coach: Call to Glory sprecata (25/11)
+
+Osservata da Matteo giocando a mano (`scripts/coach.py`, campione
+`ckpt_040000.pt` a 0,4 s, motore Python). Posizione non salvata: la pagina non
+tiene lo stato completo; la prossima volta "Segnala un problema" sul momento.
+
+- **Posizione.** Sett (Matteo) contro Sett (campione), turno 11, punti 5-3 per
+  Matteo. Il campione sposta Sett Kingpin dalla base a Packed Amphitheater,
+  controllato da Matteo: showdown. Kingpin a 6 (5 + 1 del campo per i
+  campioni; nessun buff). Di Matteo lì: un'unità di Might 2 (e Pillaged
+  Armory); Matteo ha 1 energia e una carta in mano (Fiora Victorious).
+- **Giocata.** Prima di qualsiasi mossa di Matteo, il campione lancia Call to
+  Glory (REACTION, +3 Might fino a fine turno) sul Kingpin, pagando le 3
+  energie (non ha un buff da spendere): una carta per uno scontro già vinto
+  6 a 2.
+- **Atteso (Matteo).** Passare e aspettare la reazione dell'avversario; Call
+  to Glory è una REACTION: si gioca dopo, solo se serve, quando la reazione
+  dell'avversario rimette in discussione il vantaggio di Might.
+- **Ipotesi, non verificate.** La ricerca dello showdown guarda un passo
+  (`reaction_iterations`) su copie con la mano di Matteo ricampionata: in
+  alcune Matteo ha un trucco e il +3 lo copre, e il valore di "tenere la
+  reazione per dopo" non si vede in un passo. `table_value` pesa il tavolo
+  più delle carte in mano; l'energia avanzata si perde a fine turno, quindi
+  il costo visto è solo la carta. A 0,4 s le visite sono poche.
+- **Da misurare.** Uno scenario con questa posizione (`docs/bot/scenari.json`,
+  `riftbound/ai/scenari.py`), ripetuto con semi diversi: quante volte il
+  campione lancia Call to Glory per primo, e se cambia con il budget.
