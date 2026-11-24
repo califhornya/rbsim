@@ -55,6 +55,8 @@ Rust costruisce la domanda, Python decide.
 - `AskPPO` (`riftbound/rs/agent_rs.py`) fa ciò che fa `PPOAgent._ask`: forward, campionamento col generatore dell'agente e record.
 - Con meno di due opzioni non c'è chiamata né estrazione.
 - I record sono identici bit per bit a quelli di Python: `x`, `q`, `src`, `ctx`, `otype`, `ocards`, `ofeats`, `a`, `logp`, `v`, `seat`, `turn`.
+- Il contesto `made` (scelte già fatte nella stessa domanda) ha come chiave il loop, il tipo di scelta e la sorgente: in Rust un `loop_id` unico, in Python gli oggetti stessi (fix `f8a50e4`; prima `id()`, che dipendeva dal riuso degli indirizzi).
+- Verifica del ciclo intero, col pool e l'aggiornamento: `scripts/rust/parita_ciclo.py --motore python|rust` dà gli stessi hash di esempi e pesi a ogni ciclo.
 
 ### Errori
 - Un ramo non portato dà `EngineError::NotPorted{dove, cosa}`, che risale sempre.

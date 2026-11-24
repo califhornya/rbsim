@@ -1,0 +1,55 @@
+{
+ "cosa": "bench_ppo_ciclo",
+ "motore": "python",
+ "macchina": "MACBOOKPRO-5442.station",
+ "cpu": "arm",
+ "python": "3.13.2",
+ "torch": "2.13.0",
+ "processi": 8,
+ "thread_torch_aggiornamento": 8,
+ "thread_torch_raccolta": 1,
+ "mazzi": "EK",
+ "seme": 1,
+ "pesi": "/Users/mateo/projects/rbsim2026/rbsim/runs/rengar/ekr_s8/ckpt_020032.pt",
+ "pesi_sha256_16": "6576d1fee3bd96ee",
+ "partite_per_ciclo": 64,
+ "avvio_pool_s": 0.034,
+ "riscaldamento": {
+  "ciclo": 0,
+  "raccolta_s": 2.779,
+  "aggiornamento_s": 3.173,
+  "esempi": 6537,
+  "turni_medi": 14.8
+ },
+ "cicli": [
+  {
+   "ciclo": 1,
+   "raccolta_s": 1.872,
+   "aggiornamento_s": 3.075,
+   "esempi": 6717,
+   "turni_medi": 15.11
+  },
+  {
+   "ciclo": 2,
+   "raccolta_s": 1.899,
+   "aggiornamento_s": 3.168,
+   "esempi": 6836,
+   "turni_medi": 15.5
+  },
+  {
+   "ciclo": 3,
+   "raccolta_s": 1.877,
+   "aggiornamento_s": 3.114,
+   "esempi": 6613,
+   "turni_medi": 15.09
+  }
+ ],
+ "mediana": {
+  "raccolta_s": 1.877,
+  "aggiornamento_s": 3.114,
+  "ciclo_s": 4.991
+ },
+ "quota_aggiornamento": 0.624,
+ "partite_ora_raccolta": 122749,
+ "partite_ora_ciclo": 46163
+}

@@ -22,6 +22,8 @@ esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
 - Copia di dichiarazione = loop nuovo (come `GameLoop(gs2)`); `bf.control()` muta
   lo stato: chiamato negli stessi punti (anche l'osservazione PPO).
 - Sideboard EK (4 verbi) non portata: non entra in partita.
+- Errore Python dimostrato (contesto `made` di `PPOAgent.inner` legato a `id()`):
+  test che fallisce + fix in commit separati (`9275f8f`, `f8a50e4`); Rust invariato.
 
 ## Fatto
 - F0 misure Python; F1 traccia/canon/comparatore; motore Rust (`rust/rbsim-core`).
@@ -36,16 +38,20 @@ esistente; prove riproducibili di correttezza (tracce appaiate) e velocità.
   1.000 partite 2,7 → 1,7 min. Rust: 84% della raccolta è ora il forward torch.
 - Errori Rust trovati e corretti: ordine chiavi del dump, cleanup_hidden_cards,
   copia di dichiarazione.
+- Mac (23/11, `ckpt_020032.pt`): parità esempi 20/20 → traguardo EK raggiunto.
+  Raccolta un core ×4,2 (self) e ×5,2 (contro simple_trade); ciclo 8 processi
+  5,02 → 3,84 s (×1,31): 1.000 partite 1,31 → 1,00 min; aggiornamento 80% del ciclo Rust.
+- Dopo il fix di `made`: ciclo col pool identico Python/Rust (hash esempi e pesi).
 
 ## In corso
-Chiusura EK: manca la prova con `ckpt_020032.pt` (sul Mac:
-`bash scripts/rust/confronto_mac.command <ckpt>`, oppure caricato in chat).
+Niente: traguardo EK chiuso, in attesa della decisione sul passo successivo.
 
 ## Prossimi passi
-1. Prova col checkpoint allenato; misure ufficiali sul Mac.
+1. Portare il fix di `made` sul ramo dei training (decide Matteo).
 2. Decide Matteo: arena su Rust (copie con scelta pendente, `priors`, budget ridotto
    validato a posti scambiati), oppure Rengar/Ivern/Sett per il PPO multi-mazzo.
-3. Ciclo PPO oltre ×1,6: aggiornamento (71%) e forward a batch 1 (fuori dal motore).
+3. Ciclo PPO oltre ×1,3 (Mac): aggiornamento (80% del ciclo Rust) e forward a batch 1
+   (fuori dal motore).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs` = metodi di GameLoop,
