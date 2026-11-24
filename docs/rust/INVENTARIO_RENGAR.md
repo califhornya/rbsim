@@ -92,7 +92,7 @@ Letta da: **Rust** (il nome compare nei sorgenti di rbsim-core), **solo Python**
 | FLOW | parola chiave | nessuno (testo) | Brittle Steel |
 | GANKING | parola chiave | Rust | Pyke Dockside Butcher |
 | HIDDEN | parola chiave | Rust | Elnuk Herd, Pyke Dockside Butcher |
-| LEGION | parola chiave | solo Python | Noxus Hopeful |
+| LEGION | parola chiave | nessuno (testo) | Noxus Hopeful |
 | REACTION | parola chiave | Rust | Thrill of the Hunt |
 
 ## Effetti per carta
@@ -129,5 +129,5 @@ Letta da: **Rust** (il nome compare nei sorgenti di rbsim-core), **solo Python**
 ## Sintesi
 
 - Carte: 25; effetti: 26; verbi: 15 (handler Rust 12, marcatori 3); condizioni 6, quantità 1, trigger 10, parole chiave 10.
-- Non portato: parola chiave LEGION.
+- Non portato: niente.
 - Mai eseguiti nel campione: nessuno.
