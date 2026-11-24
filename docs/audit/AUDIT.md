@@ -23,7 +23,7 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**After the freeze (2026-11-24):** D72-D75 found in games in the coach page, open, to fix in Rust
+**After the freeze (2026-11-24):** D72-D76 found in games in the coach page, open, to fix in Rust
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -157,6 +157,7 @@ From now on:
 | D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | open, to fix in Rust |
 | D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | open, to fix in Rust |
 | D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | open, to fix in Rust |
+| D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | open, to fix in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1126,6 +1127,29 @@ engine is frozen"): written here, fixed once in Rust.
 - **Fix (Rust).** A continuous +1 per buffed friendly unit at the Kingpin's
   battlefield, itself included (none in base), recomputed with the other
   passives. Red test first with the position above.
+
+### D76. A legend's "ready me" never readies it
+
+- **Card.** Sett The Boss: "If a buffed unit you control would die, you may
+  pay [rune], exhaust me, and spend its buff to heal it ... When you conquer,
+  ready me." Exhausted by a save, it is ready again when its player conquers.
+- **Seen.** Raised by the owner (24/11, Sett against Sett, coach page).
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `legend`,
+  `scripted`): A's legend Sett The Boss exhausted, a unit of A at BF0;
+  `loop._fire_scoring_trigger("on_conquer", bf, "A")`. The trigger goes on
+  the chain ("A TRIGGER on the chain: Sett The Boss (on_conquer)") and
+  resolves; the legend stays exhausted (expected ready).
+- **Engine.** The effect is `ready_unit`, `target: self`;
+  `effects.py:_resolve_targets` takes "self" from `_source_unit`, which looks
+  only at the units on the battlefields and in base: the legend's unit
+  (`legend_unit_A/B`) isn't there, so nothing is readied.
+- **Same encoding.** The other legends with a triggered `ready_unit` on
+  `self`: Irelia Blade Dancer (on conquer), Sivir Battle Mistress (when an
+  enemy unit dies). Not in the five decks.
+- **Weight.** Every Sett deck: after a save, a conquest in the same turn
+  should give the Boss another save; it doesn't.
+- **Fix (Rust).** "self" of a legend's ability is its legend unit. Red test
+  first with the position above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

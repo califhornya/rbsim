@@ -77,9 +77,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
-3. D72-D75 in Rust (AUDIT.md), test rosso prima: Rengar Trophy Hunter dove ci sono solo nemici;
+3. D72-D76 in Rust (AUDIT.md), test rosso prima: Rengar Trophy Hunter dove ci sono solo nemici;
    un'unità giocata con AMBUSH in uno showdown senza le passive del campo fino al ricalcolo;
-   Pillaged Armory che potenzia solo un'unità del suo campo; Sett Kingpin senza il +1 per le unità buffate.
+   Pillaged Armory che potenzia solo un'unità del suo campo; Sett Kingpin senza il +1 per le unità buffate;
+   Sett The Boss che non si prepara con la conquista.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
