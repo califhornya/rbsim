@@ -22,7 +22,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
 - Rust identico a Python, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
-- Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (EK, ER, KR, EI, KI, RI).
+- Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
 - Elementi della pila con identità (`ChainItem.uid`): in Python una scelta sulla pila è l'oggetto, non l'indice.
 - Sideboard provata con liste variate (`riftbound/rs/mazzi.py`): il training non fa sideboarding.
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
@@ -54,12 +54,16 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   nuovo (`docs/rust/misure/tenuti_ivern_*.json`), 720 partite d'arena e 53.355 ricerche confrontate.
   Mac col campione: esempi PPO 240/240, arena col prior EI/KI/RI 60/60 (6.120 ricerche), Rust ×15 a partita.
 
+- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, inventario `INVENTARIO_SETT.md`): costi aggiunti (Call to Glory),
+  "spendi un buff" (Monastery of Hirana), `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin.
+  Sviluppo: autonome 3.760/3.760, PPO bit per bit 960/960, replay 640/640, arena 80/80, 3 posizioni mirate;
+  `tests/rust` 97 verdi. Perimetro: `COPERTI` coi cinque mazzi fra loro. Nessuna divergenza del motore.
+
 ## In corso
-- Tappa Sett: inventario (`inventario.py --liste S --matchup ES KS RS IS Es Ks Rs Is`).
+- Sett: semi tenuti da parte (`bash scripts/rust/tenuti_sett.sh 4`), poi suite Python e PR verso `rust`.
 
 ## Prossimi passi
-1. Sett (ES, KS, RS, IS, mix `ekris`): porting, parità, posizioni mirate, semi tenuti da parte,
-   verifica sul Mac; aggiungere a `arena_rs.COPERTI`. Con Sett i cinque mazzi sono tutti su Rust.
+1. `sett_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su ES, KS, RS, IS).
 2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
@@ -71,9 +75,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
-  `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`,
+  `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`, `sett_mac.command`,
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
-- `tests/rust/`: test che caricano davvero l'estensione (`test_rengar.py`, `test_ivern.py`).
+- `tests/rust/`: test che caricano davvero l'estensione (`test_rengar.py`, `test_ivern.py`, `test_sett.py`).
 - `scripts/ppo.py` (`_motore`), `scripts/diag/arena_mazzi.py` (`--motore rust`).
 - `docs/RUST.md`, `docs/rust/` (rapporti, inventari, misure), `docs/audit/AUDIT.md`.
 - `riftbound/core/`: motore Python di riferimento (congelato).
