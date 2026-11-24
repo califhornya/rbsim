@@ -152,11 +152,13 @@ def main() -> None:
             for v in (es.params or {}).values():
                 if isinstance(v, str) and v in CARD_REGISTRY and v not in names:
                     names[v] = {f"creata da {c}"}
+    # Cards of the lists Rust already covers (arena_rs.COPERTI), other than the ones inventoried.
+    from riftbound.rs.arena_rs import COPERTI
+    covered = sorted(set("".join(COPERTI)) - set(args.liste.upper()), key="EKRIS".index)
     already = set()
-    if args.liste != "EK":
-        for c in "EK":
-            for cs in deck_cards(deck_path(c)).values():
-                already |= set(cs)
+    for c in covered:
+        for cs in deck_cards(deck_path(c)).values():
+            already |= set(cs)
     rv, rc, ra = rust_verbs(), rust_conditions(), rust_amount_sources()
     rs_str, py_str = rust_strings(), python_strings()
     calls = count_executions(args.partite, matchups)
@@ -184,7 +186,7 @@ def main() -> None:
              f"posto ({mus}, ciascuno anche rovesciato; minuscola = la lista con la sideboard nel mazzo, "
              "`riftbound/rs/mazzi.py`): self-play PPO a pesi dal seme 1, PPO contro simple_trade, random contro PPO. "
              "Sono le partite che il motore Rust gioca identiche.", "",
-             "## Carte", "", "| Carta | Dove | Tipo | Parole chiave |" + (" Già in EK |" if already else ""),
+             "## Carte", "", "| Carta | Dove | Tipo | Parole chiave |" + (f" Già in {''.join(covered)} |" if already else ""),
              "|---|---|---|---|" + ("---|" if already else "")]
     for c in sorted(names):
         s = CARD_REGISTRY[c]
