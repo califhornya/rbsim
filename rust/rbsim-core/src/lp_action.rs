@@ -3,7 +3,6 @@
 use crate::agent::{AIdx, AKind, Action};
 use crate::game::*;
 use crate::model::*;
-use crate::not_ported;
 use crate::types::*;
 
 impl Game {
@@ -64,13 +63,11 @@ impl Game {
                         let surcharge = self.destination_surcharge(card, dst.map(|d| d as i64), ap);
                         let (e, p) = self.effective_cost(card, ap, None)?;
                         let e = (e - self.destination_discount(card, dst.map(|d| d as i64), ap)?).max(0);
-                        if !extras.is_empty() {
-                            not_ported!("_apply_action", "cost extras");
-                        }
+                        let (extras, e, p) = self.choose_cost_extras(card, ap, extras, e, p)?;
                         if surcharge != 0 && !self.can_pay_generic_power(ap, surcharge + p.unwrap_or(0)) {
                             return Ok(());
                         }
-                        if !self.pay_card_x(ap, card, e, p, false, None)? {
+                        if !self.pay_card_x(ap, card, e, p, Some(extras), None)? {
                             return Ok(());
                         }
                         if surcharge != 0 {

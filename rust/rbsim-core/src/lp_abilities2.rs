@@ -35,6 +35,50 @@ impl Game {
         p
     }
 
+    /// py: _spend_buff(unit, side=None) — "When you spend a buff" (Fae Dragon) for its controller.
+    pub fn spend_buff(&mut self, unit: UnitId, side: Option<Side>) -> R<()> {
+        if self.gs.unit(unit).might_counters <= 0 {
+            return Ok(());
+        }
+        self.gs.unit_mut(unit).might_counters -= 1;
+        let side = side.or_else(|| self.locate_unit(unit).map(|w| w.0));
+        if let Some(s) = side {
+            let mut ex = Extra::default();
+            ex.set("triggering_unit", XVal::Unit(unit));
+            let c = self.gs.ucard(unit);
+            self.fire_units_trigger("on_buff_spent", s, None, Some(c), Some(ex))?;
+        }
+        Ok(())
+    }
+
+    /// py: _buff_to_spend(side, unit, who) — the unit whose buff a "spend a buff"
+    /// cost takes: "self", "other" (not the source), "any": one in base first, the weakest.
+    pub fn buff_to_spend(&mut self, side: Side, unit: Option<UnitId>, who: &str) -> R<Option<UnitId>> {
+        if who == "self" {
+            return Ok(unit.filter(|&u| self.gs.unit(u).might_counters > 0));
+        }
+        let cands: Vec<UnitId> = self
+            .friendly_units_of(side)
+            .into_iter()
+            .filter(|&u| self.gs.unit(u).might_counters > 0 && !(who == "other" && Some(u) == unit))
+            .collect();
+        if cands.is_empty() {
+            return Ok(None);
+        }
+        let key = |g: &Game, u: UnitId| (g.locate_unit(u).map_or(false, |w| w.1.is_some()), g.gs.unit_might(u));
+        let mut best = cands[0];
+        for &u in &cands[1..] {
+            if key(self, u) < key(self, best) {
+                best = u;
+            }
+        }
+        let opts: Vec<Opt> = cands.iter().map(|&u| Opt::Unit(u)).collect();
+        match self.choose("spend_buff", side, &opts, Opt::Unit(best), None)? {
+            Opt::Unit(u) => Ok(Some(u)),
+            _ => unreachable!("spend_buff chose a non-unit"),
+        }
+    }
+
     /// py: _activated_affordable(ap, unit, parsed)
     pub fn activated_affordable(&mut self, ap: Side, unit: Option<UnitId>, parsed: &ParsedCost) -> R<bool> {
         if parsed.tap && unit.map_or(false, |u| !self.gs.unit(u).ready) {
@@ -58,8 +102,13 @@ impl Game {
         if parsed.discard != 0 && (self.discardable(ap, parsed).len() as i64) < parsed.discard {
             return Ok(false);
         }
-        if parsed.spend_buff.is_some() || parsed.kill_other_token || parsed.kill_other_friendly {
-            not_ported!("_activated_affordable", "spend_buff / kill cost");
+        if let Some(sb) = parsed.spend_buff.clone().filter(|s| !s.is_empty()) {
+            if self.buff_to_spend(ap, unit, &sb)?.is_none() {
+                return Ok(false);
+            }
+        }
+        if parsed.kill_other_token || parsed.kill_other_friendly {
+            not_ported!("_activated_affordable", "kill cost");
         }
         if parsed.spend_xp != 0 && self.gs.get_xp(ap) < parsed.spend_xp {
             return Ok(false);

@@ -977,6 +977,8 @@ pub enum Opt {
     Trigger(usize),
     NoMore,
     Str(String),
+    /// A plain value (a dict of a cost_extras option: py `{"energy": 3, ...}`).
+    Json(Value),
     /// A tuple (location, object) or another small tuple.
     Tuple(Vec<Opt>),
     None,

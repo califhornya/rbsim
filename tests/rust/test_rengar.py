@@ -98,22 +98,20 @@ def test_arena_python_rust(net, seed, mu, bot, iters):
 def test_perimeter(monkeypatch):
     """The Rust engine plays EK, ER and KR in both seats (lists recognised by
     their content): the arena (arena_rs.coperto) and the PPO training
-    (scripts/ppo.py _motore); Sett's matchups, the sideboard list and the
-    games against the hand-written bot stay on Python (Ivern: test_ivern.py)."""
+    (scripts/ppo.py _motore); the sideboard list and the games against the
+    hand-written bot stay on Python (Ivern, Sett: test_ivern.py, test_sett.py)."""
     import importlib.util
     from riftbound.ai.ppo.collect import DECK_OF
     from riftbound.rs import arena_rs
     from riftbound.rs.mazzi import deck_path
     for mu in ("EK", "KE", "ER", "RE", "KR", "RK"):
         assert arena_rs.coperto(mu), mu
-    for mu in ("ES", "SR", "RS", "KS"):
-        assert not arena_rs.coperto(mu), mu
     assert not arena_rs.coperte(deck_path("r"), DECK_OF["E"])
     spec = importlib.util.spec_from_file_location("ppo_script", ROOT / "scripts/ppo.py")
     ppo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ppo)
     monkeypatch.setenv("RBSIM_MOTORE", "rust")
-    for mu, want in (("EK", "rust"), ("ER", "rust"), ("KR", "rust"), ("RE", "rust"), ("RS", "python")):
+    for mu, want in (("EK", "rust"), ("ER", "rust"), ("KR", "rust"), ("RE", "rust"), ("RS", "rust")):
         assert ppo._motore({"deck_a": DECK_OF[mu[0]], "deck_b": DECK_OF[mu[1]]}) == want, mu
     assert ppo._motore({"deck_a": DECK_OF["E"], "deck_b": DECK_OF["R"], "opponent": "bot"}) == "python"
     assert ppo._motore({}) == "rust"

@@ -28,6 +28,9 @@ FUORI = {
     # Grand Strategem (magie); escono unità e magie di pari ruolo, almeno una copia di ciascuna resta.
     "I": {"Stalwart Poro": 2, "Mutated Mouser": 2, "Trusty Ramhound": 1,
           "Defy": 2, "Back Off": 1, "Friendship": 1, "Raucous Anthem": 1},
+    # Sett: entrano solo magie (Decree of Strength, Decree of Unity, Repulse, Sabotage, Salvage, ×2);
+    # escono magie (una copia di ciascuna resta) e due unità da 3 copie.
+    "S": {"Call to Glory": 2, "Punch First": 2, "Rampage": 2, "Showstopper": 2, "Pit Rookie": 1, "First Mate": 1},
 }
 
 

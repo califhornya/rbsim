@@ -682,7 +682,6 @@ impl Game {
 
     /// py: _pay_discard_and_banish(ap, parsed, unit=None)
     pub fn pay_discard_and_banish(&mut self, ap: Side, parsed: &ParsedCost, unit: Option<UnitId>) -> R<()> {
-        let _ = unit;
         if parsed.banish_from_trash.as_ref().map_or(false, |v| truthy(Some(v))) {
             let mut card = self.trash_card_to_banish(ap, parsed);
             if let Some(c) = card {
@@ -702,8 +701,10 @@ impl Game {
         if parsed.discard != 0 {
             not_ported!("_pay_discard_and_banish", "discard cost");
         }
-        if parsed.spend_buff.is_some() {
-            not_ported!("_pay_discard_and_banish", "spend_buff cost");
+        if let Some(sb) = parsed.spend_buff.clone().filter(|s| !s.is_empty()) {
+            if let Some(holder) = self.buff_to_spend(ap, unit, &sb)? {
+                self.spend_buff(holder, Some(ap))?;
+            }
         }
         if parsed.kill_other_token || parsed.kill_other_friendly {
             not_ported!("_pay_discard_and_banish", "kill cost");
