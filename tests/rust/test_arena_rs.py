@@ -56,3 +56,17 @@ def test_arena_rs_frees_agents():
         arena_rs.game((seed, "a" if seed % 2 == 0 else "b", "A", "mano", None, "mano", None, "EK", 0.01, 0.01))
     gc.collect()
     assert riftbound_rs.live_search_agents() == before
+
+
+def test_arena_mista_lockstep():
+    """arena_mista.game: the Python copy and the Rust copy of one game in
+    step (each side's timed search repeated by the other copy with its count)
+    stay the same game: trace and every search identical."""
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import arena_mista as AM
+    for rust_seat in ("A", "B"):
+        r = AM.game((70000, "a", rust_seat, "seme:1", 0.004, 0.02, True))
+        assert "errore" not in r, r.get("errore")
+        assert "divergenza" not in r, r["divergenza"]
+        assert r["eventi"] > 50 and r["score"] in (0.0, 0.5, 1.0)
+        assert any(k.startswith("rs ") for k in r["iterazioni"]) and any(k.startswith("py ") for k in r["iterazioni"])

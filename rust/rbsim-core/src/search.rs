@@ -74,6 +74,16 @@ pub fn terminal_value(gs: &GameState, side: Side) -> Option<f64> {
 /// The PPO net's probabilities over a menu (PPOPriorAgent._evaluate: the
 /// forward and the softmax, float32), given what Rust builds: the encoded
 /// observation, the question, the context and the options' descriptors.
+/// Two copies of one game in step (scripts/rust/arena_mista.py): before each
+/// search `before` says whether this copy repeats the other's search (Some(n):
+/// exactly n iterations) or leads it (None: the agent's own budget, once the
+/// other copy is waiting); after a led search `after` passes its count on.
+/// `info`: the search's identity (seat, progressive, point, turn).
+pub trait Lockstep {
+    fn before(&mut self, info: &Value) -> R<Option<usize>>;
+    fn after(&mut self, info: &Value, n: usize) -> R<()>;
+}
+
 pub trait Prior {
     fn probs(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<Vec<f32>>;
 }
@@ -746,6 +756,9 @@ pub struct SearchCore {
     fallback_on: bool,
     /// For the parity checks: one row per searched decision (and mulligan).
     pub log: Option<Vec<Value>>,
+    /// The arena in step with a Python copy (None: the agent's own budget).
+    pub lockstep: Option<Box<dyn Lockstep>>,
+    searches: usize,
     me_ref: Option<Weak<RefCell<SearchCore>>>,
 }
 
@@ -784,6 +797,8 @@ impl SearchCore {
             stack,
             fallback_on: false,
             log: None,
+            lockstep: None,
+            searches: 0,
             me_ref: None,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
@@ -903,7 +918,23 @@ impl SearchCore {
         let tree = Rc::new(RefCell::new(Tree::default()));
         tree.borrow_mut().add();
         let turn = point == Point::TurnAction;
-        match self.budget {
+        let info = json!({"seat": self.side.name(), "k": self.searches, "point": point.name(), "turn": g.gs.turn});
+        self.searches += 1;
+        let fixed = match self.lockstep.as_mut() {
+            Some(l) => l.before(&info)?,
+            None => None,
+        };
+        if let Some(n) = fixed {
+            for _ in 0..n {
+                if turn {
+                    self.iterate(g, &tree, cards_played, legal)?;
+                } else {
+                    self.iterate_now(g, &tree, point, legal, bf_idx)?;
+                }
+            }
+            return Ok(tree);
+        }
+        let led = match self.budget {
             None => {
                 let n = if turn { self.iterations } else { self.reaction_iterations };
                 for _ in 0..n {
@@ -913,6 +944,7 @@ impl SearchCore {
                         self.iterate_now(g, &tree, point, legal, bf_idx)?;
                     }
                 }
+                n
             }
             Some(b) => {
                 let (t0, mut n) = (process_time(), 0usize);
@@ -927,7 +959,11 @@ impl SearchCore {
                 if turn {
                     self.main_iters.push(n);
                 }
+                n
             }
+        };
+        if let Some(l) = self.lockstep.as_mut() {
+            l.after(&info, led)?;
         }
         Ok(tree)
     }

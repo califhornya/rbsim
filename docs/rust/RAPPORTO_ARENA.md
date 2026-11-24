@@ -108,7 +108,37 @@ Apple M1 Max, checkpoint `runs/sett/ekris_s12/ckpt_040000.pt`.
 Sul Mac Rust è circa **14,6 volte** più veloce a parità di lavoro (8,5 su questa macchina): il forward
 della rete costa meno sull'M1 e pesa meno sul totale.
 
+## Forza a budget ridotto: arena mista a passo comune (metodo di Astra, 24/11)
+Domanda: il campione su Rust a 0,030 s CPU per ricerca è forte almeno quanto il campione su Python a
+0,400 s? Il primo tempo da provare viene da 0,400 / 14,6 ≈ 0,027 s, il rapporto misurato sul Mac.
+
+Una partita con un lato per motore non si gioca su un solo motore: si giocano due copie della stessa
+partita in due thread, una su Python e una su Rust (`scripts/rust/arena_mista.py`).
+- Chi cerca a tempo è la copia del suo motore: Python per il bot "Python", Rust per il bot "Rust".
+- Prima di partire col cronometro aspetta che l'altra copia sia ferma sulla stessa ricerca.
+- Finita la ricerca, passa il numero esatto di iterazioni; l'altra copia rifà la ricerca con quel numero.
+  A lavoro fisso i due motori sono identici, quindi le copie restano la stessa partita.
+- Vale anche per reazioni e showdown; mulligan e decisioni forzate restano come sono.
+- Controlli fuori dal cronometro:
+  - a ogni scambio, l'identità della ricerca (posto, progressivo, finestra, turno);
+  - a fine partita, traccia e ogni ricerca.
+
+Una partita divergente sospende l'esito.
+
+Prova in container: 12 partite con budget piccoli e rete casuale, tutte verificate e senza divergenze. Il bot
+con più tempo vince sempre, in tutti e due i versi, come ci si aspetta: decide il tempo concesso.
+
+Regole fissate prima (`scripts/rust/arena_mista.command`):
+- 800 coppie, semi 70000–70799; sono esclusi quelli di calibrazione e di parità;
+- posti scambiati nella coppia, primo giocatore bilanciato fra i semi;
+- punteggio del bot Rust (1, 0,5, 0) e IC 95% sulle medie delle coppie;
+- **promosso 0,030 s per Evelynn–Kha'Zix se il limite inferiore, prima dell'arrotondamento, supera 0,47**.
+
+Lo script riporta anche le iterazioni per tipo di ricerca (media, P10, mediana, P90) e il tempo reale per
+partita sul percorso Rust di produzione, con entrambi i bot a 0,030 s.
+Il budget validato andrà ricontrollato sui matchup successivi.
+
 ## Da fare (in ordine)
-1. **Forza a budget ridotto**: decisione di metodo aperta. Vedi STATO.md, "Decisioni da prendere".
+1. **Forza a budget ridotto**: `bash scripts/rust/arena_mista.command` sul Mac.
 2. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.
 3. **Giocare contro il bot su Rust**: oggi la partita interattiva (coach) usa il motore Python.

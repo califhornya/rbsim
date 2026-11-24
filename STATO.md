@@ -43,17 +43,20 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 - `arena_mazzi.py --motore rust`, `arena_rs.game`, `tests/rust/test_arena_rs.py`.
 
 ## In corso
-Niente: tappa A chiusa e verificata sul Mac; in attesa della decisione sotto.
+- Prova di forza a budget ridotto (Astra, 24/11): arena mista a passo comune, Rust 0,030 s
+  contro Python 0,400 s, 800 coppie, semi 70000–70799, promosso se lim. inf. > 0,47
+  (`bash scripts/rust/arena_mista.command` sul Mac, 2-3 ore).
+- Rengar nel motore Rust (in parallelo, come dice Astra).
 
-## Decisioni da prendere (Matteo)
-- Forza a budget ridotto: una partita mista Python/Rust non si può ancora giocare
-  (l'import di posizioni rifiuta catene aperte). Proposta: il riferimento "Python a
-  0,4 s" giocato su Rust a lavoro fisso, con le iterazioni che Python fa a 0,4 s
-  sul Mac (parità esatta a lavoro fisso); soglia: limite inferiore > 0,47.
+## Decisioni prese il 24/11 pomeriggio
+- Budget: metodo (a) di Astra; verifica esatta con due copie a passo comune (niente import
+  di posizioni); l'importatore completo seguirà le esigenze dei test.
 
 ## Prossimi passi
-1. Prova di forza a budget ridotto (dopo la decisione sopra).
-2. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo.
+1. Esito della prova mista; se promosso, arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust
+   --budget-candidato 0.03 --budget-avversario 0.03`).
+2. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo; budget da
+   ricontrollare sui nuovi matchup.
 3. Rete del prior in Rust o a batch (ora è il collo di bottiglia dell'arena).
 4. Partita interattiva contro il bot su Rust (oggi il coach usa Python).
 
@@ -63,6 +66,7 @@ Niente: tappa A chiusa e verificata sul Mac; in attesa della decisione sotto.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO, `search_py.rs` prior).
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py`, `trace_py.py`).
 - `riftbound/provenienza.py`: provenienza delle run.
+- `scripts/rust/arena_mista.py`: arena mista a passo comune (Python contro Rust).
 - `scripts/rust/`: verifiche (`arena_parita.py`, `diff_trace.py`, `autonome.py`, `parita_ppo.py`)
   e misure (`bench_arena_fisso.py`, `bench_ppo_ciclo.py`, `arena_mac.command`).
 - `scripts/diag/arena_mazzi.py`: l'arena (`--motore rust`).

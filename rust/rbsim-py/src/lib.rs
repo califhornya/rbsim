@@ -148,9 +148,11 @@ impl Game {
     /// rng=random.Random(seed), budget); with `probs`, PPOPriorAgent: the net's
     /// softmax over each menu, see search_py.rs). `log`: one row per searched
     /// decision (search_log).
-    #[pyo3(signature = (seat, iterations, seed, budget=None, probs=None, log=false))]
+    #[pyo3(signature = (seat, iterations, seed, budget=None, probs=None, log=false, before=None, after=None))]
+    #[allow(clippy::too_many_arguments)]
     fn set_search_agent(&mut self, seat: &str, iterations: usize, seed: i64, budget: Option<f64>,
-                        probs: Option<Py<PyAny>>, log: bool) -> PyResult<()> {
+                        probs: Option<Py<PyAny>>, log: bool, before: Option<Py<PyAny>>,
+                        after: Option<Py<PyAny>>) -> PyResult<()> {
         let s = seat_of(seat)?;
         let layers = self.layers.get_or_insert_with(|| Rc::new(RefCell::new(Layers::default()))).clone();
         let prior: Option<Box<dyn rbsim_core::search::Prior>> =
@@ -158,6 +160,9 @@ impl Game {
         let core = SearchCore::new(s, iterations, seed as i128, budget, prior, layers);
         if log {
             core.borrow_mut().log = Some(Vec::new());
+        }
+        if let (Some(before), Some(after)) = (before, after) {
+            core.borrow_mut().lockstep = Some(Box::new(search_py::PyLockstep { before, after }));
         }
         self.search[s.idx()] = Some(core.clone());
         let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(SearchAgent { core }));
