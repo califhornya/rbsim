@@ -10,8 +10,9 @@ the net (only with --net) and the simple bot. Without --net you play alone,
 with no advice and nothing saved for training (games.jsonl keeps the results).
 
 A local page (nothing leaves the machine) shows the board from your seat, as a
-table of card images (scripts/import_card_images.py copies them in; a card
-without one is drawn). At each of your decisions with more than one option you
+table of card images (scripts/import_card_images.py copies them in; else they
+are downloaded from Piltover Archive the first time and kept in
+riftbound/data/card_images_piltover; a card without one is drawn). At each of your decisions with more than one option you
 pick any legal move by clicking a card (with --net you also see the net's top
 three moves, with the win chance it estimates, marked on the table, and can
 accept one); for a move you pick, the choices inside it are asked too. With
@@ -34,7 +35,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DECK_DIR = ROOT / "riftbound" / "data" / "decks"
 PAGE = ROOT / "riftbound" / "ai" / "coach_page.html"
-IMAGES = ROOT / "riftbound" / "data" / "card_images"
 
 
 def main() -> None:
@@ -53,6 +53,7 @@ def main() -> None:
     ap.add_argument("--no-browser", action="store_true")
     args = ap.parse_args()
 
+    from riftbound.ai.card_images import image as card_image
     from riftbound.ai.coach import CoachSession
     from riftbound.compute import be_gentle
     be_gentle()
@@ -87,14 +88,14 @@ def main() -> None:
             if self.path in ("/", "/index.html"):
                 self._send(PAGE.read_bytes(), "text/html; charset=utf-8")
             elif image:
-                path = IMAGES / f"{image.group(1)}.webp"
-                if not path.is_file():
+                data = card_image(image.group(1))
+                if data is None:
                     return self._json({"error": "no image"}, 404)
                 self.send_response(200)
                 self.send_header("Content-Type", "image/webp")
                 self.send_header("Cache-Control", "max-age=86400")
                 self.end_headers()
-                self.wfile.write(path.read_bytes())
+                self.wfile.write(data)
             elif self.path == "/api/state":
                 self._json({**session.state(), "decks": decks(),
                             "net": str(args.net) if args.net else None, "campione": str(args.campione)})

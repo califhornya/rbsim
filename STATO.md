@@ -66,7 +66,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   "Il campione" (`PPOPriorAgent`, `--campione`, `--budget 0.4`, rete in cache), primo nel menu se il
   checkpoint c'è; `--net` facoltativo (senza: niente consigli né esempi, l'abbandono passa e il campione
   chiude a 0,01 s); `games.jsonl` scrive sempre il risultato. Lanciatori `allenatore.command` (Mac) e
-  `allenatore.bat` con `--extra rl`. `tests/test_coach.py` 19 verdi, suite Python 1.955; pagina provata con Playwright.
+  `allenatore.bat` con `--extra rl` (il campione anche da `../rbsim/runs/`). Immagini: copia locale, se no
+  Piltover Archive in cache (`riftbound/ai/card_images.py`, stessa cartella degli scenari). `tests/test_coach.py` 19 verdi, suite Python 1.955; pagina provata con Playwright.
 
 ## In corso
 - Pagina col campione pronta per la PR verso `rust`; Matteo la prova sul Mac.
