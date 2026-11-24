@@ -54,7 +54,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   nuovo (`docs/rust/misure/tenuti_ivern_*.json`), 720 partite d'arena e 53.355 ricerche confrontate.
 
 ## In corso
-- Ivern: suite Python completa, poi PR verso `rust` (su richiesta).
+- Ivern pronta per la PR verso `rust` (suite Python 1.952 verdi); poi `ivern_mac.command` sul Mac.
 
 ## Prossimi passi
 1. `ivern_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su EI, KI, RI). Poi Sett.

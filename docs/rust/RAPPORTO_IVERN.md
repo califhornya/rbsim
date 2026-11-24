@@ -82,6 +82,7 @@ Semi di sviluppo:
 | arena a 50 iterazioni, bot coi prior: traccia e ogni ricerca | EI, KI, RI (40000–40004) | 30/30 |
 | posizioni mirate (`scripts/rust/posizioni_ivern.py`) | 3 posizioni | 3/3, ramo eseguito |
 | `pytest tests/rust` | 74 test | verdi |
+| suite Python completa (`pytest -q --ignore=tests/rust`) | 1.952 test | verdi |
 
 Rami eseguiti nelle partite intere (contati sul lato Python, 360 partite random e simple_trade sui sei matchup): Brush
 messo 4.286 volte e tolto 823, abilità riflessa di Ivern Nurturer 924, Fallen Feline che vieta la magia nominata 387,
