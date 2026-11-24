@@ -6,7 +6,7 @@ use numpy::{PyArray1, PyArrayMethods, PyReadonlyArray1};
 use pyo3::prelude::*;
 
 use rbsim_core::features::{self as F, Descriptor};
-use rbsim_core::search::Prior;
+use rbsim_core::search::{Lockstep, Prior};
 use rbsim_core::types::*;
 
 pub struct PyPrior {
@@ -31,5 +31,26 @@ impl Prior for PyPrior {
             Ok(arr.as_slice()?.to_vec())
         })
         .map_err(|e| EngineError::Py(format!("prior: {e}")))
+    }
+}
+
+/// The step with the Python copy (riftbound/rs/arena_mista.py): `before(info_json)`
+/// -> the count to repeat, or -1 to lead; `after(info_json, n)` after a led search.
+pub struct PyLockstep {
+    pub before: Py<PyAny>,
+    pub after: Py<PyAny>,
+}
+
+impl Lockstep for PyLockstep {
+    fn before(&mut self, info: &serde_json::Value) -> R<Option<usize>> {
+        let s = info.to_string();
+        let n = Python::attach(|py| -> PyResult<i64> { self.before.bind(py).call1((s,))?.extract::<i64>() })
+            .map_err(|e| EngineError::Agent(format!("lockstep: {e}")))?;
+        Ok(if n < 0 { None } else { Some(n as usize) })
+    }
+    fn after(&mut self, info: &serde_json::Value, n: usize) -> R<()> {
+        let s = info.to_string();
+        Python::attach(|py| -> PyResult<()> { self.after.bind(py).call1((s, n))?; Ok(()) })
+            .map_err(|e| EngineError::Agent(format!("lockstep: {e}")))
     }
 }

@@ -4,7 +4,7 @@ same Canon as Python's (riftbound/rs/canon.py)."""
 from __future__ import annotations
 
 import json
-from functools import lru_cache
+import threading
 from pathlib import Path
 
 from riftbound.rs.canon import Canon
@@ -21,13 +21,20 @@ def available() -> bool:
         return False
 
 
-@lru_cache(maxsize=1)
+_LOCAL = threading.local()
+
+
 def registry():
-    import riftbound_rs
-    if not REGISTRY_JSON.exists():
-        from riftbound.rs.export_registry import main as export
-        export()
-    return riftbound_rs.Registry(str(REGISTRY_JSON))
+    """The card registry, one per thread: a riftbound_rs object stays in the
+    thread that made it (arena_mista.py plays the Rust copy in a thread)."""
+    reg = getattr(_LOCAL, "registry", None)
+    if reg is None:
+        import riftbound_rs
+        if not REGISTRY_JSON.exists():
+            from riftbound.rs.export_registry import main as export
+            export()
+        reg = _LOCAL.registry = riftbound_rs.Registry(str(REGISTRY_JSON))
+    return reg
 
 
 def build(seed: int, deck_a: Path, deck_b: Path, first_player: str = "a", max_turns: int = 40):

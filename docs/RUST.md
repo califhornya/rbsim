@@ -95,6 +95,7 @@ Rust costruisce la domanda, Python decide.
 | `scripts/rust/consegna1.py` | Casi Gold D59, D59b e D62. |
 | `scripts/rust/inventario.py` | Carte, verbi e stato del porting (`docs/rust/INVENTARIO_EK.md`). |
 | `scripts/rust/arena_parita.py --semi A-B --bot mano\|prior [--iterazioni 50] [--ckpt f.pt]` | Partite dell'arena a lavoro fisso: traccia della partita reale e ogni ricerca (menu, prior, visite, Q e W, mossa, nodi, mulligan). |
+| `scripts/rust/arena_mista.py --ckpt f.pt [--budget-rust 0.03 --budget-python 0.4]` | Arena mista a passo comune: due copie della stessa partita (Python e Rust); chi cerca a tempo passa il conteggio all'altra copia; traccia e ricerche controllate. |
 
 ## Misure
 - `scripts/rust/bench_raccolta.py`: raccolta su un core in ordine alternato. Separa il tempo della rete dal resto.
