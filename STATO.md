@@ -29,6 +29,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Etichette dei `repr` Python: in Rust testo diverso con la stessa uguaglianza (carte per `uuid`).
 - Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
 - Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
+- (24/11, Astra/Matteo) Matteo deve poter giocare a mano una partita completa contro il campione, prima del porting
+  di Ivern (Ivern e Sett nel frattempo sono stati portati): avversario "campione" nella pagina coach (motore Python,
+  si tocca solo la pagina); i suggerimenti della rete al giocatore si scollegano (`--net` facoltativo).
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
 
@@ -65,11 +68,14 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## In corso
 - Niente: prima tappa del porting (i cinque mazzi) chiusa e verificata sul Mac.
 
-## Prossimi passi (da decidere con Matteo)
-1. Arene su Rust a 0,030 s: promosso solo per EK; ricontrollare il budget sugli altri matchup (prova di forza come
+## Prossimi passi
+1. Partita a mano contro il campione nella pagina coach (scheda "Giocare a mano contro il campione"):
+   `riftbound/ai/coach.py`, `scripts/coach.py`, `coach_page.html`, `scripts/allenatore.command`, test; serve
+   `runs/sett/ekris_s12/ckpt_040000.pt` sulla macchina di Matteo.
+2. Arene su Rust a 0,030 s: promosso solo per EK; ricontrollare il budget sugli altri matchup (prova di forza come
    quella del 24/11) prima di usarlo lì. Training `ekris` con `--motore rust`.
-2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena col prior); partita interattiva su Rust.
-3. Il resto del catalogo con lo stesso metodo (inventario, porting guidato dalle partite, parità, semi tenuti da parte).
+3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena col prior); partita interattiva su Rust.
+4. Il resto del catalogo con lo stesso metodo (inventario, porting guidato dalle partite, parità, semi tenuti da parte).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
