@@ -156,6 +156,16 @@ Il budget validato andrà ricontrollato sui matchup successivi.
 - **Conseguenza per la prova**: la partita 70113 conta (`--spiegata 70113:A`); le partite già giocate restano
   valide, il bot Python è lo stesso salvo questi casi rari. Dal rilancio vale la correzione.
 
+### Divergenze gestite dall'arena stessa (24/11)
+Non si inseguono una per una:
+- **solo nei numeri delle ricerche** (stessa partita nelle due copie): a fine arena ciascuna si rigioca coi
+  conteggi registrati e il codice attuale (`arena_mista_riprova.spiega`). Se ora le copie coincidono è spiegata
+  dalle correzioni fatte dopo, la partita conta, e la spiegazione va in `<out>.spiegate.json` (col commit),
+  legata all'impronta di quella partita (conteggi, risultato, divergenza) e alla configurazione della prova
+  (checkpoint, budget, regole, controlli): non vale per un'altra partita né per un'altra prova;
+- **nella partita** (le copie si sono separate): la partita non ha un risultato valido e al rilancio si rigioca;
+- una divergenza che resta anche col codice attuale è un problema nuovo: tiene l'esito sospeso e va guardata.
+
 ## Da fare (in ordine)
 1. **Forza a budget ridotto**: `bash scripts/rust/arena_mista.command` sul Mac.
 2. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.

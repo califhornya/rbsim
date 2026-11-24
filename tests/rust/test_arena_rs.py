@@ -131,3 +131,35 @@ def test_arena_mista_resume_ignores_unchecked_rows(tmp_path):
                         "--workers", "1", "--out", str(out)], capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stderr[-2000:]
     assert "ripresa" not in r.stdout and "partite verificate a ogni passo: 2" in r.stdout, r.stdout
+
+
+def test_arena_mista_auto_explanation():
+    """A divergent game: one only in the searches' numbers is replayed with its
+    recorded counts (identical with the current code: explained); one whose
+    copies left each other is played again."""
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import arena_mista as AM
+    import arena_mista_riprova as RP
+    r = AM.game((70000, "a", "A", "seme:1", 0.004, 0.02, True))
+    assert "divergenza" not in r
+    x = RP.spiega((r, "seme:1"))
+    assert x["identica"], x
+    assert not AM._replay_it(r | {"divergenza": [{"ricerca": {}}]})
+    assert AM._replay_it(r | {"divergenza": [{"traccia": {}}]})
+    assert AM._replay_it({"seed": 1, "rust_seat": "A", "divergenza": [{"passo": "x"}]})
+
+
+def test_arena_mista_explanation_bound_to_game_and_configuration():
+    """A saved explanation counts only for the same recorded game in the same
+    configuration: another checkpoint or budget, or another game at that
+    seed and seat, is not explained by it."""
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import arena_mista as AM
+    key = {"ckpt_sha": "x", "budget_rust": 0.03, "budget_python": 0.4, "regole": "6427b90", "controlli": True}
+    r = {"seed": 7, "rust_seat": "A", "starter": "b", "winner": "A", "turns": 12, "score": 1.0,
+         "iterazioni": {"rs turn_action": [5, 6]}, "divergenza": [{"ricerca": {}}]}
+    entries = [{"seed": 7, "rust_seat": "A", "impronta": AM._impronta(r), "configurazione": key}]
+    assert AM._spiegazione(r, entries, key)
+    assert not AM._spiegazione(r, entries, key | {"budget_rust": 0.02})
+    assert not AM._spiegazione(r | {"iterazioni": {"rs turn_action": [5, 7]}}, entries, key)
+    assert not AM._spiegazione(r | {"winner": "B", "score": 0.0}, entries, key)

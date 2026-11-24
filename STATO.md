@@ -51,6 +51,9 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 - Divergenza del seme 70113 spiegata: chiavi della ricerca Python dipendenti dall'ordine di un
   insieme (indirizzi di memoria); correzione minima in `net_mcts._label` (regola del congelamento),
   Rust già deterministico. Rilancio dell'arena con `--spiegata 70113:A` (riprende).
+- Divergenze successive gestite dall'arena: quelle solo nelle ricerche si rigiocano a fine arena
+  coi conteggi registrati (identiche ora = spiegate, `.spiegate.json`); quelle di partita si
+  rigiocano al rilancio; solo quelle che restano vanno guardate.
 
 ## Decisioni prese il 24/11 pomeriggio
 - Budget: metodo (a) di Astra; verifica esatta con due copie a passo comune (niente import
