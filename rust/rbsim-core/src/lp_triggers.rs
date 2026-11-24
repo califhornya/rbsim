@@ -52,18 +52,14 @@ impl Game {
     pub fn card_flag_set(&mut self, c: CardId, k: &str, v: &XVal) {
         let card = self.gs.card_mut(c);
         match k {
-            "_kicker_paid" => {
-                card.kicker_paid = match v {
-                    XVal::Bool(b) => Some(*b),
-                    _ => None,
-                }
-            }
-            "_showed_off" => {
-                card.showed_off = match v {
-                    XVal::Bool(b) => Some(*b),
-                    _ => None,
-                }
-            }
+            "_kicker_paid" => card.set_kicker(match v {
+                XVal::Bool(b) => Some(*b),
+                _ => None,
+            }),
+            "_showed_off" => card.set_showed(match v {
+                XVal::Bool(b) => Some(*b),
+                _ => None,
+            }),
             "_shown" => {
                 card.shown = match v {
                     XVal::Json(j) => Some(j.clone()),
@@ -193,8 +189,10 @@ impl Game {
         if !self.gs.is_spell(card) {
             if !play_specs.is_empty() {
                 let mut flags: Flags = Flags::new();
-                flags.set("_kicker_paid".into(), XVal::Bool(self.gs.card(card).kicker_paid.unwrap_or(false)));
-                flags.set("_showed_off".into(), XVal::Bool(self.gs.card(card).showed_off.unwrap_or(false)));
+                // getattr(card, k, False): None once set to None (a _card_flags restore).
+                let xb = |v: Option<bool>| v.map(XVal::Bool).unwrap_or(XVal::None);
+                flags.set("_kicker_paid".into(), xb(self.gs.card(card).kicker_or_false()));
+                flags.set("_showed_off".into(), xb(self.gs.card(card).showed_or_false()));
                 flags.set("_shown".into(), self.card_flag_get(card, "_shown"));
                 if let Some(h) = self.gs.card(card).hidden_bf {
                     flags.set("_hidden_bf".into(), XVal::Int(h as i64));
@@ -207,8 +205,8 @@ impl Game {
                     .collect();
                 self.trigger(card, "on_play", specs, bf, actor, None, false, false, Some(flags))?;
                 let c = self.gs.card_mut(card);
-                c.kicker_paid = Some(false);
-                c.showed_off = Some(false);
+                c.set_kicker(Some(false));
+                c.set_showed(Some(false));
                 c.shown = None;
             }
             return Ok(());
@@ -275,9 +273,9 @@ impl Game {
         self.slot = outer_slot;
         let c = self.gs.card_mut(card);
         if c.kicker_paid.unwrap_or(false) {
-            c.kicker_paid = Some(false);
+            c.set_kicker(Some(false));
         }
-        c.showed_off = Some(false);
+        c.set_showed(Some(false));
         c.shown = None;
         res
     }
@@ -627,7 +625,7 @@ impl Game {
             if !self.pay_one_additional_cost(card, actor, &ac)? {
                 return Ok(false);
             }
-            self.gs.card_mut(card).kicker_paid = Some(true);
+            self.gs.card_mut(card).set_kicker(Some(true));
         }
         if let Some(cost) = cost {
             let parsed = self.parse_activated_cost(Some(&cost))?;
@@ -664,7 +662,7 @@ impl Game {
                     self.to_trash(actor, c)?;
                 }
             }
-            self.gs.card_mut(card).kicker_paid = Some(true);
+            self.gs.card_mut(card).set_kicker(Some(true));
         }
         Ok(true)
     }

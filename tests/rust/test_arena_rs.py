@@ -41,7 +41,7 @@ def test_arena_rs_game_budget():
     assert r[0] == 40000 and r[3] in (0.0, 0.5, 1.0)
     assert r[4] and min(r[4]) >= 1 and r[5]
     with pytest.raises(ValueError):
-        arena_rs.game((40000, "a", "A", "mano", None, "mano", None, "ER", 0.02, 0.02))
+        arena_rs.game((40000, "a", "A", "mano", None, "mano", None, "EI", 0.02, 0.02))
 
 
 def test_arena_rs_frees_agents():

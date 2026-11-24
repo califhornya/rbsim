@@ -9,6 +9,9 @@ use crate::types::*;
 impl Game {
     /// py: _to_trash(owner, card)
     pub fn to_trash(&mut self, owner: Side, card: CardId) -> R<()> {
+        if self.gs.card(card).empowered == Some(true) {
+            self.gs.card_mut(card).empowered = Some(false);
+        }
         if !self.gs.card_is_token(card) {
             self.put_in_trash(owner, card, true)?;
         }

@@ -1,12 +1,14 @@
-# Motore Rust (porting, primo traguardo EK)
+# Motore Rust (porting: EK, poi Rengar)
 
 Riferimento: il motore Python a `6427b90`, congelato il 24/11 (agente PPO: quello con `f8a50e4`).
 Rust ne è una traduzione fedele, funzione per funzione, deviazioni note comprese (D59, D62, Switcheroo).
 Il doppio fix (Python + Rust) è finito con la consegna EK: un difetto nuovo si corregge una volta, in Rust,
 secondo la procedura di `docs/audit/AUDIT.md` ("The Python engine is frozen").
 Ogni run registra in `provenienza.jsonl` regole, commit, motore di ciascun matchup, liste (per contenuto),
-registro delle carte e checkpoint (`riftbound/provenienza.py`). Le liste EK si riconoscono dal contenuto.
-Perimetro attuale: Evelynn contro Kha'Zix, con i mazzi competitivi e i rispettivi campi, leggende e token.
+registro delle carte e checkpoint (`riftbound/provenienza.py`). Le liste si riconoscono dal contenuto.
+Perimetro attuale (`riftbound/rs/arena_rs.COPERTI`): EK, ER, KR nei due posti, cioè le liste competitive di
+Evelynn, Kha'Zix e Rengar fra loro, con campi, leggende e token; le sideboard di Rengar ed EK hanno i loro verbi
+(non entrano nelle partite di training: si provano con le liste variate di `riftbound/rs/mazzi.py`).
 Il motore Rust si sceglie in modo esplicito. Il default resta Python.
 
 ## Costruire e verificare
@@ -20,8 +22,8 @@ python -m pytest -q tests/rust
 I test in `tests/rust` caricano davvero `riftbound_rs`. Se l'estensione manca falliscono, non vengono saltati.
 
 ## Usarlo
-- Training PPO: `python scripts/ppo.py --mazzi ek --motore rust ...`.
-  - Le partite Evelynn–Kha'Zix vanno su Rust.
+- Training PPO: `python scripts/ppo.py --mazzi ekr --motore rust ...`.
+  - Le partite dei matchup coperti (EK, ER, KR) vanno su Rust (`_motore`, liste riconosciute dal contenuto).
   - Gli altri matchup e le partite contro il bot a mano restano su Python, come dichiarato all'avvio.
   - L'aggiornamento della rete non cambia.
 - In codice: `riftbound.rs.collect_rs.play` ha la stessa firma e lo stesso ritorno di `riftbound.ai.ppo.collect.play`.
@@ -87,13 +89,17 @@ Rust costruisce la domanda, Python decide.
 
 ## Verifiche
 
+Tutti gli script di parità prendono `--matchup XY` (lettere di `riftbound/rs/mazzi.py`: il primo mazzo in A; default
+EK; minuscola = la lista con tutta la sideboard nel mazzo, es. `Er`) e `--posti` (anche il matchup rovesciato).
+
 | Script | Cosa confronta |
 |---|---|
 | `scripts/rust/diff_trace.py --semi A-B --modo self\|simple_trade` | Replay di partite Python tracciate. Confronto evento per evento (stato canonico, finestra, menu, azione, scelte, estrazioni), fino alla prima differenza. |
 | `scripts/rust/autonome.py --semi A-B --agenti X Y` | Partite autonome dai semi, senza nulla registrato. |
 | `scripts/rust/parita_ppo.py --semi A-B [--avversario X] [--init ckpt]` | Esempi PPO bit per bit. |
 | `scripts/rust/consegna1.py` | Casi Gold D59, D59b e D62. |
-| `scripts/rust/inventario.py` | Carte, verbi e stato del porting (`docs/rust/INVENTARIO_EK.md`). |
+| `scripts/rust/inventario.py [--liste R --matchup ER KR Er Kr]` | Carte, verbi, condizioni, quantità, trigger e parole chiave, con lo stato del porting e le esecuzioni (`docs/rust/INVENTARIO_EK.md`, `INVENTARIO_RENGAR.md`). |
+| `scripts/rust/posizioni_rengar.py [--caso X]` | Posizioni mirate per i rami rari di Rengar (equipaggiamento in base dopo Thrill of the Hunt, gear schierato ucciso, Mech, Seat of Power, Sunken Temple, Acceptable Losses): tracce identiche e ramo eseguito. |
 | `scripts/rust/arena_parita.py --semi A-B --bot mano\|prior [--iterazioni 50] [--ckpt f.pt]` | Partite dell'arena a lavoro fisso: traccia della partita reale e ogni ricerca (menu, prior, visite, Q e W, mossa, nodi, mulligan). |
 | `scripts/rust/arena_mista.py --ckpt f.pt [--budget-rust 0.03 --budget-python 0.4]` | Arena mista a passo comune: due copie della stessa partita (Python e Rust); chi cerca a tempo passa il conteggio all'altra copia; traccia e ricerche controllate. |
 | `scripts/rust/arena_mista_riprova.py --righe f.jsonl --seme S --posto-rust A --ckpt f.pt` | Rigioca una partita dell'arena mista coi conteggi registrati, senza cronometro; per la prima ricerca diversa, le simulazioni diverse. |
@@ -107,6 +113,7 @@ Rust costruisce la domanda, Python decide.
 I risultati vanno in `docs/rust/misure/`. Il resoconto è in `docs/rust/RAPPORTO_EK.md`.
 
 ## Non ancora portato
-- Gli altri mazzi.
-- I verbi delle carte di sideboard EK: `counter_spell`, `kill_gear`, `prevent_spell_damage_this_turn`, `banish_self_and_gear`. Non entrano nelle partite.
+- Ivern, Sett e il resto del catalogo.
+- I verbi delle carte di sideboard EK: `counter_spell`, `prevent_spell_damage_this_turn`, `banish_self_and_gear`; il
+  `play_token` di An Offer You Can't Refuse (`it_controller`). Non entrano nelle partite. `kill_gear` è portato (Rengar).
 - Gli altri bot (`HorizonAgent`, `NetAgent`, il coach) e l'esplorazione della ricerca (rumore, temperatura).

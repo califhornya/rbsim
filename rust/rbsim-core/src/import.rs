@@ -159,8 +159,8 @@ pub fn from_canonical(reg: Rc<Registry>, tree: &Value, seed: i128) -> Result<Gam
             match k.as_str() {
                 "$t" | "name" | "tapped" => {}
                 "is_token" => card.is_token = v.as_bool(),
-                "_kicker_paid" => card.kicker_paid = v.as_bool(),
-                "_showed_off" => card.showed_off = v.as_bool(),
+                "_kicker_paid" => card.set_kicker(v.as_bool()),
+                "_showed_off" => card.set_showed(v.as_bool()),
                 "_shown" => card.shown = Some(v.clone()),
                 "_owner" => card.owner = side_of(v),
                 "_played_from" => card.played_from = v.as_str().map(|s| s.to_string()),

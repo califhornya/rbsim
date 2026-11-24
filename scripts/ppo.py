@@ -152,20 +152,23 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
 
 def _motore(kw: dict) -> str:
     """The engine a game of collect.play with these arguments goes to: Rust
-    for Evelynn-Kha'Zix (the lists recognised by their content, not their
-    path: riftbound/provenienza.py) when --motore rust, Python otherwise."""
+    for the matchups the Rust engine covers (riftbound/rs/arena_rs.COPERTI:
+    Evelynn-Kha'Zix, Evelynn-Rengar, Kha'Zix-Rengar; the lists recognised by
+    their content, not their path: riftbound/provenienza.py) when --motore
+    rust, Python otherwise (and for the games against the hand-written bot)."""
     from riftbound.ai.ppo.collect import EVE, KHA
-    from riftbound.provenienza import lista_sha
-    ek = {lista_sha(kw.get("deck_a", EVE)), lista_sha(kw.get("deck_b", KHA))} <= {lista_sha(EVE), lista_sha(KHA)}
-    rust = os.environ.get("RBSIM_MOTORE", "python") == "rust" and ek and kw.get("opponent") != "bot"
+    from riftbound.rs.arena_rs import coperte
+    covered = coperte(kw.get("deck_a", EVE), kw.get("deck_b", KHA))
+    rust = os.environ.get("RBSIM_MOTORE", "python") == "rust" and covered and kw.get("opponent") != "bot"
     return "rust" if rust else "python"
 
 
 def _play(seed, nets, learners, **kw):
     """collect.play on the engine RBSIM_MOTORE names (--motore): "rust" plays
-    the Evelynn-Kha'Zix games on the Rust engine (riftbound/rs/collect_rs.py,
-    the same examples bit for bit); the other matchups and the games against
-    the hand-written bot stay on the Python engine (not ported yet)."""
+    the games of the covered matchups (_motore) on the Rust engine
+    (riftbound/rs/collect_rs.py, the same examples bit for bit); the other
+    matchups and the games against the hand-written bot stay on the Python
+    engine (not ported yet)."""
     if _motore(kw) == "rust":
         from riftbound.rs.collect_rs import play
     else:
@@ -262,13 +265,14 @@ def main() -> None:
                     help="i matchup del pannello (default: quelli di --mazzi); EK sempre")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
-                    help="motore delle partite Evelynn-Kha'Zix (rust: estensione riftbound_rs)")
+                    help="motore dei matchup coperti da Rust (EK, ER, KR; rust: estensione riftbound_rs)")
     args = ap.parse_args()
     # The workers read the engine from the environment (_play).
     os.environ["RBSIM_MOTORE"] = args.motore
     if args.motore == "rust":
         import riftbound_rs  # noqa: F401  (the extension must be there: no silent fallback)
-        print("motore: Rust per le partite Evelynn-Kha'Zix; altri mazzi e bot su Python")
+        from riftbound.rs.arena_rs import COPERTI
+        print(f"motore: Rust per i matchup {', '.join(COPERTI)} (nei due posti); altri mazzi e bot su Python")
 
     import torch
     from riftbound.ai.ppo.collect import DECK_NAME

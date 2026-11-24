@@ -387,7 +387,7 @@ impl Game {
 
     /// py: _show_off
     pub fn show_off(&mut self, card: CardId, side: Side) -> R<()> {
-        self.gs.card_mut(card).showed_off = Some(false);
+        self.gs.card_mut(card).set_showed(Some(false));
         self.gs.card_mut(card).shown = None;
         if !self.gs.has_keyword(card, "SHOW OFF") {
             return Ok(());
@@ -465,7 +465,7 @@ impl Game {
             },
             _ => return Err(EngineError::Invalid("show_off option".into())),
         };
-        self.gs.card_mut(card).showed_off = Some(true);
+        self.gs.card_mut(card).set_showed(Some(true));
         let shown = serde_json::json!({
             "might": might,
             "power_cost": self.gs.cost_power(obj).unwrap_or(0),

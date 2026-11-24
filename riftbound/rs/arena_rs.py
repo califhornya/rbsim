@@ -5,7 +5,8 @@ con la firma e il ritorno di scripts/diag/arena_bot._game.
 La ricerca gira in Rust (rust/rbsim-core/src/search.rs); per il prior Rust
 costruisce osservazione, descrittori del menu e contesto e Python fa solo il
 forward e il softmax (`make_probs`), come PPOPriorAgent._evaluate. Perimetro:
-i matchup che il motore Rust copre (oggi Evelynn-Kha'Zix, `COPERTI`).
+i matchup che il motore Rust copre (`COPERTI`: Evelynn-Kha'Zix, Evelynn-Rengar,
+Kha'Zix-Rengar, nei due posti).
 """
 from __future__ import annotations
 
@@ -13,7 +14,9 @@ from pathlib import Path
 
 REF_BUDGET = 0.4        # scripts/diag/arena_bot.REF_BUDGET
 MAX_TURNS = 40          # scripts/bootstrap_net.MAX_TURNS
-COPERTI = ("EK",)
+# The matchups verified on the Rust engine (docs/rust/RAPPORTO_EK.md,
+# docs/rust/RAPPORTO_RENGAR.md): a game between two of their lists plays on Rust.
+COPERTI = ("EK", "ER", "KR")
 _NETS: dict = {}
 
 
@@ -40,12 +43,24 @@ def _probs_for(path: str):
     return _NETS[path]
 
 
+def liste_coperte() -> set:
+    """The content hashes of the lists of the covered matchups (COPERTI)."""
+    from riftbound.ai.ppo.collect import DECK_OF
+    from riftbound.provenienza import lista_sha
+    return {lista_sha(DECK_OF[c]) for mu in COPERTI for c in mu}
+
+
+def coperte(deck_a, deck_b) -> bool:
+    """Whether the Rust engine plays a game between these two lists: both are
+    lists of the covered matchups, recognised by their content (not their path)."""
+    from riftbound.provenienza import lista_sha
+    return {lista_sha(deck_a), lista_sha(deck_b)} <= liste_coperte()
+
+
 def coperto(mu: str) -> bool:
     """Whether the Rust engine plays this matchup (by the lists' content)."""
-    from riftbound.ai.ppo.collect import DECK_OF, EVE, KHA
-    from riftbound.provenienza import lista_sha
-    ek = {lista_sha(EVE), lista_sha(KHA)}
-    return {lista_sha(DECK_OF[mu[0]]), lista_sha(DECK_OF[mu[1]])} <= ek
+    from riftbound.ai.ppo.collect import DECK_OF
+    return coperte(DECK_OF[mu[0]], DECK_OF[mu[1]])
 
 
 def game(task):

@@ -8,6 +8,7 @@ il minimo per riprodurla.
 
   python scripts/rust/diff_trace.py --semi 1000001 1000002 --modo self [--seme-rete 1]
   python scripts/rust/diff_trace.py --semi 1000001-1000020 --modo self
+  python scripts/rust/diff_trace.py --semi 1000001-1000020 --modo self --matchup KR --posti
 """
 from __future__ import annotations
 
@@ -28,10 +29,10 @@ def _digest(tree) -> str:
     return hashlib.sha256(json.dumps(tree, sort_keys=True).encode()).hexdigest()[:16]
 
 
-def python_game(seed: int, modo: str, net=None, starter: str = "a"):
+def python_game(seed: int, modo: str, net=None, starter: str = "a", mu: str = "EK"):
     """A traced Python game: PPO self-play (seeded net) or PPO vs simple_trade."""
     from riftbound.ai.ppo.agent import PPOAgent
-    from riftbound.ai.ppo.collect import EVE, KHA
+    from riftbound.rs.mazzi import decks
     from riftbound.rs.trace_py import traced_game
     from riftbound.core.game_factory import make_agent
     if modo == "self":
@@ -41,15 +42,16 @@ def python_game(seed: int, modo: str, net=None, starter: str = "a"):
                   "B": lambda p: make_agent("simple_trade", p)}
     else:
         raise ValueError(modo)
-    res, tr = traced_game(seed, EVE, KHA, agents, starter=starter, with_obs=False, keep_states=True)
+    res, tr = traced_game(seed, *decks(mu), agents, starter=starter, with_obs=False,
+                          keep_states=True)
     return res, tr
 
 
-def rust_events(seed: int, py_events: list, starter: str = "a"):
+def rust_events(seed: int, py_events: list, starter: str = "a", mu: str = "EK"):
     """Rust replays the Python game: -> (start raw, events, end raw, result or error)."""
-    from riftbound.ai.ppo.collect import EVE, KHA
+    from riftbound.rs.mazzi import decks
     from riftbound.rs import rust_bridge as rb
-    g = rb.build(seed, EVE, KHA, starter, 40)
+    g = rb.build(seed, *decks(mu), starter, 40)
     has_choice = any(e["k"] == "choice" for e in py_events)
     g.set_replay(json.dumps(py_events), True, True)
     start = json.loads(g.raw_dump())
@@ -129,18 +131,18 @@ def first_difference(py: list, rs: list, py_trees: dict, rs_trees: dict):
     return None
 
 
-def compare_seed(seed: int, modo: str, net, starter: str = "a", verbose: bool = True) -> dict:
+def compare_seed(seed: int, modo: str, net, starter: str = "a", verbose: bool = True, mu: str = "EK") -> dict:
     t0 = time.perf_counter()
-    res, tr = python_game(seed, modo, net, starter)
+    res, tr = python_game(seed, modo, net, starter, mu)
     t_py = time.perf_counter() - t0
     py_events = tr.events
     t0 = time.perf_counter()
-    start, events, end, rres, err, _ = rust_events(seed, py_events, starter)
+    start, events, end, rres, err, _ = rust_events(seed, py_events, starter, mu)
     t_rs = time.perf_counter() - t0
     rs, rs_trees = canonical_rust_events(start, events, end)
     py_cmp = [e for e in py_events if e["k"] in FIELDS or e["k"].startswith("decide_")]
     d = first_difference(py_cmp, rs, tr.states, rs_trees)
-    out = {"seed": seed, "modo": modo, "starter": starter, "py": [res.winner, res.turns],
+    out = {"seed": seed, "matchup": mu, "modo": modo, "starter": starter, "py": [res.winner, res.turns],
            "rs": list(rres) if rres else None, "rust_error": err, "events": len(py_cmp),
            "t_py_traced": round(t_py, 3), "t_rs_traced": round(t_rs, 3)}
     if d is not None:
@@ -159,6 +161,8 @@ def main() -> None:
     ap.add_argument("--semi", nargs="+", required=True, help="semi o intervalli a-b")
     ap.add_argument("--modo", choices=("self", "simple_trade"), default="self")
     ap.add_argument("--seme-rete", type=int, default=1)
+    ap.add_argument("--matchup", default="EK", help="lettere di riftbound/rs/mazzi.py: il primo mazzo in A (EK, ER, KR; minuscola = con la sideboard: Er)")
+    ap.add_argument("--posti", action="store_true", help="anche col matchup rovesciato (i mazzi ai due posti)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
     import torch
@@ -174,9 +178,11 @@ def main() -> None:
         else:
             seeds.append(int(s))
     rows = []
+    mus = [args.matchup] + ([args.matchup[::-1]] if args.posti and args.matchup[0] != args.matchup[1] else [])
     for seed in seeds:
         starter = "a" if seed % 2 == 0 else "b"
-        rows.append(compare_seed(seed, args.modo, net, starter, verbose=True))
+        for mu in mus:
+            rows.append(compare_seed(seed, args.modo, net, starter, verbose=True, mu=mu))
     ok = sum(1 for r in rows if "first_difference" not in r and not r["rust_error"])
     print(f"\n{ok}/{len(rows)} partite identiche")
     if args.out:

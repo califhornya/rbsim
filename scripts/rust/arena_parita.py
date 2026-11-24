@@ -1,4 +1,4 @@
-"""Parità dell'arena (porting Rust, tappa A): la stessa partita EK giocata dal
+"""Parità dell'arena (porting Rust, tappa A): la stessa partita (EK, o --matchup) giocata dal
 bot a mano (HandwrittenAgent) o dal bot coi prior PPO (PPOPriorAgent) su
 Python e su Rust, a lavoro fisso (--iterazioni, default 50), con i semi e i
 posti dell'arena (generatore dell'agente seme*2 + posto B, chi comincia per
@@ -102,9 +102,9 @@ def make_probs(net):
     return probs
 
 
-def python_game(seed: int, starter: str, bot: str, iters: int, net):
+def python_game(seed: int, starter: str, bot: str, iters: int, net, mu: str = "EK"):
     from riftbound.ai.handwritten import HandwrittenAgent
-    from riftbound.ai.ppo.collect import EVE, KHA
+    from riftbound.rs.mazzi import decks
     from riftbound.rs.trace_py import traced_game
     log: list = []
     hook_python(log)
@@ -115,15 +115,15 @@ def python_game(seed: int, starter: str, bot: str, iters: int, net):
             from riftbound.ai.ppo.prior_bot import PPOPriorAgent
             return lambda p: PPOPriorAgent(p, net, rng=rng, budget=None, iterations=iters)
         return lambda p: HandwrittenAgent(p, iterations=iters, rng=rng)
-    res, tr = traced_game(seed, EVE, KHA, {s: factory(s) for s in "AB"}, starter=starter, chooser="ppo",
+    res, tr = traced_game(seed, *decks(mu), {s: factory(s) for s in "AB"}, starter=starter, chooser="ppo",
                           with_obs=False, keep_states=True)
     return res, tr, log
 
 
-def rust_game(seed: int, starter: str, bot: str, iters: int, net):
-    from riftbound.ai.ppo.collect import EVE, KHA
+def rust_game(seed: int, starter: str, bot: str, iters: int, net, mu: str = "EK"):
     from riftbound.rs import rust_bridge as rb
-    g = rb.build(seed, EVE, KHA, starter, 40)
+    from riftbound.rs.mazzi import decks
+    g = rb.build(seed, *decks(mu), starter, 40)
     probs = make_probs(net) if bot == "prior" else None
     for s in "AB":
         g.set_search_agent(s, iters, agent_seed(seed, s), None, probs, True)
@@ -179,18 +179,18 @@ def first_search_difference(py_log: list, rs_logs: dict):
     return None
 
 
-def compare(seed: int, starter: str, bot: str, iters: int, net) -> dict:
+def compare(seed: int, starter: str, bot: str, iters: int, net, mu: str = "EK") -> dict:
     from diff_trace import FIELDS, canonical_rust_events, first_difference
     t0 = time.perf_counter()
-    res, tr, py_log = python_game(seed, starter, bot, iters, net)
+    res, tr, py_log = python_game(seed, starter, bot, iters, net, mu)
     t_py = time.perf_counter() - t0
     t0 = time.perf_counter()
-    start, events, end, rres, err, rs_logs = rust_game(seed, starter, bot, iters, net)
+    start, events, end, rres, err, rs_logs = rust_game(seed, starter, bot, iters, net, mu)
     t_rs = time.perf_counter() - t0
     rs, rs_trees = canonical_rust_events(start, events, end)
     py = [e for e in tr.events if e["k"] in FIELDS or e["k"].startswith("decide_")]
     d = first_difference(py, rs, tr.states, rs_trees)
-    out = {"seed": seed, "starter": starter, "bot": bot, "iterazioni": iters, "py": [res.winner, res.turns],
+    out = {"seed": seed, "matchup": mu, "starter": starter, "bot": bot, "iterazioni": iters, "py": [res.winner, res.turns],
            "rs": list(rres) if rres else None, "rust_error": err, "events": len(py),
            "ricerche": len([r for r in py_log if r["k"] == "search"]),
            "t_py": round(t_py, 2), "t_rs": round(t_rs, 2)}
@@ -212,6 +212,8 @@ def main() -> None:
     ap.add_argument("--iterazioni", type=int, default=50)
     ap.add_argument("--ckpt", default=None, help="i pesi del prior (default: PPONet() da --seme-rete)")
     ap.add_argument("--seme-rete", type=int, default=1)
+    ap.add_argument("--matchup", default="EK", help="lettere di riftbound/rs/mazzi.py: il primo mazzo in A (EK, ER, KR; minuscola = con la sideboard: Er)")
+    ap.add_argument("--posti", action="store_true", help="anche col matchup rovesciato (i mazzi ai due posti)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--stop", action="store_true")
     args = ap.parse_args()
@@ -230,17 +232,18 @@ def main() -> None:
         torch.manual_seed(args.seme_rete)
         net = (load(args.ckpt) if args.ckpt else PPONet()).eval()
     rows = []
-    for seed in seeds:
+    mus = [args.matchup] + ([args.matchup[::-1]] if args.posti and args.matchup[0] != args.matchup[1] else [])
+    for seed, mu in [(s, m) for s in seeds for m in mus]:
         starter = "a" if seed % 2 == 0 else "b"
-        r = compare(seed, starter, args.bot, args.iterazioni, net)
+        r = compare(seed, starter, args.bot, args.iterazioni, net, mu)
         rows.append(r)
         ok = "first_difference" not in r and "search_difference" not in r and not r["rust_error"]
-        print(f"{seed}: identiche ({r['events']} eventi, {r['ricerche']} ricerche, {r['py']}, "
+        print(f"{seed} {mu}: identiche ({r['events']} eventi, {r['ricerche']} ricerche, {r['py']}, "
               f"py {r['t_py']} s, rs {r['t_rs']} s)" if ok else json.dumps(r, default=str)[:3000], flush=True)
         if args.stop and not ok:
             break
     ok = sum(1 for r in rows if "first_difference" not in r and "search_difference" not in r and not r["rust_error"])
-    print(f"\n{ok}/{len(rows)} partite identiche (bot {args.bot}, {args.iterazioni} iterazioni)")
+    print(f"\n{ok}/{len(rows)} partite identiche (bot {args.bot}, {args.iterazioni} iterazioni, {'+'.join(mus)})")
     if args.out:
         Path(args.out).write_text(json.dumps(rows, indent=1, default=str))
 
