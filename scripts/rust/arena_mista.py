@@ -299,6 +299,20 @@ def _replay_it(r: dict) -> bool:
     return "divergenza" in r and ("score" not in r or any(set(d) - {"ricerca"} for d in r["divergenza"]))
 
 
+def _impronta(r: dict) -> str:
+    """The fingerprint of one recorded game: what an explanation is about."""
+    import hashlib
+    g = {k: r.get(k) for k in ("seed", "rust_seat", "starter", "winner", "turns", "score", "iterazioni", "divergenza")}
+    return hashlib.sha256(json.dumps(g, sort_keys=True, default=str).encode()).hexdigest()[:16]
+
+
+def _spiegazione(r: dict, entries: list, key: dict) -> bool:
+    """Whether a saved explanation is about this very game (same fingerprint)
+    played in this configuration (checkpoint, budgets, rules, checks)."""
+    imp = _impronta(r)
+    return any(e.get("impronta") == imp and e.get("configurazione") == key for e in entries)
+
+
 def _explained(r: dict, spiegate: set) -> bool:
     """A divergence reproduced and explained (arena_mista_riprova.py identical
     with the current code), only in the searches' numbers: the two copies
@@ -410,22 +424,26 @@ def main() -> None:
     from arena_mista_riprova import spiega
     from riftbound.provenienza import revisione
     sp_file = righe.with_suffix(".spiegate.json")
-    known = json.loads(sp_file.read_text()) if sp_file.exists() else {}
-    todo = [r for r in rows if "divergenza" in r and not _replay_it(r) and f"{r['seed']}:{r['rust_seat']}" not in known
+    entries = json.loads(sp_file.read_text()) if sp_file.exists() else []
+    entries = entries if isinstance(entries, list) else []
+    todo = [r for r in rows if "divergenza" in r and not _replay_it(r) and not _spiegazione(r, entries, key)
             and (r["seed"], r["rust_seat"]) not in spiegate]
     if todo:
         say(f"   riprova automatica di {len(todo)} divergenze nelle ricerche, col codice attuale")
         commit = revisione()["commit"]
+        by_game = {(r["seed"], r["rust_seat"]): r for r in todo}
         with Pool(min(args.workers, len(todo)), initializer=_init) as pool:
             for x in pool.imap_unordered(spiega, [(r, args.ckpt) for r in todo]):
-                k = f"{x['seed']}:{x['rust_seat']}"
+                r = by_game[(x["seed"], x["rust_seat"])]
                 if x["identica"]:
-                    known[k] = {"causa": "riprova identica col codice attuale", "commit": commit}
+                    entries.append({"seed": r["seed"], "rust_seat": r["rust_seat"], "impronta": _impronta(r),
+                                    "configurazione": key, "causa": "riprova identica col codice attuale",
+                                    "commit": commit})
                     say(f"   seme {x['seed']} posto Rust {x['rust_seat']}: spiegata (identica col codice attuale)")
                 else:
                     say(f"   seme {x['seed']} posto Rust {x['rust_seat']}: NON spiegata, {json.dumps(x['dettaglio'])[:600]}")
-        sp_file.write_text(json.dumps(known, indent=1))
-    spiegate = spiegate | {(int(k.split(":")[0]), k.split(":")[1]) for k in known}
+        sp_file.write_text(json.dumps(entries, indent=1))
+    spiegate = spiegate | {(r["seed"], r["rust_seat"]) for r in rows if "divergenza" in r and _spiegazione(r, entries, key)}
     ver = valuta(rows, seeds, args.coppie, args.soglia, spiegate)
     if spiegate:
         say("   divergenze spiegate (contano): " + ", ".join(f"seme {s} posto Rust {p}" for s, p in sorted(spiegate)))

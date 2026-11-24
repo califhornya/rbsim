@@ -147,3 +147,19 @@ def test_arena_mista_auto_explanation():
     assert not AM._replay_it(r | {"divergenza": [{"ricerca": {}}]})
     assert AM._replay_it(r | {"divergenza": [{"traccia": {}}]})
     assert AM._replay_it({"seed": 1, "rust_seat": "A", "divergenza": [{"passo": "x"}]})
+
+
+def test_arena_mista_explanation_bound_to_game_and_configuration():
+    """A saved explanation counts only for the same recorded game in the same
+    configuration: another checkpoint or budget, or another game at that
+    seed and seat, is not explained by it."""
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import arena_mista as AM
+    key = {"ckpt_sha": "x", "budget_rust": 0.03, "budget_python": 0.4, "regole": "6427b90", "controlli": True}
+    r = {"seed": 7, "rust_seat": "A", "starter": "b", "winner": "A", "turns": 12, "score": 1.0,
+         "iterazioni": {"rs turn_action": [5, 6]}, "divergenza": [{"ricerca": {}}]}
+    entries = [{"seed": 7, "rust_seat": "A", "impronta": AM._impronta(r), "configurazione": key}]
+    assert AM._spiegazione(r, entries, key)
+    assert not AM._spiegazione(r, entries, key | {"budget_rust": 0.02})
+    assert not AM._spiegazione(r | {"iterazioni": {"rs turn_action": [5, 7]}}, entries, key)
+    assert not AM._spiegazione(r | {"winner": "B", "score": 0.0}, entries, key)

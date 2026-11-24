@@ -160,7 +160,9 @@ Il budget validato andrà ricontrollato sui matchup successivi.
 Non si inseguono una per una:
 - **solo nei numeri delle ricerche** (stessa partita nelle due copie): a fine arena ciascuna si rigioca coi
   conteggi registrati e il codice attuale (`arena_mista_riprova.spiega`). Se ora le copie coincidono è spiegata
-  dalle correzioni fatte dopo, la partita conta, e la spiegazione va in `<out>.spiegate.json` (col commit);
+  dalle correzioni fatte dopo, la partita conta, e la spiegazione va in `<out>.spiegate.json` (col commit),
+  legata all'impronta di quella partita (conteggi, risultato, divergenza) e alla configurazione della prova
+  (checkpoint, budget, regole, controlli): non vale per un'altra partita né per un'altra prova;
 - **nella partita** (le copie si sono separate): la partita non ha un risultato valido e al rilancio si rigioca;
 - una divergenza che resta anche col codice attuale è un problema nuovo: tiene l'esito sospeso e va guardata.
 
