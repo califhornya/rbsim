@@ -9,6 +9,7 @@ Aggiornato: 2026-11-24. Ramo di lavoro `rust` (default su GitHub; sessione su
 - Bot a mano = la ricerca (MCTS: prova molte continuazioni) con una valutazione scritta a mano.
 - Campione = il bot a mano guidato dai prior di `ekris_s12/ckpt_040000.pt`.
 - Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte.
+- Lavoro fisso = numero fisso di iterazioni per decisione (invece di un tempo).
 
 ## Obiettivo (Matteo, 24/11)
 Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi
@@ -17,45 +18,52 @@ avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 
 ## Decisioni prese
 - (24/11, Astra/Matteo) Python congelato: regole `6427b90`, agente PPO con `f8a50e4`.
-  Fine del doppio fix: un difetto nuovo si corregge una volta, in Rust (AUDIT.md,
-  "The Python engine is frozen").
+  Fine del doppio fix: un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
 - Ogni run registra regole, commit, motore per matchup, liste per contenuto,
   registro carte, checkpoint (`provenienza.jsonl`). Liste EK riconosciute dal contenuto.
-- Ordine: prima l'arena EK su Rust (ricerca del bot a mano + prior PPO), poi
-  Rengar, Ivern, Sett con sideboard e test, poi il resto del catalogo.
-- Fix di `made`: già sul ramo dei training (unito in `rust`). Per confronti sensibili
-  con `PPOAgent.inner`, rivalutare i due checkpoint con la stessa versione.
-- Rust identico a Python, deviazioni note comprese (D59, D62, D71); traduzione fedele.
-- Confine PPO: Rust costruisce la domanda, Python forward + campionamento.
+- Ordine: prima l'arena EK su Rust, poi Rengar, Ivern, Sett con sideboard e test,
+  poi il resto del catalogo.
+- Fix di `made`: già sul ramo dei training (unito in `rust`).
+- Rust identico a Python, deviazioni note comprese (D59, D62, D71).
+- Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
+- Etichette delle scelte che in Python sono un `repr`: in Rust un testo diverso con la stessa
+  uguaglianza (carte per `uuid`). Si confrontano forma e numeri dell'albero, non il testo.
+- Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
 
 ## Fatto
-- Porting EK chiuso (`docs/rust/RAPPORTO_EK.md`): replay 40/40, autonome 300/300,
-  PPO 251/251 bit per bit; Mac: ciclo PPO 1.000 partite 1,31 → 1,00 min.
-- Training: campione promosso (arena 0,484, lim. inf. 0,470).
-- 24/11: `riftbound/provenienza.py`; `ppo.py` (instradamento per contenuto,
-  provenienza a ogni lancio), `arena_mazzi.py` (provenienza); AUDIT.md e RUST.md.
+- Porting EK del motore (`docs/rust/RAPPORTO_EK.md`).
+- 24/11 tappa 1: provenienza delle run, procedura dei difetti.
+- 24/11 tappa A (`docs/rust/RAPPORTO_ARENA.md`): ricerca dell'arena in Rust (`search.rs`).
+  Parità a 50 iterazioni: bot a mano 40/40 + 10/10 tenuti da parte, bot col prior
+  (rete casuale) 20/20 + 10/10; ogni ricerca identica (menu, prior, visite, Q, mossa).
+  Tempo per partita col prior: Python 11–12 s, Rust 1,3–1,4 s (×8,5); senza prior ×28.
+  Su Rust il 63% è il forward della rete (batch 1, Python).
+- `arena_mazzi.py --motore rust`, `arena_rs.game`, `tests/rust/test_arena_rs.py`.
 
 ## In corso
-Tappa A: ricerca del bot a mano in Rust per l'arena EK.
-Ti permetterà: partite d'arena (e poi contro di te) più veloci a parità di forza.
-Pezzi: copia e ripresa da scelta pendente (journal/segment), determinizzazione,
-etichette delle opzioni, PUCT/backup best, piani di scelta, mulligan, prior PPO
-calcolato su tutto il menu (forward in Python).
+Niente: tappa A chiusa in container, manca la verifica sul Mac col campione.
+
+## Decisioni da prendere (Matteo)
+- Forza a budget ridotto: una partita mista Python/Rust non si può ancora giocare
+  (l'import di posizioni rifiuta catene aperte). Proposta: il riferimento "Python a
+  0,4 s" giocato su Rust a lavoro fisso, con le iterazioni che Python fa a 0,4 s
+  sul Mac (parità esatta a lavoro fisso); soglia: limite inferiore > 0,47.
 
 ## Prossimi passi
-1. Parità a 50 iterazioni (semi appaiati): menu, prior, visite, mossa, traccia; tempo per partita.
-2. Sul Mac col campione: stessa parità; poi budget Rust ridotto contro Python a 0,4 s
-   (tolleranza fissata prima, lim. inf. 0,47).
-3. Rengar, Ivern, Sett (+ sideboard), con le interazioni coi mazzi già ammessi.
-4. Rifiuto prima della partita di liste fuori copertura (carta/meccanica mancante).
+1. Sul Mac: `bash scripts/rust/arena_mac.command` (parità col campione, 20 semi, e tempi).
+2. Prova di forza a budget ridotto (dopo la decisione sopra).
+3. Rengar, Ivern, Sett (+ sideboard) nel motore Rust, con i test di ciascun mazzo.
+4. Rete del prior in Rust o a batch (ora è il collo di bottiglia dell'arena).
+5. Partita interattiva contro il bot su Rust (oggi il coach usa Python).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`,
-  `agents.rs`, `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`).
-- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO di confine).
-- `riftbound/rs/`: ponte Python (`canon.py`, `trace_py.py`, `rust_bridge.py`, `agent_rs.py`, `collect_rs.py`).
-- `riftbound/ai/net_mcts.py`, `handwritten.py`, `ppo/prior_bot.py`: la ricerca da portare.
+  `agents.rs`, `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
+- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO, `search_py.rs` prior).
+- `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py`, `trace_py.py`).
 - `riftbound/provenienza.py`: provenienza delle run.
-- `scripts/rust/`: verifiche e misure; `tests/rust/`: parità.
+- `scripts/rust/`: verifiche (`arena_parita.py`, `diff_trace.py`, `autonome.py`, `parita_ppo.py`)
+  e misure (`bench_arena_fisso.py`, `bench_ppo_ciclo.py`, `arena_mac.command`).
+- `scripts/diag/arena_mazzi.py`: l'arena (`--motore rust`).
 - `docs/RUST.md`, `docs/rust/`, `docs/PIANO_FORZA.md`, `docs/audit/AUDIT.md`.
 - `riftbound/core/`: motore Python di riferimento (congelato).

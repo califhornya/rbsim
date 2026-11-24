@@ -1,0 +1,192 @@
+[
+ {
+  "seed": 900001,
+  "starter": "b",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 90,
+  "ricerche": 46,
+  "t_py": 14.52,
+  "t_rs": 1.04
+ },
+ {
+  "seed": 900002,
+  "starter": "a",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 86,
+  "ricerche": 48,
+  "t_py": 13.55,
+  "t_rs": 1.88
+ },
+ {
+  "seed": 900003,
+  "starter": "b",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 138,
+  "ricerche": 52,
+  "t_py": 12.78,
+  "t_rs": 1.46
+ },
+ {
+  "seed": 900004,
+  "starter": "a",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 144,
+  "ricerche": 60,
+  "t_py": 16.14,
+  "t_rs": 1.59
+ },
+ {
+  "seed": 900005,
+  "starter": "b",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 105,
+  "ricerche": 47,
+  "t_py": 13.27,
+  "t_rs": 0.97
+ },
+ {
+  "seed": 900006,
+  "starter": "a",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 131,
+  "ricerche": 71,
+  "t_py": 22.85,
+  "t_rs": 2.61
+ },
+ {
+  "seed": 900007,
+  "starter": "b",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 143,
+  "ricerche": 62,
+  "t_py": 17.4,
+  "t_rs": 1.75
+ },
+ {
+  "seed": 900008,
+  "starter": "a",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 153,
+  "ricerche": 72,
+  "t_py": 22.0,
+  "t_rs": 1.93
+ },
+ {
+  "seed": 900009,
+  "starter": "b",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 136,
+  "ricerche": 52,
+  "t_py": 17.42,
+  "t_rs": 2.02
+ },
+ {
+  "seed": 900010,
+  "starter": "a",
+  "bot": "prior",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 151,
+  "ricerche": 58,
+  "t_py": 14.91,
+  "t_rs": 1.36
+ }
+]
