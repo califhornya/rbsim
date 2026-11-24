@@ -75,7 +75,22 @@ Semi di sviluppo, build finale:
 
 Semi tenuti da parte (900001–900040, mai usati prima), build finale; risultati in `docs/rust/misure/tenuti_rengar_*.json`:
 
-TENUTI
+| prova | ER (ER+RE) | KR (KR+RK) | EK (EK+KE) | Er (con sideboard) | Kr (con sideboard) |
+|---|---|---|---|---|---|
+| arena a 50 iterazioni, bot a mano: traccia e ogni ricerca | 80/80 | 80/80 | 80/80 | | |
+| arena a 50 iterazioni, bot coi prior: traccia e ogni ricerca | 80/80 | 80/80 | 80/80 | | |
+| esempi PPO bit per bit, self-play | 80/80 | 80/80 | 80/80 | | |
+| esempi PPO bit per bit, PPO contro simple_trade | 80/80 | 80/80 | 80/80 | | |
+| replay tracciato di partite PPO self-play | 80/80 | 80/80 | 80/80 | | |
+| autonome simple_trade contro simple_trade | 80/80 | 80/80 | 80/80 | 80/80 | 80/80 |
+| autonome random contro random | 80/80 | 80/80 | 80/80 | 80/80 | 80/80 |
+
+In tutto 2.000 partite su 2.000, di cui 480 dell'arena con ogni ricerca confrontata. Nessun `NotPorted`, nessuna
+differenza. Il lanciatore è `bash scripts/rust/tenuti_rengar.sh 4`; sul container ha impiegato circa 2 ore e mezza.
+Il tempo va quasi tutto alla canonicalizzazione degli stati negli strumenti di confronto: una partita dell'arena costa
+circa 14 s in Python e 0,5 s in Rust, poi circa 50 s di confronto.
+
+Suite Python completa (`pytest -q --ignore=tests/rust`): 1.952 test verdi.
 
 Le partite dell'arena confrontano anche ogni ricerca: menu, prior della radice, visite, Q e W di ogni figlio,
 valore, mossa e numero di nodi. Un `NotPorted` nelle simulazioni della ricerca fermerebbe la partita Rust
