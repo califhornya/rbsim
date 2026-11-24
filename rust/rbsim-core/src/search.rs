@@ -258,6 +258,7 @@ fn name_of(g: &Game, x: &Opt) -> String {
     match x {
         Opt::Card(c) => g.gs.name(*c).to_string(),
         Opt::Str(s) => s.clone(),
+        Opt::Json(v) => v.to_string(),
         Opt::Int(i) => i.to_string(),
         Opt::Bool(b) => (if *b { "True" } else { "False" }).into(),
         Opt::None => "None".into(),
@@ -319,6 +320,7 @@ pub fn describe_option(g: &Game, side: Side, kind: &str, o: &Opt, foreign: bool)
         Opt::Domain(d) => d.name().to_string(),
         Opt::Side(s) => s.name().to_string(),
         Opt::Str(s) => s.clone(),
+        Opt::Json(v) => v.to_string(),
         Opt::None => "None".to_string(),
         Opt::NoMore => "no more".to_string(),
         Opt::Gear(gid) => dgear_repr(gs, *gid),

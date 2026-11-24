@@ -102,6 +102,13 @@ impl Game {
                     .sum();
                 total >= threshold(params, 0)
             }
+            "this_is_mighty" => {
+                // Mighty = 5+ Might now (§ MIGHTY), not the printed number.
+                match self.find_unit_by_card(card) {
+                    Some(u) => self.gs.unit_might(u) >= 5,
+                    None => self.gs.might(card).unwrap_or(0) >= 5,
+                }
+            }
             "you_have_n_or_more_units_here" => {
                 let Some(bf) = extra.bf("battlefield") else { return Ok(false) };
                 if self.gs.players[side.idx()].base_units.iter().any(|&u| self.gs.ucard(u) == card) {

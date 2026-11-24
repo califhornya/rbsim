@@ -516,6 +516,10 @@ impl Game {
         let mut ctx = ctx.clone();
         match effect.as_str() {
             "counter_spell" => return Ok(Some(!self.counter_targets(&ctx, spec).is_empty())),
+            "kill_unit_or_gear" => {
+                let (u, g) = self.unit_or_gear_options(&ctx, spec)?;
+                return Ok(Some(!u.is_empty() || !g.is_empty()));
+            }
             "stun_or_return_attacker" => not_ported!("has_valid_target", "{effect}"),
             "play_token" if sget(spec, "location").map(py_str).as_deref() == Some("enemy_occupied") => {
                 not_ported!("has_valid_target", "play_token enemy_occupied")
@@ -539,7 +543,7 @@ impl Game {
                 });
             }
             "attach_equipment" | "ready_gear" | "move_self_to_weaker_enemy_battlefield" | "champion_to_hand" | "akali_retreat"
-            | "ward_unit" | "return_friendly_to_hand" | "play_one_banished_with_this" | "kill_unit_or_gear" => {
+            | "ward_unit" | "return_friendly_to_hand" | "play_one_banished_with_this" => {
                 not_ported!("has_valid_target", "{effect}")
             }
             _ => {}
@@ -581,6 +585,42 @@ impl Game {
         s2.insert("scope".into(), Value::String("all".into()));
         let units = self.resolve_targets(&mut ctx, &s2, "none", None)?;
         Ok(Some(!self.choosable(&ctx, &units)?.is_empty()))
+    }
+
+    /// py: _unit_or_gear_options(ctx, spec) — kill_unit_or_gear's choices: (units,
+    /// gear cards) passing its filter, the opponent's (with `side: any` the
+    /// actor's too), `where: here` or anywhere.
+    pub fn unit_or_gear_options(&mut self, ctx: &Ctx, spec: &Map<String, Value>) -> R<(Vec<UnitId>, Vec<CardId>)> {
+        let tf = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned().unwrap_or(Value::Object(Map::new()));
+        let here = sget(spec, "where").and_then(|v| v.as_str()) == Some("here");
+        let sides: Vec<Side> = if sget(spec, "side").and_then(|v| v.as_str()) == Some("any") {
+            vec![ctx.opponent, ctx.actor]
+        } else {
+            vec![ctx.opponent]
+        };
+        let (mut units, mut gear) = (Vec::new(), Vec::new());
+        for side in sides {
+            let at = self.units_at(ctx, side, if here { "here" } else { "anywhere" });
+            for u in self.choosable(ctx, &at)? {
+                if self.passes_filter(u, &tf, ctx)? {
+                    units.push(u);
+                }
+            }
+            for e in self.gear_entries(ctx, true, true) {
+                if e.0 != side || !self.gear_matches(e.2, &tf) {
+                    continue;
+                }
+                let ok_here = match e.1 {
+                    GearHolder::Bf(b) => b == ctx.bf,
+                    GearHolder::Unit(u) => self.gs.battlefields[ctx.bf].units_for(side).contains(&u),
+                    GearHolder::Base => false,
+                };
+                if !here || ok_here {
+                    gear.push(self.gear_card(e.2));
+                }
+            }
+        }
+        Ok((units, gear))
     }
 
     /// py: _counterable(card, spec) — the printed cost within the card's limits.

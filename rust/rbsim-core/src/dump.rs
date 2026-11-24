@@ -292,6 +292,7 @@ impl<'a> Dumper<'a> {
             },
             Opt::NoMore => json!("$NO_MORE"),
             Opt::Str(s) => json!(s),
+            Opt::Json(v) => v.clone(),
             Opt::Tuple(v) => Value::Array(v.iter().map(|x| self.opt(x)).collect()),
             Opt::None => Value::Null,
         }

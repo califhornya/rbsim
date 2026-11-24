@@ -43,8 +43,20 @@ impl Game {
         if !repl && self.gs.unit(dead).ward_turn == self.gs.turn {
             not_ported!("_try_replace_death", "ward (Tactical Retreat, Unlicensed Armory)");
         }
-        if !repl && self.legend_with(owner, "sett_save", true).is_some() && self.gs.unit(dead).might_counters > 0 {
-            not_ported!("_try_replace_death", "sett_save");
+        if let Some(legend) = self.legend_with(owner, "sett_save", true) {
+            if !repl && self.gs.unit(dead).might_counters > 0 && self.can_pay_generic_power(owner, 1) {
+                let lc = self.gs.ucard(legend);
+                if self.choose("optional:sett_save", owner, &[Opt::Bool(true), Opt::Bool(false)], Opt::Bool(true), Some(lc))?
+                    == Opt::Bool(true)
+                {
+                    // "If a buffed unit you control would die, you may pay [rune], exhaust me,
+                    // and spend its buff to heal it, exhaust it, and recall it instead" (Sett The Boss).
+                    self.pay_generic_power(owner, 1)?;
+                    self.exhaust(legend, None, None)?;
+                    self.spend_buff(dead, Some(owner))?;
+                    return self.death_saved(dead, owner);
+                }
+            }
         }
         if !repl && in_combat {
             if let Some(b) = bf {
@@ -59,6 +71,15 @@ impl Game {
             return Ok(false);
         }
         not_ported!("_try_replace_death", "death replacement (Guardian Angel / Zhonya's)")
+    }
+
+    /// py: _try_replace_death.saved() — heal it, exhaust it, and recall it instead.
+    fn death_saved(&mut self, dead: UnitId, owner: Side) -> R<bool> {
+        let u = self.gs.unit_mut(dead);
+        u.reset_damage();
+        u.ready = false;
+        self.gs.player_mut(owner).base_units.push(dead);
+        Ok(true)
     }
 
     /// py: _route_combat_deaths(stats, bf)

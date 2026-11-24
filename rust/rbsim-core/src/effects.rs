@@ -145,6 +145,17 @@ impl Game {
             "deal_damage" => self.fx_deal_damage(ctx, spec),
             "kill_gear" => self.fx_kill_gear(ctx, spec),
             "counter_spell" => self.fx_counter_spell(ctx, spec),
+            "kill_unit_or_gear" => self.fx_kill_unit_or_gear(ctx, spec),
+            "grant_temporary_might_per_friendly" => {
+                let base = spec.get("amount").map(py_int).unwrap_or(0);
+                let target = sstr(spec, "target", "actor");
+                let units = self.units_for_target(ctx, &target)?;
+                let Some(&unit) = units.first() else { return Ok(()) };
+                // Count friendly units at the target battlefield
+                let n = self.units_for_target(ctx, "actor")?.len() as i64;
+                self.gs.unit_mut(unit).temporary_might += base * n;
+                Ok(())
+            }
             "dig" | "reveal_and_choose" => self.fx_dig(ctx, spec),
             "name_spell" => {
                 // "Name a spell" (Fallen Feline): baseline, the costliest spell in the
@@ -971,6 +982,60 @@ impl Game {
         Ok(())
     }
 
+    /// py: _kill_unit_or_gear — "Kill an enemy Chaos unit or gear" (Decree of
+    /// Unity): one choice among both; baseline the mightiest unit, else the
+    /// priciest gear. `banish` (Burn Away) is not ported.
+    fn fx_kill_unit_or_gear(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let (units, gear) = self.unit_or_gear_options(ctx, spec)?;
+        let enemy_units: Vec<UnitId> = units.iter().copied().filter(|&u| self.locate_unit(u).map(|w| w.0) == Some(ctx.opponent)).collect();
+        let entries = self.gear_entries(ctx, true, true);
+        let enemy_gear: Vec<CardId> = gear
+            .iter()
+            .copied()
+            .filter(|&g| entries.iter().any(|e| self.gear_card(e.2) == g && e.0 == ctx.opponent))
+            .collect();
+        if enemy_units.is_empty() && enemy_gear.is_empty() {
+            return Ok(());
+        }
+        let default = if !enemy_units.is_empty() {
+            let mut best = enemy_units[0];
+            for &u in &enemy_units[1..] {
+                if self.gs.unit_might(u) > self.gs.unit_might(best) {
+                    best = u;
+                }
+            }
+            Opt::Unit(best)
+        } else {
+            let mut best = enemy_gear[0];
+            for &g in &enemy_gear[1..] {
+                if self.zone_value(g) > self.zone_value(best) {
+                    best = g;
+                }
+            }
+            Opt::Card(best)
+        };
+        let mut opts: Vec<Opt> = units.iter().map(|&u| Opt::Unit(u)).collect();
+        opts.extend(gear.iter().map(|&g| Opt::Card(g)));
+        let pick = self.choose(&kind("target", spec), ctx.actor, &opts, default, Some(ctx.card))?;
+        if truthy(spec.get("banish")) {
+            not_ported!("_kill_unit_or_gear", "banish (Burn Away)");
+        }
+        match pick {
+            Opt::Card(g) if gear.contains(&g) => {
+                let mut s2 = Map::new();
+                s2.insert("target".into(), Value::String("chosen_gear".into()));
+                self.fx_kill_gear_only(ctx, &s2, Some(g))
+            }
+            Opt::Unit(u) => {
+                if let Some((side, wbf)) = self.take_off_board(u) {
+                    self.route_deaths(&[(u, side)], wbf.unwrap_or(ctx.bf), wbf.is_none(), Some((ctx.actor, ctx.card)), false)?;
+                }
+                Ok(())
+            }
+            _ => unreachable!("kill_unit_or_gear chose something else"),
+        }
+    }
+
     /// py: _counter_spell — "Counter a spell": one on the chain, chosen as it
     /// is played (a target, §355). Baseline: the opponent's latest, else the latest.
     fn fx_counter_spell(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
@@ -1016,6 +1081,11 @@ impl Game {
     }
 
     fn fx_kill_gear(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        self.fx_kill_gear_only(ctx, spec, None)
+    }
+
+    /// py: _kill_gear(ctx, spec) with `_only` (a gear card: kill_unit_or_gear's pick).
+    fn fx_kill_gear_only(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>, only: Option<CardId>) -> R<()> {
         let tf = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned().unwrap_or(Value::Object(Map::new()));
         let scope = sstr(spec, "scope", "").to_lowercase();
         let target = sstr(spec, "target", "").to_lowercase();
@@ -1025,7 +1095,10 @@ impl Game {
         let mut entries: Vec<(Side, GearHolder, GearRef)> =
             self.gear_entries(ctx, true, true).into_iter().filter(|e| self.gear_matches(e.2, &tf)).collect();
         if sget(spec, "_only").is_some() {
-            not_ported!("_kill_gear", "_only");
+            not_ported!("_kill_gear", "_only in a spec");
+        }
+        if let Some(c) = only {
+            entries.retain(|e| self.gear_card(e.2) == c);
         }
         if truthy(spec.get("max_energy_self_might")) {
             let cap = self.source_unit(ctx).map(|u| self.gs.unit_might(u)).unwrap_or(0);

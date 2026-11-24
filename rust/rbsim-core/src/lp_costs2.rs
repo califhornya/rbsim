@@ -251,18 +251,95 @@ impl Game {
         Ok((energy.max(0), power))
     }
 
-    /// py: _cost_extras(card, side) — EK cards have none of these markers.
-    pub fn cost_extras(&mut self, card: CardId, _side: Side) -> R<Map<String, Value>> {
-        let out: Map<String, Value> = Map::new();
-        for es in self.gs.spec(card).effects.iter() {
+    /// py: _cost_extras(card, side) — what a card lets you spend as you play it
+    /// to cost less: "spend a buff and ignore this spell's cost" (Call to Glory).
+    /// The other kinds are not ported.
+    pub fn cost_extras(&mut self, card: CardId, side: Side) -> R<Map<String, Value>> {
+        let mut out: Map<String, Value> = Map::new();
+        let specs = self.gs.spec(card).effects.clone();
+        for es in specs.iter() {
             if matches!(es.effect.as_str(), "spend_buffs_for_power" | "kill_units_for_power" | "spend_xp_for_energy"
-                | "discard_for_energy" | "return_gear_for_energy" | "spend_buff_free")
-                || truthy(es.params.get("less_if_chosen"))
+                | "discard_for_energy" | "return_gear_for_energy")
             {
                 not_ported!("_cost_extras", "{}", es.effect);
             }
+            if es.effect == "spend_buff_free"
+                && self.friendly_units_of(side).iter().any(|&u| self.gs.unit(u).might_counters > 0)
+            {
+                out.insert("energy".into(), Value::from(self.gs.cost_energy(card)));
+                out.insert("power".into(), Value::from(self.gs.cost_power(card).unwrap_or(0)));
+                out.insert("buffs".into(), Value::from(1));
+            }
+            if truthy(es.params.get("less_if_chosen")) {
+                not_ported!("_cost_extras", "less_if_chosen");
+            }
         }
         Ok(out)
+    }
+
+    /// py: _choose_cost_extras(card, ap, extras, energy, power) — how much of
+    /// `extras` the player spends (baseline: all of it). Each buff not spent is
+    /// one Power back on the cost; only affordable amounts are offered.
+    pub fn choose_cost_extras(&mut self, card: CardId, ap: Side, extras: Map<String, Value>, energy: i64,
+                              power: Option<i64>) -> R<(Map<String, Value>, i64, Option<i64>)> {
+        if extras.is_empty() || (self.chooser.is_none() && !extras.contains_key("kills")) {
+            return Ok((extras, energy, power));
+        }
+        let mut options: Vec<(Map<String, Value>, i64, Option<i64>)> = vec![(extras.clone(), energy, power)];
+        let key = if extras.contains_key("buffs") {
+            Some("buffs")
+        } else if extras.contains_key("kills") {
+            Some("kills")
+        } else {
+            None
+        };
+        if let Some(key) = key {
+            let n = extras.get(key).map(py_int).unwrap_or(0);
+            for k in (0..n).rev() {
+                let back = n - k;
+                let less: Map<String, Value> = if k != 0 {
+                    let mut m = extras.clone();
+                    m.insert(key.into(), Value::from(k));
+                    m.insert("power".into(), Value::from(k));
+                    m
+                } else {
+                    extras.iter().filter(|(x, _)| x.as_str() != key && x.as_str() != "power").map(|(x, v)| (x.clone(), v.clone())).collect()
+                };
+                options.push((less, energy, Some(power.unwrap_or(0) + back)));
+            }
+        }
+        if ["xp", "discards", "gear_returns", "picks"].iter().any(|k| extras.contains_key(*k)) {
+            not_ported!("_choose_cost_extras", "xp / discards / gear_returns / picks");
+        }
+        let mut kept = vec![options[0].clone()];
+        for o in options.into_iter().skip(1) {
+            if self.can_pay_card(ap, card, o.1, o.2, true, None, None)? {
+                kept.push(o);
+            }
+        }
+        if key == Some("kills") {
+            not_ported!("_choose_cost_extras", "kills (Commander Ledros)");
+        }
+        let opt_of = |o: &(Map<String, Value>, i64, Option<i64>)| {
+            Opt::Tuple(vec![Opt::Json(Value::Object(o.0.clone())), Opt::Int(o.1), o.2.map(Opt::Int).unwrap_or(Opt::None)])
+        };
+        let opts: Vec<Opt> = kept.iter().map(opt_of).collect();
+        let got = self.choose("cost_extras", ap, &opts, opts[0].clone(), Some(card))?;
+        let i = opts.iter().position(|o| *o == got).expect("cost_extras chose an option");
+        Ok(kept.swap_remove(i))
+    }
+
+    /// py: _spend_cost_extras(extras, side, card) — pay what _cost_extras said the play spends.
+    pub fn spend_cost_extras(&mut self, extras: &Map<String, Value>, side: Side, _card: CardId) -> R<()> {
+        for _ in 0..extras.get("buffs").map(py_int).unwrap_or(0) {
+            if let Some(holder) = self.buff_to_spend(side, None, "any")? {
+                self.spend_buff(holder, Some(side))?;
+            }
+        }
+        if ["kills", "xp", "discards", "gear_returns", "picks"].iter().any(|k| extras.get(*k).map_or(false, |v| truthy(Some(v)))) {
+            not_ported!("_spend_cost_extras", "kills / xp / discards / gear_returns / picks");
+        }
+        Ok(())
     }
 
     /// py: _adjust_ability_cost

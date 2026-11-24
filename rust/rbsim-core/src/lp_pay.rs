@@ -1,7 +1,7 @@
 //! py: loop.py — can a card be paid, paying it, counting it as played and
 //! "when you play a card" triggers.
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::game::*;
 use crate::model::*;
@@ -83,11 +83,13 @@ impl Game {
 
     /// py: _pay_card(actor, card, energy, power, extras=True, lane=None)
     pub fn pay_card(&mut self, actor: Side, card: CardId, energy: i64, power: Option<i64>, lane: Option<i64>) -> R<bool> {
-        self.pay_card_x(actor, card, energy, power, true, lane)
+        self.pay_card_x(actor, card, energy, power, None, lane)
     }
 
-    pub fn pay_card_x(&mut self, actor: Side, card: CardId, energy: i64, power: Option<i64>, extras: bool,
-                      lane: Option<i64>) -> R<bool> {
+    /// `extras`: None = py extras=True (chosen now), Some = already chosen (a dict, maybe empty).
+    pub fn pay_card_x(&mut self, actor: Side, card: CardId, energy: i64, power: Option<i64>,
+                      extras: Option<Map<String, Value>>, lane: Option<i64>) -> R<bool> {
+        let (mut energy, mut power) = (energy, power);
         if !self.can_pay_card(actor, card, energy, power, true, None, lane)? {
             return Ok(false);
         }
@@ -100,18 +102,25 @@ impl Game {
             }
         }
         // _choose_alt_cost: EK has no alternate costs (alt_cost_offered checked above).
-        if extras {
-            let ex = self.cost_extras(card, actor)?;
-            if !ex.is_empty() {
-                not_ported!("_pay_card", "cost extras");
+        let extras = match extras {
+            Some(m) => m,
+            None => {
+                let ex0 = self.cost_extras(card, actor)?;
+                let (ex, e2, p2) = self.choose_cost_extras(card, actor, ex0, energy, power)?;
+                energy = e2;
+                power = p2;
+                ex
             }
-        }
+        };
         // _songstress_discount / _kill_discount: not offered in EK (checked in can_pay_card).
         let domain: Option<Domain> = None;
         if !self.pay_card_cost(actor, card, energy, power, domain)? {
             self.gs.card_mut(card).graceful_owed = Some(Vec::new());
             self.gs.card_mut(card).graceful_prepaid = Some(Value::from(0));
             return Ok(false);
+        }
+        if !extras.is_empty() {
+            self.spend_cost_extras(&extras, actor, card)?;
         }
         self.drain_rune_recycles()?;
         Ok(true)
