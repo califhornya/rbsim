@@ -166,7 +166,45 @@ Non si inseguono una per una:
 - **nella partita** (le copie si sono separate): la partita non ha un risultato valido e al rilancio si rigioca;
 - una divergenza che resta anche col codice attuale è un problema nuovo: tiene l'esito sospeso e va guardata.
 
+## Esito della prova di forza (Mac, 24/11): PROMOSSO
+Apple M1 Max, 8 processi, campione `ekris_s12/ckpt_040000.pt` in entrambi i posti, Rust 0,030 s contro Python
+0,400 s per ricerca, semi 70000–70799.
+
+**Cosa ti permette di fare:** le arene Evelynn–Kha'Zix possono girare su Rust a 0,03 s per mossa, senza
+perdere forza rispetto al bot Python a 0,4 s:
+- circa 2,4 s per partita invece di circa 28 s, cioè circa 12 volte più veloci;
+- per giocare contro il bot, il bot risponde in 0,03 s per decisione.
+
+- **800 coppie complete su 800**, 1.600 partite verificate a ogni passo.
+- **Divergenze:** 2 (semi 70113 e 70316, posto Rust A), entrambe solo nei numeri delle ricerche. La riprova
+  automatica col codice attuale le ha trovate identiche, quindi spiegate dalla correzione delle etichette:
+  le partite contano.
+- **Punteggio del bot Rust: 0,4938 ± 0,0158** (limite inferiore 0,4780 > 0,47).
+  **Promosso 0,030 s per Evelynn–Kha'Zix.**
+- Per cella:
+
+| bot Rust con | comincia Evelynn | comincia Kha'Zix |
+|---|---|---|
+| Evelynn | 0,868 | 0,593 |
+| Kha'Zix | 0,128 | 0,388 |
+
+Le celle riflettono il vantaggio di Evelynn nel matchup e si compensano a posti scambiati.
+
+- **Iterazioni per ricerca** (media, mediana, P10–P90):
+
+| | Python a 0,4 s | Rust a 0,03 s |
+|---|---|---|
+| turno principale | 136, 93 (43–317) | 184, 103 (43–464) |
+| reazione | 244, 284 (63–407) | 416, 429 (209–611) |
+| showdown | 152, 103 (47–374) | 338, 322 (144–560) |
+
+  A 0,03 s Rust fa almeno lo stesso lavoro di Python a 0,4 s in ogni tipo di ricerca.
+- **Tempo reale per partita sul percorso Rust di produzione**, entrambi a 0,03 s, un processo:
+  mediana 2,36 s. Un'arena Python a 0,4 s costa circa 28 s per partita, quindi circa 12 volte di più.
+- Il budget validato vale per Evelynn–Kha'Zix: va ricontrollato sui matchup successivi (Rengar, Ivern, Sett).
+
 ## Da fare (in ordine)
-1. **Forza a budget ridotto**: `bash scripts/rust/arena_mista.command` sul Mac.
+1. **Arene EK su Rust a 0,03 s**:
+   `arena_mazzi.py --motore rust --budget-candidato 0.03 --budget-avversario 0.03`.
 2. **Rengar, Ivern, Sett** (con le sideboard), per arena e raccolta PPO su tutti e cinque i mazzi.
 3. **Giocare contro il bot su Rust**: oggi la partita interattiva (coach) usa il motore Python.
