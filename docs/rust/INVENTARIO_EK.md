@@ -1,6 +1,6 @@
-# Inventario EK (porting Rust, F3)
+# Inventario Evelynn+Kha'Zix (porting Rust)
 
-Generato da `python scripts/rust/inventario.py --partite 30`. Esecuzioni: chiamate degli handler Python su 90 partite EK (self-play PPO a pesi dal seme 1, PPO contro simple_trade, random contro PPO), le stesse che il motore Rust gioca identiche.
+Generato da `python scripts/rust/inventario.py --liste EK --matchup EK --partite 30`. Esecuzioni: chiamate Python su 90 partite per matchup e per posto (EK, ciascuno anche rovesciato; minuscola = la lista con la sideboard nel mazzo, `riftbound/rs/mazzi.py`): self-play PPO a pesi dal seme 1, PPO contro simple_trade, random contro PPO. Sono le partite che il motore Rust gioca identiche.
 
 ## Carte
 
@@ -60,39 +60,94 @@ Stato in Rust: **handler** (rbsim-core `run_effect`), **marcatore** (nessun hand
 | Verbo | Stato Rust | Esecuzioni | Carte |
 |---|---|---|---|
 | ambush | marcatore | 0 | Rengar Trophy Hunter |
-| attach_gear | handler | 40 | Edge of Night |
+| attach_gear | handler | 52 | Edge of Night |
 | banish_self_and_gear | NON PORTATO | 0 | Ravenbloom Prefect |
-| bounce_enemy_at_crowded_battlefield | handler | 66 | Bedeviling Stranger |
-| buff_unit | handler | 200 | Kha'Zix Voidreaver |
+| bounce_enemy_at_crowded_battlefield | handler | 112 | Bedeviling Stranger |
+| buff_unit | handler | 356 | Kha'Zix Voidreaver |
 | cant_be_chosen | marcatore | 0 | Ruin Runner |
-| channel_rune | handler | 88 | K'Sante Courageous |
+| channel_rune | handler | 134 | K'Sante Courageous |
 | counter_spell | NON PORTATO | 0 | Abandon |
-| discard_card | handler | 898 | Evelynn Agony's Embrace, The Good Stuff, Traveling Merchant, Zaun Warrens |
-| draw_cards | handler | 1154 | Evelynn Agony's Embrace, The Good Stuff, Traveling Merchant, Zaun Warrens |
-| fight | handler | 117 | Rampage |
-| gain_power_any_domain | handler | 189 | Gold, Gutter Guardian |
-| gain_xp | handler | 312 | Kha'Zix Mutating Horror, Kha'Zix Voidreaver |
-| give_keyword | handler | 26 | Boots of Swiftness, Momentary Companion |
-| give_temporary_assault | handler | 0 | Shadow Clone |
+| discard_card | handler | 1692 | Evelynn Agony's Embrace, The Good Stuff, Traveling Merchant, Zaun Warrens |
+| draw_cards | handler | 2212 | Evelynn Agony's Embrace, The Good Stuff, Traveling Merchant, Zaun Warrens |
+| fight | handler | 310 | Rampage |
+| gain_power_any_domain | handler | 392 | Gold, Gutter Guardian |
+| gain_xp | handler | 643 | Kha'Zix Mutating Horror, Kha'Zix Voidreaver |
+| give_keyword | handler | 48 | Boots of Swiftness, Momentary Companion |
+| give_temporary_assault | handler | 2 | Shadow Clone |
 | grant_might | handler | 0 | Packed Amphitheater |
-| grant_temporary_might | handler | 800 | Grim Resolve, Hold 'Em, Kha'Zix Mutating Horror, Onslaught, Punch First, Rampage |
-| kill_gear | NON PORTATO | 0 | Acceptable Losses, An Offer You Can't Refuse |
-| mode_choice | handler | 274 | Reckless Innovator |
-| move_unit | handler | 352 | Evelynn Entrancing, Irresistible Faefolk, Kha'Zix Voidreaver, Void Assault |
-| play_from_trash | handler | 130 | Fizz Trickster |
-| play_token | handler | 568 | An Offer You Can't Refuse, Bandle Scouts' Academy, Pyke Returned, Up from the Deep, Zed Without a Sound |
-| predict | handler | 234 | Abandon, Rakelstake |
+| grant_temporary_might | handler | 1579 | Grim Resolve, Hold 'Em, Kha'Zix Mutating Horror, Onslaught, Punch First, Rampage |
+| kill_gear | handler | 0 | Acceptable Losses, An Offer You Can't Refuse |
+| mode_choice | handler | 572 | Reckless Innovator |
+| move_unit | handler | 802 | Evelynn Entrancing, Irresistible Faefolk, Kha'Zix Voidreaver, Void Assault |
+| play_from_trash | handler | 252 | Fizz Trickster |
+| play_token | handler | 1232 | An Offer You Can't Refuse, Bandle Scouts' Academy, Pyke Returned, Up from the Deep, Zed Without a Sound |
+| predict | handler | 367 | Abandon, Rakelstake |
 | prevent_spell_damage_this_turn | NON PORTATO | 0 | Unyielding Spirit |
-| recall_unit | handler | 699 | Gust, Rebuke, Star-Crossed |
-| recycle_from_opponent_hand | handler | 48 | Decree of Strength, Sabotage |
+| recall_unit | handler | 1383 | Gust, Rebuke, Star-Crossed |
+| recycle_from_opponent_hand | handler | 100 | Decree of Strength, Sabotage |
 | reduce_cost | marcatore | 0 | Hold 'Em |
 | reduce_cost_here | marcatore | 0 | Sandswept Tomb |
-| return_gear_to_hand | handler | 220 | The Good Stuff |
-| sequence | handler | 118 | Vex Apathetic |
+| return_gear_to_hand | handler | 386 | The Good Stuff |
+| sequence | handler | 344 | Vex Apathetic |
 | show_off | marcatore | 0 | Gutter Guardian |
-| swap_might | handler | 245 | Switcheroo |
-| swap_position | handler | 16 | Zed Without a Sound |
-| xp_when_it_wins | handler | 61 | Grim Resolve |
+| swap_might | handler | 393 | Switcheroo |
+| swap_position | handler | 24 | Zed Without a Sound |
+| xp_when_it_wins | handler | 98 | Grim Resolve |
+
+## Condizioni e quantità
+
+Condizioni (`_check_condition`, Rust `check_condition`) e fonti di quantità (`_amount`, Rust `effect_amount`). Esecuzioni: valutazioni in Python.
+
+| Tipo | Che cos'è | Stato Rust | Esecuzioni | Carte |
+|---|---|---|---|---|
+| all_of | condizione | portata | 2854 | Evelynn Agony's Embrace, Evelynn Entrancing |
+| enemy_alone_here | condizione | portata | 458 | Kha'Zix Mutating Horror |
+| kicker_paid | condizione | portata | 310 | Rampage |
+| moved_to_battlefield | condizione | portata | 120 | Irresistible Faefolk |
+| not_your_turn | condizione | portata | 559 | Momentary Companion |
+| played_to_battlefield_this_turn | condizione | portata | 1960 | Hold 'Em |
+| showed_off | condizione | portata | 175 | Gutter Guardian |
+| this_is_at_battlefield | condizione | portata | 612 | Pyke Returned, Vex Apathetic |
+| triggering_card_from_zone | condizione | portata | 5274 | Edge of Night, Evelynn Agony's Embrace |
+
+## Trigger e parole chiave
+
+Letta da: **Rust** (il nome compare nei sorgenti di rbsim-core), **solo Python** (da portare), **nessuno** (un'etichetta senza regole nel motore: LEGION si legge dalla condizione, DEATHKNELL dal trigger `on_death`).
+
+| Nome | Che cos'è | Letta da | Carte |
+|---|---|---|---|
+| activated | trigger | Rust | Gold, Kha'Zix Voidreaver, Zed Without a Sound |
+| cost_modifier | trigger | Rust | Hold 'Em |
+| on_attack | trigger | Rust | Kha'Zix Mutating Horror, Shadow Clone |
+| on_card_played | trigger | Rust | Evelynn Agony's Embrace |
+| on_cast | trigger | Rust | Abandon, Acceptable Losses, An Offer You Can't Refuse, Decree of Strength, Grim Resolve, Gust, Hold 'Em, Onslaught, Punch First, Rampage, Rebuke, Sabotage, Star-Crossed, Unyielding Spirit, Up from the Deep, Void Assault |
+| on_conquer | trigger | Rust | Zaun Warrens, Zed Without a Sound |
+| on_defend | trigger | Rust | Kha'Zix Mutating Horror |
+| on_enemy_gear_played | trigger | Rust | Ravenbloom Prefect |
+| on_enemy_unit_died | trigger | Rust | Pyke Returned |
+| on_enemy_unit_played | trigger | Rust | Vex Apathetic |
+| on_exhaust | trigger | Rust | Reckless Innovator |
+| on_first_unit_here | trigger | Rust | Rakelstake |
+| on_hide_here | trigger | Rust | Bandle Scouts' Academy |
+| on_hold | trigger | Rust | K'Sante Courageous, The Good Stuff |
+| on_move | trigger | Rust | Irresistible Faefolk, Traveling Merchant |
+| on_play | trigger | Rust | Bedeviling Stranger, Fizz Trickster, Gutter Guardian, Momentary Companion, Switcheroo, The Good Stuff |
+| on_self_played | trigger | Rust | Edge of Night, Evelynn Entrancing |
+| on_win_combat | trigger | Rust | Kha'Zix Voidreaver |
+| passive | trigger | Rust | Boots of Swiftness, Packed Amphitheater, Rengar Trophy Hunter, Ruin Runner, Sandswept Tomb |
+| ACCELERATE | parola chiave | Rust | K'Sante Courageous, Reckless Innovator |
+| ACTION | parola chiave | Rust | Acceptable Losses, An Offer You Can't Refuse, Grim Resolve, Hold 'Em, Punch First, Rebuke, Switcheroo |
+| AMBUSH | parola chiave | Rust | Kha'Zix Mutating Horror, Rengar Trophy Hunter |
+| BACKLINE | parola chiave | Rust | Evelynn Entrancing, Pyke Returned |
+| DEFLECT | parola chiave | Rust | Vex Apathetic |
+| DEPLOY | parola chiave | Rust | The Good Stuff |
+| EQUIP | parola chiave | solo Python | Boots of Swiftness, Edge of Night |
+| FLOW | parola chiave | nessuno (testo) | Onslaught, Up from the Deep |
+| HIDDEN | parola chiave | Rust | Bedeviling Stranger, Edge of Night, Evelynn Entrancing, Gutter Guardian, Momentary Companion, Pyke Returned, Switcheroo |
+| PREDICT | parola chiave | Rust | Abandon |
+| REACTION | parola chiave | Rust | Abandon, Gust, Star-Crossed, Unyielding Spirit |
+| SHIELD | parola chiave | Rust | K'Sante Courageous |
+| SHOW | parola chiave | nessuno (testo) | Gutter Guardian |
 
 ## Effetti per carta
 
@@ -165,5 +220,6 @@ Stato in Rust: **handler** (rbsim-core `run_effect`), **marcatore** (nessun hand
 
 ## Sintesi
 
-- Carte: 46; effetti: 64; verbi: 34 (handler Rust 25, marcatori 5, non portati 4: banish_self_and_gear, counter_spell, kill_gear, prevent_spell_damage_this_turn).
-- Verbi mai eseguiti nel campione: banish_self_and_gear, counter_spell, give_temporary_assault, grant_might, kill_gear, prevent_spell_damage_this_turn.
+- Carte: 46; effetti: 64; verbi: 34 (handler Rust 26, marcatori 5); condizioni 9, quantità 0, trigger 19, parole chiave 13.
+- Non portato: banish_self_and_gear, counter_spell, prevent_spell_damage_this_turn, parola chiave EQUIP.
+- Mai eseguiti nel campione: banish_self_and_gear, counter_spell, grant_might, kill_gear, prevent_spell_damage_this_turn.

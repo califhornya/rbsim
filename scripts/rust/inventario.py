@@ -77,6 +77,8 @@ def python_strings() -> set:
     for p in sorted((ROOT / "riftbound/core").glob("*.py")):
         tree = ast.parse(p.read_text())
         docs = {id(n.value) for n in ast.walk(tree) if isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant)}
+        # f-strings are messages (verbose prints), not rules
+        docs |= {id(c) for n in ast.walk(tree) if isinstance(n, ast.JoinedStr) for c in ast.walk(n)}
         out |= {n.value for n in ast.walk(tree)
                 if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs}
     return out
@@ -216,7 +218,12 @@ def main() -> None:
         missing += [] if k in ra else [f"quantità {k}"]
         lines.append(f"| {k} | quantità | {st} | {calls['quantità'].get(k, 0)} | {', '.join(sorted(amounts[k]))} |")
 
+    # Keywords both engines read from the rules text, not by name (EQUIP: §744, `_equip_cost`).
+    from_text = {"EQUIP": "Rust (dal testo: `parse_equip_cost`)"}
+
     def read(name: str) -> str:
+        if name in from_text:
+            return from_text[name]
         if name in rs_str:
             return "Rust"
         return "solo Python" if name in py_str else "nessuno (testo)"
