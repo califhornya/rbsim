@@ -23,7 +23,7 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**After the freeze (2026-11-24):** D72 found in a game in the coach page, open, to fix in Rust
+**After the freeze (2026-11-24):** D72-D73 found in games in the coach page, open, to fix in Rust
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -154,6 +154,7 @@ From now on:
 | D69 | The deck loader refuses the Chosen Champion in the Main Deck | §103.3.b.1 | not in these decks; 82FAW's Ivern list (champion + 1) didn't load | fixed, `e2d6b2e` |
 | D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
 | D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | open, to fix in Rust |
+| D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | open, to fix in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1044,6 +1045,34 @@ engine is frozen"): written here, fixed once in Rust.
   Zone, main phase and reaction speed); a unit played there makes the
   battlefield contested, as `_deploy_ambush_champion` does. Red test first
   with the two positions above.
+
+### D73. An AMBUSH play into a showdown misses the battlefield's passives
+
+- **Card.** Packed Amphitheater: "Champion units here have +1 [Might]."
+  Rengar Trophy Hunter is a Champion unit (Might 6).
+- **Seen.** In the coach page (24/11, Sett against Sett, turn 5): at Packed
+  Amphitheater the opponent's Fiora Victorious at 5 (4 + 1) and Rengar Trophy
+  Hunter, just played there with AMBUSH, at 6; the page's total 11. Expected
+  7 and 12.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup(active="B")`,
+  `scripted`): BF0 Packed Amphitheater, A's vanilla unit of Might 12 and B's
+  Fiora Victorious there, Rengar Trophy Hunter in B's hand;
+  `loop._play_ambush_unit(b, 0, 0)`. At A's showdown decision Rengar's
+  `might` is 6 (expected 7); with Rengar as B's Chosen Champion,
+  `loop._deploy_ambush_champion("B", 0)`: the same. The combat after it is
+  right (the unit of 12 dies: 5 + 7).
+- **Engine.** `loop.py:_play_ambush_unit` and `_deploy_ambush_champion` call
+  `_play_unit`, then `_run_showdown`, with no `_recompute_passives` in
+  between: the new unit's `passive_might` stays 0 until the next recompute.
+  Rust is the same (`lp_dest.rs:play_ambush_unit`,
+  `lp_costs.rs:deploy_ambush_champion`).
+- **Weight.** What the showdown's players see and decide on: the Observation
+  (the page, the PPO features, `table_value` of the searches), and every
+  check by Might during the showdown (not verified one by one: targets by
+  Might, damage that kills). Any battlefield or unit passive giving Might to
+  the unit just played.
+- **Fix (Rust).** Recompute the passives after the unit enters, before the
+  showdown. Red test first with the position above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
