@@ -1,0 +1,116 @@
+{
+ "cosa": "bench_arena_fisso",
+ "motore": "rust",
+ "macchina": "Matteos-MacBook-Pro-2.local",
+ "cpu": "arm",
+ "python": "3.13.2",
+ "torch": "2.13.0",
+ "thread_torch": 1,
+ "processi": 1,
+ "mazzi": "EK",
+ "bot": "PPOPriorAgent su Rust (stesso checkpoint nei due posti)",
+ "pesi": "/Users/mateo/projects/rbsim2026/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+ "pesi_sha256_16": "f0a4e383859620c5",
+ "lavoro": {
+  "iterazioni": 50
+ },
+ "semi": [
+  40000,
+  40003
+ ],
+ "partite": 8,
+ "totale_s": 4.639,
+ "mediana_parete_s": 0.61,
+ "minimo_parete_s": 0.438,
+ "massimo_parete_s": 0.679,
+ "quote": {
+  "motore e ricerca": 0.5991,
+  "rete": 0.3951
+ },
+ "chiamate": {
+  "rete": 7500,
+  "partita": 8
+ },
+ "partite_dettaglio": [
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 15,
+   "parete_s": 0.633,
+   "cpu_s": 0.633,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40000,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 15,
+   "parete_s": 0.679,
+   "cpu_s": 0.679,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 14,
+   "parete_s": 0.445,
+   "cpu_s": 0.445,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40001,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 14,
+   "parete_s": 0.438,
+   "cpu_s": 0.438,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 0.554,
+   "cpu_s": 0.554,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40002,
+   "comincia": "a",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 17,
+   "parete_s": 0.603,
+   "cpu_s": 0.603,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "A",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 0.642,
+   "cpu_s": 0.642,
+   "iter_medie_principali": 50
+  },
+  {
+   "seme": 40003,
+   "comincia": "b",
+   "candidato": "B",
+   "vincitore": "A",
+   "turni": 16,
+   "parete_s": 0.617,
+   "cpu_s": 0.617,
+   "iter_medie_principali": 50
+  }
+ ]
+}
