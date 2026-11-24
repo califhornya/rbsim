@@ -1,0 +1,1682 @@
+[
+ {
+  "seed": 900001,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 211,
+  "t_py_traced": 1.602,
+  "t_rs_traced": 0.335
+ },
+ {
+  "seed": 900001,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 207,
+  "t_py_traced": 0.551,
+  "t_rs_traced": 0.249
+ },
+ {
+  "seed": 900002,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 139,
+  "t_py_traced": 0.346,
+  "t_rs_traced": 0.165
+ },
+ {
+  "seed": 900002,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 185,
+  "t_py_traced": 0.512,
+  "t_rs_traced": 0.23
+ },
+ {
+  "seed": 900003,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 183,
+  "t_py_traced": 0.434,
+  "t_rs_traced": 0.211
+ },
+ {
+  "seed": 900003,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 192,
+  "t_py_traced": 0.573,
+  "t_rs_traced": 0.243
+ },
+ {
+  "seed": 900004,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 166,
+  "t_py_traced": 0.422,
+  "t_rs_traced": 0.195
+ },
+ {
+  "seed": 900004,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   11
+  ],
+  "rs": [
+   "A",
+   11
+  ],
+  "rust_error": null,
+  "events": 113,
+  "t_py_traced": 0.27,
+  "t_rs_traced": 0.126
+ },
+ {
+  "seed": 900005,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   11
+  ],
+  "rs": [
+   "B",
+   11
+  ],
+  "rust_error": null,
+  "events": 126,
+  "t_py_traced": 0.405,
+  "t_rs_traced": 0.139
+ },
+ {
+  "seed": 900005,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 218,
+  "t_py_traced": 0.516,
+  "t_rs_traced": 0.247
+ },
+ {
+  "seed": 900006,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 143,
+  "t_py_traced": 0.45,
+  "t_rs_traced": 0.164
+ },
+ {
+  "seed": 900006,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 199,
+  "t_py_traced": 0.493,
+  "t_rs_traced": 0.246
+ },
+ {
+  "seed": 900007,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 193,
+  "t_py_traced": 0.585,
+  "t_rs_traced": 0.233
+ },
+ {
+  "seed": 900007,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 186,
+  "t_py_traced": 0.433,
+  "t_rs_traced": 0.216
+ },
+ {
+  "seed": 900008,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   12
+  ],
+  "rs": [
+   "B",
+   12
+  ],
+  "rust_error": null,
+  "events": 114,
+  "t_py_traced": 0.266,
+  "t_rs_traced": 0.129
+ },
+ {
+  "seed": 900008,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 191,
+  "t_py_traced": 0.454,
+  "t_rs_traced": 0.232
+ },
+ {
+  "seed": 900009,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 111,
+  "t_py_traced": 0.288,
+  "t_rs_traced": 0.133
+ },
+ {
+  "seed": 900009,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 219,
+  "t_py_traced": 0.669,
+  "t_rs_traced": 0.282
+ },
+ {
+  "seed": 900010,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 135,
+  "t_py_traced": 0.31,
+  "t_rs_traced": 0.149
+ },
+ {
+  "seed": 900010,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 141,
+  "t_py_traced": 0.442,
+  "t_rs_traced": 0.165
+ },
+ {
+  "seed": 900011,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 178,
+  "t_py_traced": 0.435,
+  "t_rs_traced": 0.263
+ },
+ {
+  "seed": 900011,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 122,
+  "t_py_traced": 0.324,
+  "t_rs_traced": 0.151
+ },
+ {
+  "seed": 900012,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   22
+  ],
+  "rs": [
+   "B",
+   22
+  ],
+  "rust_error": null,
+  "events": 248,
+  "t_py_traced": 0.654,
+  "t_rs_traced": 0.357
+ },
+ {
+  "seed": 900012,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 195,
+  "t_py_traced": 0.664,
+  "t_rs_traced": 0.261
+ },
+ {
+  "seed": 900013,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   11
+  ],
+  "rs": [
+   "B",
+   11
+  ],
+  "rust_error": null,
+  "events": 143,
+  "t_py_traced": 0.348,
+  "t_rs_traced": 0.167
+ },
+ {
+  "seed": 900013,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 205,
+  "t_py_traced": 0.515,
+  "t_rs_traced": 0.256
+ },
+ {
+  "seed": 900014,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   22
+  ],
+  "rs": [
+   "B",
+   22
+  ],
+  "rust_error": null,
+  "events": 178,
+  "t_py_traced": 0.419,
+  "t_rs_traced": 0.206
+ },
+ {
+  "seed": 900014,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 185,
+  "t_py_traced": 0.459,
+  "t_rs_traced": 0.218
+ },
+ {
+  "seed": 900015,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 205,
+  "t_py_traced": 0.486,
+  "t_rs_traced": 0.238
+ },
+ {
+  "seed": 900015,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 141,
+  "t_py_traced": 0.345,
+  "t_rs_traced": 0.164
+ },
+ {
+  "seed": 900016,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 171,
+  "t_py_traced": 0.51,
+  "t_rs_traced": 0.215
+ },
+ {
+  "seed": 900016,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   19
+  ],
+  "rs": [
+   "A",
+   19
+  ],
+  "rust_error": null,
+  "events": 221,
+  "t_py_traced": 0.559,
+  "t_rs_traced": 0.263
+ },
+ {
+  "seed": 900017,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 148,
+  "t_py_traced": 0.389,
+  "t_rs_traced": 0.179
+ },
+ {
+  "seed": 900017,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 98,
+  "t_py_traced": 0.233,
+  "t_rs_traced": 0.113
+ },
+ {
+  "seed": 900018,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 165,
+  "t_py_traced": 0.378,
+  "t_rs_traced": 0.207
+ },
+ {
+  "seed": 900018,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 99,
+  "t_py_traced": 0.242,
+  "t_rs_traced": 0.117
+ },
+ {
+  "seed": 900019,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 172,
+  "t_py_traced": 0.449,
+  "t_rs_traced": 0.211
+ },
+ {
+  "seed": 900019,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 200,
+  "t_py_traced": 0.605,
+  "t_rs_traced": 0.25
+ },
+ {
+  "seed": 900020,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   12
+  ],
+  "rs": [
+   "B",
+   12
+  ],
+  "rust_error": null,
+  "events": 123,
+  "t_py_traced": 0.286,
+  "t_rs_traced": 0.141
+ },
+ {
+  "seed": 900020,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 159,
+  "t_py_traced": 0.385,
+  "t_rs_traced": 0.186
+ },
+ {
+  "seed": 900021,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   20
+  ],
+  "rs": [
+   "A",
+   20
+  ],
+  "rust_error": null,
+  "events": 197,
+  "t_py_traced": 0.471,
+  "t_rs_traced": 0.231
+ },
+ {
+  "seed": 900021,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 190,
+  "t_py_traced": 0.446,
+  "t_rs_traced": 0.215
+ },
+ {
+  "seed": 900022,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 183,
+  "t_py_traced": 0.462,
+  "t_rs_traced": 0.214
+ },
+ {
+  "seed": 900022,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 148,
+  "t_py_traced": 0.387,
+  "t_rs_traced": 0.184
+ },
+ {
+  "seed": 900023,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 192,
+  "t_py_traced": 0.482,
+  "t_rs_traced": 0.226
+ },
+ {
+  "seed": 900023,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 160,
+  "t_py_traced": 0.363,
+  "t_rs_traced": 0.185
+ },
+ {
+  "seed": 900024,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 137,
+  "t_py_traced": 0.32,
+  "t_rs_traced": 0.166
+ },
+ {
+  "seed": 900024,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   23
+  ],
+  "rs": [
+   "A",
+   23
+  ],
+  "rust_error": null,
+  "events": 222,
+  "t_py_traced": 0.552,
+  "t_rs_traced": 0.265
+ },
+ {
+  "seed": 900025,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 131,
+  "t_py_traced": 0.41,
+  "t_rs_traced": 0.151
+ },
+ {
+  "seed": 900025,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 203,
+  "t_py_traced": 0.477,
+  "t_rs_traced": 0.242
+ },
+ {
+  "seed": 900026,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 155,
+  "t_py_traced": 0.498,
+  "t_rs_traced": 0.18
+ },
+ {
+  "seed": 900026,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 206,
+  "t_py_traced": 0.492,
+  "t_rs_traced": 0.244
+ },
+ {
+  "seed": 900027,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 168,
+  "t_py_traced": 0.457,
+  "t_rs_traced": 0.186
+ },
+ {
+  "seed": 900027,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 165,
+  "t_py_traced": 0.441,
+  "t_rs_traced": 0.211
+ },
+ {
+  "seed": 900028,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 121,
+  "t_py_traced": 0.319,
+  "t_rs_traced": 0.138
+ },
+ {
+  "seed": 900028,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   20
+  ],
+  "rs": [
+   "B",
+   20
+  ],
+  "rust_error": null,
+  "events": 229,
+  "t_py_traced": 0.615,
+  "t_rs_traced": 0.357
+ },
+ {
+  "seed": 900029,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 138,
+  "t_py_traced": 0.342,
+  "t_rs_traced": 0.177
+ },
+ {
+  "seed": 900029,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 152,
+  "t_py_traced": 0.363,
+  "t_rs_traced": 0.181
+ },
+ {
+  "seed": 900030,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   20
+  ],
+  "rs": [
+   "B",
+   20
+  ],
+  "rust_error": null,
+  "events": 185,
+  "t_py_traced": 0.446,
+  "t_rs_traced": 0.212
+ },
+ {
+  "seed": 900030,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 128,
+  "t_py_traced": 0.477,
+  "t_rs_traced": 0.156
+ },
+ {
+  "seed": 900031,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 206,
+  "t_py_traced": 0.498,
+  "t_rs_traced": 0.247
+ },
+ {
+  "seed": 900031,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 193,
+  "t_py_traced": 0.577,
+  "t_rs_traced": 0.248
+ },
+ {
+  "seed": 900032,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 154,
+  "t_py_traced": 0.372,
+  "t_rs_traced": 0.181
+ },
+ {
+  "seed": 900032,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   22
+  ],
+  "rs": [
+   "B",
+   22
+  ],
+  "rust_error": null,
+  "events": 220,
+  "t_py_traced": 0.65,
+  "t_rs_traced": 0.277
+ },
+ {
+  "seed": 900033,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   25
+  ],
+  "rs": [
+   "B",
+   25
+  ],
+  "rust_error": null,
+  "events": 277,
+  "t_py_traced": 0.637,
+  "t_rs_traced": 0.381
+ },
+ {
+  "seed": 900033,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 143,
+  "t_py_traced": 0.333,
+  "t_rs_traced": 0.162
+ },
+ {
+  "seed": 900034,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   20
+  ],
+  "rs": [
+   "B",
+   20
+  ],
+  "rust_error": null,
+  "events": 235,
+  "t_py_traced": 0.685,
+  "t_rs_traced": 0.341
+ },
+ {
+  "seed": 900034,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 131,
+  "t_py_traced": 0.334,
+  "t_rs_traced": 0.158
+ },
+ {
+  "seed": 900035,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 170,
+  "t_py_traced": 0.443,
+  "t_rs_traced": 0.21
+ },
+ {
+  "seed": 900035,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   23
+  ],
+  "rs": [
+   "B",
+   23
+  ],
+  "rust_error": null,
+  "events": 247,
+  "t_py_traced": 0.703,
+  "t_rs_traced": 0.288
+ },
+ {
+  "seed": 900036,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   21
+  ],
+  "rs": [
+   "A",
+   21
+  ],
+  "rust_error": null,
+  "events": 227,
+  "t_py_traced": 0.529,
+  "t_rs_traced": 0.271
+ },
+ {
+  "seed": 900036,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 159,
+  "t_py_traced": 0.386,
+  "t_rs_traced": 0.19
+ },
+ {
+  "seed": 900037,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 125,
+  "t_py_traced": 0.313,
+  "t_rs_traced": 0.14
+ },
+ {
+  "seed": 900037,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 153,
+  "t_py_traced": 0.339,
+  "t_rs_traced": 0.167
+ },
+ {
+  "seed": 900038,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 165,
+  "t_py_traced": 0.417,
+  "t_rs_traced": 0.202
+ },
+ {
+  "seed": 900038,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 122,
+  "t_py_traced": 0.378,
+  "t_rs_traced": 0.133
+ },
+ {
+  "seed": 900039,
+  "matchup": "KR",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 169,
+  "t_py_traced": 0.446,
+  "t_rs_traced": 0.209
+ },
+ {
+  "seed": 900039,
+  "matchup": "RK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 175,
+  "t_py_traced": 0.504,
+  "t_rs_traced": 0.229
+ },
+ {
+  "seed": 900040,
+  "matchup": "KR",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 179,
+  "t_py_traced": 0.496,
+  "t_rs_traced": 0.228
+ },
+ {
+  "seed": 900040,
+  "matchup": "RK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 123,
+  "t_py_traced": 0.369,
+  "t_rs_traced": 0.134
+ }
+]

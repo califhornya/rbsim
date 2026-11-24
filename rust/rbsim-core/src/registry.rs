@@ -33,6 +33,179 @@ pub struct EffectSpec {
 
 pub type Spec = Rc<EffectSpec>;
 
+/// py: cards_registry._EFFECT_TOP_LEVEL_FIELDS
+const TOP_FIELDS: [&str; 11] =
+    ["trigger", "timing", "condition", "target", "target_filter", "scope", "duration", "optional", "cost", "scaling", "additional_cost"];
+
+/// py: json.dumps(v, sort_keys=True) (default separators, ensure_ascii).
+pub fn py_dumps_sorted(v: &Value) -> String {
+    fn esc(s: &str, out: &mut String) {
+        out.push('"');
+        for ch in s.chars() {
+            match ch {
+                '"' => out.push_str("\\\""),
+                '\\' => out.push_str("\\\\"),
+                '\n' => out.push_str("\\n"),
+                '\r' => out.push_str("\\r"),
+                '\t' => out.push_str("\\t"),
+                '\u{8}' => out.push_str("\\b"),
+                '\u{c}' => out.push_str("\\f"),
+                c if (c as u32) < 0x20 || (c as u32) > 0x7e => {
+                    let mut buf = [0u16; 2];
+                    for u in c.encode_utf16(&mut buf) {
+                        out.push_str(&format!("\\u{:04x}", u));
+                    }
+                }
+                c => out.push(c),
+            }
+        }
+        out.push('"');
+    }
+    fn w(v: &Value, out: &mut String) {
+        match v {
+            Value::Null => out.push_str("null"),
+            Value::Bool(b) => out.push_str(if *b { "true" } else { "false" }),
+            Value::Number(n) => out.push_str(&n.to_string()),
+            Value::String(s) => esc(s, out),
+            Value::Array(a) => {
+                out.push('[');
+                for (i, x) in a.iter().enumerate() {
+                    if i > 0 {
+                        out.push_str(", ");
+                    }
+                    w(x, out);
+                }
+                out.push(']');
+            }
+            Value::Object(m) => {
+                let mut keys: Vec<&String> = m.keys().collect();
+                keys.sort();
+                out.push('{');
+                for (i, k) in keys.iter().enumerate() {
+                    if i > 0 {
+                        out.push_str(", ");
+                    }
+                    esc(k, out);
+                    out.push_str(": ");
+                    w(&m[k.as_str()], out);
+                }
+                out.push('}');
+            }
+        }
+    }
+    let mut out = String::new();
+    w(v, &mut out);
+    out
+}
+
+impl EffectSpec {
+    /// py: EffectSpec.from_dict(data) — a spec made in play (a reflexive "then"):
+    /// no origin; its canonical name is its value (no registry spec is equal
+    /// to one with trigger "reflexive"). A `condition` (normalized in Python) is
+    /// not ported.
+    pub fn from_dict(data: &Map<String, Value>) -> Result<EffectSpec, String> {
+        let mut d: Map<String, Value> = data.clone();
+        if let Some(Value::Object(nested)) = data.get("params") {
+            let mut m = nested.clone();
+            for (k, v) in data {
+                if k != "params" {
+                    m.insert(k.clone(), v.clone());
+                }
+            }
+            d = m;
+        }
+        let effect = match d.get("effect") {
+            Some(Value::String(s)) => s.trim().to_string(),
+            _ => return Err("an effect specification without a string 'effect'".into()),
+        };
+        if d.contains_key("condition") {
+            return Err("EffectSpec.from_dict with a condition".into());
+        }
+        let get = |k: &str| d.get(k).cloned();
+        let mut params = Map::new();
+        for (k, v) in &d {
+            if k != "effect" && !TOP_FIELDS.contains(&k.as_str()) {
+                params.insert(k.clone(), v.clone());
+            }
+        }
+        let field = |k: &str| -> Value {
+            match k {
+                "trigger" => get(k).unwrap_or_else(|| Value::String("on_play".into())),
+                "optional" => get(k).unwrap_or(Value::Bool(false)),
+                _ => get(k).unwrap_or(Value::Null),
+            }
+        };
+        for k in TOP_FIELDS {
+            if let Some(v) = d.get(k) {
+                if !(v.is_string() || v.is_null() || (k == "optional" && v.is_boolean()) || k == "target_filter"
+                    || k == "cost" || k == "scaling" || k == "additional_cost")
+                {
+                    return Err(format!("EffectSpec.from_dict: field {k} = {v}"));
+                }
+            }
+        }
+        let mut to_dict = Map::new();
+        to_dict.insert("effect".into(), Value::String(effect.clone()));
+        for k in TOP_FIELDS {
+            let v = field(k);
+            let default = match k {
+                "trigger" => Value::String("on_play".into()),
+                "optional" => Value::Bool(false),
+                _ => Value::Null,
+            };
+            if v != default {
+                to_dict.insert(k.into(), v);
+            }
+        }
+        for (k, v) in &params {
+            to_dict.insert(k.clone(), v.clone());
+        }
+        let s_of = |k: &str| field(k).as_str().map(|s| s.to_string());
+        let mut merged = params.clone();
+        if !merged.contains_key("effect") {
+            merged.insert("effect".into(), Value::String(effect.clone()));
+        }
+        if let Some(t) = s_of("target") {
+            merged.insert("target".into(), Value::String(t));
+        }
+        let tf = field("target_filter");
+        if crate::cards::truthy(Some(&tf)) {
+            merged.insert("target_filter".into(), tf.clone());
+        }
+        if let Some(t) = s_of("scope") {
+            merged.insert("scope".into(), Value::String(t));
+        }
+        if let Some(t) = s_of("duration") {
+            merged.insert("duration".into(), Value::String(t));
+        }
+        let mut asdict = Map::new();
+        asdict.insert("effect".into(), Value::String(effect.clone()));
+        for k in TOP_FIELDS {
+            asdict.insert(k.into(), field(k));
+        }
+        asdict.insert("params".into(), Value::Object(params.clone()));
+        Ok(EffectSpec {
+            effect,
+            trigger: s_of("trigger").unwrap_or_else(|| "on_play".into()),
+            timing: s_of("timing"),
+            condition: None,
+            target: s_of("target"),
+            target_filter: Some(tf).filter(|v| !v.is_null()),
+            scope: s_of("scope"),
+            duration: s_of("duration"),
+            optional: field("optional").as_bool().unwrap_or(false),
+            cost: Some(field("cost")).filter(|v| !v.is_null()),
+            scaling: Some(field("scaling")).filter(|v| !v.is_null()),
+            additional_cost: Some(field("additional_cost")).filter(|v| !v.is_null()),
+            params,
+            to_dict,
+            merged,
+            origin: None,
+            spec_ref: py_dumps_sorted(&Value::Object(asdict)),
+        })
+    }
+}
+
 #[derive(Debug)]
 pub struct CardSpec {
     pub name: String,

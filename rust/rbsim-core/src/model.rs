@@ -36,6 +36,8 @@ pub struct Card {
     pub owner: Option<Side>,
     pub play_pending: Option<Value>,
     pub played_from: Option<String>,
+    /// py: Card._named_spell ("Name a spell": Fallen Feline)
+    pub named_spell: Option<String>,
     pub power_paid: Option<i64>,
     pub repeat_extra: Option<Value>,
     pub repeat_paid: Option<Value>,
@@ -96,6 +98,7 @@ impl Card {
             owner: None,
             play_pending: None,
             played_from: None,
+            named_spell: None,
             power_paid: None,
             repeat_extra: None,
             repeat_paid: None,
@@ -982,6 +985,8 @@ pub enum Opt {
 /// py: state.ChainItem.
 #[derive(Clone, Debug)]
 pub struct ChainItem {
+    /// The item's identity (py: the ChainItem object): set as it goes on the chain.
+    pub uid: usize,
     pub player: Side,
     pub card: CardId,
     pub bf_idx: usize,
@@ -1067,6 +1072,11 @@ pub struct GameState {
     pub rally_turn: PyDict<Side, i64>,
     pub conquer_return: Vec<(UnitId, i64)>,
     pub cant_play_spells_turn: PyDict<Side, i64>,
+    /// The next chain item identity (ChainItem.uid).
+    pub chain_uid: usize,
+    /// Items that left the chain while it isn't empty: a counter's declared
+    /// target still names one (py: the object, dumped by value).
+    pub chain_gone: Vec<ChainItem>,
     pub next_unit_ready_buff: PyDict<Side, i64>,
     pub died_in_beginning: PyDict<Side, i64>,
     pub in_beginning_phase: bool,
@@ -1101,6 +1111,10 @@ pub enum OnceKey {
 }
 
 impl GameState {
+    /// Where the chain item with identity `uid` is on the chain (Opt::Chain / Obj::Chain hold the uid).
+    pub fn chain_pos(&self, uid: usize) -> Option<usize> {
+        self.chain.iter().position(|c| c.uid == uid)
+    }
     pub fn other(&self, s: Side) -> Side {
         s.other()
     }

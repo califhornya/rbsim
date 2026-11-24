@@ -102,6 +102,38 @@ impl Game {
                     .sum();
                 total >= threshold(params, 0)
             }
+            "you_have_n_or_more_units_here" => {
+                let Some(bf) = extra.bf("battlefield") else { return Ok(false) };
+                if self.gs.players[side.idx()].base_units.iter().any(|&u| self.gs.ucard(u) == card) {
+                    return Ok(false); // a unit in base isn't at a battlefield
+                }
+                let units = self.gs.battlefields[bf].units_for(side).to_vec();
+                let mut n = units.len() as i64;
+                if crate::cards::truthy(params.get("with_gear")) {
+                    // "2 or more other friendly units and/or gear at my battlefield" (Steadfast Outrider)
+                    n += self.gs.battlefields[bf].gear[side.idx()].len() as i64;
+                    n += units.iter().map(|&u| self.gs.units[u.i()].gear.len() as i64).sum::<i64>();
+                }
+                n >= threshold(params, 0)
+            }
+            "undamaged_this_turn" => {
+                // "if I haven't been dealt damage this turn" (Affectionate Poro)
+                match self.find_unit_by_card(card) {
+                    Some(u) => self.gs.units[u.i()].damaged_turn != self.gs.turn,
+                    None => false,
+                }
+            }
+            "played_from_hand" => {
+                // "If you played this from your hand" (Back Off)
+                self.gs.card(card).played_from.as_deref().unwrap_or("hand") == "hand"
+            }
+            "has_all_pet_tags" => {
+                // "if your units have all of the following tags among them - Bird,
+                // Cat, Dog, and Poro" (Ivern Friend to All): _friendly_units_of (no legend units).
+                let tags: std::collections::HashSet<String> =
+                    self.friendly_units_of(side).into_iter().flat_map(|u| self.gs.unit_tags(u)).collect();
+                ["Bird", "Cat", "Dog", "Poro"].iter().all(|t| tags.contains(*t))
+            }
             other => not_ported!("_check_condition", "condition type {other}"),
         })
     }

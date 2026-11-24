@@ -1,12 +1,13 @@
 # Rapporto Rengar: il mazzo di Rengar nel motore Rust
 
-Ramo `claude/clever-mendel-vdxw9k`, verso `rust`. Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
+Ramo `claude/clever-mendel-vdxw9k`, unito in `rust` (PR 43). Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
 (congelato, `docs/audit/AUDIT.md`). Il motore Python non è stato toccato; l'unica correzione Python è nello strumento
 di traccia (`riftbound/rs/trace_py.py`, punto 2 delle divergenze).
 
 **Tappa Rengar raggiunta.** La lista competitiva di Rengar con la sua sideboard gioca su Rust. Sui matchup ER e KR
 nei due posti, ed EK di nuovo, le partite sono identiche a quelle Python. Valgono i semi tenuti da parte, gli esempi
 PPO bit per bit e l'arena a lavoro fisso, ricerche comprese: zero divergenze inspiegate, nessun `NotPorted`.
+Verificata anche sul Mac col checkpoint del campione: 240/240 partite con esempi PPO identici, 40/40 d'arena.
 EK, ER e KR vanno su Rust nell'arena e nel training (`arena_rs.COPERTI`, `ppo._motore`).
 
 ## Cosa è stato portato
@@ -145,17 +146,25 @@ Non è emerso nessun caso di regole ambigue. Le deviazioni note (D59, D62, Switc
 - Il mix `ekr` del training (EK, EK, ER, KR) è ora tutto su Rust.
 
 ## Col checkpoint vero (sul Mac)
-Il checkpoint del campione non è nel repository: qui le prove PPO e quelle col prior usano reti dal seme. Sul Mac:
+Il checkpoint del campione non è nel repository: qui le prove PPO e quelle col prior usano reti dal seme.
+Sul Mac (M1 Max, 24/11, commit `59bed2e`, campione `ekris_s12/ckpt_040000.pt`):
 
 ```bash
-bash scripts/rust/rengar_mac.command runs/sett/ekris_s12/ckpt_040000.pt
+bash scripts/rust/rengar_mac.command ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
 ```
 
-Lo script compila, esegue `pytest tests/rust` e poi fa due prove col checkpoint:
-1. esempi PPO bit per bit su ER, KR ed EK, nei due posti, self-play e contro simple_trade, semi 1–20;
-2. parità dell'arena col bot coi prior a 50 iterazioni su ER e KR, semi 40000–40009, nei due posti.
+`pytest tests/rust`: 51 verdi. Uscite: `docs/rust/misure/mac_rengar_*_20261124_1613.json`.
 
-Uscite: `docs/rust/misure/mac_rengar_*.json`.
+| Prova (semi, nei due posti) | ER | KR | EK |
+|---|---|---|---|
+| Esempi PPO bit per bit, self-play (1–20) | 40/40 | 40/40 | 40/40 |
+| Esempi PPO bit per bit, contro simple_trade (1–20) | 40/40 | 40/40 | 40/40 |
+| Arena col prior, 50 iterazioni (40000–40009): partite identiche | 20/20 | 20/20 | (tappa A) |
+| Ricerche confrontate, tutte identiche | 1.581 | 1.449 | |
+| Tempo per partita d'arena, Python / Rust | 16,1 / 1,13 s (×14,3) | 16,0 / 0,98 s (×16,3) | |
+
+Nessun errore Rust. Il rapporto di velocità sugli esempi PPO (×3,8–5,8) conta anche il forward della rete,
+che resta in Python.
 
 ## Comandi esatti
 
@@ -172,10 +181,9 @@ bash scripts/rust/tenuti_rengar.sh 4        # i semi tenuti da parte, tutte le p
 ```
 
 ## Cosa vale fare dopo
-1. Lanciare `rengar_mac.command` sul Mac, col campione.
-2. Ivern (EI, KI, RI, e il mix `ekri`), con lo stesso metodo:
+1. Ivern (EI, KI, RI, e il mix `ekri`), con lo stesso metodo:
    - inventario e porting;
    - autonome, replay, esempi PPO e arena;
    - posizioni mirate per i rami rari;
    - semi tenuti da parte.
-3. Sett.
+2. Sett.

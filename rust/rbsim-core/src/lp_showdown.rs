@@ -75,7 +75,7 @@ impl Game {
                         if has && self.spell_has_targets(card, side, bf_idx)? && self.pay_card(side, card, e, p, Some(bf_idx as i64))? {
                             self.gs.player_mut(side).hand.remove(i as usize);
                             self.spell_played(card, side, "hand")?;
-                            self.put_on_chain(ChainItem { player: side, card, bf_idx, declared: None, choices_noted: false, owner: None, ability: None })?;
+                            self.put_on_chain(ChainItem { uid: 0, player: side, card, bf_idx, declared: None, choices_noted: false, owner: None, ability: None })?;
                             self.run_chain(side)?;
                             return Ok("acted");
                         }

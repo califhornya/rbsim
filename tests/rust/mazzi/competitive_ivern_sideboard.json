@@ -1,0 +1,117 @@
+{
+ "name": "Ivern Nurturer (sideboard)",
+ "legend": "Ivern Green Father",
+ "champion": "Ivern Nurturer",
+ "runes": [
+  {
+   "domain": "CALM",
+   "count": 6
+  },
+  {
+   "domain": "ORDER",
+   "count": 6
+  }
+ ],
+ "battlefields": [
+  {
+   "name": "Forbidding Waste"
+  },
+  {
+   "name": "Rockfall Path"
+  },
+  {
+   "name": "Vilemaw's Lair"
+  }
+ ],
+ "cards": [
+  {
+   "name": "Affectionate Poro",
+   "count": 2
+  },
+  {
+   "name": "Back Off",
+   "count": 2
+  },
+  {
+   "name": "Blitzcrank Impassive",
+   "count": 1
+  },
+  {
+   "name": "Block",
+   "count": 2
+  },
+  {
+   "name": "Daisy!",
+   "count": 2
+  },
+  {
+   "name": "Defy",
+   "count": 1
+  },
+  {
+   "name": "Disarming Rake",
+   "count": 3
+  },
+  {
+   "name": "Fallen Feline",
+   "count": 2
+  },
+  {
+   "name": "Friendship",
+   "count": 2
+  },
+  {
+   "name": "Frisky Hunter",
+   "count": 2
+  },
+  {
+   "name": "Iridescent Avian",
+   "count": 3
+  },
+  {
+   "name": "Ivern Nurturer",
+   "count": 1
+  },
+  {
+   "name": "Mutated Mouser",
+   "count": 1
+  },
+  {
+   "name": "Not So Fast",
+   "count": 2
+  },
+  {
+   "name": "Raucous Anthem",
+   "count": 2
+  },
+  {
+   "name": "Stalwart Poro",
+   "count": 1
+  },
+  {
+   "name": "Trusty Ramhound",
+   "count": 2
+  },
+  {
+   "name": "Grand Strategem",
+   "count": 1
+  },
+  {
+   "name": "Hush",
+   "count": 2
+  },
+  {
+   "name": "Janna Savior",
+   "count": 2
+  },
+  {
+   "name": "Salvage",
+   "count": 2
+  },
+  {
+   "name": "Vilemaw",
+   "count": 1
+  }
+ ],
+ "sideboard": []
+}

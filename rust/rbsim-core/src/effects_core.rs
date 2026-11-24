@@ -515,7 +515,8 @@ impl Game {
         let effect = sstr(spec, "effect", "None");
         let mut ctx = ctx.clone();
         match effect.as_str() {
-            "counter_spell" | "stun_or_return_attacker" => not_ported!("has_valid_target", "{effect}"),
+            "counter_spell" => return Ok(Some(!self.counter_targets(&ctx, spec).is_empty())),
+            "stun_or_return_attacker" => not_ported!("has_valid_target", "{effect}"),
             "play_token" if sget(spec, "location").map(py_str).as_deref() == Some("enemy_occupied") => {
                 not_ported!("has_valid_target", "play_token enemy_occupied")
             }
@@ -580,6 +581,83 @@ impl Game {
         s2.insert("scope".into(), Value::String("all".into()));
         let units = self.resolve_targets(&mut ctx, &s2, "none", None)?;
         Ok(Some(!self.choosable(&ctx, &units)?.is_empty()))
+    }
+
+    /// py: _counterable(card, spec) — the printed cost within the card's limits.
+    pub fn counterable(&self, card: CardId, spec: &Map<String, Value>) -> bool {
+        let lim = |k: &str, d: i64| sget(spec, k).map(py_int).unwrap_or(d);
+        let power = self.gs.cost_power(card).unwrap_or(0);
+        self.gs.cost_energy(card) <= lim("max_energy", 99) && lim("min_power", 0) <= power && power <= lim("max_power", 99)
+    }
+
+    /// py: _chose_mine(ctx, item, only_one) — an opponent's chain item whose
+    /// declared choices include one of our units or gear (Not So Fast).
+    pub fn chose_mine(&self, ctx: &Ctx, idx: usize, only_one: bool) -> bool {
+        let item = &self.gs.chain[idx];
+        if item.player == ctx.actor {
+            return false;
+        }
+        let mine_units = self.units_at(ctx, ctx.actor, "anywhere");
+        let mine_gear: Vec<CardId> =
+            self.gear_entries(ctx, false, false).into_iter().filter(|e| e.0 == ctx.actor).map(|e| self.gear_card(e.2)).collect();
+        let mut hits: Vec<Opt> = Vec::new();
+        if let Some(d) = &item.declared {
+            for (_, (_k, _n, got)) in &d.items {
+                let xs: Vec<Opt> = match got {
+                    Chosen::One(o) => vec![o.clone()],
+                    Chosen::Many(v) => v.clone(),
+                };
+                for x in xs {
+                    let x = match x {
+                        Opt::Tuple(v) if !v.is_empty() => v.last().unwrap().clone(),
+                        o => o,
+                    };
+                    // getattr(x, "card", x): a unit's or deployed gear's card, else x itself.
+                    let card = match &x {
+                        Opt::Unit(u) => Some(self.gs.ucard(*u)),
+                        Opt::Gear(g) => Some(self.gs.dgear[g.i()].card),
+                        Opt::Card(c) => Some(*c),
+                        _ => None,
+                    };
+                    let unit_hit = matches!(&x, Opt::Unit(u) if mine_units.contains(u));
+                    if (unit_hit || card.map_or(false, |c| mine_gear.contains(&c))) && !hits.contains(&x) {
+                        hits.push(x);
+                    }
+                }
+            }
+        }
+        // Repulse: "that chooses it and no other friendly unit" (only_one).
+        if only_one { hits.len() == 1 } else { !hits.is_empty() }
+    }
+
+    /// py: _uncounterable(side) — an EMPOWERED unit with "uncounterable" (Mel Newly Awakened).
+    pub fn uncounterable(&self, side: Side) -> bool {
+        self.friendly_units_of(side).into_iter().any(|u| self.gs.unit(u).empowered && self.has_effect(self.gs.ucard(u), "uncounterable"))
+    }
+
+    /// py: _counter_targets(ctx, spec) — indices of the chain items counter_spell may choose.
+    pub fn counter_targets(&self, ctx: &Ctx, spec: &Map<String, Value>) -> Vec<usize> {
+        let mine = truthy(sget(spec, "enemy_choosing_mine"));
+        let only_one = truthy(sget(spec, "only_one"));
+        let mut out = Vec::new();
+        for (i, it) in self.gs.chain.iter().enumerate() {
+            if it.card == ctx.card {
+                continue;
+            }
+            let spell = self.gs.is_spell(it.card) && it.ability.is_none()
+                && self.counterable(it.card, spec) && !self.has_effect(it.card, "cant_be_countered");
+            if !(spell || (mine && it.ability.is_some())) {
+                continue;
+            }
+            if self.uncounterable(it.player) {
+                continue;
+            }
+            if mine && !self.chose_mine(ctx, i, only_one) {
+                continue;
+            }
+            out.push(i);
+        }
+        out
     }
 
     /// py: _gear_entries(ctx, enemy_first, units=False)
@@ -659,6 +737,22 @@ impl Game {
                     }
                 }
                 Ok(n)
+            }
+            Some(Value::String(s)) if s == "n_distinct_tags_among_friendlies" => {
+                // `tags`: only these count ("Bird, Cat, Dog, and Poro": Friendship).
+                let only: Vec<String> = match spec.get("tags") {
+                    Some(Value::Array(a)) => a.iter().map(py_str).collect(),
+                    _ => Vec::new(),
+                };
+                let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+                for u in self.ctx_friendly_units(ctx) {
+                    for t in self.gs.unit_tags(u) {
+                        if only.is_empty() || only.contains(&t) {
+                            seen.insert(t);
+                        }
+                    }
+                }
+                Ok(seen.len() as i64)
             }
             Some(src) => not_ported!("_amount", "amount_source {}", py_str(src)),
         }

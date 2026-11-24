@@ -266,6 +266,17 @@ impl Chooser for ReplayChooser {
             return Err(EngineError::Agent(format!("replay: choice {kind}: {} options {names:?}, trace {}", options.len(), e["options"])));
         }
         if e["by"] == "agent" {
+            // py: the PPO agent's question builds an Observation of the real
+            // game (also on a declaration's copy), whose bf.control() notes
+            // control (rbsim-py ppo.rs does the same).
+            let real: &mut Game = match g.real_game {
+                // SAFETY: as in ppo.rs, the real game's frame runs this copy.
+                Some(p) => unsafe { &mut *p },
+                None => g,
+            };
+            for i in 0..real.gs.battlefields.len() {
+                real.gs.battlefields[i].control();
+            }
             Ok(e["chosen"].as_u64().map(|x| x as usize))
         } else {
             Ok(None)

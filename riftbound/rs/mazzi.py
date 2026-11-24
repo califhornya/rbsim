@@ -24,6 +24,10 @@ OUT_DIR = ROOT / "tests/rust/mazzi"
 # (quante ne entrano: la somma deve essere la stessa).
 FUORI = {
     "R": {"Noxus Hopeful": 3, "Pit Rookie": 3, "First Mate": 2, "Irresistible Faefolk": 2},
+    # Ivern: entrano Disarming Rake ×2, Janna Savior ×2, Vilemaw (unità) e Hush ×2, Salvage ×2,
+    # Grand Strategem (magie); escono unità e magie di pari ruolo, almeno una copia di ciascuna resta.
+    "I": {"Stalwart Poro": 2, "Mutated Mouser": 2, "Trusty Ramhound": 1,
+          "Defy": 2, "Back Off": 1, "Friendship": 1, "Raucous Anthem": 1},
 }
 
 

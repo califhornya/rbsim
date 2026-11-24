@@ -344,7 +344,7 @@ impl Game {
             let lane = self.zone_play_lane();
             if !self.gs.chain.is_empty() {
                 self.spell_played(card, ap, zone)?;
-                self.put_on_chain(ChainItem { player: ap, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
+                self.put_on_chain(ChainItem { uid: 0, player: ap, card, bf_idx: lane, declared: None, choices_noted: false, owner: None, ability: None })?;
             } else {
                 self.cast_spell_now(card, ap, lane, zone)?;
             }

@@ -164,6 +164,7 @@ pub fn from_canonical(reg: Rc<Registry>, tree: &Value, seed: i128) -> Result<Gam
                 "_shown" => card.shown = Some(v.clone()),
                 "_owner" => card.owner = side_of(v),
                 "_played_from" => card.played_from = v.as_str().map(|s| s.to_string()),
+                "_named_spell" => card.named_spell = v.as_str().map(|s| s.to_string()),
                 "_spent" => card.spent = v.as_i64(),
                 "_power_paid" => card.power_paid = v.as_i64(),
                 "_attached_turn" => card.attached_turn = v.as_i64(),

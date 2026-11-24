@@ -6,7 +6,7 @@ La ricerca gira in Rust (rust/rbsim-core/src/search.rs); per il prior Rust
 costruisce osservazione, descrittori del menu e contesto e Python fa solo il
 forward e il softmax (`make_probs`), come PPOPriorAgent._evaluate. Perimetro:
 i matchup che il motore Rust copre (`COPERTI`: Evelynn-Kha'Zix, Evelynn-Rengar,
-Kha'Zix-Rengar, nei due posti).
+Kha'Zix-Rengar, Evelynn-Ivern, Kha'Zix-Ivern, Rengar-Ivern, nei due posti).
 """
 from __future__ import annotations
 
@@ -15,8 +15,9 @@ from pathlib import Path
 REF_BUDGET = 0.4        # scripts/diag/arena_bot.REF_BUDGET
 MAX_TURNS = 40          # scripts/bootstrap_net.MAX_TURNS
 # The matchups verified on the Rust engine (docs/rust/RAPPORTO_EK.md,
-# docs/rust/RAPPORTO_RENGAR.md): a game between two of their lists plays on Rust.
-COPERTI = ("EK", "ER", "KR")
+# docs/rust/RAPPORTO_RENGAR.md, docs/rust/RAPPORTO_IVERN.md): a game between two
+# of their lists plays on Rust.
+COPERTI = ("EK", "ER", "KR", "EI", "KI", "RI")
 _NETS: dict = {}
 
 

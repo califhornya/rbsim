@@ -35,6 +35,14 @@ pub fn is_add_verb(v: &str) -> bool {
     ADD_VERBS.contains(&v)
 }
 
+/// The index of an instruction made in play (py: None in (index, EffectSpec)).
+pub const NO_IDX: usize = usize::MAX;
+
+/// py: the instruction index, None for one made in play.
+pub fn ix(i: usize) -> Option<usize> {
+    if i == NO_IDX { None } else { Some(i) }
+}
+
 impl Game {
     // ------------------------------------------------------- card flags ---
 
@@ -383,10 +391,43 @@ impl Game {
         Ok(())
     }
 
-    /// py: _once_used
+    /// py: _once_used (an instruction made in play, index None: key (card, None))
     pub fn once_used(&self, card: CardId, i: usize, es: &Spec) -> bool {
-        truthy(es.params.get("once_per_turn"))
-            && self.gs.once_per_turn_used.get(&OnceK::Card(card, OnceKey::Idx(i as i64))) == Some(&self.gs.turn)
+        let key = match ix(i) {
+            Some(i) => OnceKey::Idx(i as i64),
+            None => OnceKey::Str("None".into()),
+        };
+        truthy(es.params.get("once_per_turn")) && self.gs.once_per_turn_used.get(&OnceK::Card(card, key)) == Some(&self.gs.turn)
+    }
+
+    /// py: _reflexive(ctx, then, extra=None) — a reflexive trigger of the
+    /// resolving spell or ability ("do this:", §388): `then` (an effect dict or
+    /// a list of them) goes on the chain once that is done (§389), sharing the
+    /// resolving one's information ("it", `extra`).
+    pub fn reflexive(&mut self, ctx: &Ctx, then: &Value, extra: Option<&Extra>) -> R<()> {
+        let list: Vec<Value> = match then {
+            Value::Array(a) => a.clone(),
+            v => vec![v.clone()],
+        };
+        let mut specs: Vec<(usize, Spec)> = Vec::new();
+        for es in list {
+            let Value::Object(mut m) = es else { not_ported!("_reflexive", "an EffectSpec instance") };
+            m.insert("trigger".into(), Value::String("reflexive".into()));
+            match crate::registry::EffectSpec::from_dict(&m) {
+                Ok(spec) => specs.push((NO_IDX, std::rc::Rc::new(spec))),
+                Err(e) => not_ported!("_reflexive", "{e}"),
+            }
+        }
+        let mut ex = ctx.extra.clone();
+        if let Some(e) = extra {
+            for (k, v) in e.items.iter() {
+                ex.set(k, v.clone());
+            }
+        }
+        let mut flags = Flags::new();
+        let kp = self.gs.card(ctx.card).kicker_paid;
+        flags.set("_kicker_paid".into(), XVal::Bool(kp.unwrap_or(false)));
+        self.trigger(ctx.card, "reflexive", specs, ctx.bf, ctx.actor, Some(ex), true, false, Some(flags))
     }
 
     /// py: _params_now
@@ -517,7 +558,7 @@ impl Game {
         let mut flags = p.flags.take();
         let found = self.with_card_flags(card, &mut flags, |g| {
             for (n, (i, es)) in specs.iter().enumerate() {
-                if g.instruction_runs(card, Some(*i), es, side, extra.as_ref(), additional, once, n == 0)? {
+                if g.instruction_runs(card, ix(*i), es, side, extra.as_ref(), additional, once, n == 0)? {
                     return Ok(Some(n));
                 }
             }
@@ -534,7 +575,7 @@ impl Game {
         ab.additional = p.additional;
         ab.once = p.once;
         ab.cond_extra = p.extra.clone();
-        Ok(Some(ChainItem {
+        Ok(Some(ChainItem { uid: 0,
             player: side,
             card,
             bf_idx,
@@ -554,7 +595,7 @@ impl Game {
         ctx.extra = ab.extra.clone();
         let outer_slot = self.slot;
         let mut instructions: Vec<(Option<usize>, Spec)> = vec![(None, ab.eff.clone().unwrap())];
-        instructions.extend(ab.rest.iter().map(|(i, s)| (Some(*i), s.clone())));
+        instructions.extend(ab.rest.iter().map(|(i, s)| (ix(*i), s.clone())));
         let cond_extra = ab.cond_extra.clone();
         let (additional, once) = (ab.additional, ab.once);
         let mut flags = ab.flags.take();

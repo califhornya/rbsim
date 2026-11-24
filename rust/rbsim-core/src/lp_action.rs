@@ -98,7 +98,7 @@ impl Game {
                         }
                         self.gs.player_mut(ap).hand.remove(i);
                         self.spell_played(card, ap, "hand")?;
-                        self.put_on_chain(ChainItem {
+                        self.put_on_chain(ChainItem { uid: 0,
                             player: ap,
                             card,
                             bf_idx: target_lane,

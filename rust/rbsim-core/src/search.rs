@@ -326,7 +326,7 @@ pub fn describe_option(g: &Game, side: Side, kind: &str, o: &Opt, foreign: bool)
             Some(p) => trigger_repr(gs, p),
             None => format!("Trigger #{i}"),
         },
-        Opt::Chain(i) => match gs.chain.get(*i) {
+        Opt::Chain(i) => match gs.chain_pos(*i).map(|p| &gs.chain[p]) {
             Some(it) => format!("CI({}|{:?}|{}|{:?}|{:?}|{:?})", card_repr(gs, it.card), it.player, it.bf_idx,
                                 it.owner, it.declared, it.ability),
             None => format!("ChainItem #{i}"),

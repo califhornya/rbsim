@@ -119,6 +119,7 @@ impl<'a> Dumper<'a> {
         put(&mut m, "_graceful_prepaid", card.graceful_prepaid.clone());
         put(&mut m, "_granted_repeat", card.granted_repeat.clone());
         put(&mut m, "_kicker_paid", card.kicker_paid.map(Value::Bool));
+        put(&mut m, "_named_spell", card.named_spell.clone().map(Value::String));
         put(&mut m, "_owner", card.owner.map(side));
         put(&mut m, "_play_pending", card.play_pending.clone());
         put(&mut m, "_played_from", card.played_from.clone().map(Value::String));
@@ -278,7 +279,13 @@ impl<'a> Dumper<'a> {
             Opt::Int(i) => json!(i),
             Opt::Domain(d) => json!(d.name()),
             Opt::Side(s) => side(*s),
-            Opt::Chain(i) => json!({"$chain": i}),
+            // py: the ChainItem itself (a dataclass, dumped by value)
+            Opt::Chain(i) => match self.g.gs.chain_pos(*i).map(|p| self.g.gs.chain[p].clone())
+                .or_else(|| self.g.gs.chain_gone.iter().rev().find(|c| c.uid == *i).cloned())
+            {
+                Some(it) => self.chain_item(&it),
+                None => json!({"$chain": i}),
+            },
             Opt::Trigger(i) => match self.g.trigger_menu.get(*i).cloned() {
                 Some(p) => self.pending(&p),
                 None => json!({"$trigger": i}),
@@ -324,7 +331,7 @@ impl<'a> Dumper<'a> {
                 if a.kind == "triggered" {
                     let bf = self.bf(a.bf.unwrap_or(0));
                     m.insert("bf".into(), bf);
-                    let rest: Vec<Value> = a.rest.iter().map(|(i, s)| json!([i, self.spec(s)])).collect();
+                    let rest: Vec<Value> = a.rest.iter().map(|(i, s)| json!([crate::lp_triggers::ix(*i), self.spec(s)])).collect();
                     m.insert("rest".into(), Value::Array(rest));
                     let fl = match &a.flags {
                         Some(f) => {
@@ -357,7 +364,7 @@ impl<'a> Dumper<'a> {
     fn pending(&mut self, p: &PendingTrigger) -> Value {
         let card = self.card(p.card);
         let bf = self.bf(p.bf);
-        let specs: Vec<Value> = p.specs.iter().map(|(i, s)| json!([i, self.spec(s)])).collect();
+        let specs: Vec<Value> = p.specs.iter().map(|(i, s)| json!([crate::lp_triggers::ix(*i), self.spec(s)])).collect();
         let extra = match &p.extra {
             Some(e) => self.extra(e),
             None => Value::Null,

@@ -107,6 +107,8 @@ pub fn empty_state(reg: Rc<Registry>, rng: PyRandom) -> GameState {
         rally_turn: PyDict::new(),
         conquer_return: Vec::new(),
         cant_play_spells_turn: PyDict::new(),
+        chain_uid: 1,
+        chain_gone: Vec::new(),
         next_unit_ready_buff: PyDict::new(),
         died_in_beginning: PyDict::new(),
         in_beginning_phase: false,
