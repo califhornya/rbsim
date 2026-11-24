@@ -12,7 +12,8 @@ with no advice and nothing saved for training (games.jsonl keeps the results).
 A local page (nothing leaves the machine) shows the board from your seat, as a
 table of card images (scripts/import_card_images.py copies them in; else they
 are downloaded from Piltover Archive the first time and kept in
-riftbound/data/card_images_piltover; a card without one is drawn). At each of your decisions with more than one option you
+riftbound/data/card_images_piltover, or, when that fails, the browser loads them
+from the archive itself; a card without one is drawn). At each of your decisions with more than one option you
 pick any legal move by clicking a card (with --net you also see the net's top
 three moves, with the win chance it estimates, marked on the table, and can
 accept one); for a move you pick, the choices inside it are asked too. With
@@ -54,6 +55,7 @@ def main() -> None:
     args = ap.parse_args()
 
     from riftbound.ai.card_images import image as card_image
+    from riftbound.ai.card_images import url as card_url
     from riftbound.ai.coach import CoachSession
     from riftbound.compute import be_gentle
     be_gentle()
@@ -90,7 +92,15 @@ def main() -> None:
             elif image:
                 data = card_image(image.group(1))
                 if data is None:
-                    return self._json({"error": "no image"}, 404)
+                    address = card_url(image.group(1))
+                    if address is None:
+                        return self._json({"error": "no image"}, 404)
+                    # Not downloaded here: the browser loads it from the archive.
+                    self.send_response(302)
+                    self.send_header("Location", address)
+                    self.send_header("Cache-Control", "no-store")
+                    self.end_headers()
+                    return
                 self.send_response(200)
                 self.send_header("Content-Type", "image/webp")
                 self.send_header("Cache-Control", "max-age=86400")
