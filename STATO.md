@@ -1,7 +1,7 @@
 # STATO
 
-Aggiornato: 2026-11-24 (sera). Ramo di lavoro `rust` (default su GitHub; tappa Rengar su
-`claude/clever-mendel-vdxw9k`, PR verso `rust` da unire). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-24 (sera). Ramo di lavoro `rust` (default su GitHub; tappa Rengar unita, PR 43;
+tappa Ivern su `claude/vibrant-johnson-k8ovzv`). `main` resta fermo al 19/11.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -43,19 +43,19 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Parità ER/KR/EK nei due posti: autonome, replay, PPO bit per bit, arena (mano e prior), 7 posizioni mirate;
   semi tenuti da parte 2.000/2.000 (`docs/rust/misure/tenuti_rengar_*.json`); zero divergenze inspiegate, nessun
   NotPorted. Suite Python 1.952 verdi, `tests/rust` 49 verdi. Inventario `docs/rust/INVENTARIO_RENGAR.md`.
+  Mac col campione: esempi PPO 240/240, arena col prior ER/KR 40/40 (3.030 ricerche), Rust ×14–16 a partita.
 - Perimetro esteso: `arena_rs.COPERTI = ("EK", "ER", "KR")`, `ppo._motore` e `arena_mazzi.py` lo seguono.
 - Script di parità con `--matchup` e `--posti`; difetto dello strumento di traccia (`_to_real_any`) corretto.
 
 ## In corso
-- Verifica Rengar col checkpoint vero sul Mac: `bash scripts/rust/rengar_mac.command` (da lanciare).
+- Tappa Ivern: inventario (`inventario.py --liste I --matchup EI KI RI Ei Ki Ri`).
 
 ## Prossimi passi
-1. `rengar_mac.command` sul Mac col campione (PPO bit per bit ER/KR/EK, arena col prior ER/KR).
+1. Ivern (EI, KI, RI, mix `ekri`): porting, parità, posizioni mirate, semi tenuti da parte,
+   verifica sul Mac; aggiungere a `arena_rs.COPERTI`. Poi Sett.
 2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare su ER/KR prima di usarlo lì.
-3. Ivern (EI, KI, RI, mix `ekri`): inventario (`inventario.py --liste I --matchup EI KI RI Ei Ki Ri`),
-   porting, parità, posizioni mirate, semi tenuti da parte; poi Sett. Aggiungere a `mazzi.FUORI`.
-4. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
+3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
