@@ -122,9 +122,13 @@ class PPOAgent(SimpleTradeAgent):
     def inner(self, loop, kind: str, options: list, default: int, source) -> Optional[int]:
         from riftbound.core.loop import NO_MORE
         side = self.player.name
-        key = (id(loop), kind, id(source))
-        made = self._many[1] + 1 if getattr(loop, "_in_many", False) and self._many[0] == key else 0
-        self._many = (key, made)
+        # The key holds the loop and the source themselves, not their id(): a
+        # declaration's copy, once freed, can leave its address to the next
+        # one, which would count as the same loop (tests/test_ppo_many_key.py).
+        prev = self._many[0]
+        same = prev is not None and prev[0] is loop and prev[1] == kind and prev[2] is source
+        made = self._many[1] + 1 if getattr(loop, "_in_many", False) and same else 0
+        self._many = ((loop, kind, source), made)
         descs = [F.describe_choice(loop, side, o) for o in options]
         ctx = F.context(len(options), made=made, up_to=any(o is NO_MORE for o in options),
                         declaring=loop is not self.loop)

@@ -55,6 +55,9 @@ def test_made_restarts_on_a_new_loop_at_a_reused_address():
             break
         keep.append(x)
     if second is None:
-        pytest.skip("no address reused in 1000 tries: the case can't be built here")
+        # No address came back: the first loop is still alive (the agent holds
+        # it, as it now does) or the allocator didn't hand it back; a new loop
+        # all the same.
+        second = _Loop()
     a.inner(second, "target:x", [], 0, None)
     assert a._many[1] == 0
