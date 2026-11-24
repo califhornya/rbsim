@@ -67,6 +67,7 @@ class Link:
         self.box = {"py": queue.Queue(), "rs": queue.Queue()}
         self.leader = leader
         self.counts: list = []        # (seat, point, n, engine) of every led search
+        self.diverged = None          # the first identity mismatch met by either copy
 
     def _get(self, engine: str):
         try:
@@ -81,6 +82,11 @@ class Link:
         for q in self.box.values():
             q.put(("abort", why))
 
+    def _diverge(self, why: str):
+        if self.diverged is None:
+            self.diverged = why
+        raise Divergence(why)
+
     def hooks(self, engine: str):
         other = "rs" if engine == "py" else "py"
 
@@ -88,12 +94,12 @@ class Link:
             if self.leader[info["seat"]] == engine:
                 msg = self._get(engine)
                 if msg != ("ready", info):
-                    raise Divergence(f"{engine} leads {info}, the other copy is at {msg}")
+                    self._diverge(f"{engine} leads {info}, the other copy is at {msg}")
                 return -1
             self.box[other].put(("ready", info))
             msg = self._get(engine)
             if msg[0] != "count" or msg[1] != info:
-                raise Divergence(f"{engine} repeats {info}, the other copy sent {msg}")
+                self._diverge(f"{engine} repeats {info}, the other copy sent {msg}")
             return msg[2]
 
         def after(info: dict, n: int) -> None:
@@ -234,6 +240,11 @@ def game(task) -> dict:
     for t in threads:
         t.join()
     row = {"seed": seed, "starter": starter, "rust_seat": rs_seat, "wall_s": round(time.perf_counter() - t0, 2)}
+    if link.diverged is not None:
+        # The copies left each other at a search: a divergence (the other
+        # copy's stop is its consequence), not a failed game to replay.
+        row["divergenza"] = [{"passo": link.diverged}]
+        return row
     if "py_err" in out or "rs_err" in out:
         row["errore"] = {k: out[k] for k in ("py_err", "rs_err") if k in out}
         return row
@@ -282,6 +293,28 @@ def _pct(xs: list, q: float) -> float:
     return xs[min(len(xs) - 1, int(q * (len(xs) - 1) + 0.5))]
 
 
+def valuta(rows: list, seeds, coppie: int, soglia: float) -> dict:
+    """The verdict on the prescribed sample: SOSPESO while any game diverged or
+    any of the 2 x coppie games is missing (failed games are replayed on the
+    next launch); else PROMOSSO when the lower bound of the 95% CI on the
+    pairs' means, before rounding, is above `soglia`."""
+    seeds = set(seeds)
+    rows = [r for r in rows if r["seed"] in seeds]
+    div = [r for r in rows if "divergenza" in r]
+    valid = [r for r in rows if "score" in r and "divergenza" not in r]
+    expected = {(s, seat) for s in seeds for seat in ("A", "B")}
+    missing = expected - {(r["seed"], r["rust_seat"]) for r in rows}
+    by: dict = {}
+    for r in valid:
+        by.setdefault(r["seed"], []).append(r["score"])
+    pairs = [sum(v) / len(v) for v in by.values() if len(v) == 2]
+    complete = not div and not missing and len(pairs) == coppie
+    m, h = _ci(pairs) if pairs else (float("nan"), float("nan"))
+    esito = "SOSPESO" if not complete else "PROMOSSO" if m - h > soglia else "NON PROMOSSO"
+    return {"esito": esito, "media": m, "mezzo_ic": h, "coppie": pairs, "valide": valid, "divergenti": div,
+            "mancanti": missing, "completo": complete}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ckpt", required=True, help="i prior di entrambi i bot (o seme:N per una rete casuale)")
@@ -319,17 +352,21 @@ def main() -> None:
         motore={"EK": "misto (passo comune)"}, liste={"E": EVE, "K": KHA},
         checkpoint={"prior": None if sha == args.ckpt else args.ckpt},
         arena=str(args.out), budget={"rust": args.budget_rust, "python": args.budget_python}))
+    check = not args.senza_controlli
     key = {"ckpt_sha": sha, "budget_rust": args.budget_rust, "budget_python": args.budget_python,
-           "regole": REGOLE_PYTHON}
+           "regole": REGOLE_PYTHON, "controlli": check}
     rows: list = []
     if righe.exists():
         for line in open(righe):
             r = json.loads(line)
-            if all(r.get(k) == v for k, v in key.items()) and "errore" not in r:
+            # Only comparable games, and with the checks on only checked ones
+            # (a trace compared, or a divergence met); failed games are replayed.
+            if all(r.get(k) == v for k, v in key.items()) and "errore" not in r and \
+                    (not check or "eventi" in r or "divergenza" in r):
                 rows.append(r)
     done = {(r["seed"], r["rust_seat"]) for r in rows}
     tasks = [(s, "a" if s % 2 == 0 else "b", seat, args.ckpt, args.budget_rust, args.budget_python,
-              not args.senza_controlli) for s in seeds for seat in ("A", "B") if (s, seat) not in done]
+              check) for s in seeds for seat in ("A", "B") if (s, seat) not in done]
     if rows:
         say(f"   ripresa: {len(rows)} partite già giocate, {len(tasks)} da giocare")
     t0 = time.time()
@@ -346,22 +383,21 @@ def main() -> None:
                 say(f"   DIVERGENZA seme {r['seed']} posto Rust {r['rust_seat']}: {json.dumps(r['divergenza'])[:600]}")
             if len(rows) % 100 == 0:
                 print(f"   ... {len(rows)}/{2 * args.coppie} partite, {(time.time() - t0) / 60:.0f} min", flush=True)
-    rows = [r for r in rows if r["seed"] in seeds]
-    by: dict = {}
-    for r in rows:
-        by.setdefault(r["seed"], []).append(r["score"])
-    pairs = [sum(v) / len(v) for v in by.values() if len(v) == 2]
-    div = [r for r in rows if "divergenza" in r]
+    ver = valuta(rows, seeds, args.coppie, args.soglia)
+    div, missing, pairs, complete = ver["divergenti"], ver["mancanti"], ver["coppie"], ver["completo"]
     if not pairs:
-        say("   nessuna coppia completa")
+        say(f"   nessuna coppia completa; divergenti {len(div)}, mancanti o in errore {len(missing)}")
+        say("   Esito: SOSPESO")
         return
-    m, h = _ci(pairs)
+    rows = ver["valide"]
+    m, h = ver["media"], ver["mezzo_ic"]
     cells = []
     for seat, deck in (("A", "Evelynn"), ("B", "Kha'Zix")):
         for starter, who in (("a", "Evelynn"), ("b", "Kha'Zix")):
             xs = [r["score"] for r in rows if r["rust_seat"] == seat and r["starter"] == starter]
             cells.append(f"Rust con {deck}, comincia {who} {sum(xs) / max(1, len(xs)):.3f}")
-    say(f"   {len(pairs)} coppie complete: punteggio del bot Rust {m:.4f} +- {h:.4f} (limite inferiore "
+    say(f"   {len(pairs)} coppie complete su {args.coppie}{'' if complete else ' (parziale)'}: punteggio del bot "
+        f"Rust {m:.4f} +- {h:.4f} (limite inferiore "
         f"{m - h:.4f}); " + "; ".join(cells))
     allc: dict = {}
     for r in rows:
@@ -371,12 +407,15 @@ def main() -> None:
         v = allc[k]
         say(f"   iterazioni {k}: {len(v)} ricerche, media {sum(v) / len(v):.1f}, P10 {_pct(v, .1)}, "
             f"mediana {_pct(v, .5)}, P90 {_pct(v, .9)}")
-    say(f"   partite verificate a ogni passo: {sum(1 for r in rows if 'eventi' in r)}; divergenti: {len(div)}")
+    say(f"   partite verificate a ogni passo: {sum(1 for r in rows if 'eventi' in r)}; divergenti: {len(div)}; "
+        f"mancanti o in errore: {len(missing)}")
     if div:
-        say(f"   Esito: SOSPESO ({len(div)} partite divergenti da riprodurre e spiegare)")
+        say(f"   Esito: {ver['esito']} ({len(div)} partite divergenti da riprodurre e spiegare)")
+    elif not complete:
+        say(f"   Esito: {ver['esito']} (campione incompleto: {len(missing)} partite mancanti o in errore; rilanciare)")
     else:
-        say(f"   Esito: {'PROMOSSO' if m - h > args.soglia else 'NON PROMOSSO'} {args.budget_rust} s per "
-            f"Evelynn-Kha'Zix (limite inferiore {m - h:.4f}, soglia {args.soglia})")
+        say(f"   Esito: {ver['esito']} {args.budget_rust} s per Evelynn-Kha'Zix (limite inferiore {m - h:.4f}, "
+            f"soglia {args.soglia})" + ("" if check else "; SENZA controlli di traccia e ricerche"))
     if args.tempo_produzione > 0 and not args.ckpt.startswith("seme:"):
         from riftbound.rs.arena_rs import game as rs_game
         walls = []
