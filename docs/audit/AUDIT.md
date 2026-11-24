@@ -23,7 +23,7 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**After the freeze (2026-11-24):** D72-D73 found in games in the coach page, open, to fix in Rust
+**After the freeze (2026-11-24):** D72-D74 found in games in the coach page, open, to fix in Rust
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -155,6 +155,7 @@ From now on:
 | D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
 | D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | open, to fix in Rust |
 | D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | open, to fix in Rust |
+| D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | open, to fix in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1073,6 +1074,31 @@ engine is frozen"): written here, fixed once in Rust.
   the unit just played.
 - **Fix (Rust).** Recompute the passives after the unit enters, before the
   showdown. Red test first with the position above.
+
+### D74. Pillaged Armory buffs only a friendly unit at its own battlefield
+
+- **Card.** Pillaged Armory: "DEPLOY ... When you play this or when you
+  conquer here, BUFF a friendly unit." The buff names no place: any friendly
+  unit, in base or at any battlefield ("here" is only the conquer's place).
+- **Seen.** In the coach page (24/11, Sett against Sett): Fiora Victorious
+  saved by Sett The Boss (healed, exhausted, recalled to base), then the
+  Armory's buff at Packed Amphitheater: "bersaglio → Vi Peacekeeper (unica
+  scelta)". Fiora in base wasn't offered.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `choices`,
+  `act`): A's Vi Peacekeeper at BF0, Fiora Victorious in A's base, Pit Rookie
+  at BF1, Pillaged Armory in hand; "Play gear Pillaged Armory @BF0". The
+  choice `target:buff_unit` offers only Vi Peacekeeper; expected the three.
+- **Engine.** The card's two `buff_unit` effects (`on_play`, `on_conquer`,
+  `target: friendly_unit`) have no `where`; `effects.py:_resolve_targets`
+  then takes "the units here (a spell's battlefield, the source's)". Pit
+  Rookie, with the same verb, has `"where": "anywhere"`.
+- **Same encoding elsewhere.** In the five decks, effects of non-spells with
+  a single target and no `where`: Blitzcrank Impassive, Daisy!, Evelynn
+  Entrancing, Irresistible Faefolk, Janna Savior, Vi Peacekeeper (and Void
+  Assault, a spell). Not read against the print here; many say "here" or
+  move to "my location", where the default is right.
+- **Fix (Rust).** `where: anywhere` for both effects of Pillaged Armory. Red
+  test first with the position above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
