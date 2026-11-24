@@ -72,7 +72,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 
 ## In corso
 - Pagina col campione pronta per la PR verso `rust`; Matteo ci gioca sul Mac: difetti in `AUDIT.md`
-  (D72-D76), giocate del campione in `docs/bot/GIOCATE.md` §7 (Call to Glory sprecata).
+  (D72-D76), giocate del campione in `docs/bot/GIOCATE.md` §7 (Call to Glory e Punch First sprecate).
 
 ## Prossimi passi
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
@@ -80,7 +80,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. D72-D76 in Rust (AUDIT.md, test rosso prima): Rengar Trophy Hunter dove ci sono solo nemici, AMBUSH
    in showdown senza passive del campo, Pillaged Armory, Sett Kingpin, Sett The Boss che non si prepara.
-4. Scenario della Call to Glory sprecata (GIOCATE.md §7): quante volte il campione la lancia per primo.
+4. Scenario di GIOCATE.md §7: quante volte il campione spreca Call to Glory o Punch First.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
