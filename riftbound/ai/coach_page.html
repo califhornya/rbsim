@@ -244,7 +244,7 @@ aside section.grow { flex: 1 1 0; min-height: 150px; overflow-y: auto; }
   <section class="grow"><h2>Cosa è successo</h2><div class="log" id="log"></div></section>
   <section>
     <details><summary>Segnala un problema</summary>
-      <textarea id="note" placeholder="Es.: questa carta non dovrebbe poter fare…, la rete ha ignorato…" style="margin-top:8px"></textarea>
+      <textarea id="note" placeholder="Es.: questa carta non dovrebbe poter fare…, l'avversario ha ignorato…" style="margin-top:8px"></textarea>
       <div style="display:flex; gap:8px; margin-top:6px; align-items:center">
         <button class="ghost" id="sendReport">Invia segnalazione</button><span id="reportOk" class="hint"></span>
       </div>
@@ -415,6 +415,7 @@ function actionsBySrc() {
   p.actions.forEach((a, i) => { if (a.src) (out[a.src] = out[a.src] || []).push(i); });
   return out;
 }
+function oppName(id) { const o = (S.opponents || []).find((x) => x.id === id); return o ? o.name : ({ campione: "Il campione", net: "La rete", simple_trade: "Bot semplice" })[id] || id || ""; }
 function suggOf(i) { return (S.pending.suggestions || []).findIndex((s) => s.action === i); }
 function pct(w) { const p = Math.round(w * 100); return p < 1 ? "meno dell'1%" : p > 99 ? "più del 99%" : p + "%"; }
 
@@ -500,24 +501,27 @@ function renderSide() {
   $("#tech").textContent = (S.log || []).join("\n");
   // game box
   const playing = S.status === "thinking" || S.status === "waiting";
-  const who = playing ? `<div class="hint" style="margin-bottom:8px">${esc(S.info.deck_mine)} (tu) contro ${esc(S.info.deck_opp)} · avversario: ${S.info.opponent === "net" ? "la rete" : "bot semplice"}</div>` : "";
+  const who = playing ? `<div class="hint" style="margin-bottom:8px">${esc(S.info.deck_mine)} (tu) contro ${esc(S.info.deck_opp)} · avversario: ${esc(oppName(S.info.opponent))}</div>` : "";
   $("#gamebox").innerHTML = !playing ? `<button id="newgame">Nuova partita</button>`
-    : S.autoplay ? `${who}<div class="hint">${S.saving ? `La rete sta finendo la partita da sola. Le tue ${S.decisions} decisioni verranno salvate alla fine.` : "La rete sta finendo la partita da sola. Non verrà salvato niente."}</div>`
+    : S.autoplay ? `${who}<div class="hint">${!S.advice ? "Partita lasciata: passi tu, l'avversario la chiude da solo. Non verrà salvato niente."
+        : S.saving ? `La rete sta finendo la partita da sola. Le tue ${S.decisions} decisioni verranno salvate alla fine.` : "La rete sta finendo la partita da sola. Non verrà salvato niente."}</div>`
     : `${who}<div style="display:flex;flex-direction:column;gap:6px">
-        <button class="ghost" id="forget" ${S.decisions ? "" : "disabled"}>Ho sbagliato l'ultima mossa: non usarla per allenare</button>
-        <button class="ghost" id="finish">Fermati qui e salva</button>
-        <button class="ghost" id="abandon" style="color:var(--muted)">Abbandona senza salvare</button></div>`;
+        ${S.advice ? `<button class="ghost" id="forget" ${S.decisions ? "" : "disabled"}>Ho sbagliato l'ultima mossa: non usarla per allenare</button>
+        <button class="ghost" id="finish">Fermati qui e salva</button>` : ""}
+        <button class="ghost" id="abandon" style="color:var(--muted)">${S.advice ? "Abbandona senza salvare" : "Abbandona la partita"}</button></div>`;
   if (!playing) $("#newgame").onclick = () => { setupOpen = true; renderModal(); };
   else if (!S.autoplay) {
-    $("#forget").onclick = async () => { if (confirm("Togliere la tua ultima decisione dall'allenamento? La partita continua normalmente.")) await post("/api/forget", {}); };
-    $("#finish").onclick = async () => { if (confirm(`La rete finirà la partita da sola, senza chiederti niente. Le tue ${S.decisions} decisioni fin qui verranno salvate con il risultato finale. Va bene?`)) await post("/api/finish", { save: true }); };
-    $("#abandon").onclick = async () => { if (confirm("Abbandonare la partita? Le tue decisioni non verranno salvate.")) await post("/api/abandon", {}); };
+    if (S.advice) {
+      $("#forget").onclick = async () => { if (confirm("Togliere la tua ultima decisione dall'allenamento? La partita continua normalmente.")) await post("/api/forget", {}); };
+      $("#finish").onclick = async () => { if (confirm(`La rete finirà la partita da sola, senza chiederti niente. Le tue ${S.decisions} decisioni fin qui verranno salvate con il risultato finale. Va bene?`)) await post("/api/finish", { save: true }); };
+    }
+    $("#abandon").onclick = async () => { if (confirm(S.advice ? "Abbandonare la partita? Le tue decisioni non verranno salvate." : "Abbandonare la partita? Il risultato non verrà salvato.")) await post("/api/abandon", {}); };
   }
 }
 
 function renderCoach() {
   const el = $("#coach"), p = S.pending;
-  if (S.status === "idle" || S.status === "over") { el.innerHTML = '<h2>Allenatore</h2><p class="hint">Quando la partita è in corso, qui vedi il consiglio della rete e decidi tu.</p>'; return; }
+  if (S.status === "idle" || S.status === "over") { el.innerHTML = `<h2>Allenatore</h2><p class="hint">${S.advice ? "Quando la partita è in corso, qui vedi il consiglio della rete e decidi tu." : "Quando la partita è in corso, qui decidi le tue mosse."}</p>`; return; }
   if (S.status !== "waiting" || !p) { el.innerHTML = `<h2>Allenatore</h2><p><span class="spin"></span>${esc(S.activity || "Si gioca…")}</p>`; return; }
   if (p.type === "choice") {
     el.innerHTML = `<h2>Scegli tu</h2><div class="what" style="font-weight:750;font-size:15px">${esc(p.question)}</div>
@@ -552,7 +556,7 @@ function renderCoach() {
       ${alts.map((s, k) => `<div class="alt"><span class="nb">${k + 2}</span>
         <span class="t">${esc(s.text)}<small>Vinci circa il ${pct(s.win)}</small></span>
         <button class="ghost" data-sugg="${k + 1}">Fai questa</button></div>`).join("")}
-      <div class="or">Oppure decidi tu</div>
+      ${best ? '<div class="or">Oppure decidi tu</div>' : ""}
       <p class="hint">Clicca sul tavolo fino a ${p.max} carte della tua mano da rimandare; riclicca per tenerle.</p>
       <button class="ghost" style="width:100%;margin-top:6px" id="mullgo">${esc(mine)}</button>`;
     el.querySelectorAll("[data-sugg]").forEach((b) => b.onclick = () => send({ suggestion: +b.dataset.sugg }));
@@ -576,8 +580,8 @@ function renderCoach() {
     ${sg.slice(1).map((s, k) => `<div class="alt" data-s="${k + 1}"><span class="nb">${k + 2}</span>
       <span class="t">${esc(s.text)}<small>${isPass(s) ? "Passare" : "Vinci circa il " + pct(s.win)}</small></span>
       <button class="ghost" data-sugg="${k + 1}">Fai questa</button></div>`).join("")}
-    <div class="or">Oppure decidi tu</div>
-    <p class="hint">Clicca una carta bordata di blu sul tavolo e scegli cosa farne. Il numero dorato indica le idee della rete.</p>
+    ${top ? '<div class="or">Oppure decidi tu</div>' : ""}
+    <p class="hint">Clicca una carta bordata di blu sul tavolo e scegli cosa farne.${top ? " Il numero dorato indica le idee della rete." : ""}</p>
     ${pass >= 0 ? `<button class="ghost" style="width:100%;margin-top:6px" data-act="${pass}">${esc(p.actions[pass].text)}</button>` : ""}
     ${others.length ? `<details style="margin-top:8px"><summary>Altre mosse (${others.length})</summary>${others.map(([a, i]) =>
       `<div class="opt" data-act="${i}"><span class="t">${esc(a.text)}</span></div>`).join("")}</details>` : ""}`;
@@ -697,23 +701,30 @@ function renderModal() {
   const res = r ? (r.error ? `<div class="result lost">Errore: ${esc(r.error)}</div>`
     : `<div class="result ${r.you_won ? "won" : "lost"}">${r.you_won ? "Hai vinto!" : r.winner === "DRAW" ? "Pareggio" : "Hai perso"}</div>
        <p class="hint">${S.observation ? `Punteggio ${S.observation.my_points} a ${S.observation.opp_points}, ` : ""}${r.turns} turni.
-       ${S.saving ? `Salvate ${S.decisions} tue decisioni, di cui ${S.corrections} diverse dal consiglio della rete: serviranno ad allenarla.` : "Partita abbandonata: non è stato salvato niente."}
-       ${S.saving && S.info && S.info.finished_by_net ? " La parte finale l'ha giocata la rete da sola (quelle mosse non sono salvate)." : ""}</p>`) : "";
+       ${!S.saving ? "Partita abbandonata: non è stato salvato niente." : !S.advice ? "Il risultato è salvato."
+         : `Salvate ${S.decisions} tue decisioni, di cui ${S.corrections} diverse dal consiglio della rete: serviranno ad allenarla.`}
+       ${S.advice && S.saving && S.info && S.info.finished_by_net ? " La parte finale l'ha giocata la rete da sola (quelle mosse non sono salvate)." : ""}</p>`) : "";
   const opts = (S.decks || []).map((d) => `<option value="${esc(d.path)}">${esc(d.name)}</option>`).join("");
   el.innerHTML = `<div class="modal"><div class="box">
     ${res ? res + '<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">' : ""}
     <h2>Nuova partita</h2>
-    <p class="hint" style="margin-top:-4px">La rete gioca il tuo mazzo e ti chiede conferma a ogni mossa. Le tue scelte la allenano.</p>
+    <p class="hint" style="margin-top:-4px">${S.advice ? "La rete gioca il tuo mazzo e ti chiede conferma a ogni mossa. Le tue scelte la allenano."
+      : "Giochi tu il tuo mazzo, mossa per mossa, contro l'avversario che scegli."}</p>
     <div class="grid2">
       <div><label>Il tuo mazzo</label><select id="mine">${opts}</select></div>
       <div><label>Mazzo avversario</label><select id="opp">${opts}</select></div>
-      <div><label>Chi è l'avversario</label><select id="vs"><option value="net">La rete</option><option value="simple_trade">Bot semplice</option></select></div>
+      <div><label>Chi è l'avversario</label><select id="vs">${(S.opponents || []).map((o) => `<option value="${esc(o.id)}">${esc(o.name)}</option>`).join("")}</select></div>
       <div><label>Posto</label><select id="seat"><option value="A">A</option><option value="B">B</option></select></div>
     </div>
     <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
       ${S.status === "over" ? '<button class="ghost" id="later">Guarda il tavolo</button>' : ""}<button id="start">Inizia partita</button></div>
-    <p class="hint" style="margin-top:10px">Rete: ${esc(S.net || "")}</p></div></div>`;
+    <p class="hint" id="vsnote" style="margin-top:10px"></p>
+    <p class="hint" style="margin-top:10px">${[S.net ? `Rete: ${esc(S.net)}` : "",
+      (S.opponents || []).some((o) => o.id === "campione") ? `Campione: ${esc(S.campione || "")}` : ""].filter(Boolean).join("<br>")}</p></div></div>`;
   if ((S.decks || []).length > 1) $("#opp").selectedIndex = 1;
+  const vsNote = () => { const o = (S.opponents || []).find((x) => x.id === $("#vs").value);
+    $("#vsnote").textContent = o && o.decks ? `Il campione è allenato su ${o.decks.slice(0, -1).join(", ")} e ${o.decks[o.decks.length - 1]}: con altri mazzi gioca peggio.` : ""; };
+  $("#vs").onchange = vsNote; vsNote();
   $("#start").onclick = () => { setupOpen = false; post("/api/new", { deck_mine: $("#mine").value, deck_opp: $("#opp").value, seat: $("#seat").value, opponent: $("#vs").value }); };
   if ($("#later")) $("#later").onclick = () => { setupOpen = false; S._seen = true; seenResult = JSON.stringify(S.result); el.innerHTML = ""; };
 }

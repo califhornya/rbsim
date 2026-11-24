@@ -25,8 +25,12 @@ uv sync --extra rl
 uv run python scripts/train_selfplay.py \
     --decks riftbound/data/decks/precon_zed.json riftbound/data/decks/precon_shen.json \
     --iterations 50 --games-per-iter 16 --mcts-iters 100 --run-dir runs/precons
-uv run python scripts/coach.py --net runs/precons/net.pt   # coach mode, http://127.0.0.1:8765
+uv run --extra rl python scripts/coach.py                  # play against the champion, http://127.0.0.1:8765
+uv run --extra rl python scripts/coach.py --net runs/precons/net.pt   # coach mode: the net's advice
 ```
+
+The champion is `runs/sett/ekris_s12/ckpt_040000.pt` (`--campione`, `--budget 0.4`);
+on the Mac double-click `scripts/allenatore.command`.
 
 The net uses CUDA when available, else the CPU; all randomness is seedable.
 

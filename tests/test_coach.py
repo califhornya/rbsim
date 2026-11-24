@@ -429,3 +429,107 @@ def test_a_second_answer_to_one_question_is_refused(tmp_path):
     except RuntimeError:
         pass                      # refused, or the next question was already up
     session.abandon()
+
+
+# -- the champion (24/11): Matteo plays a whole game against the strongest bot --
+
+EVELYNN = REPO / "riftbound" / "data" / "decks" / "competitive_evelynn.json"
+KHAZIX = REPO / "riftbound" / "data" / "decks" / "competitive_khazix.json"
+
+
+def _campione(tmp_path) -> Path:
+    """A random PPO net standing in for runs/sett/ekris_s12/ckpt_040000.pt
+    (runs/ isn't in the repository)."""
+    from riftbound.ai.ppo.model import PPONet, save
+    torch.manual_seed(0)
+    path = tmp_path / "campione.pt"
+    save(PPONet(), path)
+    return path
+
+
+def _wait(session: CoachSession, status: str, timeout: float = 120.0) -> None:
+    end = time.time() + timeout
+    while session.state()["status"] != status and time.time() < end:
+        time.sleep(0.005)
+    assert session.state()["status"] == status
+
+
+def test_a_whole_game_against_the_champion_without_the_net(tmp_path):
+    import json
+    import random
+
+    from riftbound.ai.coach import _ppo_net
+    from riftbound.ai.ppo.prior_bot import PPOPriorAgent
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0,
+                           campione_path=_campione(tmp_path), budget=0.02)
+    st = session.state()
+    assert [o["id"] for o in st["opponents"]] == ["campione", "simple_trade"] and not st["advice"]
+    assert "Sett" in st["opponents"][0]["decks"]
+    session.new_game(EVELYNN, KHAZIX, seat="A", seed=3)      # the first opponent: the champion
+    assert isinstance(session._opponent, PPOPriorAgent) and session._opponent.budget == 0.02
+    assert session._opponent.ppo is _ppo_net(session.campione_path)   # loaded once
+    rng, seen = random.Random(0), []
+
+    def pick(pending):
+        seen.append(pending["type"])
+        assert not pending.get("suggestions")                 # no net, no advice
+        if pending["type"] == "choice":
+            return {"option": rng.randrange(len(pending["options"]))}
+        if pending["type"] == "notice":
+            return {"ok": True}
+        if pending["type"] == "mulligan":
+            return {"return": [0]}
+        assert all(a["text"] for a in pending["actions"]) and pending["context"]
+        return {"action": rng.randrange(len(pending["actions"]))}
+
+    _play(session, pick, timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]
+    assert seen[0] == "mulligan" and "decision" in seen
+    assert st["info"]["opponent"] == "campione" and st["info"]["net"] is None
+    assert st["info"]["campione"] == str(session.campione_path) and st["info"]["budget"] == 0.02
+    moves = {e["who"] for e in st["events"] if e["move"]}
+    assert moves == {"me", "opp"}
+    assert not any("rete" in e["text"] for e in st["events"])
+    # Nothing for training, but the result is kept.
+    assert st["decisions"] == 0 and not list((tmp_path / "coach").glob("coach_*.npz"))
+    record = json.loads((tmp_path / "coach" / "games.jsonl").read_text().splitlines()[-1])
+    assert record["opponent"] == "campione" and record["file"] is None and record["decisions"] == 0
+    assert record["winner"] == st["result"]["winner"] and record["turns"] == st["result"]["turns"]
+
+
+def test_abandoning_the_champion_without_the_net_passes_to_the_end(tmp_path):
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0,
+                           campione_path=_campione(tmp_path), budget=0.02)
+    session.new_game(EVELYNN, KHAZIX, seat="B", opponent="campione", seed=5)
+    end = time.time() + 120
+    while (session.state()["pending"] or {}).get("type") != "decision" and time.time() < end:
+        st = session.state()
+        if st["pending"] is not None:
+            session.answer({"option": st["pending"].get("default", 0)} if st["pending"]["type"] == "choice"
+                           else {"ok": True} if st["pending"]["type"] == "notice" else {"return": []})
+        time.sleep(0.005)
+    assert session.state()["pending"]["type"] == "decision"
+    session.abandon()
+    _wait(session, "over", timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]
+    assert st["autoplay"] and not st["saving"] and st["activity"].startswith("Partita lasciata")
+    assert st["result"]["winner"] != "B"                       # the coach's seat only passed
+    assert session._opponent.budget == 0.01                  # nothing counts: it closes quickly
+    assert not (tmp_path / "coach" / "games.jsonl").exists()   # abandoned: nothing saved
+
+
+def test_the_opponents_that_arent_there_are_refused(tmp_path):
+    session = CoachSession(None, tmp_path / "coach", campione_path=tmp_path / "manca.pt")
+    assert [o["id"] for o in session.opponents()] == ["simple_trade"]
+    for who, says in (("campione", "campione"), ("net", "--net"), ("chiunque", "sconosciuto")):
+        with pytest.raises(ValueError, match=says):
+            session.new_game(EVELYNN, KHAZIX, opponent=who)
+    assert session.state()["status"] == "idle"
+    # With the net too: the champion first, then the net; the advice is on.
+    torch.manual_seed(0)
+    save_checkpoint(RiftboundNet(), tmp_path / "net.pt")
+    session = CoachSession(tmp_path / "net.pt", tmp_path / "coach", campione_path=_campione(tmp_path))
+    st = session.state()
+    assert [o["id"] for o in st["opponents"]] == ["campione", "net", "simple_trade"] and st["advice"]

@@ -1,7 +1,7 @@
 # STATO
 
-Aggiornato: 2026-11-24 (notte). Ramo di lavoro `rust` (default su GitHub; Rengar PR 43 e Ivern PR 44 unite;
-tappa Sett su `claude/vibrant-johnson-k8ovzv`). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-24 (notte). Ramo di lavoro `rust` (default su GitHub; Rengar PR 43, Ivern PR 44 e
+Sett PR 45 unite; pagina col campione su `claude/gifted-gauss-v0qj89`). `main` resta fermo al 19/11.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -20,6 +20,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## Decisioni prese
 - (24/11, Astra/Matteo) Python congelato: regole `6427b90`, agente PPO con `f8a50e4`.
   Un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
+- (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach (motore Python, 0,4 s
+  a mossa); si tocca solo la pagina. I consigli della vecchia rete si scollegano (solo con `--net`).
 - Rust identico a Python, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -59,16 +61,20 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Sviluppo: autonome 3.760/3.760, PPO bit per bit 960/960, replay 640/640, arena 80/80, 3 posizioni mirate;
   `tests/rust` 97 verdi. Perimetro: `COPERTI` coi cinque mazzi fra loro. Nessuna divergenza del motore.
   Semi tenuti da parte 4.320/4.320 con gli altri sei matchup di nuovo (`docs/rust/misure/tenuti_sett_*.json`),
-  640 partite d'arena e 43.103 ricerche; suite Python 1.952 verdi.
+  640 partite d'arena e 43.103 ricerche; suite Python 1.952 verdi. Misure sul Mac col campione in `docs/rust/misure/mac_sett_*`.
+- 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`): avversario
+  "Il campione" (`PPOPriorAgent`, `--campione`, `--budget 0.4`, rete in cache), primo nel menu se il
+  checkpoint c'è; `--net` facoltativo (senza: niente consigli né esempi, l'abbandono passa e il campione
+  chiude a 0,01 s); `games.jsonl` scrive sempre il risultato. Lanciatori `allenatore.command` (Mac) e
+  `allenatore.bat` con `--extra rl`. Test `tests/test_coach.py` 19 verdi; pagina provata con Playwright.
 
 ## In corso
-- Sett pronta per la PR verso `rust`; poi `sett_mac.command` sul Mac.
+- Pagina col campione pronta per la PR verso `rust`; Matteo la prova sul Mac.
 
 ## Prossimi passi
-1. `sett_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su ES, KS, RS, IS).
-2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
+1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
-3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
+2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
@@ -81,5 +87,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
 - `tests/rust/`: test che caricano davvero l'estensione (`test_rengar.py`, `test_ivern.py`, `test_sett.py`).
 - `scripts/ppo.py` (`_motore`), `scripts/diag/arena_mazzi.py` (`--motore rust`).
+- Partita a mano: `scripts/coach.py` (server, `--campione`, `--budget`, `--net`), `riftbound/ai/coach.py`
+  (`CoachSession`, `opponents()`), `riftbound/ai/coach_page.html`; `scripts/allenatore.command` (Mac).
 - `docs/RUST.md`, `docs/rust/` (rapporti, inventari, misure), `docs/audit/AUDIT.md`.
 - `riftbound/core/`: motore Python di riferimento (congelato).

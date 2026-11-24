@@ -1,16 +1,21 @@
 #!/usr/bin/env python
-"""Coach the net in the browser: it plays, you decide.
+"""Play in the browser against the champion, or coach the net: you decide.
 
-    uv run python scripts/coach.py                       # opens http://127.0.0.1:8765
-    uv run python scripts/coach.py --net runs/precons-2/net.pt --port 8765
+    uv run --extra rl python scripts/coach.py            # opens http://127.0.0.1:8765
+    uv run --extra rl python scripts/coach.py --net runs/precons-2/net.pt --port 8765
+
+The opponents: the champion (the hand-written search guided by the priors of
+--campione, --budget CPU seconds a move; listed when the checkpoint is there),
+the net (only with --net) and the simple bot. Without --net you play alone,
+with no advice and nothing saved for training (games.jsonl keeps the results).
 
 A local page (nothing leaves the machine) shows the board from your seat, as a
 table of card images (scripts/import_card_images.py copies them in; a card
-without one is drawn). At each decision of the net with more than one option you
-see its top three moves (the win chance it estimates), marked on the table, and
-accept one or pick any legal move by clicking a card; for a move you pick, the
-choices inside it are asked too. Your decisions are saved when a game ends
-(runs/coach/coach_*.npz) and `scripts/train_selfplay.py --coach-dir runs/coach`
+without one is drawn). At each of your decisions with more than one option you
+pick any legal move by clicking a card (with --net you also see the net's top
+three moves, with the win chance it estimates, marked on the table, and can
+accept one); for a move you pick, the choices inside it are asked too. With
+--net your decisions are saved when a game ends (runs/coach/coach_*.npz) and `scripts/train_selfplay.py --coach-dir runs/coach`
 mixes them into training. "Segnala un problema" saves the situation and your
 note (runs/coach/reports.jsonl). "Fermati qui e salva" lets the net finish the
 game alone and keeps your decisions; "Ho sbagliato l'ultima mossa" drops your
@@ -34,7 +39,12 @@ IMAGES = ROOT / "riftbound" / "data" / "card_images"
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Coach the Riftbound net in the browser")
-    ap.add_argument("--net", type=Path, default=ROOT / "runs" / "precons-2" / "net.pt")
+    ap.add_argument("--net", type=Path, default=None,
+                    help="The old AlphaZero net (e.g. runs/precons-2/net.pt): its advice, and the "
+                         "\"La rete\" opponent. Without it: no advice")
+    ap.add_argument("--campione", type=Path, default=ROOT / "runs" / "sett" / "ekris_s12" / "ckpt_040000.pt",
+                    help="The champion's PPO checkpoint (its priors)")
+    ap.add_argument("--budget", type=float, default=0.4, help="The champion's CPU seconds a move")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
     ap.add_argument("--iterations", type=int, default=100, help="Search simulations per decision")
     ap.add_argument("--port", type=int, default=8765)
@@ -46,7 +56,13 @@ def main() -> None:
     from riftbound.ai.coach import CoachSession
     from riftbound.compute import be_gentle
     be_gentle()
-    session = CoachSession(args.net, args.out, iterations=args.iterations, opponent_pause=args.pause)
+    if args.net is not None and not args.net.is_file():
+        ap.error(f"--net: {args.net} non esiste")
+    session = CoachSession(args.net, args.out, iterations=args.iterations, opponent_pause=args.pause,
+                           campione_path=args.campione, budget=args.budget)
+    if not args.campione.is_file():
+        print(f"Il campione non c'è ({args.campione}): avversari {[o['name'] for o in session.opponents()]}",
+              flush=True)
 
     def decks() -> list:
         paths = sorted(DECK_DIR.glob("*.json"), key=lambda p: (not p.stem.startswith("precon"), p.stem))
@@ -80,7 +96,8 @@ def main() -> None:
                 self.end_headers()
                 self.wfile.write(path.read_bytes())
             elif self.path == "/api/state":
-                self._json({**session.state(), "decks": decks(), "net": str(args.net)})
+                self._json({**session.state(), "decks": decks(),
+                            "net": str(args.net) if args.net else None, "campione": str(args.campione)})
             else:
                 self._json({"error": "not found"}, 404)
 
@@ -90,7 +107,7 @@ def main() -> None:
                 body = json.loads(self.rfile.read(length) or b"{}")
                 if self.path == "/api/new":
                     session.new_game(Path(body["deck_mine"]), Path(body["deck_opp"]),
-                                     seat=body.get("seat", "A"), opponent=body.get("opponent", "net"))
+                                     seat=body.get("seat", "A"), opponent=body.get("opponent"))
                 elif self.path == "/api/answer":
                     session.answer(body)
                 elif self.path == "/api/report":
@@ -110,7 +127,8 @@ def main() -> None:
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     url = f"http://127.0.0.1:{args.port}"
-    print(f"Coach: {url}  (net: {args.net}; Ctrl+C to stop)", flush=True)
+    print(f"Coach: {url}  (avversario di default: {session.opponents()[0]['name']}; "
+          f"rete: {args.net or 'nessuna'}; Ctrl+C to stop)", flush=True)
     if not args.no_browser:
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     try:
