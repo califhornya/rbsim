@@ -76,6 +76,32 @@ def replay(row: dict, ckpt: str):
     return res, tr, log, rres, start, json.loads(g.events()), json.loads(g.raw_dump()), rs_logs
 
 
+def spiega(job) -> dict:
+    """(row, ckpt): the game replayed with its recorded counts and the current
+    code; `identica`: the two copies now give the same game and searches
+    (the divergence recorded is explained by the fixes made since)."""
+    row, ckpt = job
+    import torch
+    torch.set_num_threads(1)
+    import arena_parita as AP
+    from diff_trace import FIELDS, canonical_rust_events, first_difference
+    out = {"seed": row["seed"], "rust_seat": row["rust_seat"]}
+    try:
+        res, tr, py_log, rres, start, events, end, rs_logs = replay(row, ckpt)
+    except Exception as e:  # noqa: BLE001 — reported, the divergence stays unexplained
+        return out | {"identica": False, "dettaglio": f"riprova fallita: {e!r}"}
+    rs, rs_trees = canonical_rust_events(start, events, end)
+    py = [e for e in tr.events if e["k"] in FIELDS or e["k"].startswith("decide_")]
+    d = first_difference(py, rs, tr.states, rs_trees)
+    s = AP.first_search_difference(py_log, rs_logs)
+    rr = list(rres)
+    same = d is None and s is None and [res.winner, res.turns] == rr
+    det = None if same else {"traccia": None if d is None else [d[0], d[1]],
+                             "ricerca": None if s is None else {k: s[k] for k in ("seat", "row", "field", "context")},
+                             "risultato": [[res.winner, res.turns], rr]}
+    return out | {"identica": same, "dettaglio": det}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--righe", required=True)

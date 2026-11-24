@@ -293,6 +293,12 @@ def _pct(xs: list, q: float) -> float:
     return xs[min(len(xs) - 1, int(q * (len(xs) - 1) + 0.5))]
 
 
+def _replay_it(r: dict) -> bool:
+    """A divergent game to play again: the copies left each other (no result,
+    or a different trace or result), so the game has no valid result."""
+    return "divergenza" in r and ("score" not in r or any(set(d) - {"ricerca"} for d in r["divergenza"]))
+
+
 def _explained(r: dict, spiegate: set) -> bool:
     """A divergence reproduced and explained (arena_mista_riprova.py identical
     with the current code), only in the searches' numbers: the two copies
@@ -339,7 +345,8 @@ def main() -> None:
                     help="partite tutte su Rust, entrambi i bot a --budget-rust, per il tempo reale per partita")
     ap.add_argument("--spiegata", action="append", default=[], metavar="SEME:POSTO",
                     help="una divergenza riprodotta e spiegata (arena_mista_riprova.py), solo nei numeri delle "
-                         "ricerche: la partita conta; per esempio --spiegata 70113:A")
+                         "ricerche: la partita conta; per esempio --spiegata 70113:A (a fine arena le altre si "
+                         "rigiocano da sole coi conteggi registrati: <out>.spiegate.json)")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     spiegate = frozenset((int(x.split(":")[0]), x.split(":")[1]) for x in args.spiegata)
@@ -374,7 +381,7 @@ def main() -> None:
             r = json.loads(line)
             # Only comparable games, and with the checks on only checked ones
             # (a trace compared, or a divergence met); failed games are replayed.
-            if all(r.get(k) == v for k, v in key.items()) and "errore" not in r and \
+            if all(r.get(k) == v for k, v in key.items()) and "errore" not in r and not _replay_it(r) and \
                     (not check or "eventi" in r or "divergenza" in r):
                 rows.append(r)
     done = {(r["seed"], r["rust_seat"]) for r in rows}
@@ -396,6 +403,29 @@ def main() -> None:
                 say(f"   DIVERGENZA seme {r['seed']} posto Rust {r['rust_seat']}: {json.dumps(r['divergenza'])[:600]}")
             if len(rows) % 100 == 0:
                 print(f"   ... {len(rows)}/{2 * args.coppie} partite, {(time.time() - t0) / 60:.0f} min", flush=True)
+    # Divergences only in the searches' numbers (the same game in both copies):
+    # replayed with their recorded counts and the current code; identical now
+    # = explained by the fixes made since, the game counts. One that stays is
+    # a new problem: it keeps the verdict suspended.
+    from arena_mista_riprova import spiega
+    from riftbound.provenienza import revisione
+    sp_file = righe.with_suffix(".spiegate.json")
+    known = json.loads(sp_file.read_text()) if sp_file.exists() else {}
+    todo = [r for r in rows if "divergenza" in r and not _replay_it(r) and f"{r['seed']}:{r['rust_seat']}" not in known
+            and (r["seed"], r["rust_seat"]) not in spiegate]
+    if todo:
+        say(f"   riprova automatica di {len(todo)} divergenze nelle ricerche, col codice attuale")
+        commit = revisione()["commit"]
+        with Pool(min(args.workers, len(todo)), initializer=_init) as pool:
+            for x in pool.imap_unordered(spiega, [(r, args.ckpt) for r in todo]):
+                k = f"{x['seed']}:{x['rust_seat']}"
+                if x["identica"]:
+                    known[k] = {"causa": "riprova identica col codice attuale", "commit": commit}
+                    say(f"   seme {x['seed']} posto Rust {x['rust_seat']}: spiegata (identica col codice attuale)")
+                else:
+                    say(f"   seme {x['seed']} posto Rust {x['rust_seat']}: NON spiegata, {json.dumps(x['dettaglio'])[:600]}")
+        sp_file.write_text(json.dumps(known, indent=1))
+    spiegate = spiegate | {(int(k.split(":")[0]), k.split(":")[1]) for k in known}
     ver = valuta(rows, seeds, args.coppie, args.soglia, spiegate)
     if spiegate:
         say("   divergenze spiegate (contano): " + ", ".join(f"seme {s} posto Rust {p}" for s, p in sorted(spiegate)))

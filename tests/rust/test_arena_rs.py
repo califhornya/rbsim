@@ -131,3 +131,19 @@ def test_arena_mista_resume_ignores_unchecked_rows(tmp_path):
                         "--workers", "1", "--out", str(out)], capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stderr[-2000:]
     assert "ripresa" not in r.stdout and "partite verificate a ogni passo: 2" in r.stdout, r.stdout
+
+
+def test_arena_mista_auto_explanation():
+    """A divergent game: one only in the searches' numbers is replayed with its
+    recorded counts (identical with the current code: explained); one whose
+    copies left each other is played again."""
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import arena_mista as AM
+    import arena_mista_riprova as RP
+    r = AM.game((70000, "a", "A", "seme:1", 0.004, 0.02, True))
+    assert "divergenza" not in r
+    x = RP.spiega((r, "seme:1"))
+    assert x["identica"], x
+    assert not AM._replay_it(r | {"divergenza": [{"ricerca": {}}]})
+    assert AM._replay_it(r | {"divergenza": [{"traccia": {}}]})
+    assert AM._replay_it({"seed": 1, "rust_seat": "A", "divergenza": [{"passo": "x"}]})
