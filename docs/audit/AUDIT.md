@@ -23,6 +23,10 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
+**After the freeze (2026-11-24):** D72 found in a game in the coach page, open, to fix in Rust
+(section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
+`docs/bot/GIOCATE.md`, not registered here yet.
+
 **State (2026-11-19, ninth pass): 70 deviations found, 63 fixed, 7 open (D59-D65).**
 The ninth pass is the Chosen Champion's copies (D69-D70), met with 82FAW's
 Ivern list on RiftAtlas: the deck now loads as `competitive_ivern.json`.
@@ -149,6 +153,7 @@ From now on:
 | D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | fixed, `ca16a51` |
 | D69 | The deck loader refuses the Chosen Champion in the Main Deck | §103.3.b.1 | not in these decks; 82FAW's Ivern list (champion + 1) didn't load | fixed, `e2d6b2e` |
 | D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
+| D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | open, to fix in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -990,6 +995,55 @@ the champion included: the Volibear example). Tests in
   board" already takes copies on the board (it asks for the name, not the
   champion). Sideboarding (`core/match.py`) swaps the champion with a copy by
   name: unchanged.
+
+## Deviations after the freeze (2026-11-24)
+
+Ordinary defects found after the Python engine was frozen (section "The Python
+engine is frozen"): written here, fixed once in Rust.
+
+### D72. Rengar Trophy Hunter can't be played where only enemy units are
+
+- **Card.** Rengar Trophy Hunter (UNL-120): "AMBUSH (You may play me as a
+  REACTION to a battlefield where you have units.) I can be played to a
+  battlefield where there are enemy units (even if you don't have units
+  there.)" In the data: `{"effect": "ambush", "trigger": "passive",
+  "enemy_ok": true}`.
+- **Rule.** §822.1.b: AMBUSH is "I may be played to a battlefield where you
+  control Units" and "I have [Reaction] as long as I'm being played to" one.
+  §822.1.c: it adds valid locations when the unit is played, with no limit of
+  time. §822.1.d, the example: Rengar Trophy Hunter "expands the normal
+  permissions of the Ambush keyword to include battlefields where there are
+  enemy units".
+- **Seen.** In the coach page (24/11, Evelynn against Sett, turn 6, the
+  owner's main phase): Monastery of Hirana held by the opponent with Fiora
+  Victorious, Rakelstake empty, no unit of the owner at a battlefield, 5
+  energy and Body Power. Rengar Trophy Hunter in hand: only "Play in base".
+- **Minimal positions** (`_loop_with_rengar` and `_enemy` of
+  `tests/test_ambush.py`; A active, 10 energy, 5 Body Power, an enemy unit at
+  BF1, nothing of A at a battlefield):
+  1. Rengar Trophy Hunter in A's hand, no champion. Turn action: only
+     `("UNIT", 0, 0)` (base); expected base and BF1. Reaction:
+     `_ambush_unit_lanes` is `[]`, no unit play; expected BF1.
+  2. Rengar Trophy Hunter as A's Chosen Champion. Reaction:
+     `("CHAMPION", None, 1)` (right). Turn action: base only; expected base
+     and BF1.
+- **Engine.** `loop.py:_ambush_unit_lanes` (the hand, reaction speed) reads
+  only the AMBUSH keyword, not `enemy_ok`; `loop.py:_unit_play_destinations`
+  (the main phase, hand and Champion Zone) reads neither. Only
+  `loop.py:_ambush_legal_lanes` (the champion at reaction speed) has
+  `enemy_ok`. Rust is the same (`lp_dest.rs`: `unit_play_destinations`,
+  `ambush_unit_lanes`; `lp_costs.rs`: `ambush_legal_lanes`).
+- **Not a defect.** For an AMBUSH unit without `enemy_ok` the main phase
+  misses nothing: out of a contest, a battlefield where a side has units is
+  one it controls.
+- **Weight.** A missing option, in four of the five decks (Rengar Trophy
+  Hunter in Evelynn, Kha'Zix and Sett, Rengar's champion). The champion's
+  priors (`ekris_s12`) were trained without it; the Rust arena reproduces it.
+- **Fix (Rust).** The battlefields with enemy units join both lists for a
+  card whose `ambush` effect has `enemy_ok` (from hand and from the Champion
+  Zone, main phase and reaction speed); a unit played there makes the
+  battlefield contested, as `_deploy_ambush_champion` does. Red test first
+  with the two positions above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
