@@ -1,6 +1,6 @@
 # Rapporto Sett: il mazzo di Sett nel motore Rust
 
-Ramo `claude/vibrant-johnson-k8ovzv`, verso `rust`. Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
+Ramo `claude/vibrant-johnson-k8ovzv`, unito in `rust` (PR 45). Riferimento Python: regole `6427b90`, agente PPO con `f8a50e4`
 (congelato, `docs/audit/AUDIT.md`). Il motore Python non è stato toccato.
 
 **Tappa Sett raggiunta: i cinque mazzi sono su Rust.** La lista competitiva di Sett con la sua sideboard gioca su
@@ -8,6 +8,7 @@ Rust. Sui matchup ES, KS, RS e IS nei due posti le partite sono identiche a quel
 PPO bit per bit, replay e arena a lavoro fisso, ricerche comprese. Zero divergenze del motore, nessun `NotPorted`.
 Gli altri sei matchup restano identici. Evelynn, Kha'Zix, Rengar, Ivern e Sett fra loro vanno su Rust nell'arena e
 nel training (`arena_rs.COPERTI`, `ppo._motore`).
+Verificata anche sul Mac col checkpoint del campione: 320/320 partite con esempi PPO identici, 80/80 d'arena.
 
 ## Cosa è stato portato
 Inventario: `docs/rust/INVENTARIO_SETT.md` (`scripts/rust/inventario.py --liste S --matchup ES KS RS IS Es Ks Rs Is`).
@@ -114,13 +115,24 @@ Nessuna del motore. Due degli strumenti:
   `ekris` del training è tutto su Rust.
 
 ## Col checkpoint vero (sul Mac)
+Il checkpoint del campione non è nel repository: qui le prove PPO e quelle col prior usano reti dal seme.
+Sul Mac (M1 Max, 24/11, commit `a956e64`, campione `ekris_s12/ckpt_040000.pt`):
 
 ```bash
 bash scripts/rust/sett_mac.command ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
 ```
 
-Esempi PPO bit per bit su ES, KS, RS e IS (self-play e contro simple_trade, semi 1–20) e arena col prior a 50
-iterazioni (semi 40000–40009). Uscite: `docs/rust/misure/mac_sett_*.json`.
+Uscite: `docs/rust/misure/mac_sett_*_20261124_2242.json`.
+
+| Prova (semi, nei due posti) | ES | KS | RS | IS |
+|---|---|---|---|---|
+| Esempi PPO bit per bit, self-play (1–20) | 40/40 | 40/40 | 40/40 | 40/40 |
+| Esempi PPO bit per bit, contro simple_trade (1–20) | 40/40 | 40/40 | 40/40 | 40/40 |
+| Arena col prior, 50 iterazioni (40000–40009): partite identiche | 20/20 | 20/20 | 20/20 | 20/20 |
+| Ricerche confrontate, tutte identiche | 1.373 | 1.345 | 1.212 | 1.921 |
+| Tempo per partita d'arena, Python / Rust | 11,2 / 0,76 s (×14,7) | 13,2 / 0,85 s (×15,6) | 11,8 / 0,77 s (×15,3) | 17,5 / 1,24 s (×14,1) |
+
+Nessun errore Rust. Sugli esempi PPO Rust è ×3,6–5,7: conta anche il forward della rete, che resta in Python.
 
 ## Comandi esatti
 
@@ -137,7 +149,6 @@ bash scripts/rust/tenuti_sett.sh 4        # i semi tenuti da parte, tutte le pro
 ```
 
 ## Cosa vale fare dopo
-1. Lanciare `sett_mac.command` sul Mac, col campione.
-2. Con i cinque mazzi su Rust: arene e training interamente su Rust; budget dell'arena da ricontrollare sui matchup
+1. Con i cinque mazzi su Rust: arene e training interamente su Rust; budget dell'arena da ricontrollare sui matchup
    nuovi prima di usare 0,030 s fuori da EK.
-3. Il resto del catalogo, con lo stesso metodo (inventario, porting guidato dalle partite, parità, semi tenuti da parte).
+2. Il resto del catalogo, con lo stesso metodo (inventario, porting guidato dalle partite, parità, semi tenuti da parte).

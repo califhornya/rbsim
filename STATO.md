@@ -1,7 +1,7 @@
 # STATO
 
-Aggiornato: 2026-11-24 (notte). Ramo di lavoro `rust` (default su GitHub; Rengar PR 43 e Ivern PR 44 unite;
-tappa Sett su `claude/vibrant-johnson-k8ovzv`). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-25 (notte). Ramo di lavoro `rust` (default su GitHub; Rengar PR 43, Ivern PR 44, Sett PR 45
+unite: i cinque mazzi sono su Rust). `main` resta fermo al 19/11.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -60,15 +60,16 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `tests/rust` 97 verdi. Perimetro: `COPERTI` coi cinque mazzi fra loro. Nessuna divergenza del motore.
   Semi tenuti da parte 4.320/4.320 con gli altri sei matchup di nuovo (`docs/rust/misure/tenuti_sett_*.json`),
   640 partite d'arena e 43.103 ricerche; suite Python 1.952 verdi.
+  Mac col campione: esempi PPO 320/320, arena col prior ES/KS/RS/IS 80/80 (5.851 ricerche), Rust ×14–16 a partita.
 
 ## In corso
-- Sett pronta per la PR verso `rust`; poi `sett_mac.command` sul Mac.
+- Niente: prima tappa del porting (i cinque mazzi) chiusa e verificata sul Mac.
 
-## Prossimi passi
-1. `sett_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su ES, KS, RS, IS).
-2. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
-   --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
-3. Rete del prior in Rust o a batch (collo di bottiglia dell'arena); partita interattiva su Rust.
+## Prossimi passi (da decidere con Matteo)
+1. Arene su Rust a 0,030 s: promosso solo per EK; ricontrollare il budget sugli altri matchup (prova di forza come
+   quella del 24/11) prima di usarlo lì. Training `ekris` con `--motore rust`.
+2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena col prior); partita interattiva su Rust.
+3. Il resto del catalogo con lo stesso metodo (inventario, porting guidato dalle partite, parità, semi tenuti da parte).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
