@@ -59,13 +59,36 @@ Semi di sviluppo:
 | arena a 50 iterazioni, bot a mano e coi prior: traccia e ogni ricerca | ES, KS, RS, IS (40000–40004) | 80/80 |
 | posizioni mirate (`scripts/rust/posizioni_sett.py`) | 3 posizioni | 3/3, ramo eseguito |
 | `pytest tests/rust` | 97 test | verdi |
+| suite Python completa (`pytest -q --ignore=tests/rust`) | 1.952 test | verdi |
 
 Rami eseguiti (lato Python): 320 partite random e simple_trade sugli otto matchup danno 494 buff spesi, 786 calcoli
 del costo con un buff spendibile e 85 costi aggiunti pagati, 370 morti sostituite da `sett_save` (le altre sostituzioni
 darebbero `NotPorted`), `this_is_mighty` vera 6.861 volte, Decree of Unity 50 (4 su un gear). Nelle partite PPO (agente col chooser, semi 1–30) la scelta `cost_extras` capita 125 volte, 44 senza spendere il
 buff: sono fra quelle confrontate bit per bit.
 
-TENUTI
+Semi tenuti da parte (900001–900040, mai usati prima), build finale; risultati in `docs/rust/misure/tenuti_sett_*.json`:
+
+| prova | ES | KS | RS | IS | Es, Ks, Rs, Is (sideboard) | EK, ER, KR, EI, KI, RI (di nuovo) |
+|---|---|---|---|---|---|---|
+| arena a 50 iterazioni, bot a mano: traccia e ogni ricerca | 80/80 | 80/80 | 80/80 | 80/80 | | |
+| arena a 50 iterazioni, bot coi prior: traccia e ogni ricerca | 80/80 | 80/80 | 80/80 | 80/80 | | |
+| esempi PPO bit per bit, self-play | 80/80 | 80/80 | 80/80 | 80/80 | | 80/80 ciascuno |
+| esempi PPO bit per bit, PPO contro simple_trade | 80/80 | 80/80 | 80/80 | 80/80 | | |
+| replay tracciato di partite PPO self-play | 80/80 | 80/80 | 80/80 | 80/80 | | |
+| autonome simple_trade contro simple_trade | 80/80 | 80/80 | 80/80 | 80/80 | 80/80 ciascuno | 80/80 ciascuno |
+| autonome random contro random | 80/80 | 80/80 | 80/80 | 80/80 | 80/80 ciascuno | 80/80 ciascuno |
+
+In tutto 4.320 partite su 4.320 (ogni matchup nei due posti), di cui 640 dell'arena con 43.103 ricerche confrontate.
+Nessun `NotPorted`, nessuna differenza. Lanciatore: `bash scripts/rust/tenuti_sett.sh 4`, circa un'ora sul container.
+
+Tempo medio di una partita d'arena a 50 iterazioni (container, dentro gli strumenti di confronto):
+
+| matchup | bot a mano, Python / Rust | bot coi prior, Python / Rust |
+|---|---|---|
+| ES | 12,5 / 0,48 s | 15,7 / 1,70 s |
+| KS | 13,3 / 0,47 s | 16,3 / 1,45 s |
+| RS | 12,6 / 0,47 s | 15,1 / 1,49 s |
+| IS | 18,8 / 0,70 s | 20,7 / 1,77 s |
 
 ### Posizioni mirate
 Stessa procedura di Rengar e Ivern (posizione costruita in Python, importata in Rust dallo stato canonico, stesse

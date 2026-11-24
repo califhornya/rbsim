@@ -58,9 +58,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   "spendi un buff" (Monastery of Hirana), `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin.
   Sviluppo: autonome 3.760/3.760, PPO bit per bit 960/960, replay 640/640, arena 80/80, 3 posizioni mirate;
   `tests/rust` 97 verdi. Perimetro: `COPERTI` coi cinque mazzi fra loro. Nessuna divergenza del motore.
+  Semi tenuti da parte 4.320/4.320 con gli altri sei matchup di nuovo (`docs/rust/misure/tenuti_sett_*.json`),
+  640 partite d'arena e 43.103 ricerche; suite Python 1.952 verdi.
 
 ## In corso
-- Sett: semi tenuti da parte (`bash scripts/rust/tenuti_sett.sh 4`), poi suite Python e PR verso `rust`.
+- Sett pronta per la PR verso `rust`; poi `sett_mac.command` sul Mac.
 
 ## Prossimi passi
 1. `sett_mac.command` sul Mac col campione (PPO bit per bit e arena col prior su ES, KS, RS, IS).
