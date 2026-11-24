@@ -42,3 +42,17 @@ def test_arena_rs_game_budget():
     assert r[4] and min(r[4]) >= 1 and r[5]
     with pytest.raises(ValueError):
         arena_rs.game((40000, "a", "A", "mano", None, "mano", None, "ER", 0.02, 0.02))
+
+
+def test_arena_rs_frees_agents():
+    """A finished game, dropped, frees its search agents (no reference cycle
+    between an agent and the choosers it puts on the loop)."""
+    import gc
+    import riftbound_rs
+    from riftbound.rs import arena_rs
+    gc.collect()
+    before = riftbound_rs.live_search_agents()
+    for seed in (40000, 40001):
+        arena_rs.game((seed, "a" if seed % 2 == 0 else "b", "A", "mano", None, "mano", None, "EK", 0.01, 0.01))
+    gc.collect()
+    assert riftbound_rs.live_search_agents() == before

@@ -11,7 +11,7 @@
 //! first, then the chooser that was there before (`base`).
 
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use serde_json::{json, Value};
 
@@ -515,8 +515,10 @@ pub struct Plan {
 pub enum Layer {
     /// py: _Plan
     Plan(Plan),
-    /// py: _Fallback (the agent's core)
-    Fallback(Side, Rc<RefCell<SearchCore>>),
+    /// py: _Fallback. The agent's core by a weak reference: the core holds
+    /// these layers (`stack`), a strong one would be a cycle and the agents,
+    /// their trees and logs would outlive the game.
+    Fallback(Side, Weak<RefCell<SearchCore>>),
 }
 
 /// py: the chain of choosers the search agents put on the real loop.
@@ -538,7 +540,7 @@ impl Layers {
         }
         enum Info {
             Plan(Side, i64, Rc<RefCell<Tree>>, usize),
-            Fallback(Side, Rc<RefCell<SearchCore>>),
+            Fallback(Side, Weak<RefCell<SearchCore>>),
         }
         let info = match &self.layers[idx] {
             Layer::Plan(p) => Info::Plan(p.me, p.turn, p.tree.clone(), p.node),
@@ -587,6 +589,8 @@ impl Layers {
                 if !searchable(side, me, options.len()) {
                     return self.call(idx + 1, g, kind, side, options, default, source);
                 }
+                let core = core.upgrade()
+                    .ok_or_else(|| EngineError::Agent("search: the agent of a Fallback is gone".into()))?;
                 let mut c = core.try_borrow_mut()
                     .map_err(|_| EngineError::Agent("search: a real choice while the agent decides".into()))?;
                 let values = c.replay_values(g, kind, side, options, source)?;
@@ -742,7 +746,20 @@ pub struct SearchCore {
     fallback_on: bool,
     /// For the parity checks: one row per searched decision (and mulligan).
     pub log: Option<Vec<Value>>,
-    me_ref: Option<std::rc::Weak<RefCell<SearchCore>>>,
+    me_ref: Option<Weak<RefCell<SearchCore>>>,
+}
+
+static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
+
+/// How many search cores are alive (a check that a finished game frees its agents).
+pub fn live_cores() -> i64 {
+    LIVE_CORES.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+impl Drop for SearchCore {
+    fn drop(&mut self) {
+        LIVE_CORES.fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
+    }
 }
 
 impl SearchCore {
@@ -770,6 +787,7 @@ impl SearchCore {
             me_ref: None,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
+        LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         core
     }
 
@@ -841,7 +859,7 @@ impl SearchCore {
             let c: Rc<RefCell<dyn Chooser>> = self.stack.clone();
             g.chooser = Some(c);
         }
-        let me = self.me_ref.as_ref().and_then(|w| w.upgrade()).expect("search core");
+        let me = self.me_ref.clone().expect("search core");
         st.layers.insert(0, Layer::Fallback(self.side, me));
     }
 

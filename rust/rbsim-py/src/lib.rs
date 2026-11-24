@@ -271,8 +271,15 @@ impl Game {
     }
 }
 
+/// How many search agents are alive (a finished, dropped game frees its own).
+#[pyfunction]
+fn live_search_agents() -> i64 {
+    rbsim_core::search::live_cores()
+}
+
 #[pymodule]
 fn riftbound_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(live_search_agents, m)?)?;
     m.add_class::<Registry>()?;
     m.add_class::<Game>()?;
     Ok(())
