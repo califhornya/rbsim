@@ -178,8 +178,11 @@ def _to_real(o, gs_of_loop):
 
 def _to_real_any(o):
     """An object passed to an agent from a copy of the game (decide_mode on a
-    declaration's copy), as the real game's object."""
-    for back, _g in _COPY_BACK.values():
+    declaration's copy), as the real game's object. The newest copy first: an
+    older copy's map can hold the same id() for an object freed since (seen on
+    seed 78 Er, simple_trade vs random: a Mech of an earlier copy instead of
+    Reckless Innovator); a copy made after `o` cannot hold its id while it lives."""
+    for back, _g in reversed(list(_COPY_BACK.values())):
         if id(o) in back:
             return back[id(o)]
     return o

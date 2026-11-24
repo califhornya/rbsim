@@ -30,6 +30,9 @@ pub struct Card {
     pub graceful_prepaid: Option<Value>,
     pub granted_repeat: Option<Value>,
     pub kicker_paid: Option<bool>,
+    /// py: the attribute `_kicker_paid` exists on the card (set once, to anything,
+    /// even None): getattr(card, "_kicker_paid", False) is False only before.
+    pub kicker_set: bool,
     pub owner: Option<Side>,
     pub play_pending: Option<Value>,
     pub played_from: Option<String>,
@@ -37,6 +40,8 @@ pub struct Card {
     pub repeat_extra: Option<Value>,
     pub repeat_paid: Option<Value>,
     pub showed_off: Option<bool>,
+    /// py: the attribute `_showed_off` exists (as kicker_set).
+    pub showed_set: bool,
     pub shown: Option<Value>,
     pub spent: Option<i64>,
     pub hidden_bf: Option<usize>,
@@ -46,6 +51,27 @@ pub struct Card {
     /// py: Card.uuid (uuid4 at creation, kept by every copy of the game): what
     /// a card's repr names it by (the search's trigger labels).
     pub uuid: u64,
+}
+
+impl Card {
+    /// py: card._kicker_paid = v
+    pub fn set_kicker(&mut self, v: Option<bool>) {
+        self.kicker_paid = v;
+        self.kicker_set = true;
+    }
+    /// py: card._showed_off = v
+    pub fn set_showed(&mut self, v: Option<bool>) {
+        self.showed_off = v;
+        self.showed_set = true;
+    }
+    /// py: getattr(card, "_kicker_paid", False)
+    pub fn kicker_or_false(&self) -> Option<bool> {
+        if self.kicker_set { self.kicker_paid } else { Some(false) }
+    }
+    /// py: getattr(card, "_showed_off", False)
+    pub fn showed_or_false(&self) -> Option<bool> {
+        if self.showed_set { self.showed_off } else { Some(false) }
+    }
 }
 
 static CARD_UUIDS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
@@ -66,6 +92,7 @@ impl Card {
             graceful_prepaid: None,
             granted_repeat: None,
             kicker_paid: None,
+            kicker_set: false,
             owner: None,
             play_pending: None,
             played_from: None,
@@ -73,6 +100,7 @@ impl Card {
             repeat_extra: None,
             repeat_paid: None,
             showed_off: None,
+            showed_set: false,
             shown: None,
             spent: None,
             hidden_bf: None,

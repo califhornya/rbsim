@@ -6,6 +6,7 @@ e lo stesso esito, gli stessi turni, gli stessi conteggi. Si ferma al primo
 esempio diverso e dice quale campo.
 
   python scripts/rust/parita_ppo.py --semi 1-20 [--avversario simple_trade] [--init ckpt.pt]
+  python scripts/rust/parita_ppo.py --semi 1-20 --matchup ER --posti
 """
 from __future__ import annotations
 
@@ -56,11 +57,14 @@ def main() -> None:
     ap.add_argument("--seme-rete", type=int, default=1)
     ap.add_argument("--init", default=None, help="checkpoint .pt (pesi della rete)")
     ap.add_argument("--greedy", action="store_true")
+    ap.add_argument("--matchup", default="EK", help="lettere di riftbound/rs/mazzi.py: il primo mazzo in A (EK, ER, KR; minuscola = con la sideboard: Er)")
+    ap.add_argument("--posti", action="store_true", help="anche col matchup rovesciato (i mazzi ai due posti)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
     import torch
     torch.set_num_threads(1)
     from riftbound.ai.ppo import collect
+    from riftbound.rs.mazzi import decks
     from riftbound.ai.ppo.model import PPONet
     from riftbound.rs import collect_rs
     torch.manual_seed(args.seme_rete)
@@ -75,17 +79,19 @@ def main() -> None:
     nets = {"A": net, "B": None if args.avversario else net}
     learners = {"A": True, "B": not args.avversario}
     rows, ok = [], 0
-    for seed in seeds:
+    mus = [args.matchup] + ([args.matchup[::-1]] if args.posti and args.matchup[0] != args.matchup[1] else [])
+    for seed, mu in [(s, m) for s in seeds for m in mus]:
+        mazzi = dict(zip(("deck_a", "deck_b"), decks(mu)))
         t0 = time.perf_counter()
-        py = collect.play(seed, nets, learners, sample=not args.greedy, opponent=args.avversario)
+        py = collect.play(seed, nets, learners, sample=not args.greedy, opponent=args.avversario, **mazzi)
         t1 = time.perf_counter()
         try:
-            rs = collect_rs.play(seed, nets, learners, sample=not args.greedy, opponent=args.avversario)
+            rs = collect_rs.play(seed, nets, learners, sample=not args.greedy, opponent=args.avversario, **mazzi)
             err = None
         except RuntimeError as e:
             rs, err = None, str(e)
         t2 = time.perf_counter()
-        row = {"seme": seed, "python": [py["winner"], py["turns"], sum(map(len, py["records"].values()))],
+        row = {"seme": seed, "matchup": mu, "python": [py["winner"], py["turns"], sum(map(len, py["records"].values()))],
                "t_py": round(t1 - t0, 3), "t_rs": round(t2 - t1, 3)}
         if err:
             row["errore_rust"] = err

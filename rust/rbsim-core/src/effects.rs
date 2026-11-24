@@ -140,6 +140,10 @@ impl Game {
             "predict" | "scry" => self.fx_predict(ctx, spec),
             "recycle_from_opponent_hand" => self.fx_recycle_from_opponent_hand(ctx, spec),
             "play_from_trash" => self.fx_play_from_zone(ctx, spec, "trash"),
+            "ready_unit" => self.fx_ready_unit(ctx, spec),
+            "blink_unit" => self.fx_blink_unit(ctx, spec),
+            "deal_damage" => self.fx_deal_damage(ctx, spec),
+            "kill_gear" => self.fx_kill_gear(ctx, spec),
             other => {
                 if exists(other) {
                     not_ported!("effects", "handler {other}");
@@ -777,6 +781,375 @@ impl Game {
             ctx.extra.set("stunned_at", match first { Some(b) => XVal::Bf(b), None => XVal::None });
             self.fire_stun_enemy(ctx.actor, first)?;
         }
+        Ok(())
+    }
+
+    /// py: _gear_deflect_tax
+    pub fn gear_deflect_tax(&self, gear_side: Side, chooser: Side, gear: GearRef) -> i64 {
+        if gear_side == chooser {
+            return 0;
+        }
+        let card = self.gear_card(gear);
+        (self.gs.has_keyword(card, "DEFLECT") || self.side_has_passive(gear_side, "gear_deflect")) as i64
+    }
+
+    /// py: _kill_gear — "Kill all gear" by default; one gear (enemy first) with a
+    /// target_filter, a single scope or a chooser target.
+    fn fx_kill_gear(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let tf = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned().unwrap_or(Value::Object(Map::new()));
+        let scope = sstr(spec, "scope", "").to_lowercase();
+        let target = sstr(spec, "target", "").to_lowercase();
+        const ENEMY_GEAR_HINTS: [&str; 3] = ["enemy_gear", "chosen_gear", "gear"];
+        let single = truthy(Some(&tf)) || scope == "single" || CHOOSER_TARGETS.contains(&target.as_str())
+            || ENEMY_GEAR_HINTS.contains(&target.as_str());
+        let mut entries: Vec<(Side, GearHolder, GearRef)> =
+            self.gear_entries(ctx, true, true).into_iter().filter(|e| self.gear_matches(e.2, &tf)).collect();
+        if sget(spec, "_only").is_some() {
+            not_ported!("_kill_gear", "_only");
+        }
+        if truthy(spec.get("max_energy_self_might")) {
+            let cap = self.source_unit(ctx).map(|u| self.gs.unit_might(u)).unwrap_or(0);
+            entries.retain(|e| self.gs.cost_energy(self.gear_card(e.2)) <= cap);
+        }
+        if target == "self" || target == "this" {
+            entries.retain(|e| self.gear_card(e.2) == ctx.card);
+        } else if target == "each_player" {
+            // "Each player kills one of their gear" (Acceptable Losses): each picks.
+            let mut picked = Vec::new();
+            for side in [ctx.actor, ctx.opponent] {
+                let own: Vec<(Side, GearHolder, GearRef)> = entries.iter().copied().filter(|e| e.0 == side).collect();
+                if !own.is_empty() {
+                    let base = min_first(&(0..own.len()).collect::<Vec<_>>(), |i| self.zone_value(self.gear_card(own[i].2)));
+                    let opts: Vec<Opt> = own.iter().map(Self::gear_opt).collect();
+                    let got = self.choose("kill_own:kill_gear", side, &opts, opts[base].clone(), Some(ctx.card))?;
+                    let i = opts.iter().position(|o| *o == got).unwrap();
+                    picked.push(own[i]);
+                }
+            }
+            entries = picked;
+        } else if single {
+            if target == "friendly_gear" || target == "own_gear" {
+                entries.retain(|e| e.0 == ctx.actor);
+            } else if target == "enemy_gear" {
+                entries.retain(|e| e.0 == ctx.opponent);
+            }
+            entries.retain(|e| self.can_pay_generic_power(ctx.actor, self.gear_deflect_tax(e.0, ctx.actor, e.2)));
+            if !entries.is_empty() {
+                let opts: Vec<Opt> = entries.iter().map(Self::gear_opt).collect();
+                let got = self.choose(&kind("target", spec), ctx.actor, &opts, opts[0].clone(), Some(ctx.card))?;
+                let i = opts.iter().position(|o| *o == got).unwrap();
+                entries = vec![entries[i]];
+            }
+            let tax = match entries.first() {
+                Some(e) => self.gear_deflect_tax(e.0, ctx.actor, e.2),
+                None => 0,
+            };
+            if tax != 0 && self.declaring.is_none() {
+                self.pay_generic_power(ctx.actor, tax)?;
+            }
+            if let Some(e) = entries.first() {
+                self.note_gear_chosen(ctx.card, ctx.actor, e.0);
+            }
+        }
+        for (side, holder, gear) in entries {
+            ctx.extra.set("it_controller", XVal::Side(side));
+            if let (GearHolder::Bf(b), GearRef::Deployed(d)) = (holder, gear) {
+                self.kill_deployed_gear(b, side, &[d])?;
+                continue;
+            }
+            let card = self.gear_card(gear);
+            if let GearHolder::Unit(u) = holder {
+                if self.gs.unit_is_gear(u) && self.gs.ucard(u) == card {
+                    // A unit gear dies as a unit.
+                    if let Some((_, wbf)) = self.take_off_board(u) {
+                        self.route_deaths(&[(u, side)], wbf.unwrap_or(ctx.bf), wbf.is_none(), Some((ctx.actor, ctx.card)), false)?;
+                    }
+                    continue;
+                }
+                if !self.gs.unit(u).gear.contains(&card) {
+                    continue;
+                }
+                let l = &mut self.gs.unit_mut(u).gear;
+                let p = l.iter().position(|&x| x == card).unwrap();
+                l.remove(p);
+            } else if self.gs.player(side).base_gear.contains(&card) {
+                let l = &mut self.gs.player_mut(side).base_gear;
+                let p = l.iter().position(|&x| x == card).unwrap();
+                l.remove(p);
+            } else {
+                continue;
+            }
+            self.to_trash(side, card)?;
+            self.gear_left_board(card, side)?;
+        }
+        Ok(())
+    }
+
+    /// py: _deal_damage — a single target takes it all; `count` targets each
+    /// take it; a group each take it. Baseline pick: an enemy over a friend, one
+    /// the damage kills, the mightiest.
+    fn fx_deal_damage(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let its_damage = matches!(spec.get("amount_source"), Some(Value::String(s)) if s == "its_damage");
+        let mut amount = if its_damage { 0 } else { self.effect_amount(ctx, spec)? };
+        if let Some(bs) = spec.get("bonus_source").filter(|v| truthy(Some(v))) {
+            let mut m = Map::new();
+            m.insert("amount_source".into(), bs.clone());
+            amount += self.effect_amount(ctx, &m)?;
+        }
+        if amount > 0 && self.gs.is_gear(ctx.card) {
+            // "Abilities of friendly gear deal 1 Bonus Damage" (Ziggs Short-Fused)
+            let mut bonus = 0;
+            for (src, _) in self.sources_in_play(ctx.actor) {
+                for es in &self.gs.spec(src).effects {
+                    if es.trigger == "passive" && es.effect == "gear_ability_bonus_damage" {
+                        bonus += es.params.get("amount").map(py_int).unwrap_or(1);
+                    }
+                }
+            }
+            amount += bonus;
+        }
+        if amount <= 0 && !its_damage {
+            return Ok(());
+        }
+        let mut target = sstr(spec, "target", "enemy_unit").to_lowercase();
+        if target == "opponent" || target == "enemy" {
+            target = "enemy_unit".into();
+        }
+        if truthy(spec.get("split")) {
+            not_ported!("_deal_damage", "split (EffectContext.deal_damage)");
+        }
+        let tf = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned();
+        let units: Vec<UnitId>;
+        let scope_all = sstr(spec, "scope", "").to_lowercase() == "all";
+        if matches!(spec.get("filter"), Some(Value::String(f)) if f == "all_units_at_battlefields") {
+            let mut us: Vec<UnitId> = Vec::new();
+            for bf in &self.gs.battlefields {
+                us.extend(bf.units[0].iter().copied());
+                us.extend(bf.units[1].iter().copied());
+            }
+            if let Some(tf) = &tf {
+                let mut kept = Vec::new();
+                for u in us {
+                    if self.passes_filter(u, tf, ctx)? {
+                        kept.push(u);
+                    }
+                }
+                us = kept;
+            }
+            units = us;
+        } else if target.starts_with("all") || BOTH_SIDES_TARGETS.contains(&target.as_str()) || scope_all {
+            let s = with(&with(spec, "target", Value::String(target.clone())), "scope", Value::String("all".into()));
+            units = self.resolve_targets(ctx, &s, "none", None)?;
+        } else {
+            let s = with(&with(spec, "target", Value::String(target.clone())), "scope", Value::String("all".into()));
+            let mut cands = self.resolve_targets(ctx, &s, "none", None)?;
+            if cands.is_empty() && !self.gs.is_spell(ctx.card) && self.gs.card(ctx.card).hidden_bf.is_none() {
+                cands = self.fallback_units(ctx, &target, "enemy")?;
+                if let Some(tf) = &tf {
+                    let mut kept = Vec::new();
+                    for u in cands {
+                        if self.passes_filter(u, tf, ctx)? {
+                            kept.push(u);
+                        }
+                    }
+                    cands = kept;
+                }
+            }
+            // The opponent's units: here, at every battlefield, in base.
+            let opp = ctx.opponent;
+            let mut enemy: HashSet<UnitId> = self.gs.battlefields[ctx.bf].units_for(opp).iter().copied().collect();
+            for bf in &self.gs.battlefields {
+                enemy.extend(bf.units_for(opp).iter().copied());
+            }
+            enemy.extend(self.gs.player(opp).base_units.iter().copied());
+            let value = |g: &Game, u: UnitId| -> (bool, bool, i64) {
+                let dealt = if its_damage { g.gs.unit(u).damage } else { amount };
+                let might = g.gs.unit_might(u);
+                let kills = dealt > 0 && dealt >= (might - g.gs.unit(u).damage).max(0);
+                (enemy.contains(&u) && dealt > 0, kills, might)
+            };
+            let ch = self.choosable(ctx, &cands)?;
+            // sorted(key=value, reverse=True): descending, stable.
+            let mut keyed: Vec<((bool, bool, i64), usize, UnitId)> =
+                ch.iter().enumerate().map(|(i, &u)| (value(self, u), i, u)).collect();
+            keyed.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap().then(a.1.cmp(&b.1)));
+            let cands: Vec<UnitId> = keyed.iter().map(|k| k.2).collect();
+            let count = spec.get("count").map(py_int).unwrap_or(1);
+            let mut picks: Vec<UnitId> = cands.iter().copied().take(count.max(0) as usize).collect();
+            if truthy(spec.get("up_to")) {
+                picks.retain(|&u| value(self, u).0);
+            }
+            if truthy(spec.get("same_location")) {
+                not_ported!("_deal_damage", "same_location");
+            }
+            let opts: Vec<Opt> = cands.iter().map(|&u| Opt::Unit(u)).collect();
+            let pk: Vec<Opt> = picks.iter().map(|&u| Opt::Unit(u)).collect();
+            let up_to = if truthy(spec.get("up_to")) { Some(count) } else { None };
+            let got = self.choose_many(&kind("target", spec), ctx.actor, &opts, &pk, Some(ctx.card), up_to, None)?;
+            let chosen = units_of(&got);
+            if !chosen.is_empty() {
+                self.note_chosen(ctx.card, ctx.actor, &chosen)?;
+            }
+            ctx.extra.set("it", XVal::List(chosen.iter().map(|&u| XVal::Unit(u)).collect()));
+            units = chosen;
+        }
+        if its_damage {
+            for u in units {
+                let d = self.gs.unit(u).damage;
+                if d > 0 {
+                    self.damage_units(ctx, &[u], d, "spell", None)?;
+                }
+            }
+            return Ok(());
+        }
+        if truthy(spec.get("banish_if_dies")) {
+            for &u in &units {
+                self.gs.unit_mut(u).banish_if_dies_turn = self.gs.turn;
+            }
+        }
+        if truthy(spec.get("amount_if_attacking")) {
+            not_ported!("_deal_damage", "amount_if_attacking (Sudden Storm)");
+        }
+        self.damage_units(ctx, &units, amount, "spell", None)?;
+        if truthy(spec.get("then_if_killed")) && units.iter().any(|&u| self.locate_unit(u).is_none()) {
+            not_ported!("_deal_damage", "then_if_killed (reflexive)");
+        }
+        Ok(())
+    }
+
+    /// py: _ready_unit
+    fn fx_ready_unit(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let t = spec.get("target").cloned().unwrap_or(Value::String("actor".into()));
+        let s = with(spec, "target", t);
+        let prefer = |g: &Game, u: UnitId| (g.gs.unit(u).ready || !g.can_ready(u)) as i64;
+        for unit in self.resolve_targets(ctx, &s, "none", Some(&prefer))? {
+            if truthy(spec.get("cant_move")) {
+                self.gs.unit_mut(unit).cant_move_turn = self.gs.turn;
+            }
+            if !self.can_ready(unit) {
+                continue;
+            }
+            let was_ready = self.gs.unit(unit).ready;
+            self.gs.unit_mut(unit).ready = true;
+            if !was_ready {
+                if let Some((side, _)) = self.locate_unit(unit) {
+                    self.fire_readied(unit, side)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// py: _blink_unit — "Banish a friendly unit, then its owner plays it to
+    /// any battlefield, ignoring its cost" (Thrill of the Hunt).
+    fn fx_blink_unit(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
+        let me = ctx.actor;
+        let mut units: Vec<UnitId> =
+            self.units_at(ctx, me, "anywhere").into_iter().filter(|&u| !self.gs.unit(u).is_token).collect();
+        if truthy(spec.get("any_side")) {
+            let them: Vec<UnitId> = self
+                .units_at(ctx, ctx.opponent, "anywhere")
+                .into_iter()
+                .filter(|&u| !self.gs.unit(u).is_token)
+                .collect();
+            units.extend(them);
+        }
+        if let Some(tf) = sget(spec, "target_filter").filter(|v| truthy(Some(v))).cloned() {
+            let mut kept = Vec::new();
+            for u in units {
+                if self.passes_filter(u, &tf, ctx)? {
+                    kept.push(u);
+                }
+            }
+            units = kept;
+        }
+        if units.is_empty() {
+            return Ok(());
+        }
+        let dest = spec.get("destination").map(py_str).unwrap_or_else(|| "any_battlefield".into()).to_lowercase();
+        // place(unit): where it is played (None: its base)
+        let place = |g: &mut Game, unit: UnitId| -> Option<usize> {
+            if dest == "same_location" {
+                return g.locate_unit(unit).and_then(|w| w.1);
+            }
+            if dest == "base" || dest == "play_location" {
+                return None;
+            }
+            let n = g.gs.battlefields.len();
+            let mut best = 0;
+            let mut bk = g.attack_value_mut(me, unit, 0);
+            for b in 1..n {
+                let k = g.attack_value_mut(me, unit, b);
+                if k > bk {
+                    best = b;
+                    bk = k;
+                }
+            }
+            Some(best)
+        };
+        let losing = |g: &Game, u: UnitId| -> bool {
+            match g.locate_unit(u).and_then(|w| w.1) {
+                None => false,
+                Some(b) => {
+                    let bf = &g.gs.battlefields[b];
+                    let theirs: i64 = bf.units_for(ctx.opponent).iter().map(|&x| g.gs.unit_might(x)).sum();
+                    let mine: i64 = bf.units_for(me).iter().map(|&x| g.gs.unit_might(x)).sum();
+                    theirs > mine
+                }
+            }
+        };
+        let mut keys: Vec<(i64, i64)> = Vec::new();
+        for &u in &units {
+            let k = if dest == "base" || dest == "play_location" {
+                (losing(self, u) as i64, self.gs.unit_might(u))
+            } else {
+                let av = match place(self, u) {
+                    Some(_) => {
+                        let b = place(self, u).unwrap();
+                        self.attack_value_mut(me, u, b)
+                    }
+                    None => 0,
+                };
+                (av, self.gs.unit_might(u))
+            };
+            keys.push(k);
+        }
+        let mut bi = 0;
+        for i in 1..units.len() {
+            if keys[i] > keys[bi] {
+                bi = i;
+            }
+        }
+        let opts: Vec<Opt> = units.iter().map(|&u| Opt::Unit(u)).collect();
+        let got = self.choose(&kind("target", spec), me, &opts, Opt::Unit(units[bi]), Some(ctx.card))?;
+        let Opt::Unit(unit) = got else { return Err(EngineError::Invalid("blink_unit: not a unit".into())) };
+        let mut bf = place(self, unit);
+        let Some((side, src_bf)) = self.locate_unit(unit) else { return Ok(()) };
+        if dest == "play_location" {
+            let mut options = vec![Opt::None];
+            for b in 0..self.gs.battlefields.len() {
+                if self.gs.battlefields[b].control() == Some(side) {
+                    options.push(Opt::Bf(b));
+                }
+            }
+            let keep = match src_bf {
+                Some(b) if options.contains(&Opt::Bf(b)) && !losing(self, unit) => Opt::Bf(b),
+                _ => Opt::None,
+            };
+            bf = match self.choose(&kind("destination", spec), side, &options, keep, Some(ctx.card))? {
+                Opt::Bf(b) => Some(b),
+                _ => None,
+            };
+        }
+        match src_bf {
+            None => self.gs.player_mut(side).base_units.retain(|&u| u != unit),
+            Some(b) => self.gs.battlefields[b].remove_unit(side, unit),
+        }
+        let gear = self.gs.unit(unit).gear.clone();
+        self.gs.player_mut(side).base_gear.extend(gear);
+        let card = self.gs.ucard(unit);
+        self.fire_leaves_board(card, side, src_bf.unwrap_or(0))?;
+        self.play_unit(card, side, bf, "banished")?;
         Ok(())
     }
 

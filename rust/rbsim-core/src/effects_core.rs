@@ -637,18 +637,29 @@ impl Game {
                 return false;
             }
         }
-        if tf.as_object().map_or(false, |o| o.keys().any(|k| k != "energy_at_most" && k != "energy_at_least")) {
-            // other gear filters: not in EK
-            return self.zone_card_matches(c, tf);
+        if let Some(d) = tf.get("domain").filter(|v| truthy(Some(v))) {
+            // "an enemy Chaos unit or gear" (Decree of Unity)
+            return self.card_domains(c).contains(&py_str(d).to_uppercase());
         }
         true
     }
 
-    /// py: _amount(ctx, spec): fixed amounts only in EK.
-    pub fn effect_amount(&self, ctx: &Ctx, spec: &Map<String, Value>) -> R<i64> {
-        let _ = ctx;
+    /// py: _amount(ctx, spec): the amount sources of the ported cards.
+    pub fn effect_amount(&mut self, ctx: &Ctx, spec: &Map<String, Value>) -> R<i64> {
         match sget(spec, "amount_source").filter(|v| truthy(Some(v))) {
             None => Ok(spec.get("amount").map(py_int).unwrap_or(0)),
+            Some(Value::String(s)) if s == "other_battlefields_controlled" => {
+                // "for each other battlefield you or allies control" (Seat of Power);
+                // bf.control() records control on each other battlefield.
+                let here = ctx.extra.bf("battlefield").unwrap_or(ctx.bf);
+                let mut n = 0;
+                for i in 0..self.gs.battlefields.len() {
+                    if i != here && self.gs.battlefields[i].control() == Some(ctx.actor) {
+                        n += 1;
+                    }
+                }
+                Ok(n)
+            }
             Some(src) => not_ported!("_amount", "amount_source {}", py_str(src)),
         }
     }

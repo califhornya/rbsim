@@ -80,8 +80,41 @@ impl Game {
                 .battlefields
                 .iter()
                 .any(|bf| bf.units_for(side).iter().any(|&u| self.gs.ucard(u) == card)),
+            "friendly_mighty_unit_here" => {
+                // "When you conquer here with one or more MIGHTY units" (Sunken Temple).
+                match extra.bf("battlefield") {
+                    Some(bf) => self.gs.battlefields[bf].units_for(side).iter().any(|&u| self.gs.unit_might(u) >= 5),
+                    None => false,
+                }
+            }
+            "you_already_played_another_card_this_turn" => {
+                // Another card than this one: a LEGION card's own play is already
+                // counted while its "when you play me" resolves.
+                self.gs.played_cards_this_turn[side.idx()].iter().any(|&c| c != card)
+            }
+            "friendly_total_might_at_least" => {
+                // Combined might of the actor's OTHER units (Kinkou Initiate).
+                let total: i64 = self
+                    .friendly_units(side)
+                    .into_iter()
+                    .filter(|&u| self.gs.ucard(u) != card)
+                    .map(|u| self.gs.unit_might(u))
+                    .sum();
+                total >= threshold(params, 0)
+            }
             other => not_ported!("_check_condition", "condition type {other}"),
         })
+    }
+
+    /// py: _check_condition._friendly_units — battlefield units, base units, legend units.
+    pub fn friendly_units(&self, side: Side) -> Vec<UnitId> {
+        let mut us: Vec<UnitId> = Vec::new();
+        for bf in &self.gs.battlefields {
+            us.extend(bf.units_for(side).iter().copied());
+        }
+        us.extend(self.gs.players[side.idx()].base_units.iter().copied());
+        us.extend(self.legend_units(side));
+        us
     }
 
     /// py: _find_unit_by_card
@@ -107,4 +140,19 @@ impl Game {
         }
         None
     }
+}
+
+/// py: _check_condition._threshold — the first numeric of n/amount/count/value/threshold.
+fn threshold(params: &serde_json::Map<String, Value>, default: i64) -> i64 {
+    for key in ["n", "amount", "count", "value", "threshold"] {
+        if let Some(v) = params.get(key) {
+            if let Some(i) = v.as_i64() {
+                return i;
+            }
+            if let Some(f) = v.as_f64() {
+                return f.trunc() as i64;
+            }
+        }
+    }
+    default
 }

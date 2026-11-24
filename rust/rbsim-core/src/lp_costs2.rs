@@ -81,7 +81,7 @@ impl Game {
                 }
             }
             if self.pay_one_additional_cost(card, ap, &ac)? {
-                self.gs.card_mut(card).kicker_paid = Some(true);
+                self.gs.card_mut(card).set_kicker(Some(true));
                 paid = true;
             }
         }
