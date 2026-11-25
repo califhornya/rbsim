@@ -268,6 +268,29 @@ pub enum Regole {
     D72D76,
 }
 
+thread_local! {
+    static CORREZIONI: std::cell::Cell<[u64; 5]> = const { std::cell::Cell::new([0; 5]) };
+}
+
+/// D72..D76 changed something in this thread (the real game or a search
+/// copy): what explains a divergence from the historical rules.
+pub fn conta(d: usize) {
+    CORREZIONI.with(|c| {
+        let mut v = c.get();
+        v[d - 72] += 1;
+        c.set(v);
+    });
+}
+
+/// The counts of D72..D76 in this thread.
+pub fn correzioni() -> [u64; 5] {
+    CORREZIONI.with(|c| c.get())
+}
+
+pub fn azzera_correzioni() {
+    CORREZIONI.with(|c| c.set([0; 5]));
+}
+
 /// The version of the card-data correction of the corrected profile.
 pub const CORREZIONE_DATI: &str = "D72-D76/1";
 

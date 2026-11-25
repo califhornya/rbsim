@@ -813,6 +813,12 @@ impl Game {
         let pref = move |g: &Game, u: UnitId| -> i64 { (instead == 0 && g.gs.unit(u).might_counters >= 1) as i64 };
         let units = self.resolve_targets(ctx, spec, "none", Some(&pref))?;
         for unit in units {
+            if self.gs.reg.regole.corrette() && self.gs.name(ctx.card) == "Pillaged Armory"
+                && self.locate_unit(unit).map(|w| w.1) != Some(Some(ctx.bf))
+            {
+                // D74: a unit away from the Armory's battlefield (its data correction).
+                crate::registry::conta(74);
+            }
             if instead != 0 && self.gs.unit(unit).might_counters >= 1 {
                 self.gs.unit_mut(unit).temporary_might += instead;
                 continue;

@@ -347,6 +347,20 @@ impl Game {
     }
 
     /// py: _apply_passive_grant
+    /// D73: the passives recomputed right after a unit played with AMBUSH
+    /// to battlefield `bf`, before its showdown (counted when a Might changed).
+    pub fn recompute_passives_d73(&mut self, bf: usize) -> R<()> {
+        let might = |g: &Game| -> Vec<i64> {
+            g.gs.battlefields[bf].units.iter().flatten().map(|&u| g.gs.unit(u).passive_might).collect()
+        };
+        let before = might(self);
+        self.recompute_passives()?;
+        if might(self) != before {
+            crate::registry::conta(73);
+        }
+        Ok(())
+    }
+
     pub fn apply_passive_grant(&mut self, source_unit: Option<UnitId>, ctx: &Ctx, es: &Spec) -> R<()> {
         let params = es.merged.clone();
         let side = ctx.actor;
@@ -372,6 +386,9 @@ impl Game {
                 if counts && self.gs.unit(u).might_counters > 0 {
                     n += 1;
                 }
+            }
+            if amount * n != 0 {
+                crate::registry::conta(75);
             }
             self.gs.unit_mut(me).passive_might += amount * n;
             return Ok(());

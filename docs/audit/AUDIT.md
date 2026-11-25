@@ -23,7 +23,9 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
-**After the freeze (2026-11-24):** D72-D76 found in games in the coach page, open, to fix in Rust
+**After the freeze (2026-11-25):** D72-D76 found in games in the coach page, fixed in Rust on the
+rules profile 6427b90+D72-D76 (the default stays 6427b90, identical to Python; `docs/RUST.md`, "Profili
+delle regole"). Tests `tests/rust/test_d72_d76.py`, red first (`d6e5e32`), then the fixes (`92a42e8`).
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -153,11 +155,11 @@ From now on:
 | D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | fixed, `ca16a51` |
 | D69 | The deck loader refuses the Chosen Champion in the Main Deck | §103.3.b.1 | not in these decks; 82FAW's Ivern list (champion + 1) didn't load | fixed, `e2d6b2e` |
 | D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
-| D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | open, to fix in Rust |
-| D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | open, to fix in Rust |
-| D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | open, to fix in Rust |
-| D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | open, to fix in Rust |
-| D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | open, to fix in Rust |
+| D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1004,6 +1006,21 @@ the champion included: the Volibear example). Tests in
 
 Ordinary defects found after the Python engine was frozen (section "The Python
 engine is frozen"): written here, fixed once in Rust.
+
+**Fixed (25/11), decisions of Astra and the owner.** One selector of the rules,
+chosen as a game starts and held by its registry (both players, the search
+copies, the workers, the replays): `6427b90`, the default, identical to Python,
+which the parity checks fix explicitly; `6427b90+D72-D76`, the five corrected.
+D72, D73, D75 (the passive) and D76 are code behind the selector; D74 and D75's
+`exclude_self` are a versioned data correction (`D72-D76/1`) applied as the
+registry loads (`registry.rs: correggi_dati`; `rust/data/registry.json` stays
+the reproducible export of Python). D75 also recomputes the passives when a
+buff is spent or gained (a Kingpin spending its own buff alone is 5 at the
+next decision). Each fix counts when it changes something (`riftbound_rs.correzioni`),
+which explains a divergence from the historical rules
+(`scripts/rust/confronto_regole.py`). The coach page stays on the frozen Python
+engine ("Regole Python 6427b90"). Valley of Idols is not a defect: every unit
+played there may be buffed for [1].
 
 ### D72. Rengar Trophy Hunter can't be played where only enemy units are
 

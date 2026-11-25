@@ -82,7 +82,13 @@ impl Game {
                     || (has("open") && mine.is_empty() && theirs.is_empty() && self.gs.battlefields[i].controller().is_none())
                     || (has("occupied_enemy") && !theirs.is_empty())
                     || (has("enemy_alone") && theirs.len() == 1)
-                    || (enemy_ok && !theirs.is_empty())
+                    || {
+                        let d72 = enemy_ok && !theirs.is_empty();
+                        if d72 {
+                            crate::registry::conta(72);
+                        }
+                        d72
+                    }
             };
             if ok {
                 out.push(Some(i));
@@ -129,8 +135,12 @@ impl Game {
             // also where only enemy units are (as from the Champion Zone).
             let enemy_ok = self.gs.reg.regole.corrette() && self.ambush_enemy_ok(card);
             for (i, bf) in self.gs.battlefields.iter().enumerate() {
-                let here = !bf.units_for(side).is_empty() || (enemy_ok && !bf.units_for(side.other()).is_empty());
-                if here && !lanes.contains(&i) {
+                let mine = !bf.units_for(side).is_empty();
+                let d72 = !mine && enemy_ok && !bf.units_for(side.other()).is_empty();
+                if (mine || d72) && !lanes.contains(&i) {
+                    if d72 {
+                        crate::registry::conta(72);
+                    }
                     lanes.push(i);
                 }
             }
@@ -193,7 +203,7 @@ impl Game {
         if self.gs.reg.regole.corrette() {
             // D73: the battlefield's passives (Packed Amphitheater) before
             // the showdown's first decision.
-            self.recompute_passives()?;
+            self.recompute_passives_d73(l)?;
         }
         let b = &mut self.gs.battlefields[l];
         if !b.units[0].is_empty() && !b.units[1].is_empty() {

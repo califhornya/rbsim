@@ -365,6 +365,19 @@ impl Game {
 }
 
 /// How many search agents are alive (a finished, dropped game frees its own).
+/// D72..D76 counted in this thread since the last reset: {"D72": n, ...}
+/// (the corrected branches that changed something, search copies included).
+#[pyfunction]
+fn correzioni() -> std::collections::BTreeMap<String, u64> {
+    let c = rbsim_core::registry::correzioni();
+    (0..5).map(|i| (format!("D{}", 72 + i), c[i])).collect()
+}
+
+#[pyfunction]
+fn azzera_correzioni() {
+    rbsim_core::registry::azzera_correzioni();
+}
+
 #[pyfunction]
 fn live_search_agents() -> i64 {
     rbsim_core::search::live_cores()
@@ -373,6 +386,8 @@ fn live_search_agents() -> i64 {
 #[pymodule]
 fn riftbound_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(live_search_agents, m)?)?;
+    m.add_function(wrap_pyfunction!(correzioni, m)?)?;
+    m.add_function(wrap_pyfunction!(azzera_correzioni, m)?)?;
     m.add_class::<Registry>()?;
     m.add_class::<Game>()?;
     Ok(())

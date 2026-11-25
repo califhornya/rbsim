@@ -127,15 +127,13 @@ def test_d72_rengar_from_the_champion_zone_at_reaction_speed(regole):
     assert any("Rengar" in m and "BF1" in m for m in react), react
 
 
-@pytest.mark.parametrize("regole", [STORICHE, CORRETTE])
-def test_d72_rengar_played_where_only_enemies_are_contests_it(regole):
-    """The corrected play: Rengar goes to BF1 and the battlefield is
-    contested (its showdown is staged, as for any unit played there)."""
-    if regole == STORICHE:
-        pytest.skip("the historical profile has no such play")
+def test_d72_rengar_played_where_only_enemies_are_contests_it():
+    """The corrected play (the historical profile has none): Rengar goes to
+    BF1 and the battlefield is contested (its showdown is staged, as for any
+    unit played there)."""
     loop, a, _b = _enemy_at_bf1()
     a.hand.append(card("Rengar Trophy Hunter"))
-    g = rust(loop, regole, A={"main": ["Play Rengar Trophy Hunter to BF1"]})
+    g = rust(loop, CORRETTE, A={"main": ["Play Rengar Trophy Hunter to BF1"]})
     g.run_segment(1)
     assert any(d["point"] == "showdown_action" for d in events(g, "decision")), \
         [(d["seat"], d["point"]) for d in events(g, "decision")]

@@ -75,8 +75,13 @@ impl TraceAgent {
         let act = f(g)?;
         let idx = legal.iter().position(|a| a.same(&act));
         g.drain_rng(&self.sink);
-        self.sink.borrow_mut().push(json!({"k": "decision", "seat": side.name(), "point": point.name(), "win": win,
-            "state_raw": st, "obs": null, "menu": labels, "action": action_list(&act), "index": idx}));
+        let mut e = json!({"k": "decision", "seat": side.name(), "point": point.name(), "win": win,
+            "state_raw": st, "obs": null, "menu": labels, "action": action_list(&act), "index": idx});
+        if g.gs.reg.regole.corrette() {
+            // D72..D76 counted so far in this thread, the decision's search included.
+            e["correzioni"] = json!(crate::registry::correzioni());
+        }
+        self.sink.borrow_mut().push(e);
         Ok(act)
     }
     fn simple(&self, g: &mut Game, side: Side, name: &str, args: Value, out: Value, win: Value, st: Value) {
