@@ -7,8 +7,7 @@ Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-53 unite).
 - PPO = la rete allenata giocando contro sé stessa; "prior" = le sue preferenze sulle mosse.
 - Bot a mano = la ricerca (MCTS: prova molte continuazioni) con una valutazione scritta a mano.
 - Campione = il bot a mano guidato dai prior di `ekris_s12/ckpt_040000.pt`.
-- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte. Lavoro fisso = iterazioni fisse.
-- Minuscola nei matchup degli script (`Er`) = la lista con tutta la sideboard nel mazzo.
+- Arena = partite a coppie a posti scambiati; lavoro fisso = iterazioni fisse; `Er` = lista con tutta la sideboard.
 
 ## Obiettivo (Matteo, 24/11)
 Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi (con sideboard e test) la prima tappa.
@@ -69,7 +68,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 correggono (è `table_value`). `accumulo` (k=3, alpha 0,2) bocciato in arena (EK 0,431, ES 0,465); `minaccia`/`corsa`
 (logistiche) non cambiano le mosse; `rimonta` (solo se si perde la corsa a campi fermi: Might in base verso il campo
 avversario più debole, eccesso sul campo sicuro ridotto) porta il §8 in corsa persa da 57% a 27% (ES), 52% a 19% (EK),
-invariato in corsa vinta. Arena sul Mac: `scripts/rust/rimonta_mac.command`, in attesa. Tutte spente di default.
+invariato in corsa vinta. Arena sul Mac: `rimonta_mac.command`, in attesa. Tutte spente. Da correggere (Codex, PR 55):
+`rifai --valutazione storica` con `--valutazione-orig` non storica resta sull'originale (`cmd_rifai`, `_gioca`).
 Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
 Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
 
