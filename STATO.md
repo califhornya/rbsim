@@ -69,11 +69,15 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: partite col campione (4 il 25/11 in `docs/bot/partite/coach/`), "Segnala" (SEGNALAZIONI 17-25).
-Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi senza iterazioni = 42), `episodi.py` (§7/§8).
+§8 accumulo (`docs/bot/accumulo/`): MISURA_1 (13% delle decisioni di turno; più iterazioni non correggono: è `table_value`);
+candidato `--valutazione accumulo` (k=3, alpha=0,2; spento di default, parità 30/30): 13/18 episodi lasciano il campo,
+§8 da 13,7% a 4,9% (ES), da 11,9% a 4,1% (EK) (MISURA_2). Arena sul Mac: `scripts/rust/accumulo_mac.command`, in attesa.
+Astra 25/11 sera (non nel repo, per scelta di Matteo): prima la Might da sola + controllo; poi minaccia giocabile, poi corsa ai
+punti (confronto delle due); valore della rete solo prova economica su posizioni tenute; Q massimo per ora; partite di
+Matteo non obbligatorie (2 ES nuove dopo la prima arena). I 13 episodi umani vanno ricontrollati su D80.
 
 ## Prossimi passi
-2. Due scenari, una correzione alla volta. §8 accumulo (SEGNALAZIONI 7, 17, 20: posizioni salvate in `partite/coach/`) e
+2. Due scenari, una correzione alla volta. §8 accumulo (sopra; SEGNALAZIONI 7, 17, 20) e
    §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
