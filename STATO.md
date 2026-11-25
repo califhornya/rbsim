@@ -77,7 +77,7 @@ Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi s
    §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. Segnalazione 23 (registro: morti del T5 sotto il turno 6), in verifica. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+6. PR 53 (D78-D80, segnalazione 23 corretta, partite del 25/11) da unire. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
