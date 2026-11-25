@@ -72,13 +72,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 §8 accumulo (`docs/bot/accumulo/`): MISURA_1 (13% delle decisioni di turno; più iterazioni non correggono: è `table_value`);
 candidato `--valutazione accumulo` (k=3, alpha=0,2; spento di default, parità 30/30): 13/18 episodi lasciano il campo,
 §8 da 13,7% a 4,9% (ES), da 11,9% a 4,1% (EK) (MISURA_2). Arena sul Mac: `scripts/rust/accumulo_mac.command`, in attesa.
-Astra 25/11 sera (non nel repo, per scelta di Matteo): prima la Might da sola + controllo; poi minaccia giocabile, poi corsa ai
-punti (confronto delle due); valore della rete solo prova economica su posizioni tenute; Q massimo per ora; partite di
-Matteo non obbligatorie (2 ES nuove dopo la prima arena). I 13 episodi umani vanno ricontrollati su D80.
+Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
+Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
 
 ## Prossimi passi
-2. Due scenari, una correzione alla volta. §8 accumulo (sopra; SEGNALAZIONI 7, 17, 20) e
-   §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
+2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
 6. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
