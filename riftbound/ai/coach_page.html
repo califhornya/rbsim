@@ -9,7 +9,8 @@
   --bg: #0d1014; --mat: #121a1f; --mat2: #0f1519; --panel: #161b21; --panel2: #1c232b;
   --line: #2a333d; --ink: #e9edf2; --muted: #8d97a5; --faint: #5d6672;
   --me: #2fbfac; --opp: #f08a3c; --gold: #f5c451; --act: #4ea6ff; --bad: #ff5d55; --good: #45d08f;
-  --ch: clamp(60px, 12vh, 142px);           /* a card on the table: height */
+  --ch0: clamp(50px, 10vh, 130px);
+  --ch: var(--ch0);                           /* a card on the table: height */
   --cw: calc(var(--ch) * 0.716);              /* and width */
   --hh: clamp(84px, 15.5vh, 186px);           /* a card in hand: height */
   --side: 340px;
@@ -33,7 +34,21 @@ textarea { min-height: 60px; resize: vertical; }
 .table { position: relative; height: 100vh; min-width: 0; padding: 4px 12px 0; overflow: hidden;
   background: radial-gradient(ellipse at 50% 50%, #17242a 0%, var(--mat) 45%, var(--mat2) 100%);
   display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; gap: 6px; }
-.band { display: flex; gap: 10px; align-items: stretch; min-height: calc(var(--ch) + 34px); }
+/* a player's half: the playmat (outer row: rune deck, runes, main deck, trash; inner row: base, legend, champion),
+   the opponent's turned 180 degrees. Cards here are a little smaller than on the battlefields. */
+.band { --ch: calc(var(--ch0) * .66); --cw: calc(var(--ch) * 0.716); --zw: max(98px, calc(var(--cw) + 24px));
+  display: grid; gap: 5px; grid-template-columns: var(--zw) minmax(0, 1fr) auto auto; }
+.band.opp { grid-template-columns: auto auto minmax(0, 1fr) var(--zw); }
+.band > .zone { min-width: 0; height: calc(var(--ch) + 24px); }
+.band.me .in { grid-row: 1; } .band.me .out { grid-row: 2; } .band.opp .out { grid-row: 1; } .band.opp .in { grid-row: 2; }
+.band .zone.base { grid-column: 1 / 3; } .band.opp .zone.base { grid-column: 3 / 5; }
+.band .zone.deckz, .band .zone.leg { justify-content: center; min-width: var(--zw); }
+.band .zone.runez { padding-right: 6px; }
+.band .zone > .zl { max-width: calc(100% - 14px); overflow: hidden; text-overflow: ellipsis; font-size: 9.5px; }
+.band .zone > .row { height: var(--ch); }
+.zone .zhead { position: absolute; top: 2px; right: 8px; display: flex; gap: 6px; align-items: center; font-size: 11.5px; }
+.zone .zhead .energy { font-size: 13px; font-weight: 800; }
+.zone.runez > .zl { z-index: 1; }
 .zone { position: relative; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 18px 8px 6px;
   background: rgba(255,255,255,.025); display: flex; gap: 8px; align-items: center; }
 .zone > .zl { position: absolute; top: 3px; left: 10px; font-size: 10.5px; letter-spacing: .06em;
@@ -44,28 +59,13 @@ textarea { min-height: 60px; resize: vertical; }
 .row { display: flex; align-items: center; min-width: 0; flex: 1; height: var(--ch); }
 .row > .slot + .slot { margin-left: var(--gap, 6px); }
 
-/* points and resources */
-.score { width: 74px; flex: none; justify-content: center; flex-direction: column; gap: 2px; padding-top: 16px; }
-.score .big { font-size: 30px; font-weight: 800; line-height: 1; }
-.score .big small { font-size: 14px; color: var(--muted); font-weight: 600; }
-.pips { display: grid; grid-template-columns: repeat(4, 9px); gap: 3px; margin-top: 4px; }
-.pip { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.12); }
-.me .pip.on { background: var(--me); } .opp .pip.on { background: var(--opp); }
-.res { flex: none; width: 168px; flex-direction: column; align-items: stretch; gap: 4px; padding-top: 18px; }
-.res .line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12.5px; }
-.res .energy { font-size: 18px; font-weight: 800; }
+/* resources: the runes zone header */
 .dom { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 999px; font-size: 11.5px;
   font-weight: 700; color: #0b0d10; }
 .dom.FURY { background: #e2574f; } .dom.CALM { background: #4fbf7f; } .dom.MIND { background: #4b93f2; }
 .dom.BODY { background: #f0913e; } .dom.CHAOS { background: #a66ad8; } .dom.ORDER { background: #e3bb43; }
-.runes { display: flex; gap: 4px; flex-wrap: wrap; }
-.rune { position: relative; width: calc(var(--cw) * .42); height: calc(var(--ch) * .42); }
-/* An exhausted rune (its Energy spent): turned, dimmed. */
-.rune.exh { width: calc(var(--ch) * .42); }
-.rune.exh .face { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * .42); height: calc(var(--ch) * .42);
-  transform: translate(-50%, -50%) rotate(90deg); opacity: .55; }
-.rune .n { position: absolute; right: -4px; bottom: -4px; background: #000c; border-radius: 6px; padding: 0 4px;
-  font-size: 11px; font-weight: 800; }
+/* A rune in play is one card; an exhausted one (its Energy spent) is turned and dimmed. */
+.slot.rune.exhausted .face { opacity: .55; }
 
 /* cards */
 .slot { position: relative; flex: none; width: var(--cw); height: var(--ch); border-radius: 7px; transition: margin .15s; }
@@ -239,16 +239,16 @@ aside section.grow { flex: 1 1 0; min-height: 150px; overflow-y: auto; }
 <body>
 <main class="table" id="table">
   <div class="opphand" id="opphand"></div>
-  <div class="band" id="oppband"></div>
+  <div class="band opp" id="oppband"></div>
   <div class="bfs" id="bfs"></div>
-  <div class="band" id="myband"></div>
+  <div class="band me" id="myband"></div>
   <div class="hand" id="hand"></div>
   <svg class="arrows" id="arrows"></svg>
 </main>
 <aside>
   <section>
     <div class="top"><h1>Allenatore Riftbound</h1><span id="status" class="pill">…</span></div>
-    <div class="hint" id="regole" style="margin-top:2px">Regole Python 6427b90</div>
+    <div class="hint" id="regole" style="margin-top:2px">Regole 6427b90</div>
   </section>
   <section id="score"></section>
   <section class="coach" id="coach"></section>
@@ -372,37 +372,41 @@ function renderTable() {
 
 function band(o, b, who) {
   const m = who === "me", p = (k) => o[(m ? "my_" : "opp_") + k];
-  const pts = p("points"), vs = o.victory_score;
-  const score = `<div class="zone score ${who}"><span class="zl">Punti</span>
-    <div class="big">${pts}<small>/${vs}</small></div>
-    <div class="pips">${Array.from({ length: vs }, (_, k) => `<span class="pip ${k < pts ? "on" : ""}"></span>`).join("")}</div></div>`;
   const runes = (b.runes && b.runes[who]) || [];
-  // One pile per domain and state: the ready runes, then the exhausted ones.
-  const byDom = {};
-  runes.forEach((r) => { const k = r.domain + (r.ready === false ? ":x" : ""); byDom[k] = (byDom[k] || 0) + 1; });
+  // The runes zone: one card per rune in play, side by side; the exhausted ones turned.
+  const grp = {};
+  runes.forEach((r) => { const k = r.domain + (r.ready === false ? ":x" : ""); grp[k] = (grp[k] || 0) + 1; });
   const power = Object.entries(p("power") || {}).filter(([, v]) => v);
-  const res = `<div class="zone res ${who}"><span class="zl">Risorse</span>
-    <div class="line"><span class="energy">⚡ ${p("energy")}</span><span class="muted">energia</span>${p("xp") ? `<span class="muted">· XP ${p("xp")}</span>` : ""}</div>
-    <div class="line">${power.length ? power.map(([d, v]) => `<span class="dom ${d}">${d[0] + d.slice(1).toLowerCase()} ${v}</span>`).join("") : '<span class="muted">Power 0</span>'}</div>
-    <div class="runes" title="Rune in gioco">${Object.entries(byDom).map(([key, k]) => {
-      const [d, x] = key.split(":"), name = d[0] + d.slice(1).toLowerCase() + " Rune";
-      REF[`rune:${who}:${key}`] = { name, runes: k, exhausted: !!x };
-      return `<div class="rune ${x ? "exh" : ""}" data-ref="rune:${who}:${key}">${face(name)}<span class="n">×${k}</span></div>`; }).join("") || '<span class="muted">Nessuna runa</span>'}</div></div>`;
+  const runeCards = runes.map((r) => {
+    const x = r.ready === false ? ":x" : "", key = r.domain + x, name = r.domain[0] + r.domain.slice(1).toLowerCase() + " Rune";
+    REF[`rune:${who}:${key}`] = { name, runes: grp[key], exhausted: !!x };
+    return `<div class="slot rune ${x ? "exhausted" : ""}" data-ref="rune:${who}:${key}"><div class="rot">${face(name)}</div></div>`;
+  }).join("");
+  const runez = `<div class="zone runez out ${who}"><span class="zl">Rune</span>
+    <span class="zhead"><span class="energy">⚡ ${p("energy")}</span><span class="muted">energia</span>${p("xp") ? `<span class="muted">· XP ${p("xp")}</span>` : ""}
+      ${power.length ? power.map(([d, v]) => `<span class="dom ${d}">${d[0] + d.slice(1).toLowerCase()} ${v}</span>`).join("") : '<span class="muted">Power 0</span>'}</span>
+    <div class="row">${runeCards || '<span class="muted">Nessuna runa in gioco</span>'}</div></div>`;
+  // The rune deck: 12 runes at the start, the ones not channelled yet.
+  const rdeck = Math.max(0, 12 - runes.length);
+  const runedeck = `<div class="zone deckz out ${who}"><span class="zl">Mazzo delle rune</span>
+    ${rdeck ? cardSlot(null, `runedeck:${who}`, { count: rdeck, data: { pile: "deck" } }) : emptySlot("Vuoto")}</div>`;
   const units = p("base_units") || [], gear = p("base_gear") || [];
-  const base = `<div class="zone base ${who}" data-ref="base:${who}"><span class="zl">${m ? "La tua base" : "Base avversaria"}</span>
+  const base = `<div class="zone base in ${who}" data-ref="base:${who}"><span class="zl">${m ? "La tua base" : "Base avversaria"}</span>
     <div class="row">${units.map((u, j) => unitSlot(u, `unit:${who}:base:${j}`, who)).join("")}${gear.map((g, j) => cardSlot(g, `gear:${who}:base:${j}`, { exhausted: gearExh(b, who, "base", j) })).join("")}${units.length || gear.length ? "" : '<span class="muted" style="font-size:12px">vuota</span>'}</div></div>`;
   const legend = p("legend") ? cardSlot(p("legend"), `legend:${who}`, { exhausted: !p("legend_ready"), data: { legend: true, ready: p("legend_ready") } }) : emptySlot("Leggenda");
   const champ = p("champion") ? cardSlot(p("champion"), `champion:${who}`) : emptySlot("Campione già in gioco");
   const added = (p("added_legends") || []).map(([n, r], k) =>
     cardSlot(n, `legend:${who}:${k + 1}`, { exhausted: !r, data: { legend: true, ready: r } })).join("");
-  const lz = `<div class="zone ${who}"><span class="zl">Leggenda · Campione</span>${legend}${added}${champ}</div>`;
+  const lz = `<div class="zone leg in ${who}"><span class="zl">Leggenda</span>${legend}${added}</div>`;
+  const cz = `<div class="zone deckz in ${who}"><span class="zl">Campione</span>${champ}</div>`;
   const trash = p("trash") || [], banished = p("banished") || [];
   REF[`trash:${who}`] = { name: null, pile: "trash" };
-  const piles = `<div class="zone ${who}"><span class="zl">Mazzo · Cimitero${banished.length ? " · Bandite" : ""}</span>
-    ${cardSlot(null, `deck:${who}`, { count: p("deck_count"), data: { pile: "deck" } })}
-    ${trash.length ? cardSlot(trash[trash.length - 1], `trash:${who}`, { count: trash.length, data: { pile: "trash" } }) : emptySlot("Cimitero vuoto", `trash:${who}`)}
+  const deckz = `<div class="zone deckz out ${who}"><span class="zl">Mazzo</span>
+    ${cardSlot(null, `deck:${who}`, { count: p("deck_count"), data: { pile: "deck" } })}</div>`;
+  const trashz = `<div class="zone deckz out ${who}"><span class="zl">Cimitero${banished.length ? " · Bandite" : ""}</span>
+    ${trash.length ? cardSlot(trash[trash.length - 1], `trash:${who}`, { count: trash.length, data: { pile: "trash" } }) : emptySlot("Vuoto", `trash:${who}`)}
     ${banished.length ? cardSlot(banished[banished.length - 1], `banished:${who}`, { count: banished.length, cls: "small", data: { pile: "banished" } }) : ""}</div>`;
-  return m ? score + res + base + lz + piles : piles + lz + base + res + score;
+  return m ? base + lz + cz + runedeck + runez + deckz + trashz : trashz + deckz + runez + runedeck + cz + lz + base;
 }
 
 /* squeeze crowded rows so every card stays on screen */
@@ -770,7 +774,7 @@ function render() {
   if (S.status !== "waiting") focus = 0;
   if (!S.pending || S.pending.type !== "mulligan") mullSel = [];
   S._seen = seenResult === JSON.stringify(S.result);
-  if (S.regole) $("#regole").textContent = `Regole Python ${S.regole}`;
+  if (S.regole) $("#regole").textContent = `Regole ${S.regole} (${S.motore === "rust" ? "Rust" : "Python"})`;
   renderTable(); renderSide(); markTable(); renderModal();
   requestAnimationFrame(() => { squeeze(); drawArrows(); });
 }
