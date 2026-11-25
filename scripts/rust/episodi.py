@@ -1,4 +1,4 @@
-"""Cerca nelle autonome campione contro campione (D72-D77, 42 iterazioni, sonda) le decisioni del campione che
+"""Cerca nelle autonome campione contro campione (D72-D77, iterazioni della pagina, sonda) le decisioni del campione che
 somigliano a due difetti segnalati, dai log di ricerca (decisione_rs.originale: righe di `search_log` + eventi
 di traccia con lo stato prima della mossa).
 
@@ -134,6 +134,10 @@ def main(argv=None) -> int:
                 cmd += f" --campione {P['campione']}"
             if a.pesi_casuali:
                 cmd += " --pesi-casuali"
+            elif a.ckpt:
+                cmd += f" --ckpt {a.ckpt}"
+            if a.iterazioni != D.ITERAZIONI_CAMPIONE:
+                cmd += f" --iter-orig {a.iterazioni}"
             extra = f"Might gia' {x['might_gia']}" + (f" vs {x['might_avv']}" if "might_avv" in x else "")
             print(f"  turno {x['turn']} {x['azione']}; {extra}; punti {x['punti'][0]}-{x['punti'][1]}\n    {cmd}")
     return 0

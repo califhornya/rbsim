@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """Calibrare il campione della pagina (regole 6427b90+D72-D77, solo Rust).
 
-La pagina gioca il campione a lavoro fisso (ITERAZIONI_CAMPIONE, oggi 42) con la
+La pagina gioca il campione a lavoro fisso (ITERAZIONI_CAMPIONE, 138 dalla taratura del 25/11; prima 42) con la
 prova di vittoria; l'arena gioca a 0,030 s di CPU per mossa. Tre misure:
 
-  misura  --partite G   campione@42+probe contro campione@0,030 s+probe (posti
-                        scambiati): iterazioni a 0,030 s e secondi a 42 per tipo
+  misura  --partite G   campione@N+probe contro campione@0,030 s+probe (posti
+                        scambiati): iterazioni a 0,030 s e secondi a N per tipo
                         di punto (turno / reazione / showdown); N suggerito =
                         mediana delle iterazioni del turno a 0,030 s.
-  forza   --coppie ES=400 EK=400 [--iterazioni 42]
+  forza   --coppie ES=400 EK=400 [--iterazioni N]
                         campione@N+probe contro campione@0,030 s+probe: non
                         inferiore se il limite inferiore dell'IC 95% > 0,47
                         (come la promozione del 24/11, RAPPORTO_ARENA.md).
@@ -40,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 REGOLE = "6427b90+D72-D77"
+from riftbound.ai.coach_rs import ITERAZIONI_CAMPIONE  # noqa: E402
 ORDER = ("EK", "ER", "KR", "EI", "KI", "RI", "ES", "KS", "RS", "IS")
 BUDGET = 0.030
 SEME = {"misura": 78_000, "forza": 80_000, "profilo": 82_000}
@@ -163,6 +164,7 @@ def _arena(args, nome: str, extra: list, mus: list, coppie: dict, ckpt: str, avv
     """scripts/diag/arena_mazzi.py on Rust; one line per matchup from its rows."""
     out = args.out / f"{nome}.txt"
     righe = args.out / f"{nome}.jsonl"
+    righe.unlink(missing_ok=True)  # the summary reads every row: only this experiment's
     cmd = [sys.executable, str(ROOT / "scripts/diag/arena_mazzi.py"), "--motore", "rust", "--regole", REGOLE,
            "--ckpt", ckpt, "--vecchi", *mus, "--blocchi", "--coppie", *[f"{m}={coppie[m]}" for m in mus],
            "--seed0", str(args.seed0 if args.seed0 is not None else SEME[nome]), "--workers", str(args.workers),
@@ -227,7 +229,7 @@ def main() -> None:
         sp.add_argument("--pesi-casuali", action="store_true")
         sp.add_argument("--out", type=Path, required=True)
         sp.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-        sp.add_argument("--iterazioni", type=int, default=42, help="le iterazioni della pagina (default 42)")
+        sp.add_argument("--iterazioni", type=int, default=ITERAZIONI_CAMPIONE, help=f"le iterazioni della pagina (default {ITERAZIONI_CAMPIONE})")
         if nome == "misura":
             sp.add_argument("--matchup", nargs="+", default=["ES", "EK"])
             sp.add_argument("--partite", type=int, default=20, help="per matchup (posti scambiati)")

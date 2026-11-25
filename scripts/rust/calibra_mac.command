@@ -5,7 +5,7 @@
 # Prerequisiti: il ramo rust, uv, una toolchain Rust (https://rustup.rs).
 # Cosa fa (regole 6427b90+D72-D77, matchup ES ed EK), in ordine:
 #  1. misura: campione@42+probe contro campione@0,030 s+probe, 20 partite per matchup; iterazioni a
-#     0,030 s e secondi a 42 iterazioni per tipo di punto; N suggerito = mediana del turno;
+#     0,030 s e secondi alle iterazioni della pagina per tipo di punto; N suggerito = mediana del turno;
 #  2. concordanza delle mosse (scripts/rust/decisione.py) alle iterazioni N suggerite per il turno;
 #  3. forza: campione@N+probe contro campione@0,030 s+probe, 400 coppie per matchup,
 #     non inferiore se il limite inferiore dell'IC 95% > 0,47;
