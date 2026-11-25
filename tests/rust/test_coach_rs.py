@@ -308,9 +308,55 @@ def test_the_cards_looked_at_are_shown_with_the_choice_that_follows():
     assert pred and all(len(p["seen"]) == 1 for p in pred)
 
 
-@pytest.mark.xfail(strict=True, reason="Rust gives the human seat no information on a look: the cards are "
-                                       "taken off the deck inside the effect (fx_dig) and only the choice "
-                                       "after it lists them; needs a hook in rbsim-core")
 def test_the_cards_looked_at_are_shown_in_prendere_una_delle_carte_guardate():
+    """"Prendere una delle carte guardate?" shows the cards looked at (the Rust engine tells the seat
+    what it looks at: Agent::notify "look")."""
     asked = _pendings("IS", 11, lambda p: p["type"] == "choice" and p["kind"] == "optional:keep")
-    assert asked and all(p.get("seen") for p in asked)
+    assert asked and all(len(p.get("seen") or []) >= 2 for p in asked)
+
+
+def test_a_look_with_no_choice_after_it_is_held_on_the_board():
+    """A dig whose cards can't be taken (no choice follows) stops the page on a "notice" with the cards."""
+    notes = []
+    for mu, seed in (("IS", 11), ("IS", 5), ("RI", 3), ("KI", 9), ("EI", 4), ("IS", 20)):
+        notes += _pendings(mu, seed, lambda p: p["type"] == "notice" and p.get("own") and p.get("cards"))
+        if notes:
+            break
+    assert notes and all(len(p["cards"]) >= 2 and "Hai guardato" in p["context"] for p in notes)
+
+
+def test_sett_the_boss_save_is_asked_once_for_the_units_dying_together(tmp_path):
+    """Sett (the coach) against Ivern: when buffed units die the page asks which one to save, once per
+    group, offering only the units that may be saved; the engine's yes/no per unit is answered from it."""
+    for seed in range(100, 140):
+        session = _session(tmp_path / str(seed))
+        session.new_game(_deck("S"), _deck("I"), seat="A", opponent="simple_trade", seed=seed)
+        rng, asked = random.Random(seed), []
+        while True:
+            st = _wait(session)
+            if st["status"] == "over":
+                break
+            p = st["pending"]
+            if p["type"] == "choice" and p["kind"] == "optional:sett_save":
+                asked.append(("generic", p))
+            elif p["type"] == "choice" and p["kind"] == "sett_save":
+                asked.append(("group", p))
+                assert p["question"] == "Quale unità salvare?" and p["source"] == "Sett The Boss"
+                assert p["options"][-1]["text"] == "Non salvare nessuna" and len(p["options"]) >= 2
+                assert all(o["text"].startswith("Salva ") for o in p["options"][:-1])
+                session.answer({"option": 0})                         # save the first one offered
+                st = _wait(session)
+                saved = [e["text"] for e in st["events"] if "salvi " in e["text"]]
+                assert saved and p["options"][0]["text"][len("Salva "):].split(" (")[0] in saved[-1]
+                if st["status"] == "over":
+                    break
+                p = st["pending"]
+                assert not (p["type"] == "choice" and p["kind"] == "optional:sett_save")  # no second question
+                session.answer(_answer(p, rng))
+                continue
+            session.answer(_answer(p, rng))
+        if any(k == "group" for k, _ in asked):
+            assert not any(k == "generic" for k, _ in asked), "yes/no per unit is no longer asked"
+            return
+    pytest.fail("no Sett save question in the test seeds")
+

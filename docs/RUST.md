@@ -110,12 +110,13 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
   ES/EK (semi 1-6, profilo D72-D77, entrambi i posti a cercare; 252 ricerche, per partita 33-61, media 140, max 786).
   Misurata con una `PPONet` di pesi casuali (il checkpoint del campione non è nel container: il costo del forward è lo
   stesso): da rimisurare sul Mac col checkpoint vero.
-- Differenze note con la pagina Python (Rust non dà al posto umano le informazioni): "Sett The Boss" chiede sì/no unità per
-  unità (il gruppo che muore e l'unità in questione vivono solo dentro `route_deaths`, non nello stato né negli eventi);
-  le carte guardate in cima si mostrano con le scelte che seguono (tenere, predire) ma non in "Prendere una delle carte
-  guardate?" né in uno sguardo senza scelta (le carte escono dal mazzo dentro l'effetto, `fx_dig`): servirebbe un gancio
-  in rbsim-core (`offer_reveal_from_top`, `route_deaths`) che avvisi il posto umano. Il log scrive una scelta una volta
-  (i pick di una "fino a N" insieme, `RustGame._logged_choice`).
+- Il posto umano è avvisato di ciò che il motore gli mostra senza domanda (`Agent::notify`, default vuoto, solo per un
+  posto umano, mai nella traccia né in `watch`, mai sulle copie di dichiarazione o di ricerca): `set_human_agent(.., notify=f)`
+  chiama `f(evento)` con `k="look"` (carte guardate in cima al mazzo, da `offer_reveal_from_top`: dig, predict, look_recycle),
+  e la scelta `optional:sett_save` che riceve `ask` porta `dying` (le unità del suo lato che muoiono insieme e quella in
+  questione, da `route_deaths`/`try_replace_death`). La pagina mostra le carte guardate (anche senza scelta dopo, e in
+  "Prendere una delle carte guardate?") e chiede una volta "Quale unità salvare?" (solo le salvabili, `ask_save`).
+  Il log scrive una scelta una volta (i pick di una "fino a N" insieme, `RustGame._logged_choice`).
 - Test: `tests/rust/test_coach_rs.py` (partite intere ES/EK/RS, rewind, campione a poche iterazioni, ripiego su Python).
 
 ### Confine PPO

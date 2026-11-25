@@ -384,7 +384,13 @@ impl Game {
     }
 
     /// py: _offer_reveal_from_top (EK: no card has on_reveal_from_top)
-    pub fn offer_reveal_from_top(&mut self, _actor: Side, cards: &[CardId]) -> R<Vec<CardId>> {
+    pub fn offer_reveal_from_top(&mut self, actor: Side, cards: &[CardId]) -> R<Vec<CardId>> {
+        if !cards.is_empty() {
+            // The human seat is shown what it looks at (py: CoachSession._watch's hook).
+            self.notify_seat(actor, "look", |g| {
+                serde_json::json!({"cards": cards.iter().map(|&c| g.raw_opt(&Opt::Card(c))).collect::<Vec<_>>()})
+            })?;
+        }
         for &c in cards {
             if self.gs.spec(c).effects.iter().any(|e| e.trigger == "on_reveal_from_top") {
                 not_ported!("_offer_reveal_from_top", "on_reveal_from_top (Nocturne)");

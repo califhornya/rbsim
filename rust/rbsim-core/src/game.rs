@@ -169,6 +169,18 @@ impl Game {
         self.agents[s.idx()].clone()
     }
 
+    /// Tell `side`'s agent something (Agent::notify), if it is a seat that wants events; `args` is
+    /// built only then. Never changes the game.
+    pub fn notify_seat(&mut self, side: Side, what: &str, args: impl FnOnce(&Game) -> serde_json::Value) -> R<()> {
+        let Some(a) = self.agent(side) else { return Ok(()) };
+        if !a.borrow().wants_event() {
+            return Ok(());
+        }
+        let v = args(self);
+        let r = a.borrow_mut().notify(self, side, what, &v);
+        r
+    }
+
     /// py: CoachLoop._preferred(actor): the domain `actor` asked to pay from,
     /// once (the preference is spent); None for the other side or none set.
     pub fn preferred(&mut self, actor: Side) -> Option<Domain> {

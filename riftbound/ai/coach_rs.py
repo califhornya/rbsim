@@ -30,11 +30,12 @@ How a game runs here (`RustGame`, on the game thread of the session):
   answers from the record, without asking the page, up to the checkpoint; the session's
   `_resume` then checks the view is the checkpoint's and the game goes on live.
 
-Known differences from the Python page (the events Rust has no hook for): the Sett
-The Boss save is asked unit by unit (the engine's yes/no) and not once for the units
-dying together; the cards looked at on top of the deck are shown with the choices that
-follow them (keep, predict) but a look with no choice after it is not held on the
-board; a choice is logged once per pick.
+What Rust tells the seat besides the questions (`Agent::notify`, only a human seat, never in the trace):
+`notify(event)` of `set_human_agent` is told the cards it looks at on top of its deck ("look"; `RustGame.notify`
+-> `CoachSession._looked`, shown with the choice that follows or held on the board when none does), and its
+sett_save choice event carries `dying` (the units of its side dying together, the one asked about): the page
+asks once which to save (`CoachSession.ask_save`, only the savable ones) and the engine's yes/no per unit is
+answered from that pick.
 """
 from __future__ import annotations
 
@@ -68,11 +69,19 @@ def giocabile(deck_a, deck_b) -> bool:
 
 
 class RsLoop:
-    """What `CoachSession.loop` is on Rust: only the record the rewind replays,
-    one (event kind, answer) per `ask` of the human seat, in order."""
+    """What `CoachSession.loop` is on Rust: the record the rewind replays, one (event kind, answer) per
+    `ask` of the human seat, in order; and, for the rules the page's helpers read from a loop
+    (`_has_effect`, `_unit_death_replacement`...), a GameLoop never started over the current
+    state (`vloop`, set where needed)."""
 
     def __init__(self, record: list):
         self.record = record
+        self.vloop = None
+
+    def __getattr__(self, name):
+        if name in ("record", "vloop") or self.vloop is None:
+            raise AttributeError(name)
+        return getattr(self.vloop, name)
 
 
 class RustGame:
@@ -88,7 +97,6 @@ class RustGame:
         self.k = 0
         self.objs: dict = {}
         self.chooser_on = False    # the coach's choices are asked (CoachAgent's _CoachChooser)
-        self.predicting: Optional[str] = None   # the card of the last decide_predict_recycle
         self._batch: Optional[dict] = None      # the picks of the choice being logged (_logged_choice)
 
     # -- the game thread -------------------------------------------------------------
@@ -103,7 +111,9 @@ class RustGame:
             C._thread_log().sinks[threading.get_ident()] = deque(maxlen=50)   # the replay's lines: not shown
         self.record = list(entries or [])
         self.k, self.n_replay = 0, len(self.record)
-        self.chooser_on, self.predicting, self._batch = False, None, None
+        self.chooser_on, self._batch = False, None
+        self._save_group: Optional[frozenset] = None     # the dying group the page was asked about
+        self._save_pick: Optional[int] = None            # ... and the unit it saves (its id; None: no one)
         s.loop = RsLoop(self.record)
         winner, turns = self._game().start()
         return SimpleNamespace(winner=winner, turns=turns)
@@ -119,7 +129,7 @@ class RustGame:
                                arena_rs.make_probs(b["ppo"]), False)
         else:
             g.set_agent(opp, "simple_trade", self.seed)
-        g.set_human_agent(s.side, self.ask, True)
+        g.set_human_agent(s.side, self.ask, True, self.notify)
         g.set_side_chooser()
         g.trace_on(self.watch)
         return g
@@ -158,10 +168,6 @@ class RustGame:
         return None
 
     def _decide_predict_recycle(self, e: dict) -> bool:
-        from riftbound.rs import vista_rs
-        self._load(e)
-        card = vista_rs.valore(e["args"][0], self.objs) if e.get("args") else None
-        self.predicting = getattr(card, "name", None)
         return False
 
     def _decide_mulligan(self, e: dict) -> list:
@@ -183,6 +189,7 @@ class RustGame:
         s, side = self.s, e["seat"]
         point, menu = DecisionPoint(e["point"]), e["menu"]
         n = len(menu)
+        s.show_looked()                    # a look no choice followed: held on the board until seen
         if point == DecisionPoint.TURN_ACTION:
             self.chooser_on = False        # CoachAgent._release_coach
         if n <= 1:
@@ -246,24 +253,61 @@ class RustGame:
         gs = s.gs
         options = [vista_rs.valore(o, self.objs) for o in raw]
         source = vista_rs.valore(e["source_raw"], self.objs) if e.get("source_raw") is not None else None
+        if kind == "optional:sett_save" and e.get("dying"):
+            got = self._sett_save(e, source)
+            if got is not None:
+                return got
         described = [{"text": C.option_text(gs, side, o), "ref": C.option_ref(gs, side, o)} for o in options]
         # Options the page can't tell apart are one (CoachAgent's _CoachChooser).
         keys = [(d["text"], d["ref"]) for d in described]
         firsts = [i for i, k in enumerate(keys) if k not in keys[:i]]
         if len(firsts) <= 1:
             return default
-        head = kind.partition(":")[0]
-        if head in ("keep", "predict_order"):                # the cards looked at, drawn with the choice
-            names = [o.name for o in options if hasattr(o, "cost_energy")]
-            if names:
-                s._looked(names)
-        elif head == "predict_recycle" and self.predicting:
-            s._looked([self.predicting])
         shown = firsts.index(keys.index(keys[default])) if 0 <= default < len(keys) else 0
         pick = s.ask_choice(kind, side, [described[i] for i in firsts], shown, getattr(source, "name", None))
         return firsts[pick] if 0 <= pick < len(firsts) else default
 
+    def _sett_save(self, e: dict, source) -> Optional[int]:
+        """Sett The Boss's save, asked once for the units dying together (CoachSession.ask_save: only
+        the savable ones), then yes for the unit picked and no for the others as the engine asks them
+        one by one. None: not a death the page saw (the generic question)."""
+        from riftbound.rs import vista_rs
+        s = self.s
+        dying = e["dying"]
+        if not dying.get("group") or not dying.get("now"):
+            return None
+        s.loop.vloop = vista_rs.vista_loop(s.gs)
+        group = {u["id"]: vista_rs.valore(u["unit"], self.objs) for u in dying["group"]["units"]}
+        now = vista_rs.valore(dying["now"]["unit"], self.objs)
+        ids = frozenset(group)
+        if self._save_group != ids:
+            self._save_group, self._save_pick = ids, C._UNASKED
+        bf = dying["group"]["bf"]
+        kept = (s._dying, s._save_pick, s._dying_bf, s._replacing)
+        s._dying, s._dying_bf, s._replacing = list(group.values()), None if bf is None else s.gs.battlefields[bf], now
+        s._save_pick = C._UNASKED if self._save_pick is C._UNASKED else \
+            (None if self._save_pick is None else group.get(self._save_pick))
+        try:
+            got = s.ask_save(getattr(source, "name", None))
+            pick = s._save_pick
+        finally:
+            s._dying, s._save_pick, s._dying_bf, s._replacing = kept
+        if got is None:
+            return None
+        self._save_pick = next((i for i, u in group.items() if u is pick), None)
+        return got
+
     # -- what happens: the live trace ------------------------------------------------
+
+    def notify(self, ev: str) -> None:
+        """The cards the coach looks at on top of their deck (Trifarian Captain's dig, Predict...):
+        held for the choice that follows, or alone when there is none (CoachSession._looked)."""
+        from riftbound.rs import vista_rs
+        if self.s._replaying:
+            return
+        e = json.loads(ev)
+        if e["k"] == "look":
+            self.s._looked([vista_rs.valore(c, {}).name for c in e["args"]["cards"]])
 
     def watch(self, ev: str) -> None:
         """Every event, answer included (trace_on): the opponent's moves keep the page's

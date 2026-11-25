@@ -222,6 +222,9 @@ impl Agent for TraceAgent {
     fn wants_event(&self) -> bool {
         self.inner.borrow().wants_event()
     }
+    fn notify(&mut self, g: &Game, side: Side, what: &str, args: &Value) -> R<()> {
+        self.inner.borrow_mut().notify(g, side, what, args)
+    }
 }
 
 /// Wraps the loop's chooser: records each choice as trace_py does.

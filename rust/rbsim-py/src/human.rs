@@ -59,6 +59,12 @@ pub struct HumanAgent {
     /// The domains the Golds just used Add, answered to the next "which domain"
     /// choice of the seat, newest first (py: the _GoldDomain choosers).
     gold_domains: Vec<Domain>,
+    /// notify(event_json): what the engine shows the seat (cards looked at); no answer.
+    notify: Option<Py<PyAny>>,
+    /// The units of the seat's side dying together, innermost last (Agent::notify "dying_group").
+    groups: Vec<Value>,
+    /// The unit a death replacement is asked about now ("dying_now"), for the next sett_save choice.
+    dying_now: Option<Value>,
 }
 
 struct Plan {
@@ -111,8 +117,9 @@ fn index_of(o: &Bound<'_, PyAny>, n: usize, what: &str) -> PyResult<usize> {
 }
 
 impl HumanAgent {
-    pub fn new(ask: Py<PyAny>, real_loop: u64, payments: bool) -> HumanAgent {
-        HumanAgent { ask, real_loop, payments, plan: None, gold_domains: Vec::new() }
+    pub fn new(ask: Py<PyAny>, real_loop: u64, payments: bool, notify: Option<Py<PyAny>>) -> HumanAgent {
+        HumanAgent { ask, real_loop, payments, plan: None, gold_domains: Vec::new(), notify, groups: Vec::new(),
+                     dying_now: None }
     }
 
     /// Ask with `e`, parse the answer with `parse`; any Python error is kept.
@@ -292,6 +299,26 @@ impl Agent for HumanAgent {
     fn wants_event(&self) -> bool {
         true
     }
+    fn notify(&mut self, g: &Game, side: Side, what: &str, args: &Value) -> R<()> {
+        if g.loop_id != self.real_loop {
+            return Ok(()); // a declaration's copy: the real game shows nothing twice
+        }
+        match what {
+            "look" => {
+                if let Some(n) = &self.notify {
+                    let e = simple_event(g, side, "look", args.clone());
+                    Python::attach(|py| n.bind(py).call1((e.to_string(),)).map(|_| ())).map_err(|er| stash(er, "notify"))?;
+                }
+            }
+            "dying_group" => self.groups.push(args.clone()),
+            "dying_end" => {
+                self.groups.pop();
+            }
+            "dying_now" => self.dying_now = Some(args.clone()),
+            _ => {}
+        }
+        Ok(())
+    }
     fn decide_action(&mut self, g: &mut Game, side: Side, _cards_played: i64) -> R<Action> {
         self.menu(g, side, Point::TurnAction)
     }
@@ -354,7 +381,12 @@ impl Agent for HumanAgent {
                 }
             }
         }
-        let e = choice_event(g, kind, side, options, default, source, self.real_loop);
+        let mut e = choice_event(g, kind, side, options, default, source, self.real_loop);
+        if kind == "optional:sett_save" {
+            // For `ask` alone: the units of the seat dying together and the one asked about.
+            let group = self.groups.last().cloned().unwrap_or(Value::Null);
+            e["dying"] = json!({"group": group, "now": self.dying_now.take()});
+        }
         let n = options.len();
         let what = format!("choice {kind}");
         self.query(&e, "ask", |r| index_of(r, n, &what).map(Some))

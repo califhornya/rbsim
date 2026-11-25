@@ -200,10 +200,14 @@ impl Game {
     /// the seat through the side chooser: it is set here if the game has none.
     /// Call it before trace_on() (as the other set_* methods); do not touch the
     /// Game from inside `ask`.
-    #[pyo3(signature = (seat, ask, payments=false))]
-    fn set_human_agent(&mut self, seat: &str, ask: Py<PyAny>, payments: bool) -> PyResult<()> {
+    /// `notify(event_json)`: what the engine shows the seat without a question (no answer, never in
+    /// the trace): {"k": "look", args: {"cards": [raw card, ...]}} when it looks at cards on top of its
+    /// deck. The seat's sett_save choice event (for `ask` alone) also carries `dying`: {"group": {"bf",
+    /// "units": [{"id", "unit": raw}]}, "now": {"id", "unit"}}, the units of its side dying together.
+    #[pyo3(signature = (seat, ask, payments=false, notify=None))]
+    fn set_human_agent(&mut self, seat: &str, ask: Py<PyAny>, payments: bool, notify: Option<Py<PyAny>>) -> PyResult<()> {
         let s = seat_of(seat)?;
-        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(human::HumanAgent::new(ask, self.g.loop_id, payments)));
+        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(human::HumanAgent::new(ask, self.g.loop_id, payments, notify)));
         self.g.agents[s.idx()] = Some(a);
         self.g.gs.players[s.idx()].has_agent = true;
         if self.g.chooser.is_none() {

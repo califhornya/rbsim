@@ -85,6 +85,9 @@ def check_actions(e, want):
     """`actions` is for `ask` alone: one trace-shaped action per menu item, on decisions only."""
     if e["k"] != "decision":
         assert "actions" not in e
+        # `dying` (units dying together) is for `ask` alone too, on Sett The Boss's choice only
+        assert ("dying" in e) == (e["k"] == "choice" and e["kind"] == "optional:sett_save")
+        e.pop("dying", None)
         return
     acts = e.pop("actions")
     assert len(acts) == len(e["menu"])
