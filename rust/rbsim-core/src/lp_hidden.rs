@@ -181,10 +181,10 @@ impl Game {
         let fd = self.gs.battlefields[lane].facedowns.remove(slot);
         let card = fd.card;
         self.gs.card_mut(card).hidden_bf = Some(lane);
-        let r: R<()> = (|| {
-            if self.gs.is_spell(card) {
-                self.spell_played(card, side, "facedown")?;
-                self.put_on_chain(ChainItem { uid: 0,
+        let play = |g: &mut Game| -> R<()> {
+            if g.gs.is_spell(card) {
+                g.spell_played(card, side, "facedown")?;
+                g.put_on_chain(ChainItem { uid: 0,
                     player: side,
                     card,
                     bf_idx: lane,
@@ -193,14 +193,23 @@ impl Game {
                     owner: None,
                     ability: None,
                 })?;
-                self.run_chain(side)?;
-            } else if self.gs.is_gear_card(card) {
-                self.play_gear(card, side, lane as i64, "facedown")?;
+                g.run_chain(side)?;
+            } else if g.gs.is_gear_card(card) {
+                g.play_gear(card, side, lane as i64, "facedown")?;
             } else {
-                self.play_unit(card, side, Some(lane), "facedown")?;
+                g.play_unit(card, side, Some(lane), "facedown")?;
             }
             Ok(())
-        })();
+        };
+        let r: R<()> = if self.gs.reg.regole.d79() && self.task_depth == 0 {
+            // D79 (profile 6427b90+D72-D80): the play is a task, as from the Main
+            // Phase: its triggers (the card's own, the legend's) are flushed
+            // together when it ends, not one by one as they trigger.
+            crate::registry::conta(79);
+            self.as_task(play)
+        } else {
+            play(self)
+        };
         self.gs.card_mut(card).hidden_bf = None;
         r?;
         Ok(true)
