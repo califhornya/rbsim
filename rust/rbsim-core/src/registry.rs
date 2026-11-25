@@ -261,18 +261,20 @@ pub struct Registry {
 /// after the freeze"). `Storiche`: the Python engine at 6427b90, deviations
 /// included (the default; the parity checks fix it). `D72D76`: the same with
 /// D72-D76 corrected, in the code and, for D74-D75, in the card data
-/// (`correggi_dati`, applied as the registry loads).
+/// (`correggi_dati`, applied as the registry loads). `D72D77`: D72-D76 plus
+/// D77 (a Standard Move not held runs the showdowns its triggers staged).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Regole {
     Storiche,
     D72D76,
+    D72D77,
 }
 
 thread_local! {
-    static CORREZIONI: std::cell::Cell<[u64; 5]> = const { std::cell::Cell::new([0; 5]) };
+    static CORREZIONI: std::cell::Cell<[u64; 6]> = const { std::cell::Cell::new([0; 6]) };
 }
 
-/// D72..D76 changed something in this thread (the real game or a search
+/// D72..D77 changed something in this thread (the real game or a search
 /// copy): what explains a divergence from the historical rules.
 pub fn conta(d: usize) {
     CORREZIONI.with(|c| {
@@ -282,13 +284,13 @@ pub fn conta(d: usize) {
     });
 }
 
-/// The counts of D72..D76 in this thread.
-pub fn correzioni() -> [u64; 5] {
+/// The counts of D72..D77 in this thread.
+pub fn correzioni() -> [u64; 6] {
     CORREZIONI.with(|c| c.get())
 }
 
 pub fn azzera_correzioni() {
-    CORREZIONI.with(|c| c.set([0; 5]));
+    CORREZIONI.with(|c| c.set([0; 6]));
 }
 
 /// The version of the card-data correction of the corrected profile.
@@ -297,23 +299,35 @@ pub const CORREZIONE_DATI: &str = "D72-D76/1";
 impl Regole {
     pub const STORICHE: &'static str = "6427b90";
     pub const D72_D76: &'static str = "6427b90+D72-D76";
+    pub const D72_D77: &'static str = "6427b90+D72-D77";
 
     pub fn parse(s: &str) -> Result<Regole, String> {
         match s {
             Self::STORICHE => Ok(Regole::Storiche),
             Self::D72_D76 => Ok(Regole::D72D76),
-            _ => Err(format!("regole sconosciute: {s:?} (note: {:?}, {:?})", Self::STORICHE, Self::D72_D76)),
+            Self::D72_D77 => Ok(Regole::D72D77),
+            _ => Err(format!(
+                "regole sconosciute: {s:?} (note: {:?}, {:?}, {:?})",
+                Self::STORICHE,
+                Self::D72_D76,
+                Self::D72_D77
+            )),
         }
     }
     pub fn name(self) -> &'static str {
         match self {
             Regole::Storiche => Self::STORICHE,
             Regole::D72D76 => Self::D72_D76,
+            Regole::D72D77 => Self::D72_D77,
         }
     }
-    /// D72-D76 corrected.
+    /// D72-D76 corrected (also in the profile that adds D77).
     pub fn corrette(self) -> bool {
-        self == Regole::D72D76
+        matches!(self, Regole::D72D76 | Regole::D72D77)
+    }
+    /// D77 corrected: only in the D72-D77 profile.
+    pub fn d77(self) -> bool {
+        self == Regole::D72D77
     }
 }
 

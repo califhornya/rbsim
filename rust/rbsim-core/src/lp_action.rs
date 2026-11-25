@@ -235,6 +235,15 @@ impl Game {
         }
         if kind != AKind::Move {
             self.run_staged_showdowns()?;
+        } else if self.gs.reg.regole.d77() && self.gs.pending_move.is_none() && !self.gs.staged_showdowns.is_empty() {
+            // D77 (profile 6427b90+D72-D77): a Standard Move not held by a
+            // pending move runs the showdowns its triggers staged, as after
+            // any other action (§462).
+            let n = self.gs.staged_showdowns.len();
+            self.run_staged_showdowns()?;
+            if self.gs.staged_showdowns.len() != n {
+                crate::registry::conta(77);
+            }
         }
         if self.gs.chain.is_empty() {
             self.cleanup_hidden_cards()?;

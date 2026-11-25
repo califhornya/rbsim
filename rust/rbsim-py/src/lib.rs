@@ -44,7 +44,7 @@ struct Registry {
 #[pymethods]
 impl Registry {
     /// `regole`: the rules profile ("6427b90", the default, or
-    /// "6427b90+D72-D76"); every game built on this registry plays it.
+    /// "6427b90+D72-D76" or "6427b90+D72-D77"); every game built on this registry plays it.
     #[new]
     #[pyo3(signature = (path, regole=None))]
     fn new(path: &str, regole: Option<&str>) -> PyResult<Self> {
@@ -365,12 +365,12 @@ impl Game {
 }
 
 /// How many search agents are alive (a finished, dropped game frees its own).
-/// D72..D76 counted in this thread since the last reset: {"D72": n, ...}
+/// D72..D77 counted in this thread since the last reset: {"D72": n, ...}
 /// (the corrected branches that changed something, search copies included).
 #[pyfunction]
 fn correzioni() -> std::collections::BTreeMap<String, u64> {
     let c = rbsim_core::registry::correzioni();
-    (0..5).map(|i| (format!("D{}", 72 + i), c[i])).collect()
+    (0..6).map(|i| (format!("D{}", 72 + i), c[i])).collect()
 }
 
 #[pyfunction]

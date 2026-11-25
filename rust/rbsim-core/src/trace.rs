@@ -78,7 +78,7 @@ impl TraceAgent {
         let mut e = json!({"k": "decision", "seat": side.name(), "point": point.name(), "win": win,
             "state_raw": st, "obs": null, "menu": labels, "action": action_list(&act), "index": idx});
         if g.gs.reg.regole.corrette() {
-            // D72..D76 counted so far in this thread, the decision's search included.
+            // D72..D77 counted so far in this thread, the decision's search included.
             e["correzioni"] = json!(crate::registry::correzioni());
         }
         self.sink.borrow_mut().push(e);

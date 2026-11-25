@@ -324,3 +324,14 @@ def test_the_provenance_of_the_corrected_profile():
     assert p["registro"]["correzione_dati"] == "D72-D76/1"
     assert "rust_effettivo" not in provenienza(motore={"EK": "rust"}, liste={}, checkpoint={},
                                                regole=STORICHE)["registro"]
+
+
+def test_the_d72_d77_profile_loads_like_d72_d76_on_the_data():
+    """D77 is a code change only: same effective cards and data correction."""
+    import riftbound_rs
+
+    from riftbound.rs.rust_bridge import REGISTRY_JSON
+    d77 = riftbound_rs.Registry(str(REGISTRY_JSON), "6427b90+D72-D77")
+    d76 = riftbound_rs.Registry(str(REGISTRY_JSON), CORRETTE)
+    assert d77.regole == "6427b90+D72-D77"
+    assert d77.impronta == d76.impronta and d77.correzione_dati == d76.correzione_dati == "D72-D76/1"
