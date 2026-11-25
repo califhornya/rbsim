@@ -259,6 +259,19 @@ impl Game {
         }
     }
 
+    /// Observation only: the search_log rows of this seat also carry `iters`, `secs`
+    /// (CPU seconds of the search) and `probe_secs` (win probe since the previous row).
+    fn set_search_timing(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().timing = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// A search seat's rows (JSON list), [] for another seat.
     fn search_log(&self, seat: &str) -> PyResult<String> {
         let s = seat_of(seat)?;

@@ -66,26 +66,55 @@ def coperto(mu: str) -> bool:
 
 def game(task):
     """arena_bot._game on Rust: task (seed, starter, cand_seat, name, ckpt,
-    opp, opp_ckpt[, mu[, budget_cand, budget_opp]]); name/opp "prior_ppo"
-    (the hand-written bot with that checkpoint's priors) or "mano"."""
+    opp, opp_ckpt[, mu[, budget_cand, budget_opp[, opzioni]]]); name/opp "prior_ppo"
+    (the hand-written bot with that checkpoint's priors) or "mano".
+
+    opzioni (optional dict, absent = as before): iter_cand / iter_opp (fixed
+    work: that many iterations per search, no time budget for that side),
+    probe_cand / probe_opp (the win probe of that side), log (the last element
+    of the return carries, per side, the compact rows [point, turn, iters,
+    secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
     from riftbound.rs import rust_bridge as rb
     seed, starter, cand_seat, name, ckpt, opp, opp_ckpt = task[:7]
     mu = task[7] if len(task) > 7 else "EK"
     b_cand, b_opp = (task[8], task[9]) if len(task) > 9 else (None, None)
+    opz = (task[10] if len(task) > 10 else None) or {}
     if not coperto(mu):
         raise ValueError(f"matchup {mu}: non coperto dal motore Rust ({', '.join(COPERTI)})")
     g = rb.build(seed, Path(DECK_OF[mu[0]]), Path(DECK_OF[mu[1]]), starter, MAX_TURNS)
     for seat in ("A", "B"):
         kind, path, b = (name, ckpt, b_cand) if seat == cand_seat else (opp, opp_ckpt, b_opp)
+        lato = "cand" if seat == cand_seat else "opp"
+        iters = opz.get(f"iter_{lato}")
         if kind not in ("prior_ppo", "mano"):
             raise ValueError(f"bot {kind}: su Rust solo prior_ppo e mano")
         probs = _probs_for(str(path)) if kind == "prior_ppo" else None
-        g.set_search_agent(seat, 100, seed * 2 + (seat == "B"), b or REF_BUDGET, probs, False)
+        if iters:
+            g.set_search_agent(seat, int(iters), seed * 2 + (seat == "B"), None, probs, bool(opz.get("log")))
+        else:
+            g.set_search_agent(seat, 100, seed * 2 + (seat == "B"), b or REF_BUDGET, probs, bool(opz.get("log")))
+        if opz.get("log"):
+            g.set_search_timing(seat, True)
+        if opz.get(f"probe_{lato}"):
+            g.set_search_win_probe(seat, True)
     g.set_side_chooser()
     winner, _turns = g.start()
     other = "B" if cand_seat == "A" else "A"
     s = 1.0 if winner == cand_seat else 0.5 if winner == "DRAW" else 0.0
     ci, ce, ct = g.search_stats(cand_seat)
     oi, oe, ot = g.search_stats(other)
-    return (seed, starter, cand_seat, s, list(ci), list(oi), (ce, ct), (oe, ot), {})
+    extra = {}
+    if opz.get("log"):
+        import json
+        extra = {"log": {lato: righe_log(g.search_log(seat))
+                         for lato, seat in (("cand", cand_seat), ("opp", other))}}
+    return (seed, starter, cand_seat, s, list(ci), list(oi), (ce, ct), (oe, ot), extra)
+
+
+def righe_log(testo: str) -> list:
+    """The compact rows [point, turn, iters, secs, probe_secs] of a search_log."""
+    import json
+    return [[r["point"], r["turn"], r.get("iters", 0), round(r.get("secs", 0.0), 6),
+             round(r.get("probe_secs", 0.0), 6)]
+            for r in json.loads(testo) if r.get("k") == "search"]

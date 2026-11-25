@@ -804,6 +804,11 @@ pub struct SearchCore {
     searches: usize,
     /// With `log`: the value each simulation of the current search backed up.
     vals: Vec<f64>,
+    /// Observation only: iterations / CPU seconds of the last search and the win-probe seconds since.
+    pub timing: bool,
+    last_iters: usize,
+    last_secs: f64,
+    probe_secs: f64,
     /// Diagnosis: (search, simulation) whose copy is dumped at every step
     /// into `debug_out` (raw states, the leaf's observation and value).
     pub debug: Option<(usize, usize)>,
@@ -853,6 +858,10 @@ impl SearchCore {
             lockstep: None,
             searches: 0,
             vals: Vec::new(),
+            timing: false,
+            last_iters: 0,
+            last_secs: 0.0,
+            probe_secs: 0.0,
             debug: None,
             debug_out: Vec::new(),
             cur_search: 0,
@@ -955,7 +964,10 @@ impl SearchCore {
             return Ok(root_legal.first().cloned().unwrap_or_else(Action::pass));
         }
         let probed = if self.win_probe && self.lockstep.is_none() {
-            self.win_this_turn(g, &root_legal, cards_played)?
+            let t_probe = process_time();
+            let r = self.win_this_turn(g, &root_legal, cards_played);
+            self.probe_secs += process_time() - t_probe;
+            r?
         } else {
             None
         };
@@ -1113,6 +1125,7 @@ impl SearchCore {
         let tree = Rc::new(RefCell::new(Tree::default()));
         tree.borrow_mut().add();
         let turn = point == Point::TurnAction;
+        let t_search = process_time();
         let info = json!({"seat": self.side.name(), "k": self.searches, "point": point.name(), "turn": g.gs.turn});
         self.cur_search = self.searches;
         self.sim = 0;
@@ -1129,6 +1142,8 @@ impl SearchCore {
                     self.iterate_now(g, &tree, point, legal, bf_idx)?;
                 }
             }
+            self.last_iters = n;
+            self.last_secs = process_time() - t_search;
             return Ok(tree);
         }
         let led = match self.budget {
@@ -1159,6 +1174,8 @@ impl SearchCore {
                 n
             }
         };
+        self.last_iters = led;
+        self.last_secs = process_time() - t_search;
         if let Some(l) = self.lockstep.as_mut() {
             l.after(&info, led)?;
         }
@@ -1394,10 +1411,20 @@ impl SearchCore {
         }
         let ch: Vec<Value> = root.children.iter()
             .map(|(a, c)| { let n = &t.nodes[*c]; json!([action_list(a), n.n, n.q, n.w, sub(t, *c, 3)]) }).collect();
-        log.push(json!({"k": "search", "seat": self.side.name(), "point": point.name(), "turn": g.gs.turn,
+        let mut row = json!({"k": "search", "seat": self.side.name(), "point": point.name(), "turn": g.gs.turn,
                         "menu": legal.iter().map(action_list).collect::<Vec<_>>(), "value": root.value,
                         "P": p, "children": ch, "action": action_list(chosen), "nodes": t.nodes.len(),
-                        "vals": std::mem::take(&mut self.vals)}));
+                        "vals": std::mem::take(&mut self.vals)});
+        // Only on request (set_search_timing): the seconds differ from run to run, and the
+        // log is compared between runs and engines.
+        if self.timing {
+            row["iters"] = json!(self.last_iters);
+            row["secs"] = json!(self.last_secs);
+            row["probe_secs"] = json!(std::mem::take(&mut self.probe_secs));
+        }
+        log.push(row);
+        self.last_iters = 0;
+        self.last_secs = 0.0;
     }
 
     /// py: replay_values — each option of the real loop's choice, its segment
