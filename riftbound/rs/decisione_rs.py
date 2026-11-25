@@ -261,7 +261,7 @@ def riassunto(state_raw: dict, seat: str) -> dict:
     return {"seat": seat, "turno": o.turn, "attivo": o.active, "punti": [o.my_points, o.opp_points],
             "energia": [o.my_energy, o.opp_energy], "campi": campi, "base": {"campione": lato(o.my_base_units),
             "avversario": lato(o.opp_base_units)}, "mano": list(o.my_hand), "mano_avv": o.opp_hand_count,
-            "showdown": o.showdown_bf}
+            "showdown": o.showdown_bf, "v": o.victory_score}
 
 
 def testo_posizione(p: dict) -> list[str]:

@@ -15,6 +15,8 @@
   unito, prima il `git fetch` + `git checkout` di quel ramo.
 - Matteo fa sempre pull dal ramo principale `rust`, non usa altri rami (Matteo, 25/11): quando c'è qualcosa che deve
   lanciare o provare (pagina, `.command`), apri la PR verso `rust` senza aspettare che la chieda; lui la unisce.
+- Matteo non usa il doppio clic sui `.command`: dagli sempre il comando completo da incollare nel Terminale
+  (`cd ~/projects/rbsim2026/rbsim-rust && git checkout rust && git pull && bash scripts/...`).
 
 ## Uso del contesto
 - Leggi solo le parti di file che servono (offset/limit, grep), non file interi se non necessario.

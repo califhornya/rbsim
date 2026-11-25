@@ -41,6 +41,9 @@ fn parse_valutazione(nome: &str, k: f64, alpha: f64) -> PyResult<rbsim_core::sea
     match nome {
         "storica" => Ok(rbsim_core::search::Valutazione::Storica),
         "accumulo" => Ok(rbsim_core::search::Valutazione::Accumulo { k, alpha }),
+        "minaccia" => Ok(rbsim_core::search::Valutazione::Minaccia),
+        "corsa" => Ok(rbsim_core::search::Valutazione::Corsa),
+        "rimonta" => Ok(rbsim_core::search::Valutazione::Rimonta),
         _ => Err(pyo3::exceptions::PyValueError::new_err(format!("valutazione sconosciuta: {nome}"))),
     }
 }
@@ -91,6 +94,44 @@ struct Game {
     /// shared choosers on the real loop.
     search: [Option<Rc<RefCell<SearchCore>>>; 2],
     layers: Option<Rc<RefCell<Layers>>>,
+}
+
+impl Game {
+    /// Osservazione costruita (test): vedi `valore_costruito`.
+    fn costruita(&mut self, bfs: Vec<(Option<String>, Vec<i64>, Vec<i64>)>, my_base: Vec<i64>, opp_base: Vec<i64>,
+                 punti: Option<(i64, i64)>, attivo: Option<String>, gank: Vec<(usize, i64)>) -> rbsim_core::obs::Observation {
+        let mut o = rbsim_core::obs::Observation::from_state(&mut self.g.gs, Side::A);
+        let uv = |m: i64| rbsim_core::obs::UnitView {
+            name: "x".into(), might: m, ready: true, stunned: false, is_token: false, gear: vec![], damage: 0,
+            buffed: false, empowered: false, keywords: vec![], lasting_might: m,
+        };
+        let (pm, po) = punti.unwrap_or((0, 0));
+        o.my_points = pm;
+        o.opp_points = po;
+        match attivo.as_deref() {
+            Some("me") => o.active = Side::A,
+            Some("opp") => o.active = Side::B,
+            _ => {}
+        }
+        o.my_hand = vec![];
+        o.opp_hand_count = 0;
+        o.my_base_units = my_base.iter().map(|&m| uv(m)).collect();
+        o.opp_base_units = opp_base.iter().map(|&m| uv(m)).collect();
+        let template = o.battlefields[0].clone();
+        o.battlefields = bfs.iter().map(|(c, mine, theirs)| {
+            let mut b = template.clone();
+            b.a = mine.iter().map(|&m| uv(m)).collect();
+            b.b = theirs.iter().map(|&m| uv(m)).collect();
+            b.controller = match c.as_deref() { Some("me") => Some(Side::A), Some("opp") => Some(Side::B), _ => None };
+            b
+        }).collect();
+        for (i, m) in gank {
+            let mut u = uv(m);
+            u.keywords = vec!["GANKING"];
+            o.battlefields[i].a.push(u);
+        }
+        o
+    }
 }
 
 #[pymethods]
@@ -267,7 +308,7 @@ impl Game {
         }
     }
 
-    /// Valutazione delle foglie: "storica" (default) o "accumulo" (k, alpha).
+    /// Valutazione delle foglie: "storica" (default), "accumulo" (k, alpha), "minaccia", "corsa" o "rimonta".
     #[pyo3(signature = (seat, nome, k=3.0, alpha=0.2))]
     fn set_search_valutazione(&mut self, seat: &str, nome: &str, k: f64, alpha: f64) -> PyResult<()> {
         let s = seat_of(seat)?;
@@ -297,31 +338,24 @@ impl Game {
 
     /// Test: valore di una posizione costruita, visto dal posto A. Parte dall'osservazione reale della
     /// partita e sovrascrive punti, mano, basi e campi: `bfs` = [(controllore "me"|"opp"|None,
-    /// [Might miei], [Might loro])], basi = liste di Might.
-    #[pyo3(signature = (nome, bfs, my_base, opp_base, k=3.0, alpha=0.2))]
+    /// [Might miei], [Might loro])], basi = liste di Might. Opzionali: `punti` = (miei, loro; default 0-0),
+    /// `attivo` = "me"|"opp" (chi e' attivo alla foglia), `gank` = [(indice campo, Might)] unita' mie GANKING.
+    #[pyo3(signature = (nome, bfs, my_base, opp_base, k=3.0, alpha=0.2, punti=None, attivo=None, gank=vec![]))]
     fn valore_costruito(&mut self, nome: &str, bfs: Vec<(Option<String>, Vec<i64>, Vec<i64>)>, my_base: Vec<i64>,
-                        opp_base: Vec<i64>, k: f64, alpha: f64) -> PyResult<f64> {
+                        opp_base: Vec<i64>, k: f64, alpha: f64, punti: Option<(i64, i64)>, attivo: Option<String>,
+                        gank: Vec<(usize, i64)>) -> PyResult<f64> {
         let v = parse_valutazione(nome, k, alpha)?;
-        let mut o = rbsim_core::obs::Observation::from_state(&mut self.g.gs, Side::A);
-        let uv = |m: i64| rbsim_core::obs::UnitView {
-            name: "x".into(), might: m, ready: true, stunned: false, is_token: false, gear: vec![], damage: 0,
-            buffed: false, empowered: false, keywords: vec![], lasting_might: m,
-        };
-        o.my_points = 0;
-        o.opp_points = 0;
-        o.my_hand = vec![];
-        o.opp_hand_count = 0;
-        o.my_base_units = my_base.iter().map(|&m| uv(m)).collect();
-        o.opp_base_units = opp_base.iter().map(|&m| uv(m)).collect();
-        let template = o.battlefields[0].clone();
-        o.battlefields = bfs.iter().map(|(c, mine, theirs)| {
-            let mut b = template.clone();
-            b.a = mine.iter().map(|&m| uv(m)).collect();
-            b.b = theirs.iter().map(|&m| uv(m)).collect();
-            b.controller = match c.as_deref() { Some("me") => Some(Side::A), Some("opp") => Some(Side::B), _ => None };
-            b
-        }).collect();
+        let o = self.costruita(bfs, my_base, opp_base, punti, attivo, gank);
         Ok(rbsim_core::search::table_value_v(&o, v))
+    }
+
+    /// Test: (race, op_next_wins, threat) di una posizione costruita (stessi argomenti di `valore_costruito`).
+    #[pyo3(signature = (bfs, my_base, opp_base, punti=None, attivo=None, gank=vec![]))]
+    fn analisi_costruita(&mut self, bfs: Vec<(Option<String>, Vec<i64>, Vec<i64>)>, my_base: Vec<i64>, opp_base: Vec<i64>,
+                         punti: Option<(i64, i64)>, attivo: Option<String>, gank: Vec<(usize, i64)>) -> (i64, bool, f64) {
+        let o = self.costruita(bfs, my_base, opp_base, punti, attivo, gank);
+        let (race, onw) = rbsim_core::search::race_info(&o);
+        (race, onw, rbsim_core::search::threat(&o, onw))
     }
 
     /// Diagnosis: the search with index `k` of this seat does exactly `iterations` iterations (fixed

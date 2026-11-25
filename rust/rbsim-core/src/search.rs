@@ -50,6 +50,108 @@ pub fn obs_summary(o: &Observation) -> Value {
 pub enum Valutazione {
     Storica,
     Accumulo { k: f64, alpha: f64 },
+    /// Storica + 0.30 * minaccia (vedi `threat`).
+    Minaccia,
+    /// Storica + w * minaccia, con w secondo la corsa ai punti (`race_info`): 0.45 se si perde, 0.15 se si vince, 0.30 altrimenti.
+    Corsa,
+    /// Storica, ma solo se si perde la corsa (race == -1) e l'avversario non vince subito: premio 0.04 * min(A, D+2)
+    /// verso la conquista del campo avversario con D minima, e Might oltre (Might base avversaria + 3) sui campi
+    /// propri sicuri conta 0.2 invece di 1. Negli altri stati = storica. Il premio verso la conquista non conta se un
+    /// campo proprio sicuro ha Might sotto `need` (li' il rinforzo vale piu' dell'attacco: dedotto dal caso di controllo).
+    Rimonta,
+}
+
+/// Corsa ai punti a campi fissi (solo le tenute segnano): -> (race, op_next_wins).
+/// La prossima Beginning Phase e' di chi NON e' attivo alla foglia (`o.active`); da li' si alternano le tenute
+/// fino a V (massimo 30 passi). race = +1 se il visualizzatore arriva prima, -1 se l'avversario, 0 se nessuno segna.
+/// op_next_wins: l'avversario arriva a V alla sua prossima tenuta prima del prossimo turno del visualizzatore.
+pub fn race_info(o: &Observation) -> (i64, bool) {
+    let me = o.viewer;
+    let h_me = o.battlefields.iter().filter(|b| b.controller == Some(me)).count() as i64;
+    let h_op = o.battlefields.iter().filter(|b| b.controller == Some(me.other())).count() as i64;
+    let v = o.victory_score;
+    let next = o.active.other();
+    let op_next_wins = next != me && o.opp_points + h_op >= v && h_op > 0;
+    if h_me == 0 && h_op == 0 {
+        return (0, op_next_wins);
+    }
+    let (mut pm, mut po, mut turno) = (o.my_points, o.opp_points, next);
+    for _ in 0..30 {
+        if turno == me {
+            pm += h_me;
+            if pm >= v {
+                return (1, op_next_wins);
+            }
+        } else {
+            po += h_op;
+            if po >= v {
+                return (-1, op_next_wins);
+            }
+        }
+        turno = turno.other();
+    }
+    (0, op_next_wins)
+}
+
+/// Minaccia in [0,1]: possibilita' del visualizzatore di conquistare un campo avversario al prossimo turno.
+/// Attaccanti = Might duratura in base + quella dei suoi GANKING su un altro campo; per ogni campo controllato
+/// dall'avversario t = logistica((A - D - 2) / 2), D = Might duratura avversaria li'; minaccia = max. 0 se
+/// `op_next_wins` (troppo tardi) o senza attaccanti. Non conta incantesimi che muovono o potenziano.
+pub fn threat(o: &Observation, op_next_wins: bool) -> f64 {
+    if op_next_wins {
+        return 0.0;
+    }
+    let me = o.viewer;
+    let base: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum();
+    let mut best = 0.0f64;
+    for (i, bf) in o.battlefields.iter().enumerate() {
+        if bf.controller != Some(me.other()) {
+            continue;
+        }
+        let mut a = base;
+        for (j, other) in o.battlefields.iter().enumerate() {
+            if j != i {
+                let mine = if me == Side::A { &other.a } else { &other.b };
+                a += mine.iter().filter(|u| u.keywords.contains(&"GANKING")).map(|u| u.lasting_might).sum::<i64>();
+            }
+        }
+        if a <= 0 {
+            continue;
+        }
+        let theirs = if me == Side::A { &bf.b } else { &bf.a };
+        let d: i64 = theirs.iter().map(|u| u.lasting_might).sum();
+        let t = 1.0 / (1.0 + (-((a - d) as f64 - 2.0) / 2.0).exp());
+        best = best.max(t);
+    }
+    best
+}
+
+fn campo_proprio_scoperto(o: &Observation, need: f64) -> bool {
+    let me = o.viewer;
+    o.battlefields.iter().any(|bf| {
+        let (mine_v, theirs_v) = if me == Side::A { (&bf.a, &bf.b) } else { (&bf.b, &bf.a) };
+        bf.controller == Some(me) && theirs_v.is_empty() && (mine_v.iter().map(|u| u.lasting_might).sum::<i64>() as f64) < need
+    })
+}
+
+/// Progresso verso la conquista: min(A, D + 2) con D = Might duratura avversaria minima fra i campi che l'avversario
+/// controlla, A = Might duratura in base + dei GANKING miei sugli altri campi. 0 se l'avversario non controlla campi.
+pub fn rimonta_progresso(o: &Observation) -> i64 {
+    let me = o.viewer;
+    let theirs_of = |bf: &crate::obs::BattlefieldView| if me == Side::A { bf.b.clone() } else { bf.a.clone() };
+    let target = o.battlefields.iter().enumerate()
+        .filter(|(_, bf)| bf.controller == Some(me.other()))
+        .map(|(i, bf)| (i, theirs_of(bf).iter().map(|u| u.lasting_might).sum::<i64>()))
+        .min_by_key(|&(_, d)| d);
+    let Some((i, d)) = target else { return 0 };
+    let mut a: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum();
+    for (j, other) in o.battlefields.iter().enumerate() {
+        if j != i {
+            let mine = if me == Side::A { &other.a } else { &other.b };
+            a += mine.iter().filter(|u| u.keywords.contains(&"GANKING")).map(|u| u.lasting_might).sum::<i64>();
+        }
+    }
+    a.max(0).min(d + 2)
 }
 
 /// py: handwritten.table_value
@@ -61,6 +163,10 @@ pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
     let me = o.viewer;
     let mut s = 0.45 * ((o.my_points - o.opp_points) as f64);
     let opp_base: i64 = o.opp_base_units.iter().map(|u| u.lasting_might).sum();
+    let rimonta = val == Valutazione::Rimonta && {
+        let (race, onw) = race_info(o);
+        race == -1 && !onw
+    };
     for bf in &o.battlefields {
         let (mine_v, theirs_v) = if me == Side::A { (&bf.a, &bf.b) } else { (&bf.b, &bf.a) };
         let mine: i64 = mine_v.iter().map(|u| u.lasting_might).sum();
@@ -76,13 +182,34 @@ pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
                 let m = mine as f64;
                 s += 0.05 * (m.min(need) + alpha * (m - need).max(0.0));
             }
+            Valutazione::Rimonta if rimonta && bf.controller == Some(me) && theirs_v.is_empty() => {
+                let need = (opp_base + 3) as f64;
+                let m = mine as f64;
+                s += 0.05 * (m.min(need) + 0.2 * (m - need).max(0.0));
+            }
             _ => s += 0.05 * ((mine - theirs) as f64),
         }
+    }
+    // il premio non conta se un campo proprio sicuro e' sotto `need`: li' il rinforzo vale piu' dell'attacco
+    if rimonta && !campo_proprio_scoperto(o, (opp_base + 3) as f64) {
+        s += 0.04 * rimonta_progresso(o) as f64;
     }
     let base: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum::<i64>()
         - o.opp_base_units.iter().map(|u| u.lasting_might).sum::<i64>();
     s += 0.03 * (base as f64);
     s += 0.03 * ((o.my_hand.len() as i64 - o.opp_hand_count as i64) as f64);
+    match val {
+        Valutazione::Minaccia => {
+            let (_, onw) = race_info(o);
+            s += 0.30 * threat(o, onw);
+        }
+        Valutazione::Corsa => {
+            let (race, onw) = race_info(o);
+            let w = if race < 0 { 0.45 } else if race > 0 { 0.15 } else { 0.30 };
+            s += w * threat(o, onw);
+        }
+        _ => {}
+    }
     s.tanh()
 }
 
