@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); correzione Punch First su `claude/lucid-dirac-0aq2d3`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); D77 su `claude/wonderful-bell-wjsdfz` (da `claude/lucid-dirac-0aq2d3`).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -22,8 +22,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach (motore Python, 0,4 s
   a mossa); si tocca solo la pagina. I consigli della vecchia rete si scollegano (solo con `--net`).
 - (25/11, Astra) Un selettore delle regole in Rust: `6427b90` (default, = Python; le verifiche di parità lo
-  fissano) o `6427b90+D72-D76` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e ripresa dell'arena
-  con le regole; run nuova (`--init`) per allenare sul nuovo profilo; promozioni solo con partite del nuovo profilo.
+  fissano), `6427b90+D72-D76` o `6427b90+D72-D77` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
+  ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
+- (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -47,20 +48,13 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   2.000/2.000, nessun NotPorted; Mac col campione: PPO 240/240, arena col prior 40/40, Rust ×14–16 a partita.
 - 24/11 tappa Ivern (`docs/rust/RAPPORTO_IVERN.md`, `INVENTARIO_IVERN.md`): pila con identità, semi tenuti
   3.120/3.120; Mac col campione: PPO 240/240, arena col prior EI/KI/RI 60/60, Rust ×15 a partita.
-- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, inventario `INVENTARIO_SETT.md`): costi aggiunti (Call to Glory),
-  "spendi un buff" (Monastery of Hirana), `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin.
-  Sviluppo: autonome 3.760/3.760, PPO bit per bit 960/960, replay 640/640, arena 80/80, 3 posizioni mirate;
-  `tests/rust` 97 verdi. Perimetro: `COPERTI` coi cinque mazzi fra loro. Nessuna divergenza del motore.
-  Semi tenuti da parte 4.320/4.320 con gli altri sei matchup di nuovo (`docs/rust/misure/tenuti_sett_*.json`),
-  640 partite d'arena e 43.103 ricerche; suite Python 1.952 verdi. Misure sul Mac col campione in `docs/rust/misure/mac_sett_*`.
-- 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`): avversario
-  "Il campione" (`PPOPriorAgent`, `--campione`, `--budget 0.4`, rete in cache), primo nel menu se il
-  checkpoint c'è; `--net` facoltativo (senza: niente consigli né esempi, l'abbandono passa e il campione
-  chiude a 0,01 s); `games.jsonl` scrive sempre il risultato. Lanciatori `allenatore.command` (Mac) e
-  `allenatore.bat` con `--extra rl` (il campione anche da `../rbsim/runs/`). Immagini: copia locale, se no
-  Piltover Archive in cache (`riftbound/ai/card_images.py`, stessa cartella degli scenari), campi
-  raddrizzati in orizzontale; chi inizia nel mulligan, nel turno e nel registro; le carte guardate in cima al mazzo
-  (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. Playwright.
+- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, `INVENTARIO_SETT.md`): costi aggiunti (Call to Glory), "spendi un
+  buff", `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin. Autonome 3.760/3.760, PPO 960/960, replay
+  640/640, arena 80/80; tenuti 4.320/4.320 con gli altri sei matchup (`docs/rust/misure/tenuti_sett_*.json`), nessuna
+  divergenza. Perimetro `COPERTI` coi cinque mazzi fra loro; misure sul Mac in `docs/rust/misure/mac_sett_*`.
+- 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`): avversario "Il campione"
+  (`PPOPriorAgent`, `--campione`, `--budget 0.4`), `--net` facoltativo; lanciatori `allenatore.command`/`.bat`; immagini
+  locali o Piltover Archive in cache (`card_images.py`); carte guardate; Sett The Boss chiede quale unità salvare. Playwright.
 - 25/11 pagina (segnalazioni di Matteo, `docs/bot/SEGNALAZIONI.md`): magia uguale su ogni campo = una voce "Lancia X";
   gear/rune esauste ruotate; "Come paghi?" (`payment_options`, `CoachLoop`); opzioni identiche una sola. Rewind ("Annulla
   l'ultima mossa", R): `CoachLoop.record` + replay dal seme (`_Record`, `_Seat`, `CoachSession.rewind`). Motore invariato.
@@ -69,6 +63,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   delle correzioni. Storico dopo i fix: 600/600 identiche (autonome, replay, PPO, arena a lavoro fisso; semi
   910001-910010, ES/KS/RS/IS/EK, `docs/rust/misure/d72d76_storiche_*`). Confronto dei profili (100 partite,
   `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
+- 25/11 D77 corretto in Rust sul profilo `6427b90+D72-D77` (`9fcdc25`, `lp_action.rs` dietro `regole.d77()`): dopo uno
+  spostamento non in sospeso gli showdown in attesa partono subito; contatore `D77`. `tests/rust/test_d77.py` verde (e il
+  profilo D72-D76 tiene il comportamento vecchio); `tests/rust` 135 verdi. Storico: 180/180 identiche (sei tipi, semi
+  910001-910003, cinque matchup, `docs/rust/misure/d77_storiche_*`). D72-D76 contro D72-D77 (ES/KS/RS/IS, semi 1-10):
+  simple_trade 80/80 identiche, random 65/80 (le 15 diverse hanno tutte D77 e la prima differenza in uno showdown, ma
+  `confronto_regole._delta` non le attribuisce a D77: finestra da ricontrollare se si riusa lo script).
 
 ## In corso
 
@@ -76,9 +76,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
-3. Profilo corretto: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
+3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust col profilo corretto (Matteo d'accordo, 25/11): D77 in Rust, agente umano nel ponte, vista dallo stato Rust, rifare pagamento/rewind.
+4. Pagina su Rust col profilo D72-D77 (Matteo d'accordo, 25/11): agente umano nel ponte, vista dallo stato Rust, rifare pagamento/rewind.
 5. Segnalazioni in `docs/bot/SEGNALAZIONI.md`; scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
@@ -90,7 +90,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
   `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`, `sett_mac.command`,
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
-- `tests/rust/`: test che caricano davvero l'estensione (`test_rengar.py`, `test_ivern.py`, `test_sett.py`).
+- `tests/rust/`: test che caricano davvero l'estensione (`test_rengar.py`, `test_ivern.py`, `test_sett.py`,
+  `test_d72_d76.py`, `test_d77.py`). Qui: estensione con `maturin build --release` + `pip install` della wheel; torch da PyPI.
 - `scripts/ppo.py` (`_motore`, `--regole`), `scripts/diag/arena_mazzi.py` (`--motore rust`, `--regole`);
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).
 - Partita a mano: `scripts/coach.py` (server, `--campione`, `--budget`, `--net`), `riftbound/ai/coach.py`
