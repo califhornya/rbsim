@@ -559,7 +559,7 @@ def _play_trifarian_captain(session: CoachSession, timeout: float = 60.0) -> lis
             session.answer({"action": next(k for k, a in enumerate(p["actions"]) if a["kind"] == "PASS")})
             continue
         if played:
-            shown.append(p)
+            shown.append(dict(p, _cards=st["cards"]))      # the page's card metadata then
         session.answer({"option": p["default"]} if p["type"] == "choice"
                        else {"return": []} if p["type"] == "mulligan" else {"ok": True})
     session.abandon()
@@ -579,12 +579,15 @@ def test_the_coach_sees_the_cards_trifarian_captain_looks_at(tmp_path):
     assert [(p["question"], p.get("seen")) for p in shown[:2]] == [
         ("Prendere una delle carte guardate?", seen), ("Quale carta tenere?", seen)]
     assert "Guardi le prime 4 carte del mazzo: " + ", ".join(seen) in [e["text"] for e in session.state()["events"]]
+    # The page has their image code and text, not only the board's cards.
+    assert all(shown[0]["_cards"][n]["img"] and shown[0]["_cards"][n]["text"] for n in seen)
     # None of the four may be taken: shown alone, held until seen.
     session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
     session.new_game(sett, sett, seat="A", opponent="simple_trade", seed=20)
     notice = _play_trifarian_captain(session)[0]
     assert notice["type"] == "notice" and notice["own"] and \
         notice["cards"] == ["Fiora Victorious", "Fiora Victorious", "Showstopper", "Rampage"]
+    assert all(notice["_cards"][n]["img"] for n in notice["cards"])
 
 
 def test_the_coach_picks_which_unit_sett_the_boss_saves(tmp_path):
@@ -621,3 +624,36 @@ def test_the_coach_picks_which_unit_sett_the_boss_saves(tmp_path):
     game.join(timeout=10)
     assert [u.card.name for u in a.base_units] == ["Fiora Victorious"] and not boss.ready
     assert [c.name for c in a.trash] == ["Pit Rookie"] and session.pending is None
+
+
+def test_sett_the_boss_offers_only_the_units_it_can_save(tmp_path):
+    """A buffed unit Smite will banish if it dies this turn never reaches the
+    save: it isn't offered (choosing it would lose both)."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import legend, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="B")
+    scripted(loop, a, b)
+    legend(loop, "A", "Sett The Boss")
+    rookie, fiora = unit("Pit Rookie"), unit("Fiora Victorious")
+    for u in (rookie, fiora):
+        u.might_counters = 1
+    fiora.banish_if_dies_turn = loop.gs.turn
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._route_deaths,
+                            args=([(rookie, "A"), (fiora, "A")], loop.gs.battlefields[0]),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    assert [o["text"] for o in session.pending["options"]] == ["Salva Pit Rookie (Might 3)", "Non salvare nessuna"]
+    session.answer({"option": 0})
+    game.join(timeout=10)
+    assert [u.card.name for u in a.base_units] == ["Pit Rookie"] and "Fiora Victorious" in [c.name for c in a.banished]

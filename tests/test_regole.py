@@ -66,6 +66,14 @@ def test_ppo_checks_the_profile_before_launching(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="--init in una nuova cartella"):
         ppo._check_regole(_Ap(), _ppo_args(run, CORRETTE), run)
     ppo._check_regole(_Ap(), _ppo_args(run, STORICHE), run)
+    # A run older than the provenance (stato.json, no provenienza.jsonl): historical too.
+    old = tmp_path / "vecchia"
+    old.mkdir()
+    (old / "stato.json").write_text("{}")
+    assert ppo._regole_run(old) == STORICHE
+    with pytest.raises(SystemExit, match="--init in una nuova cartella"):
+        ppo._check_regole(_Ap(), _ppo_args(old, CORRETTE), old)
+    assert ppo._regole_run(tmp_path / "nuova") is None
 
 
 def test_the_provenance_says_the_rules_each_matchup_played(monkeypatch):

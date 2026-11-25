@@ -588,11 +588,12 @@ def _card_id(name: str) -> Optional[str]:
     return _CARD_IDS.get(name)
 
 
-def _card_texts(obs: Optional[dict], extras: Optional[dict] = None) -> dict:
-    """Printed text, type, cost, Might and image code of the cards on view."""
+def _card_texts(obs: Optional[dict], extras: Optional[dict] = None, more=()) -> dict:
+    """Printed text, type, cost, Might and image code of the cards on view
+    (and `more`: the ones a question shows, such as those looked at)."""
     if not obs:
         return {}
-    names: set = set(obs.get("my_hand") or [])
+    names: set = set(obs.get("my_hand") or []) | set(more)
     names |= set(obs.get("my_trash") or []) | set(obs.get("opp_trash") or [])
     names |= set(obs.get("my_banished") or []) | set(obs.get("opp_banished") or [])
     names |= set(obs.get("my_base_gear") or []) | set(obs.get("opp_base_gear") or [])
@@ -841,6 +842,7 @@ class CoachSession:
         self._dying: list = []              # the coach's units dying together (_route_deaths)
         self._replacing = None              # the one whose death may be replaced now
         self._save_pick = _UNASKED          # the one the coach saves (ask_save)
+        self._dying_bf = None               # where they die (None: in base)
 
     # -- what a game can have ------------------------------------------------------
 
@@ -977,12 +979,15 @@ class CoachSession:
         def route_deaths(ordered, *a, _inner=loop._route_deaths, **k):
             # Units dying together: the engine offers each a replacement in
             # turn ("you may ... instead"); the coach picks one (ask_save).
-            kept = (self._dying, self._save_pick)
+            kept = (self._dying, self._save_pick, self._dying_bf)
             self._dying, self._save_pick = [u for u, s in ordered if s == self.side], _UNASKED
+            self._dying_bf = a[0] if a else k.get("bf")
+            if (a[1:2] or [k.get("in_base", False)])[0]:
+                self._dying_bf = None
             try:
                 return _inner(ordered, *a, **k)
             finally:
-                self._dying, self._save_pick = kept
+                self._dying, self._save_pick, self._dying_bf = kept
         loop._route_deaths = route_deaths
 
         def replace_death(dead_unit, *a, _inner=loop._try_replace_death, **k):
@@ -994,6 +999,29 @@ class CoachSession:
         loop._try_replace_death = replace_death
         loop.on_choice = self._log_choice
 
+    def _may_be_saved(self, u) -> bool:
+        """Whether the engine will offer Sett The Boss's save for `u` (one of
+        the coach's units dying together): buffed, and no earlier way out
+        of its death in _route_deaths / _try_replace_death (a banish of
+        Smite, Mordekaiser's sacrifice, Soraka here, its own or a base gear's
+        death replacement, a ward this turn)."""
+        from riftbound.registry.cards_registry import CARD_REGISTRY as REG
+        loop, gs = self.loop, self.gs
+        owner = gs.get_player(self.side)
+        if u.might_counters <= 0 or u.banish_if_dies_turn == gs.turn or u.ward_turn == gs.turn:
+            return False
+        if loop._has_effect(u.card, "sacrifice_instead_of_dying") and \
+                gs.once_per_turn_used.get((u.card, "sacrifice_instead_of_dying")) != gs.turn:
+            return False
+        bf = self._dying_bf
+        if bf is not None and any(o is not u and loop._has_effect(o.card, "protect_weaker_here")
+                                  and u.might < o.might for o in bf._units_for(self.side)):
+            return False
+        if loop._unit_death_replacement(u) is not None:
+            return False
+        return not any(e.trigger == "death_replacement" and e.effect in loop._DEATH_REPLACEMENT_EFFECTS
+                       for g in owner.base_gear for e in (REG[g.name].effects if g.name in REG else ()))
+
     def ask_save(self, source: Optional[str]) -> Optional[int]:
         """Sett The Boss ("If a buffed unit you control would die, you may pay
         [rune], exhaust me, and spend its buff to heal it ... instead"), asked
@@ -1004,7 +1032,7 @@ class CoachSession:
         if unit is None or not self._dying:
             return None
         if self._save_pick is _UNASKED:
-            cands = [u for u in self._dying if u.might_counters > 0]
+            cands = [u for u in self._dying if self._may_be_saved(u)]
             if not any(u is unit for u in cands):
                 cands.insert(0, unit)
             names = [u.card.name for u in cands]
@@ -1280,6 +1308,12 @@ class CoachSession:
                 continue
         return []
 
+    def _shown_cards(self) -> list:
+        """The cards the pending question shows besides the board (looked at
+        on top of the deck): the page draws them with their image and text."""
+        p = self.pending or {}
+        return list(p.get("seen") or []) + list(p.get("cards") or [])
+
     def state(self) -> dict:
         obs, extras = self.view, self.extras
         return {"status": self.status, "activity": self.activity, "info": self.info,
@@ -1288,7 +1322,7 @@ class CoachSession:
                 "events": self._copy(self.events), "log": self._copy(self.log)[-60:],
                 "result": self.result, "decisions": len(self.examples),
                 "corrections": sum(1 for e in self.examples if e["corrected"]),
-                "cards": _card_texts(obs, extras),
+                "cards": _card_texts(obs, extras, self._shown_cards()),
                 "opponents": self.opponents(), "advice": self.advice, "regole": REGOLE_PYTHON}
 
     def report(self, note: str) -> Path:

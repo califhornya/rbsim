@@ -153,11 +153,14 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
 
 def _regole_run(run: Path) -> Optional[str]:
     """The rules profile an existing run was trained on (its last provenienza
-    line; a line without it, before 25/11: 6427b90). None: a new run."""
+    line; a line without it, or a run older than the provenance, before
+    25/11: 6427b90). None: a new run (no stato.json)."""
     from riftbound.provenienza import REGOLE_PYTHON
     prov = run / "provenienza.jsonl"
-    if not (run / "stato.json").exists() or not prov.exists():
+    if not (run / "stato.json").exists():
         return None
+    if not prov.exists():
+        return REGOLE_PYTHON
     lines = [ln for ln in prov.read_text().splitlines() if ln.strip()]
     return json.loads(lines[-1]).get("regole", REGOLE_PYTHON) if lines else REGOLE_PYTHON
 
