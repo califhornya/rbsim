@@ -49,7 +49,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 24-25/11 tappe Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): tutto identico a Python; `COPERTI` = i cinque mazzi.
 - 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`, `--campione`, `--net`
   facoltativo; lanciatori `allenatore.command`/`.bat`; immagini in cache `card_images.py`). Playwright.
-- 25/11 pagina (segnalazioni, `docs/bot/SEGNALAZIONI.md`): "Lancia X" unica, "Come paghi?", opzioni uniche, rewind (R).
+- 25/11 segnalazioni 1-14 (`docs/bot/SEGNALAZIONI.md`): pagina corretta, D78 segnato, partite salvate in
+  `runs/coach/partite/`, il campione cerca prima la vittoria nel turno (`win_probe`; arena invariata).
 - 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
   `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
 - 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `test_d77.py`): storico 180/180 identiche
@@ -62,9 +63,6 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
 - 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
   `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
-- 25/11 segnalazioni 10-13 (`docs/bot/SEGNALAZIONI.md`): D78 segnato; dig che rivela nel registro; ACCELERATE chiesto prima di
-  "Come paghi?" (`PayWay.accelerate`); ogni partita salvata in `runs/coach/partite/`, registro tecnico su Rust. `tests/rust` 257.
-- 25/11 segnalazione 14: il campione della pagina cerca prima la vittoria nel turno coi soli spostamenti (`win_probe`; arena invariata).
 
 ## In corso
 Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`, domande in `DOMANDE_ASTRA.md`). Matteo: 5 partite Evelynn-Sett
