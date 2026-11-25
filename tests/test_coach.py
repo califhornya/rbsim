@@ -429,3 +429,231 @@ def test_a_second_answer_to_one_question_is_refused(tmp_path):
     except RuntimeError:
         pass                      # refused, or the next question was already up
     session.abandon()
+
+
+# -- the champion (24/11): Matteo plays a whole game against the strongest bot --
+
+EVELYNN = REPO / "riftbound" / "data" / "decks" / "competitive_evelynn.json"
+KHAZIX = REPO / "riftbound" / "data" / "decks" / "competitive_khazix.json"
+
+
+def _campione(tmp_path) -> Path:
+    """A random PPO net standing in for runs/sett/ekris_s12/ckpt_040000.pt
+    (runs/ isn't in the repository)."""
+    from riftbound.ai.ppo.model import PPONet, save
+    torch.manual_seed(0)
+    path = tmp_path / "campione.pt"
+    save(PPONet(), path)
+    return path
+
+
+def _wait(session: CoachSession, status: str, timeout: float = 120.0) -> None:
+    end = time.time() + timeout
+    while session.state()["status"] != status and time.time() < end:
+        time.sleep(0.005)
+    assert session.state()["status"] == status
+
+
+def test_a_whole_game_against_the_champion_without_the_net(tmp_path):
+    import json
+    import random
+
+    from riftbound.ai.coach import _ppo_net
+    from riftbound.ai.ppo.prior_bot import PPOPriorAgent
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0,
+                           campione_path=_campione(tmp_path), budget=0.02)
+    st = session.state()
+    assert [o["id"] for o in st["opponents"]] == ["campione", "simple_trade"] and not st["advice"]
+    assert "Sett" in st["opponents"][0]["decks"]
+    session.new_game(EVELYNN, KHAZIX, seat="A", seed=3)      # the first opponent: the champion
+    assert isinstance(session._opponent, PPOPriorAgent) and session._opponent.budget == 0.02
+    assert session._opponent.ppo is _ppo_net(session.campione_path)   # loaded once
+    rng, seen = random.Random(0), []
+
+    def pick(pending):
+        seen.append(pending["type"])
+        assert not pending.get("suggestions")                 # no net, no advice
+        if pending["type"] == "choice":
+            return {"option": rng.randrange(len(pending["options"]))}
+        if pending["type"] == "notice":
+            return {"ok": True}
+        if pending["type"] == "mulligan":
+            return {"return": [0]}
+        assert all(a["text"] for a in pending["actions"]) and pending["context"]
+        return {"action": rng.randrange(len(pending["actions"]))}
+
+    _play(session, pick, timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]
+    assert seen[0] == "mulligan" and "decision" in seen
+    assert st["info"]["opponent"] == "campione" and st["info"]["net"] is None
+    assert st["info"]["campione"] == str(session.campione_path) and st["info"]["budget"] == 0.02
+    moves = {e["who"] for e in st["events"] if e["move"]}
+    assert moves == {"me", "opp"}
+    assert not any("rete" in e["text"] for e in st["events"])
+    # Nothing for training, but the result is kept.
+    assert st["decisions"] == 0 and not list((tmp_path / "coach").glob("coach_*.npz"))
+    record = json.loads((tmp_path / "coach" / "games.jsonl").read_text().splitlines()[-1])
+    assert record["opponent"] == "campione" and record["file"] is None and record["decisions"] == 0
+    assert record["regole"] == "6427b90" and st["regole"] == "6427b90"     # the frozen Python engine
+    assert record["winner"] == st["result"]["winner"] and record["turns"] == st["result"]["turns"]
+
+
+def test_abandoning_the_champion_without_the_net_passes_to_the_end(tmp_path):
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0,
+                           campione_path=_campione(tmp_path), budget=0.02)
+    session.new_game(EVELYNN, KHAZIX, seat="B", opponent="campione", seed=5)
+    end = time.time() + 120
+    while (session.state()["pending"] or {}).get("type") != "decision" and time.time() < end:
+        st = session.state()
+        if st["pending"] is not None:
+            session.answer({"option": st["pending"].get("default", 0)} if st["pending"]["type"] == "choice"
+                           else {"ok": True} if st["pending"]["type"] == "notice" else {"return": []})
+        time.sleep(0.005)
+    assert session.state()["pending"]["type"] == "decision"
+    session.abandon()
+    _wait(session, "over", timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]
+    assert st["autoplay"] and not st["saving"] and st["activity"].startswith("Partita lasciata")
+    assert st["result"]["winner"] != "B"                       # the coach's seat only passed
+    assert session._opponent.budget == 0.01                  # nothing counts: it closes quickly
+    assert not (tmp_path / "coach" / "games.jsonl").exists()   # abandoned: nothing saved
+
+
+def test_the_opponents_that_arent_there_are_refused(tmp_path):
+    session = CoachSession(None, tmp_path / "coach", campione_path=tmp_path / "manca.pt")
+    assert [o["id"] for o in session.opponents()] == ["simple_trade"]
+    for who, says in (("campione", "campione"), ("net", "--net"), ("chiunque", "sconosciuto")):
+        with pytest.raises(ValueError, match=says):
+            session.new_game(EVELYNN, KHAZIX, opponent=who)
+    assert session.state()["status"] == "idle"
+    # With the net too: the champion first, then the net; the advice is on.
+    torch.manual_seed(0)
+    save_checkpoint(RiftboundNet(), tmp_path / "net.pt")
+    session = CoachSession(tmp_path / "net.pt", tmp_path / "coach", campione_path=_campione(tmp_path))
+    st = session.state()
+    assert [o["id"] for o in st["opponents"]] == ["campione", "net", "simple_trade"] and st["advice"]
+
+
+def _play_trifarian_captain(session: CoachSession, timeout: float = 60.0) -> list:
+    """Answer PASS (or the default) until the coach may play Trifarian Captain,
+    play it, then collect the questions up to the next turn action."""
+    played, shown, end = False, [], time.time() + timeout
+    while time.time() < end:
+        st = session.state()
+        if st["status"] == "over":
+            break
+        p = st["pending"]
+        if st["status"] != "waiting" or not p:
+            time.sleep(0.003)
+            continue
+        if p["type"] == "decision":
+            i = next((k for k, a in enumerate(p["actions"]) if "Trifarian Captain" in a["text"]), None)
+            if i is not None and not played:
+                played = True
+                session.answer({"action": i})
+                continue
+            if played and p["point"] == "turn_action":
+                break
+            session.answer({"action": next(k for k, a in enumerate(p["actions"]) if a["kind"] == "PASS")})
+            continue
+        if played:
+            shown.append(dict(p, _cards=st["cards"]))      # the page's card metadata then
+        session.answer({"option": p["default"]} if p["type"] == "choice"
+                       else {"return": []} if p["type"] == "mulligan" else {"ok": True})
+    session.abandon()
+    assert played
+    return shown
+
+
+def test_the_coach_sees_the_cards_trifarian_captain_looks_at(tmp_path):
+    """'Look at the top 4 cards ... you may reveal a unit or gear ... and draw
+    it. Recycle the rest.' The page shows the four cards with the choice, and
+    alone when none may be taken (seeds of competitive_sett, simple_trade)."""
+    sett = REPO / "riftbound" / "data" / "decks" / "competitive_sett.json"
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(sett, sett, seat="A", opponent="simple_trade", seed=2)
+    shown = _play_trifarian_captain(session)
+    seen = ["Rampage", "Kinkou Initiate", "Pit Rookie", "Showstopper"]
+    assert [(p["question"], p.get("seen")) for p in shown[:2]] == [
+        ("Prendere una delle carte guardate?", seen), ("Quale carta tenere?", seen)]
+    assert "Guardi le prime 4 carte del mazzo: " + ", ".join(seen) in [e["text"] for e in session.state()["events"]]
+    # The page has their image code and text, not only the board's cards.
+    assert all(shown[0]["_cards"][n]["img"] and shown[0]["_cards"][n]["text"] for n in seen)
+    # None of the four may be taken: shown alone, held until seen.
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(sett, sett, seat="A", opponent="simple_trade", seed=20)
+    notice = _play_trifarian_captain(session)[0]
+    assert notice["type"] == "notice" and notice["own"] and \
+        notice["cards"] == ["Fiora Victorious", "Fiora Victorious", "Showstopper", "Rampage"]
+    assert all(notice["_cards"][n]["img"] for n in notice["cards"])
+
+
+def test_the_coach_picks_which_unit_sett_the_boss_saves(tmp_path):
+    """Two buffed units of the coach die together: the engine offers Sett The
+    Boss's save to each in turn; the page asks once which one to save."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import legend, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="B")
+    scripted(loop, a, b)
+    boss = legend(loop, "A", "Sett The Boss")
+    rookie, fiora = unit("Pit Rookie"), unit("Fiora Victorious")
+    for u in (rookie, fiora):
+        u.might_counters = 1
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._route_deaths,
+                            args=([(rookie, "A"), (fiora, "A")], loop.gs.battlefields[0]),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    p = session.pending
+    assert p["question"] == "Quale unità salvare?" and p["source"] == "Sett The Boss"
+    assert [o["text"] for o in p["options"]] == [
+        "Salva Pit Rookie (Might 3)", "Salva Fiora Victorious (Might 5)", "Non salvare nessuna"]
+    session.answer({"option": 1})                     # the second one the engine meets
+    game.join(timeout=10)
+    assert [u.card.name for u in a.base_units] == ["Fiora Victorious"] and not boss.ready
+    assert [c.name for c in a.trash] == ["Pit Rookie"] and session.pending is None
+
+
+def test_sett_the_boss_offers_only_the_units_it_can_save(tmp_path):
+    """A buffed unit Smite will banish if it dies this turn never reaches the
+    save: it isn't offered (choosing it would lose both)."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import legend, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="B")
+    scripted(loop, a, b)
+    legend(loop, "A", "Sett The Boss")
+    rookie, fiora = unit("Pit Rookie"), unit("Fiora Victorious")
+    for u in (rookie, fiora):
+        u.might_counters = 1
+    fiora.banish_if_dies_turn = loop.gs.turn
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._route_deaths,
+                            args=([(rookie, "A"), (fiora, "A")], loop.gs.battlefields[0]),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    assert [o["text"] for o in session.pending["options"]] == ["Salva Pit Rookie (Might 3)", "Non salvare nessuna"]
+    session.answer({"option": 0})
+    game.join(timeout=10)
+    assert [u.card.name for u in a.base_units] == ["Pit Rookie"] and "Fiora Victorious" in [c.name for c in a.banished]

@@ -1,0 +1,362 @@
+[
+ {
+  "seed": 910001,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 174,
+  "t_py_traced": 0.542,
+  "t_rs_traced": 0.326
+ },
+ {
+  "seed": 910001,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 171,
+  "t_py_traced": 0.503,
+  "t_rs_traced": 0.237
+ },
+ {
+  "seed": 910002,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 106,
+  "t_py_traced": 0.429,
+  "t_rs_traced": 0.129
+ },
+ {
+  "seed": 910002,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 243,
+  "t_py_traced": 0.839,
+  "t_rs_traced": 0.385
+ },
+ {
+  "seed": 910003,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 194,
+  "t_py_traced": 0.818,
+  "t_rs_traced": 0.266
+ },
+ {
+  "seed": 910003,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 133,
+  "t_py_traced": 0.388,
+  "t_rs_traced": 0.16
+ },
+ {
+  "seed": 910004,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 119,
+  "t_py_traced": 0.374,
+  "t_rs_traced": 0.199
+ },
+ {
+  "seed": 910004,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 153,
+  "t_py_traced": 0.686,
+  "t_rs_traced": 0.213
+ },
+ {
+  "seed": 910005,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   20
+  ],
+  "rs": [
+   "A",
+   20
+  ],
+  "rust_error": null,
+  "events": 196,
+  "t_py_traced": 0.634,
+  "t_rs_traced": 0.269
+ },
+ {
+  "seed": 910005,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 183,
+  "t_py_traced": 0.775,
+  "t_rs_traced": 0.249
+ },
+ {
+  "seed": 910006,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 133,
+  "t_py_traced": 0.423,
+  "t_rs_traced": 0.178
+ },
+ {
+  "seed": 910006,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 132,
+  "t_py_traced": 0.428,
+  "t_rs_traced": 0.17
+ },
+ {
+  "seed": 910007,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 202,
+  "t_py_traced": 0.805,
+  "t_rs_traced": 0.26
+ },
+ {
+  "seed": 910007,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 146,
+  "t_py_traced": 0.428,
+  "t_rs_traced": 0.189
+ },
+ {
+  "seed": 910008,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 184,
+  "t_py_traced": 0.718,
+  "t_rs_traced": 0.239
+ },
+ {
+  "seed": 910008,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   20
+  ],
+  "rs": [
+   "B",
+   20
+  ],
+  "rust_error": null,
+  "events": 315,
+  "t_py_traced": 0.982,
+  "t_rs_traced": 0.458
+ },
+ {
+  "seed": 910009,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 129,
+  "t_py_traced": 0.383,
+  "t_rs_traced": 0.169
+ },
+ {
+  "seed": 910009,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 204,
+  "t_py_traced": 0.604,
+  "t_rs_traced": 0.264
+ },
+ {
+  "seed": 910010,
+  "matchup": "ES",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 149,
+  "t_py_traced": 0.63,
+  "t_rs_traced": 0.184
+ },
+ {
+  "seed": 910010,
+  "matchup": "SE",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 187,
+  "t_py_traced": 0.592,
+  "t_rs_traced": 0.261
+ }
+]

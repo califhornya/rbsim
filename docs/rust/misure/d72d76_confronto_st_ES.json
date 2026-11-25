@@ -1,0 +1,412 @@
+[
+ {
+  "seed": 920001,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   11
+  ],
+  "corrette": [
+   "B",
+   11
+  ],
+  "correzioni": {
+   "D74": 2,
+   "D76": 10
+  },
+  "prima_differenza": {
+   "evento": 68,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     0,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "ES",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   14
+  ],
+  "corrette": [
+   "B",
+   14
+  ],
+  "correzioni": {
+   "D72": 27,
+   "D74": 2,
+   "D75": 54,
+   "D76": 4
+  },
+  "prima_differenza": {
+   "evento": 15,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   11
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D72": 5,
+   "D74": 4,
+   "D75": 81,
+   "D76": 8
+  },
+  "prima_differenza": {
+   "evento": 36,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "ES",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   12
+  ],
+  "corrette": [
+   "B",
+   12
+  ],
+  "correzioni": {
+   "D72": 10,
+   "D74": 4,
+   "D75": 50,
+   "D76": 8
+  },
+  "prima_differenza": {
+   "evento": 23,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     1,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D75": 31,
+   "D76": 8
+  },
+  "prima_differenza": {
+   "evento": 46,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 3
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920001,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 20,
+   "D74": 4,
+   "D76": 6
+  },
+  "prima_differenza": {
+   "evento": 23,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     0,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "SE",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   15
+  ],
+  "corrette": [
+   "A",
+   13
+  ],
+  "correzioni": {
+   "D74": 6,
+   "D75": 16,
+   "D76": 10
+  },
+  "prima_differenza": {
+   "evento": 46,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D75": 3
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   14
+  ],
+  "corrette": [
+   "A",
+   14
+  ],
+  "correzioni": {
+   "D76": 8
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "SE",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   11
+  ],
+  "corrette": [
+   "A",
+   11
+  ],
+  "correzioni": {
+   "D72": 8,
+   "D75": 42,
+   "D76": 8
+  },
+  "prima_differenza": {
+   "evento": 28,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 7,
+   "D74": 8,
+   "D75": 36,
+   "D76": 8
+  },
+  "prima_differenza": {
+   "evento": 40,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 1
+   },
+   "origine": "partita"
+  }
+ }
+]

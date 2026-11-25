@@ -299,7 +299,17 @@ impl Game {
         if let Some(&u) = units.iter().find(|&&u| self.gs.ucard(u) == ctx.card) {
             return Some(u);
         }
-        units.into_iter().find(|&u| self.gs.unit(u).gear.contains(&ctx.card))
+        let gear = units.into_iter().find(|&u| self.gs.unit(u).gear.contains(&ctx.card));
+        if gear.is_none() && self.gs.reg.regole.corrette() {
+            // D76 (profile 6427b90+D72-D76): "me" of a legend's ability is its
+            // legend unit (Sett The Boss: "When you conquer, ready me").
+            let legend = self.legend_units(ctx.actor).into_iter().find(|&l| self.gs.ucard(l) == ctx.card);
+            if legend.is_some() {
+                crate::registry::conta(76);
+            }
+            return legend;
+        }
+        gear
     }
 
     /// py: _friendly_units(ctx)

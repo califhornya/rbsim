@@ -53,6 +53,10 @@ impl Game {
         let perms = self.play_permissions(card, side);
         let has = |p: &str| perms.iter().any(|x| x == p);
         let only_conquered = has("conquered_this_turn_only");
+        // D72 (profile 6427b90+D72-D76): "I can be played to a battlefield
+        // where there are enemy units" (Rengar Trophy Hunter), from hand or the
+        // Champion Zone, in the Main Phase too.
+        let enemy_ok = self.gs.reg.regole.corrette() && self.ambush_enemy_ok(card);
         let mut out: Vec<Option<usize>> = if only_conquered { Vec::new() } else { vec![None] };
         if !self.units_at_battlefields_with(opp, "warden_only_base").is_empty() {
             return out;
@@ -78,6 +82,13 @@ impl Game {
                     || (has("open") && mine.is_empty() && theirs.is_empty() && self.gs.battlefields[i].controller().is_none())
                     || (has("occupied_enemy") && !theirs.is_empty())
                     || (has("enemy_alone") && theirs.len() == 1)
+                    || {
+                        let d72 = enemy_ok && !theirs.is_empty();
+                        if d72 {
+                            crate::registry::conta(72);
+                        }
+                        d72
+                    }
             };
             if ok {
                 out.push(Some(i));
@@ -120,8 +131,16 @@ impl Game {
     pub fn ambush_unit_lanes(&mut self, card: CardId, side: Side) -> Vec<usize> {
         let mut lanes: Vec<usize> = Vec::new();
         if self.gs.has_keyword(card, "AMBUSH") {
+            // D72 (profile 6427b90+D72-D76): Rengar Trophy Hunter from hand
+            // also where only enemy units are (as from the Champion Zone).
+            let enemy_ok = self.gs.reg.regole.corrette() && self.ambush_enemy_ok(card);
             for (i, bf) in self.gs.battlefields.iter().enumerate() {
-                if !bf.units_for(side).is_empty() && !lanes.contains(&i) {
+                let mine = !bf.units_for(side).is_empty();
+                let d72 = !mine && enemy_ok && !bf.units_for(side.other()).is_empty();
+                if (mine || d72) && !lanes.contains(&i) {
+                    if d72 {
+                        crate::registry::conta(72);
+                    }
                     lanes.push(i);
                 }
             }
@@ -181,6 +200,11 @@ impl Game {
         self.gs.player_mut(side).hand.retain(|&c| c != card);
         let l = lane as usize;
         self.play_unit(card, side, Some(l), "hand")?;
+        if self.gs.reg.regole.corrette() {
+            // D73: the battlefield's passives (Packed Amphitheater) before
+            // the showdown's first decision.
+            self.recompute_passives_counted(73)?;
+        }
         let b = &mut self.gs.battlefields[l];
         if !b.units[0].is_empty() && !b.units[1].is_empty() {
             b.contested_this_turn = true;

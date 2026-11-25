@@ -21,6 +21,8 @@ from multiprocessing import Pool
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Le verifiche di parità con Python fissano le regole storiche (decisione del 25/11).
+os.environ["RBSIM_REGOLE"] = "6427b90"
 sys.path.insert(0, str(ROOT))
 # scripts/ppo.py as the module "ppo", importable by the pool's workers too:
 # on macOS they start by spawn and re-import what they run (P._init,

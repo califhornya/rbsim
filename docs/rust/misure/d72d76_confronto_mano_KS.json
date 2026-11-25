@@ -1,0 +1,421 @@
+[
+ {
+  "seed": 920001,
+  "matchup": "KS",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   15
+  ],
+  "correzioni": {
+   "D72": 127,
+   "D74": 166,
+   "D75": 146,
+   "D76": 930
+  },
+  "prima_differenza": {
+   "evento": 18,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 52
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "KS",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   14
+  ],
+  "corrette": [
+   "B",
+   14
+  ],
+  "correzioni": {
+   "D72": 62,
+   "D74": 378,
+   "D75": 1923,
+   "D76": 376
+  },
+  "prima_differenza": {
+   "evento": 17,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 46,
+    "D74": 4,
+    "D76": 124
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "KS",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 77,
+   "D74": 88,
+   "D75": 881,
+   "D76": 64
+  },
+  "prima_differenza": {
+   "evento": 23,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Kha'Zix Mutating Horror:1@1",
+     "was_mighty"
+    ],
+    false,
+    true
+   ],
+   "correzioni": {
+    "D75": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "KS",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   15
+  ],
+  "corrette": [
+   "A",
+   15
+  ],
+  "correzioni": {
+   "D72": 26,
+   "D74": 76,
+   "D75": 1386,
+   "D76": 303
+  },
+  "prima_differenza": {
+   "evento": 31,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 3
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "KS",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D72": 5,
+   "D75": 206,
+   "D76": 1178
+  },
+  "prima_differenza": {
+   "evento": 148,
+   "campo": "state",
+   "tipo": "end",
+   "seat": null,
+   "point": null,
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett The Boss:1@1",
+     "ready"
+    ],
+    false,
+    true
+   ],
+   "correzioni": {
+    "D76": 2
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920001,
+  "matchup": "SK",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 214,
+   "D74": 22,
+   "D75": 1943,
+   "D76": 223
+  },
+  "prima_differenza": {
+   "evento": 39,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 50,
+    "D75": 18
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "SK",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   13
+  ],
+  "corrette": [
+   "A",
+   13
+  ],
+  "correzioni": {
+   "D72": 66,
+   "D74": 244,
+   "D75": 156,
+   "D76": 1122
+  },
+  "prima_differenza": {
+   "evento": 61,
+   "campo": "action",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "storiche": [
+    "GEAR",
+    2,
+    1
+   ],
+   "corrette": [
+    "GEAR",
+    2,
+    0
+   ],
+   "correzioni": {
+    "D74": 40
+   },
+   "origine": "ricerca"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "SK",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   18
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 58,
+   "D75": 3293,
+   "D76": 212
+  },
+  "prima_differenza": {
+   "evento": 31,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 52
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "SK",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   13
+  ],
+  "corrette": [
+   "A",
+   13
+  ],
+  "correzioni": {
+   "D72": 148,
+   "D73": 31,
+   "D74": 90,
+   "D75": 1195,
+   "D76": 576
+  },
+  "prima_differenza": {
+   "evento": 17,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 29,
+    "D76": 8
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "SK",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 582,
+   "D73": 43,
+   "D74": 1018,
+   "D75": 233,
+   "D76": 1054
+  },
+  "prima_differenza": {
+   "evento": 19,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 82,
+    "D74": 12,
+    "D75": 24,
+    "D76": 68
+   },
+   "origine": "partita"
+  }
+ }
+]

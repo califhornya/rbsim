@@ -1,0 +1,315 @@
+[
+ {
+  "seed": 920001,
+  "matchup": "EK",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 38
+  },
+  "prima_differenza": {
+   "evento": 108,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 4
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "EK",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   14
+  ],
+  "corrette": [
+   "B",
+   14
+  ],
+  "correzioni": {
+   "D72": 12,
+   "D75": 2
+  },
+  "prima_differenza": {
+   "evento": 88,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 2
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "EK",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D72": 12,
+   "D75": 2
+  },
+  "prima_differenza": {
+   "evento": 60,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "EK",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   14
+  ],
+  "corrette": [
+   "B",
+   14
+  ],
+  "correzioni": {
+   "D72": 10
+  },
+  "prima_differenza": {
+   "evento": 13,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "EK",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 28
+  },
+  "prima_differenza": {
+   "evento": 50,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920001,
+  "matchup": "KE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   11
+  ],
+  "corrette": [
+   "B",
+   11
+  ],
+  "correzioni": {
+   "D72": 28
+  },
+  "prima_differenza": {
+   "evento": 35,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 2
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "KE",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   12
+  ],
+  "corrette": [
+   "B",
+   12
+  ],
+  "correzioni": {}
+ },
+ {
+  "seed": 920003,
+  "matchup": "KE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D75": 2
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "KE",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   13
+  ],
+  "corrette": [
+   "A",
+   13
+  ],
+  "correzioni": {
+   "D72": 47
+  },
+  "prima_differenza": {
+   "evento": 86,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "KE",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {}
+ }
+]

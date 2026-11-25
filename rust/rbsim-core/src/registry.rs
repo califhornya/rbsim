@@ -249,6 +249,122 @@ pub struct Registry {
     pub by_name: HashMap<String, usize>,
     /// py: encoding._CARD_INDEX: a name's place in sorted(CARD_REGISTRY).
     pub vocab: HashMap<String, usize>,
+    /// The rules profile every game built on this registry plays (both
+    /// players, the search copies, the replays): see `Regole`.
+    pub regole: Regole,
+    /// sha256 (16 hex) of the registry as loaded, the profile's data
+    /// correction applied: the effective cards of the profile.
+    pub impronta: String,
+}
+
+/// The rules profile (decision of 25/11, docs/audit/AUDIT.md "Deviations
+/// after the freeze"). `Storiche`: the Python engine at 6427b90, deviations
+/// included (the default; the parity checks fix it). `D72D76`: the same with
+/// D72-D76 corrected, in the code and, for D74-D75, in the card data
+/// (`correggi_dati`, applied as the registry loads).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Regole {
+    Storiche,
+    D72D76,
+}
+
+thread_local! {
+    static CORREZIONI: std::cell::Cell<[u64; 5]> = const { std::cell::Cell::new([0; 5]) };
+}
+
+/// D72..D76 changed something in this thread (the real game or a search
+/// copy): what explains a divergence from the historical rules.
+pub fn conta(d: usize) {
+    CORREZIONI.with(|c| {
+        let mut v = c.get();
+        v[d - 72] += 1;
+        c.set(v);
+    });
+}
+
+/// The counts of D72..D76 in this thread.
+pub fn correzioni() -> [u64; 5] {
+    CORREZIONI.with(|c| c.get())
+}
+
+pub fn azzera_correzioni() {
+    CORREZIONI.with(|c| c.set([0; 5]));
+}
+
+/// The version of the card-data correction of the corrected profile.
+pub const CORREZIONE_DATI: &str = "D72-D76/1";
+
+impl Regole {
+    pub const STORICHE: &'static str = "6427b90";
+    pub const D72_D76: &'static str = "6427b90+D72-D76";
+
+    pub fn parse(s: &str) -> Result<Regole, String> {
+        match s {
+            Self::STORICHE => Ok(Regole::Storiche),
+            Self::D72_D76 => Ok(Regole::D72D76),
+            _ => Err(format!("regole sconosciute: {s:?} (note: {:?}, {:?})", Self::STORICHE, Self::D72_D76)),
+        }
+    }
+    pub fn name(self) -> &'static str {
+        match self {
+            Regole::Storiche => Self::STORICHE,
+            Regole::D72D76 => Self::D72_D76,
+        }
+    }
+    /// D72-D76 corrected.
+    pub fn corrette(self) -> bool {
+        self == Regole::D72D76
+    }
+}
+
+/// The card data of every representation the engine reads (the spec's
+/// fields, `params`, `merged`, `to_dict`, the instance's and the raw card's
+/// effect dicts) for one effect: `f` is applied to each dict.
+fn each_effect_dict(card: &mut Value, i: usize, f: &dyn Fn(&mut Map<String, Value>)) -> Result<(), String> {
+    let name = card["name"].as_str().unwrap_or("?").to_string();
+    let miss = || format!("correzione dati: {name}, effetto {i} mancante");
+    let spec = card["effects"].get_mut(i).and_then(|e| e.as_object_mut()).ok_or_else(miss)?;
+    f(spec);
+    for key in ["merged", "to_dict"] {
+        f(spec.get_mut(key).and_then(|v| v.as_object_mut()).ok_or_else(miss)?);
+    }
+    for path in [["inst", "effects"], ["raw", "effects"]] {
+        let d = card[path[0]][path[1]].get_mut(i).and_then(|e| e.as_object_mut()).ok_or_else(miss)?;
+        f(d);
+    }
+    Ok(())
+}
+
+/// The data correction of the corrected profile (CORREZIONE_DATI), on the
+/// registry as exported from Python (rust/data/registry.json stays the
+/// reproducible export of the reference):
+/// - D74, Pillaged Armory: "BUFF a friendly unit" names no place: both
+///   effects (on_play, on_conquer) `where: anywhere`;
+/// - D75, Sett Kingpin: "each buffed friendly unit at my battlefield" counts
+///   itself: no `exclude_self` in its target filter.
+pub fn correggi_dati(root: &mut Value) -> Result<(), String> {
+    let cards = root["cards"].as_array_mut().ok_or("registry: no cards")?;
+    let mut find = |n: &str| -> Result<usize, String> {
+        cards.iter().position(|c| c["name"] == n).ok_or(format!("correzione dati: {n} non c'è"))
+    };
+    let armory = find("Pillaged Armory")?;
+    let kingpin = find("Sett Kingpin")?;
+    for i in 0..2 {
+        each_effect_dict(&mut cards[armory], i, &|d| {
+            if d.contains_key("effect") || d.contains_key("target") {
+                d.insert("where".into(), Value::from("anywhere"));
+            }
+        })?;
+        let spec = cards[armory]["effects"][i].as_object_mut().unwrap();
+        spec.get_mut("params").and_then(|v| v.as_object_mut()).ok_or("correzione dati: params")?
+            .insert("where".into(), Value::from("anywhere"));
+    }
+    each_effect_dict(&mut cards[kingpin], 0, &|d| {
+        if let Some(tf) = d.get_mut("target_filter").and_then(|v| v.as_object_mut()) {
+            tf.remove("exclude_self");
+        }
+    })?;
+    Ok(())
 }
 
 fn s_opt(v: &Value) -> Option<String> {
@@ -274,7 +390,18 @@ impl Registry {
     }
 
     pub fn from_json(text: &str) -> Result<Registry, String> {
-        let root: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
+        Self::from_json_regole(text, Regole::Storiche)
+    }
+
+    /// The registry for a rules profile: the corrected one applies its data
+    /// correction (correggi_dati) as it loads.
+    pub fn from_json_regole(text: &str, regole: Regole) -> Result<Registry, String> {
+        use sha2::{Digest, Sha256};
+        let mut root: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
+        if regole.corrette() {
+            correggi_dati(&mut root)?;
+        }
+        let impronta = hex::encode(Sha256::digest(root.to_string().as_bytes()))[..16].to_string();
         let mut cards = Vec::new();
         let mut by_name = HashMap::new();
         for c in root["cards"].as_array().ok_or("registry: no cards")? {
@@ -351,7 +478,7 @@ impl Registry {
         let mut names: Vec<&String> = by_name.keys().collect();
         names.sort();
         let vocab = names.iter().enumerate().map(|(i, n)| ((*n).clone(), i)).collect();
-        Ok(Registry { cards, by_name, vocab })
+        Ok(Registry { cards, by_name, vocab, regole, impronta })
     }
 
     pub fn get(&self, name: &str) -> Option<&CardSpec> {

@@ -28,6 +28,27 @@ I test in `tests/rust` caricano davvero `riftbound_rs`. Se l'estensione manca fa
   - L'aggiornamento della rete non cambia.
 - In codice: `riftbound.rs.collect_rs.play` ha la stessa firma e lo stesso ritorno di `riftbound.ai.ppo.collect.play`.
 
+## Profili delle regole
+
+Decisione del 25/11 (Astra, Matteo): un unico selettore, scelto all'avvio della partita e tenuto dal suo
+registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i replay.
+- `6427b90` (default): identico a Python, deviazioni comprese. Le verifiche di parità lo fissano in modo esplicito
+  (`scripts/rust/*.py`, `tests/rust/conftest.py`).
+- `6427b90+D72-D76`: D72-D76 corretti (`docs/audit/AUDIT.md`). Codice dietro `reg.regole.corrette()`; per D74 e
+  l'`exclude_self` di D75 una correzione dati versionata (`D72-D76/1`, `registry.rs: correggi_dati`) applicata al
+  caricamento: `rust/data/registry.json` resta l'esportazione riproducibile di Python.
+- Scelta: `--regole` in `scripts/ppo.py` e `scripts/diag/arena_mazzi.py` (variabile `RBSIM_REGOLE`, ereditata dai
+  worker); in codice `rust_bridge.build(..., regole=...)`, `rust_bridge.registry(regole)` (uno per thread e profilo).
+- Col profilo corretto le partite di training e dell'arena devono giocare su Rust (controllo prima del lancio); un
+  pannello diagnostico su Python riporta le regole storiche. Per allenare sul nuovo profilo `--init` in una nuova
+  cartella: una run non cambia profilo.
+- Provenienza: `regole` (il profilo), `regole_partite` (quelle di ciascun matchup), `registro.rust_effettivo`
+  (l'impronta del registro corretto) e `correzione_dati`; le righe dell'arena e la chiave di ripresa hanno le regole
+  del matchup (una riga senza = `6427b90`); accanto a ogni `ckpt_*.pt` di `ppo.py` un `ckpt_*.provenienza.json`.
+- `riftbound_rs.correzioni()`: quante volte D72..D76 hanno cambiato qualcosa in questo thread, ricerca compresa;
+  sul profilo corretto ogni decisione della traccia ne ha l'istantanea. `scripts/rust/confronto_regole.py` gioca le
+  stesse partite sui due profili e spiega la prima differenza.
+
 ## Contratti
 
 ### Stato e copie
@@ -102,6 +123,7 @@ EK; minuscola = la lista con tutta la sideboard nel mazzo, es. `Er`) e `--posti`
 | `scripts/rust/posizioni_rengar.py [--caso X]` | Posizioni mirate per i rami rari di Rengar (equipaggiamento in base dopo Thrill of the Hunt, gear schierato ucciso, Mech, Seat of Power, Sunken Temple, Acceptable Losses): tracce identiche e ramo eseguito. |
 | `scripts/rust/arena_parita.py --semi A-B --bot mano\|prior [--iterazioni 50] [--ckpt f.pt]` | Partite dell'arena a lavoro fisso: traccia della partita reale e ogni ricerca (menu, prior, visite, Q e W, mossa, nodi, mulligan). |
 | `scripts/rust/arena_mista.py --ckpt f.pt [--budget-rust 0.03 --budget-python 0.4]` | Arena mista a passo comune: due copie della stessa partita (Python e Rust); chi cerca a tempo passa il conteggio all'altra copia; traccia e ricerche controllate. |
+| `scripts/rust/confronto_regole.py --semi A-B --agenti mano mano [--iterazioni 50]` | Le stesse partite in Rust su `6427b90` e su `6427b90+D72-D76`: prima differenza, origine (partita o ricerca) e correzioni scattate. |
 | `scripts/rust/arena_mista_riprova.py --righe f.jsonl --seme S --posto-rust A --ckpt f.pt` | Rigioca una partita dell'arena mista coi conteggi registrati, senza cronometro; per la prima ricerca diversa, le simulazioni diverse. |
 
 ## Misure

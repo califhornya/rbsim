@@ -23,6 +23,12 @@ hit both. The owner's post-ban decks are `competitive_evelynn` and
 `competitive_khazix` (seventh pass); the two old files stay, with their tests
 and golden games, as engine fixtures.
 
+**After the freeze (2026-11-25):** D72-D76 found in games in the coach page, fixed in Rust on the
+rules profile 6427b90+D72-D76 (the default stays 6427b90, identical to Python; `docs/RUST.md`, "Profili
+delle regole"). Tests `tests/rust/test_d72_d76.py`, red first (`d6e5e32`), then the fixes (`92a42e8`).
+(section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
+`docs/bot/GIOCATE.md`, not registered here yet.
+
 **State (2026-11-19, ninth pass): 70 deviations found, 63 fixed, 7 open (D59-D65).**
 The ninth pass is the Chosen Champion's copies (D69-D70), met with 82FAW's
 Ivern list on RiftAtlas: the deck now loads as `competitive_ivern.json`.
@@ -149,6 +155,11 @@ From now on:
 | D68 | A copy of the game forgets "return to base on conquer" (`conquer_return` keyed by `id()`) | search copies | constructed (Relentless Pursuit) | fixed, `ca16a51` |
 | D69 | The deck loader refuses the Chosen Champion in the Main Deck | §103.3.b.1 | not in these decks; 82FAW's Ivern list (champion + 1) didn't load | fixed, `e2d6b2e` |
 | D70 | Hallowed Tomb returns only the card chosen as champion, not a copy in the trash | §103.3.a.3 | not in these decks (reachable since D69) | fixed, `c008776` |
+| D72 | Rengar Trophy Hunter can't be played to a battlefield where only enemy units are: from hand never, from the Champion Zone only at reaction speed | §822.1.b, §822.1.d, UNL-120 | Evelynn, Kha'Zix, Sett (hand), Rengar (champion): a missing option; seen by the owner in the coach page | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D73 | A unit played with AMBUSH into a showdown misses the battlefield's passives until the next recompute | §822, Packed Amphitheater | seen by the owner (Rengar Trophy Hunter at 6, not 7): the showdown's decisions see the wrong Might; combat is right | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -990,6 +1001,172 @@ the champion included: the Volibear example). Tests in
   board" already takes copies on the board (it asks for the name, not the
   champion). Sideboarding (`core/match.py`) swaps the champion with a copy by
   name: unchanged.
+
+## Deviations after the freeze (2026-11-24)
+
+Ordinary defects found after the Python engine was frozen (section "The Python
+engine is frozen"): written here, fixed once in Rust.
+
+**Fixed (25/11), decisions of Astra and the owner.** One selector of the rules,
+chosen as a game starts and held by its registry (both players, the search
+copies, the workers, the replays): `6427b90`, the default, identical to Python,
+which the parity checks fix explicitly; `6427b90+D72-D76`, the five corrected.
+D72, D73, D75 (the passive) and D76 are code behind the selector; D74 and D75's
+`exclude_self` are a versioned data correction (`D72-D76/1`) applied as the
+registry loads (`registry.rs: correggi_dati`; `rust/data/registry.json` stays
+the reproducible export of Python). D75 also recomputes the passives when a
+buff is spent or gained (a Kingpin spending its own buff alone is 5 at the
+next decision). Each fix counts when it changes something (`riftbound_rs.correzioni`),
+which explains a divergence from the historical rules
+(`scripts/rust/confronto_regole.py`). The coach page stays on the frozen Python
+engine ("Regole Python 6427b90"). Valley of Idols is not a defect: every unit
+played there may be buffed for [1].
+
+### D72. Rengar Trophy Hunter can't be played where only enemy units are
+
+- **Card.** Rengar Trophy Hunter (UNL-120): "AMBUSH (You may play me as a
+  REACTION to a battlefield where you have units.) I can be played to a
+  battlefield where there are enemy units (even if you don't have units
+  there.)" In the data: `{"effect": "ambush", "trigger": "passive",
+  "enemy_ok": true}`.
+- **Rule.** §822.1.b: AMBUSH is "I may be played to a battlefield where you
+  control Units" and "I have [Reaction] as long as I'm being played to" one.
+  §822.1.c: it adds valid locations when the unit is played, with no limit of
+  time. §822.1.d, the example: Rengar Trophy Hunter "expands the normal
+  permissions of the Ambush keyword to include battlefields where there are
+  enemy units".
+- **Seen.** In the coach page (24/11, Evelynn against Sett, turn 6, the
+  owner's main phase): Monastery of Hirana held by the opponent with Fiora
+  Victorious, Rakelstake empty, no unit of the owner at a battlefield, 5
+  energy and Body Power. Rengar Trophy Hunter in hand: only "Play in base".
+- **Minimal positions** (`_loop_with_rengar` and `_enemy` of
+  `tests/test_ambush.py`; A active, 10 energy, 5 Body Power, an enemy unit at
+  BF1, nothing of A at a battlefield):
+  1. Rengar Trophy Hunter in A's hand, no champion. Turn action: only
+     `("UNIT", 0, 0)` (base); expected base and BF1. Reaction:
+     `_ambush_unit_lanes` is `[]`, no unit play; expected BF1.
+  2. Rengar Trophy Hunter as A's Chosen Champion. Reaction:
+     `("CHAMPION", None, 1)` (right). Turn action: base only; expected base
+     and BF1.
+- **Engine.** `loop.py:_ambush_unit_lanes` (the hand, reaction speed) reads
+  only the AMBUSH keyword, not `enemy_ok`; `loop.py:_unit_play_destinations`
+  (the main phase, hand and Champion Zone) reads neither. Only
+  `loop.py:_ambush_legal_lanes` (the champion at reaction speed) has
+  `enemy_ok`. Rust is the same (`lp_dest.rs`: `unit_play_destinations`,
+  `ambush_unit_lanes`; `lp_costs.rs`: `ambush_legal_lanes`).
+- **Not a defect.** For an AMBUSH unit without `enemy_ok` the main phase
+  misses nothing: out of a contest, a battlefield where a side has units is
+  one it controls.
+- **Weight.** A missing option, in four of the five decks (Rengar Trophy
+  Hunter in Evelynn, Kha'Zix and Sett, Rengar's champion). The champion's
+  priors (`ekris_s12`) were trained without it; the Rust arena reproduces it.
+- **Fix (Rust).** The battlefields with enemy units join both lists for a
+  card whose `ambush` effect has `enemy_ok` (from hand and from the Champion
+  Zone, main phase and reaction speed); a unit played there makes the
+  battlefield contested, as `_deploy_ambush_champion` does. Red test first
+  with the two positions above.
+
+### D73. An AMBUSH play into a showdown misses the battlefield's passives
+
+- **Card.** Packed Amphitheater: "Champion units here have +1 [Might]."
+  Rengar Trophy Hunter is a Champion unit (Might 6).
+- **Seen.** In the coach page (24/11, Sett against Sett, turn 5): at Packed
+  Amphitheater the opponent's Fiora Victorious at 5 (4 + 1) and Rengar Trophy
+  Hunter, just played there with AMBUSH, at 6; the page's total 11. Expected
+  7 and 12.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup(active="B")`,
+  `scripted`): BF0 Packed Amphitheater, A's vanilla unit of Might 12 and B's
+  Fiora Victorious there, Rengar Trophy Hunter in B's hand;
+  `loop._play_ambush_unit(b, 0, 0)`. At A's showdown decision Rengar's
+  `might` is 6 (expected 7); with Rengar as B's Chosen Champion,
+  `loop._deploy_ambush_champion("B", 0)`: the same. The combat after it is
+  right (the unit of 12 dies: 5 + 7).
+- **Engine.** `loop.py:_play_ambush_unit` and `_deploy_ambush_champion` call
+  `_play_unit`, then `_run_showdown`, with no `_recompute_passives` in
+  between: the new unit's `passive_might` stays 0 until the next recompute.
+  Rust is the same (`lp_dest.rs:play_ambush_unit`,
+  `lp_costs.rs:deploy_ambush_champion`).
+- **Weight.** What the showdown's players see and decide on: the Observation
+  (the page, the PPO features, `table_value` of the searches), and every
+  check by Might during the showdown (not verified one by one: targets by
+  Might, damage that kills). Any battlefield or unit passive giving Might to
+  the unit just played.
+- **Fix (Rust).** Recompute the passives after the unit enters, before the
+  showdown. Red test first with the position above.
+
+### D74. Pillaged Armory buffs only a friendly unit at its own battlefield
+
+- **Card.** Pillaged Armory: "DEPLOY ... When you play this or when you
+  conquer here, BUFF a friendly unit." The buff names no place: any friendly
+  unit, in base or at any battlefield ("here" is only the conquer's place).
+- **Seen.** In the coach page (24/11, Sett against Sett): Fiora Victorious
+  saved by Sett The Boss (healed, exhausted, recalled to base), then the
+  Armory's buff at Packed Amphitheater: "bersaglio → Vi Peacekeeper (unica
+  scelta)". Fiora in base wasn't offered.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `choices`,
+  `act`): A's Vi Peacekeeper at BF0, Fiora Victorious in A's base, Pit Rookie
+  at BF1, Pillaged Armory in hand; "Play gear Pillaged Armory @BF0". The
+  choice `target:buff_unit` offers only Vi Peacekeeper; expected the three.
+- **Engine.** The card's two `buff_unit` effects (`on_play`, `on_conquer`,
+  `target: friendly_unit`) have no `where`; `effects.py:_resolve_targets`
+  then takes "the units here (a spell's battlefield, the source's)". Pit
+  Rookie, with the same verb, has `"where": "anywhere"`.
+- **Same encoding elsewhere.** In the five decks, effects of non-spells with
+  a single target and no `where`: Blitzcrank Impassive, Daisy!, Evelynn
+  Entrancing, Irresistible Faefolk, Janna Savior, Vi Peacekeeper (and Void
+  Assault, a spell). Not read against the print here; many say "here" or
+  move to "my location", where the default is right.
+- **Fix (Rust).** `where: anywhere` for both effects of Pillaged Armory. Red
+  test first with the position above.
+
+### D75. Sett Kingpin's Might from buffed friendly units never applies
+
+- **Card.** Sett Kingpin (champion, Might 5): "TANK ... I get +1 [Might] for
+  each buffed friendly unit at my battlefield." No "other": a buffed Kingpin
+  counts itself (the cards that leave themselves out say "another" or
+  "other", e.g. Wraith of Echoes, the "Other friendly units ..." examples of
+  §478). A buffed Kingpin alone: 5 + 1 (its buff) + 1 = 7.
+- **Seen.** In the coach page (24/11, Sett against Sett): a buffed Kingpin
+  at 6.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `unit`):
+  A's Sett Kingpin at BF0 with a buff, `_recompute_passives()`: Might 6
+  (expected 7). With a buffed Pit Rookie there too: still 6 (expected 8).
+- **Engine.** The card's effect is `grant_temporary_might_per_friendly`,
+  `trigger: passive`, `target_filter: {is_buffed: true, exclude_self: true}`.
+  `loop.py:_apply_passive_grant` folds only some verbs into
+  `passive_might`; this one is "safely ignored", so the passive never
+  applies (`docs/rust/RAPPORTO_SETT.md` already counted 0 executions). The
+  handler in `effects.py` would count every friendly unit, not the buffed
+  ones, and as temporary Might. `exclude_self` disagrees with the text.
+- **Weight.** Every Sett deck: the Kingpin is its champion, and Sett buffs
+  (Sett Brawler, Pit Rookie, Pillaged Armory, Call to Glory). In combat it
+  is 1 Might or more short; the champion's priors were trained this way.
+- **Fix (Rust).** A continuous +1 per buffed friendly unit at the Kingpin's
+  battlefield, itself included (none in base), recomputed with the other
+  passives. Red test first with the position above.
+
+### D76. A legend's "ready me" never readies it
+
+- **Card.** Sett The Boss: "If a buffed unit you control would die, you may
+  pay [rune], exhaust me, and spend its buff to heal it ... When you conquer,
+  ready me." Exhausted by a save, it is ready again when its player conquers.
+- **Seen.** Raised by the owner (24/11, Sett against Sett, coach page).
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `legend`,
+  `scripted`): A's legend Sett The Boss exhausted, a unit of A at BF0;
+  `loop._fire_scoring_trigger("on_conquer", bf, "A")`. The trigger goes on
+  the chain ("A TRIGGER on the chain: Sett The Boss (on_conquer)") and
+  resolves; the legend stays exhausted (expected ready).
+- **Engine.** The effect is `ready_unit`, `target: self`;
+  `effects.py:_resolve_targets` takes "self" from `_source_unit`, which looks
+  only at the units on the battlefields and in base: the legend's unit
+  (`legend_unit_A/B`) isn't there, so nothing is readied.
+- **Same encoding.** The other legends with a triggered `ready_unit` on
+  `self`: Irelia Blade Dancer (on conquer), Sivir Battle Mistress (when an
+  enemy unit dies). Not in the five decks.
+- **Weight.** Every Sett deck: after a save, a conquest in the same turn
+  should give the Boss another save; it doesn't.
+- **Fix (Rust).** "self" of a legend's ability is its legend unit. Red test
+  first with the position above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

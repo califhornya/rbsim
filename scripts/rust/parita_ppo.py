@@ -19,6 +19,9 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+import os  # noqa: E402
+# Le verifiche di parità con Python fissano le regole storiche (decisione del 25/11).
+os.environ["RBSIM_REGOLE"] = "6427b90"
 sys.path.insert(0, str(ROOT))
 
 FIELDS = ("x", "q", "src", "ctx", "otype", "ocards", "ofeats", "a", "logp", "v", "seat", "turn")
