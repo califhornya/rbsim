@@ -7,13 +7,11 @@ Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-53 unite).
 - PPO = la rete allenata giocando contro sé stessa; "prior" = le sue preferenze sulle mosse.
 - Bot a mano = la ricerca (MCTS: prova molte continuazioni) con una valutazione scritta a mano.
 - Campione = il bot a mano guidato dai prior di `ekris_s12/ckpt_040000.pt`.
-- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte.
-- Lavoro fisso = numero fisso di iterazioni per decisione (invece di un tempo).
+- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte. Lavoro fisso = iterazioni fisse.
 - Minuscola nei matchup degli script (`Er`) = la lista con tutta la sideboard nel mazzo.
 
 ## Obiettivo (Matteo, 24/11)
-Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi
-sono la prima tappa verificabile (ordine Rengar, Ivern, Sett, ciascuno con sideboard e test).
+Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi (con sideboard e test) la prima tappa.
 Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 
 ## Decisioni prese
