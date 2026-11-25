@@ -45,9 +45,9 @@ N=$(python -c "import json,sys; print(json.load(open('$OUT/misura.json'))['N_sug
 grep -E '^misura' "$OUT/misura.txt" >> "$OUT/riepilogo.txt"
 
 echo "[2/4] concordanza delle mosse a $N iterazioni ($(date +%H:%M), ~3-6 min)"
-python scripts/rust/decisione.py concordanza --matchup ES EK --semi 10 --iterazioni "$N" \
+python scripts/rust/decisione.py concordanza --matchup ES EK --semi 10 --iterazioni "$N" --ckpt "$CKPT" \
   > "$OUT/concordanza.txt" 2>&1 || echo "concordanza: fallita (vedi $OUT/concordanza.txt)" >> "$OUT/riepilogo.txt"
-{ echo "concordanza (N=$N):"; tail -4 "$OUT/concordanza.txt"; } >> "$OUT/riepilogo.txt"
+{ echo "concordanza (N=$N):"; tail -7 "$OUT/concordanza.txt"; } >> "$OUT/riepilogo.txt"
 
 echo "[3/4] forza a $N iterazioni ($(date +%H:%M), ~${M_FORZA} min)"
 python scripts/rust/calibra_campione.py forza --ckpt "$CKPT" --coppie ES=400 EK=400 --iterazioni "$N" --workers "$W" \

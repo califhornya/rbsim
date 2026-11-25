@@ -162,6 +162,19 @@ Rust costruisce la domanda, Python decide.
   gli altri su Python); in codice `riftbound.rs.arena_rs.game(task)` = `arena_bot._game(task)`.
 - Chiavi di ripresa dell'arena: checkpoint (percorso e hash), budget, motore, regole.
 
+## Rifare una decisione del campione
+
+Il campione (ricerca coi prior) rigiocato da capo con le impostazioni originali (`riftbound/rs/decisione_rs.py`); alla
+ricerca k fa più iterazioni (ganci `before`), poi la partita si ferma. Pesi casuali (`--pesi-casuali`) dove il checkpoint
+(default `runs/sett/ekris_s12/ckpt_040000.pt`) non c'è.
+- `scripts/rust/decisione.py rifai --pagina runs/coach/partite/X.json --turno 5 --iterazioni 42 200 1000 --attese "Vi Peacekeeper"`
+  (oppure `--autonoma ES:3:a --k 17`): mossa scelta, prime 6 per visite, attese (visite, q, rango); la prima riga dice se
+  a 42 la mossa originale si riproduce. `--tipo turno|reazione|showdown|tutti`, `--out F.json` per il dettaglio.
+- `decisione.py concordanza --matchup ES EK --semi 10 --iterazioni 200 [--campioni-per-tipo 20]`: quante mosse restano uguali.
+- `scripts/rust/episodi.py --matchup ES --semi 1-50`: cerca accumulo (§8) e spreco di Might (§7) nelle autonome; stampa i comandi `rifai`.
+- Limite: con i ganci il `win_probe` non gira (`search.rs`, `lockstep.is_none()`): dal turno in cui il campione decide con la
+  sonda il rifacimento può divergere; `rifai` confronta il prefisso e lo segnala (`riproduce`, `dopo_sonda`).
+
 ## Errori
 - Un ramo non portato dà `EngineError::NotPorted{dove, cosa}`, che risale sempre.
 - Le eccezioni che Python ignora (`except Exception` nelle dichiarazioni, `_Ignored`) sono ignorate allo stesso modo.
