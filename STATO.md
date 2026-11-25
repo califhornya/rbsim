@@ -32,7 +32,6 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Sideboard provata con liste variate (`riftbound/rs/mazzi.py`): il training non fa sideboarding.
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
 - Etichette dei `repr` Python: in Rust testo diverso con la stessa uguaglianza (carte per `uuid`).
-- Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
 - Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
 - (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
