@@ -735,3 +735,80 @@ def test_the_gold_reckless_innovator_plays_is_drawn_exhausted():
     extras = _board_extras(loop.gs, "A")
     assert extras["gear_exhausted"]["me"] == {"base": [True], "0": [], "1": []}
     assert _board_extras(loop.gs, "B")["gear_exhausted"]["opp"]["base"] == [True]
+
+
+def _gold_table(tmp_path, body_runes: int):
+    """The coach (A, no net) with `body_runes` Body runes channeled, a ready
+    Gold, Punch First in hand and Reckless Innovator in base."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, scripted, setup, unit
+
+    from riftbound.ai.coach import CoachAgent
+    from riftbound.core.player import Domain, Rune
+    loop, a, b = setup(active="A", rich=())
+    scripted(loop, a, b)
+    a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(body_runes)]
+    a.channel()
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.base_units.append(unit("Reckless Innovator"))
+    a.hand.append(card("Punch First"))
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    agent = CoachAgent(a, None, session)
+    a.agent, agent.gs, agent.loop = agent, loop.gs, loop
+    return loop, a, b, session, agent
+
+
+def _next_pending(session, end):
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    return session.pending
+
+
+def test_a_card_played_with_a_gold_ready_asks_how_to_pay(tmp_path):
+    """Matteo (25/11): players keep their runes and pay with Gold when they
+    have one. Played straight from the hand, the card asks how to pay; the
+    Gold is used first (its Power in the card's domain), then the card."""
+    import threading
+
+    from riftbound.core.player import Domain
+    loop, a, b, session, agent = _gold_table(tmp_path, 3)
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)])
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": texts.index("Lancia Punch First")})
+    p = _next_pending(session, end)
+    assert p["question"] == "Come paghi?" and p["source"] == "Punch First"
+    assert [o["text"] for o in p["options"]] == ["Con le rune: ricicli 2 rune", "Con il Gold: ricicli 1 runa"]
+    session.answer({"option": 1})
+    game.join(timeout=20)
+    assert not a.base_gear and len(a.rune_pool[Domain.BODY]) == 2 and a.base_units[0].might == 8
+    log = [e["text"] for e in session.events if e["who"] == "me"]
+    assert log[:3] == ["Punch First: Come paghi? → Con il Gold: ricicli 1 runa",
+                       "Usa Gold: Power Body per pagare Punch First", "Lancia Punch First"]
+
+
+def test_a_card_only_the_gold_pays_for_is_offered_with_it(tmp_path):
+    """One Body rune and a Gold: Punch First (two Body Power) is played only
+    with the Gold; the engine has none of it until the Gold is used. The page
+    offers it "col Gold", and plays the Gold first."""
+    import threading
+
+    from riftbound.core.player import Domain
+    loop, a, b, session, agent = _gold_table(tmp_path, 1)
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)])
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    assert "Lancia Punch First" not in texts
+    session.answer({"action": texts.index("Lancia Punch First (col Gold)")})
+    game.join(timeout=20)
+    assert session.pending is None
+    assert not a.base_gear and not a.rune_pool.get(Domain.BODY) and a.base_units[0].might == 8

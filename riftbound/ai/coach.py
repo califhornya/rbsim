@@ -113,7 +113,7 @@ _TYPES = {"UNIT": "unità", "SPELL": "magia", "GEAR": "equipaggiamento", "RUNE":
           "LEGEND": "leggenda", "CHAMPION": "campione", "BATTLEFIELD": "campo di battaglia"}
 
 _QUESTIONS = {
-    "target": "Scegli il bersaglio", "mode": "Quale effetto usare?",
+    "target": "Scegli il bersaglio", "mode": "Quale effetto usare?", "payment": "Come paghi?",
     "equip": "Su quale unità attaccare l'equipaggiamento?",
     "combat_damage_order": "Quale unità nemica colpire per prima in combattimento?",
     "cost_unit": "Quale unità usare per pagare il costo?", "discard": "Quale carta scartare?",
@@ -324,6 +324,146 @@ def spell_lane_free(loop, side: str, point: DecisionPoint, idx) -> bool:
         return False
     first = _cast_outcome(loop, side, lanes[0])
     return first is not None and all(_cast_outcome(loop, side, a) == first for a in lanes[1:])
+
+
+# Paying with Gold (Matteo, 25/11): its ability Adds a Power of any domain, so
+# the engine has it used before the card is played; the page asks how to pay
+# when a card is played, and plays the Golds first if that is the answer.
+_PAY_KINDS = ("UNIT", "SPELL", "GEAR", "CHAMPION", "HIDE")
+
+
+def _golds(loop, side: str) -> list:
+    """The ABILITY lanes of `side`'s ready gear that Add a Power of any domain (Gold)."""
+    return [i for i, e in enumerate(loop.activatable_abilities(side))
+            if e.get("type") == "gear_ability"
+            and getattr(e.get("eff"), "effect", None) == "gain_power_any_domain"]
+
+
+def _paid_card(loop, side: str, action):
+    """The card whose cost `action` pays (from hand, or the champion)."""
+    kind, idx = action[0], action[1]
+    p = loop.gs.get_player(side)
+    if kind == "CHAMPION" or (kind == "HIDE" and idx == "champion"):
+        return loop.gs.champion_A if side == "A" else loop.gs.champion_B
+    return p.hand[idx] if isinstance(idx, int) and 0 <= idx < len(p.hand) else None
+
+
+def _gold_domain(loop, side: str, card):
+    """The domain a Gold Adds to pay `card`: its own, or (several, or any)
+    the one the engine pays from first (Player.pay_power_of)."""
+    p = loop.gs.get_player(side)
+    domains = [card.cost_power_domain] if getattr(card, "cost_power_domain", None) \
+        else loop._power_domains(card)
+    return max(domains, key=p._power_left)
+
+
+def _runes_in_play(p) -> int:
+    return sum(len(rs) for rs in p.rune_pool.values())
+
+
+def _runes_spent(loop, side: str, point: DecisionPoint, action, golds: int, domain):
+    """The runes `action` recycles once `golds` Golds Added `domain` Power,
+    on a copy of the game; None if it can't be played so."""
+    from riftbound.core.loop import GameLoop
+    clone = loop.gs.clone()
+    copy = GameLoop(clone)
+    p = clone.get_player(side)
+
+    def chooser(_loop, kind, s, options, default, source):
+        return options.index(domain) if kind.startswith("domain") and s == side and domain in options else None
+    copy.chooser = chooser
+    try:
+        for _ in range(golds):
+            lanes = _golds(copy, side)
+            if not lanes:
+                return None
+            copy._apply_action(p, ("ABILITY", "ACTIVATED", lanes[0]))
+        if action not in [a.to_engine() for a in legal_actions(copy, point, side)]:
+            return None
+        before = _runes_in_play(p)
+        copy._apply_action(p, action)
+        return before - _runes_in_play(p)
+    except Exception:  # noqa: BLE001 — a comparison never stops the game
+        return None
+
+
+def payment_plans(loop, side: str, point: DecisionPoint, action) -> list:
+    """How `action` can be paid with `side`'s Golds: [(golds, domain, runes
+    recycled)], Golds used first (0: runes only, when the runes are enough),
+    each further Gold saving a rune. Empty when no Gold helps."""
+    if action[0] not in _PAY_KINDS:
+        return []
+    n = len(_golds(loop, side))
+    card = _paid_card(loop, side, action) if n else None
+    if card is None:
+        return []
+    domain = _gold_domain(loop, side, card)
+    plans: list = []
+    for k in range(n + 1):
+        runes = _runes_spent(loop, side, point, action, k, domain)
+        if runes is None:
+            continue
+        if plans and runes >= plans[-1][2]:
+            break
+        plans.append((k, domain, runes))
+    return plans if any(k for k, _, _ in plans) else []
+
+
+def gold_only_plays(loop, side: str, point: DecisionPoint, legal: list) -> list:
+    """The cards `side` can play only with its Golds' Power: [(action, info)],
+    the info as action_info gives it, read once the Golds are used."""
+    from riftbound.core.loop import GameLoop
+    lanes = _golds(loop, side)
+    if not lanes:
+        return []
+    p = loop.gs.get_player(side)
+    champ = loop.gs.champion_A if side == "A" else loop.gs.champion_B
+    domains: list = []
+    for card in list(p.hand) + ([champ] if champ is not None else []):
+        for d in ([card.cost_power_domain] if getattr(card, "cost_power_domain", None)
+                  else loop._power_domains(card)):
+            if d not in domains:
+                domains.append(d)
+    out: dict = {}
+    for domain in domains:
+        clone = loop.gs.clone()
+        copy = GameLoop(clone)
+        copy.chooser = lambda _l, kind, s, options, default, source, d=domain: \
+            options.index(d) if kind.startswith("domain") and s == side and d in options else None
+        try:
+            for _ in lanes:
+                copy._apply_action(clone.get_player(side), ("ABILITY", "ACTIVATED", _golds(copy, side)[0]))
+            for a in legal_actions(copy, point, side):
+                t = a.to_engine()
+                if t[0] in _PAY_KINDS and t not in legal and t not in out:
+                    out[t] = action_info(copy, side, side, point, t)
+        except Exception:  # noqa: BLE001
+            continue
+    return [(t, info) for t, info in out.items() if payment_plans(loop, side, point, t)]
+
+
+def payment_text(golds: int, runes: int) -> str:
+    """A way to pay, in words: "Con il Gold: ricicli 1 runa"."""
+    how = "Con le rune" if not golds else "Con il Gold" if golds == 1 else f"Con {golds} Gold"
+    spent = "nessuna runa riciclata" if not runes else "ricicli 1 runa" if runes == 1 else f"ricicli {runes} rune"
+    return f"{how}: {spent}"
+
+
+class _GoldDomain:
+    """The domain a Gold Adds, chosen with the card it pays for: answers the
+    player's next "which domain" choice, then leaves the chain of choosers."""
+
+    def __init__(self, me: str, domain, loop, previous):
+        self.me, self.domain, self.loop, self.previous = me, domain, loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if side == self.me and kind.startswith("domain") and self.domain in options:
+            self.release()
+            return options.index(self.domain)
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        _unlink(self.loop, self)
 
 
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
@@ -704,6 +844,7 @@ class CoachAgent(NetGuidedMCTSAgent):
     def __init__(self, player, net, session: "CoachSession", **kw):
         super().__init__(player, net, **kw)
         self.session = session
+        self._gold_plan: Optional[dict] = None    # a card paid with Golds: the Golds first
 
     def decide_action(self, opponent, cards_played: int = 0):
         return self._coached(DecisionPoint.TURN_ACTION, cards_played=cards_played)
@@ -771,6 +912,10 @@ class CoachAgent(NetGuidedMCTSAgent):
             self._release_coach()
         side = self.player.name
         legal = legal_actions(self.loop, point, side)
+        if self._gold_plan is not None:        # a card paid with Golds: its next step
+            step = self._gold_step(side, point, [a.to_engine() for a in legal])
+            if step is not None:
+                return step
         if len(legal) <= 1:
             if point == DecisionPoint.REACTION:
                 self.session.notice_chain()
@@ -778,6 +923,9 @@ class CoachAgent(NetGuidedMCTSAgent):
         self.session.thinking(point)
         tuples = [a.to_engine() for a in legal]
         infos = [action_info(self.loop, side, side, point, t) for t in tuples]
+        # Cards only the Golds' Power pays for: offered too, after the engine's moves.
+        gold_only = gold_only_plays(self.loop, side, point, tuples)
+        infos += [{**info, "text": info["text"] + " (col Gold)"} for _t, info in gold_only]
         suggestions = []
         ranked, total = [], 1
         if self.net is not None:           # without a net: no search, no advice
@@ -814,11 +962,31 @@ class CoachAgent(NetGuidedMCTSAgent):
                 self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
             corrected = int(answer["suggestion"]) != 0
         else:
-            action = tuples[int(answer["action"])]
+            i = int(answer["action"])
+            action = tuples[i] if i < len(tuples) else gold_only[i - len(tuples)][0]
             self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
             best = _split_key(suggestions[0]["key"])[0] if suggestions else None
             corrected = action != best
         auto = bool(answer.get("auto"))      # the net finishing the game on its own
+        plans = payment_plans(self.loop, side, point, action) if not auto and force is None else []
+        if plans:
+            pick = len(plans) - 1             # as many Golds as help
+            if len(plans) > 1:
+                card = _paid_card(self.loop, side, action)
+                pick = self.session.ask_choice("payment", side, [{"text": payment_text(k, r), "ref": None}
+                                                                 for k, _d, r in plans],
+                                               pick, getattr(card, "name", None))
+            golds, domain, _r = plans[pick]
+            if golds:
+                card = _paid_card(self.loop, side, action)
+                text = next((info["text"] for t, info in zip(tuples, infos) if t == action), None) \
+                    or next(info["text"] for t, info in gold_only if t == action).removesuffix(" (col Gold)")
+                self._gold_plan = {"left": golds, "domain": domain, "action": action, "point": point,
+                                   "card": getattr(card, "name", "?"), "text": text}
+                step = self._gold_step(side, point, tuples)
+                if self.net is not None:
+                    self.session.record(self.gs, side, legal, step, corrected)
+                return step
         if action != _PASS or force is not None:
             # A suggestion taken says the choice it makes too ("Fatto: parte lo
             # showdown → Shadow Clone: Usare questo effetto? Sì").
@@ -833,6 +1001,30 @@ class CoachAgent(NetGuidedMCTSAgent):
         if not auto and self.net is not None:   # no net, no training examples
             self.session.record(self.gs, side, legal, action, corrected)
         return action
+
+    def _gold_step(self, side: str, point: DecisionPoint, tuples: list):
+        """The next step of a card paid with Golds: a Gold (Adding the domain
+        the card needs), then the card. An Add ability keeps the player's
+        priority, so the steps follow one another. None: the plan is over or
+        no longer possible (the decision is asked as usual)."""
+        plan = self._gold_plan
+        if plan["point"] != point:
+            self._gold_plan = None
+            return None
+        lanes = _golds(self.loop, side)
+        gold = ("ABILITY", "ACTIVATED", lanes[0]) if lanes else None
+        if plan["left"] > 0 and gold in tuples:
+            plan["left"] -= 1
+            self.loop.chooser = _GoldDomain(side, plan["domain"], self.loop, self.loop.chooser)
+            domain = plan["domain"].name.title()
+            self.session.event("me", f"Usa Gold: Power {domain} per pagare {plan['card']}", move=True)
+            return gold
+        self._gold_plan = None
+        if plan["action"] not in tuples:
+            return None
+        self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
+        self.session.event("me", plan["text"], move=True)
+        return plan["action"]
 
 
 class CoachSession:

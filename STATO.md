@@ -61,8 +61,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Piltover Archive in cache (`riftbound/ai/card_images.py`, stessa cartella degli scenari), campi
   raddrizzati in orizzontale; chi inizia nel mulligan, nel turno e nel registro; le carte guardate in cima al mazzo
   (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. Playwright.
-- 25/11 pagina: magia uguale su ogni campo (Punch First: "a unit" anche in base) = una voce "Lancia X", poi il bersaglio;
-  `spell_lane_free` (`coach.py`) confronta i lanci su copie. Gear esauste ruotate. Motore invariato; `test_coach.py` 25 verdi.
+- 25/11 pagina (segnalazioni di Matteo, `docs/bot/SEGNALAZIONI.md`): magia uguale su ogni campo = una voce "Lancia X";
+  gear esauste ruotate; Gold pronto: "Come paghi?" (`payment_plans`) e "(col Gold)". Motore invariato; `test_coach.py` 27 verdi.
 - 25/11 D72-D76 corretti in Rust sul profilo `6427b90+D72-D76` (`docs/RUST.md` "Profili delle regole", AUDIT.md):
   test rossi prima (`tests/rust/test_d72_d76.py`), correzione dati D74/D75 al caricamento del registro, contatori
   delle correzioni. Storico dopo i fix: 600/600 identiche (autonome, replay, PPO, arena a lavoro fisso; semi
