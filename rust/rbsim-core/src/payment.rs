@@ -218,12 +218,16 @@ pub fn payment_options(g: &Game, side: Side, point: Point, action: &Action) -> V
                 }
             }
             for (acc, recycled) in outcomes {
+                let key = acc.unwrap_or(false); // py: a move that did not ask ACCELERATE counts as "No"
                 let fewest = if k == 0 {
                     None
                 } else {
-                    out.iter().filter(|o| o.golds == k - 1 && o.accelerate == acc).map(|o| sum(&o.recycled)).min()
+                    out.iter()
+                        .filter(|o| o.golds == k - 1 && o.accelerate.unwrap_or(false) == key)
+                        .map(|o| sum(&o.recycled))
+                        .min()
                 };
-                if out.iter().any(|o| o.golds == k && o.accelerate == acc && o.recycled == recycled) {
+                if out.iter().any(|o| o.golds == k && o.accelerate.unwrap_or(false) == key && o.recycled == recycled) {
                     continue;
                 }
                 if k != 0 && fewest.map_or(false, |f| sum(&recycled) >= f) {
@@ -231,6 +235,12 @@ pub fn payment_options(g: &Game, side: Side, point: Point, action: &Action) -> V
                 }
                 out.push(PayWay { golds: k, gold_domain, prefer, accelerate: acc, recycled });
             }
+        }
+    }
+    // py: the move asks it on some way: the others are "No"
+    if out.iter().any(|o| o.accelerate.is_some()) {
+        for o in out.iter_mut() {
+            o.accelerate.get_or_insert(false);
         }
     }
     out

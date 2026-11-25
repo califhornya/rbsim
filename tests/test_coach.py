@@ -833,6 +833,32 @@ def _ksante_table(tmp_path):
     return loop, a, b, session, agent
 
 
+def test_accelerate_payable_only_with_the_gold_has_no_gold_way_for_no():
+    """ACCELERATE affordable only with the Gold (Body power in the pool, no Body rune): the way where the move
+    asks nothing counts as No, so "No" offers no Gold and "Sì" only Gold-backed ways (the unit enters ready)."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, setup
+
+    from riftbound.ai.coach import CoachLoop, accelerate_ways, payment_options
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    from riftbound.core.player import Domain
+    loop, a, b = setup(active="A", rich=())
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.power_pool[Domain.BODY] = 1
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    cl = CoachLoop(loop.gs)
+    t = next(g.to_engine() for g in legal_actions(cl, DecisionPoint.TURN_ACTION, "A") if g.kind == "UNIT")
+    ways = payment_options(cl, "A", DecisionPoint.TURN_ACTION, t)
+    assert [(w["accelerate"], w["golds"]) for w in ways] == [(False, 0), (True, 1)]
+    assert [w["golds"] for _i, w in accelerate_ways(ways, False)] == [0]
+    assert [w["golds"] for _i, w in accelerate_ways(ways, True)] == [1]
+
+
 def _play_ksante(tmp_path, accelerate: bool):
     """Gioca K'Sante Courageous; `accelerate` answers the page's ACCELERATE question, the last way pays.
     -> (the questions asked, a)."""

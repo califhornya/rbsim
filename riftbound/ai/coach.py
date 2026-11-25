@@ -641,14 +641,19 @@ def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
                 other = _pay_outcome(loop, side, point, action, k, gold_domain, prefer, False)
                 outcomes = [(True, got[0])] + ([(False, other[0])] if other is not None else [])
             for acc, recycled in outcomes:
+                key = bool(acc)                 # a move that did not ask ACCELERATE counts as "No"
                 fewest = min((sum(n for _d, n in o["recycled"]) for o in out
-                              if o["golds"] == k - 1 and o["accelerate"] == acc), default=None)
-                if any(o["golds"] == k and o["accelerate"] == acc and o["recycled"] == recycled for o in out):
+                              if o["golds"] == k - 1 and bool(o["accelerate"]) == key), default=None)
+                if any(o["golds"] == k and bool(o["accelerate"]) == key and o["recycled"] == recycled for o in out):
                     continue
                 if k and fewest is not None and sum(n for _d, n in recycled) >= fewest:
                     continue
                 out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer, "accelerate": acc,
                             "recycled": recycled, "text": payment_text(k, recycled)})
+    if any(o["accelerate"] is not None for o in out):   # the move asks it on some way: the others are "No"
+        for o in out:
+            if o["accelerate"] is None:
+                o["accelerate"] = False
     return out
 
 
@@ -722,9 +727,10 @@ def accelerate_asked(ways: list) -> bool:
 
 
 def accelerate_ways(ways: list, answer: bool) -> list:
-    """The ways for `answer` ("Sì" = True), (index in `ways`, way) pairs; a way
-    that asks nothing (None) is for both."""
-    return [(i, w) for i, w in enumerate(ways) if w.get("accelerate") in (None, answer)]
+    """The ways for `answer` ("Sì" = True), (index in `ways`, way) pairs; Sì: only
+    the ways that pay ACCELERATE; No: those that do not (False) or never ask (None)."""
+    return [(i, w) for i, w in enumerate(ways)
+            if (w.get("accelerate") is True if answer else w.get("accelerate") in (None, False))]
 
 
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",

@@ -359,14 +359,30 @@ def _ksante_python():
     return loop, a, b
 
 
-def _ksante_rust(answer_accelerate: bool):
+def _ksante_gold_only_python():
+    """ACCELERATE payable only with the Gold: Body power left in the pool but no Body rune to pay it, 6 energy."""
+    sys.path.insert(0, str(ROOT / "tests/audit"))
+    from audit_helpers import card, setup
+
+    from riftbound.core.player import Domain
+    loop, a, b = setup(active="A", rich=())
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.power_pool[Domain.BODY] = 1
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    return loop, a, b
+
+
+def _ksante_rust(answer_accelerate: bool, build=_ksante_python):
     """The position on Rust with a human seat A answering as the page does: K'Sante's move paid with the last way
     of those for `answer_accelerate`. -> (the K'Sante move's ways, events asked of the page, the units)."""
     import riftbound_rs
 
     from riftbound.rs import rust_bridge as rb
     from riftbound.rs.canon import canonical_state
-    pyloop, a, b = _ksante_python()
+    pyloop, a, b = build()
     state = canonical_state(pyloop.gs)
     g = riftbound_rs.Game.from_canonical(rb.registry("6427b90"), json.dumps(state), 1)
     g.set_script("B", main=[], showdown=[], reaction=[])
@@ -416,5 +432,28 @@ def test_ksante_page_answer_decides_the_engine_question(accelerate):
     K'Sante enters exhausted, Yes with the Gold way spends the Gold and K'Sante enters ready."""
     _, asked, units, _ = _ksante_rust(accelerate)
     assert "choice:optional:accelerate" not in asked
+    k = next(u for u in units if u["card"] == "K'Sante Courageous")
+    assert bool(k["ready"]) is accelerate
+
+
+def test_ksante_accelerate_payable_only_with_the_gold():
+    """No Gold way for "No" (the move not asking counts as No), only Gold ways for "Sì"; Python = Rust."""
+    ways, _, _, pyloop = _ksante_rust(True, _ksante_gold_only_python)
+    assert ways is not None
+    assert [(w["accelerate"], w["golds"]) for w in ways] == [(False, 0), (True, 1)]
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    with plain_copies():
+        cl = loop_class()(pyloop.gs.clone())
+        t = next(g.to_engine() for g in legal_actions(cl, DecisionPoint.TURN_ACTION, "A") if g.kind == "UNIT")
+        from riftbound.ai import coach
+        py = [way_json(w) for w in coach.payment_options(cl, "A", DecisionPoint.TURN_ACTION, t)]
+    assert py == ways
+
+
+@pytest.mark.parametrize("accelerate", [False, True])
+def test_ksante_gold_only_page_answer(accelerate):
+    """The page answers with the last way of those for its answer: Sì pays with the Gold (ready), No leaves it."""
+    _, asked, units, _ = _ksante_rust(accelerate, _ksante_gold_only_python)
     k = next(u for u in units if u["card"] == "K'Sante Courageous")
     assert bool(k["ready"]) is accelerate
