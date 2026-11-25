@@ -1,7 +1,7 @@
 """The coach page on the Rust engine (25/11, phase 4).
 
 `CoachSession.new_game` plays on Rust, with the rules profile `regole` (default
-6427b90+D72-D77), a game between two lists the Rust engine covers
+6427b90+D72-D80), a game between two lists the Rust engine covers
 (`arena_rs.COPERTI`) against the champion ("campione") or "simple_trade"; the net's
 advice and "La rete" stay on Python (6427b90, the frozen engine). The page is the
 same: it reads the same JSON (`CoachSession.state()`).
@@ -199,9 +199,13 @@ class RustGame:
         if point == DecisionPoint.TURN_ACTION:
             self.chooser_on = False        # CoachAgent._release_coach
         if n <= 1:
-            if n and point == DecisionPoint.REACTION:
+            if n:
+                # The page never asks, but the board and the log must catch up with what came before
+                # (a combat's deaths, a point): else they land in the next turn's lines.
                 self._load(e)
-                s.notice_chain()
+                s._snapshot()
+                if point == DecisionPoint.REACTION:
+                    s.notice_chain()
             return 0 if n else None
         self._load(e)
         s.thinking(point)

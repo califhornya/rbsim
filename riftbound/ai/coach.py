@@ -25,7 +25,7 @@ a PPO checkpoint's priors, `budget` CPU seconds a decision; opponents()).
 
 The engine (25/11, phase 4): a game between two lists Rust covers (arena_rs.COPERTI),
 against the champion or the simple bot, plays on the Rust engine with the rules profile
-`regole` (default 6427b90+D72-D77; riftbound/ai/coach_rs.py, the champion there with a fixed
+`regole` (default 6427b90+D72-D80; riftbound/ai/coach_rs.py, the champion there with a fixed
 number of iterations a decision); the net's advice and "La rete" stay on Python (6427b90).
 `state()["regole"]` and games.jsonl say what was played.
 """
@@ -57,7 +57,7 @@ from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
 from riftbound.core.loop import NO_MORE, GameLoop
 from riftbound.core.player import Domain
-from riftbound.provenienza import REGOLE_D72_D77, REGOLE_PYTHON
+from riftbound.provenienza import REGOLE_D72_D80, REGOLE_PYTHON
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 CARDS_JSON = Path(__file__).resolve().parents[1] / "data" / "cards" / "all_cards.json"
@@ -1209,6 +1209,7 @@ class CoachAgent(NetGuidedMCTSAgent):
             if step is not None:
                 return step
         if len(legal) <= 1:
+            self.session._snapshot()            # the page never asks: the log still catches up
             if point == DecisionPoint.REACTION:
                 self.session.notice_chain()
             return legal[0].to_engine() if legal else _PASS
@@ -1339,7 +1340,7 @@ class CoachSession:
     def __init__(self, net_path: Optional[Path] = None, out_dir: Path = Path("runs") / "coach",
                  iterations: int = 100, opponent_pause: float = 0.8,
                  campione_path: Optional[Path] = None, budget: float = 0.4,
-                 motore: str = "python", regole: str = REGOLE_D72_D77, iterazioni: Optional[int] = None):
+                 motore: str = "python", regole: str = REGOLE_D72_D80, iterazioni: Optional[int] = None):
         # The old AlphaZero net: the advice to the coach and the "net"
         # opponent. Without it the coach plays alone (no advice, nothing kept
         # for training).

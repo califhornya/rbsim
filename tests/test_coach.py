@@ -1080,3 +1080,30 @@ def test_a_game_is_saved_in_its_own_file(tmp_path):
     assert data["events"] and data["log"] and data["replay"]["seed"] == 5 and data["winner"]
     session.report("nota")
     assert json.loads(files[0].read_text(encoding="utf-8"))["reports"][0]["note"] == "nota"
+
+
+def test_a_forced_pass_still_brings_the_log_up_to_date_on_python(tmp_path, monkeypatch):
+    """The Python page too: a decision with one move only (not asked) takes the view first, so a
+    combat's deaths are logged in their own turn (Matteo, 25/11)."""
+    import random
+
+    from riftbound.ai import coach as C
+    from riftbound.ai.encoding import Observation
+    stale, forced = [], [0]
+    real = C.CoachAgent._coached
+
+    def spy(self, point, *a, **k):
+        out = real(self, point, *a, **k)
+        s = self.session
+        if not s._replaying and s.view is not None and self.gs is not None:
+            forced[0] += 1
+            if s.view != Observation.from_state(self.gs, s.side).to_dict():
+                stale.append((point, self.gs.turn))
+        return out
+    monkeypatch.setattr(C.CoachAgent, "_coached", spy)
+    session = _session(tmp_path)
+    session.new_game(ZED, SHEN, seat="A", opponent="simple_trade", seed=3)
+    rng = random.Random(1)
+    _play(session, lambda p: {"option": 0} if p["type"] == "choice" else {"return": []} if p["type"] == "mulligan"
+          else {} if p["type"] == "notice" else {"action": rng.randrange(len(p["actions"]))}, timeout=300)
+    assert forced[0] > 5 and not stale, stale[:5]

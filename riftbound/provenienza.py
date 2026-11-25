@@ -3,7 +3,7 @@
 Ogni run di training o d'arena registra con che cosa è stata giocata:
 - `regole`: il profilo delle regole scelto (`--regole`, RBSIM_REGOLE): lo
   storico 6427b90 (il motore Python congelato), 6427b90+D72-D76 (Rust con
-  D72-D76 corretti) o 6427b90+D72-D77 (come questo, con D77; docs/audit/AUDIT.md); `regole_partite` quello che gioca
+  D72-D76 corretti), 6427b90+D72-D77 (come questo, con D77) o 6427b90+D72-D80 (come questo, con D78-D80; docs/audit/AUDIT.md); `regole_partite` quello che gioca
   davvero ciascun matchup (su Python sempre lo storico);
 - `agente_ppo`: la versione dell'agente PPO (PPOAgent.inner col contesto
   `made` legato agli oggetti, fix f8a50e4);
@@ -33,7 +33,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REGOLE_PYTHON = "6427b90"
 REGOLE_D72_D76 = "6427b90+D72-D76"
 REGOLE_D72_D77 = "6427b90+D72-D77"
-REGOLE = (REGOLE_PYTHON, REGOLE_D72_D76, REGOLE_D72_D77)
+REGOLE_D72_D80 = "6427b90+D72-D80"
+REGOLE = (REGOLE_PYTHON, REGOLE_D72_D76, REGOLE_D72_D77, REGOLE_D72_D80)
 
 
 def regole_scelte() -> str:

@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-50 unite). Matteo (25/11): la pagina sembra andare tutto bene.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-52 unite); lavoro su `claude/focused-cannon-khz3rg`, non unito.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -20,11 +20,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (24/11, Astra/Matteo) Python congelato: regole `6427b90`, agente PPO con `f8a50e4`.
   Un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
 - (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach; i consigli della vecchia rete
-  si scollegano (solo con `--net`, su Python). (25/11) La pagina gira su Rust col profilo D72-D77 dove Rust copre la partita.
+  si scollegano (solo con `--net`, su Python). (25/11) La pagina gira su Rust col profilo D72-D80 dove Rust copre la partita.
 - (25/11, Astra) Un selettore delle regole in Rust: `6427b90` (default, = Python; le verifiche di parità lo
-  fissano), `6427b90+D72-D76` o `6427b90+D72-D77` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
+  fissano), `6427b90+D72-D76`, `+D72-D77` o `+D72-D80` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
 - (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
+- (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo (D78-D80: `+D72-D80`).
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -53,8 +54,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `runs/coach/partite/`, il campione cerca prima la vittoria nel turno (`win_probe`; arena invariata).
 - 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
   `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
-- 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `test_d77.py`): storico 180/180 identiche
-  (`confronto_regole._delta` non attribuisce a D77 15 partite che lo contengono: da sistemare se si riusa).
+- 25/11 D77 corretto in Rust (`6427b90+D72-D77`, `test_d77.py`): storico 180/180 (`confronto_regole._delta` da sistemare).
+- 25/11 D78-D80 corretti (`6427b90+D72-D80`, pagina; `test_d78_d80.py`; Vex solo per il controllore): `tests/rust` 288, storico 200/200.
 - 25/11 pagina su Rust col profilo D72-D77 (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"):
   posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
   stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
@@ -68,15 +69,15 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: 5 partite Evelynn-Sett (poi 10), "Segnala" con TEMPO/PIANO.
+Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: partite col campione (4 il 25/11 in `docs/bot/partite/coach/`), "Segnala" (SEGNALAZIONI 17-25).
 Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi senza iterazioni = 42), `episodi.py` (§7/§8).
 
 ## Prossimi passi
-2. Due scenari, una correzione alla volta. §8 (Vi sul 6-6, ricostruito: non salvato; Rengar ora può entrare) e
+2. Due scenari, una correzione alla volta. §8 accumulo (SEGNALAZIONI 7, 17, 20: posizioni salvate in `partite/coach/`) e
    §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. In attesa: D78 (decide Matteo); Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+6. PR 53 (D78-D80, segnalazione 23 corretta, partite del 25/11) da unire. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
