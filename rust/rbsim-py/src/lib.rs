@@ -89,10 +89,12 @@ struct Game {
 impl Game {
     /// py: build_game(game_seed, deck_a_path, deck_b_path, first_player, max_turns)
     #[staticmethod]
-    fn build(reg: &Registry, seed: i64, deck_a_json: &str, deck_b_json: &str, first_player: &str, max_turns: i64) -> PyResult<Game> {
+    #[pyo3(signature = (reg, seed, deck_a_json, deck_b_json, first_player, max_turns, bf_a=None, bf_b=None))]
+    fn build(reg: &Registry, seed: i64, deck_a_json: &str, deck_b_json: &str, first_player: &str, max_turns: i64,
+             bf_a: Option<&str>, bf_b: Option<&str>) -> PyResult<Game> {
         let a = rbsim_core::setup::load_deck(deck_a_json).map_err(serr)?;
         let b = rbsim_core::setup::load_deck(deck_b_json).map_err(serr)?;
-        let g = rbsim_core::setup::build_game(reg.reg.clone(), seed, &a, &b, first_player, max_turns).map_err(serr)?;
+        let g = rbsim_core::setup::build_game(reg.reg.clone(), seed, &a, &b, first_player, max_turns, bf_a, bf_b).map_err(serr)?;
         Ok(Game { g, ppo: [None, None], sink: None, winner: None, turns: 0, search: [None, None], layers: None })
     }
 

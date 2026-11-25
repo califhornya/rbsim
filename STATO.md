@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); D77 e pagina su Rust su `claude/wonderful-bell-wjsdfz`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-47 unite); apertura della partita su `claude/brave-ramanujan-jk1cha`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -32,8 +32,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Sideboard provata con liste variate (`riftbound/rs/mazzi.py`): il training non fa sideboarding.
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
 - Etichette dei `repr` Python: in Rust testo diverso con la stessa uguaglianza (carte per `uuid`).
-- Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
 - Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
+- (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
+  comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
 
@@ -42,18 +43,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   verificata sul Mac col campione (20/20 a 50 iterazioni; Rust ×14,6 a partita).
 - 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie): bot Rust a 0,030 s contro Python a 0,400 s =
   0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**. Partita Rust a 0,03 s: 2,36 s.
-- 24/11 tappe Rengar e Ivern (`docs/rust/RAPPORTO_RENGAR.md`, `RAPPORTO_IVERN.md`, inventari): semi tenuti 2.000/2.000 e
-  3.120/3.120, pila con identità; Mac col campione: PPO 240/240 ciascuna, arena col prior 40/40 e 60/60.
-- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, `INVENTARIO_SETT.md`): costi aggiunti (Call to Glory), "spendi un
-  buff", `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin. Autonome 3.760/3.760, PPO 960/960, replay
-  640/640, arena 80/80; tenuti 4.320/4.320 con gli altri sei matchup (`docs/rust/misure/tenuti_sett_*.json`), nessuna
-  divergenza. Perimetro `COPERTI` coi cinque mazzi fra loro; misure sul Mac in `docs/rust/misure/mac_sett_*`.
-- 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`): avversario "Il campione"
-  (`PPOPriorAgent`, `--campione`, `--budget 0.4`), `--net` facoltativo; lanciatori `allenatore.command`/`.bat`; immagini
-  locali o Piltover Archive in cache (`card_images.py`); carte guardate; Sett The Boss chiede quale unità salvare. Playwright.
-- 25/11 pagina (segnalazioni di Matteo, `docs/bot/SEGNALAZIONI.md`): magia uguale su ogni campo = una voce "Lancia X";
-  gear/rune esauste ruotate; "Come paghi?" (`payment_options`, `CoachLoop`); opzioni identiche una sola. Rewind ("Annulla
-  l'ultima mossa", R): `CoachLoop.record` + replay dal seme (`_Record`, `_Seat`, `CoachSession.rewind`). Motore invariato.
+- 24/11 tappe Rengar e Ivern (`docs/rust/RAPPORTO_RENGAR.md`, `RAPPORTO_IVERN.md`): tenuti e Mac col campione identici.
+- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, `INVENTARIO_SETT.md`): autonome, PPO, replay, arena e tenuti con gli
+  altri matchup identici (`docs/rust/misure/`); perimetro `COPERTI` coi cinque mazzi fra loro.
+- 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`, `--campione`, `--net`
+  facoltativo; lanciatori `allenatore.command`/`.bat`; immagini in cache `card_images.py`). Playwright.
+- 25/11 pagina (segnalazioni, `docs/bot/SEGNALAZIONI.md`): "Lancia X" unica, "Come paghi?", opzioni uniche, rewind (R).
 - 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
   `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
 - 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `9fcdc25`, contatore `D77`, `tests/rust/test_d77.py`): storico 180/180
@@ -65,12 +60,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `riftbound/ai/coach_rs.py` (campione a lavoro fisso N=42, rewind rigiocando le risposte, Sett The Boss, carte guardate);
   `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
-- 25/11 tavolo come il tappetino ufficiale (`coach_page.html`): rune stese una per carta, Base/Leggenda/Campione e
-  Mazzo delle rune/Rune/Mazzo/Cimitero, avversario ruotato; niente punti sul tavolo (Matteo).
+- 25/11 tavolo come il tappetino ufficiale (`coach_page.html`).
+- 25/11 apertura nella pagina (`ef54d27`, `704d578`): Rust `build_game(bf_a, bf_b)` come Python (senza scelte estrazioni
+  invariate; `test_campi.py`), flusso campo/d20/chi comincia su entrambi i motori (`CoachSession.scegli_campo`, `inizia`,
+  `/api/campo`, `/api/inizia`; `test_apertura.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
+  `tests/rust` 243, coach 59, apertura 11 verdi; Playwright fino al mulligan.
 
 ## In corso
 
 ## Prossimi passi
+0. Scelta ponderata del campione (`apertura.py`): tabella per matchup misurata sul Mac, campione contro sé stesso,
+   per campo mio × campo suo × chi comincia; campo = il migliore contro le scelte avversarie (col d20), inizio = confronto
+   a campi scoperti, se non significativo comincia. In attesa dell'ok di Matteo e dei suoi campi da Game 1. Poi la Bo3.
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
