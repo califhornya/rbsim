@@ -55,7 +55,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
   `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
 - 25/11 D77 corretto in Rust (`6427b90+D72-D77`, `test_d77.py`): storico 180/180 (`confronto_regole._delta` da sistemare).
-- 25/11 D78-D80 corretti (`6427b90+D72-D80`, pagina; `test_d78_d80.py`): `tests/rust` 286 verdi, storico 200/200.
+- 25/11 D78-D80 corretti (`6427b90+D72-D80`, pagina; `test_d78_d80.py`; Vex solo per il controllore): `tests/rust` 288, storico 200/200.
 - 25/11 pagina su Rust col profilo D72-D77 (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"):
   posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
   stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
