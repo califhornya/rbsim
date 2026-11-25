@@ -977,12 +977,20 @@ impl SearchCore {
     }
 
     /// Opt-in probe: a line of moves (and the commit of the pending move) that
-    /// wins this turn by conquests. Uses no `self.rng`. Some(first action) or None.
+    /// wins this turn by conquests and that the opponent cannot answer: the
+    /// opponent has no energy, a watcher agent on the opponent seat of every
+    /// copy flags any showdown/reaction option besides Pass (a branch where it
+    /// fires is dead), and a line found on one determinization must win on 8 more.
+    /// Uses no `self.rng`. Some(first action) or None.
     fn win_this_turn(&mut self, g: &Game, root_legal: &[Action], cards_played: i64) -> R<Option<Action>> {
         const PROBE_SEED: u64 = 0x5EED;
         const MAX_DEPTH: usize = 8;
         const MAX_APPLIES: usize = 3000;
+        const EXTRA_SEEDS: u64 = 8;
         let side = self.side;
+        if g.gs.player(side.other()).energy() != 0 {
+            return Ok(None);
+        }
         let n_bf = g.gs.battlefields.len() as i64;
         let need = g.gs.victory_score - g.gs.points[side.idx()];
         let unscored = g.gs.battlefields.iter().filter(|b| !b.scored_this_turn[side.idx()]).count() as i64;
@@ -991,76 +999,90 @@ impl SearchCore {
         }
         let mut applies = 0usize;
         let mut stack: Vec<Vec<Action>> = vec![Vec::new()];
-        // Depth-first: the stack holds prefixes still to expand (children pushed in reverse).
         while let Some(prefix) = stack.pop() {
-            let legal: Vec<Action> = if prefix.is_empty() {
-                root_legal.to_vec()
+            // The menu of this node, and whether a Pass here commits a pending move.
+            let (legal, commit): (Vec<Action>, bool) = if prefix.is_empty() {
+                (root_legal.to_vec(), matches!(g.gs.pending_move, Some((_, s)) if s == side))
             } else {
-                // rebuild the state of this node to list its menu
-                let Some(c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &prefix, cards_played, &mut applies, MAX_APPLIES) else {
-                    if applies > MAX_APPLIES { return Ok(None); }
+                let Some(mut c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &prefix, cards_played, &mut applies, MAX_APPLIES)
+                else {
+                    if applies > MAX_APPLIES {
+                        return Ok(None);
+                    }
                     continue;
                 };
-                let mut c = c;
                 match c.legal_actions(Point::TurnAction, side) {
-                    Ok(l) => l,
+                    Ok(l) => (l, matches!(c.gs.pending_move, Some((_, s)) if s == side)),
                     Err(_) => continue,
                 }
             };
-            let mut kids: Vec<Action> = Vec::new();
             for a in legal.iter() {
                 let ok = match a.kind {
                     AKind::Move => matches!(a.dst, Some(d) if d >= 0 && d < n_bf),
-                    AKind::Pass => true, // only the commit of a pending move; checked on the state below
+                    AKind::Pass => commit,
                     _ => false,
                 };
-                if ok {
-                    kids.push(a.clone());
+                if !ok {
+                    continue;
                 }
-            }
-            for a in kids.into_iter() {
                 let mut line = prefix.clone();
                 line.push(a.clone());
-                let Some(c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &prefix, cards_played, &mut applies, MAX_APPLIES) else {
-                    if applies > MAX_APPLIES { return Ok(None); }
+                let Some(c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &line, cards_played, &mut applies, MAX_APPLIES)
+                else {
+                    if applies > MAX_APPLIES {
+                        return Ok(None);
+                    }
                     continue;
                 };
-                let mut c = c;
-                if a.kind == AKind::Pass && !matches!(c.gs.pending_move, Some((_, s)) if s == side) {
-                    continue;
-                }
-                if applies >= MAX_APPLIES {
-                    return Ok(None);
-                }
-                applies += 1;
-                let cpt = cards_played + prefix.len() as i64;
-                if c.apply_action(side, &a, cpt).is_err() || c.recompute_passives().is_err() {
-                    continue;
-                }
                 match terminal_value(&c.gs, side) {
                     Some(v) if v == 1.0 => {
-                        if let Some(log) = self.log.as_mut() {
-                            let labels: Vec<String> = line.iter().map(|x| x.label.clone()).collect();
-                            log.push(json!({"k": "vittoria", "seat": side.name(), "turn": g.gs.turn, "line": labels}));
+                        let mut all = true;
+                        for k in 1..=EXTRA_SEEDS {
+                            let r = Self::probe_replay(&g.gs, side, PROBE_SEED + k, &line, cards_played, &mut applies, MAX_APPLIES);
+                            match r {
+                                Some(c2) if terminal_value(&c2.gs, side) == Some(1.0) => {}
+                                Some(_) => {
+                                    all = false;
+                                    break;
+                                }
+                                None => {
+                                    if applies > MAX_APPLIES {
+                                        return Ok(None);
+                                    }
+                                    all = false;
+                                    break;
+                                }
+                            }
                         }
-                        return Ok(Some(line[0].clone()));
+                        if all {
+                            if let Some(log) = self.log.as_mut() {
+                                let labels: Vec<String> = line.iter().map(|x| x.label.clone()).collect();
+                                log.push(json!({"k": "vittoria", "seat": side.name(), "turn": g.gs.turn, "line": labels}));
+                            }
+                            return Ok(Some(line[0].clone()));
+                        }
                     }
-                    Some(_) => continue,
-                    None => {}
+                    Some(_) => {}
+                    None => {
+                        if c.gs.active == side && line.len() < MAX_DEPTH {
+                            stack.push(line);
+                        }
+                    }
                 }
-                if c.gs.active != side || line.len() >= MAX_DEPTH {
-                    continue;
-                }
-                stack.push(line);
             }
         }
         Ok(None)
     }
 
-    /// A fresh copy of the root with `prefix` applied (counts every apply).
+    /// A fresh copy of the root (determinized with `seed`) with `prefix` applied, a watcher on
+    /// the opponent seat. None: an error, a response by the opponent, or the apply cap (then
+    /// `applies > max`). Stops early at a terminal state or when the turn passes to the other side.
     fn probe_replay(gs: &GameState, side: Side, seed: u64, prefix: &[Action], cards_played: i64,
                     applies: &mut usize, max: usize) -> Option<Game> {
         let mut c = search_copy(gs, side, seed);
+        let flag = Rc::new(std::cell::Cell::new(false));
+        let w: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(crate::agent::Watcher { responded: flag.clone() }));
+        c.agents[side.other().idx()] = Some(w);
         for (i, a) in prefix.iter().enumerate() {
             if *applies >= max {
                 *applies = max + 1;
@@ -1069,6 +1091,12 @@ impl SearchCore {
             *applies += 1;
             if c.apply_action(side, a, cards_played + i as i64).is_err() || c.recompute_passives().is_err() {
                 return None;
+            }
+            if flag.get() {
+                return None;
+            }
+            if terminal_value(&c.gs, side).is_some() || c.gs.active != side {
+                break;
             }
         }
         Some(c)
