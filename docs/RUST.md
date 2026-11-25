@@ -36,18 +36,24 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
   (`scripts/rust/*.py`, `tests/rust/conftest.py`).
 - `6427b90+D72-D76`: D72-D76 corretti (`docs/audit/AUDIT.md`). Codice dietro `reg.regole.corrette()`; per D74 e
   l'`exclude_self` di D75 una correzione dati versionata (`D72-D76/1`, `registry.rs: correggi_dati`) applicata al
-  caricamento: `rust/data/registry.json` resta l'esportazione riproducibile di Python.
+  caricamento: `rust/data/registry.json` resta l'esportazione riproducibile di Python. Resta com'è: le run già
+  allenate con lui restano riproducibili.
+- `6427b90+D72-D77`: il precedente più D77 (decisione del 25/11): dopo uno spostamento normale che non resta in
+  sospeso (`pending_move` vuoto) gli showdown messi in attesa dai suoi inneschi partono subito, come dopo ogni altra
+  azione (`lp_action.rs`, dietro `reg.regole.d77()`). Stessi dati carte e stessa impronta del registro di
+  `6427b90+D72-D76` (`corrette()` vale per entrambi). Profilo da usare per run e arene nuove.
 - Scelta: `--regole` in `scripts/ppo.py` e `scripts/diag/arena_mazzi.py` (variabile `RBSIM_REGOLE`, ereditata dai
   worker); in codice `rust_bridge.build(..., regole=...)`, `rust_bridge.registry(regole)` (uno per thread e profilo).
-- Col profilo corretto le partite di training e dell'arena devono giocare su Rust (controllo prima del lancio); un
+- Coi profili corretti le partite di training e dell'arena devono giocare su Rust (controllo prima del lancio); un
   pannello diagnostico su Python riporta le regole storiche. Per allenare sul nuovo profilo `--init` in una nuova
   cartella: una run non cambia profilo.
 - Provenienza: `regole` (il profilo), `regole_partite` (quelle di ciascun matchup), `registro.rust_effettivo`
   (l'impronta del registro corretto) e `correzione_dati`; le righe dell'arena e la chiave di ripresa hanno le regole
   del matchup (una riga senza = `6427b90`); accanto a ogni `ckpt_*.pt` di `ppo.py` un `ckpt_*.provenienza.json`.
-- `riftbound_rs.correzioni()`: quante volte D72..D76 hanno cambiato qualcosa in questo thread, ricerca compresa;
-  sul profilo corretto ogni decisione della traccia ne ha l'istantanea. `scripts/rust/confronto_regole.py` gioca le
-  stesse partite sui due profili e spiega la prima differenza.
+- `riftbound_rs.correzioni()`: quante volte D72..D77 hanno cambiato qualcosa in questo thread, ricerca compresa
+  (D77 solo sul suo profilo); sui profili corretti ogni decisione della traccia ne ha l'istantanea.
+  `scripts/rust/confronto_regole.py` gioca le stesse partite su `6427b90` e `6427b90+D72-D76` e spiega la prima
+  differenza.
 
 ## Contratti
 

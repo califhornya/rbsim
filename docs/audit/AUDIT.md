@@ -26,8 +26,9 @@ and golden games, as engine fixtures.
 **After the freeze (2026-11-25):** D72-D76 found in games in the coach page, fixed in Rust on the
 rules profile 6427b90+D72-D76 (the default stays 6427b90, identical to Python; `docs/RUST.md`, "Profili
 delle regole"). Tests `tests/rust/test_d72_d76.py`, red first (`d6e5e32`), then the fixes (`92a42e8`).
-D77 (25/11) is open: written, not fixed yet.
-(section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
+D77 (25/11) fixed in Rust on a new profile, 6427b90+D72-D77 (6427b90+D72-D76 stays as it is, so the
+runs trained on it stay reproducible): test `tests/rust/test_d77.py`, red first (`46afd65`), then the fix
+(`9fcdc25`) (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
 **State (2026-11-19, ninth pass): 70 deviations found, 63 fixed, 7 open (D59-D65).**
@@ -161,6 +162,7 @@ From now on:
 | D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D77 | A showdown staged by a trigger of a Standard Move that isn't held waits for the next action that isn't a move (or the end of the turn) | §462, Irresistible Faefolk | Sett (deck): seen by the owner, Pillaged Armory played and a defender buffed before the showdown | fixed in Rust on the profile 6427b90+D72-D77, `9fcdc25` |
 | D77 | A showdown a Standard Move's trigger stages (Irresistible Faefolk moving an enemy unit in) waits for the next action that isn't a move, or the end of the turn | §462 | Sett (Faefolk): open-state plays (gear, units, spells without ACTION) before that showdown; seen by the owner in the coach page | open: to be fixed in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
@@ -1172,7 +1174,8 @@ played there may be buffed for [1].
 
 ### D77. A showdown an effect stages during a Standard Move waits for the next action
 
-Open (25/11): written here, to be fixed in Rust like D72-D76.
+Fixed in Rust (25/11) on the profile 6427b90+D72-D77, `9fcdc25`; 6427b90 and
+6427b90+D72-D76 keep the behavior below.
 
 - **Card.** Irresistible Faefolk (Sett): "When I move to a battlefield, you
   may move an enemy unit to that battlefield."
@@ -1205,8 +1208,10 @@ Open (25/11): written here, to be fixed in Rust like D72-D76.
   without ACTION, more moves) before the showdown the effect started; here a
   buff on a defender.
 - **Fix (Rust).** After a MOVE that leaves no move held, run the staged
-  showdowns as after any other action. Red test first with the position
-  above.
+  showdowns as after any other action (`lp_action.rs`, behind
+  `regole.d77()`; counted as `D77` in `riftbound_rs.correzioni`). Red test
+  first with the position above (`46afd65`); a second test keeps the old
+  behavior on 6427b90+D72-D76.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
