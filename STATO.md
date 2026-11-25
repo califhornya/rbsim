@@ -71,7 +71,6 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
 
 ## In corso
-- Segnalazioni di Matteo: `docs/bot/SEGNALAZIONI.md`; giocate del campione: `GIOCATE.md` §7-§8.
 
 ## Prossimi passi
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
@@ -80,7 +79,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 3. Profilo corretto: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
 4. Pagina su Rust col profilo corretto (Matteo d'accordo, 25/11): D77 in Rust, agente umano nel ponte, vista dallo stato Rust, rifare pagamento/rewind.
-5. Scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
+5. Segnalazioni in `docs/bot/SEGNALAZIONI.md`; scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
