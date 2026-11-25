@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); D77 e pagina su Rust su `claude/wonderful-bell-wjsdfz`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-47 unite); apertura della partita su `claude/brave-ramanujan-jk1cha`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -34,6 +34,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - Etichette dei `repr` Python: in Rust testo diverso con la stessa uguaglianza (carte per `uuid`).
 - Chiavi di ripresa dell'arena: checkpoint (hash), budget, motore, regole (non il commit).
 - Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
+- (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
+  comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
 
@@ -68,9 +70,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 tavolo come il tappetino ufficiale (`coach_page.html`): rune stese una per carta, Base/Leggenda/Campione e
   Mazzo delle rune/Rune/Mazzo/Cimitero, avversario ruotato; niente punti sul tavolo (Matteo).
 
+- 25/11 apertura nella pagina (`ef54d27`, `704d578`): Rust `build_game(bf_a, bf_b)` come Python (senza scelte estrazioni
+  invariate; `test_campi.py`), flusso campo/d20/chi comincia su entrambi i motori (`CoachSession.scegli_campo`, `inizia`,
+  `/api/campo`, `/api/inizia`; `test_apertura.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
+  `tests/rust` 243, coach 59, apertura 11 verdi; Playwright fino al mulligan.
+
 ## In corso
 
 ## Prossimi passi
+0. Scelta ponderata del campione (`apertura.py`): tabella per matchup misurata sul Mac, campione contro sé stesso,
+   per campo mio × campo suo × chi comincia; campo = il migliore contro le scelte avversarie (col d20), inizio = confronto
+   a campi scoperti, se non significativo comincia. In attesa dell'ok di Matteo e dei suoi campi da Game 1. Poi la Bo3.
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
    --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).

@@ -29,4 +29,4 @@ Non implementato: la pagina gioca partite singole.
 ## Non osservato
 - Cosa succede al d20 in caso di pari: si suppone il ritiro (la pagina lo fa).
 - Bo3: §488.5, campi esclusi dopo una vittoria (non osservato su RiftAtlas, non implementato).
-- Dove vanno le carte del mulligan (in fondo al mazzo, come oggi nel motore, §116: da confermare).
+- Carte del mulligan: in fondo al mazzo (§117.3 Recycle, §417.1), come nel motore; su RiftAtlas non si vede.
