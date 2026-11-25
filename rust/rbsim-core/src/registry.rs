@@ -265,19 +265,21 @@ pub struct Registry {
 /// D77 (a Standard Move not held runs the showdowns its triggers staged).
 /// `D72D80`: D72-D77 plus D78 (an effect's move honors "can't move this
 /// turn"), D79 (a face-down play is a task) and D80 (no points after the win).
+/// `D72D81`: D72-D80 plus D81 (Call to Glory without the buff costs its energy).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Regole {
     Storiche,
     D72D76,
     D72D77,
     D72D80,
+    D72D81,
 }
 
 thread_local! {
-    static CORREZIONI: std::cell::Cell<[u64; 9]> = const { std::cell::Cell::new([0; 9]) };
+    static CORREZIONI: std::cell::Cell<[u64; 10]> = const { std::cell::Cell::new([0; 10]) };
 }
 
-/// D72..D80 changed something in this thread (the real game or a search
+/// D72..D81 changed something in this thread (the real game or a search
 /// copy): what explains a divergence from the historical rules.
 pub fn conta(d: usize) {
     CORREZIONI.with(|c| {
@@ -287,13 +289,13 @@ pub fn conta(d: usize) {
     });
 }
 
-/// The counts of D72..D80 in this thread.
-pub fn correzioni() -> [u64; 9] {
+/// The counts of D72..D81 in this thread.
+pub fn correzioni() -> [u64; 10] {
     CORREZIONI.with(|c| c.get())
 }
 
 pub fn azzera_correzioni() {
-    CORREZIONI.with(|c| c.set([0; 9]));
+    CORREZIONI.with(|c| c.set([0; 10]));
 }
 
 /// The version of the card-data correction of the corrected profile.
@@ -304,6 +306,7 @@ impl Regole {
     pub const D72_D76: &'static str = "6427b90+D72-D76";
     pub const D72_D77: &'static str = "6427b90+D72-D77";
     pub const D72_D80: &'static str = "6427b90+D72-D80";
+    pub const D72_D81: &'static str = "6427b90+D72-D81";
 
     pub fn parse(s: &str) -> Result<Regole, String> {
         match s {
@@ -311,12 +314,14 @@ impl Regole {
             Self::D72_D76 => Ok(Regole::D72D76),
             Self::D72_D77 => Ok(Regole::D72D77),
             Self::D72_D80 => Ok(Regole::D72D80),
+            Self::D72_D81 => Ok(Regole::D72D81),
             _ => Err(format!(
-                "regole sconosciute: {s:?} (note: {:?}, {:?}, {:?}, {:?})",
+                "regole sconosciute: {s:?} (note: {:?}, {:?}, {:?}, {:?}, {:?})",
                 Self::STORICHE,
                 Self::D72_D76,
                 Self::D72_D77,
-                Self::D72_D80
+                Self::D72_D80,
+                Self::D72_D81
             )),
         }
     }
@@ -326,27 +331,32 @@ impl Regole {
             Regole::D72D76 => Self::D72_D76,
             Regole::D72D77 => Self::D72_D77,
             Regole::D72D80 => Self::D72_D80,
+            Regole::D72D81 => Self::D72_D81,
         }
     }
     /// D72-D76 corrected (also in the profile that adds D77).
     pub fn corrette(self) -> bool {
-        matches!(self, Regole::D72D76 | Regole::D72D77 | Regole::D72D80)
+        matches!(self, Regole::D72D76 | Regole::D72D77 | Regole::D72D80 | Regole::D72D81)
     }
-    /// D77 corrected: in the D72-D77 profile and the one that adds D78-D80.
+    /// D77 corrected: in the D72-D77 profile and the ones that add D78-D81.
     pub fn d77(self) -> bool {
-        matches!(self, Regole::D72D77 | Regole::D72D80)
+        matches!(self, Regole::D72D77 | Regole::D72D80 | Regole::D72D81)
     }
-    /// D78 (an effect's move honors "can't move this turn"): only in D72-D80.
+    /// D78 (an effect's move honors "can't move this turn"): in D72-D80 and D72-D81.
     pub fn d78(self) -> bool {
-        self == Regole::D72D80
+        matches!(self, Regole::D72D80 | Regole::D72D81)
     }
-    /// D79 (a face-down play runs as a task): only in D72-D80.
+    /// D79 (a face-down play runs as a task): in D72-D80 and D72-D81.
     pub fn d79(self) -> bool {
-        self == Regole::D72D80
+        matches!(self, Regole::D72D80 | Regole::D72D81)
     }
-    /// D80 (no points once the game is won): only in D72-D80.
+    /// D80 (no points once the game is won): in D72-D80 and D72-D81.
     pub fn d80(self) -> bool {
-        self == Regole::D72D80
+        matches!(self, Regole::D72D80 | Regole::D72D81)
+    }
+    /// D81 (Call to Glory without the buff costs its energy): only in D72-D81.
+    pub fn d81(self) -> bool {
+        self == Regole::D72D81
     }
 }
 

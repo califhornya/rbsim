@@ -118,7 +118,7 @@ def main() -> None:
     ap.add_argument("--avversario-mano", action="store_true",
                     help="l'avversario è il bot a mano senza prior (solo --motore rust; senza --ckpt-avversario)")
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
-                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato), 6427b90+D72-D76, 6427b90+D72-D77 o 6427b90+D72-D80 "
+                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato), 6427b90+D72-D76, 6427b90+D72-D77, 6427b90+D72-D80 o 6427b90+D72-D81 "
                          "(Rust con D72-D76/D77 corretti: serve --motore rust e tutti i matchup su Rust)")
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
                     help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: i cinque mazzi fra loro, riconosciuti dal contenuto delle "

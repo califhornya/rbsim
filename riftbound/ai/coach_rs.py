@@ -1,7 +1,7 @@
 """The coach page on the Rust engine (25/11, phase 4).
 
 `CoachSession.new_game` plays on Rust, with the rules profile `regole` (default
-6427b90+D72-D80), a game between two lists the Rust engine covers
+6427b90+D72-D81), a game between two lists the Rust engine covers
 (`arena_rs.COPERTI`) against the champion ("campione") or "simple_trade"; the net's
 advice and "La rete" stay on Python (6427b90, the frozen engine). The page is the
 same: it reads the same JSON (`CoachSession.state()`).

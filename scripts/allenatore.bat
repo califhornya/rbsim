@@ -1,6 +1,6 @@
 @echo off
 rem Double-click: opens the coach page (scripts/coach.py) in the browser.
-rem Close this window to stop it. Engine: Rust (rules 6427b90+D72-D80) when Rust is
+rem Close this window to stop it. Engine: Rust (rules 6427b90+D72-D81) when Rust is
 rem installed (https://rustup.rs), the extension built here at every start; else Python.
 cd /d "%~dp0.."
 uv sync --extra rl || exit /b 1
