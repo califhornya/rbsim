@@ -15,6 +15,10 @@
 - Filtra sempre gli output dei comandi (head, tail, grep, wc). Niente log o dump completi.
 - Per test e build mostra solo l'esito e gli errori rilevanti.
 
+## Divisione del lavoro (Matteo, 25/11)
+- Il modello principale progetta, scrive specifiche brevi e controlla i risultati.
+- Il lavoro meccanico (scrivere codice da una specifica, test, verifiche, partite di prova) va a subagenti Sonnet con sforzo medio, con output già filtrato.
+
 ## STATO.md
 Aggiornalo a fine di ogni fase, sovrascrivendo (non accodando). Contenuto:
 - Obiettivo
