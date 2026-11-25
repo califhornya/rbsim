@@ -1209,6 +1209,7 @@ class CoachAgent(NetGuidedMCTSAgent):
             if step is not None:
                 return step
         if len(legal) <= 1:
+            self.session._snapshot()            # the page never asks: the log still catches up
             if point == DecisionPoint.REACTION:
                 self.session.notice_chain()
             return legal[0].to_engine() if legal else _PASS

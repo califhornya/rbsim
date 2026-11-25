@@ -402,3 +402,28 @@ def test_the_saved_log_follows_a_rewind(tmp_path):
         time.sleep(0.01)
     data = json.loads(next((tmp_path / "coach" / "partite").glob("*.json")).read_text(encoding="utf-8"))
     assert data["abandoned"] and data["rewinds"] == 1 and data["log"]
+
+
+def test_a_forced_pass_still_brings_the_log_up_to_date(tmp_path, monkeypatch):
+    """The coach's decision with one move only (Pass: the page never asks) still takes the view, so what
+    happened before it (a combat's deaths, a point) is logged in its own turn, not in the next one's
+    (Matteo, 25/11: "fine showdown e inizio turno avversario sovrapposti")."""
+    from riftbound.ai import coach_rs
+    from riftbound.ai.encoding import Observation
+    stale, forced = [], [0]
+    real = coach_rs.RustGame._decision
+
+    def spy(self, e):
+        out = real(self, e)
+        if len(e["menu"]) == 1 and not self.s._replaying:
+            forced[0] += 1
+            s = self.s
+            if s.view != Observation.from_state(s.gs, s.side).to_dict():
+                stale.append((e["point"], s.gs.turn))
+        return out
+    monkeypatch.setattr(coach_rs.RustGame, "_decision", spy)
+    session = _session(tmp_path)
+    session.new_game(_deck("E"), _deck("K"), seat="A", opponent="simple_trade", seed=5)
+    st, _ = _drive(session, random.Random(5))
+    assert st["status"] == "over" and forced[0] > 5
+    assert not stale, stale[:5]
