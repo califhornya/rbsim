@@ -1250,9 +1250,11 @@ Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `be38cf7`; 6427b90,
   controller (Vex) or always (Hunker Down: check the data's two encodings);
   whether such a unit may still be chosen (the CORE_RULES example: yes, the
   instruction is negated on resolution). Red test first.
-  Done: `move_unit_by_effect` (`lp_move.rs`) negates the move of a unit with `cant_move_turn == turn`, whoever
-  the mover is (Vex's and Hunker Down's restriction are the same field), counted as `D78`; the unit can still
-  be chosen. Not inventoried: the swap effect (`effects.rs`, two calls) negates each unit's move on its own.
+  Done (`566e002`, after `be38cf7`): `move_unit_by_effect` (`lp_move.rs`) takes the mover (the controller of the
+  spell/ability, §191.3) and negates the move, counted as `D78`, when the unit has `cant_move_any_turn == turn`
+  (unconditional: Hunker Down, Entrenched Boar) or `cant_move_turn == turn` and the mover is the unit's controller
+  (Vex Apathetic: the Vex player's own effects may still move it). The unit can still be chosen. The swap effect
+  (`effects.rs`, two calls, mover = actor) negates each unit's move on its own.
 
 ### D79. A face-down play outside a task splits its triggers
 
