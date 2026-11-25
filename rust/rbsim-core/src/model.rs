@@ -151,6 +151,11 @@ pub struct Unit {
     pub turn_abilities: Vec<(i64, Spec)>,
     pub win_xp_turn: i64,
     pub cant_move_turn: i64,
+    /// D78 (profile D72-D80 only): turn of an UNCONDITIONAL "can't move this turn"
+    /// (Hunker Down, Entrenched Boar): nobody's effect may move the unit. Vex
+    /// Apathetic ("They can't move it") sets only `cant_move_turn`: the unit's
+    /// controller cannot move it, the Vex player's own effects still can.
+    pub cant_move_any_turn: i64,
     pub equip_bonus_mult: i64,
     pub base_might_override: Option<i64>,
     pub moves_this_turn: i64,
@@ -203,6 +208,7 @@ impl Unit {
             turn_abilities: Vec::new(),
             win_xp_turn: -1,
             cant_move_turn: -1,
+            cant_move_any_turn: -1,
             equip_bonus_mult: 1,
             base_might_override: None,
             moves_this_turn: 0,

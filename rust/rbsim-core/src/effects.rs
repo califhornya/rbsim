@@ -109,8 +109,14 @@ impl Game {
             "cant_move_this_turn" => {
                 let t = spec.get("target").cloned().unwrap_or(Value::String("triggering_unit".into()));
                 let s = with(spec, "target", t);
+                // Entrenched Boar (target self) is unconditional; Vex Apathetic
+                // (triggering_unit) restricts only the unit's controller (D78).
+                let unconditional = self.gs.reg.regole.d78() && sstr(spec, "target", "") == "self";
                 for u in self.resolve_targets(ctx, &s, "none", None)? {
                     self.gs.unit_mut(u).cant_move_turn = self.gs.turn;
+                    if unconditional {
+                        self.gs.unit_mut(u).cant_move_any_turn = self.gs.turn;
+                    }
                 }
                 Ok(())
             }
@@ -1331,6 +1337,10 @@ impl Game {
         for unit in self.resolve_targets(ctx, &s, "none", Some(&prefer))? {
             if truthy(spec.get("cant_move")) {
                 self.gs.unit_mut(unit).cant_move_turn = self.gs.turn;
+                if self.gs.reg.regole.d78() {
+                    // Hunker Down: unconditional.
+                    self.gs.unit_mut(unit).cant_move_any_turn = self.gs.turn;
+                }
             }
             if !self.can_ready(unit) {
                 continue;
@@ -1603,7 +1613,7 @@ impl Game {
             if let Some((_, Some(sb))) = self.locate_unit(unit) {
                 ctx.extra.set("last_move_src", XVal::Bf(sb));
             }
-            if self.move_unit_by_effect(unit, dst)? {
+            if self.move_unit_by_effect(unit, dst, mover)? {
                 if truthy(spec.get("ready")) && self.can_ready(unit) {
                     self.gs.unit_mut(unit).ready = true;
                 }
@@ -1761,8 +1771,8 @@ impl Game {
         let Opt::Unit(target) = self.choose(&kind("target", spec), ctx.actor, &opts, Opt::Unit(base), Some(ctx.card))? else { unreachable!() };
         let tgt_loc = locate(self, target).unwrap();
         if named.is_some() {
-            self.move_unit_by_effect(me, tgt_loc)?;
-            self.move_unit_by_effect(target, my_loc)?;
+            self.move_unit_by_effect(me, tgt_loc, ctx.actor)?;
+            self.move_unit_by_effect(target, my_loc, ctx.actor)?;
             return Ok(());
         }
         if truthy(spec.get("take_equipment")) && !self.gs.unit(target).gear.is_empty() {

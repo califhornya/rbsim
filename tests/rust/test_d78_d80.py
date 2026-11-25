@@ -174,3 +174,25 @@ def test_d78_hunker_down_uses_the_same_restriction():
     g = _hunker_down_then_showstopper(D72_D77)
     g.run_segment(1)
     assert next(u for u in units(g) if u["card"] == "First Mate")["where"] != "base"
+
+
+def _void_assault_on_enemy(regole, restricted_by):
+    """A (Kha'Zix) casts Void Assault: its friendly unit and B's unit swap
+    battlefields... B's First Mate sits at BF1 with "can't move this turn" set
+    (`restricted_by`: "vex" = cant_move_turn only, what Vex Apathetic sets)."""
+    loop, a, b = setup(active="A")
+    loop.gs.turn = 6
+    legend(loop, "A", "Kha'Zix Voidreaver")
+    a.base_units.append(unit("Sett Kingpin"))
+    enemy = unit("First Mate")
+    enemy.cant_move_turn = loop.gs.turn
+    loop.gs.battlefields[1].add_unit("B", enemy)
+    a.hand.append(card("Void Assault"))
+    return rust(loop, regole, A={"main": ["Cast Void Assault"]})
+
+
+def test_d78_vex_restriction_binds_only_its_unit_controller():
+    g = _void_assault_on_enemy(D72_D80, "vex")
+    g.run_segment(1)
+    fm = next(u for u in units(g) if u["card"] == "First Mate")
+    assert fm["where"] == "base"                   # A's own effect moved B's Vex-stunned unit

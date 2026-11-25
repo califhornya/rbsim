@@ -220,6 +220,7 @@ pub fn from_canonical(reg: Rc<Registry>, tree: &Value, seed: i128) -> Result<Gam
         x.unmovable_by_enemies = o["unmovable_by_enemies"].as_bool().unwrap_or(false);
         x.win_xp_turn = i64_of(&o["win_xp_turn"]);
         x.cant_move_turn = i64_of(&o["cant_move_turn"]);
+        x.cant_move_any_turn = -1; // D78 field, not in the Python model
         x.equip_bonus_mult = o["equip_bonus_mult"].as_i64().unwrap_or(1);
         x.base_might_override = o["base_might_override"].as_i64();
         x.moves_this_turn = i64_of(&o["moves_this_turn"]);

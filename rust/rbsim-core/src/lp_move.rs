@@ -115,14 +115,17 @@ impl Game {
     }
 
     /// py: _move_unit_by_effect(unit, dst_bf)
-    pub fn move_unit_by_effect(&mut self, unit: UnitId, dst_bf: Option<usize>) -> R<bool> {
+    pub fn move_unit_by_effect(&mut self, unit: UnitId, dst_bf: Option<usize>, mover: Side) -> R<bool> {
         let Some((side, src_bf)) = self.locate_unit(unit) else { return Ok(false) };
         if src_bf == dst_bf {
             return Ok(false);
         }
-        if self.gs.reg.regole.d78() && self.gs.unit(unit).cant_move_turn == self.gs.turn {
+        if self.gs.reg.regole.d78()
+            && (self.gs.unit(unit).cant_move_any_turn == self.gs.turn
+                || (self.gs.unit(unit).cant_move_turn == self.gs.turn && mover == side))
+        {
             // D78 (profile 6427b90+D72-D80): "can't move this turn" (Vex Apathetic,
-            // Hunker Down) negates an effect's move too; the rest of the spell resolves.
+            // Hunker Down) negates an effect's move too (Vex: only its controller's); the rest of the spell resolves.
             crate::registry::conta(78);
             return Ok(false);
         }
