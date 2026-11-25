@@ -1,0 +1,17 @@
+rimonta_mac 25/11/2026 23:37; 16c9d44 Merge pull request #55 from califhornya/claude/focused-cannon-khz3rg; regole 6427b90+D72-D80
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi
+
+== candidato rimonta contro il campione (storica)
+
+== Arena su 2 matchup (25/11 23:37)
+candidato: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); avversario: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 138 iterazioni per ricerca + win probe + valutazione rimonta k=3.0 alpha=0.2 al candidato, 138 iterazioni per ricerca + win probe all'avversario; 9 processi
+regole fissate prima: ciascuno di EK limite inferiore > 0,47; ciascun blocco (ES), a pesi uguali, >= 0,52 e limite inferiore > 0,50; tutte -> promosso
+   EK 800 coppie, seed 90000-90799; ES 800 coppie, seed 96000-96799
+   provenienza in docs/bot/accumulo/arena_rimonta_20261125_2336/provenienza.jsonl; regole 6427b90+D72-D80; motore: EK rust, ES rust
+   Evelynn-Kha'Zix: 0.522 +- 0.018 (0.504-0.540); con Evelynn, comincia Evelynn 0.89; con Evelynn, comincia Kha'Zix 0.58; con Kha'Zix, comincia Evelynn 0.21; con Kha'Zix, comincia Kha'Zix 0.41
+   Evelynn-Sett: 0.533 +- 0.020 (0.513-0.553); con Evelynn, comincia Evelynn 0.56; con Evelynn, comincia Sett 0.27; con Sett, comincia Evelynn 0.59; con Sett, comincia Sett 0.71
+   blocco ES a pesi uguali: 0.533 +- 0.020 (0.513-0.553)
+   Evelynn-Kha'Zix tiene: SÌ (limite inferiore 0.504, soglia 0,47)
+   blocco ES: SÌ (punteggio 0.533, limite inferiore 0.513)
+   15 min da questo lancio
+   Esito: PROMOSSO

@@ -68,8 +68,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 correggono (è `table_value`). `accumulo` (k=3, alpha 0,2) bocciato in arena (EK 0,431, ES 0,465); `minaccia`/`corsa`
 (logistiche) non cambiano le mosse; `rimonta` (solo se si perde la corsa a campi fermi: Might in base verso il campo
 avversario più debole, eccesso sul campo sicuro ridotto) porta il §8 in corsa persa da 57% a 27% (ES), 52% a 19% (EK),
-invariato in corsa vinta. Arena sul Mac: `rimonta_mac.command`, in attesa. Tutte spente. Da correggere (Codex, PR 55):
-`rifai --valutazione storica` con `--valutazione-orig` non storica resta sull'originale (`cmd_rifai`, `_gioca`).
+invariato in corsa vinta. Arena (Mac, semi nuovi): EK 0,522 (0,504-0,540), ES 0,533 (0,513-0,553): passa. Tenuta sugli altri
+8 matchup: `rimonta_tenuta_mac.command`, in attesa; poi `coach.py --valutazione rimonta` di default e 2 partite ES di Matteo.
 Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
 Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
 

@@ -200,3 +200,30 @@ def test_rimonta_corsa_persa_campo_minacciato_il_rinforzo_regge():
     punti, att = (6, 6), "me"
     su, base = _caso(True, [12]), _caso(False, [12])  # need = 15 > 10: il rinforzo conta per intero
     assert _val(g, "rimonta", *su, punti, att) >= _val(g, "rimonta", *base, punti, att)
+
+
+def test_rifai_valutazione_storica_esplicita_e_un_override(monkeypatch):
+    """Review PR 55: --valutazione storica esplicita con --valutazione-orig non storica rifa' la decisione con
+    la storica (prima era ignorata); omessa, la decisione tiene la valutazione originale."""
+    import sys
+    sys.path.insert(0, str(ROOT / "scripts/rust"))
+    import decisione
+    from riftbound.rs import decisione_rs as D
+    viste = []
+
+    def finta(P, k, n, posizione=True, valutazione=None):
+        viste.append((n, valutazione, P.get("valutazione")))
+        return {"riproduce": True, "prefisso_ok": True, "dopo_sonda": False, "posizione": {}, "azione": "x", "uguale": True,
+                "classifica": [], "iterazioni": n}
+
+    monkeypatch.setattr(D, "rifai", finta)
+    monkeypatch.setattr(D, "elenca", lambda P: [{"turn": 1, "point": "turn_action", "n_menu": 2, "action": "a"}])
+    monkeypatch.setattr(D, "_prepara", lambda P: {"iterazioni": 138})
+    monkeypatch.setattr(D, "testo_posizione", lambda p: [])
+    base = ["rifai", "--autonoma", "ES:3:a", "--k", "0", "--valutazione-orig", "rimonta", "--iterazioni", "138", "200"]
+    decisione.main(base + ["--valutazione", "storica"])
+    esplicita = [v for n, v, _ in viste if n == 200]
+    assert esplicita == [("storica", 3.0, 0.2)] and viste[-1][2][0] == "rimonta"   # prefisso: ancora rimonta
+    viste.clear()
+    decisione.main(base)
+    assert [v for n, v, _ in viste if n == 200] == [None]
