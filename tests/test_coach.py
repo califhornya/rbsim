@@ -862,3 +862,38 @@ def test_the_runes_whose_energy_is_spent_are_drawn_exhausted():
     runes = _board_extras(loop.gs, "A")["runes"]["me"]
     assert [(r["domain"], r["ready"]) for r in runes] == [
         ("BODY", True), ("BODY", True), ("BODY", True), ("CHAOS", False), ("CHAOS", False)]
+
+
+def test_identical_triggers_are_not_ordered_by_hand(tmp_path):
+    """Two Pyke Returned at a battlefield, three enemy units die together: six
+    "once each turn" triggers (§383.3.e.1: none performed yet), two Golds.
+    The page asked to order six "abilità di Pyke Returned" it can't tell
+    apart (Matteo, 25/11); now it doesn't ask."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    bf = loop.gs.battlefields[0]
+    bf.units_A.extend([unit("Pyke Returned"), unit("Pyke Returned")])
+    dead = [unit("Pit Rookie"), unit("First Mate"), unit("Irresistible Faefolk")]
+    bf.units_B.extend(dead)
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    asked = []
+    game = threading.Thread(target=loop._route_deaths, args=([(u, "B") for u in dead], bf),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while game.is_alive() and time.time() < end:
+        if session.pending is not None:
+            asked.append(session.pending.get("question"))
+            session.answer({"option": 0})
+        time.sleep(0.005)
+    game.join(timeout=10)
+    assert not asked and [g.name for g in a.base_gear] == ["Gold", "Gold"]

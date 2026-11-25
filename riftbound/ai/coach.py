@@ -888,7 +888,15 @@ class _CoachChooser:
             gs = loop.gs
             described = [{"text": option_text(gs, side, o), "ref": option_ref(gs, side, o)}
                          for o in options]
-            return self.session.ask_choice(kind, side, described, default, getattr(source, "name", None))
+            # Options the page can't tell apart are one (Matteo, 25/11: two Pyke
+            # Returned, five enemy deaths, ten "abilità di Pyke Returned" to order).
+            keys = [(d["text"], d["ref"]) for d in described]
+            firsts = [i for i, k in enumerate(keys) if k not in keys[:i]]
+            if len(firsts) > 1:
+                shown = firsts.index(keys.index(keys[default])) if 0 <= default < len(keys) else 0
+                pick = self.session.ask_choice(kind, side, [described[i] for i in firsts], shown,
+                                               getattr(source, "name", None))
+                return firsts[pick] if 0 <= pick < len(firsts) else default
         return self.previous(loop, kind, side, options, default, source) if self.previous else None
 
     def release(self) -> None:
