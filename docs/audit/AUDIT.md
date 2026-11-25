@@ -1322,6 +1322,38 @@ Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `09d9384`; 6427b90,
   Done: `gain_points` (`lp_rules.rs`) gains nothing once `winner` is set, counted as `D80`; the game's end path
   (`result_now`, `victory`) is unchanged.
 
+### D81. Call to Glory without the buff costs 1 Power
+
+Collected (25/11) for the next package; every profile has it, Python too.
+
+- **Seen.** Raised by the owner (25/11, Evelynn-Sett, coach page on Rust,
+  6427b90+D72-D80, T3): Evelynn Entrancing at 5 (Hold 'Em) attacks, a buffed
+  Trifarian Captain (2) defends, Sett has no Energy left. The champion casts
+  Call to Glory on the Captain without spending a buff (no "spende il buff di"
+  in the log) and pays 1 Power from a recycled rune: the Captain is 5, the two
+  trade, and Sett The Boss saves the Captain, still buffed. The card says to
+  spend a buff and ignore the cost; without the buff it costs 3 Energy, which
+  Sett didn't have.
+- **Engine.** `_cost_extras` (Rust `lp_costs2.rs: cost_extras`) prices the buff
+  option as the whole printed cost off (`energy` 3, `power` 0, `buffs` 1).
+  `_choose_cost_extras` (`choose_cost_extras`) then prices "not spending it" as
+  the same cost plus 1 Power per buff kept. That is the rule of
+  `spend_buffs_for_power`, not of `spend_buff_free`: the 3 Energy taken off never
+  come back. Reproduced on both engines (0 Energy, a buffed unit, a rune to
+  recycle): options `({energy 3, power 0, buffs 1}, 0, None)` and
+  `({energy 3}, 0, 1)`; the second is paid with 1 Power, keeps the buff, gives +3.
+- **Weight.** Wherever the choice is asked: the search (champion and arena bots
+  explore it on their copies, so it's in the arena results with Sett), PPO's
+  `inner`, the human seat. With a buff around, Call to Glory costs at most
+  1 Power and the buff stays (Sett The Boss's save, Monastery of Hirana,
+  Sett Kingpin).
+- **Fix (Rust).** Behind the next profile's flag: for `spend_buff_free`, the
+  option without the buff puts back what the buff took off (`energy +
+  extras.energy`, `power + extras.power`), so it is offered only when the full
+  cost is affordable; `spend_buffs_for_power` unchanged. Red test first: the
+  position above, no option without the buff at 0 Energy; at 3 Energy, offered
+  and priced 3.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in

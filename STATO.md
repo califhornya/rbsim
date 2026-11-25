@@ -69,6 +69,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 gli altri 8 matchup 0,515-0,607 (tutti tengono). Bocciati `accumulo` (sempre), `minaccia`/`corsa` (non cambiano le mosse).
 Matteo: 2 partite Evelynn-Sett col campione nuovo; a fine partita «Quale giocata di Sett mi ha costretto a spendere una carta
 o a difendere il mio campo prima dell'ottavo punto?». Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
+D81 raccolto (25/11, segnalazione 26): Call to Glory senza buff costa 1 Power invece di 3 Energia (tutti i profili).
 
 ## Prossimi passi
 2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
