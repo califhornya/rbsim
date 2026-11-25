@@ -50,6 +50,75 @@ pub fn obs_summary(o: &Observation) -> Value {
 pub enum Valutazione {
     Storica,
     Accumulo { k: f64, alpha: f64 },
+    /// Storica + 0.30 * minaccia (vedi `threat`).
+    Minaccia,
+    /// Storica + w * minaccia, con w secondo la corsa ai punti (`race_info`): 0.45 se si perde, 0.15 se si vince, 0.30 altrimenti.
+    Corsa,
+}
+
+/// Corsa ai punti a campi fissi (solo le tenute segnano): -> (race, op_next_wins).
+/// La prossima Beginning Phase e' di chi NON e' attivo alla foglia (`o.active`); da li' si alternano le tenute
+/// fino a V (massimo 30 passi). race = +1 se il visualizzatore arriva prima, -1 se l'avversario, 0 se nessuno segna.
+/// op_next_wins: l'avversario arriva a V alla sua prossima tenuta prima del prossimo turno del visualizzatore.
+pub fn race_info(o: &Observation) -> (i64, bool) {
+    let me = o.viewer;
+    let h_me = o.battlefields.iter().filter(|b| b.controller == Some(me)).count() as i64;
+    let h_op = o.battlefields.iter().filter(|b| b.controller == Some(me.other())).count() as i64;
+    let v = o.victory_score;
+    let next = o.active.other();
+    let op_next_wins = next != me && o.opp_points + h_op >= v && h_op > 0;
+    if h_me == 0 && h_op == 0 {
+        return (0, op_next_wins);
+    }
+    let (mut pm, mut po, mut turno) = (o.my_points, o.opp_points, next);
+    for _ in 0..30 {
+        if turno == me {
+            pm += h_me;
+            if pm >= v {
+                return (1, op_next_wins);
+            }
+        } else {
+            po += h_op;
+            if po >= v {
+                return (-1, op_next_wins);
+            }
+        }
+        turno = turno.other();
+    }
+    (0, op_next_wins)
+}
+
+/// Minaccia in [0,1]: possibilita' del visualizzatore di conquistare un campo avversario al prossimo turno.
+/// Attaccanti = Might duratura in base + quella dei suoi GANKING su un altro campo; per ogni campo controllato
+/// dall'avversario t = logistica((A - D - 2) / 2), D = Might duratura avversaria li'; minaccia = max. 0 se
+/// `op_next_wins` (troppo tardi) o senza attaccanti. Non conta incantesimi che muovono o potenziano.
+pub fn threat(o: &Observation, op_next_wins: bool) -> f64 {
+    if op_next_wins {
+        return 0.0;
+    }
+    let me = o.viewer;
+    let base: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum();
+    let mut best = 0.0f64;
+    for (i, bf) in o.battlefields.iter().enumerate() {
+        if bf.controller != Some(me.other()) {
+            continue;
+        }
+        let mut a = base;
+        for (j, other) in o.battlefields.iter().enumerate() {
+            if j != i {
+                let mine = if me == Side::A { &other.a } else { &other.b };
+                a += mine.iter().filter(|u| u.keywords.contains(&"GANKING")).map(|u| u.lasting_might).sum::<i64>();
+            }
+        }
+        if a <= 0 {
+            continue;
+        }
+        let theirs = if me == Side::A { &bf.b } else { &bf.a };
+        let d: i64 = theirs.iter().map(|u| u.lasting_might).sum();
+        let t = 1.0 / (1.0 + (-((a - d) as f64 - 2.0) / 2.0).exp());
+        best = best.max(t);
+    }
+    best
 }
 
 /// py: handwritten.table_value
@@ -83,6 +152,18 @@ pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
         - o.opp_base_units.iter().map(|u| u.lasting_might).sum::<i64>();
     s += 0.03 * (base as f64);
     s += 0.03 * ((o.my_hand.len() as i64 - o.opp_hand_count as i64) as f64);
+    match val {
+        Valutazione::Minaccia => {
+            let (_, onw) = race_info(o);
+            s += 0.30 * threat(o, onw);
+        }
+        Valutazione::Corsa => {
+            let (race, onw) = race_info(o);
+            let w = if race < 0 { 0.45 } else if race > 0 { 0.15 } else { 0.30 };
+            s += w * threat(o, onw);
+        }
+        _ => {}
+    }
     s.tanh()
 }
 

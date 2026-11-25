@@ -106,12 +106,13 @@ def main(argv=None) -> int:
     ap.add_argument("--esempi", type=int, default=5)
     ap.add_argument("--posti", nargs="+", default=["A"], choices=["A", "B"])
     ap.add_argument("--iterazioni", type=int, default=D.ITERAZIONI_CAMPIONE)
-    ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo"],
+    ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa"],
                     help="valutazione delle foglie del campione (default storica)")
     ap.add_argument("--k-acc", type=float, default=3.0)
     ap.add_argument("--alpha", type=float, default=0.2)
     a = ap.parse_args(argv)
     extra = {"valutazione": (a.valutazione, a.k_acc, a.alpha)} if a.valutazione != "storica" else {}
+    val_orig = extra.get("valutazione")
     print(f"valutazione: {a.valutazione}" + (f" k={a.k_acc} alpha={a.alpha}" if extra else ""))
     might = carte_might()
     print("carte che aumentano la Might:", ", ".join(sorted(might)))
@@ -144,6 +145,8 @@ def main(argv=None) -> int:
                 cmd += f" --ckpt {a.ckpt}"
             if a.iterazioni != D.ITERAZIONI_CAMPIONE:
                 cmd += f" --iter-orig {a.iterazioni}"
+            if val_orig:  # la partita originale ha giocato con questa valutazione: il prefisso si riproduce solo con lei
+                cmd += f" --valutazione-orig {val_orig[0]}:{val_orig[1]}:{val_orig[2]}"
             extra = f"Might gia' {x['might_gia']}" + (f" vs {x['might_avv']}" if "might_avv" in x else "")
             print(f"  turno {x['turn']} {x['azione']}; {extra}; punti {x['punti'][0]}-{x['punti'][1]}\n    {cmd}")
     return 0
