@@ -245,6 +245,57 @@ impl Agent for ReplayAgent {
     }
 }
 
+/// A seat scripted by label prefixes (positions in tests; py: the Scripted
+/// of tests/audit/audit_helpers.py): at each decision of a point the next
+/// entry of its script, PASS once it runs out. An entry that isn't legal is
+/// an error naming the menu. Optional decisions keep the engine's baseline.
+pub struct ScriptAgent {
+    /// main, showdown, reaction
+    pub scripts: [VecDeque<String>; 3],
+}
+
+impl ScriptAgent {
+    fn pick(&mut self, g: &mut Game, side: Side, point: Point, i: usize) -> R<Action> {
+        let legal = g.legal_actions(point, side)?;
+        let pass = || Action::new(crate::agent::AKind::from_name("PASS").unwrap(), AIdx::None, None, None, String::new());
+        match self.scripts[i].pop_front() {
+            None => Ok(pass()),
+            Some(w) if w == "PASS" => Ok(pass()),
+            Some(w) => legal.iter().find(|a| a.label.starts_with(&w)).cloned().ok_or_else(|| {
+                let labels: Vec<&str> = legal.iter().map(|a| a.label.as_str()).collect();
+                EngineError::Agent(format!("script: {w:?} is not legal: {labels:?}"))
+            }),
+        }
+    }
+}
+
+impl Agent for ScriptAgent {
+    fn decide_action(&mut self, g: &mut Game, side: Side, _cp: i64) -> R<Action> {
+        self.pick(g, side, Point::TurnAction, 0)
+    }
+    fn decide_showdown_action(&mut self, g: &mut Game, side: Side, _bf: usize) -> R<Action> {
+        self.pick(g, side, Point::ShowdownAction, 1)
+    }
+    fn decide_reaction(&mut self, g: &mut Game, side: Side) -> R<Action> {
+        self.pick(g, side, Point::Reaction, 2)
+    }
+    fn decide_mulligan(&mut self, _g: &mut Game, _side: Side) -> R<Vec<i64>> {
+        Ok(Vec::new())
+    }
+    fn decide_optional(&mut self, _g: &mut Game, _side: Side, _card: CardId, _name: &str) -> R<bool> {
+        Ok(true)
+    }
+    fn decide_mode(&mut self, _g: &mut Game, _side: Side, _card: CardId, _n: i64) -> R<Option<i64>> {
+        Ok(None)
+    }
+    fn decide_predict_recycle(&mut self, _g: &mut Game, _side: Side, _card: CardId) -> R<bool> {
+        Ok(false)
+    }
+    fn has(&self, method: &str) -> bool {
+        !matches!(method, "decide_optional" | "decide_mode" | "decide_predict_recycle")
+    }
+}
+
 /// Plays back the chooser's answers of a Python trace.
 pub struct ReplayChooser {
     pub events: VecDeque<Value>,

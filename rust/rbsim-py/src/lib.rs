@@ -17,7 +17,7 @@ mod search_py;
 use rbsim_core::search::{Layers, SearchAgent, SearchCore};
 use rbsim_core::game::Game as CoreGame;
 use rbsim_core::registry::Registry as CoreRegistry;
-use rbsim_core::trace::{ReplayAgent, ReplayChooser, Sink, TraceAgent, TraceChooser};
+use rbsim_core::trace::{ReplayAgent, ReplayChooser, ScriptAgent, Sink, TraceAgent, TraceChooser};
 use rbsim_core::types::{EngineError, Side};
 
 fn perr(e: EngineError) -> PyErr {
@@ -43,13 +43,31 @@ struct Registry {
 
 #[pymethods]
 impl Registry {
+    /// `regole`: the rules profile ("6427b90", the default, or
+    /// "6427b90+D72-D76"); every game built on this registry plays it.
     #[new]
-    fn new(path: &str) -> PyResult<Self> {
+    #[pyo3(signature = (path, regole=None))]
+    fn new(path: &str, regole: Option<&str>) -> PyResult<Self> {
         let text = std::fs::read_to_string(path).map_err(|e| serr(e.to_string()))?;
-        Ok(Registry { reg: Rc::new(CoreRegistry::from_json(&text).map_err(serr)?) })
+        let regole = rbsim_core::registry::Regole::parse(regole.unwrap_or(rbsim_core::registry::Regole::STORICHE))
+            .map_err(serr)?;
+        Ok(Registry { reg: Rc::new(CoreRegistry::from_json_regole(&text, regole).map_err(serr)?) })
     }
     fn __len__(&self) -> usize {
         self.reg.cards.len()
+    }
+    #[getter]
+    fn regole(&self) -> &'static str {
+        self.reg.regole.name()
+    }
+    /// The effective cards' fingerprint (the profile's data correction applied).
+    #[getter]
+    fn impronta(&self) -> String {
+        self.reg.impronta.clone()
+    }
+    #[getter]
+    fn correzione_dati(&self) -> Option<&'static str> {
+        self.reg.regole.corrette().then_some(rbsim_core::registry::CORREZIONE_DATI)
     }
 }
 
@@ -211,6 +229,20 @@ impl Game {
         })
     }
 
+    /// A seat scripted by label prefixes (positions in tests): per point the
+    /// entries in order, PASS once a script runs out (rbsim_core ScriptAgent).
+    #[pyo3(signature = (seat, main=Vec::new(), showdown=Vec::new(), reaction=Vec::new()))]
+    fn set_script(&mut self, seat: &str, main: Vec<String>, showdown: Vec<String>, reaction: Vec<String>)
+                  -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(ScriptAgent {
+            scripts: [main.into(), showdown.into(), reaction.into()],
+        }));
+        self.g.agents[s.idx()] = Some(a);
+        self.g.gs.players[s.idx()].has_agent = true;
+        Ok(())
+    }
+
     /// The loop's chooser: each choice to the agent of the side making it
     /// (py: PPOChooser).
     fn set_side_chooser(&mut self) {
@@ -286,6 +318,44 @@ impl Game {
             Some(s) => serde_json::Value::Array(s.borrow().clone()).to_string(),
             None => "[]".into(),
         }
+    }
+
+    /// The units in play, for tests: JSON list of {side, where ("base",
+    /// "bf0"...), card, might (unit_might), ready, buffs}; legends too
+    /// (where "legend").
+    fn units(&self) -> String {
+        let gs = &self.g.gs;
+        let mut out = Vec::new();
+        let mut put = |side: Side, place: String, u: rbsim_core::types::UnitId| {
+            let un = gs.unit(u);
+            out.push(serde_json::json!({"side": side.name(), "where": place, "card": gs.name(gs.ucard(u)),
+                                        "might": gs.unit_might(u), "ready": un.ready, "buffs": un.might_counters}));
+        };
+        for s in Side::BOTH {
+            for &u in &gs.player(s).base_units {
+                put(s, "base".into(), u);
+            }
+            for (i, bf) in gs.battlefields.iter().enumerate() {
+                for &u in bf.units_for(s) {
+                    put(s, format!("bf{i}"), u);
+                }
+            }
+            if let Some(l) = gs.legend_unit[s.idx()] {
+                put(s, "legend".into(), l);
+            }
+        }
+        serde_json::Value::Array(out).to_string()
+    }
+
+    /// py: _recompute_passives (tests: the continuous Might of a position).
+    fn recompute_passives(&mut self) -> PyResult<()> {
+        self.g.recompute_passives().map_err(perr)
+    }
+
+    /// The rules profile this game plays (its registry's).
+    #[getter]
+    fn regole(&self) -> &'static str {
+        self.g.gs.reg.regole.name()
     }
 
     #[getter]
