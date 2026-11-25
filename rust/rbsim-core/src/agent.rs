@@ -126,6 +126,12 @@ pub trait Agent {
         let _ = (g, kind, side, options, default, source);
         Ok(None)
     }
+    /// A seat that is asked with the trace's event of its decision (a human):
+    /// the TraceAgent hands it the event it built before the menu's
+    /// legal_actions (which notes control) ran, see `trace::decision_event_for`.
+    fn wants_event(&self) -> bool {
+        false
+    }
     /// py: hasattr(agent, method) — the engine skips (or defaults) a
     /// decision the agent has no method for.
     fn has(&self, method: &str) -> bool {

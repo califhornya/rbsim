@@ -81,6 +81,13 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
 - Il chooser del loop è il port di `PPOChooser` (`SideChooser`): ogni scelta va all'`inner` dell'agente del lato che sceglie. Gli agenti sono quelli del gioco reale, anche quando si sceglie su una copia di dichiarazione.
 - Agenti Rust: `random`, `simple_trade` (con l'aiuto al pagamento delle abilità Add di `base_agent`) e PPO.
 
+### Posto umano e traccia in diretta
+- `Game.set_human_agent(seat, ask)`: ogni decisione del posto (mulligan, turn_action, reaction, showdown_action, anche con una sola opzione) e ogni scelta nella mossa (tutti i `choice`, più `decide_optional`, `decide_mode`, `decide_predict_recycle`) chiama `ask(event_json: str)`. L'evento è quello che la traccia registra (stesse funzioni di `trace.rs`, stesse chiavi, stato prima della risposta) senza i campi della risposta (`action`/`index`, `chosen`/`by`, `out`). Imposta il side chooser se il gioco non ne ha uno; da chiamare prima di `trace_on()`.
+- La risposta è un oggetto Python (non JSON) della forma del campo mancante: decisione = int indice in `menu`; scelta = int indice in `options_raw`; mulligan = lista di al più 2 indici distinti della mano; `decide_optional` e `decide_predict_recycle` = bool; `decide_mode` = int in `0..n` o `None`. Per una decisione vale anche la lista `[tipo, indice, corsia(, dst)]` (il campo `action` della traccia), giocata così com'è anche fuori dal menu: serve a bot e replay (`simple_trade` gioca azioni fuori dal menu), la pagina umana risponde con l'indice. Una risposta non valida (bool al posto di int, tipo sbagliato, indice fuori range) alza `ValueError` da `start()` / `run_segment()`.
+- `trace_on(watch=None)`: con `watch`, ogni evento registrato va anche a `watch(event_json: str)`, completo (risposta compresa), nello stesso ordine di `events()`.
+- Un'eccezione di `ask` o `watch` (anche una `BaseException`) esce da `start()` / `run_segment()` come lo stesso oggetto; il gioco è finito, se ne costruisce un altro. Dentro i callback non si usa il `Game`.
+- `correzioni` (profili D72+) è il contatore al momento della registrazione, dopo il lavoro dell'agente: la domanda a un umano lo porta com'era prima della risposta.
+
 ### Confine PPO
 Rust costruisce la domanda, Python decide.
 - Rust prepara osservazione, codifica, descrittori delle opzioni, contesto, domanda e sorgente.
