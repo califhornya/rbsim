@@ -28,7 +28,9 @@ rules profile 6427b90+D72-D76 (the default stays 6427b90, identical to Python; `
 delle regole"). Tests `tests/rust/test_d72_d76.py`, red first (`d6e5e32`), then the fixes (`92a42e8`).
 D77 (25/11) fixed in Rust on a new profile, 6427b90+D72-D77 (6427b90+D72-D76 stays as it is, so the
 runs trained on it stay reproducible): test `tests/rust/test_d77.py`, red first (`46afd65`), then the fix
-(`9fcdc25`) (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
+(`9fcdc25`) (section "Deviations after the freeze"). D78-D80 (25/11) fixed in Rust on a further profile,
+6427b90+D72-D80 (the other profiles stay as they are): tests `tests/rust/test_d78_d80.py` (red first, then
+each fix: D80 `09d9384`, D79 `11374fa`, D78 `be38cf7`). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
 **State (2026-11-19, ninth pass): 70 deviations found, 63 fixed, 7 open (D59-D65).**
@@ -163,9 +165,9 @@ From now on:
 | D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D77 | A showdown staged by a trigger of a Standard Move that isn't held waits for the next action that isn't a move (or the end of the turn) | §462, Irresistible Faefolk | Sett (deck): seen by the owner, Pillaged Armory played and a defender buffed before the showdown | fixed in Rust on the profile 6427b90+D72-D77, `9fcdc25` |
-| D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | open: in the package of fixes, when the owner says |
-| D79 | A card played from face down in a showdown or as a reaction: its own "when you play me" goes on the chain and resolves before the other triggers of the same play (Evelynn Agony's Embrace) trigger | §383.3, §383.4.a | Evelynn (Bedeviling Stranger + legend): seen by the owner in the coach page, the legend's draw/discard after the Stranger's bounce had resolved | open: in the package of fixes, when the owner says |
-| D80 | Points keep counting after the winning one: holding two battlefields at 7 ends 9 to 4 | victory at the Victory Score | Evelynn against Sett: seen by the owner in the coach page (end of game "9 a 4"); the winner is right | open: in the package of fixes, when the owner says |
+| D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | fixed in Rust on the profile 6427b90+D72-D80, `be38cf7` |
+| D79 | A card played from face down in a showdown or as a reaction: its own "when you play me" goes on the chain and resolves before the other triggers of the same play (Evelynn Agony's Embrace) trigger | §383.3, §383.4.a | Evelynn (Bedeviling Stranger + legend): seen by the owner in the coach page, the legend's draw/discard after the Stranger's bounce had resolved | fixed in Rust on the profile 6427b90+D72-D80, `11374fa` |
+| D80 | Points keep counting after the winning one: holding two battlefields at 7 ends 9 to 4 | victory at the Victory Score | Evelynn against Sett: seen by the owner in the coach page (end of game "9 a 4"); the winner is right | fixed in Rust on the profile 6427b90+D72-D80, `09d9384` |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1217,7 +1219,8 @@ Fixed in Rust (25/11) on the profile 6427b90+D72-D77, `9fcdc25`; 6427b90 and
 
 ### D78. "They can't move it this turn" doesn't stop a spell's move
 
-Open (25/11): recorded, not fixed (the owner's call).
+Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `be38cf7`; 6427b90,
+6427b90+D72-D76 and 6427b90+D72-D77 keep the behavior below.
 
 - **Card.** Vex Apathetic (Evelynn): "When an opponent plays a unit while
   I'm at a battlefield, STUN it. They can't move it this turn."
@@ -1242,16 +1245,19 @@ Open (25/11): recorded, not fixed (the owner's call).
   Vex against Showstopper; other move effects not inventoried yet.
 - **Weight.** Sett: Showstopper rescues a champion Vex stopped (here 7 Might
   on the battlefield instead of 5 stuck in base).
-- **Fix (Rust, to do).** Behind a new profile's flag: a move effect on a unit
+- **Fix (Rust).** Behind a new profile's flag: a move effect on a unit
   with `cant_move_turn == turn` is negated when the mover is the unit's
   controller (Vex) or always (Hunker Down: check the data's two encodings);
   whether such a unit may still be chosen (the CORE_RULES example: yes, the
   instruction is negated on resolution). Red test first.
+  Done: `move_unit_by_effect` (`lp_move.rs`) negates the move of a unit with `cant_move_turn == turn`, whoever
+  the mover is (Vex's and Hunker Down's restriction are the same field), counted as `D78`; the unit can still
+  be chosen. Not inventoried: the swap effect (`effects.rs`, two calls) negates each unit's move on its own.
 
 ### D79. A face-down play outside a task splits its triggers
 
-Open (25/11): recorded, not fixed (the owner collects reports; one package of
-fixes on a new profile, when the owner says).
+Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `11374fa`; 6427b90,
+6427b90+D72-D76 and 6427b90+D72-D77 keep the behavior below.
 
 - **Cards.** Bedeviling Stranger (HIDDEN; "When you play me, choose a
   battlefield. If there are 4 or more units there, you may return an enemy
@@ -1284,14 +1290,19 @@ fixes on a new profile, when the owner says).
 - **Weight.** Evelynn: the draw (and, on the opponent's turn, the discard)
   can't come before the Stranger's bounce; the opponent answers the two
   abilities apart.
-- **Fix (Rust, to do).** Behind the package profile's flag: run
+- **Fix (Rust).** Behind the package profile's flag: run
   `play_from_hidden` as a task (`as_task`), so the play's triggers are flushed
   together when it ends. Red test first with the position above; a second
   test keeps the old behavior on 6427b90+D72-D77.
+  Done: `play_from_hidden` (`lp_hidden.rs`) runs in `as_task` when no task is running, counted as `D79`.
+  The face-down spell case (Sprite Call with Evelynn's legend, checked): before, the legend's trigger was on the
+  chain alone and resolved before the spell was put on it; now the spell is on the chain and the trigger on top
+  of it, as from the Main Phase. Covered by the same `as_task`.
 
 ### D80. Points after the winning one
 
-Open (25/11): recorded, not fixed (package of fixes).
+Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `09d9384`; 6427b90,
+6427b90+D72-D76 and 6427b90+D72-D77 keep the behavior below.
 
 - **Seen.** Raised by the owner (25/11, game
   20261125_201243 in `docs/bot/partite/coach/`, coach page on
@@ -1303,9 +1314,11 @@ Open (25/11): recorded, not fixed (package of fixes).
   were still on. The winner and the end are right; the score isn't.
 - **Weight.** The score shown and saved (games, arena rows); anything that
   reads the points after the win (margins, values) sees one too many.
-- **Fix (Rust, to do).** Behind the package profile's flag: once a winner is
+- **Fix (Rust).** Behind the package profile's flag: once a winner is
   noted, `gain_points` gains nothing and the phase stops (check what else runs
   after the win). Red test first: 7 points, two battlefields held, 8 at the end.
+  Done: `gain_points` (`lp_rules.rs`) gains nothing once `winner` is set, counted as `D80`; the game's end path
+  (`result_now`, `victory`) is unchanged.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
