@@ -14,9 +14,9 @@ import pytest
 torch = pytest.importorskip("torch")
 
 from riftbound.ai.coach import CoachSession  # noqa: E402
-from riftbound.provenienza import REGOLE_D72_D77  # noqa: E402
+from riftbound.provenienza import REGOLE_D72_D80  # noqa: E402
 
-PROFILO = REGOLE_D72_D77
+PROFILO = REGOLE_D72_D80
 RUN = {}           # statistics of the full games, read by the last test
 
 

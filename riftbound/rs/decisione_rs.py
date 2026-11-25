@@ -29,7 +29,7 @@ import random
 import re
 from pathlib import Path
 
-from riftbound.provenienza import REGOLE_D72_D77
+from riftbound.provenienza import REGOLE_D72_D80
 
 ROOT = Path(__file__).resolve().parents[2]
 CKPT_DEFAULT = "runs/sett/ekris_s12/ckpt_040000.pt"
@@ -88,14 +88,14 @@ def _prepara(partita: dict) -> dict:
                  starter=(rp.get("starter") or random.Random(seed).choice(["A", "B"])).lower(),
                  # Files saved before 25/11 evening hold None for the default, which was then 42.
                  iterazioni=rp.get("iterazioni") or ITERAZIONI_PAGINA_PRIMA, probe=True,
-                 regole=rp.get("regole") or REGOLE_D72_D77, answers=rp["answers"],
+                 regole=rp.get("regole") or REGOLE_D72_D80, answers=rp["answers"],
                  ckpt=partita.get("ckpt") or d.get("info", {}).get("campione") or CKPT_DEFAULT)
     elif partita["tipo"] == "autonoma":
         mu = partita["matchup"]
         P.update(seed=partita["seed"], camp=partita.get("campione", "A"), umano=None,
                  deck_a=Path(DECK_OF[mu[0]]), deck_b=Path(DECK_OF[mu[1]]), bf_a=None, bf_b=None,
                  starter=str(partita.get("starter", "a")).lower(), iterazioni=partita.get("iterazioni", ITERAZIONI_CAMPIONE),
-                 probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D77, answers=None,
+                 probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D80, answers=None,
                  ckpt=partita.get("ckpt") or CKPT_DEFAULT)
     else:
         raise ValueError(f"tipo di partita sconosciuto: {partita['tipo']}")

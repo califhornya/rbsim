@@ -263,18 +263,21 @@ pub struct Registry {
 /// D72-D76 corrected, in the code and, for D74-D75, in the card data
 /// (`correggi_dati`, applied as the registry loads). `D72D77`: D72-D76 plus
 /// D77 (a Standard Move not held runs the showdowns its triggers staged).
+/// `D72D80`: D72-D77 plus D78 (an effect's move honors "can't move this
+/// turn"), D79 (a face-down play is a task) and D80 (no points after the win).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Regole {
     Storiche,
     D72D76,
     D72D77,
+    D72D80,
 }
 
 thread_local! {
-    static CORREZIONI: std::cell::Cell<[u64; 6]> = const { std::cell::Cell::new([0; 6]) };
+    static CORREZIONI: std::cell::Cell<[u64; 9]> = const { std::cell::Cell::new([0; 9]) };
 }
 
-/// D72..D77 changed something in this thread (the real game or a search
+/// D72..D80 changed something in this thread (the real game or a search
 /// copy): what explains a divergence from the historical rules.
 pub fn conta(d: usize) {
     CORREZIONI.with(|c| {
@@ -284,13 +287,13 @@ pub fn conta(d: usize) {
     });
 }
 
-/// The counts of D72..D77 in this thread.
-pub fn correzioni() -> [u64; 6] {
+/// The counts of D72..D80 in this thread.
+pub fn correzioni() -> [u64; 9] {
     CORREZIONI.with(|c| c.get())
 }
 
 pub fn azzera_correzioni() {
-    CORREZIONI.with(|c| c.set([0; 6]));
+    CORREZIONI.with(|c| c.set([0; 9]));
 }
 
 /// The version of the card-data correction of the corrected profile.
@@ -300,17 +303,20 @@ impl Regole {
     pub const STORICHE: &'static str = "6427b90";
     pub const D72_D76: &'static str = "6427b90+D72-D76";
     pub const D72_D77: &'static str = "6427b90+D72-D77";
+    pub const D72_D80: &'static str = "6427b90+D72-D80";
 
     pub fn parse(s: &str) -> Result<Regole, String> {
         match s {
             Self::STORICHE => Ok(Regole::Storiche),
             Self::D72_D76 => Ok(Regole::D72D76),
             Self::D72_D77 => Ok(Regole::D72D77),
+            Self::D72_D80 => Ok(Regole::D72D80),
             _ => Err(format!(
-                "regole sconosciute: {s:?} (note: {:?}, {:?}, {:?})",
+                "regole sconosciute: {s:?} (note: {:?}, {:?}, {:?}, {:?})",
                 Self::STORICHE,
                 Self::D72_D76,
-                Self::D72_D77
+                Self::D72_D77,
+                Self::D72_D80
             )),
         }
     }
@@ -319,15 +325,28 @@ impl Regole {
             Regole::Storiche => Self::STORICHE,
             Regole::D72D76 => Self::D72_D76,
             Regole::D72D77 => Self::D72_D77,
+            Regole::D72D80 => Self::D72_D80,
         }
     }
     /// D72-D76 corrected (also in the profile that adds D77).
     pub fn corrette(self) -> bool {
-        matches!(self, Regole::D72D76 | Regole::D72D77)
+        matches!(self, Regole::D72D76 | Regole::D72D77 | Regole::D72D80)
     }
-    /// D77 corrected: only in the D72-D77 profile.
+    /// D77 corrected: in the D72-D77 profile and the one that adds D78-D80.
     pub fn d77(self) -> bool {
-        self == Regole::D72D77
+        matches!(self, Regole::D72D77 | Regole::D72D80)
+    }
+    /// D78 (an effect's move honors "can't move this turn"): only in D72-D80.
+    pub fn d78(self) -> bool {
+        self == Regole::D72D80
+    }
+    /// D79 (a face-down play runs as a task): only in D72-D80.
+    pub fn d79(self) -> bool {
+        self == Regole::D72D80
+    }
+    /// D80 (no points once the game is won): only in D72-D80.
+    pub fn d80(self) -> bool {
+        self == Regole::D72D80
     }
 }
 
