@@ -79,7 +79,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 3. Profilo corretto: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
 4. Partita interattiva Evelynn-Sett su Rust col profilo corretto (dopo i fix, priorità di Astra).
-5. Scenario di GIOCATE.md §7: quante volte il campione spreca Call to Glory o Punch First.
+5. Scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`). D77 da correggere in Rust.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,

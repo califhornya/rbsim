@@ -26,6 +26,7 @@ and golden games, as engine fixtures.
 **After the freeze (2026-11-25):** D72-D76 found in games in the coach page, fixed in Rust on the
 rules profile 6427b90+D72-D76 (the default stays 6427b90, identical to Python; `docs/RUST.md`, "Profili
 delle regole"). Tests `tests/rust/test_d72_d76.py`, red first (`d6e5e32`), then the fixes (`92a42e8`).
+D77 (25/11) is open: written, not fixed yet.
 (section "Deviations after the freeze"). D71 is reserved for the Switcheroo proposal of
 `docs/bot/GIOCATE.md`, not registered here yet.
 
@@ -160,6 +161,7 @@ From now on:
 | D74 | Pillaged Armory buffs only a friendly unit at its own battlefield | Pillaged Armory (gear, DEPLOY) | Sett (deck): seen by the owner, a unit in base not offered | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
+| D77 | A showdown a Standard Move's trigger stages (Irresistible Faefolk moving an enemy unit in) waits for the next action that isn't a move, or the end of the turn | §462 | Sett (Faefolk): open-state plays (gear, units, spells without ACTION) before that showdown; seen by the owner in the coach page | open: to be fixed in Rust |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1167,6 +1169,44 @@ played there may be buffed for [1].
   should give the Boss another save; it doesn't.
 - **Fix (Rust).** "self" of a legend's ability is its legend unit. Red test
   first with the position above.
+
+### D77. A showdown an effect stages during a Standard Move waits for the next action
+
+Open (25/11): written here, to be fixed in Rust like D72-D76.
+
+- **Card.** Irresistible Faefolk (Sett): "When I move to a battlefield, you
+  may move an enemy unit to that battlefield."
+- **Seen.** Raised by the owner (25/11, Evelynn against Sett, coach page):
+  Sett moved Irresistible Faefolk from base to Packed Amphitheater, which it
+  controlled; the trigger moved the owner's Gutter Guardian there; Sett then
+  played Pillaged Armory (gear, DEPLOY, no ACTION) and buffed First Mate
+  before any showdown.
+- **Minimal position** (`tests/audit/audit_helpers.py`: `setup`, `scripted`,
+  `choices`, `act`): `setup(active="B")`; BF0: Pit Rookie and First Mate of
+  B (B controls it); BF1: Gutter Guardian of A; Irresistible Faefolk in B's
+  base, Pillaged Armory in B's hand; choices: the "you may" yes, the first
+  target. `act(loop, "B", "Move Irresistible Faefolk base→BF0")`. Gutter
+  Guardian is at BF0, `gs.staged_showdowns == [(0, "A")]`, no showdown, no
+  move held, empty chain; B's legal actions: Pass, Play gear Pillaged Armory
+  @BF0/@BF1, moves. Expected: the showdown at BF0 (A contesting it, as
+  `_run_staged_showdowns` starts it) once the trigger has resolved, before
+  B's next action ("once no chain or showdown is going on", §462); no gear
+  without ACTION while it goes on.
+- **Engine.** `loop.py:_apply_action` ends with `if kind != "MOVE":
+  self._run_staged_showdowns()` (Rust: `lp_action.rs`, the same): a MOVE is
+  left out because it may be held (`pending_move`, more units may join it).
+  A move that isn't held (to a battlefield its side controls, no enemy
+  there) leaves the staged showdown to the next action that isn't a move
+  (it runs after that action: after the gear here) or to the end of the
+  turn (`_end_turn`).
+- **Same encoding.** Every unit brought into a battlefield by a trigger of a
+  Standard Move that isn't held. In the five decks: Irresistible Faefolk.
+- **Weight.** Sett with Faefolk: plays of the open state (gear, units, spells
+  without ACTION, more moves) before the showdown the effect started; here a
+  buff on a defender.
+- **Fix (Rust).** After a MOVE that leaves no move held, run the staged
+  showdowns as after any other action. Red test first with the position
+  above.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
