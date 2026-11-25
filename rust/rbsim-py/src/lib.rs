@@ -37,6 +37,14 @@ fn seat_of(seat: &str) -> PyResult<Side> {
     }
 }
 
+fn parse_valutazione(nome: &str, k: f64, alpha: f64) -> PyResult<rbsim_core::search::Valutazione> {
+    match nome {
+        "storica" => Ok(rbsim_core::search::Valutazione::Storica),
+        "accumulo" => Ok(rbsim_core::search::Valutazione::Accumulo { k, alpha }),
+        _ => Err(pyo3::exceptions::PyValueError::new_err(format!("valutazione sconosciuta: {nome}"))),
+    }
+}
+
 #[pyclass(unsendable)]
 struct Registry {
     reg: Rc<CoreRegistry>,
@@ -257,6 +265,63 @@ impl Game {
             }
             None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
         }
+    }
+
+    /// Valutazione delle foglie: "storica" (default) o "accumulo" (k, alpha).
+    #[pyo3(signature = (seat, nome, k=3.0, alpha=0.2))]
+    fn set_search_valutazione(&mut self, seat: &str, nome: &str, k: f64, alpha: f64) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let v = parse_valutazione(nome, k, alpha)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().valutazione = v;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Diagnosi: solo la ricerca di indice `k` usa la valutazione (il resto della partita resta com'era).
+    #[pyo3(signature = (seat, k, nome, kk=3.0, alpha=0.2))]
+    fn set_search_valutazione_at(&mut self, seat: &str, k: usize, nome: &str, kk: f64, alpha: f64) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let v = parse_valutazione(nome, kk, alpha)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().valutazione_at = Some((k, v));
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Test: valore di una posizione costruita, visto dal posto A. Parte dall'osservazione reale della
+    /// partita e sovrascrive punti, mano, basi e campi: `bfs` = [(controllore "me"|"opp"|None,
+    /// [Might miei], [Might loro])], basi = liste di Might.
+    #[pyo3(signature = (nome, bfs, my_base, opp_base, k=3.0, alpha=0.2))]
+    fn valore_costruito(&mut self, nome: &str, bfs: Vec<(Option<String>, Vec<i64>, Vec<i64>)>, my_base: Vec<i64>,
+                        opp_base: Vec<i64>, k: f64, alpha: f64) -> PyResult<f64> {
+        let v = parse_valutazione(nome, k, alpha)?;
+        let mut o = rbsim_core::obs::Observation::from_state(&mut self.g.gs, Side::A);
+        let uv = |m: i64| rbsim_core::obs::UnitView {
+            name: "x".into(), might: m, ready: true, stunned: false, is_token: false, gear: vec![], damage: 0,
+            buffed: false, empowered: false, keywords: vec![], lasting_might: m,
+        };
+        o.my_points = 0;
+        o.opp_points = 0;
+        o.my_hand = vec![];
+        o.opp_hand_count = 0;
+        o.my_base_units = my_base.iter().map(|&m| uv(m)).collect();
+        o.opp_base_units = opp_base.iter().map(|&m| uv(m)).collect();
+        let template = o.battlefields[0].clone();
+        o.battlefields = bfs.iter().map(|(c, mine, theirs)| {
+            let mut b = template.clone();
+            b.a = mine.iter().map(|&m| uv(m)).collect();
+            b.b = theirs.iter().map(|&m| uv(m)).collect();
+            b.controller = match c.as_deref() { Some("me") => Some(Side::A), Some("opp") => Some(Side::B), _ => None };
+            b
+        }).collect();
+        Ok(rbsim_core::search::table_value_v(&o, v))
     }
 
     /// Diagnosis: the search with index `k` of this seat does exactly `iterations` iterations (fixed

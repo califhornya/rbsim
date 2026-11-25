@@ -42,10 +42,25 @@ pub fn obs_summary(o: &Observation) -> Value {
            "base": [us(&o.my_base_units), us(&o.opp_base_units)]})
 }
 
+/// Valutazione delle foglie. `Storica` = handwritten.table_value (default, parita con Python).
+/// `Accumulo`: su un campo controllato dal visualizzatore senza nemici, la Might oltre
+/// `need = opp_base_might + k` vale `alpha` volte (invece di 1): l'eccesso non e' preferibile
+/// a un'unita' in base, che minaccerebbe il campo avversario.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Valutazione {
+    Storica,
+    Accumulo { k: f64, alpha: f64 },
+}
+
 /// py: handwritten.table_value
 pub fn table_value(o: &Observation) -> f64 {
+    table_value_v(o, Valutazione::Storica)
+}
+
+pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
     let me = o.viewer;
     let mut s = 0.45 * ((o.my_points - o.opp_points) as f64);
+    let opp_base: i64 = o.opp_base_units.iter().map(|u| u.lasting_might).sum();
     for bf in &o.battlefields {
         let (mine_v, theirs_v) = if me == Side::A { (&bf.a, &bf.b) } else { (&bf.b, &bf.a) };
         let mine: i64 = mine_v.iter().map(|u| u.lasting_might).sum();
@@ -55,7 +70,14 @@ pub fn table_value(o: &Observation) -> f64 {
         } else if bf.controller.is_some() {
             s -= 0.30;
         }
-        s += 0.05 * ((mine - theirs) as f64);
+        match val {
+            Valutazione::Accumulo { k, alpha } if bf.controller == Some(me) && theirs_v.is_empty() => {
+                let need = opp_base as f64 + k;
+                let m = mine as f64;
+                s += 0.05 * (m.min(need) + alpha * (m - need).max(0.0));
+            }
+            _ => s += 0.05 * ((mine - theirs) as f64),
+        }
     }
     let base: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum::<i64>()
         - o.opp_base_units.iter().map(|u| u.lasting_might).sum::<i64>();
@@ -67,7 +89,11 @@ pub fn table_value(o: &Observation) -> f64 {
 /// py: table_value(Observation.from_state(gs, side)) (the observation notes
 /// battlefield control, as Python's does).
 pub fn state_value(gs: &mut GameState, side: Side) -> f64 {
-    table_value(&Observation::from_state(gs, side))
+    state_value_v(gs, side, Valutazione::Storica)
+}
+
+pub fn state_value_v(gs: &mut GameState, side: Side, val: Valutazione) -> f64 {
+    table_value_v(&Observation::from_state(gs, side), val)
 }
 
 /// py: NetGuidedMCTSAgent._terminal_value
@@ -818,6 +844,10 @@ pub struct SearchCore {
     me_ref: Option<Weak<RefCell<SearchCore>>>,
     /// Opt-in (off by default): before searching, look for a win this turn by moves.
     pub win_probe: bool,
+    /// Valutazione delle foglie (default Storica).
+    pub valutazione: Valutazione,
+    /// Diagnosi: la ricerca di indice k (come `info["k"]`) usa questa valutazione.
+    pub valutazione_at: Option<(usize, Valutazione)>,
     /// Diagnosis (decisione_rs): the search with this index (k, as `info["k"]`) does exactly this
     /// many iterations at a fixed workload, whatever the point or the budget; nothing else changes.
     pub override_at: Option<(usize, usize)>,
@@ -871,6 +901,8 @@ impl SearchCore {
             sim: 0,
             me_ref: None,
             win_probe: false,
+            valutazione: Valutazione::Storica,
+            valutazione_at: None,
             override_at: None,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
@@ -892,12 +924,12 @@ impl SearchCore {
                 for a in legal {
                     dict_set(&mut p, a, u);
                 }
-                let v = state_value(&mut c.gs, side);
+                let v = state_value_v(&mut c.gs, side, self.valutazione);
                 Ok((p, v))
             }
             Some(net) => {
                 let obs = Observation::from_state(&mut c.gs, side);
-                let tv = table_value(&obs);
+                let tv = table_value_v(&obs, self.valutazione);
                 let mut p = Vec::new();
                 if legal.len() < 2 {
                     for a in legal {
@@ -1118,8 +1150,22 @@ impl SearchCore {
         Some(c)
     }
 
-    /// py: search (and _Budget.search): the root is node 0.
+    /// Con `valutazione_at = (k, v)` la ricerca di indice k usa la valutazione v (le altre `valutazione`).
     fn search(&mut self, g: &mut Game, point: Point, legal: &[Action], cards_played: i64, bf_idx: Option<usize>)
+              -> R<Rc<RefCell<Tree>>> {
+        let saved = self.valutazione;
+        if let Some((k, v)) = self.valutazione_at {
+            if k == self.searches {
+                self.valutazione = v;
+            }
+        }
+        let r = self.search_inner(g, point, legal, cards_played, bf_idx);
+        self.valutazione = saved;
+        r
+    }
+
+    /// py: search (and _Budget.search): the root is node 0.
+    fn search_inner(&mut self, g: &mut Game, point: Point, legal: &[Action], cards_played: i64, bf_idx: Option<usize>)
               -> R<Rc<RefCell<Tree>>> {
         self.question = match point {
             Point::Reaction => "reaction",
@@ -1206,7 +1252,7 @@ impl SearchCore {
         let mut steps = 0;
         loop {
             if steps >= MAX_TURN_ACTIONS {
-                value = state_value(&mut c.gs, side);
+                value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             }
             steps += 1;
@@ -1215,12 +1261,12 @@ impl SearchCore {
                 break;
             }
             if c.gs.active != side {
-                value = state_value(&mut c.gs, side);
+                value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             }
             let legal_ga = if node == 0 { root_legal.to_vec() } else { c.legal_actions(Point::TurnAction, side)? };
             if legal_ga.is_empty() {
-                value = state_value(&mut c.gs, side);
+                value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             }
             if !tree.borrow().nodes[node].expanded {
@@ -1231,14 +1277,14 @@ impl SearchCore {
             }
             let pick = tree.borrow().puct_select(node, &legal_ga, self.c_puct);
             let Some(ci) = pick else {
-                value = state_value(&mut c.gs, side);
+                value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             };
             let (key, child) = tree.borrow().nodes[node].children[ci].clone();
             node = child;
             path.push(node);
             if key.kind == AKind::Pass && c.gs.pending_move.is_none() {
-                value = state_value(&mut c.gs, side);
+                value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             }
             let tc = Rc::new(RefCell::new(TreeChooser { tree: tree.clone(), me: side, node, path: Vec::new(),
@@ -1333,7 +1379,7 @@ impl SearchCore {
         path.extend(tc.borrow().path.iter().copied());
         let value = match terminal_value(&c.gs, side) {
             Some(v) => v,
-            None => state_value(&mut c.gs, side),
+            None => state_value_v(&mut c.gs, side, self.valutazione),
         };
         tree.borrow_mut().backup(&path, value);
         if self.log.is_some() {
@@ -1477,7 +1523,7 @@ impl SearchCore {
             rl.agents = [None, None];
             let v = match terminal_value(&rl.gs, self.side) {
                 Some(v) => v,
-                None => state_value(&mut rl.gs, self.side),
+                None => state_value_v(&mut rl.gs, self.side, self.valutazione),
             };
             values.push(v);
         }
@@ -1512,7 +1558,7 @@ impl SearchCore {
                 let mut rng = std::mem::replace(&mut c.gs.rng, PyRandom::new(0));
                 c.gs.player_mut(side).mulligan(&combo, &mut rng);
                 c.gs.rng = rng;
-                sum += state_value(&mut c.gs, side);
+                sum += state_value_v(&mut c.gs, side, self.valutazione);
             }
             let v = sum / worlds.len() as f64;
             rows.push(json!([combo, v]));

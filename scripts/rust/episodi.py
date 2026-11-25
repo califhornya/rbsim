@@ -106,7 +106,13 @@ def main(argv=None) -> int:
     ap.add_argument("--esempi", type=int, default=5)
     ap.add_argument("--posti", nargs="+", default=["A"], choices=["A", "B"])
     ap.add_argument("--iterazioni", type=int, default=D.ITERAZIONI_CAMPIONE)
+    ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo"],
+                    help="valutazione delle foglie del campione (default storica)")
+    ap.add_argument("--k-acc", type=float, default=3.0)
+    ap.add_argument("--alpha", type=float, default=0.2)
     a = ap.parse_args(argv)
+    extra = {"valutazione": (a.valutazione, a.k_acc, a.alpha)} if a.valutazione != "storica" else {}
+    print(f"valutazione: {a.valutazione}" + (f" k={a.k_acc} alpha={a.alpha}" if extra else ""))
     might = carte_might()
     print("carte che aumentano la Might:", ", ".join(sorted(might)))
     t0 = time.time()
@@ -114,7 +120,7 @@ def main(argv=None) -> int:
     per_partita: dict = {}
     for seed in D.semi(a.semi):
         for seat in a.posti:
-            P = D.autonoma(a.matchup, seed, a.ckpt, a.pesi_casuali, a.iterazioni, seat)
+            P = D.autonoma(a.matchup, seed, a.ckpt, a.pesi_casuali, a.iterazioni, seat, **extra)
             n, ep = esamina(P, might)
             esaminate += n
             partite += 1

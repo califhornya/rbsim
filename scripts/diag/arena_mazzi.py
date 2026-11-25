@@ -110,6 +110,11 @@ def main() -> None:
                     help="lavoro fisso: iterazioni per ricerca all'avversario, al posto del budget (solo --motore rust)")
     ap.add_argument("--win-probe-candidato", action="store_true", help="il candidato prova la vittoria nel turno (solo --motore rust)")
     ap.add_argument("--win-probe-avversario", action="store_true", help="idem l'avversario (solo --motore rust)")
+    for lato in ("candidato", "avversario"):
+        ap.add_argument(f"--valutazione-{lato[0]}", choices=("storica", "accumulo"), default="storica",
+                        help=f"valutazione delle foglie del {lato} (solo --motore rust; default storica = invariato)")
+        ap.add_argument(f"--k-{lato[0]}", type=float, default=3.0, help=f"k dell'accumulo del {lato}")
+        ap.add_argument(f"--alpha-{lato[0]}", type=float, default=0.2, help=f"alpha dell'accumulo del {lato}")
     ap.add_argument("--avversario-mano", action="store_true",
                     help="l'avversario è il bot a mano senza prior (solo --motore rust; senza --ckpt-avversario)")
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
@@ -121,6 +126,9 @@ def main() -> None:
     args = ap.parse_args()
     nuove = {"iter_cand": args.iterazioni_candidato, "iter_opp": args.iterazioni_avversario,
              "probe_cand": args.win_probe_candidato or None, "probe_opp": args.win_probe_avversario or None}
+    for lato, chiave in (("c", "val_cand"), ("a", "val_opp")):
+        if getattr(args, f"valutazione_{lato}") != "storica":
+            nuove[chiave] = [getattr(args, f"valutazione_{lato}"), getattr(args, f"k_{lato}"), getattr(args, f"alpha_{lato}")]
     opz = {k: v for k, v in nuove.items() if v} or None
     if (opz or args.avversario_mano) and args.motore != "rust":
         ap.error("--iterazioni-*, --win-probe-* e --avversario-mano valgono solo con --motore rust")
@@ -150,12 +158,12 @@ def main() -> None:
     avv = ("il bot a mano senza prior" if args.avversario_mano else
            f"il bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {_sha(args.ckpt_avversario)})")
 
-    def lavoro(it, budget, probe):
+    def lavoro(it, budget, probe, val=None):
         return (f"{it} iterazioni per ricerca" if it else f"{budget or A.REF_BUDGET} s per mossa") + \
-            (" + win probe" if probe else "")
+            (" + win probe" if probe else "") + (f" + valutazione {val[0]} k={val[1]} alpha={val[2]}" if val else "")
     say(f"candidato: il bot a mano con i prior PPO di {args.ckpt} (sha256 {_sha(args.ckpt)}); avversario: {avv}; "
-        f"{lavoro(args.iterazioni_candidato, args.budget_candidato, args.win_probe_candidato)} al candidato, "
-        f"{lavoro(args.iterazioni_avversario, args.budget_avversario, args.win_probe_avversario)} all'avversario; "
+        f"{lavoro(args.iterazioni_candidato, args.budget_candidato, args.win_probe_candidato, (opz or {}).get('val_cand'))} al candidato, "
+        f"{lavoro(args.iterazioni_avversario, args.budget_avversario, args.win_probe_avversario, (opz or {}).get('val_opp'))} all'avversario; "
         f"{args.workers} processi")
     say(f"regole fissate prima: ciascuno di {' '.join(args.vecchi) or '-'} limite inferiore > 0,47; ciascun blocco "
         f"({'; '.join(' '.join(b) for b in blocks) or '-'}), a pesi uguali, >= 0,52 e limite inferiore > 0,50; "

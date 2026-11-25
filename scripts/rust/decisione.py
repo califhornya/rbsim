@@ -59,6 +59,8 @@ def cmd_rifai(a) -> int:
                   f"{sorted({r['turn'] for r in elenco})}")
             return 1
     orig_n = (D._prepara(P)["iterazioni"])
+    val = (a.valutazione, a.k_acc, a.alpha) if a.valutazione != "storica" else None
+    etich = f" [{a.valutazione} k={a.k_acc} alpha={a.alpha}]" if val else ""
     tutti = []
     for k in bersagli:
         base = D.rifai(P, k, None, posizione=True)
@@ -70,9 +72,12 @@ def cmd_rifai(a) -> int:
             print("  " + r[:200])
         out = {"k": k, "originale": e["action"], "posizione": base["posizione"], "varianti": {}}
         for n in a.iterazioni:
-            r = base if n == orig_n else D.rifai(P, k, n, posizione=False)
+            if val is not None:
+                r = D.rifai(P, k, n, posizione=False, valutazione=val)
+            else:
+                r = base if n == orig_n else D.rifai(P, k, n, posizione=False)
             out["varianti"][n] = {kk: vv for kk, vv in r.items() if kk != "posizione"}
-            print(f"  N={n}: scelta {r['azione']} ({'uguale' if r['uguale'] else 'DIVERSA'} dall'originale)")
+            print(f"  N={n}{etich}: scelta {r['azione']} ({'uguale' if r['uguale'] else 'DIVERSA'} dall'originale)")
             print(f"    top: {_riga_top(r['classifica'])}")
             for sub in a.attese:
                 trov = [x for x in r["classifica"] if sub.casefold() in x["azione"].casefold()]
@@ -122,6 +127,10 @@ def main(argv=None) -> int:
     t = r.add_mutually_exclusive_group(required=True)
     t.add_argument("--turno", type=int)
     t.add_argument("--k", type=int)
+    r.add_argument("--valutazione", default="storica", choices=["storica", "accumulo"],
+                   help="valutazione delle foglie nella decisione rifatta (il prefisso resta storico)")
+    r.add_argument("--k-acc", dest="k_acc", type=float, default=3.0)
+    r.add_argument("--alpha", type=float, default=0.2)
     r.add_argument("--tipo", default="turno", choices=["turno", "reazione", "showdown", "tutti"])
     r.add_argument("--attese", nargs="*", default=[])
     c = sub.choices["concordanza"]
