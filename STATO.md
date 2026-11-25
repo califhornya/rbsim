@@ -25,8 +25,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   fissano), `6427b90+D72-D76` o `6427b90+D72-D77` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
 - (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
-- (25/11, Matteo) Difetti di motore dalle partite: si raccolgono e si correggono in un pacchetto su un profilo nuovo, quando
-  Matteo lo dice (un test rosso ciascuno); congelato col nome dell'ultimo Dxx prima di misurare.
+- (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo quando Matteo lo dice.
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
