@@ -77,7 +77,7 @@ Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi s
    §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. Pacchetto di correzioni in raccolta (AUDIT.md, SEGNALAZIONI.md): D78 (Vex), D79 (carta coperta nello showdown). Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+6. Pacchetto di correzioni in raccolta (AUDIT.md, SEGNALAZIONI.md): D78 (Vex), D79 (carta coperta nello showdown), D80 (punti oltre l'8). Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,

@@ -165,6 +165,7 @@ From now on:
 | D77 | A showdown staged by a trigger of a Standard Move that isn't held waits for the next action that isn't a move (or the end of the turn) | §462, Irresistible Faefolk | Sett (deck): seen by the owner, Pillaged Armory played and a defender buffed before the showdown | fixed in Rust on the profile 6427b90+D72-D77, `9fcdc25` |
 | D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | open: in the package of fixes, when the owner says |
 | D79 | A card played from face down in a showdown or as a reaction: its own "when you play me" goes on the chain and resolves before the other triggers of the same play (Evelynn Agony's Embrace) trigger | §383.3, §383.4.a | Evelynn (Bedeviling Stranger + legend): seen by the owner in the coach page, the legend's draw/discard after the Stranger's bounce had resolved | open: in the package of fixes, when the owner says |
+| D80 | Points keep counting after the winning one: holding two battlefields at 7 ends 9 to 4 | victory at the Victory Score | Evelynn against Sett: seen by the owner in the coach page (end of game "9 a 4"); the winner is right | open: in the package of fixes, when the owner says |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1286,6 +1287,24 @@ fixes on a new profile, when the owner says).
   `play_from_hidden` as a task (`as_task`), so the play's triggers are flushed
   together when it ends. Red test first with the position above; a second
   test keeps the old behavior on 6427b90+D72-D77.
+
+### D80. Points after the winning one
+
+Open (25/11): recorded, not fixed (package of fixes).
+
+- **Seen.** Raised by the owner (25/11, game
+  `20261125_201243_competitive_sett_vs_competitive_evelynn`, coach page on
+  Rust): at 7 points holding two battlefields, the game ends "9 a 4". The game
+  ends at the 8th point (owner): the second hold is never scored.
+- **Engine.** `_gain_points` (Rust `lp_rules.rs:82`) adds the points, then
+  `_note_winner` fixes the winner at the first 8; the Beginning Phase goes on
+  scoring the other held battlefields (and any trigger after it) as if the game
+  were still on. The winner and the end are right; the score isn't.
+- **Weight.** The score shown and saved (games, arena rows); anything that
+  reads the points after the win (margins, values) sees one too many.
+- **Fix (Rust, to do).** Behind the package profile's flag: once a winner is
+  noted, `gain_points` gains nothing and the phase stops (check what else runs
+  after the win). Red test first: 7 points, two battlefields held, 8 at the end.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
