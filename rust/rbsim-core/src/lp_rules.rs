@@ -80,6 +80,14 @@ impl Game {
 
     /// py: _gain_points
     pub fn gain_points(&mut self, side: Side, n: i64, how: &str, bf: Option<usize>) -> R<i64> {
+        if self.gs.reg.regole.d80() && self.gs.winner.is_some() {
+            // D80 (profile 6427b90+D72-D80): the game is over at the winning
+            // point, the points after it (a second hold, a trigger) aren't gained.
+            if n > 0 {
+                crate::registry::conta(80);
+            }
+            return Ok(0);
+        }
         let n = self.points_allowed(side, n, how, bf)?;
         self.gs.points[side.idx()] += n;
         self.note_winner();
