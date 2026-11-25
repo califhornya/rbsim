@@ -1,0 +1,122 @@
+[
+ {
+  "seed": 910001,
+  "matchup": "RS",
+  "starter": "b",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 131,
+  "ricerche": 70,
+  "t_py": 15.86,
+  "t_rs": 0.55
+ },
+ {
+  "seed": 910001,
+  "matchup": "SR",
+  "starter": "b",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 171,
+  "ricerche": 57,
+  "t_py": 11.62,
+  "t_rs": 0.53
+ },
+ {
+  "seed": 910002,
+  "matchup": "RS",
+  "starter": "a",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 155,
+  "ricerche": 74,
+  "t_py": 18.73,
+  "t_rs": 0.66
+ },
+ {
+  "seed": 910002,
+  "matchup": "SR",
+  "starter": "a",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 130,
+  "ricerche": 48,
+  "t_py": 10.05,
+  "t_rs": 0.41
+ },
+ {
+  "seed": 910003,
+  "matchup": "RS",
+  "starter": "b",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 115,
+  "ricerche": 77,
+  "t_py": 19.54,
+  "t_rs": 0.58
+ },
+ {
+  "seed": 910003,
+  "matchup": "SR",
+  "starter": "b",
+  "bot": "mano",
+  "iterazioni": 50,
+  "py": [
+   "A",
+   18
+  ],
+  "rs": [
+   "A",
+   18
+  ],
+  "rust_error": null,
+  "events": 118,
+  "ricerche": 61,
+  "t_py": 13.75,
+  "t_rs": 0.47
+ }
+]

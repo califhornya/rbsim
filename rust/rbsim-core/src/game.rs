@@ -74,6 +74,11 @@ pub struct Game {
     pub discard_sides: Vec<Side>,
     /// The pending triggers a trigger_order choice is about (for the trace).
     pub trigger_menu: Vec<PendingTrigger>,
+    /// The coach page's payment preference (py: CoachLoop.recycle_first): that
+    /// side's next [rune] cost or generic Power is paid from that domain when
+    /// it can (then the preference is spent). None, the default: the engine's
+    /// own way, bit for bit.
+    pub recycle_first: Option<(Side, Domain)>,
 }
 
 /// py: the `segment` tuple (gs.clone(), side, action, cards_played).
@@ -146,6 +151,7 @@ impl Game {
             discard_depth: 0,
             discard_sides: Vec::new(),
             trigger_menu: Vec::new(),
+            recycle_first: None,
         }
     }
 
@@ -161,6 +167,30 @@ impl Game {
 
     pub fn agent(&self, s: Side) -> Option<Rc<RefCell<dyn Agent>>> {
         self.agents[s.idx()].clone()
+    }
+
+    /// Tell `side`'s agent something (Agent::notify), if it is a seat that wants events; `args` is
+    /// built only then. Never changes the game.
+    pub fn notify_seat(&mut self, side: Side, what: &str, args: impl FnOnce(&Game) -> serde_json::Value) -> R<()> {
+        let Some(a) = self.agent(side) else { return Ok(()) };
+        if !a.borrow().wants_event() {
+            return Ok(());
+        }
+        let v = args(self);
+        let r = a.borrow_mut().notify(self, side, what, &v);
+        r
+    }
+
+    /// py: CoachLoop._preferred(actor): the domain `actor` asked to pay from,
+    /// once (the preference is spent); None for the other side or none set.
+    pub fn preferred(&mut self, actor: Side) -> Option<Domain> {
+        match self.recycle_first {
+            Some((s, d)) if s == actor => {
+                self.recycle_first = None;
+                Some(d)
+            }
+            _ => None,
+        }
     }
 
     pub fn has_agent(&self, s: Side) -> bool {

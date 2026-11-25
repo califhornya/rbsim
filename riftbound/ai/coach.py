@@ -22,6 +22,12 @@ The net is optional (24/11): without it the coached seat is the person alone,
 with no search, no suggestions and no training examples (games.jsonl still
 keeps each result), and the opponent can be the champion (`PPOPriorAgent` with
 a PPO checkpoint's priors, `budget` CPU seconds a decision; opponents()).
+
+The engine (25/11, phase 4): a game between two lists Rust covers (arena_rs.COPERTI),
+against the champion or the simple bot, plays on the Rust engine with the rules profile
+`regole` (default 6427b90+D72-D77; riftbound/ai/coach_rs.py, the champion there with a fixed
+number of iterations a decision); the net's advice and "La rete" stay on Python (6427b90).
+`state()["regole"]` and games.jsonl say what was played.
 """
 
 from __future__ import annotations
@@ -49,8 +55,9 @@ from riftbound.ai.net_mcts import (
 )
 from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
-from riftbound.core.loop import NO_MORE
-from riftbound.provenienza import REGOLE_PYTHON
+from riftbound.core.loop import NO_MORE, GameLoop
+from riftbound.core.player import Domain
+from riftbound.provenienza import REGOLE_D72_D77, REGOLE_PYTHON
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 CARDS_JSON = Path(__file__).resolve().parents[1] / "data" / "cards" / "all_cards.json"
@@ -113,7 +120,7 @@ _TYPES = {"UNIT": "unità", "SPELL": "magia", "GEAR": "equipaggiamento", "RUNE":
           "LEGEND": "leggenda", "CHAMPION": "campione", "BATTLEFIELD": "campo di battaglia"}
 
 _QUESTIONS = {
-    "target": "Scegli il bersaglio", "mode": "Quale effetto usare?",
+    "target": "Scegli il bersaglio", "mode": "Quale effetto usare?", "payment": "Come paghi?",
     "equip": "Su quale unità attaccare l'equipaggiamento?",
     "combat_damage_order": "Quale unità nemica colpire per prima in combattimento?",
     "cost_unit": "Quale unità usare per pagare il costo?", "discard": "Quale carta scartare?",
@@ -292,6 +299,356 @@ def mulligan_text(hand: list, back: list) -> str:
     return "Rimanda " + " e ".join(hand[i] for i in back)
 
 
+def _cast_outcome(loop, side: str, action):
+    """What casting `action` (a SPELL) does, as the players see it: the choices
+    asked on the way (default answers) and the table after, for both seats.
+    Played on a copy of the game; None if the copy fails."""
+    from riftbound.core.loop import GameLoop
+    clone = loop.gs.clone()
+    copy = GameLoop(clone)
+    asked: list = []
+
+    def chooser(_loop, kind, s, options, default, source):
+        asked.append((s, kind, [option_text(_loop.gs, s, o) for o in options]))
+        return None
+    copy.chooser = chooser
+    try:
+        copy._apply_action(clone.get_player(side), action)
+        seen = [(Observation.from_state(clone, s).to_dict(), _board_extras(clone, s)) for s in ("A", "B")]
+    except Exception:  # noqa: BLE001 — a comparison never stops the game
+        return None
+    return json.dumps([asked, seen], sort_keys=True, default=str)
+
+
+def spell_lane_free(loop, side: str, point: DecisionPoint, idx) -> bool:
+    """Whether hand card `idx`, a spell, does the same whichever battlefield the
+    engine aims it at (§355: a spell has no place; the engine's battlefield only
+    narrows "a unit here"). Punch First's "a unit" is any unit, the base's too:
+    the page then offers one cast, and the target is the next question."""
+    lanes = [a.to_engine() for a in legal_actions(loop, point, side)
+             if a.kind == "SPELL" and a.to_engine()[1] == idx]
+    if len(lanes) < 2:
+        return False
+    first = _cast_outcome(loop, side, lanes[0])
+    return first is not None and all(_cast_outcome(loop, side, a) == first for a in lanes[1:])
+
+
+# Paying (Matteo, 25/11). A Gold's ability Adds a Power of any domain: the
+# engine has it used before the card is played. A [rune] cost (any domain:
+# hiding a card, a two-domain card's Power, DEFLECT) the engine pays from the
+# first domain that covers it, where the rules let the player pick the rune.
+# The page asks how to pay when a move can be paid in more than one way and
+# plays it so: the Golds first (CoachAgent._gold_step), the [rune] from the
+# chosen domain (CoachLoop). The engine itself is unchanged.
+_PAY_KINDS = ("UNIT", "SPELL", "GEAR", "CHAMPION", "HIDE", "ABILITY")
+
+
+class CoachLoop(GameLoop):
+    """The engine's game as the page plays it: `recycle_first` = (side,
+    domain) pays that side's next [rune] cost from that domain when it can
+    (then it is spent); without it, as the engine does. `record`: every
+    decision and choice of both players, in order, to replay the game up to
+    one of them (CoachSession.rewind)."""
+    recycle_first = None
+
+    def __init__(self, gs, *args, **kwargs):
+        super().__init__(gs, *args, **kwargs)
+        self.record: list = []
+
+    def _consult(self, loop, kind: str, side: str, options: list, default: int, source):
+        i = super()._consult(loop, kind, side, options, default, source)
+        self.record.append(("choice", side, kind, len(options), default if i is None else int(i)))
+        return i
+
+    def _note_decision(self, side: str, point: str, action) -> None:
+        super()._note_decision(side, point, action)
+        self.record.append(("decision", side, point, action, self.recycle_first))
+
+    def _open_segment(self, side: str, action, cards_played: int) -> None:
+        super()._open_segment(side, action, cards_played)
+        self.record.append(("decision", side, DecisionPoint.TURN_ACTION.value, action, self.recycle_first))
+
+    def _preferred(self, actor):
+        pref = self.recycle_first
+        if pref is None or self.gs.get_player(pref[0]) is not actor:
+            return None
+        self.recycle_first = None
+        return pref[1]
+
+    def _pay_generic_power(self, actor, n: int) -> bool:
+        d = self._preferred(actor) if n > 0 else None
+        if d is not None and actor.can_pay_cost(0, n, d):
+            ok = actor.pay_cost(0, n, d)
+            self._drain_rune_recycles()
+            return ok
+        return super()._pay_generic_power(actor, n)
+
+    def _pay_card_cost(self, actor, card, energy: int, power, domain=None) -> bool:
+        d = self._preferred(actor) if power and (domain or card.cost_power_domain) is None else None
+        if d is None:
+            return super()._pay_card_cost(actor, card, energy, power, domain)
+        base = actor.pay_power_of
+
+        def first(n, domains):               # a two-domain card's Power: `d` first
+            domains = list(domains)
+            k = min(n, actor._power_left(d)) if d in domains else 0
+            if k and not actor.pay_cost(0, k, d):
+                return False
+            return base(n - k, domains) if n > k else True
+        actor.pay_power_of = first
+        try:
+            return super()._pay_card_cost(actor, card, energy, power, domain)
+        finally:
+            del actor.pay_power_of
+
+
+class _Rewind(BaseException):
+    """The coach takes back their last move (CoachSession.rewind). Not an
+    Exception: the engine's own `except Exception` must let it through."""
+
+
+class _ReplayError(BaseException):
+    """A rewind's replay left the recorded game."""
+
+
+_LIVE = object()
+
+
+class _Record:
+    """A page game's record (CoachLoop.record) replayed by a rewind: the
+    chooser at the bottom of the loop's chain, and the seats' agents (_Seat),
+    answer from it in order; at its end the live game goes on. A game that
+    isn't replayed has an empty one: it only lets the other choosers answer."""
+
+    def __init__(self, entries: list):
+        self.entries, self.k = list(entries), 0
+        self.loop = None
+        self.previous = None                # always the bottom of the chain
+
+    @property
+    def replaying(self) -> bool:
+        return self.k < len(self.entries)
+
+    def _next(self, *head):
+        e = self.entries[self.k]
+        if tuple(e[:len(head)]) != head:
+            raise _ReplayError(f"atteso {head}, registrato {tuple(e[:len(head)])} ({self.k})")
+        self.k += 1
+        return e
+
+    def __call__(self, loop, kind, side, options, default, source):
+        return self._next("choice", side, kind, len(options))[4] if self.replaying else None
+
+    def decision(self, side: str, point: str):
+        if not self.replaying:
+            return _LIVE
+        e = self._next("decision", side, point)
+        self.loop.recycle_first = e[4]
+        return e[3]
+
+    def mulligan(self, side: str):
+        return self._next("mulligan", side)[2] if self.replaying else _LIVE
+
+
+class _Seat:
+    """A seat's agent in a page game: answers from the record while a rewind
+    replays it (_Record), else is the live agent (its other methods too).
+    The mulligans are recorded here: the engine asks the agent, not a chooser.
+    `on_live`: called the first time the live agent is asked (the coach's
+    seat: the replay is over)."""
+
+    def __init__(self, live, record: _Record, on_live=None):
+        self.live, self.record, self.on_live = live, record, on_live
+        self.player = live.player
+
+    def __getattr__(self, name):
+        if name == "live":                  # not built yet (a copy)
+            raise AttributeError(name)
+        return getattr(self.live, name)
+
+    def _live(self):
+        if self.on_live is not None:
+            self.on_live()
+        return self.live
+
+    def _decide(self, point: DecisionPoint, method: str, *args, **kwargs):
+        got = self.record.decision(self.player.name, point.value)
+        return getattr(self._live(), method)(*args, **kwargs) if got is _LIVE else got
+
+    def decide_action(self, opponent, cards_played: int = 0):
+        return self._decide(DecisionPoint.TURN_ACTION, "decide_action", opponent, cards_played=cards_played)
+
+    def decide_showdown_action(self, opponent, bf_idx: int):
+        return self._decide(DecisionPoint.SHOWDOWN_ACTION, "decide_showdown_action", opponent, bf_idx)
+
+    def decide_reaction(self, opponent, chain):
+        return self._decide(DecisionPoint.REACTION, "decide_reaction", opponent, chain)
+
+    def decide_mulligan(self) -> list:
+        got = self.record.mulligan(self.player.name)
+        if got is _LIVE:
+            got = list(self._live().decide_mulligan() or [])
+        self.loop.record.append(("mulligan", self.player.name, list(got)))
+        return got
+
+    # The agent's preferences, only defaults for the choices that follow (the
+    # chooser answers them): none while replaying.
+    def decide_optional(self, card, name) -> bool:
+        f = None if self.record.replaying else getattr(self.live, "decide_optional", None)
+        return True if f is None else f(card, name)
+
+    def decide_mode(self, card, n_modes: int):
+        f = None if self.record.replaying else getattr(self.live, "decide_mode", None)
+        return None if f is None else f(card, n_modes)
+
+    def decide_predict_recycle(self, card) -> bool:
+        f = None if self.record.replaying else getattr(self.live, "decide_predict_recycle", None)
+        return False if f is None else f(card)
+
+
+def _golds(loop, side: str, point: DecisionPoint) -> list:
+    """The ABILITY lanes of `side`'s gear that Add a Power of any domain
+    (Gold) and are legal moves now: not an exhausted one, nor one while units
+    are being moved (only more moves are)."""
+    entries = loop.activatable_abilities(side)
+    return [t[2] for t in (a.to_engine() for a in legal_actions(loop, point, side))
+            if t[0] == "ABILITY" and isinstance(t[2], int) and t[2] < len(entries)
+            and entries[t[2]].get("type") == "gear_ability"
+            and getattr(entries[t[2]].get("eff"), "effect", None) == "gain_power_any_domain"]
+
+
+def _paid_card(loop, side: str, action):
+    """The card whose cost `action` pays (from hand, or the champion)."""
+    kind, idx = action[0], action[1]
+    p = loop.gs.get_player(side)
+    if kind == "CHAMPION" or (kind == "HIDE" and idx == "champion"):
+        return loop.gs.champion_A if side == "A" else loop.gs.champion_B
+    if kind == "ABILITY":
+        return None
+    return p.hand[idx] if isinstance(idx, int) and 0 <= idx < len(p.hand) else None
+
+
+def _pay_domains(loop, side: str, card) -> list:
+    """The domains that may pay `card`'s Power: its own, then the player's."""
+    own = getattr(card, "cost_power_domain", None) if card is not None else None
+    doms = [own] if own is not None else []
+    if card is not None and own is None and len(loop._power_domains(card)) < len(Domain):
+        doms += loop._power_domains(card)               # two domains: either
+    doms += list(loop.gs.get_player(side).power_pool)
+    return list(dict.fromkeys(doms))
+
+
+def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold_domain, prefer):
+    """The runes `action` recycles, ((domain name, n), ...), once `golds`
+    Golds Added `gold_domain` Power, its [rune] paid from `prefer` first; on
+    a copy of the game. None if it can't be played so."""
+    clone = loop.gs.clone()
+    copy = CoachLoop(clone)
+    p = clone.get_player(side)
+
+    def chooser(_loop, kind, s, options, default, source):
+        return options.index(gold_domain) if kind.startswith("domain") and s == side \
+            and gold_domain in options else None
+    copy.chooser = chooser
+    try:
+        for _ in range(golds):
+            lanes = _golds(copy, side, point)
+            if not lanes:
+                return None
+            copy._apply_action(p, ("ABILITY", "ACTIVATED", lanes[0]))
+        if action not in [a.to_engine() for a in legal_actions(copy, point, side)]:
+            return None
+        before = {d: len(rs) for d, rs in p.rune_pool.items()}
+        copy.recycle_first = (side, prefer) if prefer is not None else None
+        copy._apply_action(p, action)
+        return tuple((d.name, n - len(p.rune_pool.get(d, []))) for d, n in before.items()
+                     if n > len(p.rune_pool.get(d, [])))
+    except Exception:  # noqa: BLE001 — a comparison never stops the game
+        return None
+
+
+def payment_text(golds: int, recycled) -> str:
+    """A way to pay, in words: "Col Gold, ricicli 1 runa Body"."""
+    how = "" if not golds else "col Gold, " if golds == 1 else f"con {golds} Gold, "
+    what = ", ".join(f"{n} {'runa' if n == 1 else 'rune'} {d.title()}" for d, n in recycled)
+    text = how + (f"ricicli {what}" if what else "nessuna runa riciclata")
+    return text[0].upper() + text[1:]
+
+
+def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
+    """The ways to pay `action` that recycle different runes: [{"golds",
+    "gold_domain", "prefer", "recycled", "text"}], fewest Golds first (the
+    engine's own way first); a Gold only where it saves a rune. One way: no
+    choice to make; none: it can't be paid, Golds or not."""
+    if action[0] not in _PAY_KINDS:
+        return []
+    golds = _golds(loop, side, point)
+    if action[0] == "ABILITY" and action[2] in golds:
+        return []
+    p = loop.gs.get_player(side)
+    doms = _pay_domains(loop, side, _paid_card(loop, side, action))
+    out: list = []
+    for k in range(len(golds) + 1):
+        ways = [(None, None)] + [(None, d) for d in p.power_pool if p._power_left(d)] if not k \
+            else [(g, g) for g in doms]
+        fewest = min((sum(n for _d, n in o["recycled"]) for o in out if o["golds"] == k - 1), default=None)
+        for gold_domain, prefer in ways:
+            got = _pay_outcome(loop, side, point, action, k, gold_domain, prefer)
+            if got is None or any(o["golds"] == k and o["recycled"] == got for o in out):
+                continue
+            if k and fewest is not None and sum(n for _d, n in got) >= fewest:
+                continue
+            out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer,
+                        "recycled": got, "text": payment_text(k, got)})
+    return out
+
+
+def gold_only_plays(loop, side: str, point: DecisionPoint, legal: list) -> list:
+    """The cards `side` can play only with its Golds' Power: [(action, info)],
+    the info as action_info gives it, read once the Golds are used."""
+    lanes = _golds(loop, side, point)
+    if not lanes:
+        return []
+    p = loop.gs.get_player(side)
+    champ = loop.gs.champion_A if side == "A" else loop.gs.champion_B
+    domains: list = []
+    for card in list(p.hand) + ([champ] if champ is not None else []):
+        domains += [d for d in _pay_domains(loop, side, card) if d not in domains]
+    out: dict = {}
+    for domain in domains:
+        clone = loop.gs.clone()
+        copy = CoachLoop(clone)
+        copy.chooser = lambda _l, kind, s, options, default, source, d=domain: \
+            options.index(d) if kind.startswith("domain") and s == side and d in options else None
+        try:
+            for _ in lanes:
+                copy._apply_action(clone.get_player(side), ("ABILITY", "ACTIVATED", _golds(copy, side, point)[0]))
+            for a in legal_actions(copy, point, side):
+                t = a.to_engine()
+                if t[0] in _PAY_KINDS and t[0] != "ABILITY" and t not in legal and t not in out:
+                    out[t] = action_info(copy, side, side, point, t)
+        except Exception:  # noqa: BLE001
+            continue
+    return [(t, info) for t, info in out.items() if payment_options(loop, side, point, t)]
+
+
+class _GoldDomain:
+    """The domain a Gold Adds, chosen with the card it pays for: answers the
+    player's next "which domain" choice, then leaves the chain of choosers."""
+
+    def __init__(self, me: str, domain, loop, previous):
+        self.me, self.domain, self.loop, self.previous = me, domain, loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if side == self.me and kind.startswith("domain") and self.domain in options:
+            self.release()
+            return options.index(self.domain)
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        _unlink(self.loop, self)
+
+
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
               DecisionPoint.SHOWDOWN_ACTION: "Passa", DecisionPoint.REACTION: "Non reagire"}
 
@@ -323,6 +680,8 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
         else:
             how = "" if point == DecisionPoint.TURN_ACTION else " con AMBUSH"
             text, to = f"Gioca {name}{how} su {_bf_name(gs, dst)}", f"bf:{dst}"
+    elif kind == "SPELL" and spell_lane_free(loop, side, point, idx):
+        text = f"Lancia {name}"          # one cast; its target is the next question
     elif kind == "SPELL":
         text, to = f"Lancia {name} (campo: {_bf_name(gs, lane)})", f"bf:{lane}"
     elif kind == "GEAR":
@@ -426,8 +785,19 @@ def _board_extras(gs, viewer: str) -> dict:
     showdown starts when the player is done), each rune and whether it is
     ready, the chain in order, the viewer's own facedown cards."""
     def runes(side):
-        return [{"domain": d.name, "ready": bool(r.ready)}
-                for d, rs in gs.get_player(side).rune_pool.items() for r in rs]
+        # The engine keeps no exhausted rune, only the Energy not spent yet
+        # (`rune_energy`, Player.channel): as many runes are ready, the first
+        # ones in the pool's order; the others are drawn exhausted.
+        p = gs.get_player(side)
+        ready = max(0, p.rune_energy)
+        pool = [d for d, rs in p.rune_pool.items() for _r in rs]
+        return [{"domain": d.name, "ready": k < ready} for k, d in enumerate(pool)]
+
+    def gear_exhausted(side):
+        # In the Observation's order: base gear, then each battlefield's.
+        return {"base": [bool(getattr(g, "tapped", False)) for g in gs.get_player(side).base_gear],
+                **{str(i): [bool(getattr(dg.card, "tapped", False)) for dg in bf.gear_for(side)]
+                   for i, bf in enumerate(gs.battlefields)}}
     moving = gs.pending_move
 
     def fight(i, bf):
@@ -451,6 +821,7 @@ def _board_extras(gs, viewer: str) -> dict:
         "fight": {str(i): fight(i, bf) for i, bf in enumerate(gs.battlefields)
                   if bf.units_A and bf.units_B},
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
+        "gear_exhausted": {"me": gear_exhausted(viewer), "opp": gear_exhausted(gs.other(viewer))},
         "chain": [{"name": i.card.name, "ability": i.ability is not None,
                    "owner": _rel(i.player, viewer), "bf": i.bf_idx,
                    "chose": declared_text(gs, viewer, i)} for i in gs.chain],
@@ -646,11 +1017,42 @@ class _CoachChooser:
             gs = loop.gs
             described = [{"text": option_text(gs, side, o), "ref": option_ref(gs, side, o)}
                          for o in options]
-            return self.session.ask_choice(kind, side, described, default, getattr(source, "name", None))
+            # Options the page can't tell apart are one (Matteo, 25/11: two Pyke
+            # Returned, five enemy deaths, ten "abilità di Pyke Returned" to order).
+            keys = [(d["text"], d["ref"]) for d in described]
+            firsts = [i for i, k in enumerate(keys) if k not in keys[:i]]
+            if len(firsts) > 1:
+                shown = firsts.index(keys.index(keys[default])) if 0 <= default < len(keys) else 0
+                pick = self.session.ask_choice(kind, side, [described[i] for i in firsts], shown,
+                                               getattr(source, "name", None))
+                return firsts[pick] if 0 <= pick < len(firsts) else default
         return self.previous(loop, kind, side, options, default, source) if self.previous else None
 
     def release(self) -> None:
         _unlink(self.loop, self)
+
+
+def decision_context(gs, side: str, point: DecisionPoint, bf_idx: Optional[int] = None) -> str:
+    """What a decision of `side` is about, in a sentence (the page's context line)."""
+    if point == DecisionPoint.SHOWDOWN_ACTION:
+        where = _bf_name(gs, bf_idx if bf_idx is not None else gs.showdown_bf_idx or 0)
+        return f"Showdown su {where}: puoi giocare magie veloci (ACTION, REACTION) o passare."
+    if point == DecisionPoint.REACTION and gs.chain:
+        top = gs.chain[-1]
+        who = "L'avversario ha lanciato" if top.player != side else "Hai lanciato"
+        if top.ability is not None:
+            who = "L'avversario ha usato" if top.player != side else "Hai usato"
+            if top.ability["kind"] in ("triggered", "reflexive"):
+                who = "Si è innescata per l'avversario" if top.player != side \
+                    else "Si è innescata per te"
+        chose = declared_text(gs, side, top)
+        return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") + \
+            ": puoi rispondere con una reazione o lasciar correre."
+    if gs.pending_move is not None and gs.pending_move[1] == side:
+        where = _bf_name(gs, gs.pending_move[0])
+        return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
+                "Quando hai finito parte lo showdown, poi il turno continua.")
+    return "È il tuo turno: puoi giocare carte, spostare unità, usare abilità o passare."
 
 
 class CoachAgent(NetGuidedMCTSAgent):
@@ -661,6 +1063,7 @@ class CoachAgent(NetGuidedMCTSAgent):
     def __init__(self, player, net, session: "CoachSession", **kw):
         super().__init__(player, net, **kw)
         self.session = session
+        self._gold_plan: Optional[dict] = None    # a card paid with Golds: the Golds first
 
     def decide_action(self, opponent, cards_played: int = 0):
         return self._coached(DecisionPoint.TURN_ACTION, cards_played=cards_played)
@@ -700,25 +1103,7 @@ class CoachAgent(NetGuidedMCTSAgent):
 
     def _context(self, point: DecisionPoint, bf_idx: Optional[int]) -> str:
         """What the decision is about, in a sentence."""
-        gs = self.gs
-        if point == DecisionPoint.SHOWDOWN_ACTION:
-            where = _bf_name(gs, bf_idx if bf_idx is not None else gs.showdown_bf_idx or 0)
-            return f"Showdown su {where}: puoi giocare magie veloci (ACTION, REACTION) o passare."
-        if point == DecisionPoint.REACTION and gs.chain:
-            top = gs.chain[-1]
-            who = "L'avversario ha lanciato" if top.player != self.player.name else "Hai lanciato"
-            if top.ability is not None:
-                who = "L'avversario ha usato" if top.player != self.player.name else "Hai usato"
-                if top.ability["kind"] in ("triggered", "reflexive"):
-                    who = "Si è innescata per l'avversario" if top.player != self.player.name \
-                        else "Si è innescata per te"
-            chose = declared_text(gs, self.player.name, top)
-            return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
-        if gs.pending_move is not None and gs.pending_move[1] == self.player.name:
-            where = _bf_name(gs, gs.pending_move[0])
-            return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
-                    "Quando hai finito parte lo showdown, poi il turno continua.")
-        return "È il tuo turno: puoi giocare carte, spostare unità, usare abilità o passare."
+        return decision_context(self.gs, self.player.name, point, bf_idx)
 
     def _coached(self, point: DecisionPoint, cards_played: int = 0, bf_idx: Optional[int] = None):
         self.session.show_looked()
@@ -727,7 +1112,12 @@ class CoachAgent(NetGuidedMCTSAgent):
             self._release_forced()
             self._release_coach()
         side = self.player.name
+        self.loop.recycle_first = None          # a [rune] domain chosen for a move: that move only
         legal = legal_actions(self.loop, point, side)
+        if self._gold_plan is not None:        # a card paid with Golds: its next step
+            step = self._gold_step(side, point, [a.to_engine() for a in legal])
+            if step is not None:
+                return step
         if len(legal) <= 1:
             if point == DecisionPoint.REACTION:
                 self.session.notice_chain()
@@ -735,6 +1125,9 @@ class CoachAgent(NetGuidedMCTSAgent):
         self.session.thinking(point)
         tuples = [a.to_engine() for a in legal]
         infos = [action_info(self.loop, side, side, point, t) for t in tuples]
+        # Cards only the Golds' Power pays for: offered too, after the engine's moves.
+        gold_only = gold_only_plays(self.loop, side, point, tuples)
+        infos += [{**info, "text": info["text"] + " (col Gold)"} for _t, info in gold_only]
         suggestions = []
         ranked, total = [], 1
         if self.net is not None:           # without a net: no search, no advice
@@ -771,11 +1164,34 @@ class CoachAgent(NetGuidedMCTSAgent):
                 self.loop.chooser = _ForcedChoice(side, force, self.loop, self.loop.chooser)
             corrected = int(answer["suggestion"]) != 0
         else:
-            action = tuples[int(answer["action"])]
+            i = int(answer["action"])
+            action = tuples[i] if i < len(tuples) else gold_only[i - len(tuples)][0]
             self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
             best = _split_key(suggestions[0]["key"])[0] if suggestions else None
             corrected = action != best
         auto = bool(answer.get("auto"))      # the net finishing the game on its own
+        ways = payment_options(self.loop, side, point, action) if not auto and force is None else []
+        if ways:
+            card = _paid_card(self.loop, side, action)
+            text = next((info["text"] for t, info in zip(tuples, infos) if t == action), None) \
+                or next(info["text"] for t, info in gold_only if t == action).removesuffix(" (col Gold)")
+            pick = 0
+            if len(ways) > 1:
+                pick = self.session.ask_choice("payment", side, [{"text": w["text"], "ref": None} for w in ways],
+                                               0, getattr(card, "name", None) or text)
+            way = ways[pick]
+            if not way["golds"]:
+                self.loop.recycle_first = (side, way["prefer"]) if way["prefer"] is not None else None
+            else:
+                self._gold_plan = {"left": way["golds"], "domain": way["gold_domain"], "prefer": way["prefer"],
+                                   "action": action, "point": point,
+                                   "card": getattr(card, "name", None) or text, "text": text}
+                step = self._gold_step(side, point, tuples)
+                if step is None:                 # not possible after all: asked again
+                    return self._coached(point, cards_played, bf_idx)
+                if self.net is not None:
+                    self.session.record(self.gs, side, legal, step, corrected)
+                return step
         if action != _PASS or force is not None:
             # A suggestion taken says the choice it makes too ("Fatto: parte lo
             # showdown → Shadow Clone: Usare questo effetto? Sì").
@@ -791,13 +1207,40 @@ class CoachAgent(NetGuidedMCTSAgent):
             self.session.record(self.gs, side, legal, action, corrected)
         return action
 
+    def _gold_step(self, side: str, point: DecisionPoint, tuples: list):
+        """The next step of a card paid with Golds: a Gold (Adding the domain
+        the card needs), then the card. An Add ability keeps the player's
+        priority, so the steps follow one another. None: the plan is over or
+        no longer possible (the decision is asked as usual)."""
+        plan = self._gold_plan
+        if plan["point"] != point:
+            self._gold_plan = None
+            return None
+        lanes = _golds(self.loop, side, point)
+        gold = ("ABILITY", "ACTIVATED", lanes[0]) if lanes else None
+        if plan["left"] > 0 and gold in tuples:
+            plan["left"] -= 1
+            self.loop.chooser = _GoldDomain(side, plan["domain"], self.loop, self.loop.chooser)
+            domain = plan["domain"].name.title()
+            self.session.event("me", f"Usa Gold: Power {domain} per pagare {plan['card']}", move=True)
+            return gold
+        self._gold_plan = None
+        if plan["action"] not in tuples:
+            return None
+        if plan["prefer"] is not None:
+            self.loop.recycle_first = (side, plan["prefer"])
+        self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
+        self.session.event("me", plan["text"], move=True)
+        return plan["action"]
+
 
 class CoachSession:
     """One coached game at a time, on its own thread, for the web page."""
 
     def __init__(self, net_path: Optional[Path] = None, out_dir: Path = Path("runs") / "coach",
                  iterations: int = 100, opponent_pause: float = 0.8,
-                 campione_path: Optional[Path] = None, budget: float = 0.4):
+                 campione_path: Optional[Path] = None, budget: float = 0.4,
+                 motore: str = "python", regole: str = REGOLE_D72_D77, iterazioni: Optional[int] = None):
         # The old AlphaZero net: the advice to the coach and the "net"
         # opponent. Without it the coach plays alone (no advice, nothing kept
         # for training).
@@ -805,6 +1248,12 @@ class CoachSession:
         # The champion's PPO checkpoint and its CPU seconds a decision.
         self.campione_path = None if campione_path is None else Path(campione_path)
         self.budget = budget
+        # The engine the page plays on (25/11, phase 4): "rust" (scripts/coach.py's default) plays with
+        # the rules profile `regole` whatever game Rust covers (riftbound/ai/coach_rs.py), else Python;
+        # "python" (this class's default: the frozen engine) always Python.
+        # `iterazioni`: the champion's fixed iterations a decision on Rust.
+        self.motore, self.regole = motore, regole
+        self.iterazioni = iterazioni
         self.out_dir = Path(out_dir)
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self.iterations = iterations
@@ -843,6 +1292,15 @@ class CoachSession:
         self._replacing = None              # the one whose death may be replaced now
         self._save_pick = _UNASKED          # the one the coach saves (ask_save)
         self._dying_bf = None               # where they die (None: in base)
+        # Rewind (Matteo, 25/11, as RiftAtlas's): the coach's answered decisions,
+        # each with the page as it was asked; the game is rebuilt from its seed
+        # and replayed from its record up to the last one, asked again.
+        self.checkpoints: list = []
+        self.rewinds = 0
+        self._replaying = False             # a rewind replays the game: the page holds still
+        self._resume_cp: Optional[dict] = None
+        self._build: Optional[dict] = None  # what new_game built the game from
+        self.rs = None                      # the Rust game (coach_rs.RustGame), None on Python
 
     # -- what a game can have ------------------------------------------------------
 
@@ -871,7 +1329,6 @@ class CoachSession:
         opponents() (the first by default): the champion ("campione"), the net
         ("net") or the simple_trade heuristic ("simple_trade"). ValueError for
         one that isn't available."""
-        from riftbound.core.game_factory import build_game, make_agent
         available = [o["id"] for o in self.opponents()]
         opponent = opponent or available[0]
         if opponent not in available:
@@ -895,13 +1352,54 @@ class CoachSession:
         self._reset()
         seed = random.randrange(1 << 30) if seed is None else seed
         deck_a, deck_b = (deck_mine, deck_opp) if seat == "A" else (deck_opp, deck_mine)
-        gs = build_game(game_seed=seed, deck_a_path=Path(deck_a), deck_b_path=Path(deck_b),
+        self.side = seat
+        self._build = {"seed": seed, "deck_a": Path(deck_a), "deck_b": Path(deck_b),
+                       "opponent": opponent, "net": net, "ppo": ppo}
+        motore = self._engine_for(deck_mine, deck_opp, opponent)
+        if motore == "rust":
+            from riftbound.ai.coach_rs import RustGame
+            self.rs = RustGame(self)
+            gs, starter = None, self.rs.starter
+        else:
+            gs = self._new_state()
+            starter = gs.active
+        self.gs, self.side = gs, seat
+        self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
+                     "deck_opp": Path(deck_opp).stem, "opponent": opponent,
+                     "net": str(self.net_path) if net is not None else None,
+                     "motore": motore, "regole": self.regole if motore == "rust" else REGOLE_PYTHON,
+                     "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+        if opponent == "campione":
+            self.info.update(campione=str(self.campione_path), budget=self.budget)
+        # Who starts (a coin flip of the seed): the mulligan depends on it.
+        self.info["you_start"] = starter == seat
+        self.event("sys", self._starter_text())
+        self.status = "thinking"
+        self.activity = "La partita sta iniziando…"
+        self._thread = threading.Thread(target=self._run, name="rbsim-coach", daemon=True)
+        self._thread.start()
+
+    def _engine_for(self, deck_mine: Path, deck_opp: Path, opponent: str) -> str:
+        """"rust" when the page's engine is Rust and this game is one it plays: no net's advice
+        or opponent (they stay on Python), the two lists among the covered ones."""
+        if self.motore != "rust" or self.advice or opponent == "net":
+            return "python"
+        from riftbound.ai import coach_rs
+        return "rust" if coach_rs.giocabile(deck_mine, deck_opp) else "python"
+
+    def _new_state(self):
+        """The game new_game asked for, as it starts (its seed: the same deck
+        order, the same coin flip), with its agents: a rewind rebuilds it."""
+        from riftbound.core.game_factory import build_game, make_agent
+        b, seat = self._build, self.side
+        seed, net, opponent = b["seed"], b["net"], b["opponent"]
+        gs = build_game(game_seed=seed, deck_a_path=b["deck_a"], deck_b_path=b["deck_b"],
                         ai_a=None, ai_b=None)
         me, them = gs.get_player(seat), gs.get_player(gs.other(seat))
         me.agent = CoachAgent(me, net, self, iterations=self.iterations, rng=random.Random(seed))
         if opponent == "campione":
             from riftbound.ai.ppo.prior_bot import PPOPriorAgent
-            them.agent = PPOPriorAgent(them, ppo, rng=random.Random(seed + 1), budget=self.budget)
+            them.agent = PPOPriorAgent(them, b["ppo"], rng=random.Random(seed + 1), budget=self.budget)
         elif opponent == "net":
             them.agent = NetGuidedMCTSAgent(them, net, iterations=self.iterations,
                                             rng=random.Random(seed + 1))
@@ -930,22 +1428,7 @@ class CoachSession:
             self.opp_mulligan = {"hand": hand, "returned": [hand[i] for i in back]}
             return back
         them.agent.decide_mulligan = mulligan
-        self.gs, self.side = gs, seat
-        self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
-                     "deck_opp": Path(deck_opp).stem, "opponent": opponent,
-                     "net": str(self.net_path) if net is not None else None,
-                     # The page plays on the frozen Python engine (decision of 25/11).
-                     "regole": REGOLE_PYTHON,
-                     "started": time.strftime("%Y-%m-%d %H:%M:%S")}
-        if opponent == "campione":
-            self.info.update(campione=str(self.campione_path), budget=self.budget)
-        # Who starts (a coin flip of the seed): the mulligan depends on it.
-        self.info["you_start"] = gs.active == seat
-        self.event("sys", self._starter_text())
-        self.status = "thinking"
-        self.activity = "La partita sta iniziando…"
-        self._thread = threading.Thread(target=self._run, name="rbsim-coach", daemon=True)
-        self._thread.start()
+        return gs
 
     def _starter_text(self) -> str:
         if "you_start" not in self.info:
@@ -1054,17 +1537,25 @@ class CoachSession:
         return 0 if self._save_pick is unit else 1
 
     def _run(self) -> None:
-        from riftbound.core.loop import GameLoop
         log = _thread_log()
         log.sinks[threading.get_ident()] = self.log
         try:
-            self.loop = GameLoop(self.gs, verbose=True)
-            self._watch(self.loop)
-            result = self.loop.start()
+            entries = None
+            while True:
+                try:
+                    result = self._play(entries)
+                    break
+                except _Rewind:
+                    cp = self.checkpoints.pop()
+                    entries = self.loop.record[:cp["record"]]
+                    self._resume_cp = cp
+                    self.rewinds += 1
             self.result = {"winner": result.winner, "turns": result.turns,
                            "you_won": result.winner == self.side}
             if not self._abandoned:
                 self._save(result.winner)
+        except _ReplayError as exc:
+            self.result = {"error": f"Annulla: la partita rigiocata è diversa ({exc})"}
         except Exception as exc:  # noqa: BLE001
             self.result = {"error": repr(exc)}
         finally:
@@ -1078,11 +1569,69 @@ class CoachSession:
             self.pending = None
             self.status = "over"
 
+    def _play(self, entries: Optional[list]):
+        """The game on this thread: from its start, or (`entries`: a rewind)
+        rebuilt and replayed from its record up to the coach's decision asked
+        again, the page holding still meanwhile (_resume)."""
+        if self.rs is not None:
+            return self.rs.play(entries)
+        log = _thread_log()
+        if entries is not None:
+            self.gs = self._new_state()
+            self._replaying = True
+            log.sinks[threading.get_ident()] = deque(maxlen=50)    # the replay's lines: not shown
+        record = _Record(entries or [])
+        for p in (self.gs.A, self.gs.B):
+            p.agent = _Seat(p.agent, record, self._resume if p.name == self.side else None)
+        self.loop = CoachLoop(self.gs, verbose=True)
+        for p in (self.gs.A, self.gs.B):
+            p.agent.live.gs, p.agent.live.loop = self.gs, self.loop
+        record.loop = self.loop
+        self.loop.chooser = record          # at the bottom of the chain, from the start
+        self.loop.journal = []              # the champion's segments, from the start
+        self._watch(self.loop)
+        return self.loop.start()
+
+    def _resume(self) -> None:
+        """A rewind's replay reached the coach's decision: the page as it was
+        when that decision was asked; the game goes on live."""
+        if not self._replaying:
+            return
+        cp, self._replaying = self._resume_cp, False
+        _thread_log().sinks[threading.get_ident()] = self.log
+        self.log.clear()
+        self.log.extend(cp["log"])
+        self.events.clear()
+        self.events.extend(cp["events"])
+        del self.examples[cp["examples"]:]
+        for k in ("looked", "_seen", "opp_discards", "stop_on_opp_chain", "opp_mulligan", "opening"):
+            setattr(self, k, cp[k])
+        same = Observation.from_state(self.gs, self.side).to_dict() == cp["view"] and \
+            _board_extras(self.gs, self.side) == cp["extras"]
+        self.view, self.extras = cp["view"], cp["extras"]
+        if not same:
+            raise _ReplayError("il tavolo non coincide")
+        self.event("sys", "Mossa annullata: torni alla tua decisione di prima")
+
+    def _checkpoint(self) -> dict:
+        """The page as the coach is asked a decision: where a rewind takes them back."""
+        self._snapshot()
+        return {"record": len(getattr(self.loop, "record", ())), "events": list(self.events),
+                "log": list(self.log), "view": self.view, "extras": self.extras,
+                "examples": len(self.examples), "looked": self.looked, "_seen": self._seen,
+                "opp_discards": list(self.opp_discards), "stop_on_opp_chain": self.stop_on_opp_chain,
+                "opp_mulligan": self.opp_mulligan, "opening": self.opening}
+
+    def _keep(self, cp: dict, answer: dict) -> None:
+        """An answered decision: a rewind may take the coach back to it."""
+        if answer and not answer.get("auto") and hasattr(self.loop, "record"):
+            self.checkpoints.append(cp)
+
     def _snapshot(self) -> bool:
         """The coach's view of the board, taken on the game thread (the page
         never reads the live game); what changed since the last one goes to the
         log. Returns whether anything changed."""
-        if self.gs is None or self.side is None:
+        if self.gs is None or self.side is None or self._replaying:
             return False
         view = Observation.from_state(self.gs, self.side).to_dict()
         extras = _board_extras(self.gs, self.side)
@@ -1102,6 +1651,8 @@ class CoachSession:
         return self._FINISHING if self.advice else self._LEFT
 
     def _looked(self, names: list) -> None:
+        if self._replaying:
+            return
         self.show_looked()                 # an earlier look nobody showed yet
         self.looked, self._seen = names, None
         n = len(names)
@@ -1123,6 +1674,8 @@ class CoachSession:
                                "si poteva prendere."})
 
     def _opponent_turn(self) -> None:
+        if self._replaying:
+            return
         self.show_looked()
         changed = self._snapshot()
         self.status = "thinking"
@@ -1133,6 +1686,8 @@ class CoachSession:
     def event(self, who: str, text: str, move: bool = False) -> None:
         """A line of the Italian log: who is "me", "opp", "sys" or "turn"; a
         move is something a player chose to do (the rest is what happened)."""
+        if self._replaying:
+            return
         turn = self.gs.turn if self.gs is not None else 0
         self.events.append({"turn": turn, "who": who, "text": text, "move": move})
 
@@ -1187,7 +1742,10 @@ class CoachSession:
             "La rete sta pensando alla tua mossa…" if self.advice else "Tocca a te…"
 
     def _wait(self, request: dict) -> dict:
-        """Ask the coach and wait; {} once the net finishes the game alone."""
+        """Ask the coach and wait; {} once the net finishes the game alone.
+        A rewind (self.rewind) leaves the game here (_Rewind)."""
+        if self._replaying:
+            raise _ReplayError(f"una domanda durante il replay ({request.get('type')})")
         self._snapshot()
         with self._lock:
             if self.autoplay:
@@ -1198,14 +1756,19 @@ class CoachSession:
         with self._lock:
             self.pending = None
             self.status, self.activity = "thinking", "Sto giocando la mossa…"
+        if answer.get("rewind"):
+            self.activity = "Torno alla tua mossa di prima…"
+            raise _Rewind()
         return answer
 
     def ask_decision(self, point: DecisionPoint, side: str, actions: list, suggestions: list,
                      context: str = "") -> dict:
+        cp = self._checkpoint()
         answer = self._wait({"type": "decision", "point": point.value, "context": context,
                              "actions": actions,
                              "suggestions": [{k: v for k, v in s.items() if k != "key"}
                                              for s in suggestions]})
+        self._keep(cp, answer)
         if not answer:                     # the net finishes alone: its move
             if suggestions:
                 return {"suggestion": 0, "auto": True}
@@ -1216,12 +1779,14 @@ class CoachSession:
 
     def ask_mulligan(self, hand: list, suggestions: list) -> list:
         """The coach's mulligan: the hand indices to send back (up to two)."""
+        cp = self._checkpoint()
         answer = self._wait({"type": "mulligan", "hand": [{"text": n, "ref": f"hand:{i}"}
                                                           for i, n in enumerate(hand)],
                              "suggestions": suggestions, "max": 2,
                              "context": "La tua mano iniziale: puoi rimandare in fondo al mazzo "
                                         "fino a 2 carte e pescarne altrettante."
                                         + (f" {self._starter_text()}." if self._starter_text() else "")})
+        self._keep(cp, answer)
         if "suggestion" in answer:
             back = suggestions[int(answer["suggestion"])]["return"]
         elif "return" in answer:
@@ -1286,6 +1851,17 @@ class CoachSession:
             if self.pending is not None:
                 self._answers.put({})
 
+    def rewind(self) -> None:
+        """Take back the coach's last decision, as RiftAtlas's Rewind: the game
+        goes back to the page as it was asked, everything since undone (the
+        opponent's moves too, decided again). Only while a question waits."""
+        with self._lock:
+            if self.status != "waiting" or self.pending is None or self.autoplay or not self.checkpoints:
+                raise RuntimeError("Non c'è una tua mossa da annullare.")
+            self.pending = None
+            self.status, self.activity = "thinking", "Torno alla tua mossa di prima…"
+            self._answers.put({"rewind": True})
+
     def abandon(self) -> None:
         """Let the net finish the game on its own (with no net, the coach's
         seat passes to the end); nothing is saved."""
@@ -1323,7 +1899,11 @@ class CoachSession:
                 "result": self.result, "decisions": len(self.examples),
                 "corrections": sum(1 for e in self.examples if e["corrected"]),
                 "cards": _card_texts(obs, extras, self._shown_cards()),
-                "opponents": self.opponents(), "advice": self.advice, "regole": REGOLE_PYTHON}
+                "opponents": self.opponents(), "advice": self.advice,
+                "regole": self.info.get("regole", self.regole if self.motore == "rust" else REGOLE_PYTHON),
+                "motore": self.info.get("motore", self.motore),
+                "can_rewind": self.status == "waiting" and not self.autoplay and bool(self.checkpoints),
+                "rewinds": self.rewinds}
 
     def report(self, note: str) -> Path:
         path = self.out_dir / "reports.jsonl"
@@ -1363,7 +1943,7 @@ class CoachSession:
         with open(self.out_dir / "games.jsonl", "a", encoding="utf-8") as fh:
             fh.write(json.dumps({**self.info, "file": path.name if path else None, "winner": winner,
                                  "you_won": winner == self.side, "turns": turns,
-                                 "decisions": len(self.examples),
+                                 "decisions": len(self.examples), "rewinds": self.rewinds,
                                  "corrections": sum(1 for e in self.examples if e["corrected"])}) + "\n")
         return path
 

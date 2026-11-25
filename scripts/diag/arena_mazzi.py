@@ -103,8 +103,8 @@ def main() -> None:
     ap.add_argument("--budget-candidato", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--budget-avversario", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
-                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato) o 6427b90+D72-D76 "
-                         "(Rust con D72-D76 corretti: serve --motore rust e tutti i matchup su Rust)")
+                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato) 6427b90+D72-D76 o 6427b90+D72-D77 "
+                         "(Rust con D72-D76/D77 corretti: serve --motore rust e tutti i matchup su Rust)")
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
                     help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: i cinque mazzi fra loro, riconosciuti dal contenuto delle "
                          "liste) giocano su Rust (riftbound/rs/arena_rs.py), gli altri su Python")

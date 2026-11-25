@@ -42,3 +42,4 @@ pub mod agents;
 pub mod obs;
 pub mod features;
 pub mod search;
+pub mod payment;

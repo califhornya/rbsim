@@ -1,0 +1,128 @@
+[
+ {
+  "seed": 910001,
+  "matchup": "KS",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 148,
+  "t_py_traced": 1.518,
+  "t_rs_traced": 0.263
+ },
+ {
+  "seed": 910001,
+  "matchup": "SK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 134,
+  "t_py_traced": 0.342,
+  "t_rs_traced": 0.169
+ },
+ {
+  "seed": 910002,
+  "matchup": "KS",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 164,
+  "t_py_traced": 0.507,
+  "t_rs_traced": 0.206
+ },
+ {
+  "seed": 910002,
+  "matchup": "SK",
+  "starter": "a",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 114,
+  "t_py_traced": 0.272,
+  "t_rs_traced": 0.128
+ },
+ {
+  "seed": 910003,
+  "matchup": "KS",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 203,
+  "t_py_traced": 0.537,
+  "t_rs_traced": 0.291
+ },
+ {
+  "seed": 910003,
+  "matchup": "SK",
+  "starter": "b",
+  "agenti": [
+   "random",
+   "random"
+  ],
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 133,
+  "t_py_traced": 0.335,
+  "t_rs_traced": 0.167
+ }
+]

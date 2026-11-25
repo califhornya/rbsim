@@ -46,6 +46,9 @@ impl Game {
         if let Some(legend) = self.legend_with(owner, "sett_save", true) {
             if !repl && self.gs.unit(dead).might_counters > 0 && self.can_pay_generic_power(owner, 1) {
                 let lc = self.gs.ucard(legend);
+                self.notify_seat(owner, "dying_now", |g| {
+                    serde_json::json!({"id": dead.0, "unit": g.raw_opt(&Opt::Unit(dead))})
+                })?;
                 if self.choose("optional:sett_save", owner, &[Opt::Bool(true), Opt::Bool(false)], Opt::Bool(true), Some(lc))?
                     == Opt::Bool(true)
                 {
@@ -98,6 +101,29 @@ impl Game {
 
     fn route_deaths_body(&mut self, ordered: &[(UnitId, Side)], bf: usize, in_base: bool, killer: Option<(Side, CardId)>,
                          in_combat: bool) -> R<()> {
+        // The human seat is told the units of its side dying together (py: CoachSession._watch's hook).
+        let mut told = Vec::new();
+        for side in Side::BOTH {
+            let mine: Vec<UnitId> = ordered.iter().filter(|(_, s)| *s == side).map(|(u, _)| *u).collect();
+            if mine.is_empty() {
+                continue;
+            }
+            self.notify_seat(side, "dying_group", |g| {
+                serde_json::json!({"bf": if in_base { None } else { Some(bf) },
+                    "units": mine.iter().map(|&u| serde_json::json!({"id": u.0, "unit": g.raw_opt(&Opt::Unit(u))}))
+                        .collect::<Vec<_>>()})
+            })?;
+            told.push(side);
+        }
+        let r = self.route_deaths_inner(ordered, bf, in_base, killer, in_combat);
+        for side in told {
+            self.notify_seat(side, "dying_end", |_| serde_json::Value::Null)?;
+        }
+        r
+    }
+
+    fn route_deaths_inner(&mut self, ordered: &[(UnitId, Side)], bf: usize, in_base: bool, killer: Option<(Side, CardId)>,
+                          in_combat: bool) -> R<()> {
         let mut truly_dead: Vec<(UnitId, Side)> = Vec::new();
         if let Some((ksi, kcard)) = killer {
             if self.gs.is_spell(kcard) && !ordered.is_empty() {

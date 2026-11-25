@@ -1,0 +1,110 @@
+[
+ {
+  "seed": 910001,
+  "matchup": "IS",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 125,
+  "t_py_traced": 0.41,
+  "t_rs_traced": 0.239
+ },
+ {
+  "seed": 910001,
+  "matchup": "SI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   19
+  ],
+  "rs": [
+   "B",
+   19
+  ],
+  "rust_error": null,
+  "events": 207,
+  "t_py_traced": 0.73,
+  "t_rs_traced": 0.322
+ },
+ {
+  "seed": 910002,
+  "matchup": "IS",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "A",
+   13
+  ],
+  "rs": [
+   "A",
+   13
+  ],
+  "rust_error": null,
+  "events": 159,
+  "t_py_traced": 0.708,
+  "t_rs_traced": 0.215
+ },
+ {
+  "seed": 910002,
+  "matchup": "SI",
+  "modo": "self",
+  "starter": "a",
+  "py": [
+   "B",
+   18
+  ],
+  "rs": [
+   "B",
+   18
+  ],
+  "rust_error": null,
+  "events": 311,
+  "t_py_traced": 1.087,
+  "t_rs_traced": 0.505
+ },
+ {
+  "seed": 910003,
+  "matchup": "IS",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "B",
+   17
+  ],
+  "rs": [
+   "B",
+   17
+  ],
+  "rust_error": null,
+  "events": 210,
+  "t_py_traced": 0.72,
+  "t_rs_traced": 0.292
+ },
+ {
+  "seed": 910003,
+  "matchup": "SI",
+  "modo": "self",
+  "starter": "b",
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 158,
+  "t_py_traced": 0.497,
+  "t_rs_traced": 0.208
+ }
+]

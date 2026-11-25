@@ -12,12 +12,13 @@ use std::rc::Rc;
 use rbsim_core::agent::{Agent, Chooser};
 use rbsim_core::agents::{RandomAgent, SideChooser, SimpleTradeAgent};
 
+mod human;
 mod ppo;
 mod search_py;
 use rbsim_core::search::{Layers, SearchAgent, SearchCore};
 use rbsim_core::game::Game as CoreGame;
 use rbsim_core::registry::Registry as CoreRegistry;
-use rbsim_core::trace::{ReplayAgent, ReplayChooser, ScriptAgent, Sink, TraceAgent, TraceChooser};
+use rbsim_core::trace::{ReplayAgent, ReplayChooser, ScriptAgent, Sink, TraceAgent, TraceBuf, TraceChooser};
 use rbsim_core::types::{EngineError, Side};
 
 fn perr(e: EngineError) -> PyErr {
@@ -44,7 +45,7 @@ struct Registry {
 #[pymethods]
 impl Registry {
     /// `regole`: the rules profile ("6427b90", the default, or
-    /// "6427b90+D72-D76"); every game built on this registry plays it.
+    /// "6427b90+D72-D76" or "6427b90+D72-D77"); every game built on this registry plays it.
     #[new]
     #[pyo3(signature = (path, regole=None))]
     fn new(path: &str, regole: Option<&str>) -> PyResult<Self> {
@@ -162,6 +163,59 @@ impl Game {
         Ok(())
     }
 
+    /// A human seat "A" / "B": every decision of the seat (mulligan, turn_action,
+    /// reaction, showdown_action, even with a single legal option) and every
+    /// in-move choice (all `choice` kinds, decide_optional, decide_mode,
+    /// decide_predict_recycle) calls `ask(event_json: str)`, whose return value
+    /// is the answer. `event_json` is the event the trace records for it
+    /// (same builder, same keys, the state before the answer), without the
+    /// answer fields. The answer is a Python object (not JSON) shaped like the
+    /// missing field: decision -> int index into `menu` (None only for an
+    /// empty menu: a Pass; a list/tuple [kind, index, lane(, dst)], the
+    /// trace's `action` shape, is played as is even if outside the menu: for
+    /// bots and replays, a human page answers with an index); choice -> int index into `options_raw`;
+    /// decide_mulligan -> list of at most 2 distinct hand indices ([] keeps
+    /// the hand); decide_optional / decide_predict_recycle -> bool;
+    /// decide_mode -> int in 0..n (args[1]) or None (the engine picks).
+    ///
+    /// `payments=True` (the coach page's "Come paghi?", port of
+    /// coach.payment_options / gold_only_plays / _gold_step): a decision event
+    /// of a menu with more than one move also has `pay` (one entry per menu
+    /// move: null, or, where the page would offer a choice, the list of ways
+    /// to pay it, the engine's own first) and `gold_only` (the plays payable
+    /// only with Golds, [{"action": [kind, index, lane(, dst)], "ways": [...]}]).
+    /// A way is {"golds": n, "gold_domain": "FURY".. or null, "prefer": domain
+    /// name or null (the domain the [rune] cost is paid from first), "recycled":
+    /// [[domain name, runes], ...] (what it recycles, in the rune pool's order)};
+    /// the page's Italian `text` is the caller's. Besides the answers above a
+    /// decision takes {"index": i, "via": w} (menu move i paid with its way
+    /// number w in `pay[i]`) or {"solo_gold": j, "via": w} (gold_only[j] with
+    /// its way w): the seat then uses the Golds the way needs (each its own
+    /// decision in the trace, answering the Gold's "which domain" itself) and
+    /// plays the move, without asking `ask` for those steps. Computed on copies
+    /// of the game; the game is not touched.
+    /// A bool where an int is wanted (or vice versa), a wrong type or an index
+    /// out of range raises ValueError out of start() / run_segment(). An
+    /// exception of `ask` propagates as the same object. In-move choices reach
+    /// the seat through the side chooser: it is set here if the game has none.
+    /// Call it before trace_on() (as the other set_* methods); do not touch the
+    /// Game from inside `ask`.
+    /// `notify(event_json)`: what the engine shows the seat without a question (no answer, never in
+    /// the trace): {"k": "look", args: {"cards": [raw card, ...]}} when it looks at cards on top of its
+    /// deck. The seat's sett_save choice event (for `ask` alone) also carries `dying`: {"group": {"bf",
+    /// "units": [{"id", "unit": raw}]}, "now": {"id", "unit"}}, the units of its side dying together.
+    #[pyo3(signature = (seat, ask, payments=false, notify=None))]
+    fn set_human_agent(&mut self, seat: &str, ask: Py<PyAny>, payments: bool, notify: Option<Py<PyAny>>) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(human::HumanAgent::new(ask, self.g.loop_id, payments, notify)));
+        self.g.agents[s.idx()] = Some(a);
+        self.g.gs.players[s.idx()].has_agent = true;
+        if self.g.chooser.is_none() {
+            self.set_side_chooser();
+        }
+        Ok(())
+    }
+
     /// A search agent for seat "A" / "B" (py: HandwrittenAgent(p, iterations,
     /// rng=random.Random(seed), budget); with `probs`, PPOPriorAgent: the net's
     /// softmax over each menu, see search_py.rs). `log`: one row per searched
@@ -259,9 +313,19 @@ impl Game {
         })
     }
 
-    /// Trace the game (trace_py's events, raw dumps), from now on.
-    fn trace_on(&mut self) {
-        let sink: Sink = Rc::new(RefCell::new(Vec::new()));
+    /// Trace the game (trace_py's events, raw dumps), from now on. With
+    /// `watch`, every event recorded is also passed live to `watch(event_json:
+    /// str)`: the complete event, answer included, in the order `events()`
+    /// returns them. An exception of `watch` propagates out of start() /
+    /// run_segment() as the same object. Do not touch the Game from inside it.
+    #[pyo3(signature = (watch=None))]
+    fn trace_on(&mut self, watch: Option<Py<PyAny>>) {
+        let watch: Option<Rc<dyn Fn(&serde_json::Value) -> rbsim_core::types::R<()>>> = watch.map(|w| {
+            Rc::new(move |e: &serde_json::Value| -> rbsim_core::types::R<()> {
+                Python::attach(|py| w.call1(py, (e.to_string(),)).map(|_| ())).map_err(|er| human::stash(er, "watch"))
+            }) as Rc<dyn Fn(&serde_json::Value) -> rbsim_core::types::R<()>>
+        });
+        let sink: Sink = Rc::new(RefCell::new(TraceBuf { events: Vec::new(), watch }));
         for s in Side::BOTH {
             if let Some(a) = self.g.agents[s.idx()].clone() {
                 let t: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(TraceAgent { inner: a, sink: sink.clone() }));
@@ -277,12 +341,19 @@ impl Game {
     }
 
     /// GameLoop.start(): -> (winner "A" | "B" | "DRAW", turns)
+    /// An exception of a callback (`ask`, `watch`) is raised as the same object.
     fn start(&mut self) -> PyResult<(String, i64)> {
+        drop(human::take());
         let r = self.g.start();
-        if let Some(s) = self.sink.clone() {
-            self.g.drain_rng(&s);
+        let d = match &self.sink {
+            Some(s) => self.g.drain_rng(s),
+            None => Ok(()),
+        };
+        if let Some(e) = human::take() {
+            return Err(e);
         }
         let r = r.map_err(perr)?;
+        d.map_err(perr)?;
         self.winner = Some(r.winner_name().to_string());
         self.turns = r.turns;
         Ok((r.winner_name().to_string(), r.turns))
@@ -291,7 +362,9 @@ impl Game {
     /// A segment of a position (consegna1.segment_py): `turns` times the
     /// active player's actions, the end of the turn, the next turn's
     /// beginning. -> the winner if the game ended in it.
+    /// An exception of a callback (`ask`, `watch`) is raised as the same object.
     fn run_segment(&mut self, turns: i64) -> PyResult<Option<String>> {
+        drop(human::take());
         let r = (|| -> Result<Option<String>, EngineError> {
             for _ in 0..turns {
                 if let Some(res) = self.g.run_main_actions()? {
@@ -306,16 +379,22 @@ impl Game {
             }
             Ok(None)
         })();
-        if let Some(s) = self.sink.clone() {
-            self.g.drain_rng(&s);
+        let d = match &self.sink {
+            Some(s) => self.g.drain_rng(s),
+            None => Ok(()),
+        };
+        if let Some(e) = human::take() {
+            return Err(e);
         }
-        r.map_err(perr)
+        let r = r.map_err(perr)?;
+        d.map_err(perr)?;
+        Ok(r)
     }
 
     /// The trace's events (JSON list).
     fn events(&self) -> String {
         match &self.sink {
-            Some(s) => serde_json::Value::Array(s.borrow().clone()).to_string(),
+            Some(s) => serde_json::Value::Array(s.borrow().events.clone()).to_string(),
             None => "[]".into(),
         }
     }
@@ -365,12 +444,12 @@ impl Game {
 }
 
 /// How many search agents are alive (a finished, dropped game frees its own).
-/// D72..D76 counted in this thread since the last reset: {"D72": n, ...}
+/// D72..D77 counted in this thread since the last reset: {"D72": n, ...}
 /// (the corrected branches that changed something, search copies included).
 #[pyfunction]
 fn correzioni() -> std::collections::BTreeMap<String, u64> {
     let c = rbsim_core::registry::correzioni();
-    (0..5).map(|i| (format!("D{}", 72 + i), c[i])).collect()
+    (0..6).map(|i| (format!("D{}", 72 + i), c[i])).collect()
 }
 
 #[pyfunction]

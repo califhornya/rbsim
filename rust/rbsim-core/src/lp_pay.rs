@@ -129,6 +129,23 @@ impl Game {
     /// py: _pay_card_cost(actor, card, energy, power, domain=None)
     pub fn pay_card_cost(&mut self, actor: Side, card: CardId, energy: i64, power: Option<i64>,
                          domain: Option<Domain>) -> R<bool> {
+        // py: CoachLoop._pay_card_cost: the page's preference pays a Power with no domain of its own.
+        let first = if power.unwrap_or(0) != 0 && domain.or(self.gs.cost_power_domain(card)).is_none() {
+            self.preferred(actor)
+        } else {
+            None
+        };
+        if first.is_none() {
+            return self.pay_card_cost_engine(actor, card, energy, power, domain);
+        }
+        self.gs.player_mut(actor).pay_first = first;
+        let r = self.pay_card_cost_engine(actor, card, energy, power, domain);
+        self.gs.player_mut(actor).pay_first = None;
+        r
+    }
+
+    fn pay_card_cost_engine(&mut self, actor: Side, card: CardId, energy: i64, power: Option<i64>,
+                            domain: Option<Domain>) -> R<bool> {
         let domain = domain.or(self.gs.cost_power_domain(card));
         let (is_unit, is_gear_c, is_spell) = (self.gs.is_unit_card(card), self.gs.is_gear_card(card), self.gs.is_spell(card));
         let mut energy = energy;

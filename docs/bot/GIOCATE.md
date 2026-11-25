@@ -200,3 +200,36 @@ tiene lo stato completo; la prossima volta "Segnala un problema" sul momento.
   `riftbound/ai/scenari.py`), ripetuto con semi diversi: quante volte il
   campione lancia Call to Glory o Punch First per primo, se cambia con il
   budget e con il peso delle carte in mano in `table_value`.
+
+## 8. Il campione accumula unità sul campo che tiene (25/11)
+
+Osservata da Matteo giocando a mano (Evelynn contro il campione con Sett,
+`ckpt_040000.pt` a 0,4 s, motore Python 6427b90). Posizione non salvata.
+
+- **Posizione.** Turno 11, il campione a 3 contro 4 prima del punto del
+  turno (poi 4-4): tiene Packed Amphitheater con Might 24, Matteo tiene
+  Monastery of Hirana. Il campione gioca Rengar Trophy Hunter lì invece che
+  in base. Turno 15, 6-6: di nuovo lì Vi Peacekeeper (Might 31 sul campo,
+  0 di Matteo).
+- **Atteso (Matteo).** Con un campo già al sicuro, le unità nuove servono
+  per entrare nel campo dell'avversario: Rengar e Vi sono fatti per questo.
+- **Cosa c'è nel codice.**
+  - `handwritten.table_value` (la valutazione del campione): 0,05 per punto
+    di Might su un campo, senza limite, contro 0,03 in base. Un campione
+    giocato sul proprio campo vale (6 + 1 di Packed Amphitheater) × 0,05 =
+    0,35, in base 6 × 0,03 = 0,18: accumulare è premiato anche quando il
+    campo è già al sicuro.
+  - Un'unità su un campo torna solo in base (nessuno spostamento da campo a
+    campo senza GANKING): accumulare lì la blocca per un turno in più.
+  - La ricerca del turno non vede l'attacco del turno dopo: il valore di
+    avere unità in base, pronte a entrare, non compare.
+  - Rengar: sul motore della pagina (6427b90, D72 aperto) non si può giocare
+    su un campo dove ci sono solo nemici; l'ingresso diretto nel campo di
+    Matteo non era fra le mosse. Sul profilo corretto (Rust) sì.
+- **Da misurare.** Scenario da questa posizione (`docs/bot/scenari.json`), con
+  semi diversi: dove gioca Rengar e Vi (base o campo già tenuto) e quanto
+  spesso attacca il campo avversario nei turni dopo.
+- **Possibili correzioni (da provare in arena, coppie a posti scambiati).**
+  Rendimento decrescente della Might oltre quella che serve a tenere il
+  campo; Might in base pesata come minaccia per il turno dopo; un termine
+  per la corsa ai punti quando i campi sono uno a testa.

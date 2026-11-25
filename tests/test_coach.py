@@ -657,3 +657,301 @@ def test_sett_the_boss_offers_only_the_units_it_can_save(tmp_path):
     session.answer({"option": 0})
     game.join(timeout=10)
     assert [u.card.name for u in a.base_units] == ["Pit Rookie"] and "Fiora Victorious" in [c.name for c in a.banished]
+
+
+def test_punch_first_is_one_cast_and_its_unit_can_be_in_base(tmp_path):
+    """Punch First gives "a unit" +5: any unit, the base's too. The menu
+    offered one cast per battlefield ("campo: ..."), as if the spell were
+    aimed there (Matteo, 25/11): one cast now, the unit is the next question."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser, action_info
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    a.base_units.append(unit("Reckless Innovator"))
+    bf = loop.gs.battlefields[1]
+    bf.units_B.extend([unit("Pit Rookie"), unit("Sett Kingpin")])
+    bf._note_control()
+    a.hand.append(card("Punch First"))
+    casts = [g.to_engine() for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "SPELL"]
+    infos = [action_info(loop, "A", "A", DecisionPoint.TURN_ACTION, t) for t in casts]
+    assert len(casts) == 2 and {(i["text"], i["dst"]) for i in infos} == {("Lancia Punch First", None)}
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._apply_action, args=(a, casts[1]))
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    p = session.pending
+    assert [o["text"] for o in p["options"]] == [
+        "Reckless Innovator (tua, Might 3, in base)", "Pit Rookie (avversaria, Might 2, su campo 2)",
+        "Sett Kingpin (avversaria, Might 5, su campo 2)"]
+    session.answer({"option": 0})
+    game.join(timeout=10)
+    assert a.base_units[0].might == 8 and [u.might for u in bf.units_B] == [2, 5]
+
+
+def test_a_spell_that_counts_its_battlefield_still_says_which():
+    """En Garde's "+1 more if it is the only unit you control there": the
+    battlefield matters, one cast for each."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, setup, unit
+
+    from riftbound.ai.coach import action_info
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, _ = setup(active="A")
+    loop.gs.battlefields[0].units_A.append(unit("Pit Rookie"))
+    loop.gs.battlefields[1].units_A.extend([unit("Fiora Victorious"), unit("First Mate")])
+    a.hand.append(card("En Garde"))
+    texts = [action_info(loop, "A", "A", DecisionPoint.TURN_ACTION, g.to_engine())["text"]
+             for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "SPELL"]
+    assert texts == ["Lancia En Garde (campo: campo 1)", "Lancia En Garde (campo: campo 2)"]
+
+
+def test_the_gold_reckless_innovator_plays_is_drawn_exhausted():
+    """Reckless Innovator's Gold enters exhausted (the engine has it so); the
+    page drew every gear upright, as if ready (Matteo, 25/11)."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import act, choices, scripted, setup, unit
+
+    from riftbound.ai.coach import _board_extras
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    a.base_units.append(unit("Reckless Innovator"))
+    choices(loop, {"mode": lambda _loop, options: 0})          # the Gold
+    act(loop, "A", "Move Reckless Innovator base→BF1")
+    assert [g.name for g in a.base_gear] == ["Gold"]
+    extras = _board_extras(loop.gs, "A")
+    assert extras["gear_exhausted"]["me"] == {"base": [True], "0": [], "1": []}
+    assert _board_extras(loop.gs, "B")["gear_exhausted"]["opp"]["base"] == [True]
+
+
+def _gold_table(tmp_path, body_runes: int):
+    """The coach (A, no net) with `body_runes` Body runes channeled, a ready
+    Gold, Punch First in hand and Reckless Innovator in base."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, scripted, setup, unit
+
+    from riftbound.ai.coach import CoachAgent, CoachLoop
+    from riftbound.core.player import Domain, Rune
+    _, a, b = setup(active="A", rich=())
+    loop = CoachLoop(_.gs)
+    scripted(loop, a, b)
+    a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(body_runes)]
+    a.channel()
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.base_units.append(unit("Reckless Innovator"))
+    a.hand.append(card("Punch First"))
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    agent = CoachAgent(a, None, session)
+    a.agent, agent.gs, agent.loop = agent, loop.gs, loop
+    return loop, a, b, session, agent
+
+
+def _next_pending(session, end):
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    return session.pending
+
+
+def test_a_card_played_with_a_gold_ready_asks_how_to_pay(tmp_path):
+    """Matteo (25/11): players keep their runes and pay with Gold when they
+    have one. Played straight from the hand, the card asks how to pay; the
+    Gold is used first (its Power in the card's domain), then the card."""
+    import threading
+
+    from riftbound.core.player import Domain
+    loop, a, b, session, agent = _gold_table(tmp_path, 3)
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)])
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": texts.index("Lancia Punch First")})
+    p = _next_pending(session, end)
+    assert p["question"] == "Come paghi?" and p["source"] == "Punch First"
+    assert [o["text"] for o in p["options"]] == ["Ricicli 2 rune Body", "Col Gold, ricicli 1 runa Body"]
+    session.answer({"option": 1})
+    game.join(timeout=20)
+    assert not a.base_gear and len(a.rune_pool[Domain.BODY]) == 2 and a.base_units[0].might == 8
+    log = [e["text"] for e in session.events if e["who"] == "me"]
+    assert log[:3] == ["Punch First: Come paghi? → Col Gold, ricicli 1 runa Body",
+                       "Usa Gold: Power Body per pagare Punch First", "Lancia Punch First"]
+
+
+def test_a_card_only_the_gold_pays_for_is_offered_with_it(tmp_path):
+    """One Body rune and a Gold: Punch First (two Body Power) is played only
+    with the Gold; the engine has none of it until the Gold is used. The page
+    offers it "col Gold", and plays the Gold first."""
+    import threading
+
+    from riftbound.core.player import Domain
+    loop, a, b, session, agent = _gold_table(tmp_path, 1)
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)])
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    assert "Lancia Punch First" not in texts
+    session.answer({"action": texts.index("Lancia Punch First (col Gold)")})
+    game.join(timeout=20)
+    assert session.pending is None
+    assert not a.base_gear and not a.rune_pool.get(Domain.BODY) and a.base_units[0].might == 8
+
+
+def test_hiding_a_card_asks_which_rune_to_recycle(tmp_path):
+    """Matteo (25/11): hiding costs [rune], a Power of any domain; the engine
+    recycled the first domain's rune (Body before Chaos). The page asks."""
+    import threading
+
+    from riftbound.core.player import Domain, Rune
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    loop, a, b, session, agent = _gold_table(tmp_path, 2)
+    a.base_gear.clear()                                     # no Gold here
+    a.rune_pool[Domain.CHAOS] = [Rune(Domain.CHAOS) for _ in range(2)]
+    a.channel()
+    a.hand.append(CARD_REGISTRY["Back Off"].instantiate())
+    bf = loop.gs.battlefields[0]
+    bf.units_A.append(a.base_units.pop())
+    bf._note_control()
+    game = threading.Thread(target=lambda: loop._apply_action(a, agent.decide_action(b)))
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": next(i for i, t in enumerate(texts) if t.startswith("Nascondi Back Off"))})
+    p = _next_pending(session, end)
+    assert p["question"] == "Come paghi?" and p["source"] == "Back Off"
+    assert [o["text"] for o in p["options"]] == ["Ricicli 1 runa Body", "Ricicli 1 runa Chaos"]
+    session.answer({"option": 1})
+    game.join(timeout=20)
+    assert len(a.rune_pool[Domain.BODY]) == 2 and len(a.rune_pool[Domain.CHAOS]) == 1
+    assert [fd.card.name for fd in bf.facedowns] == ["Back Off"]
+
+
+def test_the_runes_whose_energy_is_spent_are_drawn_exhausted():
+    """The engine keeps the Energy not spent (`rune_energy`), not which rune
+    gave it: as many runes are drawn ready, the rest exhausted."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import setup
+
+    from riftbound.ai.coach import _board_extras
+    from riftbound.core.player import Domain, Rune
+    loop, a, _ = setup(active="A", rich=())
+    a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(3)]
+    a.rune_pool[Domain.CHAOS] = [Rune(Domain.CHAOS) for _ in range(2)]
+    a.channel()
+    a.energy -= 2
+    runes = _board_extras(loop.gs, "A")["runes"]["me"]
+    assert [(r["domain"], r["ready"]) for r in runes] == [
+        ("BODY", True), ("BODY", True), ("BODY", True), ("CHAOS", False), ("CHAOS", False)]
+
+
+def test_identical_triggers_are_not_ordered_by_hand(tmp_path):
+    """Two Pyke Returned at a battlefield, three enemy units die together: six
+    "once each turn" triggers (§383.3.e.1: none performed yet), two Golds.
+    The page asked to order six "abilità di Pyke Returned" it can't tell
+    apart (Matteo, 25/11); now it doesn't ask."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    bf = loop.gs.battlefields[0]
+    bf.units_A.extend([unit("Pyke Returned"), unit("Pyke Returned")])
+    dead = [unit("Pit Rookie"), unit("First Mate"), unit("Irresistible Faefolk")]
+    bf.units_B.extend(dead)
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    asked = []
+    game = threading.Thread(target=loop._route_deaths, args=([(u, "B") for u in dead], bf),
+                            kwargs={"in_combat": True})
+    game.start()
+    end = time.time() + 10
+    while game.is_alive() and time.time() < end:
+        if session.pending is not None:
+            asked.append(session.pending.get("question"))
+            session.answer({"option": 0})
+        time.sleep(0.005)
+    game.join(timeout=10)
+    assert not asked and [g.name for g in a.base_gear] == ["Gold", "Gold"]
+
+
+def _answer_randomly(rng):
+    def pick(pending):
+        if pending["type"] == "choice":
+            return {"option": rng.randrange(len(pending["options"]))}
+        if pending["type"] == "notice":
+            return {"ok": True}
+        if pending["type"] == "mulligan":
+            return {"return": [0]}
+        return {"action": rng.randrange(len(pending["actions"]))}
+    return pick
+
+
+def _next_question(session, timeout: float = 60.0) -> dict:
+    end = time.time() + timeout
+    while time.time() < end:
+        st = session.state()
+        if st["status"] == "over":
+            return st
+        if st["status"] == "waiting" and st["pending"] is not None:
+            return st
+        time.sleep(0.005)
+    raise AssertionError("no question came")
+
+
+def test_rewind_takes_the_last_decision_back(tmp_path):
+    """Matteo (25/11): RiftAtlas's Rewind. After a decision and what followed
+    (the opponent's moves too), "Annulla" brings back the same question on the
+    same table, with the log as it was; then the game goes on to its end."""
+    import random
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(EVELYNN, KHAZIX, seat="A", opponent="simple_trade", seed=11)
+    pick = _answer_randomly(random.Random(5))
+    asked = []
+    for _ in range(40):                       # into the game, past a few turns
+        st = _next_question(session)
+        assert st["status"] != "over"
+        if st["pending"]["type"] == "decision":
+            asked.append((st["pending"], st["observation"], st["board"], st["events"]))
+        session.answer(pick(st["pending"]))
+    st = _next_question(session)
+    while st["pending"]["type"] != "decision":
+        session.answer(pick(st["pending"]))
+        st = _next_question(session)
+    assert st["can_rewind"]
+    pending, view, board, events = asked[-1]           # the last decision answered
+    session.rewind()
+    st = _next_question(session)
+    assert st["pending"]["actions"] == pending["actions"] and st["observation"] == view
+    assert st["board"] == board and st["rewinds"] == 1
+    assert st["events"][:-1] == events and "Mossa annullata" in st["events"][-1]["text"]
+    session.rewind()                                   # and the one before
+    st = _next_question(session)
+    assert st["pending"]["actions"] == asked[-2][0]["actions"] and st["observation"] == asked[-2][1]
+    _play(session, pick, timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]

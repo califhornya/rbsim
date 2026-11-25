@@ -359,6 +359,14 @@ impl Game {
         if n <= 0 {
             return Ok(true);
         }
+        // py: CoachLoop._pay_generic_power (the page's payment preference)
+        if let Some(d) = self.preferred(actor) {
+            if self.gs.player(actor).can_pay_cost(0, Some(n), Some(d)) {
+                let ok = self.gs.player_mut(actor).pay_cost(0, Some(n), Some(d));
+                self.drain_rune_recycles()?;
+                return Ok(ok);
+            }
+        }
         let doms: Vec<Domain> = self.gs.player(actor).power_pool.keys().copied().collect();
         for d in &doms {
             if self.gs.player(actor).can_pay_cost(0, Some(n), Some(*d)) {
@@ -376,7 +384,13 @@ impl Game {
     }
 
     /// py: _offer_reveal_from_top (EK: no card has on_reveal_from_top)
-    pub fn offer_reveal_from_top(&mut self, _actor: Side, cards: &[CardId]) -> R<Vec<CardId>> {
+    pub fn offer_reveal_from_top(&mut self, actor: Side, cards: &[CardId]) -> R<Vec<CardId>> {
+        if !cards.is_empty() {
+            // The human seat is shown what it looks at (py: CoachSession._watch's hook).
+            self.notify_seat(actor, "look", |g| {
+                serde_json::json!({"cards": cards.iter().map(|&c| g.raw_opt(&Opt::Card(c))).collect::<Vec<_>>()})
+            })?;
+        }
         for &c in cards {
             if self.gs.spec(c).effects.iter().any(|e| e.trigger == "on_reveal_from_top") {
                 not_ported!("_offer_reveal_from_top", "on_reveal_from_top (Nocturne)");
