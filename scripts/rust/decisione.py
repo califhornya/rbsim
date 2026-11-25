@@ -132,7 +132,7 @@ def main(argv=None) -> int:
     t = r.add_mutually_exclusive_group(required=True)
     t.add_argument("--turno", type=int)
     t.add_argument("--k", type=int)
-    r.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa"],
+    r.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa", "rimonta"],
                    help="valutazione delle foglie nella decisione rifatta (il prefisso resta quello di --valutazione-orig)")
     r.add_argument("--valutazione-orig", default=None, metavar="NOME[:k:alpha]",
                    help="valutazione con cui e' stata giocata la partita autonoma originale (default storica): il prefisso si riproduce con lei")

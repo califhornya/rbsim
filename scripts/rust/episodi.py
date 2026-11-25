@@ -63,17 +63,43 @@ def carte_might() -> set:
     return out
 
 
+def corsa(pos: dict) -> tuple:
+    """Come `race_info` di search.rs sulla posizione di `D.riassunto`: -> (race, op_next_wins). La prossima Beginning
+    Phase e' di chi non e' attivo; si alternano le tenute (solo i campi controllati segnano) fino a V."""
+    me = pos["seat"]
+    h_me = sum(1 for c in pos["campi"] if c["controlla"] == "campione")
+    h_op = sum(1 for c in pos["campi"] if c["controlla"] == "avversario")
+    v = pos["v"]
+    pm, po = pos["punti"]
+    turno = "B" if pos["attivo"] == "A" else "A"
+    onw = turno != me and po + h_op >= v and h_op > 0
+    if h_me == 0 and h_op == 0:
+        return 0, onw
+    for _ in range(30):
+        if turno == me:
+            pm += h_me
+            if pm >= v:
+                return 1, onw
+        else:
+            po += h_op
+            if po >= v:
+                return -1, onw
+        turno = "B" if turno == "A" else "A"
+    return 0, onw
+
+
 def esamina(partita: dict, might: set) -> tuple:
-    """-> (decisioni esaminate, [episodi])."""
+    """-> (decisioni esaminate, [episodi], decisioni Play/Move per stato della corsa)."""
     seat = partita["campione"]
 
     def tieni(e):
         lab = e["menu"][e["index"]]
-        return (e["point"] == "turn_action" and (PLAY.match(lab) or MOVE.match(lab))) or \
+        return e["point"] == "turn_action" or \
                (e["point"] == "showdown_action" and e["primo"] and SHOW.match(lab) and SHOW.match(lab).group(1) in might)
 
     righe = D.originale(partita, tieni)
     ep = []
+    stati = {-1: 0, 0: 0, 1: 0}  # decisioni turn_action (Play/Move) per stato della corsa
     for o in righe:
         e = o["e"]
         if "state_raw" not in e:
@@ -81,12 +107,16 @@ def esamina(partita: dict, might: set) -> tuple:
         lab = o["action"]
         if e["point"] == "turn_action":
             m = PLAY.match(lab) or MOVE.match(lab)
+            if not m:
+                continue
+            rc = corsa(D.riassunto(e["state_raw"], seat))[0]
+            stati[rc] += 1
             d = int(m.group(2) if lab.startswith("Play") else m.group(3))
             pos = D.riassunto(e["state_raw"], seat)
             c = pos["campi"][d]
             if c["controlla"] == "campione" and not c["avversario"]["unita"] and \
                     any(x["controlla"] == "avversario" for i, x in enumerate(pos["campi"]) if i != d):
-                ep.append({"tipo": "§8 accumulo", "k": o["k"], "turn": o["turn"], "azione": lab,
+                ep.append({"tipo": "§8 accumulo", "race": rc, "k": o["k"], "turn": o["turn"], "azione": lab,
                            "might_gia": c["campione"]["might"], "punti": pos["punti"]})
         else:
             pos = D.riassunto(e["state_raw"], seat)
@@ -94,7 +124,7 @@ def esamina(partita: dict, might: set) -> tuple:
             if c["campione"]["might"] > c["avversario"]["might"]:
                 ep.append({"tipo": "§7 spreco", "k": o["k"], "turn": o["turn"], "azione": lab,
                            "might_gia": c["campione"]["might"], "might_avv": c["avversario"]["might"], "punti": pos["punti"]})
-    return len(righe), ep
+    return len(righe), ep, stati
 
 
 def main(argv=None) -> int:
@@ -106,7 +136,7 @@ def main(argv=None) -> int:
     ap.add_argument("--esempi", type=int, default=5)
     ap.add_argument("--posti", nargs="+", default=["A"], choices=["A", "B"])
     ap.add_argument("--iterazioni", type=int, default=D.ITERAZIONI_CAMPIONE)
-    ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa"],
+    ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa", "rimonta"],
                     help="valutazione delle foglie del campione (default storica)")
     ap.add_argument("--k-acc", type=float, default=3.0)
     ap.add_argument("--alpha", type=float, default=0.2)
@@ -118,21 +148,29 @@ def main(argv=None) -> int:
     print("carte che aumentano la Might:", ", ".join(sorted(might)))
     t0 = time.time()
     esaminate, partite, conta, esempi = 0, 0, {}, {}
+    den_race, ep_race = {-1: 0, 0: 0, 1: 0}, {-1: 0, 0: 0, 1: 0}
     per_partita: dict = {}
     for seed in D.semi(a.semi):
         for seat in a.posti:
             P = D.autonoma(a.matchup, seed, a.ckpt, a.pesi_casuali, a.iterazioni, seat, **extra)
-            n, ep = esamina(P, might)
+            n, ep, stati = esamina(P, might)
+            for r_, c_ in stati.items():
+                den_race[r_] += c_
             esaminate += n
             partite += 1
             for x in ep:
                 conta[x["tipo"]] = conta.get(x["tipo"], 0) + 1
+                if "race" in x:
+                    ep_race[x["race"]] += 1
                 per_partita.setdefault(x["tipo"], set()).add((seed, seat))
                 esempi.setdefault(x["tipo"], []).append((P, x))
             print(f"  seme {seed} posto {seat}: {n} ricerche, {len(ep)} episodi ({time.time() - t0:.0f} s)", flush=True)
     print(f"\nmatchup {a.matchup}: {partite} partite, {esaminate} decisioni esaminate (ricerche del campione)")
     for tipo in ("§8 accumulo", "§7 spreco"):
         print(f"{tipo}: {conta.get(tipo, 0)} episodi in {len(per_partita.get(tipo, ()))} partite su {partite}")
+    print("§8 per stato della corsa al momento della decisione (episodi / decisioni Play-Move del campione):")
+    for r_ in (-1, 0, 1):
+        print(f"  race {r_:+d}: {ep_race[r_]}/{den_race[r_]}" + (f" = {100 * ep_race[r_] / den_race[r_]:.1f}%" if den_race[r_] else ""))
     for tipo, lista in esempi.items():
         print(f"\nesempi {tipo}:")
         for P, x in lista[:a.esempi]:

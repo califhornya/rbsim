@@ -43,6 +43,7 @@ fn parse_valutazione(nome: &str, k: f64, alpha: f64) -> PyResult<rbsim_core::sea
         "accumulo" => Ok(rbsim_core::search::Valutazione::Accumulo { k, alpha }),
         "minaccia" => Ok(rbsim_core::search::Valutazione::Minaccia),
         "corsa" => Ok(rbsim_core::search::Valutazione::Corsa),
+        "rimonta" => Ok(rbsim_core::search::Valutazione::Rimonta),
         _ => Err(pyo3::exceptions::PyValueError::new_err(format!("valutazione sconosciuta: {nome}"))),
     }
 }
@@ -307,7 +308,7 @@ impl Game {
         }
     }
 
-    /// Valutazione delle foglie: "storica" (default), "accumulo" (k, alpha), "minaccia" o "corsa".
+    /// Valutazione delle foglie: "storica" (default), "accumulo" (k, alpha), "minaccia", "corsa" o "rimonta".
     #[pyo3(signature = (seat, nome, k=3.0, alpha=0.2))]
     fn set_search_valutazione(&mut self, seat: &str, nome: &str, k: f64, alpha: f64) -> PyResult<()> {
         let s = seat_of(seat)?;

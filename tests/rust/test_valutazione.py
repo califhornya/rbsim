@@ -164,3 +164,39 @@ def test_valutazione_orig_entra_nella_partita_autonoma():
     assert decisione.partita_da_args(a)["valutazione"][0] == "corsa"
     a.valutazione_orig = None
     assert "valutazione" not in decisione.partita_da_args(a)
+
+
+# ---- rimonta: attiva solo se si perde la corsa (race -1) e l'avversario non vince subito ----
+
+def test_rimonta_fuori_dallo_stato_e_uguale_alla_storica():
+    g = _vuota()
+    su, base = _caso(True), _caso(False)
+    for punti, att in (((7, 5), "opp"), ((7, 7), "me")):  # race +1, op_next_wins
+        for p in (su, base, _caso(False, [4])):
+            assert _val(g, "rimonta", *p, punti, att) == _val(g, "storica", *p, punti, att)
+    assert _an(g, UNO_CIASCUNO, punti=(7, 5), attivo="opp")[0] == 1
+    assert _an(g, UNO_CIASCUNO, punti=(7, 7), attivo="me")[1] is True
+    nessuno = [(None, [], []), (None, [], [])]
+    assert _val(g, "rimonta", nessuno, [3], [], (0, 0), "me") == _val(g, "storica", nessuno, [3], [], (0, 0), "me")
+
+
+def test_rimonta_storica_invariata_e_default():
+    g = _vuota()
+    p = _caso(True)
+    assert _val(g, "storica", *p, (6, 6), "me") == g.valore_costruito("storica", *p, 3.0, 0.2, (6, 6), "me")
+
+
+def test_rimonta_corsa_persa_base_batte_accumulo_con_margine_gia_sufficiente():
+    g = _vuota()
+    punti, att = (6, 6), "me"
+    su, base = _caso(True), _caso(False)  # opp_base vuota: need = 3, margine 10 >= 3
+    assert _an(g, base[0], [3], [], punti, att)[:2] == (-1, False)
+    assert _val(g, "storica", *su, punti, att) > _val(g, "storica", *base, punti, att)
+    assert _val(g, "rimonta", *base, punti, att) > _val(g, "rimonta", *su, punti, att)
+
+
+def test_rimonta_corsa_persa_campo_minacciato_il_rinforzo_regge():
+    g = _vuota()
+    punti, att = (6, 6), "me"
+    su, base = _caso(True, [12]), _caso(False, [12])  # need = 15 > 10: il rinforzo conta per intero
+    assert _val(g, "rimonta", *su, punti, att) >= _val(g, "rimonta", *base, punti, att)

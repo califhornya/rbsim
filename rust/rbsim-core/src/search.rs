@@ -54,6 +54,11 @@ pub enum Valutazione {
     Minaccia,
     /// Storica + w * minaccia, con w secondo la corsa ai punti (`race_info`): 0.45 se si perde, 0.15 se si vince, 0.30 altrimenti.
     Corsa,
+    /// Storica, ma solo se si perde la corsa (race == -1) e l'avversario non vince subito: premio 0.04 * min(A, D+2)
+    /// verso la conquista del campo avversario con D minima, e Might oltre (Might base avversaria + 3) sui campi
+    /// propri sicuri conta 0.2 invece di 1. Negli altri stati = storica. Il premio verso la conquista non conta se un
+    /// campo proprio sicuro ha Might sotto `need` (li' il rinforzo vale piu' dell'attacco: dedotto dal caso di controllo).
+    Rimonta,
 }
 
 /// Corsa ai punti a campi fissi (solo le tenute segnano): -> (race, op_next_wins).
@@ -121,6 +126,34 @@ pub fn threat(o: &Observation, op_next_wins: bool) -> f64 {
     best
 }
 
+fn campo_proprio_scoperto(o: &Observation, need: f64) -> bool {
+    let me = o.viewer;
+    o.battlefields.iter().any(|bf| {
+        let (mine_v, theirs_v) = if me == Side::A { (&bf.a, &bf.b) } else { (&bf.b, &bf.a) };
+        bf.controller == Some(me) && theirs_v.is_empty() && (mine_v.iter().map(|u| u.lasting_might).sum::<i64>() as f64) < need
+    })
+}
+
+/// Progresso verso la conquista: min(A, D + 2) con D = Might duratura avversaria minima fra i campi che l'avversario
+/// controlla, A = Might duratura in base + dei GANKING miei sugli altri campi. 0 se l'avversario non controlla campi.
+pub fn rimonta_progresso(o: &Observation) -> i64 {
+    let me = o.viewer;
+    let theirs_of = |bf: &crate::obs::BattlefieldView| if me == Side::A { bf.b.clone() } else { bf.a.clone() };
+    let target = o.battlefields.iter().enumerate()
+        .filter(|(_, bf)| bf.controller == Some(me.other()))
+        .map(|(i, bf)| (i, theirs_of(bf).iter().map(|u| u.lasting_might).sum::<i64>()))
+        .min_by_key(|&(_, d)| d);
+    let Some((i, d)) = target else { return 0 };
+    let mut a: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum();
+    for (j, other) in o.battlefields.iter().enumerate() {
+        if j != i {
+            let mine = if me == Side::A { &other.a } else { &other.b };
+            a += mine.iter().filter(|u| u.keywords.contains(&"GANKING")).map(|u| u.lasting_might).sum::<i64>();
+        }
+    }
+    a.max(0).min(d + 2)
+}
+
 /// py: handwritten.table_value
 pub fn table_value(o: &Observation) -> f64 {
     table_value_v(o, Valutazione::Storica)
@@ -130,6 +163,10 @@ pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
     let me = o.viewer;
     let mut s = 0.45 * ((o.my_points - o.opp_points) as f64);
     let opp_base: i64 = o.opp_base_units.iter().map(|u| u.lasting_might).sum();
+    let rimonta = val == Valutazione::Rimonta && {
+        let (race, onw) = race_info(o);
+        race == -1 && !onw
+    };
     for bf in &o.battlefields {
         let (mine_v, theirs_v) = if me == Side::A { (&bf.a, &bf.b) } else { (&bf.b, &bf.a) };
         let mine: i64 = mine_v.iter().map(|u| u.lasting_might).sum();
@@ -145,8 +182,17 @@ pub fn table_value_v(o: &Observation, val: Valutazione) -> f64 {
                 let m = mine as f64;
                 s += 0.05 * (m.min(need) + alpha * (m - need).max(0.0));
             }
+            Valutazione::Rimonta if rimonta && bf.controller == Some(me) && theirs_v.is_empty() => {
+                let need = (opp_base + 3) as f64;
+                let m = mine as f64;
+                s += 0.05 * (m.min(need) + 0.2 * (m - need).max(0.0));
+            }
             _ => s += 0.05 * ((mine - theirs) as f64),
         }
+    }
+    // il premio non conta se un campo proprio sicuro e' sotto `need`: li' il rinforzo vale piu' dell'attacco
+    if rimonta && !campo_proprio_scoperto(o, (opp_base + 3) as f64) {
+        s += 0.04 * rimonta_progresso(o) as f64;
     }
     let base: i64 = o.my_base_units.iter().map(|u| u.lasting_might).sum::<i64>()
         - o.opp_base_units.iter().map(|u| u.lasting_might).sum::<i64>();

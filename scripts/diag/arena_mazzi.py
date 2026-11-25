@@ -111,7 +111,7 @@ def main() -> None:
     ap.add_argument("--win-probe-candidato", action="store_true", help="il candidato prova la vittoria nel turno (solo --motore rust)")
     ap.add_argument("--win-probe-avversario", action="store_true", help="idem l'avversario (solo --motore rust)")
     for lato in ("candidato", "avversario"):
-        ap.add_argument(f"--valutazione-{lato[0]}", choices=("storica", "accumulo", "minaccia", "corsa"), default="storica",
+        ap.add_argument(f"--valutazione-{lato[0]}", choices=("storica", "accumulo", "minaccia", "corsa", "rimonta"), default="storica",
                         help=f"valutazione delle foglie del {lato} (solo --motore rust; default storica = invariato)")
         ap.add_argument(f"--k-{lato[0]}", type=float, default=3.0, help=f"k dell'accumulo del {lato}")
         ap.add_argument(f"--alpha-{lato[0]}", type=float, default=0.2, help=f"alpha dell'accumulo del {lato}")
