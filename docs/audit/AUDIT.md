@@ -163,8 +163,8 @@ From now on:
 | D75 | Sett Kingpin never gets +1 for the buffed friendly units at its battlefield (the passive is ignored); the data also leaves itself out | Sett Kingpin | Sett (champion): seen by the owner, a buffed Kingpin at 6 instead of 7 | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D77 | A showdown staged by a trigger of a Standard Move that isn't held waits for the next action that isn't a move (or the end of the turn) | §462, Irresistible Faefolk | Sett (deck): seen by the owner, Pillaged Armory played and a defender buffed before the showdown | fixed in Rust on the profile 6427b90+D72-D77, `9fcdc25` |
-| D77 | A showdown a Standard Move's trigger stages (Irresistible Faefolk moving an enemy unit in) waits for the next action that isn't a move, or the end of the turn | §462 | Sett (Faefolk): open-state plays (gear, units, spells without ACTION) before that showdown; seen by the owner in the coach page | open: to be fixed in Rust |
-| D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | open: to be fixed in Rust on a new profile, when the owner says |
+| D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | open: in the package of fixes, when the owner says |
+| D79 | A card played from face down in a showdown or as a reaction: its own "when you play me" goes on the chain and resolves before the other triggers of the same play (Evelynn Agony's Embrace) trigger | §383.3, §383.4.a | Evelynn (Bedeviling Stranger + legend): seen by the owner in the coach page, the legend's draw/discard after the Stranger's bounce had resolved | open: in the package of fixes, when the owner says |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1246,6 +1246,46 @@ Open (25/11): recorded, not fixed (the owner's call).
   controller (Vex) or always (Hunker Down: check the data's two encodings);
   whether such a unit may still be chosen (the CORE_RULES example: yes, the
   instruction is negated on resolution). Red test first.
+
+### D79. A face-down play outside a task splits its triggers
+
+Open (25/11): recorded, not fixed (the owner collects reports; one package of
+fixes on a new profile, when the owner says).
+
+- **Cards.** Bedeviling Stranger (HIDDEN; "When you play me, choose a
+  battlefield. If there are 4 or more units there, you may return an enemy
+  unit there to its owner's hand") and Evelynn Agony's Embrace (legend: "Once
+  each turn, when you play a card from face down, draw 1. Then, if it's not
+  your turn, discard 1").
+- **Seen.** Raised by the owner (25/11, Evelynn against Sett, coach page,
+  rules 6427b90+D72-D77 on Rust): turn 6 (Sett's), showdown at Bandle Scouts'
+  Academy; the owner plays the Stranger from face down there. The chain holds
+  only the Stranger's ability (target Sett Kingpin) and the owner is asked to
+  respond to it; the legend's draw/discard comes after it has resolved.
+- **Rules.** Both trigger on the same event, the play (a unit's "when you
+  play me" is a Play Effect, §383.4.a): they go on the chain together, each
+  player ordering theirs (§383.3). Expected: the Stranger's ability and the
+  legend's on the chain at once, the owner picking the order.
+- **Engine.** `_play_from_hidden` from `_showdown_step` (`loop.py:7860`) and
+  `_reaction_step` (`loop.py:7662`) runs outside a task (Rust: `lp_showdown.rs:124`,
+  `lp_chain.rs:414` → `lp_hidden.rs:177`). With no task running a trigger is
+  flushed as it triggers and the chain runs (`lp_triggers.rs:388`): in
+  `_play_unit` the card's own effects (`lp_play.rs:90`) go on the chain and
+  resolve before `_fire_card_played` (`lp_play.rs:97`) fires the legend's.
+  From the Main Phase (`_apply_action`, a task) the two go on the chain together.
+- **Same encoding.** Every unit or gear played from face down in a showdown
+  or as a reaction with a "when you play me" and another trigger of the same
+  play (legend, units, trash). A face-down spell: `_spell_played` fires
+  `on_card_played` before the spell is put on the chain, so the legend's
+  trigger runs before the spell is there (to check). The reaction path is
+  read from the code, not seen.
+- **Weight.** Evelynn: the draw (and, on the opponent's turn, the discard)
+  can't come before the Stranger's bounce; the opponent answers the two
+  abilities apart.
+- **Fix (Rust, to do).** Behind the package profile's flag: run
+  `play_from_hidden` as a task (`as_task`), so the play's triggers are flushed
+  together when it ends. Red test first with the position above; a second
+  test keeps the old behavior on 6427b90+D72-D77.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

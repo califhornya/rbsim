@@ -25,6 +25,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   fissano), `6427b90+D72-D76` o `6427b90+D72-D77` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
 - (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
+- (25/11, Matteo) Difetti di motore dalle partite: si raccolgono (D78, D79, ...) e si correggono in un pacchetto unico
+  su un profilo nuovo, quando Matteo lo dice (un test rosso per ciascuno); congelato col nome dell'ultimo Dxx prima di misurare.
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -76,7 +78,8 @@ Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi s
    §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. In attesa: D78 (decide Matteo); Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+6. Pacchetto di correzioni in raccolta (AUDIT.md, SEGNALAZIONI.md): D78 (Vex e gli spostamenti da effetto), D79
+   (carta coperta nello showdown: le abilità della stessa giocata non vanno sulla pila insieme). Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
