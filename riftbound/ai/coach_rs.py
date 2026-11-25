@@ -90,8 +90,9 @@ class RustGame:
     def __init__(self, session):
         self.s = session
         self.seed = session._build["seed"]
-        # Who starts: a coin flip of the seed (Python draws it off the game's generator).
-        self.starter = random.Random(self.seed).choice(["A", "B"])
+        # Who starts: the opening's choice (new_game with `apertura`), else a coin flip of the seed
+        # (Python draws it off the game's generator).
+        self.starter = session._build.get("starter") or random.Random(self.seed).choice(["A", "B"])
         self.record: list = []
         self.n_replay = 0          # answers of the record given back without asking the page
         self.k = 0
@@ -127,7 +128,7 @@ class RustGame:
         from riftbound.rs import arena_rs, rust_bridge
         s, b = self.s, self.s._build
         g = rust_bridge.build(self.seed, b["deck_a"], b["deck_b"], self.starter.lower(), arena_rs.MAX_TURNS,
-                              regole=s.regole)
+                              regole=s.regole, bf_a=b.get("bf_a"), bf_b=b.get("bf_b"))
         opp = "B" if s.side == "A" else "A"
         if b["opponent"] == "campione":
             g.set_search_agent(opp, s.iterazioni or ITERAZIONI_CAMPIONE, self.seed * 2 + (opp == "B"), None,

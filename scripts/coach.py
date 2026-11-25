@@ -143,7 +143,11 @@ def main() -> None:
                 if self.path == "/api/new":
                     session.new_game(Path(body["deck_mine"]), Path(body["deck_opp"]),
                                      seat=body.get("seat", "A"), opponent=body.get("opponent"),
-                                     seed=body.get("seed"))
+                                     seed=body.get("seed"), apertura=bool(body.get("apertura", True)))
+                elif self.path == "/api/campo":
+                    session.scegli_campo(body.get("campo"))
+                elif self.path == "/api/inizia":
+                    session.inizia(body.get("io"))
                 elif self.path == "/api/answer":
                     session.answer(body)
                 elif self.path == "/api/report":

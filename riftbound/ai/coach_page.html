@@ -227,6 +227,15 @@ aside section.grow { flex: 1 1 0; min-height: 150px; overflow-y: auto; }
 .modal { position: fixed; inset: 0; z-index: 40; background: rgba(5,7,10,.62); display: grid; place-items: center; }
 .modal .box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; width: min(560px, 92vw);
   max-height: 86vh; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.apertura .box { width: min(640px, 94vw); }
+.apertura .campi { display: flex; gap: 12px; flex-wrap: wrap; margin: 6px 0 30px; }
+.apertura .campo { width: 168px; aspect-ratio: 1.396; border: 0; padding: 0; background: none; border-radius: 8px; position: relative; }
+.apertura .campo .face { border-radius: 8px; }
+.apertura button.campo:hover .face { box-shadow: 0 0 0 3px var(--gold); }
+.apertura .campo.coperto .face { opacity: .85; filter: saturate(.6); }
+.apertura .campo .lbl { position: absolute; left: 0; right: 0; bottom: -20px; text-align: center; font-size: 12px; color: var(--muted); }
+.apertura .tiro { font-size: 17px; font-weight: 700; margin: 22px 0 6px; }
+.apertura .azioni { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .modal h2 { margin: 0 0 10px; font-size: 18px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .grid2 label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 3px; }
@@ -491,7 +500,7 @@ function drawArrows() {
 function renderSide() {
   const o = S.observation, st = $("#status");
   st.className = "pill " + S.status;
-  st.textContent = { idle: "Pronto", thinking: "Si gioca…", waiting: "Tocca a te decidere", over: "Partita finita" }[S.status] || S.status;
+  st.textContent = { idle: "Pronto", opening: "Apertura", thinking: "Si gioca…", waiting: "Tocca a te decidere", over: "Partita finita" }[S.status] || S.status;
   // score
   if (o) {
     const me = o.viewer, alert = o.showdown_bf != null ? `Showdown su ${esc(bfName(o, o.showdown_bf))}` : "";
@@ -722,6 +731,7 @@ function renderModal() {
     $("#closePile").onclick = () => { pileOpen = null; renderModal(); };
     return;
   }
+  if (S.status === "opening" && S.apertura) { renderApertura(el); return; }
   const show = S.status === "idle" || (S.status === "over" && setupOpen) || (S.status === "over" && S.result && !S._seen);
   if (!show) { el.innerHTML = ""; return; }
   const r = S.result;
@@ -752,10 +762,44 @@ function renderModal() {
   const vsNote = () => { const o = (S.opponents || []).find((x) => x.id === $("#vs").value);
     $("#vsnote").textContent = o && o.decks ? `Il campione è allenato su ${o.decks.slice(0, -1).join(", ")} e ${o.decks[o.decks.length - 1]}: con altri mazzi gioca peggio.` : ""; };
   $("#vs").onchange = vsNote; vsNote();
-  $("#start").onclick = () => { setupOpen = false; post("/api/new", { deck_mine: $("#mine").value, deck_opp: $("#opp").value, seat: $("#seat").value, opponent: $("#vs").value }); };
+  $("#start").onclick = () => { setupOpen = false; post("/api/new", { deck_mine: $("#mine").value, deck_opp: $("#opp").value, seat: $("#seat").value, opponent: $("#vs").value, apertura: true }); };
   if ($("#later")) $("#later").onclick = () => { setupOpen = false; S._seen = true; seenResult = JSON.stringify(S.result); el.innerHTML = ""; };
 }
 let seenResult = null;
+
+/* ---------- opening: battlefield, d20, who starts (as RiftAtlas) ---------- */
+function renderApertura(el) {
+  const a = S.apertura, opp = a.opponent || "Avversario";
+  const campo = (n, cls = "", tag = "button") => `<${tag} class="campo ${cls}" ${tag === "button" ? `data-campo="${esc(n)}"` : ""} title="${esc(n)}">${face(n, "wide")}<span class="lbl">${esc(n)}</span></${tag}>`;
+  let html;
+  if (a.step === "campo") {
+    html = `<h2>Scegli il tuo campo di battaglia</h2>
+      <p class="hint" style="margin-top:-4px">La scelta è coperta: ${esc(opp.toLowerCase())} sceglie adesso anche lui, i due campi si scoprono insieme.</p>
+      <div class="campi">${a.mine.map((n) => campo(n)).join("")}</div>
+      <div class="azioni"><button class="ghost" id="casuale">Casuale</button></div>
+      <p class="hint" style="margin-top:22px">Campi di ${esc(opp.toLowerCase())}</p>
+      <div class="campi">${Array.from({ length: a.opp_n }, () => `<div class="campo coperto">${back()}</div>`).join("")}</div>`;
+  } else {
+    const t = a.tiri || [], last = t[t.length - 1] || [0, 0];
+    const tiri = t.map((r, i) => `Tu ${r[0]}, ${esc(opp.toLowerCase())} ${r[1]}${i < t.length - 1 ? " (pari: si ritira)" : ""}`).join(" · ");
+    html = `<h2>Campi di battaglia</h2>
+      <div class="campi">${campo(a.bf_mine, "", "div")}${campo(a.bf_opp, "", "div")}</div>
+      <div class="tiro">d20: ${tiri}</div>`;
+    if (a.chi_decide === "io") {
+      html += `<p>Hai vinto il tiro: chi comincia?</p>
+        <div class="azioni"><button id="io">Inizio io</button><button class="ghost" id="avv">Inizia l'avversario</button></div>`;
+    } else {
+      html += `<p>${esc(opp)} ha vinto il tiro e ${a.inizia === "avv" ? "sceglie di cominciare" : "ti lascia cominciare"}.</p>
+        <div class="azioni"><button id="vai">Continua</button></div>`;
+    }
+  }
+  el.innerHTML = `<div class="modal apertura"><div class="box">${html}</div></div>`;
+  el.querySelectorAll("[data-campo]").forEach((b) => { b.onclick = () => post("/api/campo", { campo: b.dataset.campo }); });
+  if ($("#casuale")) $("#casuale").onclick = () => post("/api/campo", { campo: "random" });
+  if ($("#io")) $("#io").onclick = () => post("/api/inizia", { io: true });
+  if ($("#avv")) $("#avv").onclick = () => post("/api/inizia", { io: false });
+  if ($("#vai")) $("#vai").onclick = () => post("/api/inizia", {});
+}
 
 /* ---------- talking to the server ---------- */
 async function post(url, body) {
@@ -781,7 +825,7 @@ function render() {
 async function poll() {
   try {
     const r = await fetch("/api/state"); const s = await r.json();
-    const key = JSON.stringify([s.status, s.pending, s.observation, s.board, (s.events || []).length, s.result, s.decisions, s.activity]);
+    const key = JSON.stringify([s.status, s.apertura, s.pending, s.observation, s.board, (s.events || []).length, s.result, s.decisions, s.activity]);
     S = s;
     if (key !== lastKey) { lastKey = key; hidePreview(); render(); }
   } catch (e) { $("#status").textContent = "Server spento?"; }

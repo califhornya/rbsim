@@ -1264,7 +1264,7 @@ class CoachSession:
         self._reset()
 
     def _reset(self) -> None:
-        self.status = "idle"            # idle | thinking | waiting | over
+        self.status = "idle"            # idle | opening | thinking | waiting | over
         self.activity = ""
         self._answers: "queue.Queue" = queue.Queue()
         self.pending: Optional[dict] = None
@@ -1301,6 +1301,8 @@ class CoachSession:
         self._resume_cp: Optional[dict] = None
         self._build: Optional[dict] = None  # what new_game built the game from
         self.rs = None                      # the Rust game (coach_rs.RustGame), None on Python
+        self.apertura: Optional[dict] = None    # the opening the page shows (status "opening")
+        self._ap: dict = {}                 # ... and what it keeps hidden until both fields are shown
 
     # -- what a game can have ------------------------------------------------------
 
@@ -1323,12 +1325,14 @@ class CoachSession:
     # -- the game thread ---------------------------------------------------------
 
     def new_game(self, deck_mine: Path, deck_opp: Path, seat: str = "A",
-                 opponent: Optional[str] = None, seed: Optional[int] = None) -> None:
+                 opponent: Optional[str] = None, seed: Optional[int] = None, apertura: bool = False) -> None:
         """Start a game: the coach's seat plays `deck_mine`, with the net's
         search as advisor when there is a net; the other seat is one of
         opponents() (the first by default): the champion ("campione"), the net
         ("net") or the simple_trade heuristic ("simple_trade"). ValueError for
-        one that isn't available."""
+        one that isn't available. With `apertura` (the page: 25/11, as RiftAtlas) the game waits
+        in the opening (status "opening": battlefield, d20, who starts: scegli_campo, inizia)
+        and starts with those choices; without, the seed's coin flip and random battlefields."""
         available = [o["id"] for o in self.opponents()]
         opponent = opponent or available[0]
         if opponent not in available:
@@ -1354,7 +1358,106 @@ class CoachSession:
         deck_a, deck_b = (deck_mine, deck_opp) if seat == "A" else (deck_opp, deck_mine)
         self.side = seat
         self._build = {"seed": seed, "deck_a": Path(deck_a), "deck_b": Path(deck_b),
-                       "opponent": opponent, "net": net, "ppo": ppo}
+                       "deck_mine": Path(deck_mine), "deck_opp": Path(deck_opp),
+                       "opponent": opponent, "net": net, "ppo": ppo,
+                       # the opening's choices (None: the seed's, as before): a rewind keeps them
+                       "bf_a": None, "bf_b": None, "starter": None}
+        self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
+                     "deck_opp": Path(deck_opp).stem, "opponent": opponent,
+                     "net": str(self.net_path) if net is not None else None,
+                     "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+        if opponent == "campione":
+            self.info.update(campione=str(self.campione_path), budget=self.budget)
+        if apertura:
+            self._apri()
+        else:
+            self._avvia()
+
+    # -- the opening (RiftAtlas, 25/11): battlefield, d20, who starts -------------------
+
+    def _opp_name(self) -> str:
+        return _OPPONENTS.get(self._build["opponent"], "L'avversario")
+
+    def _apri(self) -> None:
+        from riftbound.core.game_factory import deck_battlefield_names
+        b = self._build
+        mine, theirs = deck_battlefield_names(b["deck_mine"]), deck_battlefield_names(b["deck_opp"])
+        self._ap = {"mine": mine, "theirs": theirs, "bf_mine": None, "bf_opp": None, "roll": None, "inizia": None}
+        self.apertura = {"step": "campo", "mine": mine, "opp_n": len(theirs), "opp": None, "bf_mine": None,
+                         "bf_opp": None, "tiri": None, "chi_decide": None, "inizia": None,
+                         "opponent": self._opp_name()}
+        self.status, self.activity = "opening", "Scegli il tuo campo di battaglia"
+
+    def scegli_campo(self, choice: Optional[str]) -> None:
+        """The coach's battlefield (a name of their deck, or None/"random": at random); the champion
+        chooses too (apertura.scegli_campo), both are shown, then the d20 (a generator of the seed)."""
+        from riftbound.ai import apertura as ap
+        with self._lock:
+            a = self.apertura
+            if self.status != "opening" or not a or a["step"] != "campo":
+                raise RuntimeError("Il campo di battaglia non si sceglie ora.")
+            seed, b, own = self._build["seed"], self._build, self._ap
+            if choice in (None, "", "random", "casuale"):
+                choice = random.Random(seed * 3 + 2).choice(own["mine"])
+            elif choice not in own["mine"]:
+                raise ValueError(f"Campo sconosciuto: {choice}")
+            theirs = ap.scegli_campo(b["deck_opp"].stem, b["deck_mine"].stem, own["theirs"],
+                                     random.Random(seed * 3 + 1))
+            rng = random.Random(seed * 3 + 3)
+            rolls = []
+            while True:                                  # a tie is rolled again
+                rolls.append((rng.randint(1, 20), rng.randint(1, 20)))
+                if rolls[-1][0] != rolls[-1][1]:
+                    break
+            mio, suo = rolls[-1]
+            if mio > suo:
+                inizia = None                            # the coach decides
+            else:
+                inizia = "io" if not ap.scegli_inizio(b["deck_opp"].stem, b["deck_mine"].stem,
+                                                      theirs, choice) else "avv"
+            a.update(step="tiro", opp=theirs, bf_mine=choice, bf_opp=theirs, tiri=[list(r) for r in rolls],
+                     chi_decide="io" if mio > suo else "avv", inizia=inizia)
+            self.activity = "Tiro del d20"
+        who = self._opp_name()
+        self.event("sys", f"Campi di battaglia: tu {choice}, {who.lower()} {theirs}")
+        self.event("sys", "d20: " + "; ".join(f"tu {m}, {who.lower()} {o}" for m, o in rolls)
+                   + (" (pari: si ritira)" if len(rolls) > 1 else ""))
+        if inizia is not None:
+            self._dichiara_inizio(inizia, scelto_da=who)
+
+    def _dichiara_inizio(self, inizia: str, scelto_da: Optional[str] = None) -> None:
+        self.event("sys", (f"{scelto_da} sceglie di " + ("cominciare" if inizia == "avv" else "lasciarti cominciare"))
+                   if scelto_da else ("Hai scelto di cominciare tu" if inizia == "io" else "Hai scelto che cominci l'avversario"))
+
+    def inizia(self, io: Optional[bool] = None) -> None:
+        """Who starts, then the game: `io` the coach's decision when they won the d20 (None: the
+        champion's, already taken). The game is built with the two battlefields and the first player."""
+        with self._lock:
+            a = self.apertura
+            if self.status != "opening" or not a or a["step"] != "tiro":
+                raise RuntimeError("Chi comincia non si decide ora.")
+            if a["inizia"] is None:
+                if io is None:
+                    raise ValueError("Scegli chi comincia.")
+                a["inizia"] = "io" if io else "avv"
+                decided = True
+            else:
+                decided = False
+        if decided:
+            self._dichiara_inizio(a["inizia"])
+        b, seat = self._build, self.side
+        mine_starts = a["inizia"] == "io"
+        b["starter"] = seat if mine_starts else ("B" if seat == "A" else "A")
+        bf_seat, bf_other = a["bf_mine"], a["bf_opp"]
+        b["bf_a"], b["bf_b"] = (bf_seat, bf_other) if seat == "A" else (bf_other, bf_seat)
+        self.info.update(campo_mio=bf_seat, campo_avv=bf_other, inizia="io" if mine_starts else "avv")
+        self.apertura = None
+        self._avvia()
+
+    def _avvia(self) -> None:
+        """The game the opening (or new_game) asked for: the engine, the agents, the game thread."""
+        b, seat = self._build, self.side
+        deck_mine, deck_opp, opponent = b["deck_mine"], b["deck_opp"], b["opponent"]
         motore = self._engine_for(deck_mine, deck_opp, opponent)
         if motore == "rust":
             from riftbound.ai.coach_rs import RustGame
@@ -1363,15 +1466,9 @@ class CoachSession:
         else:
             gs = self._new_state()
             starter = gs.active
-        self.gs, self.side = gs, seat
-        self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
-                     "deck_opp": Path(deck_opp).stem, "opponent": opponent,
-                     "net": str(self.net_path) if net is not None else None,
-                     "motore": motore, "regole": self.regole if motore == "rust" else REGOLE_PYTHON,
-                     "started": time.strftime("%Y-%m-%d %H:%M:%S")}
-        if opponent == "campione":
-            self.info.update(campione=str(self.campione_path), budget=self.budget)
-        # Who starts (a coin flip of the seed): the mulligan depends on it.
+        self.gs = gs
+        self.info.update(motore=motore, regole=self.regole if motore == "rust" else REGOLE_PYTHON)
+        # Who starts: the mulligan depends on it.
         self.info["you_start"] = starter == seat
         self.event("sys", self._starter_text())
         self.status = "thinking"
@@ -1394,7 +1491,8 @@ class CoachSession:
         b, seat = self._build, self.side
         seed, net, opponent = b["seed"], b["net"], b["opponent"]
         gs = build_game(game_seed=seed, deck_a_path=b["deck_a"], deck_b_path=b["deck_b"],
-                        ai_a=None, ai_b=None)
+                        ai_a=None, ai_b=None, first_player=(b["starter"] or "random").lower(),
+                        bf_a=b["bf_a"], bf_b=b["bf_b"])
         me, them = gs.get_player(seat), gs.get_player(gs.other(seat))
         me.agent = CoachAgent(me, net, self, iterations=self.iterations, rng=random.Random(seed))
         if opponent == "campione":
@@ -1898,12 +1996,21 @@ class CoachSession:
                 "events": self._copy(self.events), "log": self._copy(self.log)[-60:],
                 "result": self.result, "decisions": len(self.examples),
                 "corrections": sum(1 for e in self.examples if e["corrected"]),
-                "cards": _card_texts(obs, extras, self._shown_cards()),
+                "cards": _card_texts(obs, extras, self._shown_cards()) or self._opening_cards(),
+                "apertura": self.apertura,
                 "opponents": self.opponents(), "advice": self.advice,
                 "regole": self.info.get("regole", self.regole if self.motore == "rust" else REGOLE_PYTHON),
                 "motore": self.info.get("motore", self.motore),
                 "can_rewind": self.status == "waiting" and not self.autoplay and bool(self.checkpoints),
                 "rewinds": self.rewinds}
+
+    def _opening_cards(self) -> dict:
+        """The cards the opening shows: the coach's battlefields and, once shown, the champion's."""
+        a = self.apertura
+        if not a:
+            return {}
+        names = list(a["mine"]) + ([a["opp"]] if a["opp"] else [])
+        return _card_texts({"battlefields": [{"named": n} for n in names]})
 
     def report(self, note: str) -> Path:
         path = self.out_dir / "reports.jsonl"
