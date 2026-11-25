@@ -313,3 +313,16 @@ def test_both_profiles_load_in_one_thread_in_both_orders():
     assert riftbound_rs.Registry(str(REGISTRY_JSON), CORRETTE).impronta == a[CORRETTE][0]
     with pytest.raises(Exception, match="regole sconosciute"):
         riftbound_rs.Registry(str(REGISTRY_JSON), "6427b90+D99")
+
+
+def test_the_provenance_of_the_corrected_profile():
+    """Each matchup's rules (Python: the historical ones) and the effective
+    registry's fingerprint beside the base file's hash."""
+    from riftbound.provenienza import provenienza
+    from riftbound.rs import rust_bridge as rb
+    p = provenienza(motore={"ES": "rust", "bot": "python"}, liste={}, checkpoint={}, regole=CORRETTE)
+    assert p["regole"] == CORRETTE and p["regole_partite"] == {"ES": CORRETTE, "bot": STORICHE}
+    assert p["registro"]["rust"] and p["registro"]["rust_effettivo"] == rb.registry(CORRETTE).impronta
+    assert p["registro"]["correzione_dati"] == "D72-D76/1"
+    assert "rust_effettivo" not in provenienza(motore={"EK": "rust"}, liste={}, checkpoint={},
+                                               regole=STORICHE)["registro"]

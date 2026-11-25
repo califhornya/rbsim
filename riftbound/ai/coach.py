@@ -50,6 +50,7 @@ from riftbound.ai.net_mcts import (
 from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
 from riftbound.core.loop import NO_MORE
+from riftbound.provenienza import REGOLE_PYTHON
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 CARDS_JSON = Path(__file__).resolve().parents[1] / "data" / "cards" / "all_cards.json"
@@ -931,6 +932,8 @@ class CoachSession:
         self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
                      "deck_opp": Path(deck_opp).stem, "opponent": opponent,
                      "net": str(self.net_path) if net is not None else None,
+                     # The page plays on the frozen Python engine (decision of 25/11).
+                     "regole": REGOLE_PYTHON,
                      "started": time.strftime("%Y-%m-%d %H:%M:%S")}
         if opponent == "campione":
             self.info.update(campione=str(self.campione_path), budget=self.budget)
@@ -1286,7 +1289,7 @@ class CoachSession:
                 "result": self.result, "decisions": len(self.examples),
                 "corrections": sum(1 for e in self.examples if e["corrected"]),
                 "cards": _card_texts(obs, extras),
-                "opponents": self.opponents(), "advice": self.advice}
+                "opponents": self.opponents(), "advice": self.advice, "regole": REGOLE_PYTHON}
 
     def report(self, note: str) -> Path:
         path = self.out_dir / "reports.jsonl"

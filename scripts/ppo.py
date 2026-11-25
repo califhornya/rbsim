@@ -52,6 +52,7 @@ import time
 from collections import Counter
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -148,6 +149,35 @@ def batch_games(start: int, n: int, seme: int, archive: list, rng: random.Random
         else:
             out.append((seed, "a" if nth % 2 == 0 else "b", "self", None, mu))
     return out
+
+
+def _regole_run(run: Path) -> Optional[str]:
+    """The rules profile an existing run was trained on (its last provenienza
+    line; a line without it, before 25/11: 6427b90). None: a new run."""
+    from riftbound.provenienza import REGOLE_PYTHON
+    prov = run / "provenienza.jsonl"
+    if not (run / "stato.json").exists() or not prov.exists():
+        return None
+    lines = [ln for ln in prov.read_text().splitlines() if ln.strip()]
+    return json.loads(lines[-1]).get("regole", REGOLE_PYTHON) if lines else REGOLE_PYTHON
+
+
+def _check_regole(ap, args, run: Path) -> None:
+    """Before launching: a run on the corrected profile trains only on Rust
+    (every training matchup covered, --motore rust), and a run doesn't change
+    profile (resuming would load the historical state and optimizer: --init
+    in a new folder)."""
+    from riftbound.ai.ppo.collect import DECK_OF
+    from riftbound.provenienza import REGOLE_PYTHON
+    prima = _regole_run(run)
+    if prima is not None and prima != args.regole:
+        ap.error(f"{run} è allenata con le regole {prima}: per {args.regole} usa --init in una nuova cartella")
+    if args.regole == REGOLE_PYTHON:
+        return
+    fuori = [mu for mu in MAZZI[args.mazzi] if _motore({"deck_a": DECK_OF[mu[0]], "deck_b": DECK_OF[mu[1]]}) != "rust"]
+    if fuori:
+        ap.error(f"--regole {args.regole}: le partite di training devono giocare su Rust (--motore rust, matchup "
+                 f"coperti); su Python: {', '.join(fuori)}")
 
 
 def _motore(kw: dict) -> str:
@@ -266,9 +296,15 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
                     help="motore dei matchup coperti da Rust (EK, ER, KR; rust: estensione riftbound_rs)")
+    from riftbound.provenienza import REGOLE, REGOLE_PYTHON
+    ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
+                    help="il profilo delle regole: 6427b90 (lo storico) o 6427b90+D72-D76 (Rust con D72-D76 "
+                         "corretti: serve --motore rust e tutti i matchup di training su Rust; per allenare sul "
+                         "nuovo profilo --init in una nuova cartella)")
     args = ap.parse_args()
-    # The workers read the engine from the environment (_play).
+    # The workers read the engine and the rules profile from the environment (_play, rust_bridge.build).
     os.environ["RBSIM_MOTORE"] = args.motore
+    os.environ["RBSIM_REGOLE"] = args.regole
     if args.motore == "rust":
         import riftbound_rs  # noqa: F401  (the extension must be there: no silent fallback)
         from riftbound.rs.arena_rs import COPERTI
@@ -282,6 +318,7 @@ def main() -> None:
                                                   else list(MAZZI[args.mazzi]))))
     torch.set_num_threads(max(1, args.workers))
     run = args.run_dir
+    _check_regole(ap, args, run)
     run.mkdir(parents=True, exist_ok=True)
     stop = run / "STOP"
 
@@ -311,15 +348,18 @@ def main() -> None:
         opt.load_state_dict(torch.load(run / "ottimizzatore.pt"))
     rng = random.Random(args.seme * 1_000_003 + st["partite"])
     from riftbound.ai.ppo.collect import DECK_OF
-    from riftbound.provenienza import REGOLE_PYTHON, provenienza, registra
+    from riftbound.provenienza import provenienza, regole_di, registra
     mus = list(dict.fromkeys(list(MAZZI[args.mazzi]) + panel_matchups))
     motori = {mu: _motore({"deck_a": DECK_OF[mu[0]], "deck_b": DECK_OF[mu[1]]}) for mu in mus} | {"bot": "python"}
+    regole_mu = {mu: regole_di(m, args.regole) for mu, m in motori.items()}
     registra(run, provenienza(
-        motore=motori, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})},
+        motore=motori, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})}, regole=args.regole,
         checkpoint={"init": args.init, "corrente": run / "corrente.pt" if (run / "corrente.pt").exists() else None}
         | {f"ancora {a}": a for a in anchors}, partite=st["partite"], opzioni=vars(args) | {"run_dir": str(run)}))
-    say(f"provenienza.jsonl: regole {REGOLE_PYTHON}, motore "
-        + ", ".join(f"{mu} {m}" for mu, m in motori.items()))
+    say(f"provenienza.jsonl: regole {args.regole}, motore "
+        + ", ".join(f"{mu} {m}" for mu, m in motori.items())
+        + ("; su Python (pannello) lo storico " + REGOLE_PYTHON if any(r != args.regole for r in regole_mu.values())
+           else ""))
     pool = Pool(args.workers, initializer=_init)
 
     extra = [mu for mu in panel_matchups if mu != "EK"]
@@ -346,7 +386,9 @@ def main() -> None:
         allrows = [r for out in pool.map(_eval, [(c, cand, anchor_blobs) for c in _chunks(games, args.workers * 3)])
                    for r in out]
         rows = [r[:6] for r in allrows if r[6] == "EK"]
-        res = {"partite": st["partite"], "tappa": tag}
+        # The rules each matchup of the panel played (a diagnostic on Python: the historical ones).
+        res = {"partite": st["partite"], "tappa": tag,
+               "regole": {mu: regole_mu[mu] for mu in ["EK"] + extra} | ({"bot": regole_mu["bot"]} if with_bot else {})}
         stx = [r[5] for r in rows if r[0] == "simple_trade"]
         res["simple_trade"] = sum(stx) / len(stx) if stx else None
         line = f"   [{tag}] simple_trade {res['simple_trade']:.3f}" if stx else f"   [{tag}]"
@@ -446,6 +488,11 @@ def main() -> None:
         if st["partite"] // args.tappa > prev // args.tappa:
             key = f"ckpt_{st['partite']:06d}"
             save(net, run / f"{key}.pt")
+            # The checkpoint's training provenance, beside it (the weights' file stays the model's).
+            (run / f"{key}.provenienza.json").write_text(json.dumps(
+                {"regole": args.regole, "regole_partite": {mu: regole_mu[mu] for mu in MAZZI[args.mazzi]},
+                 "motore": {mu: motori[mu] for mu in MAZZI[args.mazzi]}, "partite": st["partite"],
+                 "init": str(args.init) if args.init else None, "run": str(run)}, ensure_ascii=False))
             st["archivio"].append(key)
             bot = args.allarme_bot > 0 and st["partite"] // args.allarme_bot > prev // args.allarme_bot
             counts: Counter = Counter()

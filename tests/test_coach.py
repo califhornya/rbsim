@@ -495,6 +495,7 @@ def test_a_whole_game_against_the_champion_without_the_net(tmp_path):
     assert st["decisions"] == 0 and not list((tmp_path / "coach").glob("coach_*.npz"))
     record = json.loads((tmp_path / "coach" / "games.jsonl").read_text().splitlines()[-1])
     assert record["opponent"] == "campione" and record["file"] is None and record["decisions"] == 0
+    assert record["regole"] == "6427b90" and st["regole"] == "6427b90"     # the frozen Python engine
     assert record["winner"] == st["result"]["winner"] and record["turns"] == st["result"]["turns"]
 
 

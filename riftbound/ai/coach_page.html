@@ -243,6 +243,7 @@ aside section.grow { flex: 1 1 0; min-height: 150px; overflow-y: auto; }
 <aside>
   <section>
     <div class="top"><h1>Allenatore Riftbound</h1><span id="status" class="pill">…</span></div>
+    <div class="hint" id="regole" style="margin-top:2px">Regole Python 6427b90</div>
   </section>
   <section id="score"></section>
   <section class="coach" id="coach"></section>
@@ -758,6 +759,7 @@ function render() {
   if (S.status !== "waiting") focus = 0;
   if (!S.pending || S.pending.type !== "mulligan") mullSel = [];
   S._seen = seenResult === JSON.stringify(S.result);
+  if (S.regole) $("#regole").textContent = `Regole Python ${S.regole}`;
   renderTable(); renderSide(); markTable(); renderModal();
   requestAnimationFrame(() => { squeeze(); drawArrows(); });
 }
