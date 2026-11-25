@@ -3,6 +3,17 @@
 
     uv run --extra rl python scripts/coach.py            # opens http://127.0.0.1:8765
     uv run --extra rl python scripts/coach.py --net runs/precons-2/net.pt --port 8765
+    uv run --extra rl python scripts/coach.py --motore python        # the frozen Python engine
+    uv run --extra rl python scripts/coach.py --regole 6427b90+D72-D76 --iterazioni 60
+
+The engine (25/11): a game between two of the five decks Rust covers (Evelynn, Kha'Zix,
+Rengar, Ivern, Sett), against the champion or the simple bot, plays on the Rust engine
+with the rules profile --regole (default 6427b90+D72-D77: D72-D77 corrected); the
+champion there searches a FIXED number of iterations a move (--iterazioni, default
+riftbound.ai.coach_rs.ITERAZIONI_CAMPIONE, the median of the Rust budget 0.03 s; its
+--budget is for Python), so that "Annulla l'ultima mossa" replays the same game. Anything
+else (another deck, --net's advice, "La rete", --motore python) plays on Python with the
+rules 6427b90. The page and games.jsonl say the engine and the rules of each game.
 
 The opponents: the champion (the hand-written search guided by the priors of
 --campione, --budget CPU seconds a move; listed when the checkpoint is there),
@@ -35,6 +46,8 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from riftbound.provenienza import REGOLE, REGOLE_D72_D77
+
 ROOT = Path(__file__).resolve().parents[1]
 DECK_DIR = ROOT / "riftbound" / "data" / "decks"
 PAGE = ROOT / "riftbound" / "ai" / "coach_page.html"
@@ -47,7 +60,15 @@ def main() -> None:
                          "\"La rete\" opponent. Without it: no advice")
     ap.add_argument("--campione", type=Path, default=ROOT / "runs" / "sett" / "ekris_s12" / "ckpt_040000.pt",
                     help="The champion's PPO checkpoint (its priors)")
-    ap.add_argument("--budget", type=float, default=0.4, help="The champion's CPU seconds a move")
+    ap.add_argument("--budget", type=float, default=0.4,
+                    help="The champion's CPU seconds a move (on Python; on Rust see --iterazioni)")
+    ap.add_argument("--motore", choices=("rust", "python"), default="rust",
+                    help="The engine: rust where it covers the game, else python (default rust)")
+    ap.add_argument("--regole", choices=REGOLE, default=REGOLE_D72_D77,
+                    help="The rules profile of the games on Rust (default %(default)s)")
+    ap.add_argument("--iterazioni", type=int, default=None,
+                    help="The champion's fixed iterations a move on Rust (default "
+                         "riftbound.ai.coach_rs.ITERAZIONI_CAMPIONE)")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
     ap.add_argument("--iterations", type=int, default=100, help="Search simulations per decision")
     ap.add_argument("--port", type=int, default=8765)
@@ -64,7 +85,8 @@ def main() -> None:
     if args.net is not None and not args.net.is_file():
         ap.error(f"--net: {args.net} non esiste")
     session = CoachSession(args.net, args.out, iterations=args.iterations, opponent_pause=args.pause,
-                           campione_path=args.campione, budget=args.budget)
+                           campione_path=args.campione, budget=args.budget,
+                           motore=args.motore, regole=args.regole, iterazioni=args.iterazioni)
     if not args.campione.is_file():
         print(f"Il campione non c'è ({args.campione}): avversari {[o['name'] for o in session.opponents()]}",
               flush=True)

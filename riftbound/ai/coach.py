@@ -22,6 +22,12 @@ The net is optional (24/11): without it the coached seat is the person alone,
 with no search, no suggestions and no training examples (games.jsonl still
 keeps each result), and the opponent can be the champion (`PPOPriorAgent` with
 a PPO checkpoint's priors, `budget` CPU seconds a decision; opponents()).
+
+The engine (25/11, phase 4): a game between two lists Rust covers (arena_rs.COPERTI),
+against the champion or the simple bot, plays on the Rust engine with the rules profile
+`regole` (default 6427b90+D72-D77; riftbound/ai/coach_rs.py, the champion there with a fixed
+number of iterations a decision); the net's advice and "La rete" stay on Python (6427b90).
+`state()["regole"]` and games.jsonl say what was played.
 """
 
 from __future__ import annotations
@@ -51,7 +57,7 @@ from riftbound.core.decisions import DecisionPoint, Observation
 from riftbound.core.legality import legal_actions
 from riftbound.core.loop import NO_MORE, GameLoop
 from riftbound.core.player import Domain
-from riftbound.provenienza import REGOLE_PYTHON
+from riftbound.provenienza import REGOLE_D72_D77, REGOLE_PYTHON
 from riftbound.registry.cards_registry import CARD_REGISTRY
 
 CARDS_JSON = Path(__file__).resolve().parents[1] / "data" / "cards" / "all_cards.json"
@@ -1026,6 +1032,29 @@ class _CoachChooser:
         _unlink(self.loop, self)
 
 
+def decision_context(gs, side: str, point: DecisionPoint, bf_idx: Optional[int] = None) -> str:
+    """What a decision of `side` is about, in a sentence (the page's context line)."""
+    if point == DecisionPoint.SHOWDOWN_ACTION:
+        where = _bf_name(gs, bf_idx if bf_idx is not None else gs.showdown_bf_idx or 0)
+        return f"Showdown su {where}: puoi giocare magie veloci (ACTION, REACTION) o passare."
+    if point == DecisionPoint.REACTION and gs.chain:
+        top = gs.chain[-1]
+        who = "L'avversario ha lanciato" if top.player != side else "Hai lanciato"
+        if top.ability is not None:
+            who = "L'avversario ha usato" if top.player != side else "Hai usato"
+            if top.ability["kind"] in ("triggered", "reflexive"):
+                who = "Si è innescata per l'avversario" if top.player != side \
+                    else "Si è innescata per te"
+        chose = declared_text(gs, side, top)
+        return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") + \
+            ": puoi rispondere con una reazione o lasciar correre."
+    if gs.pending_move is not None and gs.pending_move[1] == side:
+        where = _bf_name(gs, gs.pending_move[0])
+        return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
+                "Quando hai finito parte lo showdown, poi il turno continua.")
+    return "È il tuo turno: puoi giocare carte, spostare unità, usare abilità o passare."
+
+
 class CoachAgent(NetGuidedMCTSAgent):
     """The net searches; the coach decides (see the module docstring). With no
     net (`net=None`) there is no search: the coach plays alone, with no
@@ -1074,25 +1103,7 @@ class CoachAgent(NetGuidedMCTSAgent):
 
     def _context(self, point: DecisionPoint, bf_idx: Optional[int]) -> str:
         """What the decision is about, in a sentence."""
-        gs = self.gs
-        if point == DecisionPoint.SHOWDOWN_ACTION:
-            where = _bf_name(gs, bf_idx if bf_idx is not None else gs.showdown_bf_idx or 0)
-            return f"Showdown su {where}: puoi giocare magie veloci (ACTION, REACTION) o passare."
-        if point == DecisionPoint.REACTION and gs.chain:
-            top = gs.chain[-1]
-            who = "L'avversario ha lanciato" if top.player != self.player.name else "Hai lanciato"
-            if top.ability is not None:
-                who = "L'avversario ha usato" if top.player != self.player.name else "Hai usato"
-                if top.ability["kind"] in ("triggered", "reflexive"):
-                    who = "Si è innescata per l'avversario" if top.player != self.player.name \
-                        else "Si è innescata per te"
-            chose = declared_text(gs, self.player.name, top)
-            return f"{who} {chain_name(top)}" + (f" ({chose})" if chose else "") +                 ": puoi rispondere con una reazione o lasciar correre."
-        if gs.pending_move is not None and gs.pending_move[1] == self.player.name:
-            where = _bf_name(gs, gs.pending_move[0])
-            return (f"Stai spostando unità su {where}: puoi mandarne altre insieme. "
-                    "Quando hai finito parte lo showdown, poi il turno continua.")
-        return "È il tuo turno: puoi giocare carte, spostare unità, usare abilità o passare."
+        return decision_context(self.gs, self.player.name, point, bf_idx)
 
     def _coached(self, point: DecisionPoint, cards_played: int = 0, bf_idx: Optional[int] = None):
         self.session.show_looked()
@@ -1228,7 +1239,8 @@ class CoachSession:
 
     def __init__(self, net_path: Optional[Path] = None, out_dir: Path = Path("runs") / "coach",
                  iterations: int = 100, opponent_pause: float = 0.8,
-                 campione_path: Optional[Path] = None, budget: float = 0.4):
+                 campione_path: Optional[Path] = None, budget: float = 0.4,
+                 motore: str = "python", regole: str = REGOLE_D72_D77, iterazioni: Optional[int] = None):
         # The old AlphaZero net: the advice to the coach and the "net"
         # opponent. Without it the coach plays alone (no advice, nothing kept
         # for training).
@@ -1236,6 +1248,12 @@ class CoachSession:
         # The champion's PPO checkpoint and its CPU seconds a decision.
         self.campione_path = None if campione_path is None else Path(campione_path)
         self.budget = budget
+        # The engine the page plays on (25/11, phase 4): "rust" (scripts/coach.py's default) plays with
+        # the rules profile `regole` whatever game Rust covers (riftbound/ai/coach_rs.py), else Python;
+        # "python" (this class's default: the frozen engine) always Python.
+        # `iterazioni`: the champion's fixed iterations a decision on Rust.
+        self.motore, self.regole = motore, regole
+        self.iterazioni = iterazioni
         self.out_dir = Path(out_dir)
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self.iterations = iterations
@@ -1282,6 +1300,7 @@ class CoachSession:
         self._replaying = False             # a rewind replays the game: the page holds still
         self._resume_cp: Optional[dict] = None
         self._build: Optional[dict] = None  # what new_game built the game from
+        self.rs = None                      # the Rust game (coach_rs.RustGame), None on Python
 
     # -- what a game can have ------------------------------------------------------
 
@@ -1336,23 +1355,37 @@ class CoachSession:
         self.side = seat
         self._build = {"seed": seed, "deck_a": Path(deck_a), "deck_b": Path(deck_b),
                        "opponent": opponent, "net": net, "ppo": ppo}
-        gs = self._new_state()
+        motore = self._engine_for(deck_mine, deck_opp, opponent)
+        if motore == "rust":
+            from riftbound.ai.coach_rs import RustGame
+            self.rs = RustGame(self)
+            gs, starter = None, self.rs.starter
+        else:
+            gs = self._new_state()
+            starter = gs.active
         self.gs, self.side = gs, seat
         self.info = {"seed": seed, "seat": seat, "deck_mine": Path(deck_mine).stem,
                      "deck_opp": Path(deck_opp).stem, "opponent": opponent,
                      "net": str(self.net_path) if net is not None else None,
-                     # The page plays on the frozen Python engine (decision of 25/11).
-                     "regole": REGOLE_PYTHON,
+                     "motore": motore, "regole": self.regole if motore == "rust" else REGOLE_PYTHON,
                      "started": time.strftime("%Y-%m-%d %H:%M:%S")}
         if opponent == "campione":
             self.info.update(campione=str(self.campione_path), budget=self.budget)
         # Who starts (a coin flip of the seed): the mulligan depends on it.
-        self.info["you_start"] = gs.active == seat
+        self.info["you_start"] = starter == seat
         self.event("sys", self._starter_text())
         self.status = "thinking"
         self.activity = "La partita sta iniziando…"
         self._thread = threading.Thread(target=self._run, name="rbsim-coach", daemon=True)
         self._thread.start()
+
+    def _engine_for(self, deck_mine: Path, deck_opp: Path, opponent: str) -> str:
+        """"rust" when the page's engine is Rust and this game is one it plays: no net's advice
+        or opponent (they stay on Python), the two lists among the covered ones."""
+        if self.motore != "rust" or self.advice or opponent == "net":
+            return "python"
+        from riftbound.ai import coach_rs
+        return "rust" if coach_rs.giocabile(deck_mine, deck_opp) else "python"
 
     def _new_state(self):
         """The game new_game asked for, as it starts (its seed: the same deck
@@ -1540,6 +1573,8 @@ class CoachSession:
         """The game on this thread: from its start, or (`entries`: a rewind)
         rebuilt and replayed from its record up to the coach's decision asked
         again, the page holding still meanwhile (_resume)."""
+        if self.rs is not None:
+            return self.rs.play(entries)
         log = _thread_log()
         if entries is not None:
             self.gs = self._new_state()
@@ -1589,7 +1624,7 @@ class CoachSession:
 
     def _keep(self, cp: dict, answer: dict) -> None:
         """An answered decision: a rewind may take the coach back to it."""
-        if answer and not answer.get("auto") and isinstance(self.loop, CoachLoop):
+        if answer and not answer.get("auto") and hasattr(self.loop, "record"):
             self.checkpoints.append(cp)
 
     def _snapshot(self) -> bool:
@@ -1864,7 +1899,9 @@ class CoachSession:
                 "result": self.result, "decisions": len(self.examples),
                 "corrections": sum(1 for e in self.examples if e["corrected"]),
                 "cards": _card_texts(obs, extras, self._shown_cards()),
-                "opponents": self.opponents(), "advice": self.advice, "regole": REGOLE_PYTHON,
+                "opponents": self.opponents(), "advice": self.advice,
+                "regole": self.info.get("regole", self.regole if self.motore == "rust" else REGOLE_PYTHON),
+                "motore": self.info.get("motore", self.motore),
                 "can_rewind": self.status == "waiting" and not self.autoplay and bool(self.checkpoints),
                 "rewinds": self.rewinds}
 

@@ -187,6 +187,8 @@ impl HumanAgent {
                     .collect(),
             );
         }
+        // What `ask` alone gets (never the recorded trace): each menu item as the trace's `action` list.
+        e["actions"] = Value::Array(legal.iter().map(rbsim_core::trace::action_list).collect());
         let payments = self.payments;
         // An int indexes the menu; None is a Pass when the menu is empty; a
         // list is the trace's `action` field, played as is; {"index": i, "via":

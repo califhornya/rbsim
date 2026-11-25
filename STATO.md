@@ -19,8 +19,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## Decisioni prese
 - (24/11, Astra/Matteo) Python congelato: regole `6427b90`, agente PPO con `f8a50e4`.
   Un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
-- (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach (motore Python, 0,4 s
-  a mossa); si tocca solo la pagina. I consigli della vecchia rete si scollegano (solo con `--net`).
+- (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach; i consigli della vecchia rete
+  si scollegano (solo con `--net`, su Python). (25/11) La pagina gira su Rust col profilo D72-D77 dove Rust copre la partita.
 - (25/11, Astra) Un selettore delle regole in Rust: `6427b90` (default, = Python; le verifiche di parità lo
   fissano), `6427b90+D72-D76` o `6427b90+D72-D77` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
@@ -58,17 +58,13 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 pagina (segnalazioni di Matteo, `docs/bot/SEGNALAZIONI.md`): magia uguale su ogni campo = una voce "Lancia X";
   gear/rune esauste ruotate; "Come paghi?" (`payment_options`, `CoachLoop`); opzioni identiche una sola. Rewind ("Annulla
   l'ultima mossa", R): `CoachLoop.record` + replay dal seme (`_Record`, `_Seat`, `CoachSession.rewind`). Motore invariato.
-- 25/11 D72-D76 corretti in Rust sul profilo `6427b90+D72-D76` (`docs/RUST.md` "Profili delle regole", AUDIT.md):
-  test rossi prima (`tests/rust/test_d72_d76.py`), correzione dati D74/D75 al caricamento del registro, contatori
-  delle correzioni. Storico dopo i fix: 600/600 identiche (autonome, replay, PPO, arena a lavoro fisso; semi
-  910001-910010, ES/KS/RS/IS/EK, `docs/rust/misure/d72d76_storiche_*`). Confronto dei profili (100 partite,
-  `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
-- 25/11 D77 corretto in Rust sul profilo `6427b90+D72-D77` (`9fcdc25`, `lp_action.rs` dietro `regole.d77()`): dopo uno
-  spostamento non in sospeso gli showdown in attesa partono subito; contatore `D77`. `tests/rust/test_d77.py` verde (e il
-  profilo D72-D76 tiene il comportamento vecchio); `tests/rust` 135 verdi. Storico: 180/180 identiche (sei tipi, semi
-  910001-910003, cinque matchup, `docs/rust/misure/d77_storiche_*`). D72-D76 contro D72-D77 (ES/KS/RS/IS, semi 1-10):
-  simple_trade 80/80 identiche, random 65/80 (le 15 diverse hanno tutte D77 e la prima differenza in uno showdown, ma
-  `confronto_regole._delta` non le attribuisce a D77: finestra da ricontrollare se si riusa lo script).
+- 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
+  `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
+- 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `9fcdc25`, contatore `D77`, `tests/rust/test_d77.py`): storico 180/180
+  identiche. D72-D76 contro D72-D77 (semi 1-10): simple_trade 80/80 identiche, random 65/80 (le 15 diverse hanno D77 in uno
+  showdown, ma `confronto_regole._delta` non le attribuisce a D77: da ricontrollare se si riusa lo script).
+- 25/11 pagina su Rust (fase 4, `riftbound/ai/coach_rs.py`, `docs/RUST.md` "Pagina coach su Rust"): `--motore rust|python`,
+  `--regole`, `--iterazioni` (campione a lavoro fisso N=42, rewind rigiocando le risposte); `tests/rust` 228, coach Python 59 verdi.
 
 ## In corso
 
@@ -78,7 +74,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust col profilo D72-D77 (Matteo d'accordo, 25/11): agente umano nel ponte, vista dallo stato Rust, rifare pagamento/rewind.
+4. Pagina su Rust: rimisurare N (`ITERAZIONI_CAMPIONE`, 42) col checkpoint vero sul Mac; provarla con Matteo.
 5. Segnalazioni in `docs/bot/SEGNALAZIONI.md`; scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
@@ -93,7 +89,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - `tests/rust/`: test sull'estensione (`test_<mazzo>.py`, `test_d72_d76.py`, `test_d77.py`); qui `maturin build --release` + `pip install`.
 - `scripts/ppo.py` (`_motore`, `--regole`), `scripts/diag/arena_mazzi.py` (`--motore rust`, `--regole`);
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).
-- Partita a mano: `scripts/coach.py` (server, `--campione`, `--budget`, `--net`), `riftbound/ai/coach.py`
-  (`CoachSession`, `opponents()`), `riftbound/ai/coach_page.html`; `scripts/allenatore.command` (Mac).
+- Partita a mano: `scripts/coach.py` (server, `--campione`, `--budget`, `--net`, `--motore`, `--regole`, `--iterazioni`),
+  `riftbound/ai/coach.py` (`CoachSession`), `coach_rs.py` (partita su Rust), `coach_page.html`; `scripts/allenatore.command` (Mac).
 - `docs/RUST.md`, `docs/rust/` (rapporti, inventari, misure), `docs/audit/AUDIT.md`.
 - `riftbound/core/`: motore Python di riferimento (congelato).

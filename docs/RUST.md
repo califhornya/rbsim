@@ -82,7 +82,7 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
 - Agenti Rust: `random`, `simple_trade` (con l'aiuto al pagamento delle abilità Add di `base_agent`) e PPO.
 
 ### Posto umano e traccia in diretta
-- `Game.set_human_agent(seat, ask)`: ogni decisione del posto (mulligan, turn_action, reaction, showdown_action, anche con una sola opzione) e ogni scelta nella mossa (tutti i `choice`, più `decide_optional`, `decide_mode`, `decide_predict_recycle`) chiama `ask(event_json: str)`. L'evento è quello che la traccia registra (stesse funzioni di `trace.rs`, stesse chiavi, stato prima della risposta) senza i campi della risposta (`action`/`index`, `chosen`/`by`, `out`). Imposta il side chooser se il gioco non ne ha uno; da chiamare prima di `trace_on()`.
+- `Game.set_human_agent(seat, ask)`: ogni decisione del posto (mulligan, turn_action, reaction, showdown_action, anche con una sola opzione) e ogni scelta nella mossa (tutti i `choice`, più `decide_optional`, `decide_mode`, `decide_predict_recycle`) chiama `ask(event_json: str)`. L'evento è quello che la traccia registra (stesse funzioni di `trace.rs`, stesse chiavi, stato prima della risposta) senza i campi della risposta (`action`/`index`, `chosen`/`by`, `out`); la decisione porta in più, solo per `ask`, `actions` (le mosse del menu in forma `action`). Imposta il side chooser se il gioco non ne ha uno; da chiamare prima di `trace_on()`.
 - La risposta è un oggetto Python (non JSON) della forma del campo mancante: decisione = int indice in `menu`; scelta = int indice in `options_raw`; mulligan = lista di al più 2 indici distinti della mano; `decide_optional` e `decide_predict_recycle` = bool; `decide_mode` = int in `0..n` o `None`. Per una decisione vale anche la lista `[tipo, indice, corsia(, dst)]` (il campo `action` della traccia), giocata così com'è anche fuori dal menu: serve a bot e replay (`simple_trade` gioca azioni fuori dal menu), la pagina umana risponde con l'indice. Una risposta non valida (bool al posto di int, tipo sbagliato, indice fuori range) alza `ValueError` da `start()` / `run_segment()`.
 - `set_human_agent(seat, ask, payments=False)`, con `payments=True` ("Come paghi?" della pagina, port di `coach.payment_options`, `gold_only_plays`, `CoachAgent._coached/_gold_step`, `CoachLoop`; `rbsim-core/src/payment.rs`, `human.rs`): nell'evento di ogni decisione compaiono `pay` (una voce per mossa del menu: `null`, o, dove Python offrirebbe una scelta, cioè con più di un modo, la lista dei modi, quello del motore per primo) e `gold_only` (le giocate pagabili solo con i Gold; con una mossa sola nel menu, come per Python, `pay` è tutto `null` e `gold_only` vuota; `[{"action": [tipo, indice, corsia(, dst)], "ways": [...]}]`, anche con un modo solo). Un modo è `{"golds": n, "gold_domain": "FURY".. | null, "prefer": dominio | null, "recycled": [[dominio, rune], ...]}`: gli stessi campi di Python senza il `text` italiano, che costruisce Python; `recycled` = le rune riciclate per dominio, nell'ordine del `rune_pool` (come la tupla di Python), non i riferimenti alle singole rune. Stessi ordine, dedup e regola "non più rune del minimo" di Python. Calcolati su copie del gioco dentro Rust: il gioco non si tocca.
 - Con `payments=True` una decisione accetta anche `{"index": i, "via": w}` (mossa `i` del menu pagata col modo `w` di `pay[i]`, indice nella lista) e `{"solo_gold": j, "via": w}` (`gold_only[j]` col suo modo `w`). Un modo senza Gold imposta la preferenza `recycle_first` per quella mossa; uno con Gold: il posto esegue da sé gli step, un Gold per decisione (ognuno una decisione della traccia, senza `ask`; la sua domanda "quale dominio" è risposta dal posto), poi la mossa con la preferenza, come `_gold_plan`/`_gold_step`. Una risposta `via` senza `payments=True`, un `via` fuori dalla lista o per una mossa senza scelta alza `ValueError`. Se il piano non è più possibile la decisione si richiede (un evento nuovo).
@@ -90,6 +90,33 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
 - `trace_on(watch=None)`: con `watch`, ogni evento registrato va anche a `watch(event_json: str)`, completo (risposta compresa), nello stesso ordine di `events()`.
 - Un'eccezione di `ask` o `watch` (anche una `BaseException`) esce da `start()` / `run_segment()` come lo stesso oggetto; il gioco è finito, se ne costruisce un altro. Dentro i callback non si usa il `Game`.
 - `correzioni` (profili D72+) è il contatore al momento della registrazione, dopo il lavoro dell'agente: la domanda a un umano lo porta com'era prima della risposta.
+
+### Pagina coach su Rust (fase 4)
+- `scripts/coach.py --motore rust|python` (default rust), `--regole` (default `6427b90+D72-D77`), `--iterazioni`.
+  Una partita fra due mazzi di `arena_rs.COPERTI` contro il campione o `simple_trade` gira su Rust con quel profilo
+  (`riftbound/ai/coach_rs.py`, `RustGame`); il resto (altri mazzi, `--net` con i consigli, "La rete", `--motore python`)
+  gira su Python con `6427b90`. `state()["regole"]`/`["motore"]` e le righe di `games.jsonl` dicono cosa si è giocato.
+- Il posto di Matteo è `set_human_agent(posto, ask, payments=True)` + `trace_on(watch)`: `ask` costruisce la stessa domanda
+  della pagina Python (testi e tavolo da `vista_rs` e dalle funzioni di `coach.py`; "Come paghi?" con `payment_text`),
+  risponde da sé dove Python non chiede (una sola opzione, `decide_*`, scelte fuori da una mossa di Matteo) e traduce la
+  risposta (indice; `{"index","via"}`; `{"solo_gold","via"}`); `watch` tiene tavolo, eventi e log durante le mosse dell'avversario.
+  Le mosse del menu vengono dal tasto `actions` dell'evento di decisione che riceve `ask` (una `[tipo, indice, corsia(, dst)]`
+  per voce, come il campo `action` della traccia; non è nella traccia registrata né in `watch`).
+- Il campione su Rust cerca con `iterazioni` FISSE (`set_search_agent(.., budget=None, probs=make_probs(rete))`), non a
+  tempo: la partita è determinata da seme e risposte, come serve all'"Annulla l'ultima mossa" (si registrano le risposte
+  date a Rust, si ricostruisce la stessa partita e le si rigiocano fino al checkpoint senza chiedere alla pagina; poi
+  `_resume` confronta il tavolo). Default N = `coach_rs.ITERAZIONI_CAMPIONE` = **42**: mediana delle iterazioni di una
+  ricerca di turno con `search_stats` a `budget=0.03` (il budget Rust promosso uguale a Python a 0,4 s), 6 partite
+  ES/EK (semi 1-6, profilo D72-D77, entrambi i posti a cercare; 252 ricerche, per partita 33-61, media 140, max 786).
+  Misurata con una `PPONet` di pesi casuali (il checkpoint del campione non è nel container: il costo del forward è lo
+  stesso): da rimisurare sul Mac col checkpoint vero.
+- Differenze note con la pagina Python (Rust non dà al posto umano le informazioni): "Sett The Boss" chiede sì/no unità per
+  unità (il gruppo che muore e l'unità in questione vivono solo dentro `route_deaths`, non nello stato né negli eventi);
+  le carte guardate in cima si mostrano con le scelte che seguono (tenere, predire) ma non in "Prendere una delle carte
+  guardate?" né in uno sguardo senza scelta (le carte escono dal mazzo dentro l'effetto, `fx_dig`): servirebbe un gancio
+  in rbsim-core (`offer_reveal_from_top`, `route_deaths`) che avvisi il posto umano. Il log scrive una scelta una volta
+  (i pick di una "fino a N" insieme, `RustGame._logged_choice`).
+- Test: `tests/rust/test_coach_rs.py` (partite intere ES/EK/RS, rewind, campione a poche iterazioni, ripiego su Python).
 
 ### Confine PPO
 Rust costruisce la domanda, Python decide.
@@ -154,4 +181,4 @@ I risultati vanno in `docs/rust/misure/`. Il resoconto è in `docs/rust/RAPPORTO
 - Ivern, Sett e il resto del catalogo.
 - I verbi delle carte di sideboard EK: `counter_spell`, `prevent_spell_damage_this_turn`, `banish_self_and_gear`; il
   `play_token` di An Offer You Can't Refuse (`it_controller`). Non entrano nelle partite. `kill_gear` è portato (Rengar).
-- Gli altri bot (`HorizonAgent`, `NetAgent`, il coach) e l'esplorazione della ricerca (rumore, temperatura).
+- Gli altri bot (`HorizonAgent`, `NetAgent`; il coach c'è: sopra) e l'esplorazione della ricerca (rumore, temperatura).

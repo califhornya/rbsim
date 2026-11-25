@@ -63,6 +63,7 @@ def replay(mu, seed, humans, rec, watch=None):
         def ask(ev):
             e = json.loads(ev)
             want = queues[seat].pop(0)
+            check_actions(e, want)
             assert {k: v for k, v in e.items() if k not in IGNORED} == question(want)
             asked.append(e["k"])
             return answer(want)
@@ -78,6 +79,17 @@ def replay(mu, seed, humans, rec, watch=None):
     g.start()
     assert all(not q for q in queues.values())
     return json.loads(g.events()), g.raw_dump(), asked
+
+
+def check_actions(e, want):
+    """`actions` is for `ask` alone: one trace-shaped action per menu item, on decisions only."""
+    if e["k"] != "decision":
+        assert "actions" not in e
+        return
+    acts = e.pop("actions")
+    assert len(acts) == len(e["menu"])
+    if want["index"] is not None:
+        assert acts[want["index"]] == want["action"]
 
 
 def same(ev, rec):
@@ -202,8 +214,10 @@ def test_senza_trace_stesse_domande_e_stesso_stato():
 
     def ask(ev):
         e = json.loads(ev)
+        want = queue.pop(0)
+        check_actions(e, want)
         asked.append(e)
-        return answer(queue.pop(0))
+        return answer(want)
 
     g.set_agent("A", "simple_trade", 0)
     g.set_human_agent("B", ask)  # sets the side chooser itself
