@@ -58,8 +58,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
   stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
   `riftbound/ai/coach_rs.py` (campione a lavoro fisso N=42, rewind rigiocando le risposte, Sett The Boss, carte guardate);
-  `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
-  `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
+  `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python (storico 40/40).
 - 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
   `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
 - 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
