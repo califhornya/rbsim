@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); D77 su `claude/wonderful-bell-wjsdfz` (da `claude/lucid-dirac-0aq2d3`).
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); D77 e pagina su Rust su `claude/wonderful-bell-wjsdfz`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -40,14 +40,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## Fatto
 - Porting EK (`docs/rust/RAPPORTO_EK.md`); ricerca dell'arena in Rust (`docs/rust/RAPPORTO_ARENA.md`),
   verificata sul Mac col campione (20/20 a 50 iterazioni; Rust ×14,6 a partita).
-- 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie, semi 70000–70799): bot Rust a
-  0,030 s contro Python a 0,400 s = 0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**.
-  1.600 partite verificate; 2 divergenze nelle ricerche spiegate (etichette Python dipendenti
-  dall'ordine di un insieme, corrette in `net_mcts._label`). Partita Rust a 0,03 s: 2,36 s.
-- 24/11 tappa Rengar (`docs/rust/RAPPORTO_RENGAR.md`, `INVENTARIO_RENGAR.md`): parità ER/KR/EK, semi tenuti
-  2.000/2.000, nessun NotPorted; Mac col campione: PPO 240/240, arena col prior 40/40, Rust ×14–16 a partita.
-- 24/11 tappa Ivern (`docs/rust/RAPPORTO_IVERN.md`, `INVENTARIO_IVERN.md`): pila con identità, semi tenuti
-  3.120/3.120; Mac col campione: PPO 240/240, arena col prior EI/KI/RI 60/60, Rust ×15 a partita.
+- 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie): bot Rust a 0,030 s contro Python a 0,400 s =
+  0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**. Partita Rust a 0,03 s: 2,36 s.
+- 24/11 tappe Rengar e Ivern (`docs/rust/RAPPORTO_RENGAR.md`, `RAPPORTO_IVERN.md`, inventari): semi tenuti 2.000/2.000 e
+  3.120/3.120, pila con identità; Mac col campione: PPO 240/240 ciascuna, arena col prior 40/40 e 60/60.
 - 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, `INVENTARIO_SETT.md`): costi aggiunti (Call to Glory), "spendi un
   buff", `sett_save`, `this_is_mighty`, `kill_unit_or_gear`, Sett Kingpin. Autonome 3.760/3.760, PPO 960/960, replay
   640/640, arena 80/80; tenuti 4.320/4.320 con gli altri sei matchup (`docs/rust/misure/tenuti_sett_*.json`), nessuna
@@ -63,8 +59,14 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `9fcdc25`, contatore `D77`, `tests/rust/test_d77.py`): storico 180/180
   identiche. D72-D76 contro D72-D77 (semi 1-10): simple_trade 80/80 identiche, random 65/80 (le 15 diverse hanno D77 in uno
   showdown, ma `confronto_regole._delta` non le attribuisce a D77: da ricontrollare se si riusa lo script).
-- 25/11 pagina su Rust (fase 4, `riftbound/ai/coach_rs.py`, `docs/RUST.md` "Pagina coach su Rust"): `--motore rust|python`,
-  `--regole`, `--iterazioni` (campione a lavoro fisso N=42, rewind rigiocando le risposte); `tests/rust` 228, coach Python 59 verdi.
+- 25/11 pagina su Rust col profilo D72-D77 (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"):
+  posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
+  stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
+  `riftbound/ai/coach_rs.py` (campione a lavoro fisso N=42, rewind rigiocando le risposte, Sett The Boss, carte guardate);
+  `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
+  `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
+- 25/11 tavolo come il tappetino ufficiale (`coach_page.html`): rune stese una per carta, Base/Leggenda/Campione e
+  Mazzo delle rune/Rune/Mazzo/Cimitero, avversario ruotato; niente punti sul tavolo (Matteo).
 
 ## In corso
 
@@ -74,7 +76,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust: rimisurare N (`ITERAZIONI_CAMPIONE`, 42) col checkpoint vero sul Mac; provarla con Matteo.
+4. Pagina su Rust: provarla con Matteo (tavolo nuovo compreso: clic, anteprima, evidenziazioni non provati a mano);
+   rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali) col checkpoint vero sul Mac;
+   unire il ramo in `rust` (PR) quando Matteo è d'accordo.
 5. Segnalazioni in `docs/bot/SEGNALAZIONI.md`; scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
