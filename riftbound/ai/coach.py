@@ -270,6 +270,25 @@ def option_text(gs, viewer: str, option) -> str:
     return str(getattr(option, "name", option)).title()
 
 
+def reveals_keep(kind: str, source) -> bool:
+    """A `keep:dig` / `keep:reveal_and_choose` choice whose kept card is revealed (Trifarian
+    Captain; the engine's `spec.get("reveal", not spec.get("must"))`): its answer is public."""
+    head, _, eff = kind.partition(":")
+    if head != "keep" or eff not in ("dig", "reveal_and_choose"):
+        return False
+    spec = CARD_REGISTRY.get(getattr(source, "name", None))
+    for e in (spec.effects if spec is not None else ()):
+        if e.effect == eff:
+            p = e.params
+            return bool(p.get("reveal", not p.get("must")))
+    return False
+
+
+def is_public_choice(public: set, kind: str, source) -> bool:
+    """Is the answer to this choice told in the log (`public`: the kinds that always are)?"""
+    return kind.partition(":")[0] in public or reveals_keep(kind, source)
+
+
 def _chosen_text(gs, viewer: str, got) -> str:
     """A choice's answer in words: one option, or several ("up to two")."""
     if isinstance(got, list):
@@ -1800,7 +1819,7 @@ class CoachSession:
         head = kind.partition(":")[0]
         if side == self.side and n_options:
             self.looked = None             # the choice after the look was made
-        if head not in self._PUBLIC_CHOICES or not n_options or self.gs is None:
+        if not is_public_choice(self._PUBLIC_CHOICES, kind, source) or not n_options or self.gs is None:
             return
         mine = side == self.side
         if mine and n_options > 1:
@@ -1808,7 +1827,8 @@ class CoachSession:
         if not mine and head == "discard":
             return                         # opp_discards logs it
         name = getattr(source, "name", None)
-        text = f"{name + ': ' if name else ''}{_SHORT.get(head, 'scelta')} → " \
+        label = "rivela e pesca" if head == "keep" else _SHORT.get(head, "scelta")
+        text = f"{name + ': ' if name else ''}{label} → " \
                f"{_chosen_text(self.gs, self.side, got)}"
         self.event("me" if mine else "opp", text + (" (unica scelta)" if mine else ""))
 

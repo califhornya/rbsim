@@ -349,7 +349,11 @@ class RustGame:
         from riftbound.rs import vista_rs
         s, raw, kind = self.s, e["options_raw"], e["kind"]
         head = kind.partition(":")[0]
-        if not raw or head not in s._PUBLIC_CHOICES or (mine and len(raw) > 1) or (not mine and head == "discard"):
+        source = None
+        if head == "keep" and raw and e.get("source_raw") is not None:     # public if the dig reveals
+            self._load(e)
+            source = vista_rs.valore(e["source_raw"], self.objs)
+        if not raw or not C.is_public_choice(s._PUBLIC_CHOICES, kind, source) or (mine and len(raw) > 1) or (not mine and head == "discard"):
             self._flush()
             return
         self._load(e)

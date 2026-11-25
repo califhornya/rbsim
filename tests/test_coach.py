@@ -407,6 +407,32 @@ def test_the_log_names_the_opponents_target_and_the_coachs_only_option(tmp_path)
         ("me", "Zaun Warrens: scarta → Twilight Step (magia, costo 2) (unica scelta)")]
 
 
+def _keep_log(tmp_path, source_name: str, side: str = "B", n_options: int = 1) -> list:
+    from types import SimpleNamespace
+
+    from riftbound.core.game_factory import build_game
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    session = _session(tmp_path)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
+    session.gs, session.side = gs, "A"
+    kept = CARD_REGISTRY["Pit Rookie"].instantiate()
+    session._log_choice("keep:dig", side, n_options, kept, SimpleNamespace(name=source_name))
+    return [(e["who"], e["text"]) for e in session.state()["events"]]
+
+
+def test_the_log_names_the_card_the_opponent_reveals_with_a_dig(tmp_path):
+    """Trifarian Captain's kept card is revealed: the log says which."""
+    assert _keep_log(tmp_path, "Trifarian Captain") == [
+        ("opp", "Trifarian Captain: rivela e pesca → Pit Rookie (unità, costo 2)")]
+
+
+def test_a_dig_that_does_not_reveal_is_not_logged(tmp_path):
+    """Stacked Deck (`must`) and Lightning Rush (`reveal: false`) keep a hidden card."""
+    assert _keep_log(tmp_path, "Stacked Deck") == []
+    assert _keep_log(tmp_path, "Lightning Rush") == []
+    assert _keep_log(tmp_path, "Trifarian Captain", side="A", n_options=3) == []     # the coach's: asked on the page
+
+
 def test_two_battlefields_with_one_name_say_which():
     from riftbound.ai.coach import _view_bf_names
     same = [{"named": "Threshold of the Gray"}, {"named": "Threshold of the Gray"}]
