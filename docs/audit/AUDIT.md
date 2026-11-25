@@ -164,6 +164,7 @@ From now on:
 | D76 | "When you conquer, ready me" on a legend never readies it (Sett The Boss) | Sett The Boss; Irelia Blade Dancer, Sivir Battle Mistress | Sett (legend): its save stays used until the next turn | fixed in Rust on the profile 6427b90+D72-D76, `92a42e8` |
 | D77 | A showdown staged by a trigger of a Standard Move that isn't held waits for the next action that isn't a move (or the end of the turn) | §462, Irresistible Faefolk | Sett (deck): seen by the owner, Pillaged Armory played and a defender buffed before the showdown | fixed in Rust on the profile 6427b90+D72-D77, `9fcdc25` |
 | D77 | A showdown a Standard Move's trigger stages (Irresistible Faefolk moving an enemy unit in) waits for the next action that isn't a move, or the end of the turn | §462 | Sett (Faefolk): open-state plays (gear, units, spells without ACTION) before that showdown; seen by the owner in the coach page | open: to be fixed in Rust |
+| D78 | "They can't move it this turn" (Vex Apathetic) stops only the Standard Move, not a move by its controller's spell or ability | §451, CORE_RULES example of Vilemaw's Lair and Flash | Evelynn (Vex) against Sett (Showstopper): seen by the owner in the coach page, Sett Kingpin moved from base on the turn Vex stunned it | open: to be fixed in Rust on a new profile, when the owner says |
 
 ## Deviations, priority 1: the precons and the rules they use
 
@@ -1212,6 +1213,39 @@ Fixed in Rust (25/11) on the profile 6427b90+D72-D77, `9fcdc25`; 6427b90 and
   `regole.d77()`; counted as `D77` in `riftbound_rs.correzioni`). Red test
   first with the position above (`46afd65`); a second test keeps the old
   behavior on 6427b90+D72-D76.
+
+### D78. "They can't move it this turn" doesn't stop a spell's move
+
+Open (25/11): recorded, not fixed (the owner's call).
+
+- **Card.** Vex Apathetic (Evelynn): "When an opponent plays a unit while
+  I'm at a battlefield, STUN it. They can't move it this turn."
+- **Seen.** Raised by the owner (25/11, Evelynn against Sett, coach page,
+  rules 6427b90+D72-D77 on Rust): with Vex at Bandle Scouts' Academy, Sett
+  played Sett Kingpin to base (stunned, can't move), conquered Packed
+  Amphitheater with First Mate, then cast Showstopper ("Buff a friendly unit
+  in your base, then move it to a battlefield") on Kingpin, moving it there.
+- **Rules.** The CORE_RULES example of Vilemaw's Lair ("Units can't move
+  from here to base") and Flash: a "can't move" restriction negates a
+  spell's move instruction, the rest of the spell resolves. The player who
+  moves is the spell's controller (§191.3; §418.6.b.4 says it for Deal; for
+  Move it's a reading). Expected: Showstopper buffs Kingpin, the move is
+  negated, Kingpin stays in base.
+- **Engine.** `cant_move_this_turn` sets `unit.cant_move_turn`; only the
+  Standard Move checks it (`legality.py:165`, `loop.py:5670`; Rust
+  `legality.rs:142`, `lp_action.rs:200`). `move_unit` and the other move
+  effects ignore it (`_move_candidates`, Rust the same).
+- **Same encoding.** Every move by an effect on a unit with
+  `cant_move_turn` set: Vex's, and Hunker Down's "It can't move this turn"
+  (`effects.py:3600`, the unit's own restriction). Seen in the five decks:
+  Vex against Showstopper; other move effects not inventoried yet.
+- **Weight.** Sett: Showstopper rescues a champion Vex stopped (here 7 Might
+  on the battlefield instead of 5 stuck in base).
+- **Fix (Rust, to do).** Behind a new profile's flag: a move effect on a unit
+  with `cant_move_turn == turn` is negated when the mover is the unit's
+  controller (Vex) or always (Hunker Down: check the data's two encodings);
+  whether such a unit may still be chosen (the CORE_RULES example: yes, the
+  instruction is negated on resolution). Red test first.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
