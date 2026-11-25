@@ -69,7 +69,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: 5 partite Evelynn-Sett (poi 10), "Segnala" con TEMPO/PIANO.
+Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: 5 partite Evelynn-Sett (poi 10; 2 in `docs/bot/partite/coach/`), "Segnala".
 Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi senza iterazioni = 42), `episodi.py` (§7/§8).
 
 ## Prossimi passi

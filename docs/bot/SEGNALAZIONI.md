@@ -1,5 +1,8 @@
 # Segnalazioni dalle partite a mano (pagina col campione)
 
+Partite e segnalazioni salvate da Matteo: `docs/bot/partite/coach/` (25/11: 154531 persa in 17 turni, 201243 vinta
+9 a 4 in 13 turni, con D79, D80 e la 17).
+
 Ogni segnalazione ha un esito:
 - **pagina**: difetto della pagina (`riftbound/ai/coach.py`, `coach_page.html`); si corregge subito, con un test.
 - **motore**: difetto delle regole; va in `docs/audit/AUDIT.md` (D77 in poi) con un test rosso e si corregge
@@ -26,3 +29,4 @@ Ogni segnalazione ha un esito:
 | 14 | 25/11 | Il campione a 6 punti, con due unità pronte e due campi liberi, le manda entrambe su Packed Amphitheater (7/8) invece di vincere conquistando tutti e due i campi (Matteo senza energia) | strategia: la vittoria è a 4 livelli dell'albero (sposta, conferma, sposta, conferma) e la valutazione a 7 punti vale già ~0,96 (tanh) contro 1,0; con 42 iterazioni e il prior del PPO che concentra la ricerca, la linea non viene vista. Qui non riprodotto: senza prior (rete non disponibile) il bot la trova 10/10 | corretto: prima di cercare, il campione controlla se vince nel turno coi soli spostamenti (`win_probe` in `search.rs`, `set_search_win_probe`), solo nella pagina e solo se l'avversario ha 0 energia e nessuna risposta legale lungo la linea in 9 determinizzazioni (revisione di Codex sulla PR 50); arena e parità invariate (`tests/rust/test_vittoria.py`) |
 | 15 | 25/11 | Bedeviling Stranger giocato da coperta nello showdown: sulla pila solo la sua abilità, quella di Evelynn (pesca, poi scarta) arriva dopo la risoluzione | motore (D79): le due abilità scattano dalla stessa giocata e vanno sulla pila insieme, nell'ordine scelto da Matteo; nello showdown la giocata coperta non è un "task", così l'abilità dello Stranger va sulla pila e si risolve prima che scatti quella della leggenda | `AUDIT.md` D79, nel pacchetto di correzioni (raccolta in corso) |
 | 16 | 25/11 | Fine partita "9 a 4": a 7 punti con due campi tenuti, ma la partita finisce a 8 | motore (D80): il vincitore è fissato all'8, ma il motore segna anche il secondo campo; vincitore giusto, punteggio no | `AUDIT.md` D80, nel pacchetto di correzioni (raccolta in corso) |
+| 17 | 25/11 | "Non so come Sett possa rompere un campo a Evelynn in questo matchup; forse il bot mi rispetta tanto, ok, però così non la vincerà mai" (T9, Matteo 5 a 3, campione senza energia) | strategia: da guardare con le altre partite Evelynn-Sett | raccolta in corso (`partite/coach/`, partita 201243) |

@@ -1259,7 +1259,8 @@ fixes on a new profile, when the owner says).
   each turn, when you play a card from face down, draw 1. Then, if it's not
   your turn, discard 1").
 - **Seen.** Raised by the owner (25/11, Evelynn against Sett, coach page,
-  rules 6427b90+D72-D77 on Rust): turn 6 (Sett's), showdown at Bandle Scouts'
+  rules 6427b90+D72-D77 on Rust; game saved in `docs/bot/partite/coach/`
+  20261125_201243): turn 6 (Sett's), showdown at Bandle Scouts'
   Academy; the owner plays the Stranger from face down there. The chain holds
   only the Stranger's ability (target Sett Kingpin) and the owner is asked to
   respond to it; the legend's draw/discard comes after it has resolved.
@@ -1293,7 +1294,7 @@ fixes on a new profile, when the owner says).
 Open (25/11): recorded, not fixed (package of fixes).
 
 - **Seen.** Raised by the owner (25/11, game
-  `20261125_201243_competitive_sett_vs_competitive_evelynn`, coach page on
+  20261125_201243 in `docs/bot/partite/coach/`, coach page on
   Rust): at 7 points holding two battlefields, the game ends "9 a 4". The game
   ends at the 8th point (owner): the second hold is never scored.
 - **Engine.** `_gain_points` (Rust `lp_rules.rs:82`) adds the points, then
