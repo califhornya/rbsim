@@ -62,7 +62,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   raddrizzati in orizzontale; chi inizia nel mulligan, nel turno e nel registro; le carte guardate in cima al mazzo
   (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. Playwright.
 - 25/11 pagina (segnalazioni di Matteo, `docs/bot/SEGNALAZIONI.md`): magia uguale su ogni campo = una voce "Lancia X";
-  gear/rune esauste ruotate; "Come paghi?" (`payment_options`, `CoachLoop`); opzioni identiche una sola. Motore invariato.
+  gear/rune esauste ruotate; "Come paghi?" (`payment_options`, `CoachLoop`); opzioni identiche una sola. Rewind ("Annulla
+  l'ultima mossa", R): `CoachLoop.record` + replay dal seme (`_Record`, `_Seat`, `CoachSession.rewind`). Motore invariato.
 - 25/11 D72-D76 corretti in Rust sul profilo `6427b90+D72-D76` (`docs/RUST.md` "Profili delle regole", AUDIT.md):
   test rossi prima (`tests/rust/test_d72_d76.py`), correzione dati D74/D75 al caricamento del registro, contatori
   delle correzioni. Storico dopo i fix: 600/600 identiche (autonome, replay, PPO, arena a lavoro fisso; semi
@@ -70,7 +71,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
 
 ## In corso
-- Partite di Matteo: segnalazioni in `docs/bot/SEGNALAZIONI.md`; giocate del campione in `GIOCATE.md` §7.
+- Segnalazioni di Matteo: `docs/bot/SEGNALAZIONI.md`; giocate del campione: `GIOCATE.md` §7-§8.
 
 ## Prossimi passi
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
@@ -78,8 +79,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. Profilo corretto: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Partita interattiva Evelynn-Sett su Rust col profilo corretto (dopo i fix, priorità di Astra).
-5. Scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`). D77 da correggere in Rust.
+4. Pagina su Rust col profilo corretto (Matteo d'accordo, 25/11): D77 in Rust, agente umano nel ponte, vista dallo stato Rust, rifare pagamento/rewind.
+5. Scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,

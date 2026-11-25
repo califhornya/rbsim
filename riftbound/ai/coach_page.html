@@ -524,11 +524,13 @@ function renderSide() {
     : S.autoplay ? `${who}<div class="hint">${!S.advice ? "Partita lasciata: passi tu, l'avversario la chiude da solo. Non verrà salvato niente."
         : S.saving ? `La rete sta finendo la partita da sola. Le tue ${S.decisions} decisioni verranno salvate alla fine.` : "La rete sta finendo la partita da sola. Non verrà salvato niente."}</div>`
     : `${who}<div style="display:flex;flex-direction:column;gap:6px">
+        <button class="ghost" id="rewind" ${S.can_rewind ? "" : "disabled"} title="Torna alla tua decisione di prima: tutto quello che è successo dopo si annulla (R)">↶ Annulla l'ultima mossa (R)</button>
         ${S.advice ? `<button class="ghost" id="forget" ${S.decisions ? "" : "disabled"}>Ho sbagliato l'ultima mossa: non usarla per allenare</button>
         <button class="ghost" id="finish">Fermati qui e salva</button>` : ""}
         <button class="ghost" id="abandon" style="color:var(--muted)">${S.advice ? "Abbandona senza salvare" : "Abbandona la partita"}</button></div>`;
   if (!playing) $("#newgame").onclick = () => { setupOpen = true; renderModal(); };
   else if (!S.autoplay) {
+    $("#rewind").onclick = rewind;
     if (S.advice) {
       $("#forget").onclick = async () => { if (confirm("Togliere la tua ultima decisione dall'allenamento? La partita continua normalmente.")) await post("/api/forget", {}); };
       $("#finish").onclick = async () => { if (confirm(`La rete finirà la partita da sola, senza chiederti niente. Le tue ${S.decisions} decisioni fin qui verranno salvate con il risultato finale. Va bene?`)) await post("/api/finish", { save: true }); };
@@ -781,6 +783,11 @@ async function poll() {
   } catch (e) { $("#status").textContent = "Server spento?"; }
 }
 window.addEventListener("resize", () => { if (S) { squeeze(); drawArrows(); } });
+// Rewind (as RiftAtlas's R): back to your previous decision, everything since undone.
+async function rewind() { if (S && S.can_rewind && !busy) { busy = true; closeMenu(); try { await post("/api/rewind", {}); } finally { busy = false; } } }
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "r" || e.key === "R") && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { rewind(); return; }
+});
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeMenu(); if (pileOpen) { pileOpen = null; renderModal(); } } });
 setInterval(poll, 700); poll();
 </script>

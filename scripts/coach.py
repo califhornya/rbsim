@@ -21,7 +21,9 @@ accept one); for a move you pick, the choices inside it are asked too. With
 mixes them into training. "Segnala un problema" saves the situation and your
 note (runs/coach/reports.jsonl). "Fermati qui e salva" lets the net finish the
 game alone and keeps your decisions; "Ho sbagliato l'ultima mossa" drops your
-last decision from training.
+last decision from training. "Annulla l'ultima mossa" (or R) takes your last
+decision back, as RiftAtlas's Rewind: the game goes back to it and everything
+since is undone (rebuilt from its seed and replayed from its record).
 """
 from __future__ import annotations
 
@@ -128,6 +130,8 @@ def main() -> None:
                     session.finish(save=bool(body.get("save", True)))
                 elif self.path == "/api/abandon":
                     session.abandon()
+                elif self.path == "/api/rewind":
+                    session.rewind()
                 elif self.path == "/api/forget":
                     if not session.forget_last():
                         return self._json({"error": "Nessuna tua decisione da togliere."}, 400)

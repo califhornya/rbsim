@@ -897,3 +897,61 @@ def test_identical_triggers_are_not_ordered_by_hand(tmp_path):
         time.sleep(0.005)
     game.join(timeout=10)
     assert not asked and [g.name for g in a.base_gear] == ["Gold", "Gold"]
+
+
+def _answer_randomly(rng):
+    def pick(pending):
+        if pending["type"] == "choice":
+            return {"option": rng.randrange(len(pending["options"]))}
+        if pending["type"] == "notice":
+            return {"ok": True}
+        if pending["type"] == "mulligan":
+            return {"return": [0]}
+        return {"action": rng.randrange(len(pending["actions"]))}
+    return pick
+
+
+def _next_question(session, timeout: float = 60.0) -> dict:
+    end = time.time() + timeout
+    while time.time() < end:
+        st = session.state()
+        if st["status"] == "over":
+            return st
+        if st["status"] == "waiting" and st["pending"] is not None:
+            return st
+        time.sleep(0.005)
+    raise AssertionError("no question came")
+
+
+def test_rewind_takes_the_last_decision_back(tmp_path):
+    """Matteo (25/11): RiftAtlas's Rewind. After a decision and what followed
+    (the opponent's moves too), "Annulla" brings back the same question on the
+    same table, with the log as it was; then the game goes on to its end."""
+    import random
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(EVELYNN, KHAZIX, seat="A", opponent="simple_trade", seed=11)
+    pick = _answer_randomly(random.Random(5))
+    asked = []
+    for _ in range(40):                       # into the game, past a few turns
+        st = _next_question(session)
+        assert st["status"] != "over"
+        if st["pending"]["type"] == "decision":
+            asked.append((st["pending"], st["observation"], st["board"], st["events"]))
+        session.answer(pick(st["pending"]))
+    st = _next_question(session)
+    while st["pending"]["type"] != "decision":
+        session.answer(pick(st["pending"]))
+        st = _next_question(session)
+    assert st["can_rewind"]
+    pending, view, board, events = asked[-1]           # the last decision answered
+    session.rewind()
+    st = _next_question(session)
+    assert st["pending"]["actions"] == pending["actions"] and st["observation"] == view
+    assert st["board"] == board and st["rewinds"] == 1
+    assert st["events"][:-1] == events and "Mossa annullata" in st["events"][-1]["text"]
+    session.rewind()                                   # and the one before
+    st = _next_question(session)
+    assert st["pending"]["actions"] == asked[-2][0]["actions"] and st["observation"] == asked[-2][1]
+    _play(session, pick, timeout=300)
+    st = session.state()
+    assert st["result"] and "error" not in st["result"], st["result"]
