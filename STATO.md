@@ -37,6 +37,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
+- (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
+  a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
+  avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
 
 ## Fatto
 - Porting EK (`docs/rust/RAPPORTO_EK.md`); ricerca dell'arena in Rust (`docs/rust/RAPPORTO_ARENA.md`),
@@ -51,9 +54,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 pagina (segnalazioni, `docs/bot/SEGNALAZIONI.md`): "Lancia X" unica, "Come paghi?", opzioni uniche, rewind (R).
 - 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
   `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
-- 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `9fcdc25`, contatore `D77`, `tests/rust/test_d77.py`): storico 180/180
-  identiche. D72-D76 contro D72-D77 (semi 1-10): simple_trade 80/80 identiche, random 65/80 (le 15 diverse hanno D77 in uno
-  showdown, ma `confronto_regole._delta` non le attribuisce a D77: da ricontrollare se si riusa lo script).
+- 25/11 D77 corretto in Rust (profilo `6427b90+D72-D77`, `test_d77.py`): storico 180/180 identiche
+  (`confronto_regole._delta` non attribuisce a D77 15 partite che lo contengono: da sistemare se si riusa).
 - 25/11 pagina su Rust col profilo D72-D77 (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"):
   posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
   stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
@@ -67,20 +69,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 segnalazione 14: il campione della pagina cerca prima la vittoria nel turno coi soli spostamenti (`win_probe`; arena invariata).
 
 ## In corso
+Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`, domande in `DOMANDE_ASTRA.md`). Matteo: 5 partite Evelynn-Sett
+(poi 10), segnando i turni in cui il bot regala tempo o costringe a cambiare piano. Qui: strumenti per il Mac.
 
 ## Prossimi passi
-- In attesa delle risposte di Astra a `docs/bot/DOMANDE_ASTRA.md` (tutti i fili aperti e le domande di priorità).
-0. Scelta ponderata del campione (`apertura.py`): tabella per matchup misurata sul Mac, campione contro sé stesso,
-   per campo mio × campo suo × chi comincia; campo = il migliore contro le scelte avversarie (col d20), inizio = confronto
-   a campi scoperti, se non significativo comincia. In attesa dell'ok di Matteo e dei suoi campi da Game 1. Poi la Bo3.
-1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
-   --budget-avversario 0.03`); budget da ricontrollare sugli altri matchup prima di usarlo lì.
-2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
-3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
-   i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust (Matteo la usa): rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali)
-   col checkpoint vero sul Mac; `win_probe` da misurare in arena.
-5. Segnalazioni in `docs/bot/SEGNALAZIONI.md` (D78 Vex/Showstopper segnato, si corregge quando Matteo lo dice); scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
+1. Calibrazione sul Mac col vero `ckpt_040000`, profilo D72-D77, `win_probe` uguale. 42 iterazioni contro 0,030 s:
+   mosse, iterazioni e attesa per turno, reazione e showdown; forza su semi nuovi a posti scambiati.
+2. Due scenari, una correzione alla volta. §8 (Vi sul 6-6, ricostruito: non salvato; Rengar ora può entrare) e
+   §7 (showdown 6 a 2, l'avversario risponde), al budget della pagina e a uno più alto. Mossa attesa legale, visitata, valore.
+3. Verifica breve del profilo: campione contro il bot senza prior su ES ed EK, D72-D77.
+4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
+5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
+6. In attesa: D78 (decide Matteo); Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
