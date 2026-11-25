@@ -69,6 +69,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## In corso
 
 ## Prossimi passi
+- In attesa delle risposte di Astra a `docs/bot/DOMANDE_ASTRA.md` (tutti i fili aperti e le domande di priorità).
 0. Scelta ponderata del campione (`apertura.py`): tabella per matchup misurata sul Mac, campione contro sé stesso,
    per campo mio × campo suo × chi comincia; campo = il migliore contro le scelte avversarie (col d20), inizio = confronto
    a campi scoperti, se non significativo comincia. In attesa dell'ok di Matteo e dei suoi campi da Game 1. Poi la Bo3.
