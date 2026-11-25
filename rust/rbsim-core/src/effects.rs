@@ -819,6 +819,10 @@ impl Game {
             }
             if self.gs.unit(unit).might_counters < 1 || self.has_effect(self.gs.ucard(unit), "unlimited_buffs") {
                 self.gs.unit_mut(unit).might_counters += 1;
+                if self.gs.reg.regole.corrette() {
+                    // D75: a buff gained changes Sett Kingpin's Might at once.
+                    self.recompute_passives()?;
+                }
                 if let Some((ws, wbf)) = self.locate_unit(unit) {
                     let bf = wbf.unwrap_or(0);
                     self.resolve_triggered_effects(self.gs.ucard(unit), "on_buffed", bf, ws, Some(crate::lp_phases::bf_extra(bf)))?;

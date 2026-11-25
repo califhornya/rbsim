@@ -352,6 +352,30 @@ impl Game {
         let side = ctx.actor;
         let bf = ctx.bf;
         let in_base = matches!(ctx.extra.get("in_base"), Some(XVal::Bool(true)));
+        if es.effect == "grant_temporary_might_per_friendly" && self.gs.reg.regole.corrette() {
+            // D75 (profile 6427b90+D72-D76), Sett Kingpin: "I get +1 [Might]
+            // for each buffed friendly unit at my battlefield" — itself
+            // included (its data has no exclude_self there), none in base;
+            // continuous, recomputed with the other passives.
+            let Some(me) = source_unit else { return Ok(()) };
+            if in_base {
+                return Ok(());
+            }
+            let amount = self.effect_amount(ctx, &params)?;
+            let here: Vec<UnitId> = self.gs.battlefields[bf].units_for(side).clone();
+            let mut n = 0;
+            for u in here {
+                let counts = match es.target_filter.as_ref().filter(|v| crate::cards::truthy(Some(v))) {
+                    Some(tf) => self.passes_filter_opt(Some(u), tf, ctx)?,
+                    None => true,
+                };
+                if counts && self.gs.unit(u).might_counters > 0 {
+                    n += 1;
+                }
+            }
+            self.gs.unit_mut(me).passive_might += amount * n;
+            return Ok(());
+        }
         let mut targets = self.passive_targets(source_unit, bf, side, es.target.as_deref(), es.scope.as_deref(), in_base);
         if let Some(tf) = es.target_filter.as_ref().filter(|v| crate::cards::truthy(Some(v))) {
             let mut kept = Vec::new();

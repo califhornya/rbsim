@@ -391,12 +391,7 @@ impl Game {
         if self.gs.champion_deployed[side.idx()] || !self.gs.has_keyword(champ, "AMBUSH") {
             return Vec::new();
         }
-        let enemy_ok = self
-            .gs
-            .spec(champ)
-            .effects
-            .iter()
-            .any(|e| e.trigger == "passive" && e.effect == "ambush" && truthy(e.params.get("enemy_ok")));
+        let enemy_ok = self.ambush_enemy_ok(champ);
         let mut lanes = Vec::new();
         for (i, bf) in self.gs.battlefields.iter().enumerate() {
             if !bf.units_for(side).is_empty() || (enemy_ok && !bf.units_for(side.other()).is_empty()) {
@@ -404,6 +399,16 @@ impl Game {
             }
         }
         lanes
+    }
+
+    /// The card's AMBUSH reaches battlefields where there are enemy units
+    /// (`enemy_ok` on its `ambush` effect: Rengar Trophy Hunter).
+    pub fn ambush_enemy_ok(&self, card: CardId) -> bool {
+        self.gs
+            .spec(card)
+            .effects
+            .iter()
+            .any(|e| e.trigger == "passive" && e.effect == "ambush" && truthy(e.params.get("enemy_ok")))
     }
 
     /// py: _deploy_ambush_champion
@@ -419,6 +424,10 @@ impl Game {
         }
         self.gs.champion_deployed[side.idx()] = true;
         self.play_unit(champ, side, Some(lane), "champion")?;
+        if self.gs.reg.regole.corrette() {
+            // D73: the battlefield's passives before the showdown's first decision.
+            self.recompute_passives()?;
+        }
         let bf = &mut self.gs.battlefields[lane];
         if !bf.units[0].is_empty() && !bf.units[1].is_empty() {
             bf.contested_this_turn = true;
