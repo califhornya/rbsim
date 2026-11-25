@@ -464,6 +464,12 @@ def _board_extras(gs, viewer: str) -> dict:
     def runes(side):
         return [{"domain": d.name, "ready": bool(r.ready)}
                 for d, rs in gs.get_player(side).rune_pool.items() for r in rs]
+
+    def gear_exhausted(side):
+        # In the Observation's order: base gear, then each battlefield's.
+        return {"base": [bool(getattr(g, "tapped", False)) for g in gs.get_player(side).base_gear],
+                **{str(i): [bool(getattr(dg.card, "tapped", False)) for dg in bf.gear_for(side)]
+                   for i, bf in enumerate(gs.battlefields)}}
     moving = gs.pending_move
 
     def fight(i, bf):
@@ -487,6 +493,7 @@ def _board_extras(gs, viewer: str) -> dict:
         "fight": {str(i): fight(i, bf) for i, bf in enumerate(gs.battlefields)
                   if bf.units_A and bf.units_B},
         "runes": {"me": runes(viewer), "opp": runes(gs.other(viewer))},
+        "gear_exhausted": {"me": gear_exhausted(viewer), "opp": gear_exhausted(gs.other(viewer))},
         "chain": [{"name": i.card.name, "ability": i.ability is not None,
                    "owner": _rel(i.player, viewer), "bf": i.bf_idx,
                    "chose": declared_text(gs, viewer, i)} for i in gs.chain],

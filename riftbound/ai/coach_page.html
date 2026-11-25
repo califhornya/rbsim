@@ -66,6 +66,7 @@ textarea { min-height: 60px; resize: vertical; }
 /* cards */
 .slot { position: relative; flex: none; width: var(--cw); height: var(--ch); border-radius: 7px; transition: margin .15s; }
 .slot.exhausted { width: var(--ch); }
+.slot.small.exhausted { width: calc(var(--ch) * .62); }
 .slot .rot { position: absolute; left: 50%; top: 50%; width: var(--cw); height: var(--ch); transform: translate(-50%, -50%); }
 .slot.exhausted .rot { transform: translate(-50%, -50%) rotate(90deg); }
 .face { width: 100%; height: 100%; border-radius: 7px; overflow: hidden; background: #222a33; position: relative;
@@ -305,6 +306,8 @@ function cardSlot(name, ref, opts = {}) {
   return `<div class="slot ${opts.cls || ""} ${opts.exhausted ? "exhausted" : ""}" ${ref ? `data-ref="${ref}"` : ""}>
     <div class="rot">${name ? face(name) : back()}</div>${opts.count != null ? `<span class="cnt">${opts.count}</span>` : ""}</div>`;
 }
+// A gear exhausted (Gold played exhausted): turned like a unit. `where`: "base" or a battlefield.
+const gearExh = (b, who, where, j) => !!((((b || {}).gear_exhausted || {})[who] || {})[String(where)] || [])[j];
 const emptySlot = (text, ref) => `<div class="slot empty" ${ref ? `data-ref="${ref}"` : ""}>${esc(text)}</div>`;
 
 /* ---------- the board ---------- */
@@ -337,8 +340,8 @@ function renderTable() {
     // Facedown cards here (two at Bandle Tree): the viewer sees only their own.
     const fd = (bf.facedowns || []).map((who, j) => cardSlot(who === me ? b.facedown_mine[`${i}:${j}`] : null,
       `facedown:${i}:${j}`, { cls: "small", data: { facedown: who === me ? "mine" : "theirs" } })).join("");
-    const gm = (me === "A" ? bf.gear_A : bf.gear_B).map((g, j) => cardSlot(g, `gear:me:${i}:${j}`, { cls: "small" })).join("");
-    const go = (me === "A" ? bf.gear_B : bf.gear_A).map((g, j) => cardSlot(g, `gear:opp:${i}:${j}`, { cls: "small" })).join("");
+    const gm = (me === "A" ? bf.gear_A : bf.gear_B).map((g, j) => cardSlot(g, `gear:me:${i}:${j}`, { cls: "small", exhausted: gearExh(b, "me", i, j) })).join("");
+    const go = (me === "A" ? bf.gear_B : bf.gear_A).map((g, j) => cardSlot(g, `gear:opp:${i}:${j}`, { cls: "small", exhausted: gearExh(b, "opp", i, j) })).join("");
     if (bf.named) REF[`bfcard:${i}`] = { name: bf.named, wide: true };
     const moving = b.moving && b.moving.bf === i
       ? `<span class="sd">${b.moving.who === "me" ? "STAI SPOSTANDO QUI" : "L'AVVERSARIO SI STA SPOSTANDO QUI"}</span><span class="hint">lo showdown parte a spostamento finito</span>` : "";
@@ -382,7 +385,7 @@ function band(o, b, who) {
       return `<div class="rune" data-ref="rune:${who}:${d}">${face(name)}<span class="n">×${k}</span></div>`; }).join("") || '<span class="muted">Nessuna runa</span>'}</div></div>`;
   const units = p("base_units") || [], gear = p("base_gear") || [];
   const base = `<div class="zone base ${who}" data-ref="base:${who}"><span class="zl">${m ? "La tua base" : "Base avversaria"}</span>
-    <div class="row">${units.map((u, j) => unitSlot(u, `unit:${who}:base:${j}`, who)).join("")}${gear.map((g, j) => cardSlot(g, `gear:${who}:base:${j}`)).join("")}${units.length || gear.length ? "" : '<span class="muted" style="font-size:12px">vuota</span>'}</div></div>`;
+    <div class="row">${units.map((u, j) => unitSlot(u, `unit:${who}:base:${j}`, who)).join("")}${gear.map((g, j) => cardSlot(g, `gear:${who}:base:${j}`, { exhausted: gearExh(b, who, "base", j) })).join("")}${units.length || gear.length ? "" : '<span class="muted" style="font-size:12px">vuota</span>'}</div></div>`;
   const legend = p("legend") ? cardSlot(p("legend"), `legend:${who}`, { exhausted: !p("legend_ready"), data: { legend: true, ready: p("legend_ready") } }) : emptySlot("Leggenda");
   const champ = p("champion") ? cardSlot(p("champion"), `champion:${who}`) : emptySlot("Campione già in gioco");
   const added = (p("added_legends") || []).map(([n, r], k) =>

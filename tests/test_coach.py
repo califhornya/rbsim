@@ -716,3 +716,22 @@ def test_a_spell_that_counts_its_battlefield_still_says_which():
     texts = [action_info(loop, "A", "A", DecisionPoint.TURN_ACTION, g.to_engine())["text"]
              for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "SPELL"]
     assert texts == ["Lancia En Garde (campo: campo 1)", "Lancia En Garde (campo: campo 2)"]
+
+
+def test_the_gold_reckless_innovator_plays_is_drawn_exhausted():
+    """Reckless Innovator's Gold enters exhausted (the engine has it so); the
+    page drew every gear upright, as if ready (Matteo, 25/11)."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import act, choices, scripted, setup, unit
+
+    from riftbound.ai.coach import _board_extras
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    a.base_units.append(unit("Reckless Innovator"))
+    choices(loop, {"mode": lambda _loop, options: 0})          # the Gold
+    act(loop, "A", "Move Reckless Innovator base→BF1")
+    assert [g.name for g in a.base_gear] == ["Gold"]
+    extras = _board_extras(loop.gs, "A")
+    assert extras["gear_exhausted"]["me"] == {"base": [True], "0": [], "1": []}
+    assert _board_extras(loop.gs, "B")["gear_exhausted"]["opp"]["base"] == [True]
