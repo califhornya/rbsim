@@ -364,3 +364,41 @@ def test_sett_the_boss_save_is_asked_once_for_the_units_dying_together(tmp_path)
             return
     pytest.fail("no Sett save question in the test seeds")
 
+
+
+def test_a_game_is_saved_in_its_own_file_with_a_technical_log(tmp_path):
+    session = _session(tmp_path)
+    session.new_game(_deck("E"), _deck("S"), seat="A", opponent="simple_trade", seed=3)
+    st, _seen = _drive(session, random.Random(3))
+    assert st["status"] == "over" and "error" not in st["result"], st["result"]
+    files = list((tmp_path / "coach" / "partite").glob("*_vs_*.json"))
+    assert len(files) == 1 and st["partita"] == str(files[0])
+    data = json.loads(files[0].read_text(encoding="utf-8"))
+    assert data["events"] and data["log"] and data["winner"] == st["result"]["winner"]
+    assert data["replay"]["seed"] == 3 and data["replay"]["answers"] and data["info"]["motore"] == "rust"
+    assert any(" decision " in ln for ln in data["log"])
+    # choice lines name cards (of both seats), not ids
+    ch = [ln for ln in data["log"] if " choice " in ln]
+    assert ch and any("]: " in ln and "Might" in ln for ln in ch), ch[:5]
+    assert not any("unformatted" in ln for ln in data["log"])
+    assert len(data["log"]) >= len(st["log"])
+    session.report("una nota")
+    again = json.loads(files[0].read_text(encoding="utf-8"))
+    assert [r["note"] for r in again["reports"]] == ["una nota"]
+
+
+def test_the_saved_log_follows_a_rewind(tmp_path):
+    session = _session(tmp_path)
+    session.new_game(_deck("E"), _deck("S"), seat="A", opponent="simple_trade", seed=5)
+    rng = random.Random(5)
+    _drive(session, rng, stop_after=6)
+    n = len(session.log.full)
+    session.rewind()
+    st, _ = _drive(session, rng, stop_after=0)
+    assert len(session.log.full) <= n and session.rewinds == 1
+    session.abandon()
+    end = time.time() + 120
+    while session.state()["status"] != "over" and time.time() < end:
+        time.sleep(0.01)
+    data = json.loads(next((tmp_path / "coach" / "partite").glob("*.json")).read_text(encoding="utf-8"))
+    assert data["abandoned"] and data["rewinds"] == 1 and data["log"]

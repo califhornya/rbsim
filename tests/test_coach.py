@@ -407,6 +407,32 @@ def test_the_log_names_the_opponents_target_and_the_coachs_only_option(tmp_path)
         ("me", "Zaun Warrens: scarta → Twilight Step (magia, costo 2) (unica scelta)")]
 
 
+def _keep_log(tmp_path, source_name: str, side: str = "B", n_options: int = 1) -> list:
+    from types import SimpleNamespace
+
+    from riftbound.core.game_factory import build_game
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    session = _session(tmp_path)
+    gs = build_game(game_seed=1, deck_a_path=ZED, deck_b_path=SHEN, ai_a=None, ai_b=None)
+    session.gs, session.side = gs, "A"
+    kept = CARD_REGISTRY["Pit Rookie"].instantiate()
+    session._log_choice("keep:dig", side, n_options, kept, SimpleNamespace(name=source_name))
+    return [(e["who"], e["text"]) for e in session.state()["events"]]
+
+
+def test_the_log_names_the_card_the_opponent_reveals_with_a_dig(tmp_path):
+    """Trifarian Captain's kept card is revealed: the log says which."""
+    assert _keep_log(tmp_path, "Trifarian Captain") == [
+        ("opp", "Trifarian Captain: rivela e pesca → Pit Rookie (unità, costo 2)")]
+
+
+def test_a_dig_that_does_not_reveal_is_not_logged(tmp_path):
+    """Stacked Deck (`must`) and Lightning Rush (`reveal: false`) keep a hidden card."""
+    assert _keep_log(tmp_path, "Stacked Deck") == []
+    assert _keep_log(tmp_path, "Lightning Rush") == []
+    assert _keep_log(tmp_path, "Trifarian Captain", side="A", n_options=3) == []     # the coach's: asked on the page
+
+
 def test_two_battlefields_with_one_name_say_which():
     from riftbound.ai.coach import _view_bf_names
     same = [{"named": "Threshold of the Gray"}, {"named": "Threshold of the Gray"}]
@@ -795,6 +821,91 @@ def test_a_card_played_with_a_gold_ready_asks_how_to_pay(tmp_path):
                        "Usa Gold: Power Body per pagare Punch First", "Lancia Punch First"]
 
 
+def _ksante_table(tmp_path):
+    """The Gold table with K'Sante Courageous (5 energy, ACCELERATE) alone in hand and the energy to pay it
+    and its ACCELERATE."""
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    card = lambda n: CARD_REGISTRY[n].instantiate()  # noqa: E731
+    loop, a, b, session, agent = _gold_table(tmp_path, 3)
+    a.hand.clear()
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    return loop, a, b, session, agent
+
+
+def test_accelerate_payable_only_with_the_gold_has_no_gold_way_for_no():
+    """ACCELERATE affordable only with the Gold (Body power in the pool, no Body rune): the way where the move
+    asks nothing counts as No, so "No" offers no Gold and "Sì" only Gold-backed ways (the unit enters ready)."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, setup
+
+    from riftbound.ai.coach import CoachLoop, accelerate_ways, payment_options
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    from riftbound.core.player import Domain
+    loop, a, b = setup(active="A", rich=())
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.power_pool[Domain.BODY] = 1
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    cl = CoachLoop(loop.gs)
+    t = next(g.to_engine() for g in legal_actions(cl, DecisionPoint.TURN_ACTION, "A") if g.kind == "UNIT")
+    ways = payment_options(cl, "A", DecisionPoint.TURN_ACTION, t)
+    assert [(w["accelerate"], w["golds"]) for w in ways] == [(False, 0), (True, 1)]
+    assert [w["golds"] for _i, w in accelerate_ways(ways, False)] == [0]
+    assert [w["golds"] for _i, w in accelerate_ways(ways, True)] == [1]
+
+
+def _play_ksante(tmp_path, accelerate: bool):
+    """Gioca K'Sante Courageous; `accelerate` answers the page's ACCELERATE question, the last way pays.
+    -> (the questions asked, a)."""
+    import threading
+    loop, a, b, session, agent = _ksante_table(tmp_path)
+    asked: list = []
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)], daemon=True)
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": texts.index("Gioca K'Sante Courageous in base")})
+    while game.is_alive() and time.time() < end:
+        p = _next_pending(session, time.time() + 0.5)
+        if p is None:
+            continue
+        if "actions" in p:                                  # the next decision: pass
+            session.answer({"action": [x["text"] for x in p["actions"]].index("Passa: hai finito le tue azioni")})
+            continue
+        asked.append((p["question"], [o["text"] for o in p["options"]]))
+        if p["question"].startswith("Pagare ACCELERATE"):
+            session.answer({"option": 0 if accelerate else 1})
+        else:
+            session.answer({"option": len(p["options"]) - 1})
+    game.join(timeout=20)
+    return asked, a
+
+
+def test_accelerate_is_asked_first_and_no_leaves_the_gold_alone(tmp_path):
+    """Matteo (25/11): K'Sante Courageous with a ready Gold asked "Come paghi?" (Gold or a rune), then
+    "Pagare ACCELERATE?": No wasted the Gold. Now ACCELERATE is asked first, once; on No no way uses the Gold."""
+    asked, a = _play_ksante(tmp_path, False)
+    assert [q for q, _ in asked] == ["Pagare ACCELERATE? (l'unità entra pronta)"]       # one way left: not asked how
+    assert [g.name for g in a.base_gear] == ["Gold"] and not a.base_gear[0].tapped
+    k = next(u for u in a.base_units if u.card.name == "K'Sante Courageous")
+    assert not k.ready
+
+
+def test_accelerate_yes_offers_the_gold_and_enters_ready(tmp_path):
+    asked, a = _play_ksante(tmp_path, True)
+    assert [q for q, _ in asked] == ["Pagare ACCELERATE? (l'unità entra pronta)", "Come paghi?"]
+    assert asked[1][1] == ["Ricicli 1 runa Body", "Col Gold, nessuna runa riciclata"]
+    assert not a.base_gear                                  # the last way: the Gold paid it
+    k = next(u for u in a.base_units if u.card.name == "K'Sante Courageous")
+    assert k.ready
+
+
 def test_a_card_only_the_gold_pays_for_is_offered_with_it(tmp_path):
     """One Body rune and a Gold: Punch First (two Body Power) is played only
     with the Gold; the engine has none of it until the Gold is used. The page
@@ -955,3 +1066,17 @@ def test_rewind_takes_the_last_decision_back(tmp_path):
     _play(session, pick, timeout=300)
     st = session.state()
     assert st["result"] and "error" not in st["result"], st["result"]
+
+
+def test_a_game_is_saved_in_its_own_file(tmp_path):
+    import json
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(ZED, SHEN, seat="A", opponent="simple_trade", seed=5)
+    _play(session, lambda p: {"action": 0} if p["type"] == "decision" else
+          {"return": []} if p["type"] == "mulligan" else {"option": 0} if p["type"] == "choice" else {})
+    files = list((tmp_path / "coach" / "partite").glob("*_vs_*.json"))
+    assert len(files) == 1
+    data = json.loads(files[0].read_text(encoding="utf-8"))
+    assert data["events"] and data["log"] and data["replay"]["seed"] == 5 and data["winner"]
+    session.report("nota")
+    assert json.loads(files[0].read_text(encoding="utf-8"))["reports"][0]["note"] == "nota"

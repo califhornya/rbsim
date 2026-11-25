@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-47 unite); apertura della partita su `claude/brave-ramanujan-jk1cha`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-48 unite); segnalazioni 10-13 su `claude/gifted-thompson-nzcur7`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -61,10 +61,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
 - 25/11 tavolo come il tappetino ufficiale (`coach_page.html`).
-- 25/11 apertura nella pagina (`ef54d27`, `704d578`): Rust `build_game(bf_a, bf_b)` come Python (senza scelte estrazioni
-  invariate; `test_campi.py`), flusso campo/d20/chi comincia su entrambi i motori (`CoachSession.scegli_campo`, `inizia`,
-  `/api/campo`, `/api/inizia`; `test_apertura.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
-  `tests/rust` 243, coach 59, apertura 11 verdi; Playwright fino al mulligan.
+- 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
+  `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
+- 25/11 segnalazioni 10-13 (`docs/bot/SEGNALAZIONI.md`): D78 segnato; dig che rivela nel registro; ACCELERATE chiesto prima di
+  "Come paghi?" (`PayWay.accelerate`); ogni partita salvata in `runs/coach/partite/`, registro tecnico su Rust. `tests/rust` 257.
 
 ## In corso
 
@@ -77,10 +77,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust: provarla con Matteo (tavolo nuovo compreso: clic, anteprima, evidenziazioni non provati a mano);
-   rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali) col checkpoint vero sul Mac;
-   unire il ramo in `rust` (PR) quando Matteo è d'accordo.
-5. Segnalazioni in `docs/bot/SEGNALAZIONI.md`; scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
+4. Pagina su Rust (Matteo la usa): rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali)
+   col checkpoint vero sul Mac; unire `claude/gifted-thompson-nzcur7` in `rust` (PR) quando Matteo è d'accordo.
+5. Segnalazioni in `docs/bot/SEGNALAZIONI.md` (D78 Vex/Showstopper segnato, si corregge quando Matteo lo dice); scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,

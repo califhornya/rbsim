@@ -108,6 +108,19 @@ class _ThreadLog:
         self.real.flush()
 
 
+class _Full(deque):
+    """A display deque (the last `maxlen` lines) that also keeps every line in `full`, for the saved
+    game (CoachSession._save_game). A rewind cuts `full` back to the checkpoint's length."""
+
+    def __init__(self, maxlen: Optional[int] = None):
+        super().__init__(maxlen=maxlen)
+        self.full: list = []
+
+    def append(self, item) -> None:
+        self.full.append(item)
+        super().append(item)
+
+
 def _thread_log() -> _ThreadLog:
     if not isinstance(sys.stdout, _ThreadLog):
         sys.stdout = _ThreadLog(sys.stdout)
@@ -268,6 +281,25 @@ def option_text(gs, viewer: str, option) -> str:
     if isinstance(option, int):
         return f"Effetto {option + 1}"
     return str(getattr(option, "name", option)).title()
+
+
+def reveals_keep(kind: str, source) -> bool:
+    """A `keep:dig` / `keep:reveal_and_choose` choice whose kept card is revealed (Trifarian
+    Captain; the engine's `spec.get("reveal", not spec.get("must"))`): its answer is public."""
+    head, _, eff = kind.partition(":")
+    if head != "keep" or eff not in ("dig", "reveal_and_choose"):
+        return False
+    spec = CARD_REGISTRY.get(getattr(source, "name", None))
+    for e in (spec.effects if spec is not None else ()):
+        if e.effect == eff:
+            p = e.params
+            return bool(p.get("reveal", not p.get("must")))
+    return False
+
+
+def is_public_choice(public: set, kind: str, source) -> bool:
+    """Is the answer to this choice told in the log (`public`: the kinds that always are)?"""
+    return kind.partition(":")[0] in public or reveals_keep(kind, source)
 
 
 def _chosen_text(gs, viewer: str, got) -> str:
@@ -538,15 +570,21 @@ def _pay_domains(loop, side: str, card) -> list:
     return list(dict.fromkeys(doms))
 
 
-def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold_domain, prefer):
-    """The runes `action` recycles, ((domain name, n), ...), once `golds`
-    Golds Added `gold_domain` Power, its [rune] paid from `prefer` first; on
-    a copy of the game. None if it can't be played so."""
+def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold_domain, prefer,
+                 accelerate: Optional[bool] = True):
+    """(the runes `action` recycles, ((domain name, n), ...), whether the move
+    asked ACCELERATE), once `golds` Golds Added `gold_domain` Power, its
+    [rune] paid from `prefer` first, ACCELERATE answered `accelerate`; on a
+    copy of the game. None if it can't be played so."""
     clone = loop.gs.clone()
     copy = CoachLoop(clone)
     p = clone.get_player(side)
+    asked = []
 
     def chooser(_loop, kind, s, options, default, source):
+        if kind == "optional:accelerate" and s == side:
+            asked.append(True)
+            return options.index(accelerate) if accelerate is not None else None
         return options.index(gold_domain) if kind.startswith("domain") and s == side \
             and gold_domain in options else None
     copy.chooser = chooser
@@ -562,7 +600,7 @@ def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold
         copy.recycle_first = (side, prefer) if prefer is not None else None
         copy._apply_action(p, action)
         return tuple((d.name, n - len(p.rune_pool.get(d, []))) for d, n in before.items()
-                     if n > len(p.rune_pool.get(d, [])))
+                     if n > len(p.rune_pool.get(d, []))), bool(asked)
     except Exception:  # noqa: BLE001 — a comparison never stops the game
         return None
 
@@ -577,9 +615,12 @@ def payment_text(golds: int, recycled) -> str:
 
 def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
     """The ways to pay `action` that recycle different runes: [{"golds",
-    "gold_domain", "prefer", "recycled", "text"}], fewest Golds first (the
-    engine's own way first); a Gold only where it saves a rune. One way: no
-    choice to make; none: it can't be paid, Golds or not."""
+    "gold_domain", "prefer", "accelerate", "recycled", "text"}], fewest Golds
+    first (the engine's own way first); a Gold only where it saves a rune
+    (among the ways with the same ACCELERATE answer). `accelerate`: None, or
+    where the move asks "Pagare ACCELERATE?" (and it can be paid) True / False,
+    the answer the way is for (yes first). One way: no choice to make; none:
+    it can't be paid, Golds or not."""
     if action[0] not in _PAY_KINDS:
         return []
     golds = _golds(loop, side, point)
@@ -591,15 +632,28 @@ def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
     for k in range(len(golds) + 1):
         ways = [(None, None)] + [(None, d) for d in p.power_pool if p._power_left(d)] if not k \
             else [(g, g) for g in doms]
-        fewest = min((sum(n for _d, n in o["recycled"]) for o in out if o["golds"] == k - 1), default=None)
         for gold_domain, prefer in ways:
-            got = _pay_outcome(loop, side, point, action, k, gold_domain, prefer)
-            if got is None or any(o["golds"] == k and o["recycled"] == got for o in out):
+            got = _pay_outcome(loop, side, point, action, k, gold_domain, prefer, True)
+            if got is None:
                 continue
-            if k and fewest is not None and sum(n for _d, n in got) >= fewest:
-                continue
-            out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer,
-                        "recycled": got, "text": payment_text(k, got)})
+            outcomes = [(None, got[0])]
+            if got[1]:                          # the move asks ACCELERATE: both answers
+                other = _pay_outcome(loop, side, point, action, k, gold_domain, prefer, False)
+                outcomes = [(True, got[0])] + ([(False, other[0])] if other is not None else [])
+            for acc, recycled in outcomes:
+                key = bool(acc)                 # a move that did not ask ACCELERATE counts as "No"
+                fewest = min((sum(n for _d, n in o["recycled"]) for o in out
+                              if o["golds"] == k - 1 and bool(o["accelerate"]) == key), default=None)
+                if any(o["golds"] == k and bool(o["accelerate"]) == key and o["recycled"] == recycled for o in out):
+                    continue
+                if k and fewest is not None and sum(n for _d, n in recycled) >= fewest:
+                    continue
+                out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer, "accelerate": acc,
+                            "recycled": recycled, "text": payment_text(k, recycled)})
+    if any(o["accelerate"] is not None for o in out):   # the move asks it on some way: the others are "No"
+        for o in out:
+            if o["accelerate"] is None:
+                o["accelerate"] = False
     return out
 
 
@@ -647,6 +701,36 @@ class _GoldDomain:
 
     def release(self) -> None:
         _unlink(self.loop, self)
+
+
+class _AccelerateAnswer:
+    """The answer to the next "Pagare ACCELERATE?" of the player's move, given
+    with its way to pay (asked before "Come paghi?", not again by the engine);
+    then leaves the chain of choosers."""
+
+    def __init__(self, me: str, answer: bool, loop, previous):
+        self.me, self.answer, self.loop, self.previous = me, answer, loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if side == self.me and kind == "optional:accelerate" and self.answer in options:
+            self.release()
+            return options.index(self.answer)
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        _unlink(self.loop, self)
+
+
+def accelerate_asked(ways: list) -> bool:
+    """Do the ways to pay a move hold both answers to "Pagare ACCELERATE?"."""
+    return {True, False} <= {w.get("accelerate") for w in ways}
+
+
+def accelerate_ways(ways: list, answer: bool) -> list:
+    """The ways for `answer` ("Sì" = True), (index in `ways`, way) pairs; Sì: only
+    the ways that pay ACCELERATE; No: those that do not (False) or never ask (None)."""
+    return [(i, w) for i, w in enumerate(ways)
+            if (w.get("accelerate") is True if answer else w.get("accelerate") in (None, False))]
 
 
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
@@ -1113,6 +1197,12 @@ class CoachAgent(NetGuidedMCTSAgent):
             self._release_coach()
         side = self.player.name
         self.loop.recycle_first = None          # a [rune] domain chosen for a move: that move only
+        c = self.loop.chooser                   # an ACCELERATE answer is for that move only
+        while c is not None:
+            prev = getattr(c, "previous", None)
+            if isinstance(c, _AccelerateAnswer) and c.me == side:
+                c.release()
+            c = prev
         legal = legal_actions(self.loop, point, side)
         if self._gold_plan is not None:        # a card paid with Golds: its next step
             step = self._gold_step(side, point, [a.to_engine() for a in legal])
@@ -1175,16 +1265,23 @@ class CoachAgent(NetGuidedMCTSAgent):
             card = _paid_card(self.loop, side, action)
             text = next((info["text"] for t, info in zip(tuples, infos) if t == action), None) \
                 or next(info["text"] for t, info in gold_only if t == action).removesuffix(" (col Gold)")
+            name = getattr(card, "name", None) or text
+            if accelerate_asked(ways):          # "Pagare ACCELERATE?" first, the ways are for its answer
+                yes = self.session.ask_choice("optional:accelerate", side,
+                                              [{"text": "Sì", "ref": None}, {"text": "No", "ref": None}], 0, name) == 0
+                ways = [w for _i, w in accelerate_ways(ways, yes)]
             pick = 0
             if len(ways) > 1:
                 pick = self.session.ask_choice("payment", side, [{"text": w["text"], "ref": None} for w in ways],
-                                               0, getattr(card, "name", None) or text)
+                                               0, name)
             way = ways[pick]
             if not way["golds"]:
                 self.loop.recycle_first = (side, way["prefer"]) if way["prefer"] is not None else None
+                if way.get("accelerate") is not None:
+                    self.loop.chooser = _AccelerateAnswer(side, way["accelerate"], self.loop, self.loop.chooser)
             else:
                 self._gold_plan = {"left": way["golds"], "domain": way["gold_domain"], "prefer": way["prefer"],
-                                   "action": action, "point": point,
+                                   "accelerate": way.get("accelerate"), "action": action, "point": point,
                                    "card": getattr(card, "name", None) or text, "text": text}
                 step = self._gold_step(side, point, tuples)
                 if step is None:                 # not possible after all: asked again
@@ -1230,6 +1327,8 @@ class CoachAgent(NetGuidedMCTSAgent):
         if plan["prefer"] is not None:
             self.loop.recycle_first = (side, plan["prefer"])
         self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
+        if plan.get("accelerate") is not None:
+            self.loop.chooser = _AccelerateAnswer(side, plan["accelerate"], self.loop, self.loop.chooser)
         self.session.event("me", plan["text"], move=True)
         return plan["action"]
 
@@ -1269,8 +1368,11 @@ class CoachSession:
         self._answers: "queue.Queue" = queue.Queue()
         self.pending: Optional[dict] = None
         self.examples: list = []
-        self.log: deque = deque(maxlen=400)
-        self.events: deque = deque(maxlen=300)
+        self.log: deque = _Full(maxlen=400)       # .full: every line, for the saved game
+        self.events: deque = _Full(maxlen=300)
+        self.notes: list = []                     # the reports made in this game
+        self.partita_path: Optional[Path] = None  # where _save_game wrote the game
+        self._partita_name: Optional[str] = None
         self.result: Optional[dict] = None
         self.info: dict = {}
         self.view: Optional[dict] = None    # the board, snapshot on the game thread
@@ -1366,6 +1468,7 @@ class CoachSession:
                      "deck_opp": Path(deck_opp).stem, "opponent": opponent,
                      "net": str(self.net_path) if net is not None else None,
                      "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+        self._partita_name = f"{time.strftime('%Y%m%d_%H%M%S')}_{Path(deck_a).stem}_vs_{Path(deck_b).stem}.json"
         if opponent == "campione":
             self.info.update(campione=str(self.campione_path), budget=self.budget)
         if apertura:
@@ -1652,6 +1755,8 @@ class CoachSession:
                            "you_won": result.winner == self.side}
             if not self._abandoned:
                 self._save(result.winner)
+            else:
+                self._save_game(abandoned=True)
         except _ReplayError as exc:
             self.result = {"error": f"Annulla: la partita rigiocata è diversa ({exc})"}
         except Exception as exc:  # noqa: BLE001
@@ -1697,6 +1802,8 @@ class CoachSession:
             return
         cp, self._replaying = self._resume_cp, False
         _thread_log().sinks[threading.get_ident()] = self.log
+        del self.log.full[cp["n_log"]:]
+        del self.events.full[cp["n_events"]:]
         self.log.clear()
         self.log.extend(cp["log"])
         self.events.clear()
@@ -1715,7 +1822,8 @@ class CoachSession:
         """The page as the coach is asked a decision: where a rewind takes them back."""
         self._snapshot()
         return {"record": len(getattr(self.loop, "record", ())), "events": list(self.events),
-                "log": list(self.log), "view": self.view, "extras": self.extras,
+                "log": list(self.log), "n_log": len(self.log.full), "n_events": len(self.events.full),
+                "view": self.view, "extras": self.extras,
                 "examples": len(self.examples), "looked": self.looked, "_seen": self._seen,
                 "opp_discards": list(self.opp_discards), "stop_on_opp_chain": self.stop_on_opp_chain,
                 "opp_mulligan": self.opp_mulligan, "opening": self.opening}
@@ -1800,7 +1908,7 @@ class CoachSession:
         head = kind.partition(":")[0]
         if side == self.side and n_options:
             self.looked = None             # the choice after the look was made
-        if head not in self._PUBLIC_CHOICES or not n_options or self.gs is None:
+        if not is_public_choice(self._PUBLIC_CHOICES, kind, source) or not n_options or self.gs is None:
             return
         mine = side == self.side
         if mine and n_options > 1:
@@ -1808,7 +1916,8 @@ class CoachSession:
         if not mine and head == "discard":
             return                         # opp_discards logs it
         name = getattr(source, "name", None)
-        text = f"{name + ': ' if name else ''}{_SHORT.get(head, 'scelta')} → " \
+        label = "rivela e pesca" if head == "keep" else _SHORT.get(head, "scelta")
+        text = f"{name + ': ' if name else ''}{label} → " \
                f"{_chosen_text(self.gs, self.side, got)}"
         self.event("me" if mine else "opp", text + (" (unica scelta)" if mine else ""))
 
@@ -1948,6 +2057,8 @@ class CoachSession:
             self.activity = self._finishing()
             if self.pending is not None:
                 self._answers.put({})
+        if self._abandoned:
+            self._save_game(abandoned=True)
 
     def rewind(self) -> None:
         """Take back the coach's last decision, as RiftAtlas's Rewind: the game
@@ -2002,7 +2113,7 @@ class CoachSession:
                 "regole": self.info.get("regole", self.regole if self.motore == "rust" else REGOLE_PYTHON),
                 "motore": self.info.get("motore", self.motore),
                 "can_rewind": self.status == "waiting" and not self.autoplay and bool(self.checkpoints),
-                "rewinds": self.rewinds}
+                "rewinds": self.rewinds, "partita": str(self.partita_path) if self.partita_path else None}
 
     def _opening_cards(self) -> dict:
         """The cards the opening shows: the coach's battlefields and, once shown, the champion's."""
@@ -2014,11 +2125,48 @@ class CoachSession:
 
     def report(self, note: str) -> Path:
         path = self.out_dir / "reports.jsonl"
+        self.notes.append({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "note": note})
         with open(path, "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "note": note,
                                  **self.state(), "log": self._copy(self.log),
-                                 "opp_mulligan": self.opp_mulligan}, default=str) + "\n")
+                                 "opp_mulligan": self.opp_mulligan, "partita": self._game_file()},
+                                default=str) + "\n")
+        self._save_game()
         return path
+
+    def _game_file(self) -> Optional[str]:
+        """Where this game's file is (or will be): runs/coach/partite/<start>_<deckA>_vs_<deckB>.json."""
+        return None if self._partita_name is None else str(self.out_dir / "partite" / self._partita_name)
+
+    def _save_game(self, abandoned: bool = False) -> Optional[Path]:
+        """The whole game in its own file, to be sent for review: overwritten at each call (game end,
+        abandon, report), the same file for the same game. The full Italian events and technical log,
+        what the page knew of the opening, and what replays the game exactly (seed, opening,
+        the recorded answers). Never breaks the game: None when it can't be written."""
+        if self._partita_name is None or self._build is None:
+            return None
+        try:
+            b, r = self._build, self.result or {}
+            rec = list(getattr(self.loop, "record", None) or [])
+            data = {"info": self.info, "apertura": self.apertura, "opp_mulligan": self.opp_mulligan,
+                    "status": self.status, "abandoned": abandoned or self._abandoned,
+                    "result": self.result, "winner": r.get("winner"), "turns": r.get("turns"),
+                    "rewinds": self.rewinds, "reports": list(self.notes),
+                    "events": list(self.events.full), "log": list(self.log.full),
+                    "replay": {"seed": b["seed"], "seat": self.side, "opponent": b["opponent"],
+                               "deck_a": str(b["deck_a"]), "deck_b": str(b["deck_b"]),
+                               "bf_a": b.get("bf_a"), "bf_b": b.get("bf_b"), "starter": b.get("starter"),
+                               "iterazioni": self.iterazioni, "regole": self.info.get("regole"),
+                               "motore": self.info.get("motore"), "answers": rec}}
+            path = self.out_dir / "partite" / self._partita_name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(data, default=str, ensure_ascii=False), encoding="utf-8")
+            tmp.replace(path)
+            self.partita_path = path
+            return path
+        except Exception:  # noqa: BLE001 — a failed copy never stops the game
+            return None
 
     # -- training examples -----------------------------------------------------------
 
@@ -2052,6 +2200,7 @@ class CoachSession:
                                  "you_won": winner == self.side, "turns": turns,
                                  "decisions": len(self.examples), "rewinds": self.rewinds,
                                  "corrections": sum(1 for e in self.examples if e["corrected"])}) + "\n")
+        self._save_game()
         return path
 
 

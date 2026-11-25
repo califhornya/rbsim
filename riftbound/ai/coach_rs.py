@@ -237,10 +237,18 @@ class RustGame:
             card = C._paid_card(vloop, side, action)
             name = getattr(card, "name", None) or text
             via = 0
-            if len(ways) > 1:                              # "Come paghi?"
-                via = s.ask_choice("payment", side,
-                                   [{"text": C.payment_text(w["golds"], [(d, k) for d, k in w["recycled"]]),
-                                     "ref": None} for w in ways], 0, name)
+            shown = list(enumerate(ways))                  # (index in the event's ways, way)
+            if C.accelerate_asked(ways):                   # "Pagare ACCELERATE?" first (CoachAgent._coached)
+                yes = s.ask_choice("optional:accelerate", side,
+                                   [{"text": "Sì", "ref": None}, {"text": "No", "ref": None}], 0, name) == 0
+                shown = C.accelerate_ways(ways, yes)
+            if len(shown) > 1:                             # "Come paghi?"
+                pick = s.ask_choice("payment", side,
+                                    [{"text": C.payment_text(w["golds"], [(d, k) for d, k in w["recycled"]]),
+                                      "ref": None} for _i, w in shown], 0, name)
+                via = shown[pick][0]
+            else:
+                via = shown[0][0]
             way = ways[via]
             for _ in range(way["golds"]):
                 s.event("me", f"Usa Gold: Power {str(way['gold_domain']).title()} per pagare {name}", move=True)
@@ -323,6 +331,8 @@ class RustGame:
             return
         e = json.loads(ev)
         k, mine = e["k"], e.get("seat") == s.side
+        if k in ("decision", "choice"):
+            self._tech(e)
         if k != "choice":
             self._flush()
         if k == "decision" and not mine:
@@ -341,6 +351,72 @@ class RustGame:
         elif k == "choice":
             self._logged_choice(e, mine)
 
+    # -- the technical log (English; Rust has no text log, this is made from the trace) ----------
+
+    def _tech(self, e: dict) -> None:
+        """One line of `s.log` for a decision or a choice of either seat. A line that can't be
+        formatted becomes a fallback with the raw kind: it never breaks the game."""
+        s = self.s
+        try:
+            line = self._tech_line(e)
+        except Exception as exc:  # noqa: BLE001
+            line = f"? {e.get('seat')} {e.get('k')} {e.get('kind') or e.get('point')} (unformatted: {exc!r})"
+        try:
+            s.log.append(line)
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _tech_line(self, e: dict) -> str:
+        from riftbound.rs import vista_rs
+        s, seat = self.s, e.get("seat")
+        if e["k"] == "decision":
+            turn = (e.get("win") or {}).get("turn", "?")
+            menu, i = e.get("menu") or [], e.get("index")
+            what = menu[i] if isinstance(i, int) and 0 <= i < len(menu) else " ".join(map(str, e.get("action") or ["?"]))
+            return f"T{turn} {seat} decision {str(e.get('point')).upper()}: {what}"
+        self._load(e)
+        gs, raw, kind = s.gs, e.get("options_raw") or [], e["kind"]
+        turn = gs.turn if gs is not None else "?"
+        objs = dict(self.objs)
+        options = [vista_rs.valore(o, objs) for o in raw]
+        source = vista_rs.valore(e["source_raw"], objs) if e.get("source_raw") is not None else None
+        src = f" [{source.name}]" if getattr(source, "name", None) else ""
+        i = e.get("chosen")
+        got = options[i] if isinstance(i, int) and 0 <= i < len(options) else None
+        if options and all(isinstance(o, bool) for o in options):
+            return f"T{turn} {seat} choice {kind}{src}: {got}"
+        texts = [self._en(gs, o) for o in options]
+        shown = ", ".join(texts[:12]) + (f", ... (+{len(texts) - 12})" if len(texts) > 12 else "")
+        pick = "none" if got is None else texts[i]
+        return f"T{turn} {seat} choice {kind}{src}: {pick} of [{shown}]"
+
+    @staticmethod
+    def _en(gs, o) -> str:
+        """An option in English, by names: a unit with its owner, Might and place."""
+        from riftbound.core.combat import UnitInPlay
+        if o is C.NO_MORE:
+            return "no more"
+        from riftbound.core.state import PendingTrigger
+        if isinstance(o, PendingTrigger):
+            return f"trigger of {o.card.name} ({o.trigger})"
+        if isinstance(o, tuple) and o and isinstance(o[-1], UnitInPlay):
+            o = o[-1]
+        if isinstance(o, UnitInPlay):
+            ref = (C._unit_ref(gs, "A", o) or "unit:opp:base").split(":")
+            owner = "A" if ref[1] == "me" else "B"
+            at = "legend" if ref[0] == "legend" else "base" if ref[2] == "base" else C._bf_name(gs, int(ref[2]))
+            return f"{o.card.name} ({owner}, Might {o.might}, {at})"
+        i = next((i for i, bf in enumerate(gs.battlefields) if bf is o), None)
+        if i is not None:
+            return C._bf_name(gs, i)
+        if o is None:
+            return "Base"
+        if o is gs.A or o is gs.B:
+            return o.name
+        if isinstance(o, tuple):
+            return str(getattr(o[0], "name", o[0]))
+        return str(getattr(o, "name", o))
+
     def _logged_choice(self, e: dict, mine: bool) -> None:
         """A public choice, in the log as the Python page does (CoachSession._log_choice: once per
         choice, a "choose up to N" with its picks together): the opponent's; the coach's only when
@@ -349,7 +425,11 @@ class RustGame:
         from riftbound.rs import vista_rs
         s, raw, kind = self.s, e["options_raw"], e["kind"]
         head = kind.partition(":")[0]
-        if not raw or head not in s._PUBLIC_CHOICES or (mine and len(raw) > 1) or (not mine and head == "discard"):
+        source = None
+        if head == "keep" and raw and e.get("source_raw") is not None:     # public if the dig reveals
+            self._load(e)
+            source = vista_rs.valore(e["source_raw"], self.objs)
+        if not raw or not C.is_public_choice(s._PUBLIC_CHOICES, kind, source) or (mine and len(raw) > 1) or (not mine and head == "discard"):
             self._flush()
             return
         self._load(e)
