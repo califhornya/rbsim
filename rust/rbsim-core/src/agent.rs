@@ -4,6 +4,8 @@
 use crate::game::Game;
 use crate::model::Opt;
 use crate::types::*;
+use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 /// py: decisions.GameAction / the engine's action tuple.
 #[derive(Clone, Debug, PartialEq)]
@@ -152,4 +154,52 @@ pub trait Agent {
 pub trait Chooser {
     fn choose(&mut self, g: &mut Game, kind: &str, side: Side, options: &[Opt], default: usize,
               source: Option<CardId>) -> R<Option<usize>>;
+}
+
+/// A probe's watcher for the opponent seat of a search copy: asks only the showdown and the
+/// reaction questions, notes in `responded` whether any option besides Pass existed, and passes
+/// (so the engine's priority loop behaves as with no agent: one pass, focus to the other side).
+pub struct Watcher {
+    pub responded: Rc<Cell<bool>>,
+}
+
+impl Watcher {
+    fn look(&self, g: &mut Game, side: Side, point: Point) -> R<Action> {
+        match g.legal_actions(point, side) {
+            Ok(l) => {
+                if l.iter().any(|a| a.kind != AKind::Pass) {
+                    self.responded.set(true);
+                }
+            }
+            Err(_) => self.responded.set(true),
+        }
+        Ok(Action::pass())
+    }
+}
+
+impl Agent for Watcher {
+    fn decide_action(&mut self, _: &mut Game, _: Side, _: i64) -> R<Action> {
+        Err(EngineError::Py("AttributeError: decide_action".into()))
+    }
+    fn decide_reaction(&mut self, g: &mut Game, side: Side) -> R<Action> {
+        self.look(g, side, Point::Reaction)
+    }
+    fn decide_showdown_action(&mut self, g: &mut Game, side: Side, _bf: usize) -> R<Action> {
+        self.look(g, side, Point::ShowdownAction)
+    }
+    fn decide_mulligan(&mut self, _: &mut Game, _: Side) -> R<Vec<i64>> {
+        Err(EngineError::Py("AttributeError: decide_mulligan".into()))
+    }
+    fn decide_optional(&mut self, _: &mut Game, _: Side, _: CardId, _: &str) -> R<bool> {
+        Err(EngineError::Py("AttributeError: decide_optional".into()))
+    }
+    fn decide_mode(&mut self, _: &mut Game, _: Side, _: CardId, _: i64) -> R<Option<i64>> {
+        Err(EngineError::Py("AttributeError: decide_mode".into()))
+    }
+    fn decide_predict_recycle(&mut self, _: &mut Game, _: Side, _: CardId) -> R<bool> {
+        Err(EngineError::Py("AttributeError: decide_predict_recycle".into()))
+    }
+    fn has(&self, method: &str) -> bool {
+        matches!(method, "decide_showdown_action" | "decide_reaction")
+    }
 }

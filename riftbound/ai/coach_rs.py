@@ -133,6 +133,7 @@ class RustGame:
         if b["opponent"] == "campione":
             g.set_search_agent(opp, s.iterazioni or ITERAZIONI_CAMPIONE, self.seed * 2 + (opp == "B"), None,
                                arena_rs.make_probs(b["ppo"]), False)
+            g.set_search_win_probe(opp, True)
         else:
             g.set_agent(opp, "simple_trade", self.seed)
         g.set_human_agent(s.side, self.ask, True, self.notify)
