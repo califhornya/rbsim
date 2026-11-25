@@ -70,8 +70,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
 
 ## In corso
-- Giocate del campione da misurare in `docs/bot/GIOCATE.md` §7 (Call to Glory e Punch First sprecate).
-- Partite di Matteo sulla pagina: segnalazioni in `docs/bot/SEGNALAZIONI.md` (pagina subito, motore in AUDIT.md e Rust).
+- Partite di Matteo: segnalazioni in `docs/bot/SEGNALAZIONI.md`; giocate del campione in `GIOCATE.md` §7.
 
 ## Prossimi passi
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03
