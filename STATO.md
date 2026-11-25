@@ -1,19 +1,17 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-52 unite); lavoro su `claude/focused-cannon-khz3rg`, non unito.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-53 unite).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
 - PPO = la rete allenata giocando contro sé stessa; "prior" = le sue preferenze sulle mosse.
 - Bot a mano = la ricerca (MCTS: prova molte continuazioni) con una valutazione scritta a mano.
 - Campione = il bot a mano guidato dai prior di `ekris_s12/ckpt_040000.pt`.
-- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte.
-- Lavoro fisso = numero fisso di iterazioni per decisione (invece di un tempo).
+- Arena = partite a coppie (posti scambiati) per decidere se un candidato è più forte. Lavoro fisso = iterazioni fisse.
 - Minuscola nei matchup degli script (`Er`) = la lista con tutta la sideboard nel mazzo.
 
 ## Obiettivo (Matteo, 24/11)
-Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi
-sono la prima tappa verificabile (ordine Rengar, Ivern, Sett, ciascuno con sideboard e test).
+Porting completo su Rust di carte e funzionalità del motore Python; i cinque mazzi (con sideboard e test) la prima tappa.
 Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche con pochi mazzi.
 
 ## Decisioni prese
@@ -69,15 +67,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: partite col campione (4 il 25/11 in `docs/bot/partite/coach/`), "Segnala" (SEGNALAZIONI 17-25).
-Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi senza iterazioni = 42), `episodi.py` (§7/§8).
+§8 accumulo (`docs/bot/accumulo/`): MISURA_1 (13% delle decisioni di turno; più iterazioni non correggono: è `table_value`);
+candidato `--valutazione accumulo` (k=3, alpha=0,2; spento di default, parità 30/30): 13/18 episodi lasciano il campo,
+§8 da 13,7% a 4,9% (ES), da 11,9% a 4,1% (EK) (MISURA_2). Arena sul Mac: `scripts/rust/accumulo_mac.command`, in attesa.
+Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
+Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
 
 ## Prossimi passi
-2. Due scenari, una correzione alla volta. §8 accumulo (SEGNALAZIONI 7, 17, 20: posizioni salvate in `partite/coach/`) e
-   §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
+2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. PR 53 (D78-D80, segnalazione 23 corretta, partite del 25/11) da unire. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+6. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,

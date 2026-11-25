@@ -96,7 +96,7 @@ def _prepara(partita: dict) -> dict:
                  deck_a=Path(DECK_OF[mu[0]]), deck_b=Path(DECK_OF[mu[1]]), bf_a=None, bf_b=None,
                  starter=str(partita.get("starter", "a")).lower(), iterazioni=partita.get("iterazioni", ITERAZIONI_CAMPIONE),
                  probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D80, answers=None,
-                 ckpt=partita.get("ckpt") or CKPT_DEFAULT)
+                 ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"))
     else:
         raise ValueError(f"tipo di partita sconosciuto: {partita['tipo']}")
     return P
@@ -107,10 +107,11 @@ def _chiave(P: dict) -> str:
         (json.dumps(P["answers"], sort_keys=True, default=str) if P["answers"] is not None else "")
 
 
-def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None):
+def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None, valutazione=None):
     """Una partita. `k`, `iterazioni`: la ricerca del campione da rifare con quelle iterazioni (override in Rust;
     None: l'originale); `ordine`: l'ordinale, fra gli eventi di decisione del campione, di quella di k: la
     partita si ferma li'. -> (righe di log "search", eventi del campione, evento di k).
+    `valutazione` = (nome, k, alpha): SOLO la ricerca k usa quella valutazione (il prefisso resta storico).
     `stato(e)`: tiene lo stato (state_raw) degli eventi del campione per cui è vero."""
     from riftbound.rs import arena_rs, rust_bridge
     camp, umano = P["camp"], P["umano"]
@@ -167,10 +168,15 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
         mine = s == camp
         g.set_search_agent(s, P["iterazioni"], P["seed"] * 2 + (s == "B"), None, probs, mine)
         g.set_search_win_probe(s, bool(P["probe"]))
+        if mine and P.get("valutazione") and P["valutazione"][0] != "storica":
+            v = P["valutazione"]
+            g.set_search_valutazione(s, v[0], float(v[1]), float(v[2]))
         if mine:
             g.set_search_timing(s, True)
             if k is not None and iterazioni is not None:
                 g.set_search_override(s, k, int(iterazioni))
+                if valutazione is not None and valutazione[0] != "storica":
+                    g.set_search_valutazione_at(s, k, valutazione[0], float(valutazione[1]), float(valutazione[2]))
     if umano is not None:
         g.set_human_agent(umano, ask, True, lambda ev: None)
     g.set_side_chooser()
@@ -290,7 +296,7 @@ def _classifica(riga: dict, menu: list) -> list[dict]:
     return ordine
 
 
-def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool = True) -> dict:
+def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool = True, valutazione=None) -> dict:
     """La ricerca k del campione rifatta con `iterazioni` (None: come l'originale), sulla stessa partita.
     -> {k, turn, point, iterazioni, azione, azione_originale, uguale, riproduce (il prefisso 0..k-1
     coincide con l'originale; con iterazioni None anche l'azione di k), classifica (per visite),
@@ -299,7 +305,9 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
     if not 0 <= k < len(orig):
         raise ValueError(f"k={k} fuori dalle {len(orig)} ricerche del campione")
     P = _prepara(partita)
-    righe, _ev, e = _gioca(P, k, iterazioni, ordine=_ORIGINALI[_chiave(P)]["pos"][k])
+    if valutazione is not None and iterazioni is None:
+        iterazioni = P["iterazioni"]
+    righe, _ev, e = _gioca(P, k, iterazioni, ordine=_ORIGINALI[_chiave(P)]["pos"][k], valutazione=valutazione)
     if e is None or len(righe) <= k:
         raise RuntimeError(f"la ricerca {k} non c'è nella partita rifatta ({len(righe)} ricerche)")
     r = righe[k]

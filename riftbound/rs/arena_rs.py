@@ -71,7 +71,8 @@ def game(task):
 
     opzioni (optional dict, absent = as before): iter_cand / iter_opp (fixed
     work: that many iterations per search, no time budget for that side),
-    probe_cand / probe_opp (the win probe of that side), log (the last element
+    probe_cand / probe_opp (the win probe of that side), val_cand / val_opp
+    ([nome, k, alpha]: the leaf evaluation of that side, default storica), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
@@ -98,6 +99,9 @@ def game(task):
             g.set_search_timing(seat, True)
         if opz.get(f"probe_{lato}"):
             g.set_search_win_probe(seat, True)
+        val = opz.get(f"val_{lato}")
+        if val and val[0] != "storica":
+            g.set_search_valutazione(seat, val[0], float(val[1]), float(val[2]))
     g.set_side_chooser()
     winner, _turns = g.start()
     other = "B" if cand_seat == "A" else "A"
