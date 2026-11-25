@@ -233,3 +233,8 @@ Osservata da Matteo giocando a mano (Evelynn contro il campione con Sett,
   Rendimento decrescente della Might oltre quella che serve a tenere il
   campo; Might in base pesata come minaccia per il turno dopo; un termine
   per la corsa ai punti quando i campi sono uno a testa.
+- **Esito (26/11).** Più iterazioni non correggono (`docs/bot/accumulo/MISURA_1.md`): è la valutazione. Ridurre sempre il
+  Might in eccesso (`accumulo`) peggiora (EK 0,431, ES 0,465); una minaccia logistica (`minaccia`, `corsa`) non cambia le
+  mosse; `rimonta` (solo quando a campi fermi si perde la corsa ai punti: Might in base verso il campo avversario più
+  debole, eccesso sul campo sicuro ridotto, i propri campi minacciati prima) vince: EK 0,522, ES 0,533, gli altri 8
+  matchup 0,515-0,607 (semi nuovi, `docs/bot/accumulo/risultati/`). Default della pagina dal 26/11 (`coach.py --valutazione`).

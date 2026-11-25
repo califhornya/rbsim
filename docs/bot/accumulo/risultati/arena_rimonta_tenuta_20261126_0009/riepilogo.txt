@@ -1,0 +1,28 @@
+rimonta_tenuta_mac 26/11/2026 00:09; 21e9be6 Merge pull request #56 from califhornya/claude/focused-cannon-khz3rg; regole 6427b90+D72-D80
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi
+
+== candidato rimonta contro il campione (storica), tenuta sugli otto matchup
+
+== Arena su 8 matchup (26/11 00:09)
+candidato: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); avversario: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 138 iterazioni per ricerca + win probe + valutazione rimonta k=3.0 alpha=0.2 al candidato, 138 iterazioni per ricerca + win probe all'avversario; 9 processi
+regole fissate prima: ciascuno di ER EI KR KI KS RI RS IS limite inferiore > 0,47; ciascun blocco (-), a pesi uguali, >= 0,52 e limite inferiore > 0,50; tutte -> promosso
+   ER 300 coppie, seed 101000-101299; EI 300 coppie, seed 103000-103299; KR 300 coppie, seed 102000-102299; KI 300 coppie, seed 104000-104299; KS 300 coppie, seed 107000-107299; RI 300 coppie, seed 105000-105299; RS 300 coppie, seed 108000-108299; IS 300 coppie, seed 109000-109299
+   provenienza in runs/arene/rimonta_tenuta_20261126_0009/provenienza.jsonl; regole 6427b90+D72-D80; motore: ER rust, EI rust, KR rust, KI rust, KS rust, RI rust, RS rust, IS rust
+   Evelynn-Rengar: 0.547 +- 0.030 (0.517-0.576); con Evelynn, comincia Evelynn 0.81; con Evelynn, comincia Rengar 0.67; con Rengar, comincia Evelynn 0.29; con Rengar, comincia Rengar 0.43
+   Evelynn-Ivern: 0.515 +- 0.028 (0.487-0.543); con Evelynn, comincia Evelynn 0.75; con Evelynn, comincia Ivern 0.28; con Ivern, comincia Evelynn 0.31; con Ivern, comincia Ivern 0.71
+   Kha'Zix-Rengar: 0.550 +- 0.027 (0.523-0.577); con Kha'Zix, comincia Kha'Zix 0.69; con Kha'Zix, comincia Rengar 0.39; con Rengar, comincia Kha'Zix 0.45; con Rengar, comincia Rengar 0.67
+   Kha'Zix-Ivern: 0.532 +- 0.026 (0.506-0.557); con Kha'Zix, comincia Kha'Zix 0.50; con Kha'Zix, comincia Ivern 0.21; con Ivern, comincia Kha'Zix 0.59; con Ivern, comincia Ivern 0.83
+   Kha'Zix-Sett: 0.550 +- 0.028 (0.522-0.578); con Kha'Zix, comincia Kha'Zix 0.35; con Kha'Zix, comincia Sett 0.23; con Sett, comincia Kha'Zix 0.74; con Sett, comincia Sett 0.87
+   Rengar-Ivern: 0.577 +- 0.025 (0.552-0.601); con Rengar, comincia Rengar 0.71; con Rengar, comincia Ivern 0.42; con Ivern, comincia Rengar 0.43; con Ivern, comincia Ivern 0.74
+   Rengar-Sett: 0.607 +- 0.027 (0.580-0.633); con Rengar, comincia Rengar 0.53; con Rengar, comincia Sett 0.35; con Sett, comincia Rengar 0.73; con Sett, comincia Sett 0.82
+   Ivern-Sett: 0.558 +- 0.026 (0.532-0.584); con Ivern, comincia Ivern 0.73; con Ivern, comincia Sett 0.28; con Sett, comincia Ivern 0.46; con Sett, comincia Sett 0.76
+   Evelynn-Rengar tiene: SÌ (limite inferiore 0.517, soglia 0,47)
+   Evelynn-Ivern tiene: SÌ (limite inferiore 0.487, soglia 0,47)
+   Kha'Zix-Rengar tiene: SÌ (limite inferiore 0.523, soglia 0,47)
+   Kha'Zix-Ivern tiene: SÌ (limite inferiore 0.506, soglia 0,47)
+   Kha'Zix-Sett tiene: SÌ (limite inferiore 0.522, soglia 0,47)
+   Rengar-Ivern tiene: SÌ (limite inferiore 0.552, soglia 0,47)
+   Rengar-Sett tiene: SÌ (limite inferiore 0.580, soglia 0,47)
+   Ivern-Sett tiene: SÌ (limite inferiore 0.532, soglia 0,47)
+   27 min da questo lancio
+   Esito: PROMOSSO

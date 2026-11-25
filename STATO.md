@@ -64,14 +64,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-§8 accumulo (`docs/bot/accumulo/`, MISURA_1-4): il campione ammassa nel 13% delle decisioni di turno; più iterazioni non
-correggono (è `table_value`). `accumulo` (k=3, alpha 0,2) bocciato in arena (EK 0,431, ES 0,465); `minaccia`/`corsa`
-(logistiche) non cambiano le mosse; `rimonta` (solo se si perde la corsa a campi fermi: Might in base verso il campo
-avversario più debole, eccesso sul campo sicuro ridotto) porta il §8 in corsa persa da 57% a 27% (ES), 52% a 19% (EK),
-invariato in corsa vinta. Arena (Mac, semi nuovi): EK 0,522 (0,504-0,540), ES 0,533 (0,513-0,553): passa. Tenuta sugli altri
-8 matchup: `rimonta_tenuta_mac.command`, in attesa; poi `coach.py --valutazione rimonta` di default e 2 partite ES di Matteo.
-Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
-Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
+§8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): campione della pagina con `--valutazione rimonta` (default di
+`coach.py`; spenta nell'arena e nelle verifiche se non chiesta). Arena su semi nuovi contro la storica: EK 0,522, ES 0,533,
+gli altri 8 matchup 0,515-0,607 (tutti tengono). Bocciati `accumulo` (sempre), `minaccia`/`corsa` (non cambiano le mosse).
+Matteo: 2 partite Evelynn-Sett col campione nuovo; a fine partita «Quale giocata di Sett mi ha costretto a spendere una carta
+o a difendere il mio campo prima dell'ottavo punto?». Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
 
 ## Prossimi passi
 2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.

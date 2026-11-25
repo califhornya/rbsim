@@ -69,7 +69,9 @@ def main() -> None:
     ap.add_argument("--iterazioni", type=int, default=None,
                     help="The champion's fixed iterations a move on Rust (default "
                          "riftbound.ai.coach_rs.ITERAZIONI_CAMPIONE)")
-    ap.add_argument("--valutazione", choices=("storica", "rimonta"), default="storica",
+    # rimonta from 26/11: arena vs storica on new seeds, EK 0.522, ES 0.533, the other 8 matchups 0.515-0.607
+    # (docs/bot/accumulo/risultati/).
+    ap.add_argument("--valutazione", choices=("storica", "rimonta"), default="rimonta",
                     help="The evaluation of the champion's search leaves, on Rust (default %(default)s); "
                          "ignored on the Python engine")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
