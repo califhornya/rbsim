@@ -55,6 +55,20 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
   `scripts/rust/confronto_regole.py` gioca le stesse partite su `6427b90` e `6427b90+D72-D76` e spiega la prima
   differenza.
 
+## Calibrare il campione della pagina
+La pagina gioca il campione a lavoro fisso (`ITERAZIONI_CAMPIONE` = 42, prova di vittoria, `6427b90+D72-D77`); l'arena a 0,030 s
+di CPU. Il 42 e' la mediana con pesi casuali: va ricalibrato col checkpoint vero (sul Mac: `scripts/rust/calibra_mac.command`,
+risultati in `docs/rust/misure/calibra_<data>/`). Passi di `scripts/rust/calibra_campione.py` (`--ckpt C.pt` o `--pesi-casuali`, `--out DIR`):
+- `misura --matchup ES EK --partite 20`: iterazioni a 0,030 s e secondi a 42 per tipo di punto (turno/reazione/showdown), mediana e p90;
+  **N = mediana delle iterazioni del turno a 0,030 s** (`misura.json`, `N_suggerito`).
+- `forza --coppie ES=400 EK=400 --iterazioni N`: campione@N+probe contro campione@0,030 s+probe; **non inferiore se il limite inferiore
+  dell'IC 95% sulle coppie e' > 0,47** (come la promozione del 24/11).
+- `profilo --coppie ES=200 EK=200`: campione@0,030 s contro il bot a mano senza prior @0,030 s (riferimento, nessuna soglia).
+- Le opzioni vengono da `arena_mazzi.py --motore rust`: `--iterazioni-candidato/-avversario`, `--win-probe-candidato/-avversario`,
+  `--avversario-mano`; in `arena_rs.game` un dict facoltativo in coda al task (`iter_cand`, `iter_opp`, `probe_cand`, `probe_opp`, `log`).
+- `search_log` ha `iters`, `secs`, `probe_secs` (win probe dalla riga precedente) solo dopo `set_search_timing(seat, True)`:
+  sono tempi, e i log si confrontano fra esecuzioni e motori. Semi nuovi: misura 78000, forza 80000, profilo 82000 (+1000 x indice del matchup).
+
 ## Contratti
 
 ### Stato e copie
@@ -147,6 +161,19 @@ Rust costruisce la domanda, Python decide.
 - Uso: `arena_mazzi.py --motore rust` (i matchup coperti, riconosciuti dal contenuto delle liste, su Rust;
   gli altri su Python); in codice `riftbound.rs.arena_rs.game(task)` = `arena_bot._game(task)`.
 - Chiavi di ripresa dell'arena: checkpoint (percorso e hash), budget, motore, regole.
+
+## Rifare una decisione del campione
+
+Il campione (ricerca coi prior) rigiocato da capo con le impostazioni originali (`riftbound/rs/decisione_rs.py`); alla
+ricerca k fa più iterazioni (ganci `before`), poi la partita si ferma. Pesi casuali (`--pesi-casuali`) dove il checkpoint
+(default `runs/sett/ekris_s12/ckpt_040000.pt`) non c'è.
+- `scripts/rust/decisione.py rifai --pagina runs/coach/partite/X.json --turno 5 --iterazioni 42 200 1000 --attese "Vi Peacekeeper"`
+  (oppure `--autonoma ES:3:a --k 17`): mossa scelta, prime 6 per visite, attese (visite, q, rango); la prima riga dice se
+  a 42 la mossa originale si riproduce. `--tipo turno|reazione|showdown|tutti`, `--out F.json` per il dettaglio.
+- `decisione.py concordanza --matchup ES EK --semi 10 --iterazioni 200 [--campioni-per-tipo 20]`: quante mosse restano uguali.
+- `scripts/rust/episodi.py --matchup ES --semi 1-50`: cerca accumulo (§8) e spreco di Might (§7) nelle autonome; stampa i comandi `rifai`.
+- Il `win_probe` resta acceso: la ricerca k si cambia con `Game.set_search_override(seat, k, iterazioni)` (non coi ganci
+  lockstep, che spegnerebbero la sonda); la sonda non consuma indici k. `rifai` confronta comunque il prefisso (`riproduce`).
 
 ## Errori
 - Un ramo non portato dà `EngineError::NotPorted{dove, cosa}`, che risale sempre.

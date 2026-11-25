@@ -62,11 +62,13 @@ def _game(job):
 
 
 def riprese(righe: Path, *, ckpt, avversario, budget_c, budget_a, motore: dict, regole: dict,
-            sha_c, sha_a) -> list:
+            sha_c, sha_a, opz=None) -> list:
     """The games of `righe` this arena can count: same checkpoints (path and,
     when recorded, hash), budgets, engine and rules of their matchup (a row
     without `motore` / `regole`, before 24/11: Python, 6427b90). A historical
-    game of a seed and seat leaves that game to be played on another profile."""
+    game of a seed and seat leaves that game to be played on another profile.
+    `opz`: the per-side settings of --iterazioni-*/--win-probe-* (None when none: a
+    row without `opz` is one of them)."""
     from riftbound.provenienza import REGOLE_PYTHON
     rows = []
     if not Path(righe).exists():
@@ -76,7 +78,7 @@ def riprese(righe: Path, *, ckpt, avversario, budget_c, budget_a, motore: dict, 
         if r["mu"] not in motore:
             continue
         if r["ckpt"] == ckpt and r["avversario"] == avversario and \
-                r.get("budget_c") == budget_c and r.get("budget_a") == budget_a and \
+                r.get("budget_c") == budget_c and r.get("budget_a") == budget_a and r.get("opz") == opz and \
                 r.get("motore", "python") == motore[r["mu"]] and \
                 r.get("regole", REGOLE_PYTHON) == regole[r["mu"]] and \
                 r.get("sha_c", sha_c) == sha_c and r.get("sha_a", sha_a) == sha_a:
@@ -88,7 +90,7 @@ def main() -> None:
     from riftbound.provenienza import REGOLE, REGOLE_PYTHON
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ckpt", required=True, help="i prior PPO del candidato")
-    ap.add_argument("--ckpt-avversario", required=True, help="i prior PPO del campione")
+    ap.add_argument("--ckpt-avversario", default=None, help="i prior PPO del campione (non serve con --avversario-mano)")
     ap.add_argument("--vecchi", nargs="*", choices=ORDER, default=["EK", "ER", "KR"])
     ap.add_argument("--blocchi", nargs="*", default=["EI,KI,RI", "ES,KS,RS,IS"])
     ap.add_argument("--coppie", nargs="*", default=[], help="mu=n, per esempio EK=800 EI=300")
@@ -102,6 +104,14 @@ def main() -> None:
                     help="blocchi (matchup separati da virgole) che, a pesi uguali, devono avere limite inferiore > 0,47")
     ap.add_argument("--budget-candidato", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
     ap.add_argument("--budget-avversario", type=float, default=None, help="secondi di CPU per mossa (default 0,4)")
+    ap.add_argument("--iterazioni-candidato", type=int, default=None,
+                    help="lavoro fisso: iterazioni per ricerca al candidato, al posto del budget (solo --motore rust)")
+    ap.add_argument("--iterazioni-avversario", type=int, default=None,
+                    help="lavoro fisso: iterazioni per ricerca all'avversario, al posto del budget (solo --motore rust)")
+    ap.add_argument("--win-probe-candidato", action="store_true", help="il candidato prova la vittoria nel turno (solo --motore rust)")
+    ap.add_argument("--win-probe-avversario", action="store_true", help="idem l'avversario (solo --motore rust)")
+    ap.add_argument("--avversario-mano", action="store_true",
+                    help="l'avversario è il bot a mano senza prior (solo --motore rust; senza --ckpt-avversario)")
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
                     help="il profilo delle regole: 6427b90 (lo storico, Python congelato) 6427b90+D72-D76 o 6427b90+D72-D77 "
                          "(Rust con D72-D76/D77 corretti: serve --motore rust e tutti i matchup su Rust)")
@@ -109,6 +119,13 @@ def main() -> None:
                     help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: i cinque mazzi fra loro, riconosciuti dal contenuto delle "
                          "liste) giocano su Rust (riftbound/rs/arena_rs.py), gli altri su Python")
     args = ap.parse_args()
+    nuove = {"iter_cand": args.iterazioni_candidato, "iter_opp": args.iterazioni_avversario,
+             "probe_cand": args.win_probe_candidato or None, "probe_opp": args.win_probe_avversario or None}
+    opz = {k: v for k, v in nuove.items() if v} or None
+    if (opz or args.avversario_mano) and args.motore != "rust":
+        ap.error("--iterazioni-*, --win-probe-* e --avversario-mano valgono solo con --motore rust")
+    if args.avversario_mano == (args.ckpt_avversario is not None):
+        ap.error("l'avversario è o --ckpt-avversario o --avversario-mano (uno solo)")
     from riftbound.ai.ppo.collect import DECK_NAME
     blocks = [b.split(",") for b in args.blocchi]
     holds = [b.split(",") for b in args.tenuta]
@@ -130,10 +147,16 @@ def main() -> None:
         return f"{DECK_NAME[mu[0]]}-{DECK_NAME[mu[1]]}"
 
     say(f"\n== Arena su {len(mus)} matchup ({time.strftime('%d/%m %H:%M')})")
-    say(f"candidato: il bot a mano con i prior PPO di {args.ckpt} (sha256 {_sha(args.ckpt)}); avversario: il "
-        f"bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {_sha(args.ckpt_avversario)}); "
-        f"{args.budget_candidato or A.REF_BUDGET} s per mossa al candidato, "
-        f"{args.budget_avversario or A.REF_BUDGET} s all'avversario; {args.workers} processi")
+    avv = ("il bot a mano senza prior" if args.avversario_mano else
+           f"il bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {_sha(args.ckpt_avversario)})")
+
+    def lavoro(it, budget, probe):
+        return (f"{it} iterazioni per ricerca" if it else f"{budget or A.REF_BUDGET} s per mossa") + \
+            (" + win probe" if probe else "")
+    say(f"candidato: il bot a mano con i prior PPO di {args.ckpt} (sha256 {_sha(args.ckpt)}); avversario: {avv}; "
+        f"{lavoro(args.iterazioni_candidato, args.budget_candidato, args.win_probe_candidato)} al candidato, "
+        f"{lavoro(args.iterazioni_avversario, args.budget_avversario, args.win_probe_avversario)} all'avversario; "
+        f"{args.workers} processi")
     say(f"regole fissate prima: ciascuno di {' '.join(args.vecchi) or '-'} limite inferiore > 0,47; ciascun blocco "
         f"({'; '.join(' '.join(b) for b in blocks) or '-'}), a pesi uguali, >= 0,52 e limite inferiore > 0,50; "
         + (f"ciascun blocco di tenuta ({'; '.join(' '.join(b) for b in holds)}), a pesi uguali, limite inferiore "
@@ -154,20 +177,24 @@ def main() -> None:
     if args.regole != REGOLE_PYTHON and any(m != "rust" for m in motore.values()):
         ap.error(f"--regole {args.regole}: tutti i matchup devono giocare su Rust (--motore rust, coperti); "
                  f"su Python: {', '.join(mu for mu, m in motore.items() if m != 'rust')}")
-    sha_c, sha_a = file_sha(args.ckpt), file_sha(args.ckpt_avversario)
+    sha_c = file_sha(args.ckpt)
+    sha_a = None if args.avversario_mano else file_sha(args.ckpt_avversario)
+    avversario_id = "mano" if args.avversario_mano else args.ckpt_avversario
     registra(args.out.parent, provenienza(
         motore=motore, liste={k: DECK_OF[k] for k in sorted({c for mu in mus for c in mu})},
         regole=args.regole,
-        checkpoint={"candidato": args.ckpt, "avversario": args.ckpt_avversario},
+        checkpoint={"candidato": args.ckpt, "avversario": None if args.avversario_mano else args.ckpt_avversario},
         arena=str(args.out), budget={"candidato": args.budget_candidato or A.REF_BUDGET,
-                                     "avversario": args.budget_avversario or A.REF_BUDGET}))
+                                     "avversario": args.budget_avversario or A.REF_BUDGET},
+        **({"impostazioni": opz} if opz else {}), **({"avversario_mano": True} if args.avversario_mano else {})))
     say(f"   provenienza in {args.out.parent / 'provenienza.jsonl'}; regole {args.regole}; motore: "
         + ", ".join(f"{mu} {m}" for mu, m in motore.items()))
 
-    tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt, "prior_ppo", args.ckpt_avversario, mu,
-              args.budget_candidato, args.budget_avversario)
+    tasks = [(s, "a" if s % 2 == 0 else "b", seat, "prior_ppo", args.ckpt,
+              "mano" if args.avversario_mano else "prior_ppo", args.ckpt_avversario, mu,
+              args.budget_candidato, args.budget_avversario) + ((opz,) if opz else ())
              for mu in mus for s in range(s0[mu], s0[mu] + pairs[mu]) for seat in ("A", "B")]
-    rows: list = riprese(righe, ckpt=args.ckpt, avversario=args.ckpt_avversario,
+    rows: list = riprese(righe, ckpt=args.ckpt, avversario=avversario_id, opz=opz,
                          budget_c=args.budget_candidato, budget_a=args.budget_avversario,
                          motore=motore, regole=regole, sha_c=sha_c, sha_a=sha_a)
     done = {(r[0], r[2], r[4]) for r in rows}
@@ -182,11 +209,13 @@ def main() -> None:
             rows.append((r[0], r[1], r[2], r[3], mu))
             iters["candidato"] += r[4]
             iters["avversario"] += r[5]
-            row = {"ckpt": args.ckpt, "avversario": args.ckpt_avversario, "seed": r[0],
+            row = {"ckpt": args.ckpt, "avversario": avversario_id, "seed": r[0],
                    "starter": r[1], "seat": r[2], "score": r[3], "mu": mu, "motore": motore[mu],
                    "regole": regole[mu], "sha_c": sha_c, "sha_a": sha_a}
             if args.budget_candidato is not None or args.budget_avversario is not None:
                 row |= {"budget_c": args.budget_candidato, "budget_a": args.budget_avversario}
+            if opz:
+                row["opz"] = opz
             f.write(json.dumps(row) + "\n")
             f.flush()
             if len(rows) % 100 == 0:
