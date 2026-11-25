@@ -69,6 +69,9 @@ def main() -> None:
     ap.add_argument("--iterazioni", type=int, default=None,
                     help="The champion's fixed iterations a move on Rust (default "
                          "riftbound.ai.coach_rs.ITERAZIONI_CAMPIONE)")
+    ap.add_argument("--valutazione", choices=("storica", "rimonta"), default="storica",
+                    help="The evaluation of the champion's search leaves, on Rust (default %(default)s); "
+                         "ignored on the Python engine")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
     ap.add_argument("--iterations", type=int, default=100, help="Search simulations per decision")
     ap.add_argument("--port", type=int, default=8765)
@@ -86,7 +89,8 @@ def main() -> None:
         ap.error(f"--net: {args.net} non esiste")
     session = CoachSession(args.net, args.out, iterations=args.iterations, opponent_pause=args.pause,
                            campione_path=args.campione, budget=args.budget,
-                           motore=args.motore, regole=args.regole, iterazioni=args.iterazioni)
+                           motore=args.motore, regole=args.regole, iterazioni=args.iterazioni,
+                           valutazione=args.valutazione)
     if not args.campione.is_file():
         print(f"Il campione non c'è ({args.campione}): avversari {[o['name'] for o in session.opponents()]}",
               flush=True)

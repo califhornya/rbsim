@@ -3,7 +3,7 @@
 # Da lanciare con:  bash scripts/rust/rimonta_mac.command [checkpoint.pt]
 # Stessa rete (ckpt_040000) e stessi prior per entrambi, 138 iterazioni per lato, ricerca della vittoria nel turno
 # accesa per entrambi, regole 6427b90+D72-D80, semi nuovi (da 90000), posti scambiati: 800 coppie per ES e per EK.
-# Uscite: docs/bot/accumulo/arena_rimonta_<data>/ (riepilogo.txt) e uno zip sulla Scrivania.
+# Uscite: runs/arene/rimonta_<data>/ (riepilogo.txt, fuori dai file versionati) e uno zip sulla Scrivania.
 set -euo pipefail
 CKPT="${1:-}"
 if [ -n "$CKPT" ] && [ -f "$CKPT" ]; then CKPT="$(cd "$(dirname "$CKPT")" && pwd)/$(basename "$CKPT")"; fi
@@ -16,7 +16,7 @@ fi
 [ -n "$CKPT" ] && [ -f "$CKPT" ] || { echo "Manca il checkpoint ckpt_040000.pt (passalo come argomento)"; exit 1; }
 command -v rustc >/dev/null || { echo "manca Rust: installalo con  curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh"; exit 1; }
 STAMP=$(date +%Y%m%d_%H%M)
-OUT="docs/bot/accumulo/arena_rimonta_$STAMP"
+OUT="runs/arene/rimonta_$STAMP"
 mkdir -p "$OUT"
 W=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
 W=$(( W > 1 ? W - 1 : 1 ))

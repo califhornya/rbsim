@@ -57,6 +57,7 @@ from riftbound.core.decisions import DecisionPoint
 # lower bound 0.495; 400 pairs each). The earlier 42 came from a net with random weights.
 # A decision at 138 iterations takes ~0.04 s on the Mac.
 ITERAZIONI_CAMPIONE = 138
+VALUTAZIONE_K, VALUTAZIONE_ALPHA = 3.0, 0.2     # the parameters of the evaluations (as in arena_mazzi.py's defaults)
 _NO_MORE = json.dumps("$NO_MORE")
 
 
@@ -133,6 +134,8 @@ class RustGame:
             g.set_search_agent(opp, s.iterazioni or ITERAZIONI_CAMPIONE, self.seed * 2 + (opp == "B"), None,
                                arena_rs.make_probs(b["ppo"]), False)
             g.set_search_win_probe(opp, True)
+            if s.valutazione and s.valutazione != "storica":
+                g.set_search_valutazione(opp, s.valutazione, VALUTAZIONE_K, VALUTAZIONE_ALPHA)
         else:
             g.set_agent(opp, "simple_trade", self.seed)
         g.set_human_agent(s.side, self.ask, True, self.notify)

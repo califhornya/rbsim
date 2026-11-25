@@ -64,7 +64,8 @@ def cmd_rifai(a) -> int:
                   f"{sorted({r['turn'] for r in elenco})}")
             return 1
     orig_n = (D._prepara(P)["iterazioni"])
-    val = (a.valutazione, a.k_acc, a.alpha) if a.valutazione != "storica" else None
+    # None = omessa (la decisione rifatta tiene la valutazione originale); anche "storica" esplicita e' un override.
+    val = (a.valutazione, a.k_acc, a.alpha) if a.valutazione is not None else None
     etich = f" [{a.valutazione} k={a.k_acc} alpha={a.alpha}]" if val else ""
     tutti = []
     for k in bersagli:
@@ -132,7 +133,7 @@ def main(argv=None) -> int:
     t = r.add_mutually_exclusive_group(required=True)
     t.add_argument("--turno", type=int)
     t.add_argument("--k", type=int)
-    r.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa", "rimonta"],
+    r.add_argument("--valutazione", default=None, choices=["storica", "accumulo", "minaccia", "corsa", "rimonta"],
                    help="valutazione delle foglie nella decisione rifatta (il prefisso resta quello di --valutazione-orig)")
     r.add_argument("--valutazione-orig", default=None, metavar="NOME[:k:alpha]",
                    help="valutazione con cui e' stata giocata la partita autonoma originale (default storica): il prefisso si riproduce con lei")

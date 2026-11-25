@@ -71,6 +71,12 @@ def rete(ckpt: str | None = None, casuali: bool = False):
 
 # -- la partita ---------------------------------------------------------------------------------
 
+def _valutazione_registrata(nome):
+    """(nome, k, alpha) of the evaluation a page game recorded; None for storica or absent."""
+    from riftbound.ai.coach_rs import VALUTAZIONE_ALPHA, VALUTAZIONE_K
+    return (nome, VALUTAZIONE_K, VALUTAZIONE_ALPHA) if nome and nome != "storica" else None
+
+
 def _prepara(partita: dict) -> dict:
     from riftbound.ai.ppo.collect import DECK_OF
     from riftbound.rs import arena_rs
@@ -89,7 +95,9 @@ def _prepara(partita: dict) -> dict:
                  # Files saved before 25/11 evening hold None for the default, which was then 42.
                  iterazioni=rp.get("iterazioni") or ITERAZIONI_PAGINA_PRIMA, probe=True,
                  regole=rp.get("regole") or REGOLE_D72_D80, answers=rp["answers"],
-                 ckpt=partita.get("ckpt") or d.get("info", {}).get("campione") or CKPT_DEFAULT)
+                 ckpt=partita.get("ckpt") or d.get("info", {}).get("campione") or CKPT_DEFAULT,
+                 # The champion's evaluation of the page game (files before 26/11: storica).
+                 valutazione=_valutazione_registrata(rp.get("valutazione") or d.get("info", {}).get("valutazione")))
     elif partita["tipo"] == "autonoma":
         mu = partita["matchup"]
         P.update(seed=partita["seed"], camp=partita.get("campione", "A"), umano=None,
@@ -175,7 +183,7 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
             g.set_search_timing(s, True)
             if k is not None and iterazioni is not None:
                 g.set_search_override(s, k, int(iterazioni))
-                if valutazione is not None and valutazione[0] != "storica":
+                if valutazione is not None:
                     g.set_search_valutazione_at(s, k, valutazione[0], float(valutazione[1]), float(valutazione[2]))
     if umano is not None:
         g.set_human_agent(umano, ask, True, lambda ev: None)

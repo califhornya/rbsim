@@ -427,3 +427,47 @@ def test_a_forced_pass_still_brings_the_log_up_to_date(tmp_path, monkeypatch):
     st, _ = _drive(session, random.Random(5))
     assert st["status"] == "over" and forced[0] > 5
     assert not stale, stale[:5]
+
+
+def test_the_champion_with_rimonta_is_used_saved_and_replayed(tmp_path, monkeypatch):
+    """--valutazione rimonta: the champion's seat gets it; the saved game records it; the replay of the page
+    file (decisione_rs) reads it and reproduces the champion's moves."""
+    from riftbound.rs import decisione_rs as D, rust_bridge
+    calls = []
+    build = rust_bridge.build
+
+    class Spy:
+        def __init__(self, g):
+            self._g = g
+
+        def __getattr__(self, name):
+            attr = getattr(self._g, name)
+            if name == "set_search_valutazione":
+                return lambda *a: (calls.append(a), attr(*a))[1]
+            return attr
+
+    monkeypatch.setattr(rust_bridge, "build", lambda *a, **k: Spy(build(*a, **k)))
+    s = _session(tmp_path, campione_path=_campione(tmp_path), iterazioni=10, valutazione="rimonta")
+    s.new_game(_deck("E"), _deck("S"), seat="B", opponent="campione", seed=4)
+    rng, n = random.Random(4), 0
+    while n < 25:
+        st = _wait(s)
+        if st["status"] == "over":
+            break
+        s.answer(_answer(st["pending"], rng))
+        n += 1
+    s.abandon()
+    s._thread.join(timeout=120)
+    assert calls and calls[0][:2] == ("A", "rimonta")      # the champion sits opposite the human (seat B)
+    monkeypatch.undo()
+    f = next((tmp_path / "coach" / "partite").glob("*.json"))
+    d = json.loads(f.read_text(encoding="utf-8"))
+    assert d["info"]["valutazione"] == "rimonta" and d["replay"]["valutazione"] == "rimonta"
+    partita = {"tipo": "pagina", "file": str(f), "casuali": True}
+    assert D._prepara(partita)["valutazione"] == ("rimonta", 3.0, 0.2)
+    assert D.rifai(partita, 0, None, posizione=False)["riproduce"]
+
+
+def test_a_page_file_without_valutazione_replays_as_storica(tmp_path):
+    from riftbound.rs import decisione_rs as D
+    assert D._valutazione_registrata(None) is None and D._valutazione_registrata("storica") is None

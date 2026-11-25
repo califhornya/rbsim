@@ -1340,7 +1340,8 @@ class CoachSession:
     def __init__(self, net_path: Optional[Path] = None, out_dir: Path = Path("runs") / "coach",
                  iterations: int = 100, opponent_pause: float = 0.8,
                  campione_path: Optional[Path] = None, budget: float = 0.4,
-                 motore: str = "python", regole: str = REGOLE_D72_D80, iterazioni: Optional[int] = None):
+                 motore: str = "python", regole: str = REGOLE_D72_D80, iterazioni: Optional[int] = None,
+                 valutazione: str = "storica"):
         # The old AlphaZero net: the advice to the coach and the "net"
         # opponent. Without it the coach plays alone (no advice, nothing kept
         # for training).
@@ -1354,6 +1355,8 @@ class CoachSession:
         # `iterazioni`: the champion's fixed iterations a decision on Rust.
         self.motore, self.regole = motore, regole
         self.iterazioni = iterazioni
+        # The evaluation of the champion's search leaves on Rust ("storica", "rimonta", ...); ignored on Python.
+        self.valutazione = valutazione
         self.out_dir = Path(out_dir)
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self.iterations = iterations
@@ -1572,6 +1575,8 @@ class CoachSession:
             starter = gs.active
         self.gs = gs
         self.info.update(motore=motore, regole=self.regole if motore == "rust" else REGOLE_PYTHON)
+        if motore == "rust" and b["opponent"] == "campione":
+            self.info["valutazione"] = self.valutazione
         # Who starts: the mulligan depends on it.
         self.info["you_start"] = starter == seat
         self.event("sys", self._starter_text())
@@ -2165,6 +2170,7 @@ class CoachSession:
                                "deck_a": str(b["deck_a"]), "deck_b": str(b["deck_b"]),
                                "bf_a": b.get("bf_a"), "bf_b": b.get("bf_b"), "starter": b.get("starter"),
                                "iterazioni": self._iterazioni_effettive(), "regole": self.info.get("regole"),
+                               "valutazione": self.info.get("valutazione"),
                                "motore": self.info.get("motore"), "answers": rec}}
             path = self.out_dir / "partite" / self._partita_name
             path.parent.mkdir(parents=True, exist_ok=True)
