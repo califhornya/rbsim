@@ -744,9 +744,10 @@ def _gold_table(tmp_path, body_runes: int):
     sys.path.insert(0, str(REPO / "tests" / "audit"))
     from audit_helpers import card, scripted, setup, unit
 
-    from riftbound.ai.coach import CoachAgent
+    from riftbound.ai.coach import CoachAgent, CoachLoop
     from riftbound.core.player import Domain, Rune
-    loop, a, b = setup(active="A", rich=())
+    _, a, b = setup(active="A", rich=())
+    loop = CoachLoop(_.gs)
     scripted(loop, a, b)
     a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(body_runes)]
     a.channel()
@@ -785,12 +786,12 @@ def test_a_card_played_with_a_gold_ready_asks_how_to_pay(tmp_path):
     session.answer({"action": texts.index("Lancia Punch First")})
     p = _next_pending(session, end)
     assert p["question"] == "Come paghi?" and p["source"] == "Punch First"
-    assert [o["text"] for o in p["options"]] == ["Con le rune: ricicli 2 rune", "Con il Gold: ricicli 1 runa"]
+    assert [o["text"] for o in p["options"]] == ["Ricicli 2 rune Body", "Col Gold, ricicli 1 runa Body"]
     session.answer({"option": 1})
     game.join(timeout=20)
     assert not a.base_gear and len(a.rune_pool[Domain.BODY]) == 2 and a.base_units[0].might == 8
     log = [e["text"] for e in session.events if e["who"] == "me"]
-    assert log[:3] == ["Punch First: Come paghi? → Con il Gold: ricicli 1 runa",
+    assert log[:3] == ["Punch First: Come paghi? → Col Gold, ricicli 1 runa Body",
                        "Usa Gold: Power Body per pagare Punch First", "Lancia Punch First"]
 
 
@@ -812,3 +813,52 @@ def test_a_card_only_the_gold_pays_for_is_offered_with_it(tmp_path):
     game.join(timeout=20)
     assert session.pending is None
     assert not a.base_gear and not a.rune_pool.get(Domain.BODY) and a.base_units[0].might == 8
+
+
+def test_hiding_a_card_asks_which_rune_to_recycle(tmp_path):
+    """Matteo (25/11): hiding costs [rune], a Power of any domain; the engine
+    recycled the first domain's rune (Body before Chaos). The page asks."""
+    import threading
+
+    from riftbound.core.player import Domain, Rune
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    loop, a, b, session, agent = _gold_table(tmp_path, 2)
+    a.base_gear.clear()                                     # no Gold here
+    a.rune_pool[Domain.CHAOS] = [Rune(Domain.CHAOS) for _ in range(2)]
+    a.channel()
+    a.hand.append(CARD_REGISTRY["Back Off"].instantiate())
+    bf = loop.gs.battlefields[0]
+    bf.units_A.append(a.base_units.pop())
+    bf._note_control()
+    game = threading.Thread(target=lambda: loop._apply_action(a, agent.decide_action(b)))
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": next(i for i, t in enumerate(texts) if t.startswith("Nascondi Back Off"))})
+    p = _next_pending(session, end)
+    assert p["question"] == "Come paghi?" and p["source"] == "Back Off"
+    assert [o["text"] for o in p["options"]] == ["Ricicli 1 runa Body", "Ricicli 1 runa Chaos"]
+    session.answer({"option": 1})
+    game.join(timeout=20)
+    assert len(a.rune_pool[Domain.BODY]) == 2 and len(a.rune_pool[Domain.CHAOS]) == 1
+    assert [fd.card.name for fd in bf.facedowns] == ["Back Off"]
+
+
+def test_the_runes_whose_energy_is_spent_are_drawn_exhausted():
+    """The engine keeps the Energy not spent (`rune_energy`), not which rune
+    gave it: as many runes are drawn ready, the rest exhausted."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import setup
+
+    from riftbound.ai.coach import _board_extras
+    from riftbound.core.player import Domain, Rune
+    loop, a, _ = setup(active="A", rich=())
+    a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(3)]
+    a.rune_pool[Domain.CHAOS] = [Rune(Domain.CHAOS) for _ in range(2)]
+    a.channel()
+    a.energy -= 2
+    runes = _board_extras(loop.gs, "A")["runes"]["me"]
+    assert [(r["domain"], r["ready"]) for r in runes] == [
+        ("BODY", True), ("BODY", True), ("BODY", True), ("CHAOS", False), ("CHAOS", False)]

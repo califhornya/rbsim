@@ -60,6 +60,10 @@ textarea { min-height: 60px; resize: vertical; }
 .dom.BODY { background: #f0913e; } .dom.CHAOS { background: #a66ad8; } .dom.ORDER { background: #e3bb43; }
 .runes { display: flex; gap: 4px; flex-wrap: wrap; }
 .rune { position: relative; width: calc(var(--cw) * .42); height: calc(var(--ch) * .42); }
+/* An exhausted rune (its Energy spent): turned, dimmed. */
+.rune.exh { width: calc(var(--ch) * .42); }
+.rune.exh .face { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * .42); height: calc(var(--ch) * .42);
+  transform: translate(-50%, -50%) rotate(90deg); opacity: .55; }
 .rune .n { position: absolute; right: -4px; bottom: -4px; background: #000c; border-radius: 6px; padding: 0 4px;
   font-size: 11px; font-weight: 800; }
 
@@ -373,16 +377,17 @@ function band(o, b, who) {
     <div class="big">${pts}<small>/${vs}</small></div>
     <div class="pips">${Array.from({ length: vs }, (_, k) => `<span class="pip ${k < pts ? "on" : ""}"></span>`).join("")}</div></div>`;
   const runes = (b.runes && b.runes[who]) || [];
+  // One pile per domain and state: the ready runes, then the exhausted ones.
   const byDom = {};
-  runes.forEach((r) => byDom[r.domain] = (byDom[r.domain] || 0) + 1);
+  runes.forEach((r) => { const k = r.domain + (r.ready === false ? ":x" : ""); byDom[k] = (byDom[k] || 0) + 1; });
   const power = Object.entries(p("power") || {}).filter(([, v]) => v);
   const res = `<div class="zone res ${who}"><span class="zl">Risorse</span>
     <div class="line"><span class="energy">⚡ ${p("energy")}</span><span class="muted">energia</span>${p("xp") ? `<span class="muted">· XP ${p("xp")}</span>` : ""}</div>
     <div class="line">${power.length ? power.map(([d, v]) => `<span class="dom ${d}">${d[0] + d.slice(1).toLowerCase()} ${v}</span>`).join("") : '<span class="muted">Power 0</span>'}</div>
-    <div class="runes" title="Rune in gioco">${Object.entries(byDom).map(([d, k]) => {
-      const name = d[0] + d.slice(1).toLowerCase() + " Rune";
-      REF[`rune:${who}:${d}`] = { name, runes: k };
-      return `<div class="rune" data-ref="rune:${who}:${d}">${face(name)}<span class="n">×${k}</span></div>`; }).join("") || '<span class="muted">Nessuna runa</span>'}</div></div>`;
+    <div class="runes" title="Rune in gioco">${Object.entries(byDom).map(([key, k]) => {
+      const [d, x] = key.split(":"), name = d[0] + d.slice(1).toLowerCase() + " Rune";
+      REF[`rune:${who}:${key}`] = { name, runes: k, exhausted: !!x };
+      return `<div class="rune ${x ? "exh" : ""}" data-ref="rune:${who}:${key}">${face(name)}<span class="n">×${k}</span></div>`; }).join("") || '<span class="muted">Nessuna runa</span>'}</div></div>`;
   const units = p("base_units") || [], gear = p("base_gear") || [];
   const base = `<div class="zone base ${who}" data-ref="base:${who}"><span class="zl">${m ? "La tua base" : "Base avversaria"}</span>
     <div class="row">${units.map((u, j) => unitSlot(u, `unit:${who}:base:${j}`, who)).join("")}${gear.map((g, j) => cardSlot(g, `gear:${who}:base:${j}`, { exhausted: gearExh(b, who, "base", j) })).join("")}${units.length || gear.length ? "" : '<span class="muted" style="font-size:12px">vuota</span>'}</div></div>`;
@@ -675,7 +680,7 @@ function showPreview(el) {
     if (u.gear && u.gear.length) lines.push("Equipaggiata con: " + u.gear.map(esc).join(", "));
   }
   if (r.legend) lines.push(r.ready ? "Pronta" : "Esausta (già usata in questo turno)");
-  if (r.runes) lines.push(`Ne hai in gioco: ${r.runes}`);
+  if (r.runes) lines.push(r.exhausted ? `Esauste: ${r.runes} (l'energia già spesa in questo turno; si possono ancora riciclare per il Power)` : `Pronte: ${r.runes}`);
   if (r.facedown === "theirs") lines.push("Carta coperta dell'avversario");
   if (r.facedown === "mine") lines.push("La tua carta coperta");
   if (r.pile === "trash") lines.push("In cima al cimitero. Clicca per vederlo tutto.");
