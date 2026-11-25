@@ -261,14 +261,15 @@ def instrument(gs, loop, *, with_obs: bool = True, with_state: bool = True, keep
 
 
 def traced_game(seed: int, deck_a, deck_b, agents: dict, *, starter: str = "a", max_turns: int = 40,
-                chooser: str = "ppo", with_obs: bool = True, with_state: bool = True, keep_states: bool = False):
+                chooser: str = "ppo", with_obs: bool = True, with_state: bool = True, keep_states: bool = False,
+                bf_a=None, bf_b=None):
     """A game with `agents` {"A": factory(player), "B": ...}, traced. ->
     (result, Trace)."""
     from riftbound.ai.ppo.agent import PPOChooser
     from riftbound.core.game_factory import build_game
     from riftbound.core.loop import GameLoop
     gs = build_game(game_seed=seed, deck_a_path=deck_a, deck_b_path=deck_b, ai_a=None, ai_b=None,
-                    max_turns=max_turns, first_player=starter)
+                    max_turns=max_turns, first_player=starter, bf_a=bf_a, bf_b=bf_b)
     for seat in ("A", "B"):
         p = gs.get_player(seat)
         p.agent = agents[seat](p)

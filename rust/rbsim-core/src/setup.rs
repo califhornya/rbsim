@@ -134,9 +134,9 @@ fn instantiate(gs: &mut GameState, name: &str) -> Result<CardId, String> {
 }
 
 /// py: build_game(game_seed, deck_a_path, deck_b_path, ai_a=None, ai_b=None,
-/// victory_score=8, starting_energy=0, first_player, max_turns)
+/// victory_score=8, starting_energy=0, first_player, max_turns, bf_a=None, bf_b=None)
 pub fn build_game(reg: Rc<Registry>, game_seed: i64, deck_a: &DeckData, deck_b: &DeckData, first_player: &str,
-                  max_turns: i64) -> Result<Game, String> {
+                  max_turns: i64, bf_a: Option<&str>, bf_b: Option<&str>) -> Result<Game, String> {
     let mut rng = PyRandom::new(game_seed as i128);
     let mut rune_rng_a = PyRandom::new(rng.randrange(1 << 30) as i128);
     let mut rune_rng_b = PyRandom::new(rng.randrange(1 << 30) as i128);
@@ -179,8 +179,20 @@ pub fn build_game(reg: Rc<Registry>, game_seed: i64, deck_a: &DeckData, deck_b: 
         _ => Side::A,
     };
     let mut bf_rng = PyRandom::new(((game_seed as i128 * 2654435761) & 0xFFFF_FFFF) as i128);
-    let pick_a = if bfs_a.is_empty() { None } else { Some(bfs_a[bf_rng.choice_index(bfs_a.len())].clone()) };
-    let pick_b = if bfs_b.is_empty() { None } else { Some(bfs_b[bf_rng.choice_index(bfs_b.len())].clone()) };
+    // Come `_select_battlefield` di Python: scelta valida = quella, senza toccare bf_rng; altrimenti a caso.
+    let mut select = |bfs: &Vec<String>, choice: Option<&str>| -> Option<String> {
+        if bfs.is_empty() {
+            return None;
+        }
+        if let Some(c) = choice {
+            if let Some(n) = bfs.iter().find(|n| n.as_str() == c) {
+                return Some(n.clone());
+            }
+        }
+        Some(bfs[bf_rng.choice_index(bfs.len())].clone())
+    };
+    let pick_a = select(&bfs_a, bf_a);
+    let pick_b = select(&bfs_b, bf_b);
     let mut victory_score = 8;
     for p in [&pick_a, &pick_b] {
         let card = match p {

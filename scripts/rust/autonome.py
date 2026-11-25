@@ -29,7 +29,7 @@ def agent_seed(seed: int, seat: str) -> int:
     return seed * 2 + (seat == "B")
 
 
-def python_game(seed: int, kinds: dict, starter: str, mu: str = "EK"):
+def python_game(seed: int, kinds: dict, starter: str, mu: str = "EK", bf_a=None, bf_b=None):
     from riftbound.rs.mazzi import decks
     from riftbound.ai.search.random_agent import RandomAgent
     from riftbound.core.game_factory import make_agent
@@ -40,13 +40,13 @@ def python_game(seed: int, kinds: dict, starter: str, mu: str = "EK"):
             return lambda p: RandomAgent(p, random.Random(agent_seed(seed, seat)))
         return lambda p: make_agent(kinds[seat], p)
     return traced_game(seed, *decks(mu), {s: factory(s) for s in "AB"}, starter=starter, chooser="none",
-                       with_obs=False, keep_states=True)
+                       with_obs=False, keep_states=True, bf_a=bf_a, bf_b=bf_b)
 
 
-def rust_game(seed: int, kinds: dict, starter: str, mu: str = "EK"):
+def rust_game(seed: int, kinds: dict, starter: str, mu: str = "EK", bf_a=None, bf_b=None):
     from riftbound.rs.mazzi import decks
     from riftbound.rs import rust_bridge as rb
-    g = rb.build(seed, *decks(mu), starter, 40)
+    g = rb.build(seed, *decks(mu), starter, 40, bf_a=bf_a, bf_b=bf_b)
     for s in "AB":
         g.set_agent(s, kinds[s], agent_seed(seed, s))
     start = json.loads(g.raw_dump())
@@ -59,13 +59,13 @@ def rust_game(seed: int, kinds: dict, starter: str, mu: str = "EK"):
     return start, json.loads(g.events()), json.loads(g.raw_dump()), res, err
 
 
-def compare(seed: int, kinds: dict, starter: str, mu: str = "EK") -> dict:
+def compare(seed: int, kinds: dict, starter: str, mu: str = "EK", bf_a=None, bf_b=None) -> dict:
     from diff_trace import FIELDS, canonical_rust_events, first_difference
     t0 = time.perf_counter()
-    res, tr = python_game(seed, kinds, starter, mu)
+    res, tr = python_game(seed, kinds, starter, mu, bf_a, bf_b)
     t_py = time.perf_counter() - t0
     t0 = time.perf_counter()
-    start, events, end, rres, err = rust_game(seed, kinds, starter, mu)
+    start, events, end, rres, err = rust_game(seed, kinds, starter, mu, bf_a, bf_b)
     t_rs = time.perf_counter() - t0
     rs, rs_trees = canonical_rust_events(start, events, end)
     py = [e for e in tr.events if e["k"] in FIELDS or e["k"].startswith("decide_")]

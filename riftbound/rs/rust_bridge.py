@@ -45,12 +45,13 @@ def registry(regole: str | None = None):
 
 
 def build(seed: int, deck_a: Path, deck_b: Path, first_player: str = "a", max_turns: int = 40,
-          regole: str | None = None):
+          regole: str | None = None, bf_a: str | None = None, bf_b: str | None = None):
     """A Rust game on the rules profile `regole` (default the process's): it
-    holds for both players, the search copies and the replays."""
+    holds for both players, the search copies and the replays. `bf_a`/`bf_b`:
+    battlefield names chosen per seat (None or unknown = random, as Python)."""
     import riftbound_rs
     return riftbound_rs.Game.build(registry(regole), seed, Path(deck_a).read_text(), Path(deck_b).read_text(),
-                                   first_player, max_turns)
+                                   first_player, max_turns, bf_a, bf_b)
 
 
 def canonical(raw: dict, canon: Canon) -> dict:
