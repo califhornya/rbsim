@@ -1040,3 +1040,17 @@ def test_rewind_takes_the_last_decision_back(tmp_path):
     _play(session, pick, timeout=300)
     st = session.state()
     assert st["result"] and "error" not in st["result"], st["result"]
+
+
+def test_a_game_is_saved_in_its_own_file(tmp_path):
+    import json
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.new_game(ZED, SHEN, seat="A", opponent="simple_trade", seed=5)
+    _play(session, lambda p: {"action": 0} if p["type"] == "decision" else
+          {"return": []} if p["type"] == "mulligan" else {"option": 0} if p["type"] == "choice" else {})
+    files = list((tmp_path / "coach" / "partite").glob("*_vs_*.json"))
+    assert len(files) == 1
+    data = json.loads(files[0].read_text(encoding="utf-8"))
+    assert data["events"] and data["log"] and data["replay"]["seed"] == 5 and data["winner"]
+    session.report("nota")
+    assert json.loads(files[0].read_text(encoding="utf-8"))["reports"][0]["note"] == "nota"

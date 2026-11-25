@@ -108,6 +108,19 @@ class _ThreadLog:
         self.real.flush()
 
 
+class _Full(deque):
+    """A display deque (the last `maxlen` lines) that also keeps every line in `full`, for the saved
+    game (CoachSession._save_game). A rewind cuts `full` back to the checkpoint's length."""
+
+    def __init__(self, maxlen: Optional[int] = None):
+        super().__init__(maxlen=maxlen)
+        self.full: list = []
+
+    def append(self, item) -> None:
+        self.full.append(item)
+        super().append(item)
+
+
 def _thread_log() -> _ThreadLog:
     if not isinstance(sys.stdout, _ThreadLog):
         sys.stdout = _ThreadLog(sys.stdout)
@@ -1349,8 +1362,11 @@ class CoachSession:
         self._answers: "queue.Queue" = queue.Queue()
         self.pending: Optional[dict] = None
         self.examples: list = []
-        self.log: deque = deque(maxlen=400)
-        self.events: deque = deque(maxlen=300)
+        self.log: deque = _Full(maxlen=400)       # .full: every line, for the saved game
+        self.events: deque = _Full(maxlen=300)
+        self.notes: list = []                     # the reports made in this game
+        self.partita_path: Optional[Path] = None  # where _save_game wrote the game
+        self._partita_name: Optional[str] = None
         self.result: Optional[dict] = None
         self.info: dict = {}
         self.view: Optional[dict] = None    # the board, snapshot on the game thread
@@ -1446,6 +1462,7 @@ class CoachSession:
                      "deck_opp": Path(deck_opp).stem, "opponent": opponent,
                      "net": str(self.net_path) if net is not None else None,
                      "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+        self._partita_name = f"{time.strftime('%Y%m%d_%H%M%S')}_{Path(deck_a).stem}_vs_{Path(deck_b).stem}.json"
         if opponent == "campione":
             self.info.update(campione=str(self.campione_path), budget=self.budget)
         if apertura:
@@ -1732,6 +1749,8 @@ class CoachSession:
                            "you_won": result.winner == self.side}
             if not self._abandoned:
                 self._save(result.winner)
+            else:
+                self._save_game(abandoned=True)
         except _ReplayError as exc:
             self.result = {"error": f"Annulla: la partita rigiocata è diversa ({exc})"}
         except Exception as exc:  # noqa: BLE001
@@ -1777,6 +1796,8 @@ class CoachSession:
             return
         cp, self._replaying = self._resume_cp, False
         _thread_log().sinks[threading.get_ident()] = self.log
+        del self.log.full[cp["n_log"]:]
+        del self.events.full[cp["n_events"]:]
         self.log.clear()
         self.log.extend(cp["log"])
         self.events.clear()
@@ -1795,7 +1816,8 @@ class CoachSession:
         """The page as the coach is asked a decision: where a rewind takes them back."""
         self._snapshot()
         return {"record": len(getattr(self.loop, "record", ())), "events": list(self.events),
-                "log": list(self.log), "view": self.view, "extras": self.extras,
+                "log": list(self.log), "n_log": len(self.log.full), "n_events": len(self.events.full),
+                "view": self.view, "extras": self.extras,
                 "examples": len(self.examples), "looked": self.looked, "_seen": self._seen,
                 "opp_discards": list(self.opp_discards), "stop_on_opp_chain": self.stop_on_opp_chain,
                 "opp_mulligan": self.opp_mulligan, "opening": self.opening}
@@ -2029,6 +2051,8 @@ class CoachSession:
             self.activity = self._finishing()
             if self.pending is not None:
                 self._answers.put({})
+        if self._abandoned:
+            self._save_game(abandoned=True)
 
     def rewind(self) -> None:
         """Take back the coach's last decision, as RiftAtlas's Rewind: the game
@@ -2083,7 +2107,7 @@ class CoachSession:
                 "regole": self.info.get("regole", self.regole if self.motore == "rust" else REGOLE_PYTHON),
                 "motore": self.info.get("motore", self.motore),
                 "can_rewind": self.status == "waiting" and not self.autoplay and bool(self.checkpoints),
-                "rewinds": self.rewinds}
+                "rewinds": self.rewinds, "partita": str(self.partita_path) if self.partita_path else None}
 
     def _opening_cards(self) -> dict:
         """The cards the opening shows: the coach's battlefields and, once shown, the champion's."""
@@ -2095,11 +2119,48 @@ class CoachSession:
 
     def report(self, note: str) -> Path:
         path = self.out_dir / "reports.jsonl"
+        self.notes.append({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "note": note})
         with open(path, "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "note": note,
                                  **self.state(), "log": self._copy(self.log),
-                                 "opp_mulligan": self.opp_mulligan}, default=str) + "\n")
+                                 "opp_mulligan": self.opp_mulligan, "partita": self._game_file()},
+                                default=str) + "\n")
+        self._save_game()
         return path
+
+    def _game_file(self) -> Optional[str]:
+        """Where this game's file is (or will be): runs/coach/partite/<start>_<deckA>_vs_<deckB>.json."""
+        return None if self._partita_name is None else str(self.out_dir / "partite" / self._partita_name)
+
+    def _save_game(self, abandoned: bool = False) -> Optional[Path]:
+        """The whole game in its own file, to be sent for review: overwritten at each call (game end,
+        abandon, report), the same file for the same game. The full Italian events and technical log,
+        what the page knew of the opening, and what replays the game exactly (seed, opening,
+        the recorded answers). Never breaks the game: None when it can't be written."""
+        if self._partita_name is None or self._build is None:
+            return None
+        try:
+            b, r = self._build, self.result or {}
+            rec = list(getattr(self.loop, "record", None) or [])
+            data = {"info": self.info, "apertura": self.apertura, "opp_mulligan": self.opp_mulligan,
+                    "status": self.status, "abandoned": abandoned or self._abandoned,
+                    "result": self.result, "winner": r.get("winner"), "turns": r.get("turns"),
+                    "rewinds": self.rewinds, "reports": list(self.notes),
+                    "events": list(self.events.full), "log": list(self.log.full),
+                    "replay": {"seed": b["seed"], "seat": self.side, "opponent": b["opponent"],
+                               "deck_a": str(b["deck_a"]), "deck_b": str(b["deck_b"]),
+                               "bf_a": b.get("bf_a"), "bf_b": b.get("bf_b"), "starter": b.get("starter"),
+                               "iterazioni": self.iterazioni, "regole": self.info.get("regole"),
+                               "motore": self.info.get("motore"), "answers": rec}}
+            path = self.out_dir / "partite" / self._partita_name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(data, default=str, ensure_ascii=False), encoding="utf-8")
+            tmp.replace(path)
+            self.partita_path = path
+            return path
+        except Exception:  # noqa: BLE001 — a failed copy never stops the game
+            return None
 
     # -- training examples -----------------------------------------------------------
 
@@ -2133,6 +2194,7 @@ class CoachSession:
                                  "you_won": winner == self.side, "turns": turns,
                                  "decisions": len(self.examples), "rewinds": self.rewinds,
                                  "corrections": sum(1 for e in self.examples if e["corrected"])}) + "\n")
+        self._save_game()
         return path
 
 

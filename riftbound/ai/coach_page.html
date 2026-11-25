@@ -740,6 +740,7 @@ function renderModal() {
        <p class="hint">${S.observation ? `Punteggio ${S.observation.my_points} a ${S.observation.opp_points}, ` : ""}${r.turns} turni.
        ${!S.saving ? "Partita abbandonata: non è stato salvato niente." : !S.advice ? "Il risultato è salvato."
          : `Salvate ${S.decisions} tue decisioni, di cui ${S.corrections} diverse dal consiglio della rete: serviranno ad allenarla.`}
+       ${S.partita ? " Partita salvata in " + esc(S.partita) + "." : ""}
        ${S.advice && S.saving && S.info && S.info.finished_by_net ? " La parte finale l'ha giocata la rete da sola (quelle mosse non sono salvate)." : ""}</p>`) : "";
   const opts = (S.decks || []).map((d) => `<option value="${esc(d.path)}">${esc(d.name)}</option>`).join("");
   el.innerHTML = `<div class="modal"><div class="box">
@@ -812,7 +813,7 @@ async function send(answer) {
 }
 $("#sendReport").onclick = async () => {
   const note = $("#note").value.trim(); if (!note) return;
-  const j = await post("/api/report", { note }); if (j.ok) { $("#note").value = ""; $("#reportOk").textContent = "Salvata, grazie!"; }
+  const j = await post("/api/report", { note }); if (j.ok) { $("#note").value = ""; $("#reportOk").textContent = "Salvata, grazie!" + (S.partita ? " Partita salvata in " + S.partita : ""); }
 };
 function render() {
   if (S.status !== "waiting") focus = 0;

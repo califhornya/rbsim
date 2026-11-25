@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-47 unite); apertura della partita su `claude/brave-ramanujan-jk1cha`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-48 unite); segnalazioni 10-13 su `claude/gifted-thompson-nzcur7`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -61,10 +61,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
 - 25/11 tavolo come il tappetino ufficiale (`coach_page.html`).
-- 25/11 apertura nella pagina (`ef54d27`, `704d578`): Rust `build_game(bf_a, bf_b)` come Python (senza scelte estrazioni
-  invariate; `test_campi.py`), flusso campo/d20/chi comincia su entrambi i motori (`CoachSession.scegli_campo`, `inizia`,
-  `/api/campo`, `/api/inizia`; `test_apertura.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
-  `tests/rust` 243, coach 59, apertura 11 verdi; Playwright fino al mulligan.
+- 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
+  `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
+- 25/11 segnalazioni 10-13 (`docs/bot/SEGNALAZIONI.md`): D78 segnato; dig che rivela nel registro; ACCELERATE chiesto prima di
+  "Come paghi?" (`PayWay.accelerate`); ogni partita salvata in `runs/coach/partite/`, registro tecnico su Rust. `tests/rust` 257.
 
 ## In corso
 
