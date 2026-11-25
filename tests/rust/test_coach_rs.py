@@ -107,6 +107,10 @@ def test_a_whole_game_against_simple_trade(tmp_path, mu, seed):
     assert st["status"] == "over" and st["result"] and "error" not in st["result"], st["result"]
     assert st["regole"] == PROFILO and st["info"]["regole"] == PROFILO and st["motore"] == "rust"
     assert st["result"]["winner"] in ("A", "B", "DRAW") and st["result"]["turns"] > 1
+    # The finished page shows the final state (PR 47, Codex): the winner's points reach the target.
+    obs, win = st["observation"], st["result"]["winner"]
+    if win != "DRAW":
+        assert obs["my_points" if win == "A" else "opp_points"] >= obs["victory_score"], (win, obs["my_points"], obs["opp_points"])
     assert stats["decision"] > 5 and stats["mulligan"] == 1 and st["events"] and st["log"] is not None
     RUN[(mu, seed)] = stats
     row = json.loads((tmp_path / "coach" / "games.jsonl").read_text().splitlines()[-1])

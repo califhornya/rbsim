@@ -115,7 +115,12 @@ class RustGame:
         self._save_group: Optional[frozenset] = None     # the dying group the page was asked about
         self._save_pick: Optional[int] = None            # ... and the unit it saves (its id; None: no one)
         s.loop = RsLoop(self.record)
-        winner, turns = self._game().start()
+        g = self._game()
+        winner, turns = g.start()
+        # The final state (PR 47, Codex): a game can end with no decision after the last event
+        # (a point scored at the start of a turn); the page must show where it really ended.
+        self._flush()
+        self._load({"state_raw": json.loads(g.raw_dump())})
         return SimpleNamespace(winner=winner, turns=turns)
 
     def _game(self):
