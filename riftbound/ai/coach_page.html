@@ -606,9 +606,10 @@ function renderCoach() {
 function closeMenu() { $("#menu").innerHTML = ""; }
 function openMenu(ref, el) {
   const p = S.pending, by = actionsBySrc(), list = by[ref] || [], r = REF[ref] || {};
-  const seen = new Set(), items = [];
-  list.forEach((i) => { const t = p.actions[i].text; const k = suggOf(i);
-    if (seen.has(t) && k < 0) return; seen.add(t); items.push({ i, t, k }); });
+  // One item per text (two copies of a card, a spell whatever its battlefield): the net's idea if one is.
+  const items = [];
+  list.forEach((i) => { const t = p.actions[i].text, k = suggOf(i), j = items.findIndex((it) => it.t === t);
+    if (j < 0) items.push({ i, t, k }); else if (k >= 0 && items[j].k < 0) items[j] = { i, t, k }; });
   if (r.pile && r.pile !== "deck") items.push({ look: r.pile, t: r.pile === "trash" ? "Guarda il cimitero" : "Guarda le carte bandite" });
   if (!items.length) return;
   const rect = el.getBoundingClientRect();

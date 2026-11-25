@@ -1,7 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo di lavoro `rust` (default su GitHub; Rengar PR 43, Ivern PR 44 e
-Sett PR 45 unite; pagina col campione su `claude/gifted-gauss-v0qj89`). `main` resta fermo al 19/11.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-46 unite); correzione Punch First su `claude/lucid-dirac-0aq2d3`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -61,7 +60,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `allenatore.bat` con `--extra rl` (il campione anche da `../rbsim/runs/`). Immagini: copia locale, se no
   Piltover Archive in cache (`riftbound/ai/card_images.py`, stessa cartella degli scenari), campi
   raddrizzati in orizzontale; chi inizia nel mulligan, nel turno e nel registro; le carte guardate in cima al mazzo
-  (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. `tests/test_coach.py` 21 verdi; Playwright.
+  (Trifarian Captain, Predict); Sett The Boss chiede quale unità salvare. Playwright.
+- 25/11 pagina: magia uguale su ogni campo (Punch First: "a unit" anche in base) = una voce "Lancia X", poi il bersaglio;
+  `spell_lane_free` (`coach.py`) confronta i lanci su copie; En Garde resta per campo. Motore invariato; `test_coach.py` 24 verdi.
 - 25/11 D72-D76 corretti in Rust sul profilo `6427b90+D72-D76` (`docs/RUST.md` "Profili delle regole", AUDIT.md):
   test rossi prima (`tests/rust/test_d72_d76.py`), correzione dati D74/D75 al caricamento del registro, contatori
   delle correzioni. Storico dopo i fix: 600/600 identiche (autonome, replay, PPO, arena a lavoro fisso; semi
@@ -69,8 +70,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `d72d76_confronto_*`): 8 identiche, ogni prima differenza spiegata (5 nate nella ricerca). `tests/rust` 132, Python 1.960.
 
 ## In corso
-- Ramo pronto per la PR verso `rust` (pagina col campione, D72-D76 in Rust). Giocate del campione da
-  misurare in `docs/bot/GIOCATE.md` §7 (Call to Glory e Punch First sprecate).
+- Giocate del campione da misurare in `docs/bot/GIOCATE.md` §7 (Call to Glory e Punch First sprecate).
 
 ## Prossimi passi
 1. Arene EK su Rust a 0,030 s (`arena_mazzi.py --motore rust --budget-candidato 0.03

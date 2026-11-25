@@ -292,6 +292,40 @@ def mulligan_text(hand: list, back: list) -> str:
     return "Rimanda " + " e ".join(hand[i] for i in back)
 
 
+def _cast_outcome(loop, side: str, action):
+    """What casting `action` (a SPELL) does, as the players see it: the choices
+    asked on the way (default answers) and the table after, for both seats.
+    Played on a copy of the game; None if the copy fails."""
+    from riftbound.core.loop import GameLoop
+    clone = loop.gs.clone()
+    copy = GameLoop(clone)
+    asked: list = []
+
+    def chooser(_loop, kind, s, options, default, source):
+        asked.append((s, kind, [option_text(_loop.gs, s, o) for o in options]))
+        return None
+    copy.chooser = chooser
+    try:
+        copy._apply_action(clone.get_player(side), action)
+        seen = [(Observation.from_state(clone, s).to_dict(), _board_extras(clone, s)) for s in ("A", "B")]
+    except Exception:  # noqa: BLE001 — a comparison never stops the game
+        return None
+    return json.dumps([asked, seen], sort_keys=True, default=str)
+
+
+def spell_lane_free(loop, side: str, point: DecisionPoint, idx) -> bool:
+    """Whether hand card `idx`, a spell, does the same whichever battlefield the
+    engine aims it at (§355: a spell has no place; the engine's battlefield only
+    narrows "a unit here"). Punch First's "a unit" is any unit, the base's too:
+    the page then offers one cast, and the target is the next question."""
+    lanes = [a.to_engine() for a in legal_actions(loop, point, side)
+             if a.kind == "SPELL" and a.to_engine()[1] == idx]
+    if len(lanes) < 2:
+        return False
+    first = _cast_outcome(loop, side, lanes[0])
+    return first is not None and all(_cast_outcome(loop, side, a) == first for a in lanes[1:])
+
+
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
               DecisionPoint.SHOWDOWN_ACTION: "Passa", DecisionPoint.REACTION: "Non reagire"}
 
@@ -323,6 +357,8 @@ def action_info(loop, side: str, viewer: str, point: DecisionPoint, action) -> d
         else:
             how = "" if point == DecisionPoint.TURN_ACTION else " con AMBUSH"
             text, to = f"Gioca {name}{how} su {_bf_name(gs, dst)}", f"bf:{dst}"
+    elif kind == "SPELL" and spell_lane_free(loop, side, point, idx):
+        text = f"Lancia {name}"          # one cast; its target is the next question
     elif kind == "SPELL":
         text, to = f"Lancia {name} (campo: {_bf_name(gs, lane)})", f"bf:{lane}"
     elif kind == "GEAR":

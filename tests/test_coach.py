@@ -657,3 +657,62 @@ def test_sett_the_boss_offers_only_the_units_it_can_save(tmp_path):
     session.answer({"option": 0})
     game.join(timeout=10)
     assert [u.card.name for u in a.base_units] == ["Pit Rookie"] and "Fiora Victorious" in [c.name for c in a.banished]
+
+
+def test_punch_first_is_one_cast_and_its_unit_can_be_in_base(tmp_path):
+    """Punch First gives "a unit" +5: any unit, the base's too. The menu
+    offered one cast per battlefield ("campo: ..."), as if the spell were
+    aimed there (Matteo, 25/11): one cast now, the unit is the next question."""
+    import sys
+    import threading
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, scripted, setup, unit
+
+    from riftbound.ai.coach import _CoachChooser, action_info
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, b = setup(active="A")
+    scripted(loop, a, b)
+    a.base_units.append(unit("Reckless Innovator"))
+    bf = loop.gs.battlefields[1]
+    bf.units_B.extend([unit("Pit Rookie"), unit("Sett Kingpin")])
+    bf._note_control()
+    a.hand.append(card("Punch First"))
+    casts = [g.to_engine() for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "SPELL"]
+    infos = [action_info(loop, "A", "A", DecisionPoint.TURN_ACTION, t) for t in casts]
+    assert len(casts) == 2 and {(i["text"], i["dst"]) for i in infos} == {("Lancia Punch First", None)}
+    session = CoachSession(None, tmp_path / "coach", opponent_pause=0)
+    session.gs, session.side, session.loop = loop.gs, "A", loop
+    session._watch(loop)
+    loop.chooser = _CoachChooser("A", session, loop, None)
+    game = threading.Thread(target=loop._apply_action, args=(a, casts[1]))
+    game.start()
+    end = time.time() + 10
+    while session.pending is None and time.time() < end:
+        time.sleep(0.005)
+    p = session.pending
+    assert [o["text"] for o in p["options"]] == [
+        "Reckless Innovator (tua, Might 3, in base)", "Pit Rookie (avversaria, Might 2, su campo 2)",
+        "Sett Kingpin (avversaria, Might 5, su campo 2)"]
+    session.answer({"option": 0})
+    game.join(timeout=10)
+    assert a.base_units[0].might == 8 and [u.might for u in bf.units_B] == [2, 5]
+
+
+def test_a_spell_that_counts_its_battlefield_still_says_which():
+    """En Garde's "+1 more if it is the only unit you control there": the
+    battlefield matters, one cast for each."""
+    import sys
+    sys.path.insert(0, str(REPO / "tests" / "audit"))
+    from audit_helpers import card, setup, unit
+
+    from riftbound.ai.coach import action_info
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    loop, a, _ = setup(active="A")
+    loop.gs.battlefields[0].units_A.append(unit("Pit Rookie"))
+    loop.gs.battlefields[1].units_A.extend([unit("Fiora Victorious"), unit("First Mate")])
+    a.hand.append(card("En Garde"))
+    texts = [action_info(loop, "A", "A", DecisionPoint.TURN_ACTION, g.to_engine())["text"]
+             for g in legal_actions(loop, DecisionPoint.TURN_ACTION, "A") if g.kind == "SPELL"]
+    assert texts == ["Lancia En Garde (campo: campo 1)", "Lancia En Garde (campo: campo 2)"]
