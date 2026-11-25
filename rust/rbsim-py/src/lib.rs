@@ -247,6 +247,18 @@ impl Game {
         Ok(())
     }
 
+    /// Opt-in: a search seat looks for a win this turn (by moves) before searching.
+    fn set_search_win_probe(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().win_probe = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// A search seat's rows (JSON list), [] for another seat.
     fn search_log(&self, seat: &str) -> PyResult<String> {
         let s = seat_of(seat)?;

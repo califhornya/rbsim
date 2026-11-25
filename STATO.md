@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-48 unite); segnalazioni 10-13 su `claude/gifted-thompson-nzcur7`.
+Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-49 unite); segnalazione 14 su `claude/optimistic-babbage-mec0ht`.
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -60,11 +60,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `riftbound/ai/coach_rs.py` (campione a lavoro fisso N=42, rewind rigiocando le risposte, Sett The Boss, carte guardate);
   `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python.
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
-- 25/11 tavolo come il tappetino ufficiale (`coach_page.html`).
 - 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
   `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
 - 25/11 segnalazioni 10-13 (`docs/bot/SEGNALAZIONI.md`): D78 segnato; dig che rivela nel registro; ACCELERATE chiesto prima di
   "Come paghi?" (`PayWay.accelerate`); ogni partita salvata in `runs/coach/partite/`, registro tecnico su Rust. `tests/rust` 257.
+- 25/11 segnalazione 14: il campione della pagina cerca prima la vittoria nel turno coi soli spostamenti (`win_probe`; arena invariata).
 
 ## In corso
 
@@ -78,7 +78,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
 4. Pagina su Rust (Matteo la usa): rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali)
-   col checkpoint vero sul Mac; unire `claude/gifted-thompson-nzcur7` in `rust` (PR) quando Matteo è d'accordo.
+   col checkpoint vero sul Mac; unire `claude/optimistic-babbage-mec0ht` in `rust` (PR) quando Matteo è d'accordo; `win_probe` da misurare in arena.
 5. Segnalazioni in `docs/bot/SEGNALAZIONI.md` (D78 Vex/Showstopper segnato, si corregge quando Matteo lo dice); scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali

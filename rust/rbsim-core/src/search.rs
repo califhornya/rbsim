@@ -811,6 +811,8 @@ pub struct SearchCore {
     cur_search: usize,
     sim: usize,
     me_ref: Option<Weak<RefCell<SearchCore>>>,
+    /// Opt-in (off by default): before searching, look for a win this turn by moves.
+    pub win_probe: bool,
 }
 
 static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
@@ -856,6 +858,7 @@ impl SearchCore {
             cur_search: 0,
             sim: 0,
             me_ref: None,
+            win_probe: false,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
         LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -951,8 +954,18 @@ impl SearchCore {
         if root_legal.len() <= 1 {
             return Ok(root_legal.first().cloned().unwrap_or_else(Action::pass));
         }
-        let tree = self.search(g, Point::TurnAction, &root_legal, cards_played, None)?;
-        let action = self.conclude(g, &tree, &root_legal, Point::TurnAction)?;
+        let probed = if self.win_probe && self.lockstep.is_none() {
+            self.win_this_turn(g, &root_legal, cards_played)?
+        } else {
+            None
+        };
+        let action = match probed {
+            Some(a) => a,
+            None => {
+                let tree = self.search(g, Point::TurnAction, &root_legal, cards_played, None)?;
+                self.conclude(g, &tree, &root_legal, Point::TurnAction)?
+            }
+        };
         if self.turn_seen != Some(g.gs.turn) {
             self.turn_seen = Some(g.gs.turn);
             self.turns += 1;
@@ -961,6 +974,104 @@ impl SearchCore {
             }
         }
         Ok(action)
+    }
+
+    /// Opt-in probe: a line of moves (and the commit of the pending move) that
+    /// wins this turn by conquests. Uses no `self.rng`. Some(first action) or None.
+    fn win_this_turn(&mut self, g: &Game, root_legal: &[Action], cards_played: i64) -> R<Option<Action>> {
+        const PROBE_SEED: u64 = 0x5EED;
+        const MAX_DEPTH: usize = 8;
+        const MAX_APPLIES: usize = 3000;
+        let side = self.side;
+        let n_bf = g.gs.battlefields.len() as i64;
+        let need = g.gs.victory_score - g.gs.points[side.idx()];
+        let unscored = g.gs.battlefields.iter().filter(|b| !b.scored_this_turn[side.idx()]).count() as i64;
+        if need < 1 || need > unscored {
+            return Ok(None);
+        }
+        let mut applies = 0usize;
+        let mut stack: Vec<Vec<Action>> = vec![Vec::new()];
+        // Depth-first: the stack holds prefixes still to expand (children pushed in reverse).
+        while let Some(prefix) = stack.pop() {
+            let legal: Vec<Action> = if prefix.is_empty() {
+                root_legal.to_vec()
+            } else {
+                // rebuild the state of this node to list its menu
+                let Some(c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &prefix, cards_played, &mut applies, MAX_APPLIES) else {
+                    if applies > MAX_APPLIES { return Ok(None); }
+                    continue;
+                };
+                let mut c = c;
+                match c.legal_actions(Point::TurnAction, side) {
+                    Ok(l) => l,
+                    Err(_) => continue,
+                }
+            };
+            let mut kids: Vec<Action> = Vec::new();
+            for a in legal.iter() {
+                let ok = match a.kind {
+                    AKind::Move => matches!(a.dst, Some(d) if d >= 0 && d < n_bf),
+                    AKind::Pass => true, // only the commit of a pending move; checked on the state below
+                    _ => false,
+                };
+                if ok {
+                    kids.push(a.clone());
+                }
+            }
+            for a in kids.into_iter() {
+                let mut line = prefix.clone();
+                line.push(a.clone());
+                let Some(c) = Self::probe_replay(&g.gs, side, PROBE_SEED, &prefix, cards_played, &mut applies, MAX_APPLIES) else {
+                    if applies > MAX_APPLIES { return Ok(None); }
+                    continue;
+                };
+                let mut c = c;
+                if a.kind == AKind::Pass && !matches!(c.gs.pending_move, Some((_, s)) if s == side) {
+                    continue;
+                }
+                if applies >= MAX_APPLIES {
+                    return Ok(None);
+                }
+                applies += 1;
+                let cpt = cards_played + prefix.len() as i64;
+                if c.apply_action(side, &a, cpt).is_err() || c.recompute_passives().is_err() {
+                    continue;
+                }
+                match terminal_value(&c.gs, side) {
+                    Some(v) if v == 1.0 => {
+                        if let Some(log) = self.log.as_mut() {
+                            let labels: Vec<String> = line.iter().map(|x| x.label.clone()).collect();
+                            log.push(json!({"k": "vittoria", "seat": side.name(), "turn": g.gs.turn, "line": labels}));
+                        }
+                        return Ok(Some(line[0].clone()));
+                    }
+                    Some(_) => continue,
+                    None => {}
+                }
+                if c.gs.active != side || line.len() >= MAX_DEPTH {
+                    continue;
+                }
+                stack.push(line);
+            }
+        }
+        Ok(None)
+    }
+
+    /// A fresh copy of the root with `prefix` applied (counts every apply).
+    fn probe_replay(gs: &GameState, side: Side, seed: u64, prefix: &[Action], cards_played: i64,
+                    applies: &mut usize, max: usize) -> Option<Game> {
+        let mut c = search_copy(gs, side, seed);
+        for (i, a) in prefix.iter().enumerate() {
+            if *applies >= max {
+                *applies = max + 1;
+                return None;
+            }
+            *applies += 1;
+            if c.apply_action(side, a, cards_played + i as i64).is_err() || c.recompute_passives().is_err() {
+                return None;
+            }
+        }
+        Some(c)
     }
 
     /// py: search (and _Budget.search): the root is node 0.
