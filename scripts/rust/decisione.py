@@ -10,8 +10,7 @@ la prima riga dice se è così). Con --turno T le decisioni bersaglio sono quell
 --tipo (turno | reazione | showdown | tutti; default turno). Per ogni valore: la mossa scelta, le prime 6 per visite
 (n, q, P) e, per ogni --attese (sottostringa dell'etichetta), se è nel menu: visite, q, rango.
 `concordanza`: autonome campione contro campione (42 iterazioni + sonda); su un campione di decisioni per tipo di
-punto le rifà a M iterazioni e conta le uguali. Il win_probe non gira nel rifacimento (ganci): docstring di
-riftbound/rs/decisione_rs.py. Il checkpoint di default è runs/sett/ekris_s12/ckpt_040000.pt; --pesi-casuali prova
+punto le rifà a M iterazioni e conta le uguali. Il win_probe resta acceso nel rifacimento (override in Rust). Il checkpoint di default è runs/sett/ekris_s12/ckpt_040000.pt; --pesi-casuali prova
 con una rete a pesi casuali (dove il checkpoint non c'è).
 """
 from __future__ import annotations
@@ -66,7 +65,7 @@ def cmd_rifai(a) -> int:
         e = elenco[k]
         print(f"[k={k} turno {e['turn']} {e['point']}] originale: {e['action']}; riproduce la mossa originale: "
               f"{'sì' if base['riproduce'] else 'no'}" + ("" if base["prefisso_ok"] else " (il prefisso non coincide)")
-              + (" [dopo una decisione della sonda: il rifacimento non la riproduce]" if base["dopo_sonda"] else ""))
+              + (" [dopo decisioni della sonda: indice coerente, la sonda gira anche nel rifacimento]" if base["dopo_sonda"] else ""))
         for r in D.testo_posizione(base["posizione"]):
             print("  " + r[:200])
         out = {"k": k, "originale": e["action"], "posizione": base["posizione"], "varianti": {}}

@@ -46,9 +46,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   verificata sul Mac col campione (20/20 a 50 iterazioni; Rust ×14,6 a partita).
 - 24/11 prova di forza (arena mista a passo comune, Mac, 800 coppie): bot Rust a 0,030 s contro Python a 0,400 s =
   0,4938 ± 0,0158, lim. inf. 0,4780 > 0,47: **PROMOSSO 0,030 s per EK**. Partita Rust a 0,03 s: 2,36 s.
-- 24/11 tappe Rengar e Ivern (`docs/rust/RAPPORTO_RENGAR.md`, `RAPPORTO_IVERN.md`): tenuti e Mac col campione identici.
-- 25/11 tappa Sett (`docs/rust/RAPPORTO_SETT.md`, `INVENTARIO_SETT.md`): autonome, PPO, replay, arena e tenuti con gli
-  altri matchup identici (`docs/rust/misure/`); perimetro `COPERTI` coi cinque mazzi fra loro.
+- 24-25/11 tappe Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): tutto identico a Python; `COPERTI` = i cinque mazzi.
 - 24/11 pagina col campione (`scripts/coach.py`, `riftbound/ai/coach.py`, `coach_page.html`, `--campione`, `--net`
   facoltativo; lanciatori `allenatore.command`/`.bat`; immagini in cache `card_images.py`). Playwright.
 - 25/11 pagina (segnalazioni, `docs/bot/SEGNALAZIONI.md`): "Lancia X" unica, "Come paghi?", opzioni uniche, rewind (R).
@@ -70,7 +68,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 
 ## In corso
 Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`, domande in `DOMANDE_ASTRA.md`). Matteo: 5 partite Evelynn-Sett
-(poi 10), segnando i turni in cui il bot regala tempo o costringe a cambiare piano. Qui: strumenti per il Mac.
+(poi 10), "Segnala" con TEMPO/PIANO. Pronti per il Mac (`tests/rust` 278): `scripts/rust/calibra_mac.command` (passi 1 e 3),
+`decisione.py rifai` (casi salvati della pagina, caso 14 compreso; override in Rust, sonda accesa), `episodi.py` (§7/§8).
 
 ## Prossimi passi
 1. Calibrazione sul Mac col vero `ckpt_040000`, profilo D72-D77, `win_probe` uguale. 42 iterazioni contro 0,030 s:
@@ -91,6 +90,8 @@ Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`, domande in `DOMANDE_ASTRA.m
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
   `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`, `sett_mac.command`,
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
+- Calibrazione e diagnosi del campione: `scripts/rust/calibra_campione.py` (misura, forza, profilo), `decisione.py`
+  (rifai, concordanza; `riftbound/rs/decisione_rs.py`), `episodi.py`; arena con `--iterazioni-*`, `--win-probe-*`, `--avversario-mano`.
 - `tests/rust/`: test sull'estensione (`test_<mazzo>.py`, `test_d72_d76.py`, `test_d77.py`); qui `maturin build --release` + `pip install`.
 - `scripts/ppo.py` (`_motore`, `--regole`), `scripts/diag/arena_mazzi.py` (`--motore rust`, `--regole`);
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).

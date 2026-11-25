@@ -818,6 +818,9 @@ pub struct SearchCore {
     me_ref: Option<Weak<RefCell<SearchCore>>>,
     /// Opt-in (off by default): before searching, look for a win this turn by moves.
     pub win_probe: bool,
+    /// Diagnosis (decisione_rs): the search with this index (k, as `info["k"]`) does exactly this
+    /// many iterations at a fixed workload, whatever the point or the budget; nothing else changes.
+    pub override_at: Option<(usize, usize)>,
 }
 
 static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
@@ -868,6 +871,7 @@ impl SearchCore {
             sim: 0,
             me_ref: None,
             win_probe: false,
+            override_at: None,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
         LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1130,9 +1134,10 @@ impl SearchCore {
         self.cur_search = self.searches;
         self.sim = 0;
         self.searches += 1;
-        let fixed = match self.lockstep.as_mut() {
-            Some(l) => l.before(&info)?,
-            None => None,
+        let fixed = match (self.override_at, self.lockstep.as_mut()) {
+            (Some((k, n)), _) if k == self.cur_search => Some(n),
+            (_, Some(l)) => l.before(&info)?,
+            _ => None,
         };
         if let Some(n) = fixed {
             for _ in 0..n {

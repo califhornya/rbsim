@@ -14,17 +14,13 @@ dà tutte le decisioni cercate del campione nella partita originale per sceglier
   Chiavi facoltative: "casuali": True (rete a pesi casuali: `PPONet()` con `torch.manual_seed(0)`, come la
   misura di N=42 in coach_rs.py, per provare dove il checkpoint non c'è), "ckpt", "max_turni".
 
-Ganci e win_probe (verificato in search.rs, `decide_action`): con i ganci (`before`/`after`, il lockstep)
-il win_probe NON gira (`self.win_probe && self.lockstep.is_none()`). Il rifacimento ha i ganci sul posto del
-campione, dunque salta la sonda: dove la partita originale ha deciso con la sonda (il turno in cui il campione
-trova una vittoria in questo turno, senza ricerca né riga di log) il rifacimento cerca invece, consuma
-numeri casuali e diverge da lì in poi. Prima di quel turno la partita si riproduce uguale. Nessun
-aggiramento in Rust: `rifai` confronta il prefisso (azioni delle ricerche 0..k) con l'originale e dice
-`riproduce` sì/no; le decisioni dell'ultimo turno del campione (di una partita che lui vince) sono quelle a rischio.
-
-Dopo la ricerca k il rifacimento si ferma dall'osservatore della traccia (`trace_on`) sull'evento di decisione
-di k, non dal gancio `after` (che con un numero fisso di iterazioni non viene chiamato, e comunque scatta
-prima che la riga di log di k esista): lo stato dell'evento è la posizione di k.
+win_probe: il rifacimento NON usa i ganci lockstep (che lo spegnerebbero: `win_probe && lockstep.is_none()`
+in `decide_action`) ma `Game.set_search_override(seat, k, iterazioni)`: la ricerca con indice k fa quelle
+iterazioni a lavoro fisso e tutto il resto, sonda compresa, resta com'e'. La sonda decide prima di `search`, non
+consuma un indice k: l'indice e' coerente fra originale e rifacimento perche' la sonda gira in entrambi.
+Il rifacimento si ferma dall'osservatore della traccia (`trace_on`) sull'evento di decisione di k (l'ordinale
+dell'evento si ricava dall'originale); lo stato dell'evento e' la posizione di k. Le righe di log portano `iters`
+e `secs` (`set_search_timing`).
 """
 from __future__ import annotations
 
@@ -109,25 +105,19 @@ def _chiave(P: dict) -> str:
         (str(len(P["answers"])) if P["answers"] is not None else "")
 
 
-def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ganci: bool = True):
-    """Una partita. `k`: la ricerca del campione da rifare (None: la partita originale, senza ganci);
-    si ferma sull'evento di decisione di k. -> (righe di log "search", eventi del campione, evento di k).
+def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None):
+    """Una partita. `k`, `iterazioni`: la ricerca del campione da rifare con quelle iterazioni (override in Rust;
+    None: l'originale); `ordine`: l'ordinale, fra gli eventi di decisione del campione, di quella di k: la
+    partita si ferma li'. -> (righe di log "search", eventi del campione, evento di k).
     `stato(e)`: tiene lo stato (state_raw) degli eventi del campione per cui è vero."""
     from riftbound.rs import arena_rs, rust_bridge
     camp, umano = P["camp"], P["umano"]
     g = rust_bridge.build(P["seed"], P["deck_a"], P["deck_b"], P["starter"], P["max_turni"],
                           regole=P["regole"], bf_a=P["bf_a"], bf_b=P["bf_b"])
     probs = rete(P["ckpt"], P["casuali"])
-    st = {"armato": False, "k": None, "evento": None, "finestra": None, "nonpass": False}
+    st = {"evento": None, "finestra": None, "nonpass": False, "n": 0}
     eventi: list = []
     n_ask = [0]
-
-    def before(info):
-        i = json.loads(info)
-        if k is not None and i["k"] == k:
-            st["armato"] = True
-            return -1 if iterazioni is None else int(iterazioni)
-        return -1
 
     def watch(ev):
         if '"k":"decision"' not in ev[:60]:
@@ -149,10 +139,12 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ganci: bo
             return
         slim = {"seat": e["seat"], "point": e["point"], "turn": w.get("turn"), "showdown": sd, "menu": e["menu"],
                 "action": e["action"], "index": e["index"], "primo": primo}
-        if (st["armato"] and k is not None) or (stato is not None and stato(slim)):
+        fermo = ordine is not None and st["n"] == ordine
+        st["n"] += 1
+        if fermo or (stato is not None and stato(slim)):
             slim["state_raw"] = e["state_raw"]
         eventi.append(slim)
-        if st["armato"] and k is not None:
+        if fermo:
             st["evento"] = slim
             raise _Stop()
 
@@ -167,14 +159,16 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ganci: bo
         n_ask[0] += 1
         return answer
 
-    use = ganci and k is not None
     for s in ("A", "B"):
         if s == umano:
             continue
         mine = s == camp
-        g.set_search_agent(s, P["iterazioni"], P["seed"] * 2 + (s == "B"), None, probs, mine,
-                           before if (use and mine) else None, (lambda i, n: None) if (use and mine) else None)
+        g.set_search_agent(s, P["iterazioni"], P["seed"] * 2 + (s == "B"), None, probs, mine)
         g.set_search_win_probe(s, bool(P["probe"]))
+        if mine:
+            g.set_search_timing(s, True)
+            if k is not None and iterazioni is not None:
+                g.set_search_override(s, k, int(iterazioni))
     if umano is not None:
         g.set_human_agent(umano, ask, True, lambda ev: None)
     g.set_side_chooser()
@@ -190,7 +184,7 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ganci: bo
 def _abbina(righe: list, eventi: list) -> tuple:
     """Per ogni riga di ricerca l'evento di decisione del campione (le decisioni della sonda non hanno riga:
     i turni di azione con scelta senza riga sono `sonde`, come indice della ricerca che le segue)."""
-    out, sonde, j = [], [], 0
+    out, sonde, pos, j = [], [], [], 0
     for r in righe:
         while j < len(eventi):
             e = eventi[j]
@@ -198,13 +192,14 @@ def _abbina(righe: list, eventi: list) -> tuple:
             if e["point"] == r["point"] and e["turn"] == r["turn"] and e["action"] == r["action"] \
                     and len(e["menu"]) == len(r["menu"]):
                 out.append(e)
+                pos.append(j - 1)
                 break
             if e["point"] == "turn_action" and len(e["menu"]) > 1:
                 sonde.append(len(out))
         else:
             raise RuntimeError(f"nessun evento per la ricerca {len(out)}: la traccia non coincide col log")
     sonde += [len(righe) for e in eventi[j:] if e["point"] == "turn_action" and len(e["menu"]) > 1]
-    return out, sonde
+    return out, sonde, pos
 
 
 def originale(partita: dict, stato=None) -> list[dict]:
@@ -215,8 +210,8 @@ def originale(partita: dict, stato=None) -> list[dict]:
     got = _ORIGINALI.get(key)
     if got is None or (stato is not None and not got.get("_stato")):
         righe, eventi, _ = _gioca(P, None, None, stato)
-        ev, sonde = _abbina(righe, eventi)
-        got = _ORIGINALI[key] = {"righe": righe, "eventi": ev, "sonde": sonde, "_stato": stato is not None}
+        ev, sonde, pos = _abbina(righe, eventi)
+        got = _ORIGINALI[key] = {"righe": righe, "eventi": ev, "sonde": sonde, "pos": pos, "_stato": stato is not None}
     return [{"k": i, "seat": r["seat"], "turn": r["turn"], "point": r["point"],
              "action": e["menu"][e["index"]], "menu": e["menu"], "riga": r, "e": e}
             for i, (r, e) in enumerate(zip(got["righe"], got["eventi"]))]
@@ -224,7 +219,7 @@ def originale(partita: dict, stato=None) -> list[dict]:
 
 def sonde(partita: dict) -> list[int]:
     """Gli indici di ricerca davanti a cui il campione ha deciso con la sonda (senza ricerca né riga di log):
-    da lì il rifacimento coi ganci (senza sonda) può divergere."""
+    informazione: la sonda gira anche nel rifacimento (override in Rust), non c'è divergenza."""
     originale(partita)
     return list(_ORIGINALI[_chiave(_prepara(partita))]["sonde"])
 
@@ -302,7 +297,7 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
     if not 0 <= k < len(orig):
         raise ValueError(f"k={k} fuori dalle {len(orig)} ricerche del campione")
     P = _prepara(partita)
-    righe, _ev, e = _gioca(P, k, iterazioni)
+    righe, _ev, e = _gioca(P, k, iterazioni, ordine=_ORIGINALI[_chiave(P)]["pos"][k])
     if e is None or len(righe) <= k:
         raise RuntimeError(f"la ricerca {k} non c'è nella partita rifatta ({len(righe)} ricerche)")
     r = righe[k]
@@ -312,7 +307,8 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
     uguale = r["action"] == orig[k]["riga"]["action"]
     out = {"k": k, "turn": r["turn"], "point": r["point"], "iterazioni": iterazioni,
            "iterazioni_fatte": r.get("iters"), "azione": azione, "azione_originale": orig[k]["action"],
-           "uguale": uguale, "prefisso_ok": prefisso, "dopo_sonda": any(k >= x for x in sonde(partita)), "riproduce": prefisso and (uguale if iterazioni is None else None),
+           "uguale": uguale, "prefisso_ok": prefisso, "dopo_sonda": any(k >= x for x in sonde(partita)),  # solo informazione
+           "riproduce": prefisso and (uguale if iterazioni is None else None),
            "classifica": _classifica(r, e["menu"]), "riga": r}
     if posizione:
         out["posizione"] = riassunto(e["state_raw"], P["camp"])

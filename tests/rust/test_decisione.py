@@ -94,3 +94,24 @@ def test_episodi_e_concordanza_su_due_semi(capsys):
     r2 = D.concordanza("ES", [1, 2], 3 * ITER, per_tipo=3, casuali=True, iter_orig=ITER)
     assert sum(x["decisioni"] + x["escluse"] for x in r2.values()) >= 3
     print(f"episodi+concordanza: {time.time() - t0:.0f} s")
+
+
+def test_override_con_la_sonda_riproduce_la_vittoria():
+    """Posizione di test_vittoria.py in cui la sonda trova la vittoria: l'override sulla ricerca k non spegne la
+    sonda (a differenza dei ganci lockstep) e non cambia l'indice delle ricerche."""
+    from test_vittoria import _game
+    ref = _game(seed=0, probe=True, log=True)
+    assert ref.run_segment(1) == "B"
+    righe_ref = ref.search_log("B")
+    assert '"vittoria"' in righe_ref
+    g = _game(seed=0, probe=True, log=True)
+    g.set_search_override("B", 0, 300)
+    assert g.run_segment(1) == "B" and '"vittoria"' in g.search_log("B")    # la sonda trova ancora la vittoria
+    assert g.search_log("B")[:300] == righe_ref[:300]                        # e le righe prima di k sono le stesse
+    # senza vittoria (5 punti) la ricerca 0 fa esattamente le iterazioni chieste, sonda accesa
+    g = _game(points_b=5, seed=0, probe=True, log=True)
+    g.set_search_timing("B", True)
+    g.set_search_override("B", 0, 7)
+    g.run_segment(1)
+    righe = [r for r in json.loads(g.search_log("B")) if r["k"] == "search"]
+    assert righe and righe[0]["iters"] == 7 and all(r["iters"] == 42 for r in righe[1:] if r["point"] == "turn_action")
