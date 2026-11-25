@@ -56,7 +56,7 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
   differenza.
 
 ## Calibrare il campione della pagina
-La pagina gioca il campione a lavoro fisso (`ITERAZIONI_CAMPIONE` = 42, prova di vittoria, `6427b90+D72-D77`); l'arena a 0,030 s
+La pagina gioca il campione a lavoro fisso (`ITERAZIONI_CAMPIONE` = 138 dalla taratura del 25/11, `docs/rust/misure/calibra_20261125_1931.txt`; prima 42; prova di vittoria, `6427b90+D72-D77`); l'arena a 0,030 s
 di CPU. Il 42 e' la mediana con pesi casuali: va ricalibrato col checkpoint vero (sul Mac: `scripts/rust/calibra_mac.command`,
 risultati in `docs/rust/misure/calibra_<data>/`). Passi di `scripts/rust/calibra_campione.py` (`--ckpt C.pt` o `--pesi-casuali`, `--out DIR`):
 - `misura --matchup ES EK --partite 20`: iterazioni a 0,030 s e secondi a 42 per tipo di punto (turno/reazione/showdown), mediana e p90;

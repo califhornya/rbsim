@@ -2134,6 +2134,13 @@ class CoachSession:
         self._save_game()
         return path
 
+    def _iterazioni_effettive(self) -> Optional[int]:
+        """The champion's iterations this game really used (Rust), so the file replays even after the default moves."""
+        if self.iterazioni or self.motore != "rust":
+            return self.iterazioni
+        from riftbound.ai.coach_rs import ITERAZIONI_CAMPIONE
+        return ITERAZIONI_CAMPIONE
+
     def _game_file(self) -> Optional[str]:
         """Where this game's file is (or will be): runs/coach/partite/<start>_<deckA>_vs_<deckB>.json."""
         return None if self._partita_name is None else str(self.out_dir / "partite" / self._partita_name)
@@ -2156,7 +2163,7 @@ class CoachSession:
                     "replay": {"seed": b["seed"], "seat": self.side, "opponent": b["opponent"],
                                "deck_a": str(b["deck_a"]), "deck_b": str(b["deck_b"]),
                                "bf_a": b.get("bf_a"), "bf_b": b.get("bf_b"), "starter": b.get("starter"),
-                               "iterazioni": self.iterazioni, "regole": self.info.get("regole"),
+                               "iterazioni": self._iterazioni_effettive(), "regole": self.info.get("regole"),
                                "motore": self.info.get("motore"), "answers": rec}}
             path = self.out_dir / "partite" / self._partita_name
             path.parent.mkdir(parents=True, exist_ok=True)

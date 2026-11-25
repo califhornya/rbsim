@@ -9,7 +9,7 @@ scelta rifà la decisione con ogni valore di --iterazioni (quello uguale all'ori
 la prima riga dice se è così). Con --turno T le decisioni bersaglio sono quelle del campione nel turno T al punto
 --tipo (turno | reazione | showdown | tutti; default turno). Per ogni valore: la mossa scelta, le prime 6 per visite
 (n, q, P) e, per ogni --attese (sottostringa dell'etichetta), se è nel menu: visite, q, rango.
-`concordanza`: autonome campione contro campione (42 iterazioni + sonda); su un campione di decisioni per tipo di
+`concordanza`: autonome campione contro campione (iterazioni della pagina + sonda); su un campione di decisioni per tipo di
 punto le rifà a M iterazioni e conta le uguali. Il win_probe resta acceso nel rifacimento (override in Rust). Il checkpoint di default è runs/sett/ekris_s12/ckpt_040000.pt; --pesi-casuali prova
 con una rete a pesi casuali (dove il checkpoint non c'è).
 """

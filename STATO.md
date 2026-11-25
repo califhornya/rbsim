@@ -63,18 +63,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   `tests/rust` 233, coach Python 59 verdi; storico 40/40 identiche dopo gli agganci (pagamento, notify).
 - 25/11 apertura nella pagina (`ef54d27`, `704d578`): flusso campo/d20/chi comincia su entrambi i motori (`scegli_campo`,
   `inizia`, `test_apertura.py`, `test_campi.py`); `riftbound/ai/apertura.py` provvisorio (campo a caso, comincia sempre).
+- 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
+  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali).
+  Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`, domande in `DOMANDE_ASTRA.md`). Matteo: 5 partite Evelynn-Sett
-(poi 10), "Segnala" con TEMPO/PIANO. Pronti per il Mac (`tests/rust` 278): `scripts/rust/calibra_mac.command` (passi 1 e 3),
-`decisione.py rifai` (casi salvati della pagina, caso 14 compreso; override in Rust, sonda accesa), `episodi.py` (§7/§8).
+Piano di Astra (`docs/bot/RISPOSTE_ASTRA_25_11.txt`). Matteo: 5 partite Evelynn-Sett (poi 10), "Segnala" con TEMPO/PIANO.
+Strumenti: `decisione.py rifai` (casi salvati, caso 14 compreso; i file vecchi senza iterazioni = 42), `episodi.py` (§7/§8).
 
 ## Prossimi passi
-1. Calibrazione sul Mac col vero `ckpt_040000`, profilo D72-D77, `win_probe` uguale. 42 iterazioni contro 0,030 s:
-   mosse, iterazioni e attesa per turno, reazione e showdown; forza su semi nuovi a posti scambiati.
 2. Due scenari, una correzione alla volta. §8 (Vi sul 6-6, ricostruito: non salvato; Rengar ora può entrare) e
-   §7 (showdown 6 a 2, l'avversario risponde), al budget della pagina e a uno più alto. Mossa attesa legale, visitata, valore.
-3. Verifica breve del profilo: campione contro il bot senza prior su ES ed EK, D72-D77.
+   §7 (showdown 6 a 2, l'avversario risponde; visto a 42 iterazioni, ricontrollare a 138). Mossa attesa legale, visitata, valore.
 4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
 5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
 6. In attesa: D78 (decide Matteo); Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.

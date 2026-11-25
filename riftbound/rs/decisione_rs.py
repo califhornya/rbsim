@@ -33,7 +33,8 @@ from riftbound.provenienza import REGOLE_D72_D77
 
 ROOT = Path(__file__).resolve().parents[2]
 CKPT_DEFAULT = "runs/sett/ekris_s12/ckpt_040000.pt"
-ITERAZIONI_CAMPIONE = 42
+from riftbound.ai.coach_rs import ITERAZIONI_CAMPIONE  # noqa: E402  (the page's champion, 138 from 25/11)
+ITERAZIONI_PAGINA_PRIMA = 42  # the page's default before the calibration of 25/11
 TIPI = {"turn_action": "turno", "reaction": "reazione", "showdown_action": "showdown"}
 _RETI: dict = {}
 _ORIGINALI: dict = {}
@@ -85,7 +86,8 @@ def _prepara(partita: dict) -> dict:
         P.update(seed=seed, umano=umano, camp="B" if umano == "A" else "A",
                  deck_a=Path(rp["deck_a"]), deck_b=Path(rp["deck_b"]), bf_a=rp.get("bf_a"), bf_b=rp.get("bf_b"),
                  starter=(rp.get("starter") or random.Random(seed).choice(["A", "B"])).lower(),
-                 iterazioni=rp.get("iterazioni") or ITERAZIONI_CAMPIONE, probe=True,
+                 # Files saved before 25/11 evening hold None for the default, which was then 42.
+                 iterazioni=rp.get("iterazioni") or ITERAZIONI_PAGINA_PRIMA, probe=True,
                  regole=rp.get("regole") or REGOLE_D72_D77, answers=rp["answers"],
                  ckpt=partita.get("ckpt") or d.get("info", {}).get("campione") or CKPT_DEFAULT)
     elif partita["tipo"] == "autonoma":
@@ -102,7 +104,7 @@ def _prepara(partita: dict) -> dict:
 
 def _chiave(P: dict) -> str:
     return json.dumps({k: str(v) for k, v in P.items() if k != "answers"}, sort_keys=True) + \
-        (str(len(P["answers"])) if P["answers"] is not None else "")
+        (json.dumps(P["answers"], sort_keys=True, default=str) if P["answers"] is not None else "")
 
 
 def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None):

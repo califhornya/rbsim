@@ -1,0 +1,26 @@
+calibra_campione 25/11/2026 19:32; c91f7cb Merge pull request #51 from califhornya/claude/dreamy-dirac-0k7vdz; regole 6427b90+D72-D77
+checkpoint /Users/mateo/projects/rbsim2026/rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi
+misura ES: 20 partite; iterazioni a 0,030 s mediana/p90: turno 141.5/459, reazione 436.5/643, showdown 317.5/497; s a 42 it.: turno 0.0114/0.0253, reazione 0.0033/0.0064, showdown 0.0041/0.0077
+misura EK: 20 partite; iterazioni a 0,030 s mediana/p90: turno 129.5/481, reazione 463/640, showdown 368.5/544; s a 42 it.: turno 0.0113/0.0276, reazione 0.0032/0.0058, showdown 0.0036/0.0092
+misura: N suggerito {'turno': 138, 'reazione': 445, 'showdown': 342}  (turno: 138); 0.2 min
+concordanza (N=138):
+ES turno: decisioni 20, uguali 18, 90% (disponibili 249, escluse per prefisso non riprodotto 0)
+ES reazione: decisioni 20, uguali 16, 80% (disponibili 98, escluse per prefisso non riprodotto 0)
+ES showdown: decisioni 20, uguali 14, 70% (disponibili 54, escluse per prefisso non riprodotto 0)
+EK turno: decisioni 20, uguali 16, 80% (disponibili 253, escluse per prefisso non riprodotto 0)
+EK reazione: decisioni 20, uguali 14, 70% (disponibili 79, escluse per prefisso non riprodotto 0)
+EK showdown: decisioni 20, uguali 20, 100% (disponibili 37, escluse per prefisso non riprodotto 0)
+M=138 contro originale 42; 76 s
+forza ES: 0.505 +- 0.027 (lim. inf. 0.478), 400 coppie; non inferiore (lim. inf. > 0.47): SI
+forza EK: 0.520 +- 0.025 (lim. inf. 0.495), 400 coppie; non inferiore (lim. inf. > 0.47): SI
+profilo ES: 0.583 +- 0.042 (lim. inf. 0.541), 200 coppie
+profilo EK: 0.550 +- 0.037 (lim. inf. 0.513), 200 coppie
+
+Lettura (25/11):
+- Con la rete vera 0,030 s danno ~138 iterazioni a decisione del turno, ~445 in reazione, ~342 in showdown: la pagina a 42
+  ne faceva un terzo nel turno e un decimo in reazioni e showdown.
+- forza = campione a 138 iterazioni fisse contro campione a 0,030 s: non inferiore su ES ed EK. La pagina passa a 138.
+- concordanza: rifatte a 138, le decisioni prese a 42 restano uguali nel 70-100% dei casi (le meno stabili: showdown ES,
+  reazioni EK). Il §7 (reazioni sprecate) è stato visto a 42 iterazioni: da ricontrollare a 138.
+- profilo = campione contro il bot a mano senza prior, D72-D77: il prior aiuta ancora (ES 0,583, EK 0,550, lim. inf. > 0,5).
+  Per ora niente riallenamento (Astra, 25/11).

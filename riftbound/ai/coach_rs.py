@@ -49,15 +49,14 @@ from typing import Optional
 from riftbound.ai import coach as C
 from riftbound.core.decisions import DecisionPoint
 
-# The champion's fixed iterations a decision on Rust. Measured on 25/11 with
-# `Game.search_stats` at budget=0.03 s (the Rust budget promoted as equal to Python's
-# 0.4 s, STATO.md 24/11), the champion's search (prior forward + search) on ES and EK, six
-# games (seeds 1-6, rules 6427b90+D72-D77, both seats searching): the median iterations
-# of a main-turn search is 42 (252 searches; per game 33-61, mean 140, max 786). The
-# checkpoint of the champion is not in the build container: the net there was a
-# default-architecture PPONet with random weights (the forward costs the same). Re-measure
-# on the Mac with the real checkpoint (docs/RUST.md) and change this or pass --iterazioni.
-ITERAZIONI_CAMPIONE = 42
+# The champion's fixed iterations a decision on Rust. Calibrated on the Mac on 25/11 with the
+# real checkpoint (ekris_s12/ckpt_040000.pt, rules 6427b90+D72-D77, scripts/rust/calibra_mac.command,
+# docs/rust/misure/calibra_20261125_1931.txt): at the promoted Rust budget of 0.03 s the median
+# iterations are 138 a main-turn search (reaction 445, showdown 342), and the champion at 138
+# fixed iterations is not inferior to the champion at 0.03 s (ES 0.505, lower bound 0.478; EK 0.520,
+# lower bound 0.495; 400 pairs each). The earlier 42 came from a net with random weights.
+# A decision at 138 iterations takes ~0.04 s on the Mac.
+ITERAZIONI_CAMPIONE = 138
 _NO_MORE = json.dumps("$NO_MORE")
 
 
