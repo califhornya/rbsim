@@ -67,9 +67,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-§8 accumulo (`docs/bot/accumulo/`): MISURA_1 (13% delle decisioni di turno; più iterazioni non correggono: è `table_value`);
-candidato `--valutazione accumulo` (k=3, alpha=0,2; spento di default, parità 30/30): 13/18 episodi lasciano il campo,
-§8 da 13,7% a 4,9% (ES), da 11,9% a 4,1% (EK) (MISURA_2). Arena sul Mac: `scripts/rust/accumulo_mac.command`, in attesa.
+§8 accumulo (`docs/bot/accumulo/`, MISURA_1-4): il campione ammassa nel 13% delle decisioni di turno; più iterazioni non
+correggono (è `table_value`). `accumulo` (k=3, alpha 0,2) bocciato in arena (EK 0,431, ES 0,465); `minaccia`/`corsa`
+(logistiche) non cambiano le mosse; `rimonta` (solo se si perde la corsa a campi fermi: Might in base verso il campo
+avversario più debole, eccesso sul campo sicuro ridotto) porta il §8 in corsa persa da 57% a 27% (ES), 52% a 19% (EK),
+invariato in corsa vinta. Arena sul Mac: `scripts/rust/rimonta_mac.command`, in attesa. Tutte spente di default.
 Astra 25/11 sera (fuori dal repo, Matteo): Might da sola + controllo, poi minaccia, poi corsa ai punti; rete: prova economica;
 Q massimo; partite di Matteo dopo la prima arena (2 ES). I 13 episodi umani da ricontrollare su D80.
 
