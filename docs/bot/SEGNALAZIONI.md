@@ -1,7 +1,8 @@
 # Segnalazioni dalle partite a mano (pagina col campione)
 
-Partite e segnalazioni salvate da Matteo: `docs/bot/partite/coach/` (25/11: 154531 persa in 17 turni, 201243 vinta
-9 a 4 in 13 turni, con D79, D80 e la 17).
+Partite e segnalazioni salvate da Matteo: `docs/bot/partite/coach/`, segnalazioni in `reports_<data>.jsonl`.
+25/11: Evelynn-Sett 154531 persa in 17 turni, 201243 vinta 9 a 4 in 13 (D79, D80, la 17); Evelynn-Kha'Zix 203513
+vinta 8 a 4 in 13 (18-22); Kha'Zix-Sett 204705 persa 7 a 8 in 18 (23-25).
 
 Ogni segnalazione ha un esito:
 - **pagina**: difetto della pagina (`riftbound/ai/coach.py`, `coach_page.html`); si corregge subito, con un test.
@@ -30,3 +31,11 @@ Ogni segnalazione ha un esito:
 | 15 | 25/11 | Bedeviling Stranger giocato da coperta nello showdown: sulla pila solo la sua abilità, quella di Evelynn (pesca, poi scarta) arriva dopo la risoluzione | motore (D79): le due abilità scattano dalla stessa giocata e vanno sulla pila insieme, nell'ordine scelto da Matteo; nello showdown la giocata coperta non è un "task", così l'abilità dello Stranger va sulla pila e si risolve prima che scatti quella della leggenda | `AUDIT.md` D79, nel pacchetto di correzioni (raccolta in corso) |
 | 16 | 25/11 | Fine partita "9 a 4": a 7 punti con due campi tenuti, ma la partita finisce a 8 | motore (D80): il vincitore è fissato all'8, ma il motore segna anche il secondo campo; vincitore giusto, punteggio no | `AUDIT.md` D80, nel pacchetto di correzioni (raccolta in corso) |
 | 17 | 25/11 | "Non so come Sett possa rompere un campo a Evelynn in questo matchup; forse il bot mi rispetta tanto, ok, però così non la vincerà mai" (T9, Matteo 5 a 3, campione senza energia) | strategia: da guardare con le altre partite Evelynn-Sett | raccolta in corso (`partite/coach/`, partita 201243) |
+| 18 | 25/11 | Kha'Zix (campione) gioca Fizz Trickster al T2: "spero non avesse alternative, se no carta sprecata" | strategia: cimitero vuoto, l'effetto di Fizz non fa nulla, solo il corpo da 3 | raccolta in corso (partita 203513) |
+| 19 | 25/11 | "Perché gioca Kha'Zix così?" (T4: Fizz spostato su Zaun Warrens, poi Kha'Zix Mutating Horror con AMBUSH nello showdown) | strategia | raccolta in corso (partita 203513) |
+| 20 | 25/11 | "Double down ancora sul campo? Evelynn è un punto avanti: se continui ad ammassare, a meno di una strategia di ganking, perdi sempre" (T7, Zed Without a Sound su Zaun Warrens) | strategia: come la 7 (`GIOCATE.md` §8, accumulo sul campo tenuto) | raccolta in corso (partita 203513) |
+| 21 | 25/11 | "Reckless Innovator accelerato sul campo?! Perché?" (T8) | strategia: legale (unità su un campo che controlla, ACCELERATE pagato) | raccolta in corso (partita 203513) |
+| 22 | 25/11 | Star-Crossed che rimanda in mano Evelynn (e Fizz): "sto giocando contro una pianta?!" (T8) | strategia: legale (REACTION, una unità amica e una nemica in mano) | raccolta in corso (partita 203513) |
+| 23 | 25/11 | "Si sono sovrapposti la fine dello showdown del mio turno e l'inizio del turno avversario" (Kha'Zix-Sett, T5-T6) | pagina, probabile: il registro delle decisioni chiude il combattimento nel T5 (ordine dei danni, poi il tuo Passa); le morti di Faefolk e First Mate compaiono sotto "Turno 6", dopo il punto dell'avversario. Gli eventi sono differenze fra due viste (`_board_events`): sembra mancare una vista fra il combattimento e il cambio di turno | da verificare (partita 204705) |
+| 24 | 25/11 | Rengar contro Rengar: "strano ma ci può stare, per lasciarmi la board vuota" (T8) | strategia: Matteo la ritiene ragionevole | raccolta in corso (partita 204705) |
+| 25 | 25/11 | "Mossa molto forte del bot, mi ha rovinato i piani" (T9: Call to Glory su Fiora, Packed Amphitheater) | strategia: buona mossa del campione | raccolta in corso (partita 204705) |
