@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "tests/audit"))
 sys.path.insert(0, str(ROOT / "tests/rust"))
 
 from audit_helpers import card, hide, legend, setup, unit  # noqa: E402
-from test_d72_d76 import events, rust  # noqa: E402
+from test_d72_d76 import events, rust, units  # noqa: E402
 
 D72_D77 = "6427b90+D72-D77"
 D72_D80 = "6427b90+D72-D80"
@@ -112,3 +112,65 @@ def test_d79_face_down_spell_is_on_the_chain_under_the_legend_trigger():
     assert _chain_at_first_reaction(g, abilities=True) == [False, True]
     g = _stranger_at_a_showdown(D72_D77, "Sprite Call")
     assert _chain_at_first_reaction(g, abilities=True) == [True]
+
+
+# -- D78: "can't move this turn" ignored by effect moves ------------------------------
+
+def _kingpin_and_showstopper(regole):
+    """A's Vex Apathetic is at BF1. B plays Sett Kingpin to base (Vex stuns it:
+    it can't move this turn), then casts Showstopper on it ("Buff a friendly
+    unit in your base, then move it to a battlefield")."""
+    loop, _a, b = setup(active="B")
+    loop.gs.turn = 6
+    loop.gs.battlefields[1].add_unit("A", unit("Vex Apathetic"))
+    loop.gs.battlefields[1].held_by = "A"
+    b.hand.append(card("Sett Kingpin"))
+    b.hand.append(card("Showstopper"))
+    return rust(loop, regole, B={"main": ["Play Sett Kingpin", "Cast Showstopper"]})
+
+
+def _showdowns_after_the_spell(g):
+    """Showdown decisions (Kingpin moved to a battlefield: it is contested)
+    and Kingpin's buffs."""
+    g.run_segment(1)
+    ds = events(g, "decision")
+    k = next(u for u in units(g) if u["card"] == "Sett Kingpin")
+    return sum(d["point"] == "showdown_action" for d in ds), k["buffs"]
+
+
+def test_d78_effect_move_is_negated_on_a_unit_that_cant_move_this_turn():
+    import riftbound_rs
+    g = _kingpin_and_showstopper(D72_D80)
+    riftbound_rs.azzera_correzioni()
+    showdowns, buffs = _showdowns_after_the_spell(g)
+    assert (showdowns, buffs) == (0, 1)            # buffed, the move negated: no showdown
+    assert riftbound_rs.correzioni()["D78"] >= 1
+
+
+def test_d78_not_applied_on_the_d72_d77_profile():
+    import riftbound_rs
+    g = _kingpin_and_showstopper(D72_D77)
+    riftbound_rs.azzera_correzioni()
+    showdowns, buffs = _showdowns_after_the_spell(g)
+    assert showdowns >= 1 and buffs == 1           # the move still happens
+    assert riftbound_rs.correzioni()["D78"] == 0
+
+
+def _hunker_down_then_showstopper(regole):
+    """B's own restriction: Hunker Down ("It can't move this turn") on First
+    Mate in base, then Showstopper on it."""
+    loop, _a, b = setup(active="B")
+    loop.gs.turn = 6
+    b.base_units.append(unit("First Mate"))
+    b.hand.append(card("Hunker Down"))
+    b.hand.append(card("Showstopper"))
+    return rust(loop, regole, B={"main": ["Cast Hunker Down", "Cast Showstopper"]})
+
+
+def test_d78_hunker_down_uses_the_same_restriction():
+    g = _hunker_down_then_showstopper(D72_D80)
+    g.run_segment(1)
+    assert next(u for u in units(g) if u["card"] == "First Mate")["where"] == "base"
+    g = _hunker_down_then_showstopper(D72_D77)
+    g.run_segment(1)
+    assert next(u for u in units(g) if u["card"] == "First Mate")["where"] != "base"

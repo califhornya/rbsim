@@ -120,6 +120,12 @@ impl Game {
         if src_bf == dst_bf {
             return Ok(false);
         }
+        if self.gs.reg.regole.d78() && self.gs.unit(unit).cant_move_turn == self.gs.turn {
+            // D78 (profile 6427b90+D72-D80): "can't move this turn" (Vex Apathetic,
+            // Hunker Down) negates an effect's move too; the rest of the spell resolves.
+            crate::registry::conta(78);
+            return Ok(false);
+        }
         if dst_bf.is_none() && !self.can_move_to_base(unit, src_bf) {
             return Ok(false);
         }
