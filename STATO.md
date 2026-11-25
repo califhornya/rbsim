@@ -77,9 +77,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 2. Rete del prior in Rust o a batch (collo di bottiglia dell'arena).
 3. Profilo `6427b90+D72-D77`: rimisurare il campione (pesi fermi) contro il bot a mano senza prior, da ES ed EK poi tutti
    i matchup della promozione, coppie a posti scambiati, IC 95%; ricontrollare il budget 0,030 s (Astra, 25/11).
-4. Pagina su Rust: provarla con Matteo (tavolo nuovo compreso: clic, anteprima, evidenziazioni non provati a mano);
-   rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali) col checkpoint vero sul Mac;
-   unire il ramo in `rust` (PR) quando Matteo è d'accordo.
+4. Pagina su Rust (Matteo la usa): rimisurare N (`ITERAZIONI_CAMPIONE`, 42, misurato con una rete a pesi casuali)
+   col checkpoint vero sul Mac; unire `claude/gifted-thompson-nzcur7` in `rust` (PR) quando Matteo è d'accordo.
 5. Segnalazioni in `docs/bot/SEGNALAZIONI.md` (D78 Vex/Showstopper segnato, si corregge quando Matteo lo dice); scenari di GIOCATE.md §7-§8 (carte sprecate; accumulo sul campo già tenuto: `table_value`).
 
 ## File principali
