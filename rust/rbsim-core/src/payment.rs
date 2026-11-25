@@ -5,7 +5,7 @@
 //! `Game::recycle_first` (the page's preference, see lp_pay.rs / lp_costs.rs)
 //! after the Golds it needs.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use crate::agent::{AIdx, AKind, Action, Chooser, Point};
@@ -23,6 +23,9 @@ pub struct PayWay {
     pub gold_domain: Option<Domain>,
     /// The domain the move's [rune] cost is paid from first (None: the engine's way).
     pub prefer: Option<Domain>,
+    /// Where the move asks "Pagare ACCELERATE?" (and it can be paid): the answer this way is for
+    /// (yes first); None where it asks nothing.
+    pub accelerate: Option<bool>,
     /// The runes the move recycles, (domain, how many), in the rune pool's order.
     pub recycled: Vec<(Domain, i64)>,
 }
@@ -44,11 +47,18 @@ fn pay_kind(k: AKind) -> bool {
 struct DomainPicker {
     side: Side,
     domain: Option<Domain>,
+    /// The answer to the seat's `optional:accelerate` (None: the default, yes) and whether it was asked.
+    accelerate: Option<bool>,
+    asked: Rc<Cell<bool>>,
 }
 
 impl Chooser for DomainPicker {
     fn choose(&mut self, _g: &mut Game, kind: &str, side: Side, options: &[Opt], _default: usize,
               _source: Option<CardId>) -> R<Option<usize>> {
+        if kind == "optional:accelerate" && side == self.side {
+            self.asked.set(true);
+            return Ok(self.accelerate.and_then(|b| options.iter().position(|o| *o == Opt::Bool(b))));
+        }
         if kind.starts_with("domain") && side == self.side {
             if let Some(d) = self.domain {
                 return Ok(options.iter().position(|o| *o == Opt::Domain(d)));
@@ -61,12 +71,17 @@ impl Chooser for DomainPicker {
 /// py: CoachLoop(gs.clone()): a fresh loop over a copy, no agents; its
 /// "which domain" choices of `side` answered with `domain`.
 fn sim_copy(g: &Game, side: Side, domain: Option<Domain>) -> Game {
+    sim_copy_acc(g, side, domain, None, Rc::new(Cell::new(false)))
+}
+
+/// `sim_copy`, its ACCELERATE question answered `accelerate` and noted in `asked`.
+fn sim_copy_acc(g: &Game, side: Side, domain: Option<Domain>, accelerate: Option<bool>, asked: Rc<Cell<bool>>) -> Game {
     let mut gs = g.gs.clone();
     for s in Side::BOTH {
         gs.players[s.idx()].has_agent = false;
     }
     let mut c = Game::new(gs);
-    let ch: Rc<RefCell<dyn Chooser>> = Rc::new(RefCell::new(DomainPicker { side, domain }));
+    let ch: Rc<RefCell<dyn Chooser>> = Rc::new(RefCell::new(DomainPicker { side, domain, accelerate, asked }));
     c.chooser = Some(ch);
     c
 }
@@ -135,11 +150,12 @@ fn pay_domains(g: &Game, side: Side, card: Option<CardId>) -> Vec<Domain> {
 
 /// py: _pay_outcome: the runes `action` recycles once `golds` Golds Added
 /// `gold_domain` Power, its [rune] paid from `prefer` first; on a copy.
-/// None if it can't be played so.
+/// ACCELERATE answered `accelerate`; also whether the move asked it. None if it can't be played so.
 fn pay_outcome(g: &Game, side: Side, point: Point, action: &Action, golds_n: i64, gold_domain: Option<Domain>,
-               prefer: Option<Domain>) -> Option<Vec<(Domain, i64)>> {
-    let mut c = sim_copy(g, side, gold_domain);
-    (|| -> R<Option<Vec<(Domain, i64)>>> {
+               prefer: Option<Domain>, accelerate: Option<bool>) -> Option<(Vec<(Domain, i64)>, bool)> {
+    let asked = Rc::new(Cell::new(false));
+    let mut c = sim_copy_acc(g, side, gold_domain, accelerate, asked.clone());
+    (|| -> R<Option<(Vec<(Domain, i64)>, bool)>> {
         for _ in 0..golds_n {
             let lanes = golds(&mut c, side, point)?;
             let Some(&l) = lanes.first() else { return Ok(None) };
@@ -153,7 +169,7 @@ fn pay_outcome(g: &Game, side: Side, point: Point, action: &Action, golds_n: i64
         c.recycle_first = prefer.map(|d| (side, d));
         c.apply_action(side, action, 0)?;
         let p = c.gs.player(side);
-        Ok(Some(
+        Ok(Some((
             before
                 .iter()
                 .filter_map(|&(d, n)| {
@@ -161,7 +177,8 @@ fn pay_outcome(g: &Game, side: Side, point: Point, action: &Action, golds_n: i64
                     (n > now).then_some((d, n - now))
                 })
                 .collect(),
-        ))
+            asked.get(),
+        )))
     })()
     .unwrap_or(None) // py: a comparison never stops the game
 }
@@ -190,16 +207,30 @@ pub fn payment_options(g: &Game, side: Side, point: Point, action: &Action) -> V
             doms.iter().map(|&d| (Some(d), Some(d))).collect()
         };
         let sum = |r: &[(Domain, i64)]| r.iter().map(|x| x.1).sum::<i64>();
-        let fewest = if k == 0 { None } else { out.iter().filter(|o| o.golds == k - 1).map(|o| sum(&o.recycled)).min() };
         for (gold_domain, prefer) in ways {
-            let Some(got) = pay_outcome(g, side, point, action, k, gold_domain, prefer) else { continue };
-            if out.iter().any(|o| o.golds == k && o.recycled == got) {
-                continue;
+            let Some(got) = pay_outcome(g, side, point, action, k, gold_domain, prefer, Some(true)) else { continue };
+            let mut outcomes: Vec<(Option<bool>, Vec<(Domain, i64)>)> = vec![(None, got.0.clone())];
+            if got.1 {
+                // the move asks ACCELERATE: both answers
+                outcomes = vec![(Some(true), got.0)];
+                if let Some(other) = pay_outcome(g, side, point, action, k, gold_domain, prefer, Some(false)) {
+                    outcomes.push((Some(false), other.0));
+                }
             }
-            if k != 0 && fewest.map_or(false, |f| sum(&got) >= f) {
-                continue;
+            for (acc, recycled) in outcomes {
+                let fewest = if k == 0 {
+                    None
+                } else {
+                    out.iter().filter(|o| o.golds == k - 1 && o.accelerate == acc).map(|o| sum(&o.recycled)).min()
+                };
+                if out.iter().any(|o| o.golds == k && o.accelerate == acc && o.recycled == recycled) {
+                    continue;
+                }
+                if k != 0 && fewest.map_or(false, |f| sum(&recycled) >= f) {
+                    continue;
+                }
+                out.push(PayWay { golds: k, gold_domain, prefer, accelerate: acc, recycled });
             }
-            out.push(PayWay { golds: k, gold_domain, prefer, recycled: got });
         }
     }
     out

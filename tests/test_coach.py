@@ -821,6 +821,65 @@ def test_a_card_played_with_a_gold_ready_asks_how_to_pay(tmp_path):
                        "Usa Gold: Power Body per pagare Punch First", "Lancia Punch First"]
 
 
+def _ksante_table(tmp_path):
+    """The Gold table with K'Sante Courageous (5 energy, ACCELERATE) alone in hand and the energy to pay it
+    and its ACCELERATE."""
+    from riftbound.registry.cards_registry import CARD_REGISTRY
+    card = lambda n: CARD_REGISTRY[n].instantiate()  # noqa: E731
+    loop, a, b, session, agent = _gold_table(tmp_path, 3)
+    a.hand.clear()
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    return loop, a, b, session, agent
+
+
+def _play_ksante(tmp_path, accelerate: bool):
+    """Gioca K'Sante Courageous; `accelerate` answers the page's ACCELERATE question, the last way pays.
+    -> (the questions asked, a)."""
+    import threading
+    loop, a, b, session, agent = _ksante_table(tmp_path)
+    asked: list = []
+    game = threading.Thread(target=lambda: [loop._apply_action(a, agent.decide_action(b)) for _ in range(2)], daemon=True)
+    game.start()
+    end = time.time() + 20
+    p = _next_pending(session, end)
+    texts = [x["text"] for x in p["actions"]]
+    session.answer({"action": texts.index("Gioca K'Sante Courageous in base")})
+    while game.is_alive() and time.time() < end:
+        p = _next_pending(session, time.time() + 0.5)
+        if p is None:
+            continue
+        if "actions" in p:                                  # the next decision: pass
+            session.answer({"action": [x["text"] for x in p["actions"]].index("Passa: hai finito le tue azioni")})
+            continue
+        asked.append((p["question"], [o["text"] for o in p["options"]]))
+        if p["question"].startswith("Pagare ACCELERATE"):
+            session.answer({"option": 0 if accelerate else 1})
+        else:
+            session.answer({"option": len(p["options"]) - 1})
+    game.join(timeout=20)
+    return asked, a
+
+
+def test_accelerate_is_asked_first_and_no_leaves_the_gold_alone(tmp_path):
+    """Matteo (25/11): K'Sante Courageous with a ready Gold asked "Come paghi?" (Gold or a rune), then
+    "Pagare ACCELERATE?": No wasted the Gold. Now ACCELERATE is asked first, once; on No no way uses the Gold."""
+    asked, a = _play_ksante(tmp_path, False)
+    assert [q for q, _ in asked] == ["Pagare ACCELERATE? (l'unità entra pronta)"]       # one way left: not asked how
+    assert [g.name for g in a.base_gear] == ["Gold"] and not a.base_gear[0].tapped
+    k = next(u for u in a.base_units if u.card.name == "K'Sante Courageous")
+    assert not k.ready
+
+
+def test_accelerate_yes_offers_the_gold_and_enters_ready(tmp_path):
+    asked, a = _play_ksante(tmp_path, True)
+    assert [q for q, _ in asked] == ["Pagare ACCELERATE? (l'unità entra pronta)", "Come paghi?"]
+    assert asked[1][1] == ["Ricicli 1 runa Body", "Col Gold, nessuna runa riciclata"]
+    assert not a.base_gear                                  # the last way: the Gold paid it
+    k = next(u for u in a.base_units if u.card.name == "K'Sante Courageous")
+    assert k.ready
+
+
 def test_a_card_only_the_gold_pays_for_is_offered_with_it(tmp_path):
     """One Body rune and a Gold: Punch First (two Body Power) is played only
     with the Gold; the engine has none of it until the Gold is used. The page

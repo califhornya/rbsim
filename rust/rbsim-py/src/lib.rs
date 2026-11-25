@@ -187,7 +187,9 @@ impl Game {
     /// to pay it, the engine's own first) and `gold_only` (the plays payable
     /// only with Golds, [{"action": [kind, index, lane(, dst)], "ways": [...]}]).
     /// A way is {"golds": n, "gold_domain": "FURY".. or null, "prefer": domain
-    /// name or null (the domain the [rune] cost is paid from first), "recycled":
+    /// name or null (the domain the [rune] cost is paid from first), "accelerate":
+    /// null, or true / false where the move asks "Pagare ACCELERATE?" (the answer
+    /// the way is for; the seat gives it to the engine's question itself), "recycled":
     /// [[domain name, runes], ...] (what it recycles, in the rune pool's order)};
     /// the page's Italian `text` is the caller's. Besides the answers above a
     /// decision takes {"index": i, "via": w} (menu move i paid with its way

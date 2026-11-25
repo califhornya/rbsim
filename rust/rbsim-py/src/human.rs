@@ -59,6 +59,9 @@ pub struct HumanAgent {
     /// The domains the Golds just used Add, answered to the next "which domain"
     /// choice of the seat, newest first (py: the _GoldDomain choosers).
     gold_domains: Vec<Domain>,
+    /// The answer to the seat's next "Pagare ACCELERATE?", given with the way that pays the move (py:
+    /// _AccelerateAnswer): the page asked it before "Come paghi?"; the engine's question is not asked again.
+    accelerate: Option<(Side, bool)>,
     /// notify(event_json): what the engine shows the seat (cards looked at); no answer.
     notify: Option<Py<PyAny>>,
     /// The units of the seat's side dying together, innermost last (Agent::notify "dying_group").
@@ -71,6 +74,7 @@ struct Plan {
     left: i64,
     domain: Option<Domain>,
     prefer: Option<Domain>,
+    accelerate: Option<bool>,
     action: Action,
     point: Point,
 }
@@ -86,6 +90,7 @@ enum Answer {
 /// A way as the event carries it (py: a `payment_options` dict, no `text`).
 fn way_json(w: &PayWay) -> Value {
     json!({"golds": w.golds, "gold_domain": w.gold_domain.map(|d| d.name()), "prefer": w.prefer.map(|d| d.name()),
+           "accelerate": w.accelerate,
            "recycled": w.recycled.iter().map(|(d, n)| json!([d.name(), n])).collect::<Vec<_>>()})
 }
 
@@ -118,7 +123,7 @@ fn index_of(o: &Bound<'_, PyAny>, n: usize, what: &str) -> PyResult<usize> {
 
 impl HumanAgent {
     pub fn new(ask: Py<PyAny>, real_loop: u64, payments: bool, notify: Option<Py<PyAny>>) -> HumanAgent {
-        HumanAgent { ask, real_loop, payments, plan: None, gold_domains: Vec::new(), notify, groups: Vec::new(),
+        HumanAgent { ask, real_loop, payments, plan: None, gold_domains: Vec::new(), accelerate: None, notify, groups: Vec::new(),
                      dying_now: None }
     }
 
@@ -158,12 +163,14 @@ impl HumanAgent {
         if let Some(d) = plan.prefer {
             g.recycle_first = Some((side, d));
         }
+        self.accelerate = plan.accelerate.map(|b| (side, b));
         Ok(Some(a.clone()))
     }
 
     fn menu(&mut self, g: &mut Game, side: Side, point: Point) -> R<Action> {
         g.recycle_first = None; // py: _coached: a [rune] domain chosen for a move is for that move only
         self.gold_domains.clear();
+        self.accelerate = None; // an ACCELERATE answer is for its move only
         let (mut e, legal) = decision_event_for(g, side, point)?;
         if self.plan.is_some() {
             if let Some(a) = self.gold_step(g, side, point, &legal)? {
@@ -221,11 +228,12 @@ impl HumanAgent {
                 if let Some(d) = w.prefer {
                     g.recycle_first = Some((side, d));
                 }
+                self.accelerate = w.accelerate.map(|b| (side, b));
                 a
             }
             Answer::Via(a, w) => {
                 // py: _gold_plan, then _gold_step for the first Gold
-                self.plan = Some(Plan { left: w.golds, domain: w.gold_domain, prefer: w.prefer, action: a, point });
+                self.plan = Some(Plan { left: w.golds, domain: w.gold_domain, prefer: w.prefer, accelerate: w.accelerate, action: a, point });
                 match self.gold_step(g, side, point, &legal)? {
                     Some(step) => step,
                     None => return self.menu_again(g, side, point),
@@ -378,6 +386,16 @@ impl Agent for HumanAgent {
                 if let Some(i) = options.iter().position(|o| *o == Opt::Domain(self.gold_domains[k])) {
                     self.gold_domains.remove(k);
                     return Ok(Some(i));
+                }
+            }
+        }
+        if kind == "optional:accelerate" {
+            if let Some((s, b)) = self.accelerate {
+                if s == side {
+                    if let Some(i) = options.iter().position(|o| *o == Opt::Bool(b)) {
+                        self.accelerate = None;
+                        return Ok(Some(i));
+                    }
                 }
             }
         }

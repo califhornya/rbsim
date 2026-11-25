@@ -557,15 +557,21 @@ def _pay_domains(loop, side: str, card) -> list:
     return list(dict.fromkeys(doms))
 
 
-def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold_domain, prefer):
-    """The runes `action` recycles, ((domain name, n), ...), once `golds`
-    Golds Added `gold_domain` Power, its [rune] paid from `prefer` first; on
-    a copy of the game. None if it can't be played so."""
+def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold_domain, prefer,
+                 accelerate: Optional[bool] = True):
+    """(the runes `action` recycles, ((domain name, n), ...), whether the move
+    asked ACCELERATE), once `golds` Golds Added `gold_domain` Power, its
+    [rune] paid from `prefer` first, ACCELERATE answered `accelerate`; on a
+    copy of the game. None if it can't be played so."""
     clone = loop.gs.clone()
     copy = CoachLoop(clone)
     p = clone.get_player(side)
+    asked = []
 
     def chooser(_loop, kind, s, options, default, source):
+        if kind == "optional:accelerate" and s == side:
+            asked.append(True)
+            return options.index(accelerate) if accelerate is not None else None
         return options.index(gold_domain) if kind.startswith("domain") and s == side \
             and gold_domain in options else None
     copy.chooser = chooser
@@ -581,7 +587,7 @@ def _pay_outcome(loop, side: str, point: DecisionPoint, action, golds: int, gold
         copy.recycle_first = (side, prefer) if prefer is not None else None
         copy._apply_action(p, action)
         return tuple((d.name, n - len(p.rune_pool.get(d, []))) for d, n in before.items()
-                     if n > len(p.rune_pool.get(d, [])))
+                     if n > len(p.rune_pool.get(d, []))), bool(asked)
     except Exception:  # noqa: BLE001 — a comparison never stops the game
         return None
 
@@ -596,9 +602,12 @@ def payment_text(golds: int, recycled) -> str:
 
 def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
     """The ways to pay `action` that recycle different runes: [{"golds",
-    "gold_domain", "prefer", "recycled", "text"}], fewest Golds first (the
-    engine's own way first); a Gold only where it saves a rune. One way: no
-    choice to make; none: it can't be paid, Golds or not."""
+    "gold_domain", "prefer", "accelerate", "recycled", "text"}], fewest Golds
+    first (the engine's own way first); a Gold only where it saves a rune
+    (among the ways with the same ACCELERATE answer). `accelerate`: None, or
+    where the move asks "Pagare ACCELERATE?" (and it can be paid) True / False,
+    the answer the way is for (yes first). One way: no choice to make; none:
+    it can't be paid, Golds or not."""
     if action[0] not in _PAY_KINDS:
         return []
     golds = _golds(loop, side, point)
@@ -610,15 +619,23 @@ def payment_options(loop, side: str, point: DecisionPoint, action) -> list:
     for k in range(len(golds) + 1):
         ways = [(None, None)] + [(None, d) for d in p.power_pool if p._power_left(d)] if not k \
             else [(g, g) for g in doms]
-        fewest = min((sum(n for _d, n in o["recycled"]) for o in out if o["golds"] == k - 1), default=None)
         for gold_domain, prefer in ways:
-            got = _pay_outcome(loop, side, point, action, k, gold_domain, prefer)
-            if got is None or any(o["golds"] == k and o["recycled"] == got for o in out):
+            got = _pay_outcome(loop, side, point, action, k, gold_domain, prefer, True)
+            if got is None:
                 continue
-            if k and fewest is not None and sum(n for _d, n in got) >= fewest:
-                continue
-            out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer,
-                        "recycled": got, "text": payment_text(k, got)})
+            outcomes = [(None, got[0])]
+            if got[1]:                          # the move asks ACCELERATE: both answers
+                other = _pay_outcome(loop, side, point, action, k, gold_domain, prefer, False)
+                outcomes = [(True, got[0])] + ([(False, other[0])] if other is not None else [])
+            for acc, recycled in outcomes:
+                fewest = min((sum(n for _d, n in o["recycled"]) for o in out
+                              if o["golds"] == k - 1 and o["accelerate"] == acc), default=None)
+                if any(o["golds"] == k and o["accelerate"] == acc and o["recycled"] == recycled for o in out):
+                    continue
+                if k and fewest is not None and sum(n for _d, n in recycled) >= fewest:
+                    continue
+                out.append({"golds": k, "gold_domain": gold_domain, "prefer": prefer, "accelerate": acc,
+                            "recycled": recycled, "text": payment_text(k, recycled)})
     return out
 
 
@@ -666,6 +683,35 @@ class _GoldDomain:
 
     def release(self) -> None:
         _unlink(self.loop, self)
+
+
+class _AccelerateAnswer:
+    """The answer to the next "Pagare ACCELERATE?" of the player's move, given
+    with its way to pay (asked before "Come paghi?", not again by the engine);
+    then leaves the chain of choosers."""
+
+    def __init__(self, me: str, answer: bool, loop, previous):
+        self.me, self.answer, self.loop, self.previous = me, answer, loop, previous
+
+    def __call__(self, loop, kind, side, options, default, source):
+        if side == self.me and kind == "optional:accelerate" and self.answer in options:
+            self.release()
+            return options.index(self.answer)
+        return self.previous(loop, kind, side, options, default, source) if self.previous else None
+
+    def release(self) -> None:
+        _unlink(self.loop, self)
+
+
+def accelerate_asked(ways: list) -> bool:
+    """Do the ways to pay a move hold both answers to "Pagare ACCELERATE?"."""
+    return {True, False} <= {w.get("accelerate") for w in ways}
+
+
+def accelerate_ways(ways: list, answer: bool) -> list:
+    """The ways for `answer` ("Sì" = True), (index in `ways`, way) pairs; a way
+    that asks nothing (None) is for both."""
+    return [(i, w) for i, w in enumerate(ways) if w.get("accelerate") in (None, answer)]
 
 
 _PASS_TEXT = {DecisionPoint.TURN_ACTION: "Passa: hai finito le tue azioni",
@@ -1132,6 +1178,12 @@ class CoachAgent(NetGuidedMCTSAgent):
             self._release_coach()
         side = self.player.name
         self.loop.recycle_first = None          # a [rune] domain chosen for a move: that move only
+        c = self.loop.chooser                   # an ACCELERATE answer is for that move only
+        while c is not None:
+            prev = getattr(c, "previous", None)
+            if isinstance(c, _AccelerateAnswer) and c.me == side:
+                c.release()
+            c = prev
         legal = legal_actions(self.loop, point, side)
         if self._gold_plan is not None:        # a card paid with Golds: its next step
             step = self._gold_step(side, point, [a.to_engine() for a in legal])
@@ -1194,16 +1246,23 @@ class CoachAgent(NetGuidedMCTSAgent):
             card = _paid_card(self.loop, side, action)
             text = next((info["text"] for t, info in zip(tuples, infos) if t == action), None) \
                 or next(info["text"] for t, info in gold_only if t == action).removesuffix(" (col Gold)")
+            name = getattr(card, "name", None) or text
+            if accelerate_asked(ways):          # "Pagare ACCELERATE?" first, the ways are for its answer
+                yes = self.session.ask_choice("optional:accelerate", side,
+                                              [{"text": "Sì", "ref": None}, {"text": "No", "ref": None}], 0, name) == 0
+                ways = [w for _i, w in accelerate_ways(ways, yes)]
             pick = 0
             if len(ways) > 1:
                 pick = self.session.ask_choice("payment", side, [{"text": w["text"], "ref": None} for w in ways],
-                                               0, getattr(card, "name", None) or text)
+                                               0, name)
             way = ways[pick]
             if not way["golds"]:
                 self.loop.recycle_first = (side, way["prefer"]) if way["prefer"] is not None else None
+                if way.get("accelerate") is not None:
+                    self.loop.chooser = _AccelerateAnswer(side, way["accelerate"], self.loop, self.loop.chooser)
             else:
                 self._gold_plan = {"left": way["golds"], "domain": way["gold_domain"], "prefer": way["prefer"],
-                                   "action": action, "point": point,
+                                   "accelerate": way.get("accelerate"), "action": action, "point": point,
                                    "card": getattr(card, "name", None) or text, "text": text}
                 step = self._gold_step(side, point, tuples)
                 if step is None:                 # not possible after all: asked again
@@ -1249,6 +1308,8 @@ class CoachAgent(NetGuidedMCTSAgent):
         if plan["prefer"] is not None:
             self.loop.recycle_first = (side, plan["prefer"])
         self.loop.chooser = _CoachChooser(side, self.session, self.loop, self.loop.chooser)
+        if plan.get("accelerate") is not None:
+            self.loop.chooser = _AccelerateAnswer(side, plan["accelerate"], self.loop, self.loop.chooser)
         self.session.event("me", plan["text"], move=True)
         return plan["action"]
 

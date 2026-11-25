@@ -237,10 +237,18 @@ class RustGame:
             card = C._paid_card(vloop, side, action)
             name = getattr(card, "name", None) or text
             via = 0
-            if len(ways) > 1:                              # "Come paghi?"
-                via = s.ask_choice("payment", side,
-                                   [{"text": C.payment_text(w["golds"], [(d, k) for d, k in w["recycled"]]),
-                                     "ref": None} for w in ways], 0, name)
+            shown = list(enumerate(ways))                  # (index in the event's ways, way)
+            if C.accelerate_asked(ways):                   # "Pagare ACCELERATE?" first (CoachAgent._coached)
+                yes = s.ask_choice("optional:accelerate", side,
+                                   [{"text": "Sì", "ref": None}, {"text": "No", "ref": None}], 0, name) == 0
+                shown = C.accelerate_ways(ways, yes)
+            if len(shown) > 1:                             # "Come paghi?"
+                pick = s.ask_choice("payment", side,
+                                    [{"text": C.payment_text(w["golds"], [(d, k) for d, k in w["recycled"]]),
+                                      "ref": None} for _i, w in shown], 0, name)
+                via = shown[pick][0]
+            else:
+                via = shown[0][0]
             way = ways[via]
             for _ in range(way["golds"]):
                 s.event("me", f"Usa Gold: Power {str(way['gold_domain']).title()} per pagare {name}", move=True)

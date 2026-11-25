@@ -61,7 +61,15 @@ def way_json(w) -> dict:
     """A python way as the Rust event carries it (no Italian `text`)."""
     name = lambda d: None if d is None else d.name  # noqa: E731
     return {"golds": w["golds"], "gold_domain": name(w["gold_domain"]), "prefer": name(w["prefer"]),
-            "recycled": [[d, n] for d, n in w["recycled"]]}
+            "accelerate": w["accelerate"], "recycled": [[d, n] for d, n in w["recycled"]]}
+
+
+def rust_via(ways):
+    """What the page does with the event's ways: "Pagare ACCELERATE?" answered yes (the Session's default), then the LAST
+    way of those left. -> (index in `ways`, the ways shown in "Come paghi?")."""
+    shown = [(i, w) for i, w in enumerate(ways) if w["accelerate"] in (None, True)] \
+        if {True, False} <= {w["accelerate"] for w in ways} else list(enumerate(ways))
+    return shown[-1][0], [w for _i, w in shown]
 
 
 def pick(rng, n, g):
@@ -295,15 +303,18 @@ def test_end_to_end(mu, seed, seat):
             if i >= n:
                 ways = solo[i - n]["ways"]
                 stats["solo"] += 1
-                if len(ways) > 1:                # asked of the page only then
+                via, shown = rust_via(ways)
+                if len(shown) > 1:               # asked of the page only then
                     stats["ways"] += 1
-                    stats["gold_ways"] += ways[-1]["golds"] > 0
-                return {"solo_gold": i - n, "via": len(ways) - 1}
+                    stats["gold_ways"] += shown[-1]["golds"] > 0
+                return {"solo_gold": i - n, "via": via}
             ways = e["pay"][i]
             if ways:
-                stats["ways"] += 1
-                stats["gold_ways"] += ways[-1]["golds"] > 0
-                return {"index": i, "via": len(ways) - 1}
+                via, shown = rust_via(ways)
+                if len(shown) > 1:
+                    stats["ways"] += 1
+                    stats["gold_ways"] += shown[-1]["golds"] > 0
+                return {"index": i, "via": via}
             return i
         if k == "choice":
             return e["default"]
@@ -327,3 +338,83 @@ def test_non_default_ways_were_played():
     solo = sum(t[5] for t in _TOTALS)
     print(f"non-default ways played: {ways} (with Golds: {gold}); Gold-only plays: {solo}")
     assert ways > 0
+
+
+# -- ACCELERATE asked first (Matteo, 25/11): K'Sante Courageous with a ready Gold -----------------------------
+
+def _ksante_python():
+    """The coach's table of tests/test_coach.py (3 Body runes, a ready Gold, 6 energy), K'Sante Courageous in hand."""
+    sys.path.insert(0, str(ROOT / "tests/audit"))
+    from audit_helpers import card, scripted, setup
+
+    from riftbound.core.player import Domain, Rune
+    loop, a, b = setup(active="A", rich=())
+    a.rune_pool[Domain.BODY] = [Rune(Domain.BODY) for _ in range(3)]
+    a.channel()
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.hand.append(card("K'Sante Courageous"))
+    a.energy = 6
+    return loop, a, b
+
+
+def _ksante_rust(answer_accelerate: bool):
+    """The position on Rust with a human seat A answering as the page does: K'Sante's move paid with the last way
+    of those for `answer_accelerate`. -> (the K'Sante move's ways, events asked of the page, the units)."""
+    import riftbound_rs
+
+    from riftbound.rs import rust_bridge as rb
+    from riftbound.rs.canon import canonical_state
+    pyloop, a, b = _ksante_python()
+    state = canonical_state(pyloop.gs)
+    g = riftbound_rs.Game.from_canonical(rb.registry("6427b90"), json.dumps(state), 1)
+    g.set_script("B", main=[], showdown=[], reaction=[])
+    asked, seen = [], {}
+
+    def ask(ev):
+        e = json.loads(ev)
+        asked.append(e["k"] + (":" + e["kind"] if e["k"] == "choice" else ""))
+        if e["k"] != "decision":                        # the page's defaults (coach_rs)
+            return {"decide_optional": True, "decide_mode": None, "decide_predict_recycle": False,
+                    "decide_mulligan": []}.get(e["k"], e.get("default", 0))
+        kinds = [x[0] for x in e["actions"]]
+        i = kinds.index("UNIT") if "ways" not in seen and "UNIT" in kinds else None
+        if i is None:                                   # nothing else to do: pass
+            return kinds.index("PASS")
+        ways = e["pay"][i]
+        seen["ways"] = ways
+        pick = [(k, w) for k, w in enumerate(ways) if w["accelerate"] in (None, answer_accelerate)]
+        return {"index": i, "via": pick[-1][0]}
+    g.set_human_agent("A", ask, True, None)
+    g.set_side_chooser()
+    g.trace_on()
+    g.run_segment(1)
+    return seen.get("ways"), asked, json.loads(g.units()), pyloop
+
+
+def test_ksante_ways_have_the_accelerate_dimension_as_python():
+    ways, _, _, pyloop = _ksante_rust(True)
+    assert ways is not None
+    assert {w["accelerate"] for w in ways} == {True, False}
+    # "a Gold only where it saves a rune", within each answer: with No no Gold way exists
+    assert [w["golds"] for w in ways if w["accelerate"] is False] == [0]
+    assert sorted(w["golds"] for w in ways if w["accelerate"] is True) == [0, 1]
+    from riftbound.core.decisions import DecisionPoint
+    from riftbound.core.legality import legal_actions
+    with plain_copies():
+        cl = loop_class()(pyloop.gs.clone())
+        t = next(g.to_engine() for g in legal_actions(cl, DecisionPoint.TURN_ACTION, "A") if g.kind == "UNIT")
+        from riftbound.ai import coach
+        py = [way_json(w) for w in coach.payment_options(cl, "A", DecisionPoint.TURN_ACTION, t)]
+    assert py == ways
+
+
+@pytest.mark.parametrize("accelerate", [False, True])
+def test_ksante_page_answer_decides_the_engine_question(accelerate):
+    """The page answers ACCELERATE with its way: the engine does not ask it again; No leaves the Gold alone and
+    K'Sante enters exhausted, Yes with the Gold way spends the Gold and K'Sante enters ready."""
+    _, asked, units, _ = _ksante_rust(accelerate)
+    assert "choice:optional:accelerate" not in asked
+    k = next(u for u in units if u["card"] == "K'Sante Courageous")
+    assert bool(k["ready"]) is accelerate
