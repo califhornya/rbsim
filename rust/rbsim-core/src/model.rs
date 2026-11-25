@@ -539,6 +539,10 @@ pub struct Player {
     pub runes_recycled: Option<i64>,
     /// Whether an agent sits here (py: player.agent is not None).
     pub has_agent: bool,
+    /// The coach page's payment preference while one card cost is paid (py:
+    /// CoachLoop._pay_card_cost's temporary `actor.pay_power_of`): the Power
+    /// the cost needs is paid from this domain first. None outside that call.
+    pub pay_first: Option<Domain>,
 }
 
 impl Player {
@@ -569,6 +573,7 @@ impl Player {
             base_units: Vec::new(),
             runes_recycled: None,
             has_agent: false,
+            pay_first: None,
         }
     }
     /// py: Player.energy (property)
@@ -706,8 +711,19 @@ impl Player {
     pub fn can_pay_power_of(&self, n: i64, domains: &[Domain]) -> bool {
         domains.iter().map(|&d| self.power_left(d)).sum::<i64>() >= n
     }
-    /// py: Player.pay_power_of
+    /// py: Player.pay_power_of (with CoachLoop's `first` over it while `pay_first` is set).
     pub fn pay_power_of(&mut self, n: i64, domains: &[Domain]) -> bool {
+        if let Some(d) = self.pay_first {
+            let k = if domains.contains(&d) { n.min(self.power_left(d)) } else { 0 };
+            if k != 0 && !self.pay_cost(0, Some(k), Some(d)) {
+                return false;
+            }
+            return if n > k { self.pay_power_of_base(n - k, domains) } else { true };
+        }
+        self.pay_power_of_base(n, domains)
+    }
+    /// py: Player.pay_power_of, the engine's own way.
+    fn pay_power_of_base(&mut self, n: i64, domains: &[Domain]) -> bool {
         for _ in 0..n {
             // max(): the first domain with the most left
             let mut best = domains[0];

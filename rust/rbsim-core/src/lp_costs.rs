@@ -359,6 +359,14 @@ impl Game {
         if n <= 0 {
             return Ok(true);
         }
+        // py: CoachLoop._pay_generic_power (the page's payment preference)
+        if let Some(d) = self.preferred(actor) {
+            if self.gs.player(actor).can_pay_cost(0, Some(n), Some(d)) {
+                let ok = self.gs.player_mut(actor).pay_cost(0, Some(n), Some(d));
+                self.drain_rune_recycles()?;
+                return Ok(ok);
+            }
+        }
         let doms: Vec<Domain> = self.gs.player(actor).power_pool.keys().copied().collect();
         for d in &doms {
             if self.gs.player(actor).can_pay_cost(0, Some(n), Some(*d)) {

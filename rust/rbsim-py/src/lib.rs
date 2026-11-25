@@ -177,15 +177,33 @@ impl Game {
     /// decide_mulligan -> list of at most 2 distinct hand indices ([] keeps
     /// the hand); decide_optional / decide_predict_recycle -> bool;
     /// decide_mode -> int in 0..n (args[1]) or None (the engine picks).
+    ///
+    /// `payments=True` (the coach page's "Come paghi?", port of
+    /// coach.payment_options / gold_only_plays / _gold_step): a decision event
+    /// of a menu with more than one move also has `pay` (one entry per menu
+    /// move: null, or, where the page would offer a choice, the list of ways
+    /// to pay it, the engine's own first) and `gold_only` (the plays payable
+    /// only with Golds, [{"action": [kind, index, lane(, dst)], "ways": [...]}]).
+    /// A way is {"golds": n, "gold_domain": "FURY".. or null, "prefer": domain
+    /// name or null (the domain the [rune] cost is paid from first), "recycled":
+    /// [[domain name, runes], ...] (what it recycles, in the rune pool's order)};
+    /// the page's Italian `text` is the caller's. Besides the answers above a
+    /// decision takes {"index": i, "via": w} (menu move i paid with its way
+    /// number w in `pay[i]`) or {"solo_gold": j, "via": w} (gold_only[j] with
+    /// its way w): the seat then uses the Golds the way needs (each its own
+    /// decision in the trace, answering the Gold's "which domain" itself) and
+    /// plays the move, without asking `ask` for those steps. Computed on copies
+    /// of the game; the game is not touched.
     /// A bool where an int is wanted (or vice versa), a wrong type or an index
     /// out of range raises ValueError out of start() / run_segment(). An
     /// exception of `ask` propagates as the same object. In-move choices reach
     /// the seat through the side chooser: it is set here if the game has none.
     /// Call it before trace_on() (as the other set_* methods); do not touch the
     /// Game from inside `ask`.
-    fn set_human_agent(&mut self, seat: &str, ask: Py<PyAny>) -> PyResult<()> {
+    #[pyo3(signature = (seat, ask, payments=false))]
+    fn set_human_agent(&mut self, seat: &str, ask: Py<PyAny>, payments: bool) -> PyResult<()> {
         let s = seat_of(seat)?;
-        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(human::HumanAgent { ask, real_loop: self.g.loop_id }));
+        let a: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(human::HumanAgent::new(ask, self.g.loop_id, payments)));
         self.g.agents[s.idx()] = Some(a);
         self.g.gs.players[s.idx()].has_agent = true;
         if self.g.chooser.is_none() {
