@@ -347,16 +347,18 @@ impl Game {
     }
 
     /// py: _apply_passive_grant
-    /// D73: the passives recomputed right after a unit played with AMBUSH
-    /// to battlefield `bf`, before its showdown (counted when a Might changed).
-    pub fn recompute_passives_d73(&mut self, bf: usize) -> R<()> {
-        let might = |g: &Game| -> Vec<i64> {
-            g.gs.battlefields[bf].units.iter().flatten().map(|&u| g.gs.unit(u).passive_might).collect()
+    /// A recompute of the passives the corrected profile adds (D73: after a
+    /// unit played with AMBUSH, before its showdown; D75: when a buff is spent
+    /// or gained), counted as `d` when it changed a unit's passive Might or
+    /// its Mighty state (was_mighty: "when I become Mighty").
+    pub fn recompute_passives_counted(&mut self, d: usize) -> R<()> {
+        let look = |g: &Game| -> Vec<(i64, bool)> {
+            g.gs.units.iter().map(|u| (u.passive_might, u.was_mighty)).collect()
         };
-        let before = might(self);
+        let before = look(self);
         self.recompute_passives()?;
-        if might(self) != before {
-            crate::registry::conta(73);
+        if look(self) != before {
+            crate::registry::conta(d);
         }
         Ok(())
     }

@@ -426,7 +426,7 @@ impl Game {
         self.play_unit(champ, side, Some(lane), "champion")?;
         if self.gs.reg.regole.corrette() {
             // D73: the battlefield's passives before the showdown's first decision.
-            self.recompute_passives_d73(lane)?;
+            self.recompute_passives_counted(73)?;
         }
         let bf = &mut self.gs.battlefields[lane];
         if !bf.units[0].is_empty() && !bf.units[1].is_empty() {

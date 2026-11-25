@@ -1,0 +1,419 @@
+[
+ {
+  "seed": 920001,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   15
+  ],
+  "corrette": [
+   "B",
+   15
+  ],
+  "correzioni": {
+   "D72": 10,
+   "D74": 6,
+   "D75": 4,
+   "D76": 12
+  },
+  "prima_differenza": {
+   "evento": 22,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   12
+  ],
+  "corrette": [
+   "B",
+   12
+  ],
+  "correzioni": {
+   "D72": 7,
+   "D74": 14,
+   "D75": 25,
+   "D76": 12
+  },
+  "prima_differenza": {
+   "evento": 19,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D72": 2,
+   "D74": 10,
+   "D75": 15,
+   "D76": 16
+  },
+  "prima_differenza": {
+   "evento": 24,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   12
+  ],
+  "corrette": [
+   "B",
+   12
+  ],
+  "correzioni": {
+   "D72": 2,
+   "D74": 10,
+   "D75": 37,
+   "D76": 12
+  },
+  "prima_differenza": {
+   "evento": 27,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     0,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1,
+    "D76": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   11
+  ],
+  "corrette": [
+   "B",
+   11
+  ],
+  "correzioni": {
+   "D72": 2,
+   "D75": 14,
+   "D76": 10
+  },
+  "prima_differenza": {
+   "evento": 24,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920001,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 2,
+   "D74": 8,
+   "D75": 12,
+   "D76": 12
+  },
+  "prima_differenza": {
+   "evento": 31,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     0,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   13
+  ],
+  "corrette": [
+   "A",
+   13
+  ],
+  "correzioni": {
+   "D72": 4,
+   "D74": 4,
+   "D75": 79,
+   "D76": 12
+  },
+  "prima_differenza": {
+   "evento": 22,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "B",
+   13
+  ],
+  "corrette": [
+   "B",
+   13
+  ],
+  "correzioni": {
+   "D72": 2,
+   "D76": 10
+  },
+  "prima_differenza": {
+   "evento": 30,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   11
+  ],
+  "corrette": [
+   "A",
+   11
+  ],
+  "correzioni": {
+   "D72": 10,
+   "D74": 2,
+   "D76": 10
+  },
+  "prima_differenza": {
+   "evento": 64,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "dettaglio": [
+    [
+     "root",
+     "chain",
+     0,
+     "$v",
+     "declared",
+     "$dict",
+     0,
+     1,
+     1
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D74": 1
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "storiche": [
+   "A",
+   12
+  ],
+  "corrette": [
+   "A",
+   12
+  ],
+  "correzioni": {
+   "D72": 6,
+   "D74": 8,
+   "D75": 56,
+   "D76": 14
+  },
+  "prima_differenza": {
+   "evento": 32,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Deploy champion Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 1
+   },
+   "origine": "partita"
+  }
+ }
+]

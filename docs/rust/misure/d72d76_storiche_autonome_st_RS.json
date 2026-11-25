@@ -1,0 +1,422 @@
+[
+ {
+  "seed": 910001,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   15
+  ],
+  "rs": [
+   "B",
+   15
+  ],
+  "rust_error": null,
+  "events": 196,
+  "t_py_traced": 1.494,
+  "t_rs_traced": 0.304
+ },
+ {
+  "seed": 910001,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   14
+  ],
+  "rs": [
+   "A",
+   14
+  ],
+  "rust_error": null,
+  "events": 175,
+  "t_py_traced": 0.383,
+  "t_rs_traced": 0.216
+ },
+ {
+  "seed": 910002,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 147,
+  "t_py_traced": 0.326,
+  "t_rs_traced": 0.176
+ },
+ {
+  "seed": 910002,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 203,
+  "t_py_traced": 0.45,
+  "t_rs_traced": 0.247
+ },
+ {
+  "seed": 910003,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 134,
+  "t_py_traced": 0.456,
+  "t_rs_traced": 0.157
+ },
+ {
+  "seed": 910003,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 202,
+  "t_py_traced": 0.46,
+  "t_rs_traced": 0.254
+ },
+ {
+  "seed": 910004,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   16
+  ],
+  "rs": [
+   "B",
+   16
+  ],
+  "rust_error": null,
+  "events": 207,
+  "t_py_traced": 0.612,
+  "t_rs_traced": 0.306
+ },
+ {
+  "seed": 910004,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 176,
+  "t_py_traced": 0.399,
+  "t_rs_traced": 0.216
+ },
+ {
+  "seed": 910005,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   12
+  ],
+  "rs": [
+   "A",
+   12
+  ],
+  "rust_error": null,
+  "events": 143,
+  "t_py_traced": 0.306,
+  "t_rs_traced": 0.176
+ },
+ {
+  "seed": 910005,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 144,
+  "t_py_traced": 0.312,
+  "t_rs_traced": 0.17
+ },
+ {
+  "seed": 910006,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   12
+  ],
+  "rs": [
+   "B",
+   12
+  ],
+  "rust_error": null,
+  "events": 171,
+  "t_py_traced": 0.385,
+  "t_rs_traced": 0.205
+ },
+ {
+  "seed": 910006,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 177,
+  "t_py_traced": 0.496,
+  "t_rs_traced": 0.204
+ },
+ {
+  "seed": 910007,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 123,
+  "t_py_traced": 0.254,
+  "t_rs_traced": 0.138
+ },
+ {
+  "seed": 910007,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 136,
+  "t_py_traced": 0.293,
+  "t_rs_traced": 0.165
+ },
+ {
+  "seed": 910008,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   15
+  ],
+  "rs": [
+   "A",
+   15
+  ],
+  "rust_error": null,
+  "events": 139,
+  "t_py_traced": 0.324,
+  "t_rs_traced": 0.194
+ },
+ {
+  "seed": 910008,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   12
+  ],
+  "rs": [
+   "B",
+   12
+  ],
+  "rust_error": null,
+  "events": 106,
+  "t_py_traced": 0.237,
+  "t_rs_traced": 0.114
+ },
+ {
+  "seed": 910009,
+  "matchup": "RS",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   16
+  ],
+  "rs": [
+   "A",
+   16
+  ],
+  "rust_error": null,
+  "events": 187,
+  "t_py_traced": 0.476,
+  "t_rs_traced": 0.226
+ },
+ {
+  "seed": 910009,
+  "matchup": "SR",
+  "starter": "b",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   13
+  ],
+  "rs": [
+   "B",
+   13
+  ],
+  "rust_error": null,
+  "events": 157,
+  "t_py_traced": 0.339,
+  "t_rs_traced": 0.187
+ },
+ {
+  "seed": 910010,
+  "matchup": "RS",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "B",
+   14
+  ],
+  "rs": [
+   "B",
+   14
+  ],
+  "rust_error": null,
+  "events": 159,
+  "t_py_traced": 0.348,
+  "t_rs_traced": 0.183
+ },
+ {
+  "seed": 910010,
+  "matchup": "SR",
+  "starter": "a",
+  "agenti": [
+   "simple_trade",
+   "simple_trade"
+  ],
+  "py": [
+   "A",
+   17
+  ],
+  "rs": [
+   "A",
+   17
+  ],
+  "rust_error": null,
+  "events": 198,
+  "t_py_traced": 0.553,
+  "t_rs_traced": 0.246
+ }
+]

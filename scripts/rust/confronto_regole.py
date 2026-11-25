@@ -31,7 +31,7 @@ def semi(spec: str) -> list:
 
 
 def gioca(seed: int, mu: str, starter: str, agenti: tuple, iterazioni: int, regole: str):
-    """(start, events, end, (winner, turns) | None, error) of one Rust game."""
+    """(start, events, end, (winner, turns) | None, error, D72..D76 counted) of one Rust game."""
     import riftbound_rs
 
     from riftbound.rs import rust_bridge as rb
@@ -50,14 +50,16 @@ def gioca(seed: int, mu: str, starter: str, agenti: tuple, iterazioni: int, rego
         res = g.start()
     except RuntimeError as e:
         res, err = None, str(e)
-    return start, json.loads(g.events()), json.loads(g.raw_dump()), res, err
+    return start, json.loads(g.events()), json.loads(g.raw_dump()), res, err, \
+        [riftbound_rs.correzioni()[d] for d in CODICI]
 
 
-def _delta(events: list, i: int) -> dict:
+def _delta(events: list, i: int, totali: list) -> dict:
     """D72..D76 counted from the decision before raw event `i` to the decision
-    at or after it (the corrected trace's snapshots)."""
+    at or after it (the corrected trace's snapshots; after the last decision,
+    the game's totals)."""
     snaps = [(k, e["correzioni"]) for k, e in enumerate(events) if e["k"] == "decision" and "correzioni" in e]
-    after = next((c for k, c in snaps if k >= i), snaps[-1][1] if snaps else [0] * 5)
+    after = next((c for k, c in snaps if k >= i), totali)
     before = next((c for k, c in reversed(snaps) if k < i), [0] * 5)
     return {d: a - b for d, a, b in zip(CODICI, after, before) if a - b}
 
@@ -65,14 +67,10 @@ def _delta(events: list, i: int) -> dict:
 def confronta(seed: int, mu: str, agenti: tuple, iterazioni: int) -> dict:
     from diff_trace import canonical_rust_events, first_difference
     starter = "a" if seed % 2 == 0 else "b"
-    s0, e0, f0, r0, err0 = gioca(seed, mu, starter, agenti, iterazioni, STORICHE)
-    s1, e1, f1, r1, err1 = gioca(seed, mu, starter, agenti, iterazioni, CORRETTE)
+    s0, e0, f0, r0, err0, _ = gioca(seed, mu, starter, agenti, iterazioni, STORICHE)
+    s1, e1, f1, r1, err1, totali = gioca(seed, mu, starter, agenti, iterazioni, CORRETTE)
     h, h_trees = canonical_rust_events(s0, e0, f0)
     c, c_trees = canonical_rust_events(s1, e1, f1)
-    totali = [0] * 5
-    snaps = [e["correzioni"] for e in e1 if e["k"] == "decision" and "correzioni" in e]
-    if snaps:
-        totali = snaps[-1]
     out = {"seed": seed, "matchup": mu, "starter": starter, "agenti": list(agenti),
            "storiche": list(r0) if r0 else err0, "corrette": list(r1) if r1 else err1,
            "correzioni": {d: n for d, n in zip(CODICI, totali) if n}}
@@ -89,7 +87,7 @@ def confronta(seed: int, mu: str, agenti: tuple, iterazioni: int) -> dict:
         diff["solo_corrette"] = [m for m in vb if m not in va]
     if field in ("action", "index"):
         diff["storiche"], diff["corrette"] = va, vb
-    delta = _delta(e1, raw_i)
+    delta = _delta(e1, raw_i, totali)
     diff["correzioni"] = delta
     if field in ("action", "index"):
         diff["origine"] = "ricerca" if delta else "?"

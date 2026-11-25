@@ -203,7 +203,7 @@ impl Game {
         if self.gs.reg.regole.corrette() {
             // D73: the battlefield's passives (Packed Amphitheater) before
             // the showdown's first decision.
-            self.recompute_passives_d73(l)?;
+            self.recompute_passives_counted(73)?;
         }
         let b = &mut self.gs.battlefields[l];
         if !b.units[0].is_empty() && !b.units[1].is_empty() {

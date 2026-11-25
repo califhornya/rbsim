@@ -1,0 +1,427 @@
+[
+ {
+  "seed": 920001,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 177,
+   "D74": 108,
+   "D75": 1040,
+   "D76": 80
+  },
+  "prima_differenza": {
+   "evento": 32,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 50
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "ES",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   17
+  ],
+  "corrette": [
+   "B",
+   20
+  ],
+  "correzioni": {
+   "D72": 481,
+   "D73": 36,
+   "D74": 304,
+   "D75": 3243,
+   "D76": 246
+  },
+  "prima_differenza": {
+   "evento": 15,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 82,
+    "D74": 8,
+    "D75": 11,
+    "D76": 66
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 117,
+   "D74": 66,
+   "D75": 366,
+   "D76": 72
+  },
+  "prima_differenza": {
+   "evento": 26,
+   "campo": "action",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": null,
+   "storiche": [
+    "UNIT",
+    4,
+    0,
+    0
+   ],
+   "corrette": [
+    "GEAR",
+    1,
+    0
+   ],
+   "correzioni": {
+    "D74": 20,
+    "D75": 70
+   },
+   "origine": "ricerca"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "ES",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   17
+  ],
+  "corrette": [
+   "A",
+   17
+  ],
+  "correzioni": {
+   "D72": 351,
+   "D74": 72,
+   "D75": 1209,
+   "D76": 80
+  },
+  "prima_differenza": {
+   "evento": 28,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 3
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "ES",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 16,
+   "D75": 1502,
+   "D76": 218
+  },
+  "prima_differenza": {
+   "evento": 36,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "B:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 30
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920001,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 218,
+   "D74": 70,
+   "D75": 707,
+   "D76": 82
+  },
+  "prima_differenza": {
+   "evento": 31,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D74": 1,
+    "D75": 3
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920002,
+  "matchup": "SE",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   17
+  ],
+  "corrette": [
+   "A",
+   17
+  ],
+  "correzioni": {
+   "D72": 249,
+   "D74": 80,
+   "D75": 2094,
+   "D76": 160
+  },
+  "prima_differenza": {
+   "evento": 32,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    1,
+    2
+   ],
+   "correzioni": {
+    "D75": 25
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920003,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "B",
+   17
+  ],
+  "correzioni": {
+   "D72": 38,
+   "D75": 344,
+   "D76": 648
+  },
+  "prima_differenza": {
+   "evento": 30,
+   "campo": "state",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": [
+    [
+     "objs",
+     "A:Sett Kingpin:1@1",
+     "passive_might"
+    ],
+    0,
+    1
+   ],
+   "correzioni": {
+    "D75": 50
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920004,
+  "matchup": "SE",
+  "starter": "a",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "A",
+   17
+  ],
+  "corrette": [
+   "A",
+   17
+  ],
+  "correzioni": {
+   "D72": 492,
+   "D74": 42,
+   "D75": 4587,
+   "D76": 168
+  },
+  "prima_differenza": {
+   "evento": 26,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF1"
+   ],
+   "correzioni": {
+    "D72": 51,
+    "D74": 4,
+    "D75": 117
+   },
+   "origine": "partita"
+  }
+ },
+ {
+  "seed": 920005,
+  "matchup": "SE",
+  "starter": "b",
+  "agenti": [
+   "mano",
+   "mano"
+  ],
+  "storiche": [
+   "B",
+   17
+  ],
+  "corrette": [
+   "A",
+   16
+  ],
+  "correzioni": {
+   "D72": 168,
+   "D74": 238,
+   "D75": 2121,
+   "D76": 290
+  },
+  "prima_differenza": {
+   "evento": 15,
+   "campo": "menu",
+   "tipo": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "dettaglio": null,
+   "solo_storiche": [],
+   "solo_corrette": [
+    "Play Rengar Trophy Hunter to BF0"
+   ],
+   "correzioni": {
+    "D72": 48,
+    "D74": 8,
+    "D76": 112
+   },
+   "origine": "partita"
+  }
+ }
+]

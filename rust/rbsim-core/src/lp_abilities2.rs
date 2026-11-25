@@ -43,7 +43,7 @@ impl Game {
         self.gs.unit_mut(unit).might_counters -= 1;
         if self.gs.reg.regole.corrette() {
             // D75: a buff spent changes Sett Kingpin's Might at once.
-            self.recompute_passives()?;
+            self.recompute_passives_counted(75)?;
         }
         let side = side.or_else(|| self.locate_unit(unit).map(|w| w.0));
         if let Some(s) = side {

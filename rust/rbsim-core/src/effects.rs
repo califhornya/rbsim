@@ -811,14 +811,17 @@ impl Game {
     fn fx_buff_unit(&mut self, ctx: &mut Ctx, spec: &Map<String, Value>) -> R<()> {
         let instead = spec.get("if_buffed_might").map(py_int).unwrap_or(0);
         let pref = move |g: &Game, u: UnitId| -> i64 { (instead == 0 && g.gs.unit(u).might_counters >= 1) as i64 };
-        let units = self.resolve_targets(ctx, spec, "none", Some(&pref))?;
-        for unit in units {
-            if self.gs.reg.regole.corrette() && self.gs.name(ctx.card) == "Pillaged Armory"
-                && self.locate_unit(unit).map(|w| w.1) != Some(Some(ctx.bf))
-            {
-                // D74: a unit away from the Armory's battlefield (its data correction).
+        if self.gs.reg.regole.corrette() && self.gs.name(ctx.card) == "Pillaged Armory" {
+            // D74 (its data correction): the friendly units away from the
+            // Armory's battlefield are options too.
+            let away = !self.gs.player(ctx.actor).base_units.is_empty()
+                || (0..self.gs.battlefields.len()).any(|i| i != ctx.bf && !self.gs.battlefields[i].units_for(ctx.actor).is_empty());
+            if away {
                 crate::registry::conta(74);
             }
+        }
+        let units = self.resolve_targets(ctx, spec, "none", Some(&pref))?;
+        for unit in units {
             if instead != 0 && self.gs.unit(unit).might_counters >= 1 {
                 self.gs.unit_mut(unit).temporary_might += instead;
                 continue;
@@ -827,7 +830,7 @@ impl Game {
                 self.gs.unit_mut(unit).might_counters += 1;
                 if self.gs.reg.regole.corrette() {
                     // D75: a buff gained changes Sett Kingpin's Might at once.
-                    self.recompute_passives()?;
+                    self.recompute_passives_counted(75)?;
                 }
                 if let Some((ws, wbf)) = self.locate_unit(unit) {
                     let bf = wbf.unwrap_or(0);
