@@ -11,6 +11,7 @@
 //! first, then the chooser that was there before (`base`).
 
 use std::cell::RefCell;
+use std::collections::{BTreeMap, VecDeque};
 use std::rc::{Rc, Weak};
 
 use serde_json::{json, Value};
@@ -335,6 +336,105 @@ fn search_copy(gs: &GameState, side: Side, seed: u64) -> Game {
     Game::new(gs)
 }
 
+/// What the pilots played in one simulation: (seat, point, action label), in order.
+type PilotLog = Rc<RefCell<Vec<(Side, &'static str, String)>>>;
+type SharedPrior = Rc<RefCell<Box<dyn Prior>>>;
+
+/// The agent a seat of a search copy has with `finestre`: it plays the reaction and showdown windows
+/// (nothing else: `has()` is true only for those two) from the PPO prior's probabilities over the
+/// legal menu, as seen from its own seat; without a prior, uniform over the menu (Pass included);
+/// with one option, that one. Its own RNG, apart from the search's. Choices inside the windows
+/// (targets...) still go through the game's choosers. `script` (tests): per point the label
+/// prefixes to play in order ("PASS" or an exhausted script pass), a menu with one option taking
+/// the only one without using an entry.
+pub struct Pilota {
+    prior: Option<SharedPrior>,
+    rng: PyRandom,
+    /// showdown, reaction
+    script: Option<[VecDeque<String>; 2]>,
+    log: Option<PilotLog>,
+}
+
+impl Pilota {
+    fn decide(&mut self, g: &mut Game, side: Side, point: Point) -> R<Action> {
+        let menu = g.legal_actions(point, side)?;
+        let (question, slot, pname) = match point {
+            Point::ShowdownAction => ("showdown", 0, "showdown"),
+            _ => ("reaction", 1, "reaction"),
+        };
+        let action = if menu.len() < 2 {
+            menu.first().cloned().unwrap_or_else(Action::pass)
+        } else if let Some(sc) = self.script.as_mut() {
+            match sc[slot].pop_front() {
+                None => Action::pass(),
+                Some(w) if w == "PASS" => Action::pass(),
+                Some(w) => menu.iter().find(|a| a.label.starts_with(&w)).cloned().ok_or_else(|| {
+                    let labels: Vec<&str> = menu.iter().map(|a| a.label.as_str()).collect();
+                    EngineError::Agent(format!("pilot script: {w:?} is not legal: {labels:?}"))
+                })?,
+            }
+        } else if let Some(net) = self.prior.clone() {
+            let obs = Observation::from_state(&mut g.gs, side);
+            let descs = on_fresh_loop(g, |fg| -> R<Vec<Descriptor>> {
+                menu.iter().map(|a| F::describe_action(fg, side, a)).collect()
+            })?;
+            let x = encode_observation(&obs, &g.gs.reg);
+            let ctx = F::context(descs.len(), 0, false, false);
+            let probs = net.borrow_mut().probs(x, F::question_of(question), ctx, &descs)?;
+            let total: f64 = probs.iter().map(|&p| p.max(0.0) as f64).sum();
+            if total > 0.0 && total.is_finite() {
+                let r = self.rng.random() * total;
+                let mut acc = 0.0;
+                let mut pick = menu.len() - 1;
+                for (i, &p) in probs.iter().enumerate().take(menu.len()) {
+                    acc += p.max(0.0) as f64;
+                    if r < acc {
+                        pick = i;
+                        break;
+                    }
+                }
+                menu[pick].clone()
+            } else {
+                menu[self.rng.choice_index(menu.len())].clone()
+            }
+        } else {
+            menu[self.rng.choice_index(menu.len())].clone()
+        };
+        if let Some(l) = self.log.as_ref() {
+            let label = if action.kind == AKind::Pass { "PASS".to_string() } else { action.label.clone() };
+            l.borrow_mut().push((side, pname, label));
+        }
+        Ok(action)
+    }
+}
+
+impl Agent for Pilota {
+    fn decide_action(&mut self, _: &mut Game, _: Side, _: i64) -> R<Action> {
+        Err(EngineError::Py("AttributeError: decide_action".into()))
+    }
+    fn decide_reaction(&mut self, g: &mut Game, side: Side) -> R<Action> {
+        self.decide(g, side, Point::Reaction)
+    }
+    fn decide_showdown_action(&mut self, g: &mut Game, side: Side, _bf: usize) -> R<Action> {
+        self.decide(g, side, Point::ShowdownAction)
+    }
+    fn decide_mulligan(&mut self, _: &mut Game, _: Side) -> R<Vec<i64>> {
+        Err(EngineError::Py("AttributeError: decide_mulligan".into()))
+    }
+    fn decide_optional(&mut self, _: &mut Game, _: Side, _: CardId, _: &str) -> R<bool> {
+        Err(EngineError::Py("AttributeError: decide_optional".into()))
+    }
+    fn decide_mode(&mut self, _: &mut Game, _: Side, _: CardId, _: i64) -> R<Option<i64>> {
+        Err(EngineError::Py("AttributeError: decide_mode".into()))
+    }
+    fn decide_predict_recycle(&mut self, _: &mut Game, _: Side, _: CardId) -> R<bool> {
+        Err(EngineError::Py("AttributeError: decide_predict_recycle".into()))
+    }
+    fn has(&self, method: &str) -> bool {
+        matches!(method, "decide_showdown_action" | "decide_reaction")
+    }
+}
+
 /// `f` on a fresh loop over `g`'s state (py: GameLoop(clone) on the same
 /// state, as PPOPriorAgent._evaluate builds one for the descriptors).
 fn on_fresh_loop<T>(g: &mut Game, f: impl FnOnce(&mut Game) -> T) -> T {
@@ -596,6 +696,26 @@ impl Tree {
             }
         }
         best
+    }
+
+    /// Root quota: among the children whose label contains one of `subs` (lower case) and that have
+    /// fewer than `n` visits, the one with the fewest (ties: menu order); None when there is none.
+    fn quota_select(&self, node: usize, legal: &[Action], subs: &[String], n: usize) -> Option<usize> {
+        let mut best: Option<(usize, i64)> = None;
+        for (i, (a, c)) in self.nodes[node].children.iter().enumerate() {
+            if !legal.iter().any(|l| l.same(a)) {
+                continue;
+            }
+            let label = a.label.to_lowercase();
+            if !subs.iter().any(|x| label.contains(x.as_str())) {
+                continue;
+            }
+            let v = self.nodes[*c].n;
+            if v < n as i64 && best.map_or(true, |(_, bv)| v < bv) {
+                best = Some((i, v));
+            }
+        }
+        best.map(|b| b.0)
     }
 
     /// py: _select_option
@@ -941,7 +1061,7 @@ pub struct SearchCore {
     pub mulligan_samples: usize,
     pub budget: Option<f64>,
     pub rng: PyRandom,
-    pub prior: Option<Box<dyn Prior>>,
+    pub prior: Option<SharedPrior>,
     question: &'static str,
     pub decisions: i64,
     pub turns: i64,
@@ -978,6 +1098,28 @@ pub struct SearchCore {
     /// Diagnosis (decisione_rs): the search with this index (k, as `info["k"]`) does exactly this
     /// many iterations at a fixed workload, whatever the point or the budget; nothing else changes.
     pub override_at: Option<(usize, usize)>,
+    /// Option `finestre` (default off): the simulations play the reaction and showdown windows for both
+    /// seats with a `Pilota` each; a window search resumes the window as the real loop would go on.
+    pub finestre: bool,
+    /// Diagnosis: `finestre` only for the search with this index (k, as `info["k"]`).
+    pub finestre_at: Option<usize>,
+    /// Option `quota` (default off): (label substrings, n): in the turn search's root, while a child whose
+    /// label contains one of them has fewer than n visits, the one with the fewest is simulated (not PUCT).
+    pub quota: Option<(Vec<String>, usize)>,
+    /// Diagnosis: the quota only for the search with this index.
+    pub quota_at: Option<(usize, Vec<String>, usize)>,
+    /// Tests: scripted pilots instead of sampled ones, per seat (showdown, reaction) label prefixes.
+    pub pilot_script: Option<[(Vec<String>, Vec<String>); 2]>,
+    /// Tests: the diagnosis also keeps each simulation's window plays.
+    pub diag_trace: bool,
+    /// Diagnosis, one entry per search that ran with `finestre` or a quota: per root child its visits, q and
+    /// the tally of the pilots' window plays (seat, point, label) in its simulations.
+    pub diag: Vec<Value>,
+    cur_fin: bool,
+    cur_quota: Option<(Vec<String>, usize)>,
+    tally: BTreeMap<usize, BTreeMap<(String, String, String), i64>>,
+    sim_traces: Vec<Value>,
+    sim_seeds: Vec<u64>,
 }
 
 static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
@@ -1005,7 +1147,7 @@ impl SearchCore {
             mulligan_samples: 3,
             budget,
             rng: PyRandom::new(seed),
-            prior,
+            prior: prior.map(|p| Rc::new(RefCell::new(p))),
             question: "main",
             decisions: 0,
             turns: 0,
@@ -1031,6 +1173,18 @@ impl SearchCore {
             valutazione: Valutazione::Storica,
             valutazione_at: None,
             override_at: None,
+            finestre: false,
+            finestre_at: None,
+            quota: None,
+            quota_at: None,
+            pilot_script: None,
+            diag_trace: false,
+            diag: Vec::new(),
+            cur_fin: false,
+            cur_quota: None,
+            tally: BTreeMap::new(),
+            sim_traces: Vec::new(),
+            sim_seeds: Vec::new(),
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
         LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1044,7 +1198,7 @@ impl SearchCore {
     /// py: _evaluate — (priors over the menu, value).
     fn evaluate(&mut self, c: &mut Game, legal: &[Action]) -> R<(Vec<(Action, f64)>, f64)> {
         let side = self.side;
-        match self.prior.as_mut() {
+        match self.prior.clone() {
             None => {
                 let u = 1.0 / legal.len().max(1) as f64;
                 let mut p = Vec::new();
@@ -1070,7 +1224,7 @@ impl SearchCore {
                 let x = encode_observation(&obs, &c.gs.reg);
                 let q = F::question_of(self.question);
                 let ctx = F::context(descs.len(), 0, false, false);
-                let probs = net.probs(x, q, ctx, &descs)?;
+                let probs = net.borrow_mut().probs(x, q, ctx, &descs)?;
                 for (a, pr) in legal.iter().zip(probs) {
                     dict_add(&mut p, a, pr as f64);
                 }
@@ -1286,9 +1440,81 @@ impl SearchCore {
                 self.valutazione = v;
             }
         }
+        let k = self.searches;
+        self.cur_fin = self.finestre || self.finestre_at == Some(k);
+        self.cur_quota = match &self.quota_at {
+            Some((qk, labels, n)) if *qk == k => Some((labels.clone(), *n)),
+            _ => self.quota.clone(),
+        }
+        .map(|(l, n)| (l.iter().map(|x| x.to_lowercase()).collect(), n));
+        self.tally.clear();
+        self.sim_traces.clear();
+        self.sim_seeds.clear();
         let r = self.search_inner(g, point, legal, cards_played, bf_idx);
         self.valutazione = saved;
+        if let Ok(tree) = &r {
+            if self.cur_fin || self.cur_quota.is_some() || self.diag_trace {
+                self.finish_diag(&tree.borrow(), k, point, g.gs.turn);
+            }
+        }
+        self.cur_fin = false;
+        self.cur_quota = None;
         r
+    }
+
+    /// A copy of the game for one simulation; with `finestre` a `Pilota` on each seat, its RNG derived
+    /// from the simulation's `seed` (never drawn from `self.rng`: the hidden worlds stay the same).
+    fn sim_copy(&self, gs: &GameState, side: Side, seed: u64) -> (Game, Option<PilotLog>) {
+        let mut c = search_copy(gs, side, seed);
+        if !self.cur_fin {
+            return (c, None);
+        }
+        let log: PilotLog = Rc::new(RefCell::new(Vec::new()));
+        for s in Side::BOTH {
+            let script = self.pilot_script.as_ref().map(|ps| {
+                let (sd, re) = &ps[s.idx()];
+                [sd.iter().cloned().collect::<VecDeque<_>>(), re.iter().cloned().collect::<VecDeque<_>>()]
+            });
+            let p: Rc<RefCell<dyn Agent>> = Rc::new(RefCell::new(Pilota {
+                prior: self.prior.clone(),
+                rng: PyRandom::new((seed as i128) * 2 + s.idx() as i128),
+                script,
+                log: Some(log.clone()),
+            }));
+            c.agents[s.idx()] = Some(p);
+        }
+        (c, Some(log))
+    }
+
+    /// The pilots' window plays of a finished simulation, to the tally of its root child.
+    fn record_sim(&mut self, child: Option<(usize, &Action)>, plog: Option<PilotLog>, c: &Game) {
+        let Some((ci, a)) = child else { return };
+        let plays: Vec<(Side, &'static str, String)> = plog.map(|l| l.borrow().clone()).unwrap_or_default();
+        let t = self.tally.entry(ci).or_default();
+        for (seat, point, label) in plays.iter() {
+            *t.entry((seat.name().to_string(), point.to_string(), label.clone())).or_insert(0) += 1;
+        }
+        if self.diag_trace {
+            let w: Vec<Value> = plays.iter().map(|(s, p, l)| json!([s.name(), p, l])).collect();
+            self.sim_traces.push(json!({"child": a.label, "window": w,
+                                        "end": {"chain": c.gs.chain.len(), "showdown": c.gs.showdown_active}}));
+        }
+    }
+
+    fn finish_diag(&mut self, t: &Tree, k: usize, point: Point, turn: i64) {
+        let kids: Vec<Value> = t.nodes[0].children.iter().enumerate().map(|(i, (a, c))| {
+            let n = &t.nodes[*c];
+            let tally: Vec<Value> = self.tally.get(&i).map(|m| m.iter()
+                .map(|((s, p, l), x)| json!([s, p, l, x])).collect()).unwrap_or_default();
+            json!({"label": a.label, "n": n.n, "q": if n.n > 0 { json!(n.q) } else { Value::Null }, "tally": tally})
+        }).collect();
+        let mut row = json!({"k": k, "seat": self.side.name(), "point": point.name(), "turn": turn,
+                             "finestre": self.cur_fin, "children": kids});
+        if self.diag_trace {
+            row["sims"] = Value::Array(std::mem::take(&mut self.sim_traces));
+            row["seeds"] = json!(std::mem::take(&mut self.sim_seeds));
+        }
+        self.diag.push(row);
     }
 
     /// py: search (and _Budget.search): the root is node 0.
@@ -1365,7 +1591,11 @@ impl SearchCore {
                -> R<()> {
         let side = self.side;
         let seed = self.seed();
-        let mut c = search_copy(&g.gs, side, seed);
+        if self.diag_trace {
+            self.sim_seeds.push(seed);
+        }
+        let (mut c, plog) = self.sim_copy(&g.gs, side, seed);
+        let mut root_child: Option<(usize, Action)> = None;
         let dbg = self.debug == Some((self.cur_search, self.sim));
         self.sim += 1;
         if dbg {
@@ -1402,12 +1632,19 @@ impl SearchCore {
                 value = v;
                 break;
             }
-            let pick = tree.borrow().puct_select(node, &legal_ga, self.c_puct);
+            let quota = match (&self.cur_quota, node) {
+                (Some((subs, n)), 0) => tree.borrow().quota_select(0, &legal_ga, subs, *n),
+                _ => None,
+            };
+            let pick = quota.or_else(|| tree.borrow().puct_select(node, &legal_ga, self.c_puct));
             let Some(ci) = pick else {
                 value = state_value_v(&mut c.gs, side, self.valutazione);
                 break;
             };
             let (key, child) = tree.borrow().nodes[node].children[ci].clone();
+            if node == 0 {
+                root_child = Some((ci, key.clone()));
+            }
             node = child;
             path.push(node);
             if key.kind == AKind::Pass && c.gs.pending_move.is_none() {
@@ -1442,6 +1679,7 @@ impl SearchCore {
         if self.log.is_some() {
             self.vals.push(value);
         }
+        self.record_sim(root_child.as_ref().map(|(i, a)| (*i, a)), plog, &c);
         Ok(())
     }
 
@@ -1481,7 +1719,10 @@ impl SearchCore {
                    bf_idx: Option<usize>) -> R<()> {
         let side = self.side;
         let seed = self.seed();
-        let mut c = search_copy(&g.gs, side, seed);
+        if self.diag_trace {
+            self.sim_seeds.push(seed);
+        }
+        let (mut c, plog) = self.sim_copy(&g.gs, side, seed);
         if !tree.borrow().nodes[0].expanded {
             let (priors, v) = self.evaluate(&mut c, legal)?;
             let mut t = tree.borrow_mut();
@@ -1499,7 +1740,17 @@ impl SearchCore {
                                                      c_puct: self.c_puct, dbg: None }));
         let dyn_tc: Rc<RefCell<dyn Chooser>> = tc.clone();
         c.chooser = Some(dyn_tc);
-        let r = self.step(&mut c, point, &key, bf_idx).and_then(|_| Self::settle(&mut c));
+        let r = if self.cur_fin {
+            self.resume(g, &mut c, point, &key).and_then(|done| {
+                if done {
+                    Ok(())
+                } else {
+                    self.step(&mut c, point, &key, bf_idx).and_then(|_| Self::settle(&mut c))
+                }
+            })
+        } else {
+            self.step(&mut c, point, &key, bf_idx).and_then(|_| Self::settle(&mut c))
+        };
         c.chooser = None;
         r?;
         let mut path = vec![0, child];
@@ -1512,7 +1763,44 @@ impl SearchCore {
         if self.log.is_some() {
             self.vals.push(value);
         }
+        self.record_sim(Some((ci, &key)), plog, &c);
         Ok(())
+    }
+
+    /// With `finestre`, a window search's simulation after our action `action`: the window goes on
+    /// exactly as the real loop would, from the (side, passes) recorded when we were asked, the pilots
+    /// playing both seats, up to what the loop does after it (finish_showdown, hidden cards, staged
+    /// showdowns). Ok(false): no record of the window (the caller settles the old way).
+    fn resume(&self, g: &Game, c: &mut Game, point: Point, action: &Action) -> R<bool> {
+        match point {
+            Point::ShowdownAction => {
+                let Some((fp, passes, bf, att)) = g.win_show else { return Ok(false) };
+                if fp != self.side {
+                    return Ok(false);
+                }
+                let p = c.showdown_apply(fp, passes, action, bf, att)?;
+                c.showdown_loop(bf, att, p)?;
+                Ok(true)
+            }
+            Point::Reaction => {
+                let Some((active, passes)) = g.win_chain else { return Ok(false) };
+                if active != self.side {
+                    return Ok(false);
+                }
+                let (a, p) = c.chain_apply(active, passes, action)?;
+                c.run_chain_from(a, p)?;
+                // The chain was opened by a step of an open showdown: its loop goes on after it.
+                if c.gs.showdown_active {
+                    if let Some((_, _, bf, att)) = g.win_show {
+                        if c.gs.showdown_bf_idx == Some(bf) {
+                            c.showdown_after_acted(bf, att)?;
+                        }
+                    }
+                }
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 
     /// py: _choices_ahead
