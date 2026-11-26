@@ -102,7 +102,7 @@ def cmd_rifai(a) -> int:
         out = {"k": k, "originale": e["action"], "posizione": base["posizione"], "varianti": {}}
         for n in a.iterazioni:
             if val is not None or a.finestre or a.quota:
-                r = D.rifai(P, k, n, posizione=False, valutazione=val, finestre=a.finestre,
+                r = D.rifai(P, k, n, posizione=False, valutazione=val, finestre=True if a.finestre else None,
                             quota=(a.quota, a.quota_n) if a.quota else None)
             else:
                 r = base if n == orig_n else D.rifai(P, k, n, posizione=False)

@@ -384,12 +384,14 @@ impl Game {
         }
     }
 
-    /// Diagnosis: `finestre` only for the search with index `k` (like `set_search_override`).
-    fn set_search_finestre_at(&mut self, seat: &str, k: usize) -> PyResult<()> {
+    /// Diagnosis: `finestre` on (or off) only for the search with index `k` (like `set_search_override`),
+    /// whatever the seat-wide option says.
+    #[pyo3(signature = (seat, k, on=true))]
+    fn set_search_finestre_at(&mut self, seat: &str, k: usize, on: bool) -> PyResult<()> {
         let s = seat_of(seat)?;
         match &self.search[s.idx()] {
             Some(c) => {
-                c.borrow_mut().finestre_at = Some(k);
+                c.borrow_mut().finestre_at = Some((k, on));
                 Ok(())
             }
             None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),

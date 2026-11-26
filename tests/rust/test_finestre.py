@@ -220,3 +220,15 @@ def test_cli_rifai_stampa_visite_q_e_giocate(partita, capsys):
     assert decisione.main(argv) == 0
     out = capsys.readouterr().out
     assert "[finestre]" in out and "figli della radice" in out and "n=" in out and "attesa 'Pass'" in out
+
+
+def test_finestre_spente_su_k_anche_se_l_originale_le_aveva():
+    """Con il campione originale a finestre accese (`--finestre-orig`), finestre=False spegne la sola ricerca k:
+    le condizioni «spente» di incrocio sono davvero spente (segnalazione di Codex, PR 61)."""
+    from riftbound.rs import decisione_rs as D
+    P = {**D.autonoma("ES", 3, None, True, 138, finestre=True), "starter": "a"}
+    k = next(r["k"] for r in D.elenca(P) if r["point"] == "turn_action" and r["n_menu"] > 5)
+    off = D.rifai(P, k, 138, posizione=False, finestre=False, semi=True)["diagnosi"]
+    on = D.rifai(P, k, 138, posizione=False, finestre=True, semi=True)["diagnosi"]
+    assert off["k"] == k and not off["finestre"] and not any(c["tally"] for c in off["children"])
+    assert on["finestre"] and any(c["tally"] for c in on["children"])
