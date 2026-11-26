@@ -9,6 +9,9 @@ Candidato (b): rete nuova + `rimonta`; candidato (c): rete nuova con 80% `rimont
 Punteggio di una partita 1 / 1/2 / 0 dal lato del candidato; di una coppia (stesso seme e apertura, posti scambiati) la
 media delle due; di un matchup la media delle coppie; totale = media a pesi uguali fra i matchup. Intervallo al 95%:
 ricampionamento (bootstrap, 4000 estrazioni, seme fisso) di coppie intere dentro ogni matchup.
+Variante (d), Astra 26/11: separa prior e valore. Prior del campione, valore della rete nuova (80% rimonta + 20% valore):
+d - c cambia solo il prior; d contro il campione cambia solo il valore. `confronto_appaiato` dà la differenza fra due
+varianti sulle stesse coppie (stessi semi e aperture), con intervallo bootstrap sulle differenze di coppia.
 Semi: BASE_SEME_SVILUPPO + 1.000 x indice del matchup + k (distinti da raccolta 30.000.000 e promozione 40.000).
 """
 from __future__ import annotations
@@ -27,17 +30,21 @@ ROOT = Path(__file__).resolve().parents[2]
 BASE_SEME_SVILUPPO = 40_000_000
 ITERAZIONI = 138
 PESO_VALORE = 0.2
-VARIANTI = {"b": 0.0, "c": PESO_VALORE}
-ETICHETTE = {"b": "(b) rete nuova + rimonta", "c": "(c) rete nuova, 80% rimonta + 20% valore"}
+VARIANTI = {"b": 0.0, "c": PESO_VALORE, "d": PESO_VALORE}
+PRIOR_DEL_CAMPIONE = {"d"}      # prior dal campione, valore dalla rete nuova
+ETICHETTE = {"b": "(b) rete nuova + rimonta", "c": "(c) rete nuova, 80% rimonta + 20% valore",
+             "d": "(d) prior del campione, 80% rimonta + 20% valore della rete nuova"}
 
 
-def _opz(peso: float, iterazioni: int, log: bool) -> dict:
+def _opz(peso: float, iterazioni: int, log: bool, valore_da: str | None = None) -> dict:
     from riftbound.ai.coach_rs import VALUTAZIONE_ALPHA, VALUTAZIONE_K
     val = ["rimonta", VALUTAZIONE_K, VALUTAZIONE_ALPHA]
     o = {"iter_cand": iterazioni, "iter_opp": iterazioni, "probe_cand": True, "probe_opp": True,
          "val_cand": val, "val_opp": val, "log": log}
     if peso > 0:
         o["vr_cand"] = peso
+        if valore_da:
+            o["vc_cand"] = valore_da
     return o
 
 
@@ -89,8 +96,11 @@ def _gioca(job: dict) -> dict:
     os.environ["RBSIM_REGOLE"] = job["regole"]
     from riftbound.rs import arena_rs
     seme, mu, posto, v = job["seme"], job["mu"], job["posto"], job["variante"]
-    r = arena_rs.game((seme, "a" if seme % 2 == 0 else "b", posto, "prior_ppo", job["rete"], "prior_ppo",
-                       job["campione"], mu, None, None, _opz(VARIANTI[v], job["iterazioni"], True)))
+    prior_campione = v in PRIOR_DEL_CAMPIONE
+    opz = _opz(VARIANTI[v], job["iterazioni"], True, job["rete"] if prior_campione else None)
+    r = arena_rs.game((seme, "a" if seme % 2 == 0 else "b", posto, "prior_ppo",
+                       job["campione"] if prior_campione else job["rete"], "prior_ppo",
+                       job["campione"], mu, None, None, opz))
     log = r[8].get("log", {})
     return {"variante": v, "mu": mu, "seme": seme, "posto": posto, "score": r[3], "secondi_ricerca": {
         lato: [[riga[0], riga[2], riga[3], riga[4]] for riga in log.get(lato, [])] for lato in ("cand", "opp")},
@@ -109,6 +119,11 @@ def intervallo(punteggi: dict, rng, n_boot: int = 4000):
     lo_hi = np.percentile(boot.mean(axis=1), [2.5, 97.5])
     per = {mu: (medie[mu], *map(float, np.percentile(boot[:, j], [2.5, 97.5]))) for j, mu in enumerate(mus)}
     return tot, float(lo_hi[0]), float(lo_hi[1]), per
+
+
+def _ricerca_manifest(v: str, peso: float, iterazioni: int) -> dict:
+    o = _opz(peso, iterazioni, False)
+    return o | {"vc_cand": "rete", "prior": "campione"} if v in PRIOR_DEL_CAMPIONE else o
 
 
 def durata(righe_ricerca: list) -> dict:
@@ -135,7 +150,8 @@ def arena(rete: str, campione: str, matchup, coppie: int, regole: str, righe: Pa
     t0 = time.time()
     config = {"rete_sha256": checkpoint_sha256(rete), "campione_sha256": checkpoint_sha256(campione),
               "regole": regole, "iterazioni": iterazioni, "max_turni": MAX_TURNS, "base_seme": BASE_SEME_SVILUPPO,
-              "ricerca": {v: _opz(peso, iterazioni, False) for v, peso in VARIANTI.items()}}
+              "ricerca": {v: _ricerca_manifest(v, peso, iterazioni) for v, peso in VARIANTI.items()
+                          if v in ("b", "c") or v in varianti}}
     manifest = righe.with_name(righe.name + ".provenienza.json")
     with FileLock(str(righe) + ".rbsim.lock", timeout=0):
         if manifest.exists():
@@ -227,4 +243,51 @@ def testo_arena(res: dict) -> list[str]:
         if c[0]:
             out.append(f"   chiamate della rete del candidato: {c[0]}, di cui solo per il valore {c[1]}")
     out.append(f"durata dell'arena: {res['minuti']} min")
+    return out
+
+
+# -- confronto appaiato fra varianti ------------------------------------------------------------
+
+_CHIAVI_COMUNI = ("campione_sha256", "rete_sha256", "regole", "iterazioni", "max_turni", "base_seme")
+
+
+def _leggi_righe(righe: Path) -> tuple[dict, list[dict]]:
+    manifest = righe.with_name(righe.name + ".provenienza.json")
+    if not manifest.is_file():
+        raise ValueError(f"manca la provenienza di {righe}")
+    rr = [json.loads(x) for x in righe.read_text().splitlines() if x.strip()]
+    return json.loads(manifest.read_text()), rr
+
+
+def confronto_appaiato(righe_x: Path, vx: str, righe_y: Path, vy: str, n_boot: int = 40_000, seme: int = 0) -> dict:
+    """Differenza x - y fra due varianti sulle stesse coppie (matchup, seme, entrambi i posti): per coppia la media
+    sui due posti di (punteggio x - punteggio y); intervallo come `intervallo` (pesi uguali fra i matchup)."""
+    mx, rx = _leggi_righe(Path(righe_x))
+    my, ry = _leggi_righe(Path(righe_y))
+    diverse = [k for k in _CHIAVI_COMUNI if mx.get(k) != my.get(k)]
+    if diverse:
+        raise ValueError(f"Confronto impossibile: provenienza diversa ({', '.join(diverse)}) fra {righe_x} e {righe_y}.")
+    px = {(r["mu"], r["seme"], r["posto"]): r["score"] for r in rx if r["variante"] == vx}
+    py = {(r["mu"], r["seme"], r["posto"]): r["score"] for r in ry if r["variante"] == vy}
+    diff = defaultdict(list)
+    for mu, s in sorted({(m, s) for m, s, _ in px} & {(m, s) for m, s, _ in py}):
+        chiavi = [(mu, s, p) for p in ("A", "B")]
+        if all(k in px and k in py for k in chiavi):
+            diff[mu].append(sum(px[k] - py[k] for k in chiavi) / 2)
+    if not diff:
+        raise ValueError(f"Nessuna coppia in comune fra {vx} e {vy}.")
+    punti = {mu: np.array(d) for mu, d in diff.items()}
+    tot, lo, hi, per = intervallo(punti, np.random.default_rng(seme), n_boot)
+    return {"x": vx, "y": vy, "coppie": {mu: len(d) for mu, d in diff.items()}, "totale": [tot, lo, hi],
+            "matchup": {mu: list(v) for mu, v in per.items()}}
+
+
+def testo_confronto(res_list: list[dict]) -> list[str]:
+    out = []
+    for r in res_list:
+        m, lo, hi = (100 * x for x in r["totale"])
+        out.append(f"{r['x']} \u2212 {r['y']}: {m:+.2f} punti percentuali (IC 95% da {lo:+.2f} a {hi:+.2f}), "
+                   f"{sum(r['coppie'].values())} coppie, pesi uguali fra i matchup")
+        out.append("   " + "; ".join(f"{mu} {100 * x[0]:+.2f} ({100 * x[1]:+.2f} / {100 * x[2]:+.2f})"
+                                     for mu, x in r["matchup"].items()))
     return out
