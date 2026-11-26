@@ -274,3 +274,11 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
     la mossa e aprire lo showdown; la sequenza non lo aveva. Da rifare, con una continuazione che la impone tutta.
   - Rilevatore §9 (campione `storica`, 50 partite, posto B): ES 105 occasioni, Vex uccisa dopo 15, ordine giusto 3;
     EK 114 occasioni, uccisa dopo 14, ordine giusto 2. L'ordine sbagliato è ~5 volte più frequente di quello giusto.
+- **Secondo giro (26/11, Astra).** Arena `rimonta`+finestre contro `rimonta`, 138 iterazioni, 800 coppie per matchup
+  (`docs/bot/finestre/arena_20261126_1056/`): ES 0,474 (0,454-0,494), EK 0,531 (0,513-0,550), blocco 0,503
+  (0,489-0,516): NON PASSA, effetti opposti nei due matchup. Il T9 a 138 con le finestre: Vi in base (q 0,24), Sett su
+  Valley -0,27, Kinkou 1 visita. Rilevatore per turni unici con scelta possibile (50 partite, posto B): ES `rimonta`
+  ordine sbagliato 12, giusto 2, Vex sopravvive 45 (su 60); con finestre 14 / 2 / 40 (57). EK 7 / 2 / 59 (71); con
+  finestre 13 / 3 / 51 (69). Le finestre non insegnano a togliere Vex prima: lo stordimento finisce col turno e la
+  valutazione di fine turno non lo vede. La linea condizionale di Matteo (Punch First solo se risponde, danni su
+  Vex) non è ancora misurata: due errori nella sequenza e nel comando (zsh conta gli array da 1).

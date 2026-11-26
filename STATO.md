@@ -67,15 +67,14 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
 Matteo: Evelynn-Sett 013325 (`rimonta`, D72-D81) vinta 8 a 4 in 14; risposta §8: nessuna difficoltà (GIOCATE §8).
 Manca la seconda partita. Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
-§9 (GIOCATE, segnalazione 28): il campione gioca Vi con Vex vivo e lo toglie dopo; nelle simulazioni nessuno giocava le
-finestre di reazione e showdown (copie senza agenti). Astra (26/11, risposte fuori dal repo): migliorare la ricerca, `rimonta`
-resta il campione; esperimento sul T9 di 013325 (k=10): finestre on/off × quota on/off sugli stessi mondi, linea di Matteo
-guidata, continuazioni fino alla fine per Kinkou su Bandle / Vi in base / Sett su Valley; poi il valore oltre il turno.
-Fatto (spento di default, storico 80/80): `finestre` (piloti PPO nelle simulazioni, ripresa della finestra), `quota`, diagnosi;
-`decisione.py incrocio|guidata|continua`; rilevatore §9 in `episodi.py`. In attesa: il blocco sul Mac (`docs/bot/esperimenti/`).
+§9 (GIOCATE, segnalazione 28): il campione gioca sotto Vex e lo toglie dopo (ES 12 turni su 60, ordine giusto 2).
+Simulazioni con le finestre (`finestre`, piloti PPO; `quota`; `decisione.py incrocio|guidata|continua`; Vex in
+`episodi.py`): arena contro `rimonta` NON PASSA (ES 0,474, EK 0,531, blocco 0,503); non cambiano il §9. Linea di
+Matteo al T9 (Vex muore per primo, Punch First solo se risponde): da misurare (`?`, `danni:`, `@finestre`). Esiti in
+`docs/bot/esperimenti/`, `docs/bot/finestre/`; domande ad Astra date a Matteo (fuori dal repo).
 
 ## Prossimi passi
-1. Leggere `docs/bot/esperimenti/` (T9, Vex ES/EK): se le finestre trovano la linea da sole → arena; solo con la quota → esplorazione in allenamento.
+1. Risposta di Astra sull'arena delle finestre (a: diagnosi ES, b: pilota greedy, c: più iterazioni, d: solo l'avversario).
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
 

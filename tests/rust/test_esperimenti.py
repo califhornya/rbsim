@@ -417,3 +417,14 @@ def test_danni_condizionale_resta_fino_alla_scelta_dei_danni():
     guida, t, _vivi, _g = _gioca_condizionale(seq)
     assert guida.saltate == 1 and "?danni:First Mate: condizione non verificata: saltata" in t
     assert "[scelta] combat_damage_order: First Mate" not in t
+
+
+def test_condizionale_seguente_eredita_la_risposta():
+    """`?Punch First ; ?scelta:Kinkou`: giocata la prima dopo la risposta, la seconda (il bersaglio) vale per la stessa
+    risposta; senza risposta si saltano entrambe."""
+    seq = ["Move Kinkou Initiate base→BF0", "Pass", "?Punch First", "?scelta:Kinkou", "danni:Pit Rookie"]
+    guida, t, vivi, _g = _gioca_condizionale(seq, ["Punch First"], {"showdown": ["Showdown Punch First"]})
+    assert guida.saltate == 0 and "[scelta] target:grant_temporary_might: Kinkou Initiate" in t
+    assert "[scelta] combat_damage_order: Pit Rookie" in t
+    guida, t, vivi, _g = _gioca_condizionale(seq)
+    assert guida.saltate == 2 and "[scelta] combat_damage_order: Pit Rookie" in t

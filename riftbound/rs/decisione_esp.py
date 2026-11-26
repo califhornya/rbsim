@@ -336,7 +336,10 @@ class Guida:
 
     def passo(self, desc: str, dopo: str | None = None) -> None:
         self.i += 1
-        self.cond_da, self.cond_key = len(self.opp_log), None
+        if dopo is None:
+            self.cond_da, self.cond_key = len(self.opp_log), None
+        # una condizionale appena giocata (`dopo`): le condizionali che la seguono subito (es. `?scelta:` per il suo
+        # bersaglio) valgono per la stessa risposta, finche' la finestra resta quella
         self.attesa = (self.i, desc + (f" (giocata dopo la risposta {dopo})" if dopo else ""))
 
     def ask(self, ev: str):
