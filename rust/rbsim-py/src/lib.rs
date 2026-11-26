@@ -427,6 +427,32 @@ impl Game {
         }
     }
 
+    /// Observation only: the diagnosis (`search_finestre_diag`) is kept for every search of the seat, with
+    /// the simulations' seeds (and window plays), also with `finestre` and quota off. Changes nothing else.
+    fn set_search_diag_trace(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().diag_trace = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Continuations: the search seat's next turn decision plays the first legal move whose label contains
+    /// `label` (case-insensitive); after that it searches as usual.
+    fn set_search_first_move(&mut self, seat: &str, label: &str) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().first_forced = Some(label.to_string());
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// The finestre / quota diagnosis of a search seat (JSON list, one entry per search that ran with
     /// either): per root child its label, visits, q and the tally of the pilots' window plays.
     fn search_finestre_diag(&self, seat: &str) -> PyResult<String> {
@@ -596,6 +622,35 @@ impl Game {
         let r = r.map_err(perr)?;
         d.map_err(perr)?;
         Ok(r)
+    }
+
+    /// The first half of `run_segment`'s turn: the active player's actions and the end of the turn (not the
+    /// next turn's beginning). -> the winner if the game ended in it.
+    fn run_actions_end(&mut self) -> PyResult<Option<String>> {
+        drop(human::take());
+        let r = (|| -> Result<Option<String>, EngineError> {
+            if let Some(res) = self.g.run_main_actions()? {
+                return Ok(Some(res.winner_name().to_string()));
+            }
+            if let Some(res) = self.g.end_turn()? {
+                return Ok(Some(res.winner_name().to_string()));
+            }
+            Ok(None)
+        })();
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        r.map_err(perr)
+    }
+
+    /// The other half: the next turn's beginning. -> the winner if the game ended in it.
+    fn run_begin(&mut self) -> PyResult<Option<String>> {
+        drop(human::take());
+        let r = self.g.begin_turn();
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        Ok(r.map_err(perr)?.map(|res| res.winner_name().to_string()))
     }
 
     /// The trace's events (JSON list).

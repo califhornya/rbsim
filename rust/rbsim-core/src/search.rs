@@ -1112,6 +1112,9 @@ pub struct SearchCore {
     pub pilot_script: Option<[(Vec<String>, Vec<String>); 2]>,
     /// Tests: the diagnosis also keeps each simulation's window plays.
     pub diag_trace: bool,
+    /// Continuations: the seat's first turn decision plays the first legal action whose label contains this
+    /// (case-insensitive); then the search goes on as usual.
+    pub first_forced: Option<String>,
     /// Diagnosis, one entry per search that ran with `finestre` or a quota: per root child its visits, q and
     /// the tally of the pilots' window plays (seat, point, label) in its simulations.
     pub diag: Vec<Value>,
@@ -1179,6 +1182,7 @@ impl SearchCore {
             quota_at: None,
             pilot_script: None,
             diag_trace: false,
+            first_forced: None,
             diag: Vec::new(),
             cur_fin: false,
             cur_quota: None,
@@ -1277,6 +1281,13 @@ impl SearchCore {
         self.ensure_fallback(g);
         self.release_forced(g, 0);
         let root_legal = g.legal_actions(Point::TurnAction, self.side)?;
+        if let Some(sub) = self.first_forced.take() {
+            let sub = sub.to_lowercase();
+            return match root_legal.iter().find(|a| a.label.to_lowercase().contains(&sub)) {
+                Some(a) => Ok(a.clone()),
+                None => Err(EngineError::Agent(format!("first forced move not legal: {sub}"))),
+            };
+        }
         if root_legal.len() <= 1 {
             return Ok(root_legal.first().cloned().unwrap_or_else(Action::pass));
         }
