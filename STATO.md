@@ -67,15 +67,15 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
 Matteo: 013325 (`rimonta`, D72-D81) vinta 8 a 4, nessuna difficoltà (§8); manca la 2a partita; 13 episodi umani su D80.
 §9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo (ES 12 su 60); finestre: arena NON PASSA (ES 0,474, EK 0,531).
-(26/11, Astra, GIOCATE §9 terzo giro, `docs/bot/esperimenti/t9_attacco/`) Dal T9 attaccare Bandle vince di più di
-Valley: Armory su Sett + Punch First + Vi 30-38/100 contro 7-8 (+23/+30 pp). Due difetti distinti: linea mai costruita
-(Armory 1 visita) e costruita ma valutata male (Kinkou, q -0,75). Il prototipo genera la linea ma la selezione su 16
-mondi sbaglia. `scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`), Mac 26/11 (`attacco_20261126/`):
-T9 IDENTICO ad Astra; valutazione di fine T9: ogni attacco sotto Valley (-0,50/-0,88 contro -0,11). EK7B T9: attacco
-+35 pp, 0 visite, valutazione concorde (solo costruzione). 9 posizioni su 12 saltate (carte note): corretto, da rifare.
+(26/11, Astra, GIOCATE §9, `esperimenti/t9_attacco/`) Al T9 attaccare Bandle (Armory su Sett, Punch First, Vi)
+vince 30-38/100 contro 7-8 di Valley: linea mai costruita (Armory 1 visita), Kinkou costruita e valutata male.
+`scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`) sul Mac: T9 IDENTICO ad Astra; a fine T9 ogni
+attacco vale meno di Valley (-0,50/-0,88 contro -0,11). Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
+migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown, valutazione concorde. Domande ad
+Astra date a Matteo.
 
 ## Prossimi passi
-1. Matteo: `attacco_serie_mac.command` (24 posizioni) -> Astra (mai costruite / valutate male); poi il bot, arena.
+1. Risposta di Astra sulla costruzione degli attacchi con lo showdown (sonda nel bot o quota/finestre), poi arena.
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
 
