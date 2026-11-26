@@ -8,6 +8,7 @@
   decisione.py guidata  --pagina F.json --campione B --k 10 --sequenza "Move X base→BF0" "Punch First" "Pass"
         [--avversario passa|campione] [--out F.txt]
   decisione.py continua --pagina F.json --campione B --k 10 --mosse "Move X base→BF0" "Play Y" [--n 100] [--processi 4]
+        (ogni --mosse puo' essere una linea intera: "Play gear Z @BF0 ; Kinkou ; Move X base→BF0 ; Pass ; Punch First")
 
 `rifai`: rigioca la partita (regole, seed, mazzi, prior e iterazioni del campione come all'origine) e alla ricerca
 scelta rifà la decisione con ogni valore di --iterazioni (quello uguale all'originale, 42 di norma, riproduce la mossa:
@@ -44,6 +45,8 @@ def partita_da_args(a) -> dict:
     if vo and vo.split(":")[0] != "storica":
         nome, *par = vo.split(":")
         orig["valutazione"] = (nome, float(par[0]) if par else 3.0, float(par[1]) if len(par) > 1 else 0.2)
+    if getattr(a, "finestre_orig", False):
+        orig["finestre"] = True
     return {"tipo": "autonoma", "matchup": mu, "seed": int(seed), "starter": starter, "iterazioni": a.iter_orig,
             "probe": True, "campione": a.campione, **orig, **extra}
 
@@ -99,7 +102,7 @@ def cmd_rifai(a) -> int:
         out = {"k": k, "originale": e["action"], "posizione": base["posizione"], "varianti": {}}
         for n in a.iterazioni:
             if val is not None or a.finestre or a.quota:
-                r = D.rifai(P, k, n, posizione=False, valutazione=val, finestre=a.finestre,
+                r = D.rifai(P, k, n, posizione=False, valutazione=val, finestre=True if a.finestre else None,
                             quota=(a.quota, a.quota_n) if a.quota else None)
             else:
                 r = base if n == orig_n else D.rifai(P, k, n, posizione=False)
@@ -197,6 +200,8 @@ def cmd_continua(a) -> int:
     for r in E.testo_continua(res):
         out(r)
     out.scrivi(a.out)
+    if a.out:   # gli esiti per mondo (differenze appaiate, istogrammi delle deviazioni) accanto al testo
+        Path(a.out).with_suffix(".json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str))
     return 0
 
 
@@ -222,6 +227,8 @@ def main(argv=None) -> int:
                    help="valutazione delle foglie nella decisione rifatta (il prefisso resta quello di --valutazione-orig)")
     r.add_argument("--valutazione-orig", default=None, metavar="NOME[:k:alpha]",
                    help="valutazione con cui e' stata giocata la partita autonoma originale (default storica): il prefisso si riproduce con lei")
+    r.add_argument("--finestre-orig", action="store_true",
+                   help="la partita autonoma originale e' stata giocata con le finestre (il prefisso si riproduce solo cosi')")
     r.add_argument("--k-acc", dest="k_acc", type=float, default=3.0)
     r.add_argument("--alpha", type=float, default=0.2)
     r.add_argument("--tipo", default="turno", choices=["turno", "reazione", "showdown", "tutti"])
@@ -250,6 +257,8 @@ def main(argv=None) -> int:
         t.add_argument("--turno", type=int, help="la prima decisione di turno del campione in quel turno")
         t.add_argument("--k", type=int)
         x.add_argument("--valutazione-orig", default=None, metavar="NOME[:k:alpha]")
+        x.add_argument("--finestre-orig", action="store_true",
+                       help="la partita autonoma originale e' stata giocata con le finestre")
     x = sub.choices["incrocio"]
     x.add_argument("--iterazioni", type=int, nargs="+", required=True)
     x.add_argument("--mosse", nargs="+", required=True, metavar="ETICHETTA")
@@ -259,7 +268,8 @@ def main(argv=None) -> int:
     x.add_argument("--sequenza", nargs="+", required=True, metavar="ETICHETTA")
     x.add_argument("--avversario", default="passa", choices=["passa", "campione"])
     x = sub.choices["continua"]
-    x.add_argument("--mosse", nargs="+", required=True, metavar="ETICHETTA")
+    x.add_argument("--mosse", nargs="+", required=True, metavar="LINEA",
+                   help='una etichetta (la prima mossa, poi il campione) o etichette separate da " ; " (la linea, forzata come in guidata)')
     x.add_argument("--n", type=int, default=100)
     x.add_argument("--processi", type=int, default=1, help="processi in parallelo (una continuazione ciascuno)")
     a = ap.parse_args(argv)

@@ -1102,7 +1102,8 @@ pub struct SearchCore {
     /// seats with a `Pilota` each; a window search resumes the window as the real loop would go on.
     pub finestre: bool,
     /// Diagnosis: `finestre` only for the search with this index (k, as `info["k"]`).
-    pub finestre_at: Option<usize>,
+    /// Per-search override of `finestre` (search index, on/off); otherwise `finestre` holds.
+    pub finestre_at: Option<(usize, bool)>,
     /// Option `quota` (default off): (label substrings, n): in the turn search's root, while a child whose
     /// label contains one of them has fewer than n visits, the one with the fewest is simulated (not PUCT).
     pub quota: Option<(Vec<String>, usize)>,
@@ -1452,7 +1453,10 @@ impl SearchCore {
             }
         }
         let k = self.searches;
-        self.cur_fin = self.finestre || self.finestre_at == Some(k);
+        self.cur_fin = match self.finestre_at {
+            Some((kk, on)) if kk == k => on,
+            _ => self.finestre,
+        };
         self.cur_quota = match &self.quota_at {
             Some((qk, labels, n)) if *qk == k => Some((labels.clone(), *n)),
             _ => self.quota.clone(),

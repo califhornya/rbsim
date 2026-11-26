@@ -211,7 +211,7 @@ def test_rifai_valutazione_storica_esplicita_e_un_override(monkeypatch):
     from riftbound.rs import decisione_rs as D
     viste = []
 
-    def finta(P, k, n, posizione=True, valutazione=None):
+    def finta(P, k, n, posizione=True, valutazione=None, **_resto):
         viste.append((n, valutazione, P.get("valutazione")))
         return {"riproduce": True, "prefisso_ok": True, "dopo_sonda": False, "posizione": {}, "azione": "x", "uguale": True,
                 "classifica": [], "iterazioni": n}

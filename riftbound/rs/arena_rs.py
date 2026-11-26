@@ -71,7 +71,9 @@ def game(task):
 
     opzioni (optional dict, absent = as before): iter_cand / iter_opp (fixed
     work: that many iterations per search, no time budget for that side),
-    probe_cand / probe_opp (the win probe of that side), val_cand / val_opp
+    probe_cand / probe_opp (the win probe of that side), diag_finestre (the last element carries, per side, the `search_finestre_diag` entries: the collaudo of
+    scripts/diag/collaudo_finestre.py), fin_cand / fin_opp (the `finestre`
+    option of that side's search), val_cand / val_opp
     ([nome, k, alpha]: the leaf evaluation of that side, default storica), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
@@ -99,6 +101,8 @@ def game(task):
             g.set_search_timing(seat, True)
         if opz.get(f"probe_{lato}"):
             g.set_search_win_probe(seat, True)
+        if opz.get(f"fin_{lato}"):
+            g.set_search_finestre(seat, True)
         val = opz.get(f"val_{lato}")
         if val and val[0] != "storica":
             g.set_search_valutazione(seat, val[0], float(val[1]), float(val[2]))
@@ -113,6 +117,10 @@ def game(task):
         import json
         extra = {"log": {lato: righe_log(g.search_log(seat))
                          for lato, seat in (("cand", cand_seat), ("opp", other))}}
+    if opz.get("diag_finestre"):
+        import json
+        extra["finestre_diag"] = {lato: json.loads(g.search_finestre_diag(seat))
+                                  for lato, seat in (("cand", cand_seat), ("opp", other))}
     return (seed, starter, cand_seat, s, list(ci), list(oi), (ce, ct), (oe, ot), extra)
 
 

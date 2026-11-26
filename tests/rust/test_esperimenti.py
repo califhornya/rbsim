@@ -189,6 +189,8 @@ def test_cli_guidata_incrocio_continua_scrivono_il_rapporto(pos, tmp_path):
     assert "fine del turno" in f1.read_text() or "fermo" in f1.read_text()
     assert "stessi semi nelle 4 condizioni: sì" in f2.read_text()
     assert "differenza rispetto alla migliore" in f3.read_text() and "vittorie" in f3.read_text()
+    j = json.loads(f3.with_suffix(".json").read_text())
+    assert all(len(v["mondi"]) == 2 for v in j["mosse"].values())
 
 
 def test_un_mondo_si_ferma_al_tetto_di_turni(pos):
@@ -199,3 +201,70 @@ def test_un_mondo_si_ferma_al_tetto_di_turni(pos):
     r = E.un_mondo(Pp, tree, "Pass", 0, 77)
     assert r["vince"] in ("A", "B", "DRAW")
     assert r["turni"] <= tree["root"]["turn"] + 1
+
+
+# -- continua con linee intere ---------------------------------------------------------------------
+
+def test_parse_linea():
+    assert E.parse_linea("Play X") == ["Play X"]
+    assert E.parse_linea("Play gear Z @BF0 ; Kinkou ; Move A base→BF0 ; Pass") == \
+        ["Play gear Z @BF0", "Kinkou", "Move A base→BF0", "Pass"]
+    assert E.parse_linea("  A  ;  B  ") == ["A", "B"]
+    assert E.parse_linea("Play A;B") == ["Play A;B"]          # il separatore e' " ; "
+
+
+def test_guida_consegna_si_ferma_al_primo_punto_di_turno_a_sequenza_esaurita():
+    g = E.Guida(["Move X"], "B", lambda t: None, consegna=True)
+    g._tavolo = lambda raw: "tavolo"
+    assert g.ask(_evento(["Pass", "Move X"], "turn_action")) == 1 and g.i == 1
+    # finestra a sequenza esaurita: passa e lo conta; il punto di turno: Stop con lo stato
+    assert g.ask(_evento(["Pass", "Showdown Z"], "showdown_action")) == 0 and g.finestre_passate == 1
+    with pytest.raises(E.Stop):
+        g.ask(_evento(["Pass", "Move Y"], "turn_action", raw={"x": 1}))
+    assert g.resume == {"x": 1} and g.non_legale is None
+
+
+def test_guida_consegna_etichetta_non_offerta_devia_e_consegna():
+    g = E.Guida(["Move X", "Punch First"], "B", lambda t: None, consegna=True)
+    g._tavolo = lambda raw: "tavolo"
+    assert g.ask(_evento(["Pass", "Move X"], "turn_action")) == 1
+    with pytest.raises(E.Stop):
+        g.ask(_evento(["Pass", "Move Y"], "turn_action", raw={"x": 2}))
+    assert g.deviazione[0] == 2 and g.deviazione[1] == "Punch First" and g.resume == {"x": 2} and g.non_legale is None
+
+
+def test_linea_che_devia_conta_il_mondo_e_ne_dice_il_passo(pos):
+    _D, P, k, Pp, e = pos
+    gioca = next(m for m in e["menu"] if m.startswith("Play "))
+    brutta = f"{gioca} ; etichetta che non esiste"
+    righe = []
+    res = E.continua(P, k, [brutta, e["menu"][0]], 3, 1, righe.append)
+    r = res["mosse"][brutta]
+    assert r["n"] == 3 and r["deviati"] == 3 and set(r["passi_deviazione"]) <= {2, 3} and len(r["mondi"]) == 3
+    assert all(w["deviato"] for w in r["mondi"]) and res["mosse"][e["menu"][0]]["deviati"] == 0
+    t = "\n".join(E.testo_continua(res))
+    assert "mondi deviati dalla linea 3/3" in t and "appaiata" in t and "Newcombe" in t
+
+
+def test_differenza_appaiata():
+    m, lo, hi = E.differenza_appaiata([1, 1, 0, 1, 0, 1], [0, 1, 0, 0, 0, 1])
+    assert abs(m - 1 / 3) < 1e-9 and lo < m < hi
+    assert E.differenza_appaiata([1, 0], [1, 0])[0] == 0
+
+
+def test_linea_legale_arriva_alla_fine_e_conta_le_etichette(pos):
+    _D, P, k, Pp, e = pos
+    gioca = next(m for m in e["menu"] if m.startswith("Play ") and " to " not in m and "@" not in m and "gear" not in m)
+    linea = f"{gioca} ; Pass"
+    res = E.continua(P, k, [linea, "Pass"], 2, 1, lambda t: None)
+    r = res["mosse"][linea]
+    assert r["n"] == 2 and r["etichette"] == 2 and r["consumate"] is not None and 1 <= r["consumate"] <= 2
+    assert r["deviati"] <= 2
+    assert res["mosse"]["Pass"]["consumate"] is None
+    assert "etichette consumate in media" in "\n".join(E.testo_continua(res))
+    # riproducibile, e uno stesso mondo giocato a mano coincide
+    tree = E.albero(e["state_raw"])
+    a = E.un_mondo(Pp, tree, [gioca, "Pass"], 0, 77)
+    b = E.un_mondo(Pp, tree, [gioca, "Pass"], 0, 77)
+    assert {x: a[x] for x in ("vince", "punti_turno", "punti_fine", "turni", "passi")} == \
+        {x: b[x] for x in ("vince", "punti_turno", "punti_fine", "turni", "passi")}

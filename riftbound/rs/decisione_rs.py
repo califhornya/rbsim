@@ -104,7 +104,9 @@ def _prepara(partita: dict) -> dict:
                  deck_a=Path(DECK_OF[mu[0]]), deck_b=Path(DECK_OF[mu[1]]), bf_a=None, bf_b=None,
                  starter=str(partita.get("starter", "a")).lower(), iterazioni=partita.get("iterazioni", ITERAZIONI_CAMPIONE),
                  probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D80, answers=None,
-                 ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"))
+                 ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"),
+                 # the champion's `finestre` option in the original game (absent = off: same key as before)
+                 **({"finestre": True} if partita.get("finestre") else {}))
     else:
         raise ValueError(f"tipo di partita sconosciuto: {partita['tipo']}")
     return P
@@ -116,7 +118,7 @@ def _chiave(P: dict) -> str:
 
 
 def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None, valutazione=None,
-           finestre: bool = False, quota=None, diag_out: list | None = None, diag_trace: bool = False):
+           finestre: bool | None = None, quota=None, diag_out: list | None = None, diag_trace: bool = False):
     """Una partita. `k`, `iterazioni`: la ricerca del campione da rifare con quelle iterazioni (override in Rust;
     None: l'originale); `ordine`: l'ordinale, fra gli eventi di decisione del campione, di quella di k: la
     partita si ferma li'. -> (righe di log "search", eventi del campione, evento di k).
@@ -183,6 +185,8 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
         if mine and P.get("valutazione") and P["valutazione"][0] != "storica":
             v = P["valutazione"]
             g.set_search_valutazione(s, v[0], float(v[1]), float(v[2]))
+        if mine and P.get("finestre"):
+            g.set_search_finestre(s, True)
         if mine:
             g.set_search_timing(s, True)
             if diag_trace:
@@ -191,8 +195,8 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
                 g.set_search_override(s, k, int(iterazioni))
                 if valutazione is not None:
                     g.set_search_valutazione_at(s, k, valutazione[0], float(valutazione[1]), float(valutazione[2]))
-                if finestre:
-                    g.set_search_finestre_at(s, k)
+                if finestre is not None:  # True/False esplicito: solo la ricerca k (None: come l'originale)
+                    g.set_search_finestre_at(s, k, bool(finestre))
                 if quota:
                     g.set_search_quota_at(s, k, list(quota[0]), int(quota[1]))
     if umano is not None:
@@ -325,7 +329,7 @@ def _classifica(riga: dict, menu: list) -> list[dict]:
 
 
 def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool = True, valutazione=None,
-          finestre: bool = False, quota=None, semi: bool = False) -> dict:
+          finestre: bool | None = None, quota=None, semi: bool = False) -> dict:
     """La ricerca k del campione rifatta con `iterazioni` (None: come l'originale), sulla stessa partita.
     -> {k, turn, point, iterazioni, azione, azione_originale, uguale, riproduce (il prefisso 0..k-1
     coincide con l'originale; con iterazioni None anche l'azione di k), classifica (per visite),
