@@ -228,7 +228,17 @@ impl Game {
     pub fn fire_card_played(&mut self, side: Side, card: CardId, from_zone: &str) -> R<()> {
         let sources = self.sources_in_play(side);
         let own = self.find_unit_by_card(card);
-        let own_bf = own.and_then(|u| self.locate_unit(u)).and_then(|(_, b)| b).unwrap_or(0);
+        let mut own_bf = own.and_then(|u| self.locate_unit(u)).and_then(|(_, b)| b).unwrap_or(0);
+        // D82: a card that is not a unit in play (Edge of Night, a gear) played from face down
+        // triggers at the battlefield it was hidden at, not at 0.
+        if own.is_none() && self.gs.reg.regole.d82() {
+            if let Some(h) = self.gs.card(card).hidden_bf {
+                if h != own_bf {
+                    crate::registry::conta(82);
+                }
+                own_bf = h;
+            }
+        }
         let mk = |bf: usize| {
             let mut ex = crate::lp_phases::bf_extra(bf);
             ex.set("triggering_card", XVal::Card(card));
