@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts/rust"))
 
 STORICHE, CORRETTE = "6427b90", "6427b90+D72-D76"
-CODICI = ("D72", "D73", "D74", "D75", "D76")
+CODICI = tuple(f"D{n}" for n in range(72, 82))
 
 
 def semi(spec: str) -> list:
@@ -60,15 +60,16 @@ def _delta(events: list, i: int, totali: list) -> dict:
     the game's totals)."""
     snaps = [(k, e["correzioni"]) for k, e in enumerate(events) if e["k"] == "decision" and "correzioni" in e]
     after = next((c for k, c in snaps if k >= i), totali)
-    before = next((c for k, c in reversed(snaps) if k < i), [0] * 5)
+    before = next((c for k, c in reversed(snaps) if k < i), [0] * len(CODICI))
     return {d: a - b for d, a, b in zip(CODICI, after, before) if a - b}
 
 
-def confronta(seed: int, mu: str, agenti: tuple, iterazioni: int) -> dict:
+def confronta(seed: int, mu: str, agenti: tuple, iterazioni: int, storiche: str = STORICHE,
+              corrette: str = CORRETTE) -> dict:
     from diff_trace import canonical_rust_events, first_difference
     starter = "a" if seed % 2 == 0 else "b"
-    s0, e0, f0, r0, err0, _ = gioca(seed, mu, starter, agenti, iterazioni, STORICHE)
-    s1, e1, f1, r1, err1, totali = gioca(seed, mu, starter, agenti, iterazioni, CORRETTE)
+    s0, e0, f0, r0, err0, _ = gioca(seed, mu, starter, agenti, iterazioni, storiche)
+    s1, e1, f1, r1, err1, totali = gioca(seed, mu, starter, agenti, iterazioni, corrette)
     h, h_trees = canonical_rust_events(s0, e0, f0)
     c, c_trees = canonical_rust_events(s1, e1, f1)
     out = {"seed": seed, "matchup": mu, "starter": starter, "agenti": list(agenti),
@@ -106,13 +107,15 @@ def main() -> None:
     ap.add_argument("--posti", action="store_true", help="anche il matchup a posti scambiati")
     ap.add_argument("--agenti", nargs=2, default=["mano", "mano"])
     ap.add_argument("--iterazioni", type=int, default=50, help="il bot a mano a lavoro fisso")
+    ap.add_argument("--storiche", default=STORICHE, help="il primo profilo (default 6427b90)")
+    ap.add_argument("--corrette", default=CORRETTE, help="il secondo profilo (default 6427b90+D72-D76)")
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
     mus = [args.matchup] + ([args.matchup[::-1]] if args.posti else [])
     rows = []
     for mu in mus:
         for s in [x for spec in args.semi for x in semi(spec)]:
-            rows.append(confronta(s, mu, tuple(args.agenti), args.iterazioni))
+            rows.append(confronta(s, mu, tuple(args.agenti), args.iterazioni, args.storiche, args.corrette))
             r = rows[-1]
             d = r.get("prima_differenza")
             print(f"{mu} {s}: " + ("identiche" if d is None else
