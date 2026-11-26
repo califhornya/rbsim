@@ -190,16 +190,18 @@ def _testo(rs: dict, imp: dict, secondi: float) -> list[str]:
 
 # -- la corsa ---------------------------------------------------------------------------------------
 
-def _controlla_impostazioni(out_dir: Path, ckpt, ckpt_valore, peso, casuali, regole, iterazioni) -> None:
+def _controlla_impostazioni(out_dir: Path, ckpt, ckpt_valore, peso, casuali, regole, iterazioni, per_partita,
+                            n_mondi) -> None:
     """Scrive `impostazioni.json` alla prima corsa; un rilancio nella stessa cartella riprende solo con le stesse
-    impostazioni e gli stessi checkpoint (sha256): la cache delle decisioni e i mondi non si mescolano."""
+    impostazioni (anche decisioni per partita e mondi per decisione) e gli stessi checkpoint (sha256): la cache delle
+    decisioni e i mondi non si mescolano (PR 72, Codex)."""
     from riftbound.provenienza import checkpoint_sha256
     pc = Path(str(ckpt or D.CKPT_DEFAULT))
     pc = pc if pc.is_absolute() else D.ROOT / pc
     imp = {"ckpt_sha256": None if casuali else checkpoint_sha256(str(pc)),
            "valore_sha256": checkpoint_sha256(str(ckpt_valore)), "peso": peso, "casuali": bool(casuali),
            "regole": regole, "iterazioni": iterazioni, "valutazione": VALUTAZIONE, "base_seme": BASE_SEME,
-           "mondi0": MONDI0}
+           "mondi0": MONDI0, "per_partita": per_partita, "mondi": n_mondi}
     f = out_dir / "impostazioni.json"
     if f.exists():
         if json.loads(f.read_text(encoding="utf-8")) != imp:
@@ -215,7 +217,7 @@ def seguiti(matchup, n_partite: int, per_partita: int, n_mondi: int, out_dir, ck
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    _controlla_impostazioni(out_dir, ckpt, ckpt_valore, peso, casuali, regole, iterazioni)
+    _controlla_impostazioni(out_dir, ckpt, ckpt_valore, peso, casuali, regole, iterazioni, per_partita, n_mondi)
     parti = partite(matchup, n_partite, ckpt, casuali, iterazioni, regole)
     cache_path = out_dir / "decisioni.jsonl"
     cache = _leggi_cache(cache_path)

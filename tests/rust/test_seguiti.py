@@ -69,3 +69,14 @@ def test_da_capo_a_fondo_e_ripresa(tmp_path, valore, monkeypatch):
     righe2 = S.seguiti(["EK"], 1, 2, 2, tmp_path, None, valore, casuali=True, iterazioni=20, n_boot=200,
                        print_=lambda *_: None)
     assert righe2[-1].startswith("totale:")
+
+
+def test_ripresa_rifiuta_campionamento_diverso(tmp_path, valore):
+    """PR 72 (Codex): decisioni per partita e mondi per decisione fanno parte delle impostazioni della cartella."""
+    args = (tmp_path, None, valore, 0.2, True, S.REGOLE, 20)
+    S._controlla_impostazioni(*args, 2, 2)
+    S._controlla_impostazioni(*args, 2, 2)              # stesse: riprende
+    with pytest.raises(ValueError):
+        S._controlla_impostazioni(*args, 2, 32)         # piu' mondi: cartella nuova
+    with pytest.raises(ValueError):
+        S._controlla_impostazioni(*args, 8, 2)          # piu' decisioni per partita: cartella nuova
