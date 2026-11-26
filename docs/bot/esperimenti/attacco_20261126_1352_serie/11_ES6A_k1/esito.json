@@ -1,0 +1,166 @@
+{
+ "migliore": "p00",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 60.0,
+   "vittorie": 60,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p00": {
+   "n": 100,
+   "punti_partita": 90.0,
+   "vittorie": 90,
+   "patte": 0,
+   "delta": 0.3,
+   "intervallo_95": [
+    0.18683934723883333,
+    0.41316065276116665
+   ],
+   "vince_solo_linea": 36,
+   "vince_solo_riferimento": 6,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.18257364203032092
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.18257364203032092
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.02559365469261257
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": -0.09697761166990829
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p00",
+  "field": 0,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 1,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Evelynn Entrancing base→BF0"
+   ],
+   [
+    1,
+    "showdown_action",
+    "Showdown Hold 'Em @BF0"
+   ],
+   [
+    1,
+    "target:grant_temporary_might",
+    "target:grant_temporary_might: Evelynn Entrancing (A, Might 2, Bandle Scouts' Academy)"
+   ]
+  ],
+  "prima_etichetta": "Move Evelynn Entrancing base→BF0",
+  "visite": 1,
+  "q": -0.5979820004989412
+ },
+ "sottoclasse": "mai costruita",
+ "esito": "attacco migliore",
+ "differenza": {
+  "media": 0.3,
+  "intervallo_95": [
+   0.18683934723883333,
+   0.41316065276116665
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.18257364203032092,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.18257364203032092,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.02559365469261257,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": -0.09697761166990829,
+   "concorda_con_vittorie": false
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 6,
+  "starter": "a",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "A",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 1,
+ "turno": 3,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 11.0,
+  "p00": 16.0,
+  "p03": 14.0
+ },
+ "secondi": 52.59068584442139
+}

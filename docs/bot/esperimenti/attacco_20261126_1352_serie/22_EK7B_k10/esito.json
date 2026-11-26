@@ -1,0 +1,207 @@
+{
+ "migliore": "p00",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 61.0,
+   "vittorie": 61,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p00": {
+   "n": 100,
+   "punti_partita": 96.0,
+   "vittorie": 96,
+   "patte": 0,
+   "delta": 0.35,
+   "intervallo_95": [
+    0.24811731840945286,
+    0.4518826815905471
+   ],
+   "vince_solo_linea": 37,
+   "vince_solo_riferimento": 2,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.9838268562232453
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.9838268562232453
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 1.3898197275662223
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 1.1364702041774755
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p00",
+  "field": 0,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 1,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Shadow Clone base→BF0"
+   ],
+   [
+    1,
+    "turn_action",
+    "Move Traveling Merchant base→BF0"
+   ],
+   [
+    1,
+    "discard",
+    "discard: Grim Resolve"
+   ],
+   [
+    1,
+    "turn_action",
+    "Move Vex Apathetic base→BF0"
+   ],
+   [
+    1,
+    "optional:give_temporary_assault",
+    "optional:give_temporary_assault: sì"
+   ],
+   [
+    1,
+    "cost_banish",
+    "cost_banish: Irresistible Faefolk"
+   ],
+   [
+    1,
+    "showdown_action",
+    "AMBUSH Rengar Trophy Hunter @BF0"
+   ],
+   [
+    1,
+    "showdown_action",
+    "Showdown Switcheroo @BF0"
+   ],
+   [
+    1,
+    "battlefield:swap_might",
+    "battlefield:swap_might: Packed Amphitheater"
+   ],
+   [
+    1,
+    "target:swap_might",
+    "target:swap_might: Traveling Merchant (B, Might 3, Packed Amphitheater)"
+   ],
+   [
+    1,
+    "target:swap_might:other",
+    "target:swap_might:other: Rengar Trophy Hunter (A, Might 7, Packed Amphitheater)"
+   ]
+  ],
+  "prima_etichetta": "Move Shadow Clone base→BF0",
+  "visite": 0,
+  "q": 0
+ },
+ "sottoclasse": "mai costruita",
+ "esito": "attacco migliore",
+ "differenza": {
+  "media": 0.35,
+  "intervallo_95": [
+   0.24811731840945286,
+   0.4518826815905471
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.9838268562232453,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.9838268562232453,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 1.3898197275662223,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": 1.1364702041774755,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "EK",
+  "seed": 7,
+  "starter": "b",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "B",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 10,
+ "turno": 9,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 10.0,
+  "p00": 16.0,
+  "p02": 1.0,
+  "p03": 2.0
+ },
+ "secondi": 75.71519017219543
+}

@@ -1,0 +1,8 @@
+posizione k=15 (turno 9): indeciso
+selezione (16 mondi ignote): migliore p21 con 1 punti, riferimento 0
+proposta p21 campo 1 {'gear_target': 'none', 'waves': 2, 'spell_wave': 2, 'ambush_index': 0}: prima mossa Move Kinkou Initiate base→BF1, visite 2, q -0.963
+differenza (proposta - riferimento) su 100 mondi: -5.0 pp [-12.0, +2.0]
+valori (storica): media -0.425; segno concorde con la differenza di vittorie
+valori (rimonta): media -0.498; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media -0.024; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media -0.026; segno concorde con la differenza di vittorie

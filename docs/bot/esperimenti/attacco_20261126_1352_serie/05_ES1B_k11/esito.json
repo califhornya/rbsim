@@ -1,0 +1,161 @@
+{
+ "migliore": "p03",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 62.0,
+   "vittorie": 62,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p03": {
+   "n": 100,
+   "punti_partita": 71.0,
+   "vittorie": 71,
+   "patte": 0,
+   "delta": 0.09,
+   "intervallo_95": [
+    -0.02518290417480111,
+    0.20518290417480112
+   ],
+   "vince_solo_linea": 22,
+   "vince_solo_riferimento": 13,
+   "prefisso_completo": 0,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.04762160826015464
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.04762160826015464
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.03285413830755975
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.05362953394167143
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p03",
+  "field": 0,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 2,
+   "spell_wave": 2,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Pit Rookie base→BF0"
+   ],
+   [
+    1,
+    "combat_damage_order",
+    "combat_damage_order: Reckless Innovator (A, Might 3, Packed Amphitheater (sinistra))"
+   ]
+  ],
+  "prima_etichetta": "Move Pit Rookie base→BF0",
+  "visite": 0,
+  "q": 0
+ },
+ "sottoclasse": null,
+ "esito": "indeciso",
+ "differenza": {
+  "media": 0.09,
+  "intervallo_95": [
+   -0.02518290417480111,
+   0.20518290417480112
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.04762160826015464,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.04762160826015464,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.03285413830755975,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": 0.05362953394167143,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 1,
+  "starter": "b",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "B",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 11,
+ "turno": 9,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 9.0,
+  "p00": 7.0,
+  "p03": 15.0
+ },
+ "secondi": 89.18022799491882
+}

@@ -1,0 +1,6 @@
+posizione k=1 (turno 4): indeciso
+selezione (16 mondi ignote): migliore p02 con 5 punti, riferimento 2
+proposta p02 campo 1 {'gear_target': 'none', 'waves': 2, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Move Kinkou Initiate base→BF1, visite 1, q -0.675
+differenza (proposta - riferimento) su 100 mondi: +1.0 pp [-11.9, +13.9]
+valori (storica): media -0.134; segno discorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.195; segno concorde con la differenza di vittorie

@@ -1,0 +1,2 @@
+posizione k=15 (turno 11): riferimento scelto
+selezione (16 mondi ignote): migliore riferimento con 0 punti, riferimento 0

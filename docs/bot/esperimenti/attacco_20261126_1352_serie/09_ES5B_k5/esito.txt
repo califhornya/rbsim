@@ -1,0 +1,8 @@
+posizione k=5 (turno 7): attacco migliore (mai costruita)
+selezione (16 mondi ignote): migliore p00 con 14 punti, riferimento 4
+proposta p00 campo 0 {'gear_target': 'none', 'waves': 1, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Move Pit Rookie base→BF0, visite 0, q 0
+differenza (proposta - riferimento) su 100 mondi: +33.0 pp [+20.5, +45.5]
+valori (storica): media +0.197; segno concorde con la differenza di vittorie
+valori (rimonta): media +0.197; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.287; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media +0.303; segno concorde con la differenza di vittorie

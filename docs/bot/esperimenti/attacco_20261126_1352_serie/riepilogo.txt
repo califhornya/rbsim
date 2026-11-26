@@ -1,0 +1,25 @@
+20261125_154531_competit | k=12 | turno 13 | punto_libero=no | riferimento scelto | differenza - | valori -
+20261125_201243_competit | k=1 | turno 4 | punto_libero=sì | indeciso | differenza +1.0 [-11.9, +13.9] pp | valori storica -0.134 (discorde); storica dopo l'avversario +0.195 (concorde)
+20261125_204705_competit | k=23 | turno 12 | punto_libero=no | riferimento scelto | differenza - | valori -
+20261125_204705_competit | k=38 | turno 16 | punto_libero=sì | riferimento scelto | differenza - | valori -
+20261126_013325_competit | k=10 | turno 9 | punto_libero=sì | indeciso | differenza -3.0 [-7.4, +1.4] pp | valori storica -0.741 (concorde); rimonta -0.726 (concorde); storica dopo l'avversario -0.077 (concorde); rimonta dopo l'avversario -0.112 (concorde)
+ES1B | k=11 | turno 9 | punto_libero=no | indeciso | differenza +9.0 [-2.5, +20.5] pp | valori storica +0.048 (concorde); rimonta +0.048 (concorde); storica dopo l'avversario +0.033 (concorde); rimonta dopo l'avversario +0.054 (concorde)
+ES3B | k=1 | turno 5 | punto_libero=sì | attacco migliore (mai costruita) | differenza +43.0 [+32.5, +53.5] pp | valori storica +0.454 (concorde); rimonta +0.454 (concorde); storica dopo l'avversario +0.745 (concorde); rimonta dopo l'avversario +0.880 (concorde)
+ES3B | k=14 | turno 11 | punto_libero=no | riferimento scelto | differenza - | valori -
+ES4A | k=10 | turno 9 | punto_libero=sì | attacco migliore (mai costruita) | differenza +28.0 [+13.5, +42.5] pp | valori storica +0.974 (concorde); rimonta +0.745 (concorde); storica dopo l'avversario +0.919 (concorde); rimonta dopo l'avversario +0.830 (concorde)
+ES5B | k=5 | turno 7 | punto_libero=sì | attacco migliore (mai costruita) | differenza +33.0 [+20.5, +45.5] pp | valori storica +0.197 (concorde); rimonta +0.197 (concorde); storica dopo l'avversario +0.287 (concorde); rimonta dopo l'avversario +0.303 (concorde)
+ES5B | k=15 | turno 9 | punto_libero=no | indeciso | differenza -5.0 [-12.0, +2.0] pp | valori storica -0.425 (concorde); rimonta -0.498 (concorde); storica dopo l'avversario -0.024 (concorde); rimonta dopo l'avversario -0.026 (concorde)
+ES6A | k=1 | turno 3 | punto_libero=sì | attacco migliore (mai costruita) | differenza +30.0 [+18.7, +41.3] pp | valori storica +0.183 (concorde); rimonta +0.183 (concorde); storica dopo l'avversario +0.026 (concorde); rimonta dopo l'avversario -0.097 (discorde)
+ES7B | k=5 | turno 5 | punto_libero=no | riferimento scelto | differenza - | valori -
+ES9B | k=2 | turno 5 | punto_libero=sì | indeciso | differenza +0.0 [-12.8, +12.8] pp | valori storica +0.169 (discorde); rimonta +0.230 (discorde); storica dopo l'avversario +0.431 (discorde); rimonta dopo l'avversario +0.400 (discorde)
+ES9B | k=21 | turno 9 | punto_libero=no | riferimento scelto | differenza - | valori -
+EK1B | k=15 | turno 11 | punto_libero=no | riferimento scelto | differenza - | valori -
+EK1B | k=21 | turno 13 | punto_libero=sì | riferimento scelto | differenza - | valori -
+EK3B | k=17 | turno 11 | punto_libero=no | riferimento scelto | differenza - | valori -
+EK4A | k=16 | turno 11 | punto_libero=sì | riferimento scelto | differenza - | valori -
+EK4A | k=27 | turno 15 | punto_libero=sì | riferimento scelto | differenza - | valori -
+EK5B | k=30 | turno 15 | punto_libero=no | riferimento scelto | differenza - | valori -
+EK7B | k=5 | turno 7 | punto_libero=sì | riferimento scelto | differenza - | valori -
+EK7B | k=10 | turno 9 | punto_libero=no | attacco migliore (mai costruita) | differenza +35.0 [+24.8, +45.2] pp | valori storica +0.984 (concorde); rimonta +0.984 (concorde); storica dopo l'avversario +1.390 (concorde); rimonta dopo l'avversario +1.136 (concorde)
+EK9B | k=5 | turno 7 | punto_libero=no | riferimento scelto | differenza - | valori -
+totale: riferimento scelto 14; indeciso 5; attacco migliore (mai costruita) 5

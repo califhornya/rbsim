@@ -1,0 +1,178 @@
+{
+ "migliore": "p00",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 35.0,
+   "vittorie": 35,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p00": {
+   "n": 100,
+   "punti_partita": 63.0,
+   "vittorie": 63,
+   "patte": 0,
+   "delta": 0.28,
+   "intervallo_95": [
+    0.13503011249632468,
+    0.42496988750367537
+   ],
+   "vince_solo_linea": 45,
+   "vince_solo_riferimento": 17,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.9741336927509963
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.7448072535511141
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.9187806782876036
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.8296367186865893
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p00",
+  "field": 1,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 1,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Pyke Returned base→BF1"
+   ],
+   [
+    1,
+    "showdown_action",
+    "Showdown Switcheroo @BF1"
+   ],
+   [
+    1,
+    "battlefield:swap_might",
+    "battlefield:swap_might: Packed Amphitheater"
+   ],
+   [
+    1,
+    "target:swap_might",
+    "target:swap_might: Pyke Returned (A, Might 4, Packed Amphitheater)"
+   ],
+   [
+    1,
+    "target:swap_might:other",
+    "target:swap_might:other: Sett Kingpin (B, Might 9, Packed Amphitheater)"
+   ]
+  ],
+  "prima_etichetta": "Move Pyke Returned base→BF1",
+  "visite": 0,
+  "q": 0
+ },
+ "sottoclasse": "mai costruita",
+ "esito": "attacco migliore",
+ "differenza": {
+  "media": 0.28,
+  "intervallo_95": [
+   0.13503011249632468,
+   0.42496988750367537
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.9741336927509963,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.7448072535511141,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.9187806782876036,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": 0.8296367186865893,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 4,
+  "starter": "a",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "A",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 10,
+ "turno": 9,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 3.0,
+  "p00": 12.0,
+  "p03": 1.0,
+  "p06": 1.0,
+  "p09": 2.0
+ },
+ "secondi": 47.796245098114014
+}

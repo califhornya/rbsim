@@ -1,0 +1,8 @@
+posizione k=11 (turno 9): indeciso
+selezione (16 mondi ignote): migliore p03 con 15 punti, riferimento 9
+proposta p03 campo 0 {'gear_target': 'none', 'waves': 2, 'spell_wave': 2, 'ambush_index': 0}: prima mossa Move Pit Rookie base→BF0, visite 0, q 0
+differenza (proposta - riferimento) su 100 mondi: +9.0 pp [-2.5, +20.5]
+valori (storica): media +0.048; segno concorde con la differenza di vittorie
+valori (rimonta): media +0.048; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.033; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media +0.054; segno concorde con la differenza di vittorie

@@ -1,0 +1,8 @@
+posizione k=10 (turno 9): attacco migliore (mai costruita)
+selezione (16 mondi ignote): migliore p00 con 16 punti, riferimento 10
+proposta p00 campo 0 {'gear_target': 'none', 'waves': 1, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Move Shadow Clone base→BF0, visite 0, q 0
+differenza (proposta - riferimento) su 100 mondi: +35.0 pp [+24.8, +45.2]
+valori (storica): media +0.984; segno concorde con la differenza di vittorie
+valori (rimonta): media +0.984; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +1.390; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media +1.136; segno concorde con la differenza di vittorie

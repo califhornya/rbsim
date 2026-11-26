@@ -1,0 +1,208 @@
+{
+ "migliore": "p06",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 69.0,
+   "vittorie": 69,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p06": {
+   "n": 100,
+   "punti_partita": 69.0,
+   "vittorie": 69,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    -0.1276624336666702,
+    0.1276624336666702
+   ],
+   "vince_solo_linea": 21,
+   "vince_solo_riferimento": 21,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.16932230462621256
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.22996308103708535
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.4314368668621226
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.39988859970641694
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p06",
+  "field": 0,
+  "proposal": {
+   "gear_target": "weak",
+   "waves": 1,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    0,
+    "turn_action",
+    "Play gear Pillaged Armory @BF0"
+   ],
+   [
+    0,
+    "trigger_order",
+    "trigger_order: trigger of Pillaged Armory (on_play)"
+   ],
+   [
+    0,
+    "trigger_order",
+    "trigger_order: trigger of Rakelstake (on_first_unit_here)"
+   ],
+   [
+    0,
+    "target:buff_unit",
+    "target:buff_unit: Sett Kingpin (B, Might 5, base)"
+   ],
+   [
+    0,
+    "predict_recycle",
+    "predict_recycle: no"
+   ],
+   [
+    1,
+    "turn_action",
+    "Move Sett Kingpin base→BF0"
+   ],
+   [
+    1,
+    "showdown_action",
+    "Showdown Punch First @BF0"
+   ],
+   [
+    1,
+    "target:grant_temporary_might",
+    "target:grant_temporary_might: Sett Kingpin (B, Might 7, Rakelstake)"
+   ],
+   [
+    1,
+    "trigger_order",
+    "trigger_order: trigger of Sett The Boss (on_conquer)"
+   ],
+   [
+    1,
+    "trigger_order",
+    "trigger_order: trigger of Pillaged Armory (on_conquer)"
+   ],
+   [
+    1,
+    "target:buff_unit",
+    "target:buff_unit: Sett Kingpin (B, Might 12, Rakelstake)"
+   ]
+  ],
+  "prima_etichetta": "Play gear Pillaged Armory @BF0",
+  "visite": 0,
+  "q": 0
+ },
+ "sottoclasse": null,
+ "esito": "indeciso",
+ "differenza": {
+  "media": 0.0,
+  "intervallo_95": [
+   -0.1276624336666702,
+   0.1276624336666702
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.16932230462621256,
+   "concorda_con_vittorie": false
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.22996308103708535,
+   "concorda_con_vittorie": false
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.4314368668621226,
+   "concorda_con_vittorie": false
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": 0.39988859970641694,
+   "concorda_con_vittorie": false
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 9,
+  "starter": "b",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "B",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 2,
+ "turno": 5,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 12.0,
+  "p00": 5.0,
+  "p03": 6.0,
+  "p06": 13.0,
+  "p09": 12.0
+ },
+ "secondi": 72.3655788898468
+}

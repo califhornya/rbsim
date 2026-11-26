@@ -1,0 +1,57 @@
+{
+ "migliore": "riferimento",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 87.0,
+   "vittorie": 87,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  }
+ },
+ "esito": "riferimento scelto",
+ "sottoclasse": null,
+ "differenza": null,
+ "valori": null,
+ "partita": {
+  "tipo": "pagina",
+  "file": "docs/bot/partite/coach/20261125_154531_competitive_evelynn_vs_competitive_sett.json",
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false
+ },
+ "k": 12,
+ "turno": 13,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 13.0,
+  "p00": 13.0
+ },
+ "secondi": 8.67802906036377
+}

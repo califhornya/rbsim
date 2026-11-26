@@ -1,0 +1,81 @@
+{
+ "migliore": "riferimento",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 94.0,
+   "vittorie": 94,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 97,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 97,
+     "media": 0.0
+    }
+   }
+  }
+ },
+ "esito": "riferimento scelto",
+ "sottoclasse": null,
+ "differenza": null,
+ "valori": null,
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "EK",
+  "seed": 4,
+  "starter": "a",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "A",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 27,
+ "turno": 15,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 16.0,
+  "p00": 13.0,
+  "p02": 8.0,
+  "p03": 7.0,
+  "p06": 12.0,
+  "p08": 4.0,
+  "p09": 10.0
+ },
+ "secondi": 17.439879894256592
+}

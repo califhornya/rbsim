@@ -1,0 +1,8 @@
+posizione k=1 (turno 5): attacco migliore (mai costruita)
+selezione (16 mondi ignote): migliore p00 con 16 punti, riferimento 9
+proposta p00 campo 0 {'gear_target': 'none', 'waves': 1, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Move Sett Kingpin base→BF0, visite 0, q 0
+differenza (proposta - riferimento) su 100 mondi: +43.0 pp [+32.5, +53.5]
+valori (storica): media +0.454; segno concorde con la differenza di vittorie
+valori (rimonta): media +0.454; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.745; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media +0.880; segno concorde con la differenza di vittorie

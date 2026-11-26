@@ -1,0 +1,8 @@
+posizione k=1 (turno 3): attacco migliore (mai costruita)
+selezione (16 mondi ignote): migliore p00 con 16 punti, riferimento 11
+proposta p00 campo 0 {'gear_target': 'none', 'waves': 1, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Move Evelynn Entrancing base→BF0, visite 1, q -0.598
+differenza (proposta - riferimento) su 100 mondi: +30.0 pp [+18.7, +41.3]
+valori (storica): media +0.183; segno concorde con la differenza di vittorie
+valori (rimonta): media +0.183; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.026; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media -0.097; segno discorde con la differenza di vittorie

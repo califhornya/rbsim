@@ -1,0 +1,2 @@
+posizione k=27 (turno 15): riferimento scelto
+selezione (16 mondi ignote): migliore riferimento con 16 punti, riferimento 16

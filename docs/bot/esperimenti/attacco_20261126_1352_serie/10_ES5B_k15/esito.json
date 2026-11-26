@@ -1,0 +1,158 @@
+{
+ "migliore": "p21",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 9.0,
+   "vittorie": 9,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p21": {
+   "n": 100,
+   "punti_partita": 4.0,
+   "vittorie": 4,
+   "patte": 0,
+   "delta": -0.05,
+   "intervallo_95": [
+    -0.1203385751313968,
+    0.020338575131396794
+   ],
+   "vince_solo_linea": 4,
+   "vince_solo_riferimento": 9,
+   "prefisso_completo": 0,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": -0.4246724074749429
+    },
+    "rimonta": {
+     "n": 100,
+     "media": -0.4979043062147002
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": -0.023897601135530258
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": -0.025887337057954943
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p21",
+  "field": 1,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 2,
+   "spell_wave": 2,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Kinkou Initiate base→BF1"
+   ]
+  ],
+  "prima_etichetta": "Move Kinkou Initiate base→BF1",
+  "visite": 2,
+  "q": -0.9625869800912908
+ },
+ "sottoclasse": null,
+ "esito": "indeciso",
+ "differenza": {
+  "media": -0.05,
+  "intervallo_95": [
+   -0.1203385751313968,
+   0.020338575131396794
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": -0.4246724074749429,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": -0.4979043062147002,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": -0.023897601135530258,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": -0.025887337057954943,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 5,
+  "starter": "b",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "B",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 15,
+ "turno": 9,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 0.0,
+  "p00": 0.0,
+  "p03": 0.0,
+  "p18": 0.0,
+  "p21": 1.0
+ },
+ "secondi": 24.118960857391357
+}

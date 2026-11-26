@@ -1,0 +1,2 @@
+posizione k=5 (turno 5): riferimento scelto
+selezione (16 mondi ignote): migliore riferimento con 10 punti, riferimento 10

@@ -1,0 +1,2 @@
+attacco_serie_mac 26/11/2026 13:52; ef4edba Merge pull request #65 from califhornya/claude/loving-curie-91669c; posizioni docs/bot/esperimenti/attacco_20261126/posizioni.json; al piu' 24
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi

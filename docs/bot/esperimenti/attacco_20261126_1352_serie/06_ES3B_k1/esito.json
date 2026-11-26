@@ -1,0 +1,172 @@
+{
+ "migliore": "p00",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 50.0,
+   "vittorie": 50,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p00": {
+   "n": 100,
+   "punti_partita": 93.0,
+   "vittorie": 93,
+   "patte": 0,
+   "delta": 0.43,
+   "intervallo_95": [
+    0.32481905153882706,
+    0.5351809484611729
+   ],
+   "vince_solo_linea": 45,
+   "vince_solo_riferimento": 2,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.4544476538339909
+    },
+    "rimonta": {
+     "n": 100,
+     "media": 0.4544476538339909
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.7445044202031973
+    },
+    "rimonta dopo l'avversario": {
+     "n": 100,
+     "media": 0.8804023875278868
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p00",
+  "field": 0,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 1,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Sett Kingpin base→BF0"
+   ],
+   [
+    1,
+    "showdown_action",
+    "AMBUSH Vi Peacekeeper @BF0"
+   ],
+   [
+    1,
+    "predict_recycle",
+    "predict_recycle: no"
+   ],
+   [
+    1,
+    "target:stun_unit",
+    "target:stun_unit: Rengar Trophy Hunter (A, Might 6, Rakelstake)"
+   ]
+  ],
+  "prima_etichetta": "Move Sett Kingpin base→BF0",
+  "visite": 0,
+  "q": 0
+ },
+ "sottoclasse": "mai costruita",
+ "esito": "attacco migliore",
+ "differenza": {
+  "media": 0.43,
+  "intervallo_95": [
+   0.32481905153882706,
+   0.5351809484611729
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": 0.4544476538339909,
+   "concorda_con_vittorie": true
+  },
+  "rimonta": {
+   "n": 100,
+   "media": 0.4544476538339909,
+   "concorda_con_vittorie": true
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.7445044202031973,
+   "concorda_con_vittorie": true
+  },
+  "rimonta dopo l'avversario": {
+   "n": 100,
+   "media": 0.8804023875278868,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "autonoma",
+  "matchup": "ES",
+  "seed": 3,
+  "starter": "b",
+  "iterazioni": 138,
+  "probe": true,
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false,
+  "campione": "B",
+  "regole": "6427b90+D72-D82",
+  "valutazione": [
+   "rimonta",
+   3.0,
+   0.2
+  ]
+ },
+ "k": 1,
+ "turno": 5,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 9.0,
+  "p00": 16.0,
+  "p02": 12.0,
+  "p03": 4.0
+ },
+ "secondi": 81.10553002357483
+}

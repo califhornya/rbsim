@@ -1,0 +1,8 @@
+posizione k=2 (turno 5): indeciso
+selezione (16 mondi ignote): migliore p06 con 13 punti, riferimento 12
+proposta p06 campo 0 {'gear_target': 'weak', 'waves': 1, 'spell_wave': 1, 'ambush_index': 0}: prima mossa Play gear Pillaged Armory @BF0, visite 0, q 0
+differenza (proposta - riferimento) su 100 mondi: +0.0 pp [-12.8, +12.8]
+valori (storica): media +0.169; segno discorde con la differenza di vittorie
+valori (rimonta): media +0.230; segno discorde con la differenza di vittorie
+valori (storica dopo l'avversario): media +0.431; segno discorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media +0.400; segno discorde con la differenza di vittorie
