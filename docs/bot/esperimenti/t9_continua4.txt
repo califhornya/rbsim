@@ -1,0 +1,26 @@
+linea 'Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex': 7 etichette
+linea 'Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex ; @finestre': 7 etichette, poi il campione con le finestre
+mossa 'Play Vi Peacekeeper' -> 'Play Vi Peacekeeper'
+linea 'Play Vi Peacekeeper ; @finestre': 1 etichette, poi il campione con le finestre
+  10/100 mondi (x4 linee), 14 s
+  20/100 mondi (x4 linee), 25 s
+  30/100 mondi (x4 linee), 36 s
+  40/100 mondi (x4 linee), 48 s
+  50/100 mondi (x4 linee), 61 s
+  60/100 mondi (x4 linee), 72 s
+  70/100 mondi (x4 linee), 84 s
+  80/100 mondi (x4 linee), 97 s
+  90/100 mondi (x4 linee), 108 s
+  100/100 mondi (x4 linee), 120 s
+continuazioni da k=10 (turno 9), campione = posto B, n=100 mondi per linea (stessi mondi per tutte le linee, mazzi rimescolati, seme di base 68015812523253); punti all'inizio: campione 2 - avversario 3; 120 s
+- Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex: vittorie 6/100 = 6% [3-12]; punti a fine turno campione 3.00 avversario 3.00; a fine partita 5.17 / 7.91; durata media 15.2 turni; 2 s a partita
+    etichette consumate in media 7.00/7; mondi deviati dalla linea 0/100 (da lì gioca il campione); passo della deviazione: nessuno; condizionali saltate in media 1.48
+- Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex ; @finestre: vittorie 7/100 = 7% [3-14]; punti a fine turno campione 2.98 avversario 3.00; a fine partita 5.44 / 7.90; durata media 15.2 turni; 3 s a partita
+    etichette consumate in media 7.00/7; mondi deviati dalla linea 0/100 (da lì gioca il campione); passo della deviazione: nessuno; condizionali saltate in media 1.48; poi il campione con le finestre
+- Play Vi Peacekeeper: vittorie 5/100 = 5% [2-11]; punti a fine turno campione 3.00 avversario 3.00; a fine partita 5.13 / 7.93; durata media 15.1 turni; 2 s a partita
+- Play Vi Peacekeeper ; @finestre: vittorie 8/100 = 8% [4-15]; punti a fine turno campione 3.00 avversario 3.00; a fine partita 5.37 / 7.92; durata media 15.3 turni; 3 s a partita
+    etichette consumate in media 1.00/1; mondi deviati dalla linea 0/100 (da lì gioca il campione); passo della deviazione: nessuno; poi il campione con le finestre
+differenza rispetto alla migliore (Play Vi Peacekeeper ; @finestre), punti percentuali: Newcombe (mondi indipendenti) e appaiata sugli stessi mondi (vittoria 1, patta 0,5), intervalli 95%:
+- Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex: Newcombe -2 [-10, +6]; appaiata -2 [-9, +5]
+- Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex ; @finestre: Newcombe -1 [-9, +7]; appaiata -1 [-8, +6]
+- Play Vi Peacekeeper: Newcombe -3 [-11, +4]; appaiata -3 [-9, +3]

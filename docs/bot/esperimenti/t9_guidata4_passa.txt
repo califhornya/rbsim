@@ -1,0 +1,20 @@
+posizione k=10, turno 9, posto B: [2, 3] punti; avversario: passa
+  T9 punti 2-3 en 7/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  1. [turn_action] Play gear Pillaged Armory @BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  2. [scelta] target:buff_unit: Kinkou Initiate (B, Might 3, base)
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+  3. [turn_action] Move Kinkou Initiate base→BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  4. [turn_action] Pass
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  5. ?Punch First: condizione non verificata: saltata
+  6. ?scelta:Kinkou: condizione non verificata: saltata
+  7. [scelta] combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  (sequenza finita al punto 'turn_action': da qui si passa)
+fine del turno
+  T10 punti 2-3 en 6/2 pot bod3,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4] BF1[ness: - / -] base[Sett Kingpin 5,Kinkou Initiate 3 / -]
+  punti: campione (B) 2 - avversario 3; passi forzati 7/7; scelte lasciate al motore 1
+  etichette condizionali saltate: 2

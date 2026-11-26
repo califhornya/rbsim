@@ -1,0 +1,6914 @@
+{
+ "partita": "B",
+ "k": 10,
+ "turno": 9,
+ "base_seme": 68015812523253,
+ "n": 100,
+ "mosse": {
+  "Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex": {
+   "mossa": "Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex",
+   "n": 100,
+   "vittorie": 6,
+   "patte": 0,
+   "non_finite": 0,
+   "etichette": 7,
+   "consumate": 7.0,
+   "finestre": false,
+   "saltate": 1.48,
+   "deviati": 0,
+   "passi_deviazione": {},
+   "punti_turno": [
+    3.0,
+    3.0
+   ],
+   "punti_fine": [
+    5.17,
+    7.91
+   ],
+   "turni": 15.2,
+   "secondi": 1.5863741970062255,
+   "mondi": [
+    {
+     "mondo": 0,
+     "seme": 68015812523253,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 1,
+     "seme": 68015812523254,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 2,
+     "seme": 68015812523255,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 3,
+     "seme": 68015812523256,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 4,
+     "seme": 68015812523257,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 5,
+     "seme": 68015812523258,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 6,
+     "seme": 68015812523259,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 7,
+     "seme": 68015812523260,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 8,
+     "seme": 68015812523261,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 9,
+     "seme": 68015812523262,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 10,
+     "seme": 68015812523263,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 11,
+     "seme": 68015812523264,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 12,
+     "seme": 68015812523265,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 13,
+     "seme": 68015812523266,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 14,
+     "seme": 68015812523267,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 15,
+     "seme": 68015812523268,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 16,
+     "seme": 68015812523269,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 17,
+     "seme": 68015812523270,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 18,
+     "seme": 68015812523271,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 19,
+     "seme": 68015812523272,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 20,
+     "seme": 68015812523273,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 21,
+     "seme": 68015812523274,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 22,
+     "seme": 68015812523275,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 23,
+     "seme": 68015812523276,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 24,
+     "seme": 68015812523277,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 25,
+     "seme": 68015812523278,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 26,
+     "seme": 68015812523279,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 27,
+     "seme": 68015812523280,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 28,
+     "seme": 68015812523281,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 29,
+     "seme": 68015812523282,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 30,
+     "seme": 68015812523283,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 31,
+     "seme": 68015812523284,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 32,
+     "seme": 68015812523285,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 33,
+     "seme": 68015812523286,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 34,
+     "seme": 68015812523287,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 35,
+     "seme": 68015812523288,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 36,
+     "seme": 68015812523289,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 37,
+     "seme": 68015812523290,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 38,
+     "seme": 68015812523291,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 39,
+     "seme": 68015812523292,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 40,
+     "seme": 68015812523293,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 41,
+     "seme": 68015812523294,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 42,
+     "seme": 68015812523295,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 43,
+     "seme": 68015812523296,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 44,
+     "seme": 68015812523297,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 45,
+     "seme": 68015812523298,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 46,
+     "seme": 68015812523299,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 47,
+     "seme": 68015812523300,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 48,
+     "seme": 68015812523301,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 49,
+     "seme": 68015812523302,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 50,
+     "seme": 68015812523303,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 51,
+     "seme": 68015812523304,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 52,
+     "seme": 68015812523305,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 53,
+     "seme": 68015812523306,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      6,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 54,
+     "seme": 68015812523307,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 55,
+     "seme": 68015812523308,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 56,
+     "seme": 68015812523309,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 57,
+     "seme": 68015812523310,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 58,
+     "seme": 68015812523311,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 59,
+     "seme": 68015812523312,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 60,
+     "seme": 68015812523313,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 19,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 61,
+     "seme": 68015812523314,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 62,
+     "seme": 68015812523315,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 63,
+     "seme": 68015812523316,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      5,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 64,
+     "seme": 68015812523317,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 65,
+     "seme": 68015812523318,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 66,
+     "seme": 68015812523319,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 67,
+     "seme": 68015812523320,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 68,
+     "seme": 68015812523321,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 69,
+     "seme": 68015812523322,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 70,
+     "seme": 68015812523323,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 71,
+     "seme": 68015812523324,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 72,
+     "seme": 68015812523325,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 73,
+     "seme": 68015812523326,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 74,
+     "seme": 68015812523327,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 75,
+     "seme": 68015812523328,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 76,
+     "seme": 68015812523329,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 77,
+     "seme": 68015812523330,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 78,
+     "seme": 68015812523331,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 79,
+     "seme": 68015812523332,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 80,
+     "seme": 68015812523333,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 81,
+     "seme": 68015812523334,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 82,
+     "seme": 68015812523335,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 83,
+     "seme": 68015812523336,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 84,
+     "seme": 68015812523337,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 85,
+     "seme": 68015812523338,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 86,
+     "seme": 68015812523339,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 87,
+     "seme": 68015812523340,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 88,
+     "seme": 68015812523341,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 89,
+     "seme": 68015812523342,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 90,
+     "seme": 68015812523343,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 91,
+     "seme": 68015812523344,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 92,
+     "seme": 68015812523345,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 93,
+     "seme": 68015812523346,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 94,
+     "seme": 68015812523347,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 95,
+     "seme": 68015812523348,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 96,
+     "seme": 68015812523349,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 97,
+     "seme": 68015812523350,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 98,
+     "seme": 68015812523351,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 99,
+     "seme": 68015812523352,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    }
+   ]
+  },
+  "Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex ; @finestre": {
+   "mossa": "Pillaged Armory @BF0 ; scelta:Kinkou ; Move Kinkou Initiate base→BF0 ; Pass ; ?Punch First ; ?scelta:Kinkou ; danni:Vex ; @finestre",
+   "n": 100,
+   "vittorie": 7,
+   "patte": 0,
+   "non_finite": 0,
+   "etichette": 7,
+   "consumate": 7.0,
+   "finestre": true,
+   "saltate": 1.48,
+   "deviati": 0,
+   "passi_deviazione": {},
+   "punti_turno": [
+    2.98,
+    3.0
+   ],
+   "punti_fine": [
+    5.44,
+    7.9
+   ],
+   "turni": 15.23,
+   "secondi": 2.7539539980888366,
+   "mondi": [
+    {
+     "mondo": 0,
+     "seme": 68015812523253,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 1,
+     "seme": 68015812523254,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 2,
+     "seme": 68015812523255,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      6,
+      8
+     ],
+     "turni": 19,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 3,
+     "seme": 68015812523256,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 4,
+     "seme": 68015812523257,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 5,
+     "seme": 68015812523258,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 6,
+     "seme": 68015812523259,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 7,
+     "seme": 68015812523260,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 8,
+     "seme": 68015812523261,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 9,
+     "seme": 68015812523262,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 10,
+     "seme": 68015812523263,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 11,
+     "seme": 68015812523264,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 12,
+     "seme": 68015812523265,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 13,
+     "seme": 68015812523266,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 14,
+     "seme": 68015812523267,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 15,
+     "seme": 68015812523268,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 16,
+     "seme": 68015812523269,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 17,
+     "seme": 68015812523270,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 18,
+     "seme": 68015812523271,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 19,
+     "seme": 68015812523272,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 20,
+     "seme": 68015812523273,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 21,
+     "seme": 68015812523274,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 22,
+     "seme": 68015812523275,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 23,
+     "seme": 68015812523276,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 24,
+     "seme": 68015812523277,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 25,
+     "seme": 68015812523278,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 26,
+     "seme": 68015812523279,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 27,
+     "seme": 68015812523280,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 28,
+     "seme": 68015812523281,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 29,
+     "seme": 68015812523282,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 30,
+     "seme": 68015812523283,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 31,
+     "seme": 68015812523284,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 32,
+     "seme": 68015812523285,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 19,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 33,
+     "seme": 68015812523286,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 34,
+     "seme": 68015812523287,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 35,
+     "seme": 68015812523288,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 36,
+     "seme": 68015812523289,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 37,
+     "seme": 68015812523290,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 38,
+     "seme": 68015812523291,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 39,
+     "seme": 68015812523292,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 40,
+     "seme": 68015812523293,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 41,
+     "seme": 68015812523294,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 42,
+     "seme": 68015812523295,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 43,
+     "seme": 68015812523296,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 44,
+     "seme": 68015812523297,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 45,
+     "seme": 68015812523298,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 46,
+     "seme": 68015812523299,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 47,
+     "seme": 68015812523300,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 19,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 48,
+     "seme": 68015812523301,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 49,
+     "seme": 68015812523302,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 50,
+     "seme": 68015812523303,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 51,
+     "seme": 68015812523304,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 52,
+     "seme": 68015812523305,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 53,
+     "seme": 68015812523306,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 54,
+     "seme": 68015812523307,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 55,
+     "seme": 68015812523308,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 56,
+     "seme": 68015812523309,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 57,
+     "seme": 68015812523310,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 58,
+     "seme": 68015812523311,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 59,
+     "seme": 68015812523312,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 60,
+     "seme": 68015812523313,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 61,
+     "seme": 68015812523314,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 62,
+     "seme": 68015812523315,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 63,
+     "seme": 68015812523316,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 64,
+     "seme": 68015812523317,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      2
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 65,
+     "seme": 68015812523318,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 66,
+     "seme": 68015812523319,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 67,
+     "seme": 68015812523320,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 68,
+     "seme": 68015812523321,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 69,
+     "seme": 68015812523322,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 70,
+     "seme": 68015812523323,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 71,
+     "seme": 68015812523324,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 72,
+     "seme": 68015812523325,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 73,
+     "seme": 68015812523326,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 74,
+     "seme": 68015812523327,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 75,
+     "seme": 68015812523328,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 76,
+     "seme": 68015812523329,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 77,
+     "seme": 68015812523330,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 78,
+     "seme": 68015812523331,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 79,
+     "seme": 68015812523332,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 80,
+     "seme": 68015812523333,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 81,
+     "seme": 68015812523334,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 82,
+     "seme": 68015812523335,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 83,
+     "seme": 68015812523336,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 84,
+     "seme": 68015812523337,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 85,
+     "seme": 68015812523338,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 86,
+     "seme": 68015812523339,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 87,
+     "seme": 68015812523340,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 88,
+     "seme": 68015812523341,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      2
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 89,
+     "seme": 68015812523342,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 90,
+     "seme": 68015812523343,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 91,
+     "seme": 68015812523344,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 92,
+     "seme": 68015812523345,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      5,
+      8
+     ],
+     "turni": 15,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 93,
+     "seme": 68015812523346,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 94,
+     "seme": 68015812523347,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 95,
+     "seme": 68015812523348,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 96,
+     "seme": 68015812523349,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 97,
+     "seme": 68015812523350,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 98,
+     "seme": 68015812523351,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 7,
+     "deviato": null
+    },
+    {
+     "mondo": 99,
+     "seme": 68015812523352,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 7,
+     "deviato": null
+    }
+   ]
+  },
+  "Play Vi Peacekeeper": {
+   "mossa": "Play Vi Peacekeeper",
+   "n": 100,
+   "vittorie": 5,
+   "patte": 0,
+   "non_finite": 0,
+   "etichette": 1,
+   "consumate": null,
+   "finestre": false,
+   "saltate": null,
+   "deviati": 0,
+   "passi_deviazione": {},
+   "punti_turno": [
+    3.0,
+    3.0
+   ],
+   "punti_fine": [
+    5.13,
+    7.93
+   ],
+   "turni": 15.09,
+   "secondi": 1.8735678815841674,
+   "mondi": [
+    {
+     "mondo": 0,
+     "seme": 68015812523253,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 1,
+     "seme": 68015812523254,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 2,
+     "seme": 68015812523255,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      6,
+      8
+     ],
+     "turni": 17,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 3,
+     "seme": 68015812523256,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 4,
+     "seme": 68015812523257,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 5,
+     "seme": 68015812523258,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 6,
+     "seme": 68015812523259,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 7,
+     "seme": 68015812523260,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 8,
+     "seme": 68015812523261,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 9,
+     "seme": 68015812523262,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 10,
+     "seme": 68015812523263,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 11,
+     "seme": 68015812523264,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 12,
+     "seme": 68015812523265,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 13,
+     "seme": 68015812523266,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 14,
+     "seme": 68015812523267,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 15,
+     "seme": 68015812523268,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 16,
+     "seme": 68015812523269,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 17,
+     "seme": 68015812523270,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 18,
+     "seme": 68015812523271,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 19,
+     "seme": 68015812523272,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 20,
+     "seme": 68015812523273,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 21,
+     "seme": 68015812523274,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 22,
+     "seme": 68015812523275,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 23,
+     "seme": 68015812523276,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 24,
+     "seme": 68015812523277,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 25,
+     "seme": 68015812523278,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 26,
+     "seme": 68015812523279,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 27,
+     "seme": 68015812523280,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 28,
+     "seme": 68015812523281,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 29,
+     "seme": 68015812523282,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 30,
+     "seme": 68015812523283,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 31,
+     "seme": 68015812523284,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 32,
+     "seme": 68015812523285,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 33,
+     "seme": 68015812523286,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 34,
+     "seme": 68015812523287,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 35,
+     "seme": 68015812523288,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 36,
+     "seme": 68015812523289,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 37,
+     "seme": 68015812523290,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 38,
+     "seme": 68015812523291,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 39,
+     "seme": 68015812523292,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 40,
+     "seme": 68015812523293,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 41,
+     "seme": 68015812523294,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 42,
+     "seme": 68015812523295,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      6,
+      8
+     ],
+     "turni": 17,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 43,
+     "seme": 68015812523296,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 44,
+     "seme": 68015812523297,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 45,
+     "seme": 68015812523298,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 19,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 46,
+     "seme": 68015812523299,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 47,
+     "seme": 68015812523300,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 48,
+     "seme": 68015812523301,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 49,
+     "seme": 68015812523302,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 50,
+     "seme": 68015812523303,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 51,
+     "seme": 68015812523304,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 52,
+     "seme": 68015812523305,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 53,
+     "seme": 68015812523306,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 54,
+     "seme": 68015812523307,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 55,
+     "seme": 68015812523308,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 56,
+     "seme": 68015812523309,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 57,
+     "seme": 68015812523310,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 58,
+     "seme": 68015812523311,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 59,
+     "seme": 68015812523312,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 60,
+     "seme": 68015812523313,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 61,
+     "seme": 68015812523314,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 62,
+     "seme": 68015812523315,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 63,
+     "seme": 68015812523316,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 64,
+     "seme": 68015812523317,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 65,
+     "seme": 68015812523318,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 66,
+     "seme": 68015812523319,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 67,
+     "seme": 68015812523320,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 68,
+     "seme": 68015812523321,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 69,
+     "seme": 68015812523322,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 70,
+     "seme": 68015812523323,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 71,
+     "seme": 68015812523324,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 72,
+     "seme": 68015812523325,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 73,
+     "seme": 68015812523326,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 74,
+     "seme": 68015812523327,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 75,
+     "seme": 68015812523328,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 76,
+     "seme": 68015812523329,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 77,
+     "seme": 68015812523330,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 78,
+     "seme": 68015812523331,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 79,
+     "seme": 68015812523332,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 80,
+     "seme": 68015812523333,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 81,
+     "seme": 68015812523334,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 82,
+     "seme": 68015812523335,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 83,
+     "seme": 68015812523336,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 84,
+     "seme": 68015812523337,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 85,
+     "seme": 68015812523338,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 86,
+     "seme": 68015812523339,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 87,
+     "seme": 68015812523340,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 88,
+     "seme": 68015812523341,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 89,
+     "seme": 68015812523342,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 90,
+     "seme": 68015812523343,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 91,
+     "seme": 68015812523344,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 92,
+     "seme": 68015812523345,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 93,
+     "seme": 68015812523346,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 94,
+     "seme": 68015812523347,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 95,
+     "seme": 68015812523348,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 96,
+     "seme": 68015812523349,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 97,
+     "seme": 68015812523350,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 98,
+     "seme": 68015812523351,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": null,
+     "deviato": null
+    },
+    {
+     "mondo": 99,
+     "seme": 68015812523352,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": null,
+     "deviato": null
+    }
+   ]
+  },
+  "Play Vi Peacekeeper ; @finestre": {
+   "mossa": "Play Vi Peacekeeper ; @finestre",
+   "n": 100,
+   "vittorie": 8,
+   "patte": 0,
+   "non_finite": 0,
+   "etichette": 1,
+   "consumate": 1.0,
+   "finestre": true,
+   "saltate": 0.0,
+   "deviati": 0,
+   "passi_deviazione": {},
+   "punti_turno": [
+    3.0,
+    3.0
+   ],
+   "punti_fine": [
+    5.37,
+    7.92
+   ],
+   "turni": 15.34,
+   "secondi": 3.284405188560486,
+   "mondi": [
+    {
+     "mondo": 0,
+     "seme": 68015812523253,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 1,
+     "seme": 68015812523254,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 2,
+     "seme": 68015812523255,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 3,
+     "seme": 68015812523256,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 4,
+     "seme": 68015812523257,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 5,
+     "seme": 68015812523258,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 6,
+     "seme": 68015812523259,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 7,
+     "seme": 68015812523260,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 8,
+     "seme": 68015812523261,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 9,
+     "seme": 68015812523262,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 10,
+     "seme": 68015812523263,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 11,
+     "seme": 68015812523264,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 12,
+     "seme": 68015812523265,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 13,
+     "seme": 68015812523266,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 14,
+     "seme": 68015812523267,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 19,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 15,
+     "seme": 68015812523268,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 16,
+     "seme": 68015812523269,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 17,
+     "seme": 68015812523270,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 18,
+     "seme": 68015812523271,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 19,
+     "seme": 68015812523272,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 20,
+     "seme": 68015812523273,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 21,
+     "seme": 68015812523274,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 22,
+     "seme": 68015812523275,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 23,
+     "seme": 68015812523276,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 24,
+     "seme": 68015812523277,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 25,
+     "seme": 68015812523278,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 26,
+     "seme": 68015812523279,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 27,
+     "seme": 68015812523280,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 28,
+     "seme": 68015812523281,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 29,
+     "seme": 68015812523282,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 30,
+     "seme": 68015812523283,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 31,
+     "seme": 68015812523284,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 32,
+     "seme": 68015812523285,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 33,
+     "seme": 68015812523286,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 34,
+     "seme": 68015812523287,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 35,
+     "seme": 68015812523288,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 36,
+     "seme": 68015812523289,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 37,
+     "seme": 68015812523290,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 38,
+     "seme": 68015812523291,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 39,
+     "seme": 68015812523292,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 40,
+     "seme": 68015812523293,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 41,
+     "seme": 68015812523294,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 42,
+     "seme": 68015812523295,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 43,
+     "seme": 68015812523296,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 44,
+     "seme": 68015812523297,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 45,
+     "seme": 68015812523298,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 46,
+     "seme": 68015812523299,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 47,
+     "seme": 68015812523300,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 48,
+     "seme": 68015812523301,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 49,
+     "seme": 68015812523302,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 50,
+     "seme": 68015812523303,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 51,
+     "seme": 68015812523304,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 52,
+     "seme": 68015812523305,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 53,
+     "seme": 68015812523306,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 54,
+     "seme": 68015812523307,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 55,
+     "seme": 68015812523308,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 56,
+     "seme": 68015812523309,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 57,
+     "seme": 68015812523310,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 58,
+     "seme": 68015812523311,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      3
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 59,
+     "seme": 68015812523312,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 60,
+     "seme": 68015812523313,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 61,
+     "seme": 68015812523314,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 62,
+     "seme": 68015812523315,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 63,
+     "seme": 68015812523316,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 64,
+     "seme": 68015812523317,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 65,
+     "seme": 68015812523318,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 66,
+     "seme": 68015812523319,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 67,
+     "seme": 68015812523320,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 68,
+     "seme": 68015812523321,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 69,
+     "seme": 68015812523322,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 70,
+     "seme": 68015812523323,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 71,
+     "seme": 68015812523324,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 72,
+     "seme": 68015812523325,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 73,
+     "seme": 68015812523326,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 74,
+     "seme": 68015812523327,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 75,
+     "seme": 68015812523328,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 76,
+     "seme": 68015812523329,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 77,
+     "seme": 68015812523330,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 78,
+     "seme": 68015812523331,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 79,
+     "seme": 68015812523332,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 80,
+     "seme": 68015812523333,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 81,
+     "seme": 68015812523334,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 82,
+     "seme": 68015812523335,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 83,
+     "seme": 68015812523336,
+     "vince": "B",
+     "esito": 1.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      7,
+      8
+     ],
+     "turni": 17,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 84,
+     "seme": 68015812523337,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 85,
+     "seme": 68015812523338,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 86,
+     "seme": 68015812523339,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 87,
+     "seme": 68015812523340,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 88,
+     "seme": 68015812523341,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 89,
+     "seme": 68015812523342,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 90,
+     "seme": 68015812523343,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 91,
+     "seme": 68015812523344,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      4
+     ],
+     "turni": 14,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 92,
+     "seme": 68015812523345,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 93,
+     "seme": 68015812523346,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      7
+     ],
+     "turni": 18,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 94,
+     "seme": 68015812523347,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 95,
+     "seme": 68015812523348,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      5
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 96,
+     "seme": 68015812523349,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 97,
+     "seme": 68015812523350,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 98,
+     "seme": 68015812523351,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    },
+    {
+     "mondo": 99,
+     "seme": 68015812523352,
+     "vince": "A",
+     "esito": 0.0,
+     "punti_turno": [
+      3,
+      3
+     ],
+     "punti_fine": [
+      8,
+      6
+     ],
+     "turni": 16,
+     "passi": 1,
+     "deviato": null
+    }
+   ]
+  }
+ },
+ "punti_iniziali": [
+  2,
+  3
+ ],
+ "secondi": 120.39078497886658
+}
