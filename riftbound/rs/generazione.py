@@ -195,6 +195,7 @@ def _partite_arena(rete, campione, matchup, coppie, regole, righe, processi, ite
                                      "campione": campione, "regole": regole, "iterazioni": iterazioni})
     scrivi(f"arena di sviluppo: {len(fatte)} partite gia' fatte, {len(jobs)} da giocare, {processi} processi")
     if jobs:
+        inizio = time.monotonic()
         os.environ["RBSIM_REGOLE"] = regole
         with ProcessPoolExecutor(processi, mp_context=multiprocessing.get_context("spawn")) as pool, \
                 open(righe, "a") as f:
@@ -203,7 +204,7 @@ def _partite_arena(rete, campione, matchup, coppie, regole, righe, processi, ite
                 f.write(json.dumps(r) + "\n")
                 f.flush()
                 if n % 20 == 0:
-                    scrivi(f"  {n}/{len(jobs)} partite, {(time.time() - t0) / 60:.1f} min")
+                    scrivi(f"  {n}/{len(jobs)} partite, {(time.monotonic() - inizio) / 60:.1f} min")
     return fatte
 
 
