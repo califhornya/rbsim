@@ -26,7 +26,15 @@ impl Game {
             }
         }
         self.open_combat(bf_idx, attacker)?;
-        let mut passes = 0;
+        self.showdown_loop(bf_idx, attacker, 0)
+    }
+
+    /// The showdown's priority loop from a given point (the focus player is asked next, `passes`
+    /// passes in a row so far; run_showdown starts it at 0), and what the showdown does after it.
+    /// Each time an agent is asked, (focus, passes, battlefield, attacker) is recorded in
+    /// `win_show`, for a search started from inside the window.
+    pub fn showdown_loop(&mut self, bf_idx: usize, attacker: Side, passes: i32) -> R<()> {
+        let mut passes = passes;
         let mut rounds = 0;
         while passes < 2 && rounds < PRIORITY_ROUNDS_CAP && self.gs.winner.is_none() {
             rounds += 1;
@@ -36,29 +44,46 @@ impl Game {
                 self.gs.focus_player = Some(fp.other());
                 continue;
             };
+            self.win_show = Some((fp, passes, bf_idx, attacker));
             let action = agent.borrow_mut().decide_showdown_action(self, fp, bf_idx)?;
-            if let Some(j) = self.journal.as_mut() {
-                j.push(JEntry::Decision(fp, "showdown_action".into(), action.clone()));
-            }
-            if action.kind == AKind::Pass {
-                passes += 1;
-            } else {
-                let step = self.showdown_step(fp, &action, bf_idx)?;
-                self.open_combat(bf_idx, attacker)?;
-                if step == "kept" {
-                    passes = 0;
-                    continue;
-                }
-                passes = if step == "acted" { 0 } else { passes + 1 };
-            }
-            let fp = self.gs.focus_player.unwrap();
-            self.gs.focus_player = Some(fp.other());
+            passes = self.showdown_apply(fp, passes, &action, bf_idx, attacker)?;
         }
+        self.win_show = None;
         self.finish_showdown(bf_idx, attacker)?;
         if self.gs.chain.is_empty() {
             self.cleanup_hidden_cards()?;
         }
         self.run_staged_showdowns()
+    }
+
+    /// What the showdown loop does with the action the focus player `fp` chose, with `passes` in a
+    /// row so far: the new count (the focus flips unless the action was "kept").
+    pub fn showdown_apply(&mut self, fp: Side, passes: i32, action: &Action, bf_idx: usize, attacker: Side) -> R<i32> {
+        if let Some(j) = self.journal.as_mut() {
+            j.push(JEntry::Decision(fp, "showdown_action".into(), action.clone()));
+        }
+        let passes = if action.kind == AKind::Pass {
+            passes + 1
+        } else {
+            let step = self.showdown_step(fp, action, bf_idx)?;
+            self.open_combat(bf_idx, attacker)?;
+            if step == "kept" {
+                return Ok(0);
+            }
+            if step == "acted" { 0 } else { passes + 1 }
+        };
+        let fp = self.gs.focus_player.unwrap();
+        self.gs.focus_player = Some(fp.other());
+        Ok(passes)
+    }
+
+    /// A showdown step that opened a chain (a spell cast) and was asked inside it: once the chain
+    /// is over the loop goes on as after an "acted" step.
+    pub fn showdown_after_acted(&mut self, bf_idx: usize, attacker: Side) -> R<()> {
+        self.open_combat(bf_idx, attacker)?;
+        let fp = self.gs.focus_player.unwrap();
+        self.gs.focus_player = Some(fp.other());
+        self.showdown_loop(bf_idx, attacker, 0)
     }
 
     /// py: _showdown_step(player, side, action, bf_idx)

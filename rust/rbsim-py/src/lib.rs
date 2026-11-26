@@ -371,6 +371,98 @@ impl Game {
         }
     }
 
+    /// Option `finestre` (default off): the simulations of this seat's search play the reaction and
+    /// showdown windows for both seats with a pilot each (the prior's probabilities over the menu).
+    fn set_search_finestre(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().finestre = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Diagnosis: `finestre` only for the search with index `k` (like `set_search_override`).
+    fn set_search_finestre_at(&mut self, seat: &str, k: usize) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().finestre_at = Some(k);
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Option `quota`, only for the search with index `k`: in the turn search's root, while a child whose
+    /// label contains one of `labels` has fewer than `n` visits, the one with the fewest is simulated.
+    fn set_search_quota_at(&mut self, seat: &str, k: usize, labels: Vec<String>, n: usize) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().quota_at = Some((k, labels, n));
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Tests: with `finestre`, the pilots of the simulations are scripted (label prefixes per point, "PASS"
+    /// or an exhausted script passes): `a_*` the pilot of seat A, `b_*` of seat B; `trace`: the diagnosis
+    /// also keeps each simulation's window plays and where the window ended.
+    #[pyo3(signature = (seat, a_showdown=Vec::new(), a_reaction=Vec::new(), b_showdown=Vec::new(), b_reaction=Vec::new(), trace=true))]
+    fn set_search_pilot_script(&mut self, seat: &str, a_showdown: Vec<String>, a_reaction: Vec<String>,
+                               b_showdown: Vec<String>, b_reaction: Vec<String>, trace: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                let mut c = c.borrow_mut();
+                c.pilot_script = Some([(a_showdown, a_reaction), (b_showdown, b_reaction)]);
+                c.diag_trace = trace;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Observation only: the diagnosis (`search_finestre_diag`) is kept for every search of the seat, with
+    /// the simulations' seeds (and window plays), also with `finestre` and quota off. Changes nothing else.
+    fn set_search_diag_trace(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().diag_trace = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Continuations: the search seat's next turn decision plays the first legal move whose label contains
+    /// `label` (case-insensitive); after that it searches as usual.
+    fn set_search_first_move(&mut self, seat: &str, label: &str) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().first_forced = Some(label.to_string());
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// The finestre / quota diagnosis of a search seat (JSON list, one entry per search that ran with
+    /// either): per root child its label, visits, q and the tally of the pilots' window plays.
+    fn search_finestre_diag(&self, seat: &str) -> PyResult<String> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => serde_json::Value::Array(c.borrow().diag.clone()).to_string(),
+            None => "[]".into(),
+        })
+    }
+
     /// Observation only: the search_log rows of this seat also carry `iters`, `secs`
     /// (CPU seconds of the search) and `probe_secs` (win probe since the previous row).
     fn set_search_timing(&mut self, seat: &str, on: bool) -> PyResult<()> {
@@ -530,6 +622,35 @@ impl Game {
         let r = r.map_err(perr)?;
         d.map_err(perr)?;
         Ok(r)
+    }
+
+    /// The first half of `run_segment`'s turn: the active player's actions and the end of the turn (not the
+    /// next turn's beginning). -> the winner if the game ended in it.
+    fn run_actions_end(&mut self) -> PyResult<Option<String>> {
+        drop(human::take());
+        let r = (|| -> Result<Option<String>, EngineError> {
+            if let Some(res) = self.g.run_main_actions()? {
+                return Ok(Some(res.winner_name().to_string()));
+            }
+            if let Some(res) = self.g.end_turn()? {
+                return Ok(Some(res.winner_name().to_string()));
+            }
+            Ok(None)
+        })();
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        r.map_err(perr)
+    }
+
+    /// The other half: the next turn's beginning. -> the winner if the game ended in it.
+    fn run_begin(&mut self) -> PyResult<Option<String>> {
+        drop(human::take());
+        let r = self.g.begin_turn();
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        Ok(r.map_err(perr)?.map(|res| res.winner_name().to_string()))
     }
 
     /// The trace's events (JSON list).

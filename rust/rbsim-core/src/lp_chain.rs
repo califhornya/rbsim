@@ -324,8 +324,15 @@ impl Game {
 
     /// py: _run_chain(caster)
     pub fn run_chain(&mut self, caster: Side) -> R<()> {
-        let mut active = caster;
-        let mut passes = 0;
+        self.run_chain_from(caster, 0)
+    }
+
+    /// The chain's priority loop from a given point: `active` is asked next, `passes` passes in a
+    /// row so far (run_chain starts it at (caster, 0)). Each time an agent is asked, (side,
+    /// passes) is recorded in `win_chain`, for a search started from inside the window.
+    pub fn run_chain_from(&mut self, active: Side, passes: i32) -> R<()> {
+        let mut active = active;
+        let mut passes = passes;
         let mut rounds = 0;
         while passes < 2 && !self.gs.chain.is_empty() && rounds < PRIORITY_ROUNDS_CAP && !self.all_pass
             && self.gs.winner.is_none()
@@ -336,30 +343,34 @@ impl Game {
                 active = active.other();
                 continue;
             };
+            self.win_chain = Some((active, passes));
             let action = agent.borrow_mut().decide_reaction(self, active)?;
-            if let Some(j) = self.journal.as_mut() {
-                j.push(JEntry::Decision(active, "reaction".into(), action.clone()));
-            }
-            let depth = self.gs.chain.len();
-            let mut step = if action.kind == AKind::Pass { "pass" } else { self.reaction_step(active, &action)? };
-            self.flush_triggers(false)?;
-            if step != "pass" && self.gs.chain.len() > depth {
-                step = "acted";
-            }
-            if step == "kept" {
-                continue; // D62 (reference behaviour): the pass streak is not reset
-            }
-            if step == "acted" {
-                passes = 0;
-                if let Some(top) = self.gs.chain.last() {
-                    active = top.player;
-                }
-            } else {
-                passes += 1;
-                active = active.other();
-            }
+            (active, passes) = self.chain_apply(active, passes, &action)?;
         }
         self.resolve_chain()
+    }
+
+    /// What the chain loop does with the action `active` chose, with `passes` in a row so far:
+    /// the new (active, passes) the loop goes on with.
+    pub fn chain_apply(&mut self, active: Side, passes: i32, action: &Action) -> R<(Side, i32)> {
+        if let Some(j) = self.journal.as_mut() {
+            j.push(JEntry::Decision(active, "reaction".into(), action.clone()));
+        }
+        let depth = self.gs.chain.len();
+        let mut step = if action.kind == AKind::Pass { "pass" } else { self.reaction_step(active, action)? };
+        self.flush_triggers(false)?;
+        if step != "pass" && self.gs.chain.len() > depth {
+            step = "acted";
+        }
+        if step == "kept" {
+            return Ok((active, passes)); // D62 (reference behaviour): the pass streak is not reset
+        }
+        if step == "acted" {
+            let active = self.gs.chain.last().map_or(active, |top| top.player);
+            Ok((active, 0))
+        } else {
+            Ok((active.other(), passes + 1))
+        }
     }
 
     /// py: _reaction_step(player, side, action) -> "acted" | "kept" | "noop"

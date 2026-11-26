@@ -79,6 +79,11 @@ pub struct Game {
     /// it can (then the preference is spent). None, the default: the engine's
     /// own way, bit for bit.
     pub recycle_first: Option<(Side, Domain)>,
+    /// Where the chain's priority loop was when an agent was last asked: (side asked, passes in a
+    /// row). Not game state (never dumped): a search started inside a window resumes from it.
+    pub win_chain: Option<(Side, i32)>,
+    /// The same for the showdown's loop: (focus asked, passes, battlefield, attacker); None outside it.
+    pub win_show: Option<(Side, i32, usize, Side)>,
 }
 
 /// py: the `segment` tuple (gs.clone(), side, action, cards_played).
@@ -152,6 +157,8 @@ impl Game {
             discard_sides: Vec::new(),
             trigger_menu: Vec::new(),
             recycle_first: None,
+            win_chain: None,
+            win_show: None,
         }
     }
 
