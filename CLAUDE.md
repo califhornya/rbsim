@@ -11,7 +11,7 @@
 - Ricorda sempre a Matteo, alla fine di ogni risposta che chiude un lavoro, come lanciare la pagina (Matteo, 25/11):
   dalla cartella del repo `scripts/allenatore.command` (Mac, anche doppio clic nel Finder) o `scripts\allenatore.bat`
   (Windows); apre http://127.0.0.1:8765. Serve `uv`; con Rust installato (https://rustup.rs) l'estensione si compila
-  all'avvio e la pagina gioca sulle regole `6427b90+D72-D82`, senza resta su Python. Se il lavoro è su un ramo non ancora
+  all'avvio e la pagina gioca sulle regole `6427b90+D72-D83`, senza resta su Python. Se il lavoro è su un ramo non ancora
   unito, prima il `git fetch` + `git checkout` di quel ramo.
 - Matteo fa sempre pull dal ramo principale `rust`, non usa altri rami (Matteo, 25/11): quando c'è qualcosa che deve
   lanciare o provare (pagina, `.command`), apri la PR verso `rust` senza aspettare che la chieda; lui la unisce.
