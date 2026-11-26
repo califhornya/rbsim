@@ -71,8 +71,8 @@ Matteo: 013325 (`rimonta`, D72-D81) vinta 8 a 4, nessuna difficoltà (§8); manc
 vince 30-38/100 contro 7-8 di Valley: linea mai costruita (Armory 1 visita), Kinkou costruita e valutata male.
 `scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`) sul Mac: T9 IDENTICO ad Astra; a fine T9 ogni
 attacco vale meno di Valley (-0,50/-0,88 contro -0,11). Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
-migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown, valutazione concorde. Domande ad
-Astra date a Matteo.
+migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown, valutazione concorde. `rivedi`:
+finestre + quota li trovano 3 su 5; sonda di fine turno con soglia +0,15: 5 veri, 0 falsi. Domande ad Astra a Matteo.
 
 ## Prossimi passi
 1. Risposta di Astra sulla costruzione degli attacchi con lo showdown (sonda nel bot o quota/finestre), poi arena.
