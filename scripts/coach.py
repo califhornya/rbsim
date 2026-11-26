@@ -74,6 +74,9 @@ def main() -> None:
     ap.add_argument("--valutazione", choices=("storica", "rimonta"), default="rimonta",
                     help="The evaluation of the champion's search leaves, on Rust (default %(default)s); "
                          "ignored on the Python engine")
+    ap.add_argument("--seme", type=int, default=None,
+                    help="Seed of the new games the page starts without one (default: random); with the seed of a saved "
+                         "game, the shuffles repeat (series 'stesso seme', riftbound/rs/stesso_seme.py)")
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "coach")
     ap.add_argument("--iterations", type=int, default=100, help="Search simulations per decision")
     ap.add_argument("--port", type=int, default=8765)
@@ -149,7 +152,8 @@ def main() -> None:
                 if self.path == "/api/new":
                     session.new_game(Path(body["deck_mine"]), Path(body["deck_opp"]),
                                      seat=body.get("seat", "A"), opponent=body.get("opponent"),
-                                     seed=body.get("seed"), apertura=bool(body.get("apertura", True)))
+                                     seed=body["seed"] if body.get("seed") is not None else args.seme,
+                                     apertura=bool(body.get("apertura", True)))
                 elif self.path == "/api/campo":
                     session.scegli_campo(body.get("campo"))
                 elif self.path == "/api/inizia":
@@ -173,6 +177,8 @@ def main() -> None:
             except Exception as exc:  # noqa: BLE001
                 self._json({"error": str(exc)}, 400)
 
+    if args.seme is not None:
+        print(f"Seme fisso: le partite nuove usano il seme {args.seme}", flush=True)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     url = f"http://127.0.0.1:{args.port}"
     print(f"Coach: {url}  (avversario di default: {session.opponents()[0]['name']}; "

@@ -36,6 +36,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
+- (26/11, Astra) Attacchi con lo showdown: sonda a un'ondata (A) dietro interruttore, soglia +0,15, generatore e
+  budget congelati sulle 24; B (finestre + quota) solo confronto economico; pagina solo dopo fuori campione e arena.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
@@ -63,21 +65,23 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-§8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`,
-spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
-Matteo: 013325 (`rimonta`, D72-D81) vinta 8 a 4, nessuna difficoltà (§8); manca la 2a partita; 13 episodi umani su D80.
-§9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo (ES 12 su 60); finestre: arena NON PASSA (ES 0,474, EK 0,531).
-(26/11, Astra, GIOCATE §9, `esperimenti/t9_attacco/`) Al T9 attaccare Bandle (Armory su Sett, Punch First, Vi)
-vince 30-38/100 contro 7-8 di Valley: linea mai costruita (Armory 1 visita), Kinkou costruita e valutata male.
-`scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`) sul Mac: T9 IDENTICO ad Astra; a fine T9 ogni
-attacco vale meno di Valley (-0,50/-0,88 contro -0,11). Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
-migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown, valutazione concorde. `rivedi`:
-finestre + quota li trovano 3 su 5; sonda di fine turno con soglia +0,15: 5 veri, 0 falsi. Domande ad Astra a Matteo.
+§8 chiuso (26/11, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`); bocciati `accumulo`, `minaccia`.
+§9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo; finestre: arena NON PASSA (ES 0,474, EK 0,531). T9 (Astra):
+attaccare Bandle vince 30-38/100 contro 7-8 di Valley. Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
+migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown; sonda di fine turno +0,15: 5 veri, 0 falsi.
+(26/11) Sonda A, prototipo offline (`riftbound/rs/sonda.py`, `attacco.py sonda|congela|fuori|t9-foglia`): sui dati
+salvati sceglie l'attacco in 6 su 24 (i 5 veri + EK4A T15 neutro). Da lanciare: `scripts/rust/sonda_mac.command`
+(congela con identità, 72 posizioni nuove ES/EK + R/I, T9 foglia contro vittorie), ~1 h.
+(26/11, Matteo) Serie «stesso seme»: Matteo gioca una partita col seme 680137721 (`coach.py --seme`), poi
+`scripts/rust/stesso_seme_mac.command` fino alla prima vittoria di Sett nella simulazione (X=500), Evelynn automatica
+dal T1 (il passaggio segui-Matteo-poi-pilota a metà finestra non c'è: serve un agente composto in Rust). Con la rete
+casuale il seme di Sett cambia le simulazioni ma non le mosse: il riepilogo conta le partite distinte.
 
 ## Prossimi passi
-1. Risposta di Astra sulla costruzione degli attacchi con lo showdown (sonda nel bot o quota/finestre), poi arena.
-2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
-3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
+1. Risultati di `sonda_mac` -> Astra; se passa fuori campione: sonda nel bot dietro interruttore (agente con consegna
+   a fine piano), arena a posti scambiati per matchup con limiti di regressione fissati prima, tempo per decisione (p95).
+2. Partita di Matteo col seme e `stesso_seme_mac`; poi, se serve, l'agente composto (segue Matteo, poi pilota).
+3. §7 (showdown 6 a 2); `win_probe` in arena; apertura G1; Bo3 col post-side; fili del 23/11.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
@@ -89,7 +93,8 @@ finestre + quota li trovano 3 su 5; sonda di fine turno con soglia +0,15: 5 veri
   `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`, `sett_mac.command`,
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
 - Calibrazione e diagnosi del campione: `scripts/rust/calibra_campione.py` (misura, forza, profilo), `decisione.py`
-  (rifai, concordanza; `riftbound/rs/decisione_rs.py`), `episodi.py`, `attacco.py` (proposte d'attacco, serie); arena con `--iterazioni-*`, `--win-probe-*`, `--avversario-mano`.
+  (rifai, concordanza; `riftbound/rs/decisione_rs.py`), `episodi.py`, `attacco.py` (proposte d'attacco, serie, sonda A:
+  `riftbound/rs/sonda.py`), `stesso_seme.py` (`riftbound/rs/stesso_seme.py`); arena con `--iterazioni-*`, `--win-probe-*`.
 - `tests/rust/`: test sull'estensione (`test_<mazzo>.py`, `test_d72_d76.py`, `test_d77.py`); qui `maturin build --release` + `pip install`.
 - `scripts/ppo.py` (`_motore`, `--regole`), `scripts/diag/arena_mazzi.py` (`--motore rust`, `--regole`);
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).
