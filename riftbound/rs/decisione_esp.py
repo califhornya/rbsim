@@ -370,9 +370,14 @@ def un_mondo(P: dict, tree: dict, mossa: str, i: int, base_seme: int) -> dict:
         _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003, mossa if s == camp else None)
     g.set_side_chooser()
     w = g.run_actions_end()
-    pt = _punti(json.loads(g.raw_dump()))
+    stato = json.loads(g.raw_dump())
+    pt = _punti(stato)
+    max_t = int(stato["root"]["max_turns"])
     giri = 0
     while w is None and giri < MAX_GIRI:
+        if g.turn > max_t:  # come play_all_turns: oltre il tetto di turni la partita è patta
+            w = "DRAW"
+            break
         w = g.run_begin()
         if w is None:
             w = g.run_actions_end()

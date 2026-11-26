@@ -189,3 +189,13 @@ def test_cli_guidata_incrocio_continua_scrivono_il_rapporto(pos, tmp_path):
     assert "fine del turno" in f1.read_text() or "fermo" in f1.read_text()
     assert "stessi semi nelle 4 condizioni: sì" in f2.read_text()
     assert "differenza rispetto alla migliore" in f3.read_text() and "vittorie" in f3.read_text()
+
+
+def test_un_mondo_si_ferma_al_tetto_di_turni(pos):
+    """Oltre max_turns dello stato la continuazione è patta, come play_all_turns (segnalazione di Codex, PR 60)."""
+    _D, P, k, Pp, e = pos
+    tree = E.albero(e["state_raw"])
+    tree["root"]["max_turns"] = tree["root"]["turn"]
+    r = E.un_mondo(Pp, tree, "Pass", 0, 77)
+    assert r["vince"] in ("A", "B", "DRAW")
+    assert r["turni"] <= tree["root"]["turn"] + 1
