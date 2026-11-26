@@ -282,3 +282,9 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
   finestre 13 / 3 / 51 (69). Le finestre non insegnano a togliere Vex prima: lo stordimento finisce col turno e la
   valutazione di fine turno non lo vede. La linea condizionale di Matteo (Punch First solo se risponde, danni su
   Vex) non è ancora misurata: due errori nella sequenza e nel comando (zsh conta gli array da 1).
+- **La linea di Matteo, misurata (26/11, `t9_guidata4_*`, `t9_continua4`).** Armory su Kinkou (4), Kinkou su Bandle,
+  Punch First solo se l'avversario risponde (nel 26% dei mondi), danni su Vex: Vex muore per primo, Sett The Boss
+  salva Kinkou, e il campione prende comunque il punto di Valley (3-3 a fine turno). Su 100 mondi appaiati: linea di
+  Matteo 6 (poi finestre 7), Vi in base 5 (poi finestre 8); differenze -1..-3 punti, intervalli ±8. Le linee sono
+  equivalenti entro la misura: la posizione era decisa (Sett vince 5-8 su 100 comunque). Per il §9 conta la
+  frequenza (rilevatore), non questo turno.
