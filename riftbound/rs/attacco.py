@@ -18,6 +18,8 @@ Pezzi:
                             campione a k, esito della posizione (esito.json, esito.txt).
   `posizioni(partita)`      le posizioni candidate di una partita (primo `turn_action` utile di ogni turno).
   `serie(...)`              `confronta` per ogni posizione di un elenco e un riepilogo.
+  `rivedi(...)`             verifiche in piu' (sonde della valutazione, migliore per vittorie, ricerca con finestre e
+                            quota) su una serie gia' fatta.
   `riproduci_t9(...)`       rifa la prova di Astra e la confronta riga per riga con i suoi dati.
 
 Valutazione del campione (`Game.valuta`, lettura pura): a fine turno e a fine turno dell'avversario, per la
@@ -748,6 +750,217 @@ def serie(elenco: list[dict], out_dir: Path, massimo: int | None = None, riferim
     righe.append("totale: " + "; ".join(f"{k} {v}" for k, v in sorted(esiti.items(), key=lambda x: -x[1]))
                  + (f"; saltate {saltate}" if saltate else ""))
     (out_dir / "riepilogo.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
+    return righe
+
+
+# -- rivedi: verifiche in piu' su una serie gia' fatta ---------------------------------------------
+
+def _chiave_valori(dati: list) -> str | None:
+    """La valutazione da leggere nelle righe di scelta: quella della partita se c'e' (es. `rimonta`), se no `storica`."""
+    for rows in dati:
+        for r in rows:
+            for punto in ("fine_turno", "fine_turno_avv"):
+                v = r["valori"][punto]
+                if v:
+                    return next((c for c in v if c != "storica"), "storica")
+    return None
+
+
+def _media_valori(dati: list, nome: str, punto: str, chiave: str) -> float | None:
+    """Media della valutazione `chiave` di una linea ai mondi di scelta (i mondi senza valutazione, partita gia' finita, non contano)."""
+    v = [_riga(rows, nome)["valori"][punto][chiave] for rows in dati if _riga(rows, nome)["valori"][punto]]
+    return mean(v) if v else None
+
+
+def linee_in_piu(dati_s: list, nomi: list[str], migliore: str, gia: set) -> tuple[dict, dict]:
+    """Le linee da verificare in piu' (vedi `rivedi`): {nome: {"motivi": [...], "margini": {punto: margine}}} e le
+    informazioni sulla posizione ({"chiave", "decisa", "punti_riferimento", "mondi"}). `gia`: nomi gia' verificati."""
+    chiave = _chiave_valori(dati_s)
+    totali = {n: sum(_riga(rows, n)["returns"] for rows in dati_s) for n in nomi}
+    info = {"chiave": chiave, "mondi": len(dati_s), "punti_riferimento": totali[NOME_RIF],
+            "decisa": totali[NOME_RIF] in (0, len(dati_s))}
+    out: dict = {}
+
+    def aggiungi(nome, motivo):
+        if nome in gia:
+            return
+        margini = {}
+        if chiave:
+            for punto in ("fine_turno", "fine_turno_avv"):
+                a, b = _media_valori(dati_s, nome, punto, chiave), _media_valori(dati_s, NOME_RIF, punto, chiave)
+                margini[punto] = None if a is None or b is None else a - b
+        voce = out.setdefault(nome, {"motivi": [], "margini": margini})
+        voce["motivi"].append(motivo)
+
+    if chiave:
+        for punto, motivo in (("fine_turno", "sonda fine turno"), ("fine_turno_avv", "sonda dopo l'avversario")):
+            medie = {n: _media_valori(dati_s, n, punto, chiave) for n in nomi}
+            medie = {n: m for n, m in medie.items() if m is not None}
+            if NOME_RIF not in medie:
+                continue
+            best = max(medie, key=lambda n: (medie[n], -nomi.index(n)))   # a pari media la prima nell'ordine
+            if best != NOME_RIF and medie[best] > medie[NOME_RIF]:
+                aggiungi(best, motivo)
+    if migliore == NOME_RIF and len(nomi) > 1:
+        best = max(nomi[1:], key=lambda n: (totali[n], -nomi.index(n)))
+        aggiungi(best, "migliore per vittorie")
+    return out, info
+
+
+def _rilegge(path: Path) -> list:
+    return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+
+def _controllo_riferimento(pos: dict, modo: str, indici, linea_rif: dict, salvate: list, processi: int) -> list[str]:
+    """Rifa il riferimento sui primi mondi di verifica e lo confronta con le righe salvate (returns, end_A_B, t9)."""
+    nuove = esegui(pos, modo, list(indici)[:2], [linea_rif], None, processi, lambda *_: None)
+    dif = []
+    for rows, vecchie in zip(nuove, salvate):
+        a = json.loads(json.dumps(rows[0]))
+        b = _riga(vecchie, NOME_RIF)
+        for campo in ("returns", "end_A_B", "t9"):
+            if a[campo] != b[campo]:
+                dif.append(f"mondo {a['world']}: {campo} {a[campo]} (nuovo) contro {b[campo]} (salvato)")
+    return dif
+
+
+def _vista_ricerca(partita: dict, k: int, iters: int, mosse: dict, conta: list, quota_n: int, mirata_n: int,
+                   prima_etichetta: str | None, print_=print) -> list[dict]:
+    """Le 5 condizioni della ricerca k (finestre si/no, quota nessuna/`([""], quota_n)`/mirata sulla prima mossa
+    dell'attacco). `mosse`: {"attacco": etichetta, "campione": etichetta}. Per ciascuna: l'azione scelta e, per le due
+    mosse, visite, q, rango e (con le finestre) le giocate dei piloti delle azioni di showdown `conta`."""
+    condizioni = [(False, None), (True, None), (False, "tutte"), (True, "tutte")]
+    if prima_etichetta:
+        condizioni.append((True, "mirata"))
+    out = []
+    for fin, quota in condizioni:
+        q = None if quota is None else ([""], quota_n) if quota == "tutte" else ([prima_etichetta], mirata_n)
+        r = D.rifai(partita, k, iters, posizione=False, semi=True, finestre=fin, quota=q)
+        out.append({"finestre": fin, "quota": quota, "scelta": r["azione"], "prefisso_ok": r["prefisso_ok"],
+                    "mosse": {n: E._riga_mossa(r, m, conta) for n, m in mosse.items() if m}})
+        print_(f"    ricerca finestre {'si' if fin else 'no'} quota {quota or 'no'}: {r['azione']}")
+    return out
+
+
+def _f(x, d=2) -> str:
+    return "-" if x is None else f"{x:.{d}f}"
+
+
+def _testo_vista(vista: list[dict], posto: str) -> list[str]:
+    righe = []
+    for v in vista:
+        quota = {None: "senza", "tutte": "quota", "mirata": "quota mirata"}[v["quota"]]
+        t = f"    finestre {'si' if v['finestre'] else 'no'}, {quota}: scelta '{v['scelta']}'"
+        for nome, m in v["mosse"].items():
+            t += f" | {nome}: n={m['n']} q={_f(m['q'])}" + (f" r{m['rango']}/{m['tot']}" if m["rango"] else " assente")
+            if m.get("conta"):
+                t += " showdown " + ",".join(f"{c[:14]}={x[posto]}" for c, x in m["conta"].items())
+        righe.append(t)
+    return righe
+
+
+def _posizione_rivedi(cart: Path, out: Path, processi: int, quota_n: int, mirata_n: int, ckpt, casuali, print_) -> tuple:
+    """-> (righe di testo, scheda json, lista delle linee in piu' verificate con le loro statistiche)."""
+    esito = json.loads((cart / "esito.json").read_text(encoding="utf-8"))
+    partita, k, modo = dict(esito["partita"]), esito["k"], esito["modo"]
+    if ckpt:
+        partita["ckpt"] = ckpt
+    if casuali:
+        partita["casuali"] = True
+    proposte = json.loads((cart / "proposte.json").read_text(encoding="utf-8"))
+    dati_s = _rilegge(cart / "scelta.jsonl")
+    dati_v = _rilegge(cart / "verifica.jsonl")
+    pos = posizione(partita, k)
+    linee = linee_da(proposte, esito["riferimento"])
+    nomi = [li["nome"] for li in linee]
+    gia = {r["line"] for r in dati_v[0]}
+    extra, info = linee_in_piu(dati_s, nomi, esito["migliore"], gia)
+    indici = [r[0]["world"] for r in dati_v]
+    scheda: dict = {"k": k, "turno": esito["turno"], "esito_serie": esito["esito"], "selezione_migliore": esito["migliore"],
+                    **info, "linee": {}, "errore": None, "vista": None}
+    righe: list[str] = []
+    stats: list[dict] = []
+    if extra:
+        dif = _controllo_riferimento(pos, modo, indici, linee[0], dati_v, processi)
+        if dif:
+            scheda["errore"] = "il riferimento rifatto non coincide con quello salvato: " + "; ".join(dif)
+            return [f"ERRORE: {scheda['errore']}"], scheda, stats
+        nuove = [li for li in linee if li["nome"] in extra]
+        dati_n = esegui(pos, modo, indici, nuove, out / "verifica_extra.jsonl", processi, print_)
+        conf = confronto([[_riga(v, NOME_RIF)] + n for v, n in zip(dati_v, dati_n)])
+        rif = conf[NOME_RIF]
+        for nome, voce in extra.items():
+            c = conf[nome]
+            lo, hi = c["intervallo_95"]
+            s = {"nome": nome, **voce, "vittorie_riferimento": rif["vittorie"], "vittorie_linea": c["vittorie"],
+                 "n": c["n"], "delta": c["delta"], "intervallo_95": [lo, hi], "migliore": lo > 0, "peggiore": hi < 0}
+            stats.append(s)
+            scheda["linee"][nome] = s
+            m = voce["margini"]
+            mm = "; ".join(f"{lab} {m[p]:+.3f}" for p, lab in (("fine_turno", "fine turno"), ("fine_turno_avv", "dopo l'avversario"))
+                           if m.get(p) is not None) or "senza valutazione"
+            righe.append(f"  {nome} ({', '.join(voce['motivi'])}): margine {info['chiave']} {mm}; vittorie riferimento/linea "
+                         f"{rif['vittorie']}/{c['vittorie']} su {c['n']}; differenza {100 * c['delta']:+.1f} "
+                         f"[{100 * lo:+.1f}, {100 * hi:+.1f}] pp" + ("; decisa" if info["decisa"] else ""))
+    # vista con finestre e quota, dove c'e' un attacco verificato migliore
+    migliori = [s for s in stats if s["migliore"]]
+    scelta_serie = esito["proposta"]["nome"] if esito["esito"] == "attacco migliore" else None
+    nome_att = scelta_serie or (max(migliori, key=lambda s: s["delta"])["nome"] if migliori else None)
+    if nome_att:
+        p = next(x for x in proposte if x["nome"] == nome_att)
+        etichetta = p.get("prima_etichetta") or next((ev[2] for ev in p["events"] if ev[1] == "turn_action"), None)
+        vista0 = json.loads((cart / "vista.json").read_text(encoding="utf-8"))
+        orig = vista0["classifica"][0]["azione"] if vista0["classifica"] else None
+        conta = list(dict.fromkeys(ev[2] for ev in p["events"] if ev[1] == "showdown_action"))
+        vista = _vista_ricerca(partita, k, pos["P"]["iterazioni"], {"attacco": etichetta, "campione": orig}, conta,
+                               quota_n, mirata_n, etichetta, print_)
+        scheda["vista"] = {"proposta": nome_att, "prima_etichetta": etichetta, "mossa_campione": orig,
+                           "showdown": conta, "condizioni": vista}
+        righe.append(f"  vista della ricerca (attacco {nome_att}: '{etichetta}'; campione: '{orig}'; "
+                     f"showdown da giocare: {', '.join(conta) or 'nessuno'}):")
+        righe += _testo_vista(vista, pos["P"]["camp"])
+    if not righe:
+        righe = ["  niente da verificare"]
+    return righe, scheda, stats
+
+
+def rivedi(serie_dir: Path, out_dir: Path, processi: int = 1, quota_n: int = 4, mirata_n: int = 10, print_=print,
+           ckpt: str | None = None, casuali: bool = False) -> list[str]:
+    """Verifiche in piu' su una serie gia' fatta (cartelle `NN_..._kK/` di `serie`): per ogni posizione le linee con la
+    media piu' alta della valutazione a fine turno e dopo l'avversario nei mondi di scelta (sonde) e, se la selezione ha
+    scelto il riferimento, la proposta con piu' punti; verificate sugli stessi mondi di verifica, appaiate alle righe
+    del riferimento salvate (controllo prima su 2 mondi). Per le posizioni con un attacco verificato migliore, la
+    ricerca del campione rifatta con finestre e quota. Scrive in `out_dir`: una cartella per posizione
+    (`rivedi.json`, `verifica_extra.jsonl`) e `rivedi.txt` (una riga `totale:` in fondo)."""
+    serie_dir, out_dir = Path(serie_dir), Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    righe: list[str] = []
+    tutte: list[dict] = []
+    sonda_fine = {"veri positivi": 0, "falsi positivi": 0, "indecisi": 0}
+    errori = 0
+    for cart in sorted(p for p in serie_dir.iterdir() if (p / "esito.json").is_file()):
+        out = out_dir / cart.name
+        out.mkdir(parents=True, exist_ok=True)
+        print_(f"== {cart.name}")
+        righe.append(f"{cart.name}:")
+        try:
+            testo, scheda, stats = _posizione_rivedi(cart, out, processi, quota_n, mirata_n, ckpt, casuali, print_)
+        except PosizioneNonAdatta as x:
+            testo, scheda, stats = [f"ERRORE: saltata: {x}"], {"errore": f"saltata: {x}"}, []
+        except Exception as x:   # una posizione che fallisce non ferma le altre
+            testo, scheda, stats = [f"ERRORE: {type(x).__name__}: {x}"], {"errore": f"{type(x).__name__}: {x}"}, []
+        errori += bool(scheda.get("errore"))
+        (out / "rivedi.json").write_text(json.dumps(scheda, ensure_ascii=False, indent=1), encoding="utf-8")
+        righe += testo
+        tutte += stats
+        for s in stats:
+            if "sonda fine turno" in s["motivi"]:
+                sonda_fine["veri positivi" if s["migliore"] else "falsi positivi" if s["peggiore"] else "indecisi"] += 1
+        (out_dir / "rivedi.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
+    righe.append(f"totale: {len(tutte)} linee in più verificate; limite inferiore > 0: {sum(s['migliore'] for s in tutte)}; "
+                 f"limite superiore < 0: {sum(s['peggiore'] for s in tutte)}; sonda fine turno: "
+                 + ", ".join(f"{k} {v}" for k, v in sonda_fine.items()) + (f"; errori {errori}" if errori else ""))
+    (out_dir / "rivedi.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
     return righe
 
 
