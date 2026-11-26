@@ -64,6 +64,19 @@ def _altro(seat: str) -> str:
 
 # -- i mondi --------------------------------------------------------------------------------------
 
+def _note_in_cima(deck: dict) -> int:
+    """Quante carte in cima al mazzo (canonico; cima = fine della lista) il proprietario conosce: `Deck.known_on_top`."""
+    cards, n = deck["cards"], 0
+    for card in deck["known_top"]:
+        if card not in cards:
+            continue
+        if n < len(cards) and cards[len(cards) - 1 - n] == card:
+            n += 1
+        else:
+            break
+    return n
+
+
 def mondo(pos: dict, modo: str, seme: int) -> dict:
     """L'albero di un mondo. `fisse`: i mazzi (carte e rune non ancora viste) rimescolati; `ignote`: le carte che il
     campione non vede (mano dell'avversario, mazzi, carte coperte dell'avversario) ridistribuite con `determinize`."""
@@ -78,9 +91,14 @@ def mondo(pos: dict, modo: str, seme: int) -> dict:
         for side in ("A", "B"):
             pl = state["root"][side]["$v"]
             deck = pl["deck"]["$v"]
-            if deck["known_top"]:
-                raise PosizioneNonAdatta("carta in cima al mazzo nota")
-            rng.shuffle(deck["cards"])
+            k = _note_in_cima(deck)
+            if k:
+                # le carte in cima note al proprietario (PREDICT) restano dove sono; si rimescola il resto
+                sotto = deck["cards"][:len(deck["cards"]) - k]
+                rng.shuffle(sotto)
+                deck["cards"][:len(sotto)] = sotto
+            else:
+                rng.shuffle(deck["cards"])
             rd = pl["rune_deck"]["$v"]
             n = rd["unseen"] if rd["unseen"] is not None else len(rd["runes"])
             first = rd["runes"][:n]
@@ -98,8 +116,6 @@ def mondo(pos: dict, modo: str, seme: int) -> dict:
     original_cards = {}
     for side, pl in (("A", gs.A), ("B", gs.B)):
         player = state["root"][side]["$v"]
-        if player["deck"]["$v"]["known_top"] or player["hand_public"]:
-            raise PosizioneNonAdatta("carta in cima al mazzo o mano pubblica nota")
         runes[side] = {id(r): x for r, x in zip(pl.rune_deck.runes, player["rune_deck"]["$v"]["runes"])}
         slots = [fd.card for bf in gs.battlefields for fd in bf.facedowns if fd.owner == side]
         original_cards[side] = sorted(to_ref[id(o)] for o in pl.hand + pl.deck.cards + slots)
@@ -116,6 +132,10 @@ def mondo(pos: dict, modo: str, seme: int) -> dict:
         player["hand"] = [to_ref[id(x)] for x in pl.hand]
         player["deck"]["$v"]["cards"] = [to_ref[id(x)] for x in pl.deck.cards]
         player["rune_deck"]["$v"]["runes"] = [runes[side][id(r)] for r in pl.rune_deck.runes]
+        # come le lascia `determinize`: la cima nota del campione resta, quella dell'avversario (mazzo rimescolato)
+        # si azzera; le carte di mano note restano nel loro posto
+        player["deck"]["$v"]["known_top"] = [to_ref[id(x)] for x in pl.deck.known_top]
+        player["hand_public"] = [to_ref[id(x)] for x in pl.hand_public]
         slots = [fd.card for bf in gs.battlefields for fd in bf.facedowns if fd.owner == side]
         assert original_cards[side] == sorted(to_ref[id(o)] for o in pl.hand + pl.deck.cards + slots)
     opp = _altro(camp)
@@ -700,6 +720,7 @@ def serie(elenco: list[dict], out_dir: Path, massimo: int | None = None, riferim
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     righe = []
+    esiti: dict = {}
     for n, p in enumerate(scegli_posizioni(elenco, massimo) if massimo else elenco):
         nome = nome_partita(p["partita"])
         print_(f"== posizione {n}: {nome} k={p['k']} turno {p['turno']}")
@@ -721,7 +742,12 @@ def serie(elenco: list[dict], out_dir: Path, massimo: int | None = None, riferim
         esito = e["esito"] + (f" ({e['sottoclasse']})" if e.get("sottoclasse") else "")
         righe.append(f"{nome} | k={p['k']} | turno {p['turno']} | punto_libero={'sì' if p.get('punto_libero') else 'no'} | "
                      f"{esito} | differenza {dif} | valori {val}")
+        esiti[esito] = esiti.get(esito, 0) + 1
         (out_dir / "riepilogo.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
+    saltate = sum("| saltata:" in r for r in righe)
+    righe.append("totale: " + "; ".join(f"{k} {v}" for k, v in sorted(esiti.items(), key=lambda x: -x[1]))
+                 + (f"; saltate {saltate}" if saltate else ""))
+    (out_dir / "riepilogo.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
     return righe
 
 

@@ -70,12 +70,12 @@ Matteo: 013325 (`rimonta`, D72-D81) vinta 8 a 4, nessuna difficoltà (§8); manc
 (26/11, Astra, GIOCATE §9 terzo giro, `docs/bot/esperimenti/t9_attacco/`) Dal T9 attaccare Bandle vince di più di
 Valley: Armory su Sett + Punch First + Vi 30-38/100 contro 7-8 (+23/+30 pp). Due difetti distinti: linea mai costruita
 (Armory 1 visita) e costruita ma valutata male (Kinkou, q -0,75). Il prototipo genera la linea ma la selezione su 16
-mondi sbaglia. Strumento generale `scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`): porting
-identico ad Astra su una posizione di prova a pesi casuali; sul T9 vero da provare sul Mac (`attacco_mac.command`).
+mondi sbaglia. `scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`), Mac 26/11 (`attacco_20261126/`):
+T9 IDENTICO ad Astra; valutazione di fine T9: ogni attacco sotto Valley (-0,50/-0,88 contro -0,11). EK7B T9: attacco
++35 pp, 0 visite, valutazione concorde (solo costruzione). 9 posizioni su 12 saltate (carte note): corretto, da rifare.
 
 ## Prossimi passi
-1. Matteo: `scripts/rust/attacco_mac.command` (riproduzione T9 identica, T9 col campione, serie su 12 posizioni ES/EK/pagina);
-   poi ad Astra: quante «mai costruite» e «valutate male», posizioni col punto libero giusto. Poi il bot, arena a pari budget.
+1. Matteo: `attacco_serie_mac.command` (24 posizioni) -> Astra (mai costruite / valutate male); poi il bot, arena.
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
 
