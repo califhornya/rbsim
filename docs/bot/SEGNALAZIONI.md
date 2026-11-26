@@ -3,6 +3,7 @@
 Partite e segnalazioni salvate da Matteo: `docs/bot/partite/coach/`, segnalazioni in `reports_<data>.jsonl`.
 25/11: Evelynn-Sett 154531 persa in 17 turni, 201243 vinta 9 a 4 in 13 (D79, D80, la 17); Evelynn-Kha'Zix 203513
 vinta 8 a 4 in 13 (18-22); Kha'Zix-Sett 204705 persa 7 a 8 in 18 (23-25).
+26/11: Evelynn-Sett 013325 vinta 8 a 4 in 14 (27-28), regole `6427b90+D72-D81`.
 
 Ogni segnalazione ha un esito:
 - **pagina**: difetto della pagina (`riftbound/ai/coach.py`, `coach_page.html`); si corregge subito, con un test.
@@ -41,3 +42,4 @@ Ogni segnalazione ha un esito:
 | 25 | 25/11 | "Mossa molto forte del bot, mi ha rovinato i piani" (T9: Call to Glory su Fiora, Packed Amphitheater) | strategia: buona mossa del campione | raccolta in corso (partita 204705) |
 | 26 | 25/11 | "Io Evelynn a 5 Might, Sett difende con un Trifarian Captain buffato, a secco; spende il buff, torna a 1, Call to Glory +3 fa 4. E ci ha fatto scambiare" (Evelynn-Sett, T3) | motore: D81. Il campione lancia Call to Glory senza spendere il buff e paga 1 Power (senza buff costa 3 Energia, che Sett non aveva): Captain a 5, scambio, Sett The Boss salva il Captain ancora buffato | corretto (26/11, `bbf59b3`): profilo `6427b90+D72-D81`, default della pagina; senza buff Call to Glory costa 3 Energia |
 | 27 | 26/11 | "Giro Edge of Night su Valley of Idols ma non me lo fa attaccare sulla unit su Valley of Idols" (Evelynn-Sett, T11) | motore: D82. Giocata da coperta, una gear non ha unità: l'abilità prende come "qui" il campo 0 (Bandle Scouts' Academy) e offre solo le unità lì | corretto (26/11): profilo `6427b90+D72-D82`, default della pagina; si attacca a un'unità del campo dove era coperta |
+| 28 | 26/11 | "Il campione ha giocato Vi in base. Perché non ha valutato di schiantare una delle unità in base contro Vex, poi entrare con l'altra, aprire lo showdown e giocare Vi in AMBUSH, che in attacco stordiva una mia unità?" (Evelynn-Sett, T9) | strategia: da rifare sul Mac (`decisione.py rifai --turno 9`, il campione è solo lì). Vex Apathetic stordisce ogni unità giocata dall'avversario mentre è su un campo, anche Vi in base | raccolta in corso (partita 013325) |
