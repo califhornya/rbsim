@@ -1381,6 +1381,10 @@ profile 6427b90+D72-D82; the earlier profiles and Python keep the behavior below
   attached to a unit elsewhere, or to nothing when no friendly unit is at BF0.
 - **Fix (Rust).** Behind `regole.d82()`: with no unit for the card, `own_bf` is
   the card's `hidden_bf` (the battlefield it was played at), counted as `D82`.
+  Done (`efdb5ff`): `fire_card_played` (`lp_pay.rs`) behind `regole.d82()`; `tests/rust/test_d82.py`, red before on
+  the BF1 case (attached to the BF0 unit). Historical profile identical to Python (EK+KE 80/80, ES+SE 80/80);
+  D72-D81 against D72-D82 on EK and ES, 30 seeds, both seats: 0/60 differ each (Edge of Night from face down at
+  BF1 doesn't come up there): the test is the coverage.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 

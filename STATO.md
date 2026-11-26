@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-25. Ramo `rust` (default; PR 43-53 unite).
+Aggiornato: 2026-11-26. Ramo `rust` (default; PR fino alla 58 unite).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -24,6 +24,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
 - (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo (D78-D80: `+D72-D80`);
   (26/11) D81 subito, da solo (`+D72-D81`), perché falsava ogni partita con Sett.
+  (26/11) D82 subito, da solo (`+D72-D82`): Edge of Night da coperta si attaccava al campo 0 (Evelynn di Matteo).
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -50,34 +51,34 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   facoltativo; lanciatori `allenatore.command`/`.bat`; immagini in cache `card_images.py`). Playwright.
 - 25/11 segnalazioni 1-14 (`docs/bot/SEGNALAZIONI.md`): pagina corretta, D78 segnato, partite salvate in
   `runs/coach/partite/`, il campione cerca prima la vittoria nel turno (`win_probe`; arena invariata).
-- 25/11 D72-D76 corretti in Rust (profilo `6427b90+D72-D76`, `docs/RUST.md` "Profili delle regole", AUDIT.md; test rossi prima,
-  `tests/rust/test_d72_d76.py`): storico 600/600 identiche, confronto dei profili 8/100 identiche con ogni prima differenza spiegata.
-- 25/11 D77 corretto in Rust (`6427b90+D72-D77`, `test_d77.py`): storico 180/180 (`confronto_regole._delta` da sistemare).
-- 25/11 D78-D80 corretti (`6427b90+D72-D80`, pagina; `test_d78_d80.py`; Vex solo per il controllore): `tests/rust` 288, storico 200/200.
-- 25/11 pagina su Rust col profilo D72-D77 (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"):
-  posto umano nel ponte (`set_human_agent`, `trace_on(watch)`, `Agent::notify` solo per lui; `test_umano.py`), vista dallo
-  stato Rust (`riftbound/rs/vista_rs.py`, viste uguali a Python), "Come paghi?" in Rust (`payment.rs`, vie uguali a Python),
-  `riftbound/ai/coach_rs.py` (campione a lavoro fisso N=42, rewind rigiocando le risposte, Sett The Boss, carte guardate);
-  `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e con `--net` resta Python (storico 40/40).
+- 25-26/11 difetti di motore corretti in Rust, ognuno su un profilo (`docs/RUST.md` "Profili delle regole", AUDIT.md,
+  `tests/rust/test_d*.py`): D72-D76 (storico 600/600), D77 (180/180), D78-D80 (200/200), D81 (Call to Glory, segnalazione
+  26; ES 80/80, 9/30 diverse), D82 (Edge of Night da coperta al BF1 si attaccava al BF0, segnalazione 27; EK ed ES 80/80,
+  0/60 diverse: lo copre il test). `tests/rust` 324; `6427b90+D72-D82` default della pagina.
+- 25/11 pagina su Rust (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"): posto umano nel ponte
+  (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
+  rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
 - 25/11 apertura nella pagina: campo/d20/chi comincia su entrambi i motori; `riftbound/ai/apertura.py` provvisorio.
 - 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali).
   Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
 
 ## In corso
-§8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): campione della pagina con `--valutazione rimonta` (default di
-`coach.py`; spenta nell'arena e nelle verifiche se non chiesta). Arena su semi nuovi contro la storica: EK 0,522, ES 0,533,
-gli altri 8 matchup 0,515-0,607 (tutti tengono). Bocciati `accumulo` (sempre), `minaccia`/`corsa` (non cambiano le mosse).
-Matteo: 2 partite Evelynn-Sett col campione nuovo (ora su D72-D81); a fine partita «Quale giocata di Sett mi ha costretto a spendere una carta
-o a difendere il mio campo prima dell'ottavo punto?». Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
-D81 corretto (26/11, segnalazione 26, `test_d81.py`): Call to Glory senza buff costava 1 Power invece di 3 Energia;
-profilo `6427b90+D72-D81`, ora default della pagina. `tests/rust` 320, storico ES 80/80, D72-D80 contro D72-D81 9/30 diverse (tutte D81).
+§8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`,
+spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
+Matteo: partita Evelynn-Sett 013325 (`rimonta`, D72-D81, quasi certamente la prima delle due) vinta 8 a 4 in 14; alla
+domanda §8 nessuna giocata di Sett l'ha messo in difficoltà (GIOCATE §8). Manca la seconda. Da fare: i 13 episodi umani
+ricontrollati su D80 (Astra).
+§9 (GIOCATE, segnalazione 28): il campione gioca Vi con Vex vivo e lo toglie solo dopo; il primo passo dell'ordine giusto
+ha 1 visita su 5000 (`rifai` sul Mac). Domanda ad Astra (`docs/bot/DOMANDE_ASTRA_26_11.md`, Matteo: il bot deve imparare,
+non essere imboccato): correggere a mano o imparare con esplorazione forzata alla radice. Si aspetta la risposta prima del
+rilevatore §9 in `episodi.py`.
 
 ## Prossimi passi
-2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
-4. Poi: `win_probe` acceso contro spento in arena (Rust nativo, costo nel budget); apertura G1.
-5. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
-6. Poi: Bo3 quando serve il post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+1. Risposta di Astra (`docs/bot/DOMANDE_ASTRA_26_11.md`): la strada per §7 e §9, a mano o imparare dalla ricerca esplorata.
+2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
+3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
+4. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
