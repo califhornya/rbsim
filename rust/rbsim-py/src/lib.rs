@@ -345,6 +345,19 @@ impl Game {
         }
     }
 
+    /// Diagnosi: solo la ricerca di indice `k` usa quel `peso` del valore della rete (il resto della partita resta
+    /// com'era). Serve un `probs` che restituisce (probs, valore).
+    fn set_search_valore_rete_at(&mut self, seat: &str, k: usize, peso: f64) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().valore_rete_at = Some((k, peso));
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// Test: valore di una posizione costruita, visto dal posto A. Parte dall'osservazione reale della
     /// partita e sovrascrive punti, mano, basi e campi: `bfs` = [(controllore "me"|"opp"|None,
     /// [Might miei], [Might loro])], basi = liste di Might. Opzionali: `punti` = (miei, loro; default 0-0),

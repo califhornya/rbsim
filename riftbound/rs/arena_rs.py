@@ -50,13 +50,39 @@ def make_probs_valore(net):
     return probs
 
 
-def _probs_for(path: str, valore: bool = False):
+def make_probs_misto(net_prior, net_valore):
+    """Come `make_probs_valore`, ma il prior (softmax sul menu) viene da una rete e il valore da un'altra: due reti
+    complete, perche' i pesi condivisi sono cambiati durante l'addestramento (Astra 26/11). Con un'opzione sola Rust
+    ignora i probs e vuole solo il valore: il forward del prior viene saltato."""
+    import numpy as np
+    import torch
+
+    def probs(x, q, ctx, otype, ocards, ofeats):
+        n = len(otype)
+        with torch.no_grad():
+            args = (torch.as_tensor(x[None]), torch.tensor([q]), torch.tensor([0]),
+                    torch.as_tensor(ctx[None]), torch.as_tensor(otype[None]), torch.as_tensor(ocards[None]),
+                    torch.as_tensor(ofeats[None]), torch.ones(1, n, dtype=torch.bool))
+            _, v = net_valore(*args)
+            if n == 1:
+                return np.ones(1, dtype=np.float32), float(v[0])
+            logits, _ = net_prior(*args)
+            return torch.softmax(logits[0], dim=0).numpy(), float(v[0])
+    return probs
+
+
+def _probs_for(path: str, valore: bool = False, valore_da: str | None = None):
     key = path + ("|valore" if valore else "")
+    if valore_da:
+        key = f"{path}|misto|{valore_da}"
     if key not in _NETS:
         import torch
         from riftbound.ai.ppo.model import load
         torch.set_num_threads(1)
-        _NETS[key] = (make_probs_valore if valore else make_probs)(load(path).eval())
+        if valore_da:
+            _NETS[key] = make_probs_misto(load(path).eval(), load(valore_da).eval())
+        else:
+            _NETS[key] = (make_probs_valore if valore else make_probs)(load(path).eval())
     return _NETS[key]
 
 
@@ -91,7 +117,8 @@ def game(task):
     scripts/diag/collaudo_finestre.py), fin_cand / fin_opp (the `finestre`
     option of that side's search), val_cand / val_opp
     ([nome, k, alpha]: the leaf evaluation of that side, default storica), vr_cand / vr_opp (weight 0..1 of the
-    net's value in the leaves, default 0 = off, search unchanged; only for prior_ppo), log (the last element
+    net's value in the leaves, default 0 = off, search unchanged; only for prior_ppo), vc_cand / vc_opp (checkpoint
+    da cui viene il valore, se diverso da quello del prior; con vr > 0 e solo per prior_ppo), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
@@ -110,7 +137,13 @@ def game(task):
         if kind not in ("prior_ppo", "mano"):
             raise ValueError(f"bot {kind}: su Rust solo prior_ppo e mano")
         vr = float(opz.get(f"vr_{lato}") or 0.0)
-        probs = _probs_for(str(path), vr > 0) if kind == "prior_ppo" else None
+        vc = opz.get(f"vc_{lato}")
+        if kind != "prior_ppo":
+            probs = None
+        elif vr > 0 and vc:
+            probs = _probs_for(str(path), True, valore_da=str(vc))
+        else:
+            probs = _probs_for(str(path), vr > 0)
         if iters:
             g.set_search_agent(seat, int(iters), seed * 2 + (seat == "B"), None, probs, bool(opz.get("log")))
         else:

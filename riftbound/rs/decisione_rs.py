@@ -69,6 +69,27 @@ def rete(ckpt: str | None = None, casuali: bool = False):
     return _RETI[key]
 
 
+def rete_mista(ckpt: str | None, casuali: bool, ckpt_valore: str):
+    """Come `rete`, ma con il valore di un'altra rete (arena_rs.make_probs_misto): prior dal checkpoint del campione,
+    valore da `ckpt_valore` (Astra 26/11: i pesi condivisi sono cambiati durante l'addestramento)."""
+    from riftbound.rs import arena_rs
+    from riftbound.ai.ppo.model import PPONet, load
+    key = f"misto|{'casuali' if casuali else str(ckpt or CKPT_DEFAULT)}|{ckpt_valore}"
+    if key not in _RETI:
+        import torch
+        torch.set_num_threads(1)
+        if casuali:
+            torch.manual_seed(0)
+            prior = PPONet().eval()
+        else:
+            p = Path(str(ckpt or CKPT_DEFAULT))
+            prior = load(p if p.is_absolute() else ROOT / p).eval()
+        pv = Path(str(ckpt_valore))
+        valore = load(pv if pv.is_absolute() else ROOT / pv).eval()
+        _RETI[key] = arena_rs.make_probs_misto(prior, valore)
+    return _RETI[key]
+
+
 # -- la partita ---------------------------------------------------------------------------------
 
 def _valutazione_registrata(nome):
@@ -106,7 +127,9 @@ def _prepara(partita: dict) -> dict:
                  probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D80, answers=None,
                  ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"),
                  # the champion's `finestre` option in the original game (absent = off: same key as before)
-                 **({"finestre": True} if partita.get("finestre") else {}))
+                 **({"finestre": True} if partita.get("finestre") else {}),
+                 # anche l'avversario usa la valutazione della partita (absent = off: same key as before)
+                 **({"entrambi": True} if partita.get("entrambi") else {}))
     else:
         raise ValueError(f"tipo di partita sconosciuto: {partita['tipo']}")
     return P
@@ -118,13 +141,15 @@ def _chiave(P: dict) -> str:
 
 
 def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None, valutazione=None,
-           finestre: bool | None = None, quota=None, diag_out: list | None = None, diag_trace: bool = False):
+           finestre: bool | None = None, quota=None, diag_out: list | None = None, diag_trace: bool = False, valore_rete=None):
     """Una partita. `k`, `iterazioni`: la ricerca del campione da rifare con quelle iterazioni (override in Rust;
     None: l'originale); `ordine`: l'ordinale, fra gli eventi di decisione del campione, di quella di k: la
     partita si ferma li'. -> (righe di log "search", eventi del campione, evento di k).
     `valutazione` = (nome, k, alpha): SOLO la ricerca k usa quella valutazione (il prefisso resta storico).
     `stato(e)`: tiene lo stato (state_raw) degli eventi del campione per cui è vero.
     `finestre`, `quota` = (sottostringhe, n): SOLO la ricerca k li usa (il prefisso resta quello originale);
+    `valore_rete` = (peso, ckpt_valore): il campione usa il prior del suo checkpoint e il valore di `ckpt_valore`
+    (rete_mista); SOLO la ricerca k usa quel peso del valore (fuori da k peso 0: il prefisso resta identico).
     `diag_out` riceve le righe di diagnosi (`search_finestre_diag`) del campione; `diag_trace`: la diagnosi
     (con i semi delle simulazioni) c'e' per ogni ricerca del campione, anche senza finestre e quota."""
     from riftbound.rs import arena_rs, rust_bridge
@@ -180,9 +205,10 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
         if s == umano:
             continue
         mine = s == camp
-        g.set_search_agent(s, P["iterazioni"], P["seed"] * 2 + (s == "B"), None, probs, mine)
+        sprobs = rete_mista(P["ckpt"], P["casuali"], valore_rete[1]) if (mine and valore_rete is not None) else probs
+        g.set_search_agent(s, P["iterazioni"], P["seed"] * 2 + (s == "B"), None, sprobs, mine)
         g.set_search_win_probe(s, bool(P["probe"]))
-        if mine and P.get("valutazione") and P["valutazione"][0] != "storica":
+        if (mine or P.get("entrambi")) and P.get("valutazione") and P["valutazione"][0] != "storica":
             v = P["valutazione"]
             g.set_search_valutazione(s, v[0], float(v[1]), float(v[2]))
         if mine and P.get("finestre"):
@@ -193,6 +219,8 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
                 g.set_search_diag_trace(s, True)
             if k is not None and iterazioni is not None:
                 g.set_search_override(s, k, int(iterazioni))
+                if valore_rete is not None:
+                    g.set_search_valore_rete_at(s, k, float(valore_rete[0]))
                 if valutazione is not None:
                     g.set_search_valutazione_at(s, k, valutazione[0], float(valutazione[1]), float(valutazione[2]))
                 if finestre is not None:  # True/False esplicito: solo la ricerca k (None: come l'originale)
@@ -329,7 +357,7 @@ def _classifica(riga: dict, menu: list) -> list[dict]:
 
 
 def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool = True, valutazione=None,
-          finestre: bool | None = None, quota=None, semi: bool = False) -> dict:
+          finestre: bool | None = None, quota=None, semi: bool = False, valore_rete=None) -> dict:
     """La ricerca k del campione rifatta con `iterazioni` (None: come l'originale), sulla stessa partita.
     -> {k, turn, point, iterazioni, azione, azione_originale, uguale, riproduce (il prefisso 0..k-1
     coincide con l'originale; con iterazioni None anche l'azione di k), classifica (per visite),
@@ -337,16 +365,17 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
     `finestre` (le simulazioni giocano le finestre di reazione/showdown per i due posti con un pilota) e
     `quota` = ([sottostringhe], n) (radice della ricerca di turno) valgono solo per la ricerca k; con uno dei due
     il risultato ha `diagnosi`: per figlio della radice etichetta, visite, q e il conteggio delle giocate dei
-    piloti (posto, punto, etichetta). `semi`: la diagnosi c'e' sempre, con `seeds` (un seme per simulazione)."""
+    piloti (posto, punto, etichetta). `semi`: la diagnosi c'e' sempre, con `seeds` (un seme per simulazione).
+    `valore_rete` = (peso, ckpt_valore): SOLO la ricerca k usa quel peso del valore di un'altra rete (prior invariato)."""
     orig = originale(partita)
     if not 0 <= k < len(orig):
         raise ValueError(f"k={k} fuori dalle {len(orig)} ricerche del campione")
     P = _prepara(partita)
-    if (valutazione is not None or finestre or quota) and iterazioni is None:
+    if (valutazione is not None or finestre or quota or valore_rete is not None) and iterazioni is None:
         iterazioni = P["iterazioni"]
     diag: list = []
     righe, _ev, e = _gioca(P, k, iterazioni, ordine=_ORIGINALI[_chiave(P)]["pos"][k], valutazione=valutazione,
-                           finestre=finestre, quota=quota, diag_out=diag, diag_trace=semi)
+                           finestre=finestre, quota=quota, diag_out=diag, diag_trace=semi, valore_rete=valore_rete)
     if e is None or len(righe) <= k:
         raise RuntimeError(f"la ricerca {k} non c'è nella partita rifatta ({len(righe)} ricerche)")
     r = righe[k]
@@ -378,7 +407,9 @@ def semi(testo: str) -> list[int]:
 
 def autonoma(matchup: str, seed: int, ckpt: str | None = None, casuali: bool = False, iterazioni: int = ITERAZIONI_CAMPIONE,
              campione: str = "A", **extra) -> dict:
-    """La partita autonoma del campione contro sé stesso (lo starter alterna col seme, come l'arena)."""
+    """La partita autonoma del campione contro sé stesso (lo starter alterna col seme, come l'arena).
+    Opzioni in `extra`: finestre (solo il campione), entrambi (anche l'avversario usa la valutazione della
+    partita, il campione dell'arena)."""
     return {"tipo": "autonoma", "matchup": matchup, "seed": seed, "starter": "a" if seed % 2 == 0 else "b",
             "iterazioni": iterazioni, "probe": True, "ckpt": ckpt, "casuali": casuali, "campione": campione, **extra}
 

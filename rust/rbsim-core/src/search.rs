@@ -1161,6 +1161,8 @@ pub struct SearchCore {
     pub valutazione: Valutazione,
     /// Diagnosi: la ricerca di indice k (come `info["k"]`) usa questa valutazione.
     pub valutazione_at: Option<(usize, Valutazione)>,
+    /// Diagnosi: la ricerca di indice k (come `info["k"]`) usa questo peso del valore della rete (le altre `peso_valore_rete`).
+    pub valore_rete_at: Option<(usize, f64)>,
     /// Diagnosis (decisione_rs): the search with this index (k, as `info["k"]`) does exactly this
     /// many iterations at a fixed workload, whatever the point or the budget; nothing else changes.
     pub override_at: Option<(usize, usize)>,
@@ -1260,6 +1262,7 @@ impl SearchCore {
             win_probe: false,
             valutazione: Valutazione::Storica,
             valutazione_at: None,
+            valore_rete_at: None,
             override_at: None,
             finestre: false,
             finestre_at: None,
@@ -1662,6 +1665,13 @@ impl SearchCore {
                 self.valutazione = v;
             }
         }
+        // Peso del valore della rete solo alla ricerca k (come `valutazione_at`).
+        let saved_peso = self.peso_valore_rete;
+        if let Some((k, w)) = self.valore_rete_at {
+            if k == self.searches {
+                self.peso_valore_rete = w;
+            }
+        }
         let k = self.searches;
         self.cur_fin = match self.finestre_at {
             Some((kk, on)) if kk == k => on,
@@ -1677,6 +1687,7 @@ impl SearchCore {
         self.sim_seeds.clear();
         let r = self.search_inner(g, point, legal, cards_played, bf_idx);
         self.valutazione = saved;
+        self.peso_valore_rete = saved_peso;
         if let Ok(tree) = &r {
             if self.cur_fin || self.cur_quota.is_some() || self.diag_trace {
                 self.finish_diag(&tree.borrow(), k, point, g.gs.turn);
