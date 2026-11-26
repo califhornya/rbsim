@@ -329,3 +329,15 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
     valutazione sbagliata (tutte le proposte sotto Valley a fine turno).
   - «Riferimento scelto» non è verificato (si verifica solo la proposta scelta); 8 su 14 sono posizioni già decise
     (16 su 16 o 0 su 16 nei mondi di scelta). Domande ad Astra date a Matteo (fuori dal repo).
+- **Sesto giro (26/11, Mac, `attacco_20261126_1352_serie/rivedi_20261126_1439/`).**
+  - Ricerca del campione sui 5 attacchi migliori, 138 iterazioni: finestre da sole 0 su 5, quota di 4 visite da sola
+    0 su 5 (l'attacco resta a q da -0,27 a -0,89). Finestre + quota: 3 su 5 (ES3B q 0,68 con Vi in 77 simulazioni,
+    ES4A, ES6A); lo stesso con la quota mirata di 10 visite sulla sola mossa d'attacco. ES5B (due spostamenti, Vi,
+    Call to Glory) ed EK7B (tre spostamenti, Rengar, Switcheroo) restano fuori: i piloti non giocano lo showdown
+    intero (EK7B: Rengar e Switcheroo 0). La quota su tutte le mosse costa da 28 a 84 visite su 138.
+  - Sonda di fine turno (rimonta, 16 mondi di scelta) su 24 posizioni: sceglie un attacco in 13. Veri positivi 5
+    (margini da +0,18 a +1,04), falso positivo 1 (EK7B T7, margine +0,004, -28 [-40,2; -15,8]), neutri 7. Con una
+    soglia di +0,15 sul margine: 5 veri, 0 falsi, 2 neutri.
+  - Non attaccare è meglio in 4 posizioni (migliore proposta per vittorie verificata): pagina 154531 T13 -18, ES3B
+    T11 -20, EK7B T7 -28 (c'era un punto libero), EK5B T15 -7 (posizione decisa). Nessuna proposta verificata batte
+    il campione dove la selezione aveva scelto lui.
