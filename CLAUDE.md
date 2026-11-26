@@ -18,7 +18,7 @@
 - Matteo non usa il doppio clic sui `.command`: dagli sempre il comando completo da incollare nel Terminale
   (`cd ~/projects/rbsim2026/rbsim-rust && git checkout rust && git pull && bash scripts/...`).
 
-- I file per Astra (domande, note) non vanno mai nel repo né su GitHub (Matteo, 26/11): un file nella scratchpad,
+- I file per Astra (domande, risposte, note) non vanno mai nel repo né su GitHub (Matteo, 26/11): un file nella scratchpad,
   mandato a Matteo con SendUserFile; lui lo porta ad Astra.
 
 ## Uso del contesto
