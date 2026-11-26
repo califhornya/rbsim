@@ -1,0 +1,221 @@
+{
+  "carte_del_replay": {
+    "valley": {
+      "n": 100,
+      "punti_partita": 7.0,
+      "vittorie_Sett": 7,
+      "patte": 0,
+      "delta_pp": 0.0,
+      "intervallo_95_pp": [
+        0.0,
+        0.0
+      ],
+      "vince_solo_variante": 0,
+      "vince_solo_riferimento": 0,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 0,
+      "prefisso_completo": 100
+    },
+    "matteo": {
+      "n": 100,
+      "punti_partita": 19.0,
+      "vittorie_Sett": 19,
+      "patte": 0,
+      "delta_pp": 12.0,
+      "intervallo_95_pp": [
+        3.1,
+        20.9
+      ],
+      "vince_solo_variante": 17,
+      "vince_solo_riferimento": 5,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 74,
+      "prefisso_completo": 100
+    },
+    "buff_sett": {
+      "n": 100,
+      "punti_partita": 30.0,
+      "vittorie_Sett": 30,
+      "patte": 0,
+      "delta_pp": 23.0,
+      "intervallo_95_pp": [
+        13.0,
+        33.0
+      ],
+      "vince_solo_variante": 27,
+      "vince_solo_riferimento": 4,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 74,
+      "prefisso_completo": 100
+    }
+  },
+  "carte_ignote_a_Sett": {
+    "valley": {
+      "n": 100,
+      "punti_partita": 8.0,
+      "vittorie_Sett": 8,
+      "patte": 0,
+      "delta_pp": 0.0,
+      "intervallo_95_pp": [
+        0.0,
+        0.0
+      ],
+      "vince_solo_variante": 0,
+      "vince_solo_riferimento": 0,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 0,
+      "prefisso_completo": 100
+    },
+    "matteo": {
+      "n": 100,
+      "punti_partita": 18.0,
+      "vittorie_Sett": 18,
+      "patte": 0,
+      "delta_pp": 10.0,
+      "intervallo_95_pp": [
+        0.6,
+        19.4
+      ],
+      "vince_solo_variante": 17,
+      "vince_solo_riferimento": 7,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 37,
+      "prefisso_completo": 100
+    },
+    "buff_sett": {
+      "n": 100,
+      "punti_partita": 38.0,
+      "vittorie_Sett": 38,
+      "patte": 0,
+      "delta_pp": 30.0,
+      "intervallo_95_pp": [
+        19.4,
+        40.6
+      ],
+      "vince_solo_variante": 34,
+      "vince_solo_riferimento": 4,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 55,
+      "prefisso_completo": 100
+    }
+  },
+  "selezione_16_mondi": {
+    "valley": 2.0,
+    "p00": 0.0,
+    "p01": 0.0,
+    "p02": 0.0,
+    "p03": 0.0,
+    "p04": 3.0,
+    "p05": 0.0,
+    "p06": 0.0,
+    "p07": 1.0,
+    "p08": 0.0,
+    "p09": 0.0,
+    "p10": 1.0,
+    "p11": 1.0,
+    "p12": 0.0,
+    "p13": 1.0,
+    "p14": 0.0,
+    "p15": 0.0,
+    "p16": 2.0,
+    "p17": 0.0
+  },
+  "selezionata": "p04",
+  "verifica_100_nuovi_mondi": {
+    "valley": {
+      "n": 100,
+      "punti_partita": 4.0,
+      "vittorie_Sett": 4,
+      "patte": 0,
+      "delta_pp": 0.0,
+      "intervallo_95_pp": [
+        0.0,
+        0.0
+      ],
+      "vince_solo_variante": 0,
+      "vince_solo_riferimento": 0,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 0,
+      "prefisso_completo": 100
+    },
+    "p04": {
+      "n": 100,
+      "punti_partita": 1.0,
+      "vittorie_Sett": 1,
+      "patte": 0,
+      "delta_pp": -3.0,
+      "intervallo_95_pp": [
+        -7.4,
+        1.4
+      ],
+      "vince_solo_variante": 1,
+      "vince_solo_riferimento": 4,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 0,
+      "prefisso_completo": 100
+    }
+  },
+  "diagnosi_bersagli_stessi_100_mondi": {
+    "valley": {
+      "n": 100,
+      "punti_partita": 4.0,
+      "vittorie_Sett": 4,
+      "patte": 0,
+      "delta_pp": 0.0,
+      "intervallo_95_pp": [
+        0.0,
+        0.0
+      ],
+      "vince_solo_variante": 0,
+      "vince_solo_riferimento": 0,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 0,
+      "prefisso_completo": 100
+    },
+    "p16": {
+      "n": 100,
+      "punti_partita": 11.0,
+      "vittorie_Sett": 11,
+      "patte": 0,
+      "delta_pp": 7.0,
+      "intervallo_95_pp": [
+        0.0,
+        14.0
+      ],
+      "vince_solo_variante": 10,
+      "vince_solo_riferimento": 3,
+      "controllo_Bandle_Sett": 0,
+      "controllo_Bandle_Evelynn": 100,
+      "resta_solo_Pyke": 13,
+      "prefisso_completo": 100,
+      "Vex_assente_prima_di_Sett": 34
+    },
+    "buff_sett": {
+      "n": 100,
+      "punti_partita": 30.0,
+      "vittorie_Sett": 30,
+      "patte": 0,
+      "delta_pp": 26.0,
+      "intervallo_95_pp": [
+        16.1,
+        35.9
+      ],
+      "vince_solo_variante": 29,
+      "vince_solo_riferimento": 3,
+      "controllo_Bandle_Sett": 3,
+      "controllo_Bandle_Evelynn": 97,
+      "resta_solo_Pyke": 53,
+      "prefisso_completo": 100,
+      "Vex_assente_prima_di_Sett": 75
+    }
+  }
+}

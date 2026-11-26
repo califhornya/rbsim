@@ -1,0 +1,60 @@
+rbsim · Sett T9 · prova riproducibile del 26 novembre 2026
+
+Questa cartella contiene gli esiti di ogni continuazione, i log della ricerca
+e il codice del confronto fuori dalla pagina di gioco. Le due sedi sono A
+(Evelynn) e B (Sett). Nel campo t9.points il primo punteggio è quello di Sett.
+Nei campi con suffisso A_B il primo punteggio è quello di Evelynn.
+
+Leggere i risultati già calcolati
+    python3 sorgenti/misure.py dati
+
+Ripetere le partite
+Aprire un terminale nella radice di rbsim-rust con il motore Rust installato nel
+suo ambiente Python. Impostare DIR alla cartella sorgenti di questo archivio.
+Con i percorsi del Mac usati per la misura, i comandi sono i seguenti.
+
+    export DIR="/percorso/dove/estratto/sorgenti"
+    PYTHONPATH=. .venv/bin/python "$DIR/prepara.py"
+    PYTHONPATH=. .venv/bin/python "$DIR/ev.py" fisse 100 --jobs 3
+    PYTHONPATH=. .venv/bin/python "$DIR/ev.py" ignote 100 --jobs 3
+    PYTHONPATH=. .venv/bin/python "$DIR/proposte.py"
+    PYTHONPATH=. .venv/bin/python "$DIR/selezione.py"
+    PYTHONPATH=. .venv/bin/python "$DIR/bersagli.py"
+    .venv/bin/python "$DIR/misure.py" "$DIR"
+
+prepara.py accetta --replay e --ckpt. Usa il replay tracciato in
+docs/bot/partite/coach e il checkpoint del progetto. Scrive la posizione e
+le tracce accanto agli script. La copia del replay in runs/coach/partite ha
+lo stesso SHA-256 della copia tracciata nel repository.
+
+Revisione del motore
+b9feb5c21dd0660513dbd703879c905324dcb023
+SHA-256 del replay
+2a7f576966356063d6c2c65f6bbc5329195390bdafdfe7c3af71a721a8c7cf6e
+SHA-256 di ekris_s12/ckpt_040000.pt
+f8d8469b506dfc1dcfe939ad944a214684fc5285aefc370bdc7549d42cec41aa
+
+Mappa dei dati
+• fisse_0_100.jsonl e ignote_0_100.jsonl contengono tre linee guidate per
+  mondo. “matteo” e “buff_sett” distinguono il bersaglio di Pillaged Armory
+  e il momento di Punch First. Il dizionario t9 fotografa il tavolo dopo il
+  cleanup di Sett e prima dell'inizio del turno avversario.
+• radice.json e quota4.json registrano la scelta originale e la prova di
+  distribuire almeno quattro visite a ogni prima azione con le finestre attive.
+• proposte.json contiene le 18 tracce generate in una posizione, in ordine.
+  L'indice p00 corrisponde alla prima, p17 all'ultima. La strategia esplorata
+  prevede un attacco con una o due ondate, un eventuale gear, una magia e
+  una riserva Ambush. Le scelte di bersaglio sono euristiche semplici.
+• scelta.jsonl e verifica.jsonl contengono rispettivamente la selezione tra
+  Valley e le 18 proposte e il confronto della selezionata contro Valley.
+  La selezione usa 16 mondi con indice 2000–2015. La verifica usa i 100
+  indici 4000–4099. La posizione pubblica iniziale è sempre la stessa.
+• bersagli.jsonl ripete, dopo la verifica, la proposta p16 e la variante guidata
+  con Armory su Sett sugli stessi 100 mondi tenuti da parte. Registra i difensori
+  presenti subito prima del secondo attacco. Il dato è una diagnosi esplorativa.
+• riepilogo.json raccoglie i conteggi e gli intervalli riprodotti da misure.py.
+
+Il punteggio finale vale 1 per la vittoria, ½ per la patta e 0 per la sconfitta
+di Sett. Per ogni indice si calcola la differenza rispetto a Valley. L'intervallo
+riportato è la media di queste differenze più o meno 1,96 errori standard
+appaiati. L'incertezza riguarda le continuazioni da questo singolo turno.
