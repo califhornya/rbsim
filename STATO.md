@@ -74,9 +74,8 @@ offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Seg
 
 ## Prossimi passi
 1. Risposta di Astra sulla prova (d): peso più alto? valore anche sul Pass che chiude il turno? raccolta grande da parte?
-   Indizio: dove (d) non gioca la più visitata −2,2 pp, dove la gioca +4,6 (non significativo): prova sulla scelta finale?
-2. Raccolta grande sul CCX63 ferma; promozioni future su semi nuovi (non 30M/40M/50M).
-3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
+   Indizio: dove (d) non gioca la più visitata −2,2 pp, dove la gioca +4,6 (non significativo). Raccolta CCX63 ferma.
+2. Promozioni future su semi nuovi (non 30M/40M/50M). `sonda_mac` sulle 72 posizioni; poi «Pensa» se c'è capacità.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
