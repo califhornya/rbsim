@@ -351,6 +351,172 @@ class Branch(Attack):
         return self.act(event)
 
 
+# -- la linea guidata del T9 (diagnostica: solo la posizione di Astra) -------------------------------
+
+def _pick(labels, query, default=None):
+    return next((i for i, s in enumerate(labels) if query.casefold() in s.casefold()), default)
+
+
+class _PianoT9:
+    """Porting di `Plan` di t9_attacco/sorgenti/exact.py (le linee di Matteo e la variante con Armory su Sett)."""
+
+    def __init__(self, arm, timing, rescue, early_target):
+        self.arm = arm
+        self.timing = timing
+        self.rescue = rescue
+        self.early_target = early_target
+        self.stage = 0
+        self.closed = False
+        self.gear = False
+        self.vi = False
+        self.pf = None
+        self.reply = False
+        self.stun = None
+        self.log = []
+        self.saves = []
+        self.menus = []
+        self.lastpoints = []
+
+    def ask(self, data):
+        e = json.loads(data)
+        k = e["k"]
+        if k == "decision":
+            m = e["menu"]
+            point = e["point"]
+            default = _pick(m, "Pass", 0)
+
+            def play(q):
+                i = _pick(m, q)
+                if i is not None:
+                    self.log.append([point, m[i]])
+                return i
+            if point == "turn_action":
+                if not self.gear:
+                    i = play("Play gear Pillaged Armory @BF0")
+                    if i is None:
+                        raise ValueError(("armory", m))
+                    self.gear = True
+                    return i
+                if self.stage == 0:
+                    i = play("Move Kinkou Initiate base→BF0")
+                    if i is None:
+                        raise ValueError(("kinkou", m))
+                    self.stage = 1
+                    self.closed = False
+                    return i
+                if not self.closed:
+                    self.closed = True
+                    return default
+                if self.stage == 1:
+                    i = play("Move Sett Kingpin base→BF0")
+                    if i is None:
+                        self.menus.append(m)
+                        return default
+                    self.stage = 2
+                    self.closed = False
+                    return i
+                self.menus.append(m)
+                for s in m:
+                    if ("→BF1" in s or "to BF1" in s) and (s.startswith("Move ") or s.startswith("Play ")):
+                        return play(s)
+                return default
+            if self.stage == 2 and (not self.vi) and self.closed:
+                i = play("AMBUSH Vi Peacekeeper @BF0")
+                if i is not None:
+                    self.vi = True
+                    return i
+            if self.stage == 1 and self.pf is None and point == "showdown_action" \
+                    and _pick(m, "Showdown Punch First @BF0") is not None:
+                early = self.timing == "early" or (self.timing == "reported" and self.reply)
+                if self.timing == "if_needed":
+                    p = D.riassunto(e["state_raw"], "B")["campi"][0]
+                    me = dict(p["campione"]["unita"])
+                    op = dict(p["avversario"]["unita"])
+                    early = "Kinkou Initiate" in me and "Vex Apathetic" in op and op["Vex Apathetic"] > me["Kinkou Initiate"]
+                if early:
+                    self.pf = "Kinkou"
+                    return play("Showdown Punch First @BF0")
+            if self.stage == 2 and self.pf is None and self.vi and point == "showdown_action" \
+                    and _pick(m, "Showdown Punch First @BF0") is not None:
+                self.pf = "Sett"
+                return play("Showdown Punch First @BF0")
+            return default
+        if k == "choice":
+            kind = e["kind"]
+            labels = E.etichette_scelta(e)
+            idx = e["default"]
+            if kind == "target:buff_unit":
+                idx = _pick(labels, self.arm, idx)
+            elif kind == "target:stun_unit":
+                idx = _pick(labels, "K'Sante", idx)
+                self.stun = labels[idx]
+            elif kind == "target:grant_temporary_might":
+                idx = _pick(labels, self.pf or "Sett", idx)
+            elif kind == "combat_damage_order":
+                ranking = ["Vex Apathetic", self.early_target, "Reckless", "Momentary", "K'Sante", "Pyke"] \
+                    if self.stage == 1 else ["Vex Apathetic", "Momentary", "Reckless", "K'Sante", "Pyke"]
+                idx = _pick(labels, "Vex Apathetic", idx) if self.stage == 1 and self.timing == "reported" \
+                    else next((_pick(labels, x) for x in ranking if _pick(labels, x) is not None), idx)
+            elif kind == "optional:sett_save":
+                use = self.stage == 2 or self.rescue
+                idx = _pick(labels, "sì" if use else ": no", idx)
+                self.saves.append([self.stage, labels[idx]])
+            self.log.append([kind, labels[idx]])
+            return idx
+        if k == "decide_optional":
+            return True
+        if k == "decide_mode":
+            return None
+        if k == "decide_mulligan":
+            return []
+        if k == "decide_predict_recycle":
+            return False
+        raise ValueError(k)
+
+
+class GuidataT9:
+    """Porting del ramo attacco di `Turn` di t9_attacco/sorgenti/ev.py: il posto del campione (B) segue il piano `matteo`
+    (Kinkou + Sett, Armory su Kinkou) o `buff_sett` (Armory su Sett) sul campo 0; rilascia a fine attacco. Solo per la
+    posizione T9 di Astra (nomi di carte e campi fissi). Protocollo Release come `Sequenza`/`Branch`."""
+
+    def __init__(self, variante: str):
+        if variante not in ("matteo", "buff_sett"):
+            raise ValueError(f"variante sconosciuta: {variante}")
+        self.variante = variante
+        self.resumed = None
+        self.complete = False
+        self.reason = None
+        self.attack = _PianoT9("Kinkou", "reported", True, "Reckless") if variante == "matteo" \
+            else _PianoT9("Sett Kingpin", "early", False, "Momentary")
+
+    def release(self, e, done, why=None):
+        self.resumed = e["state_raw"]
+        self.complete = done
+        self.reason = why
+        raise Release()
+
+    def ask(self, event):
+        e = json.loads(event)
+        p = self.attack
+        if e["k"] == "decision" and e.get("point") == "turn_action":
+            if p.stage == 2 and p.closed:
+                self.release(e, p.vi and p.stun is not None, "mancata AMBUSH/stun" if not (p.vi and p.stun) else None)
+            if p.stage == 1 and p.closed and "Move Sett Kingpin base→BF0" not in e["menu"]:
+                self.release(e, False, "secondo attacco impedito")
+            if p.gear and p.stage == 0 and "Move Kinkou Initiate base→BF0" not in e["menu"]:
+                self.release(e, False, "primo attacco impedito")
+        return p.ask(event)
+
+    def watch(self, ev):
+        if '"k":"decision"' not in ev[:60]:
+            return
+        d = json.loads(ev)
+        a = self.attack
+        if a.stage == 1 and a.closed and d.get("seat") == "A" and d.get("point") != "turn_action" \
+                and (d.get("win") or {}).get("showdown") == 0 and d.get("action") and d["action"][0] != "PASS":
+            a.reply = True
+
+
 # -- una continuazione ----------------------------------------------------------------------------
 
 def setup(g, P: dict, seed: int) -> None:
@@ -405,18 +571,53 @@ def linea_proposta(nome: str, proposta: Proposal, campo: int) -> dict:
     return {"nome": nome, "tipo": "proposta", "proposta": asdict(proposta), "campo": campo}
 
 
+def linea_guidata_t9(nome: str, variante: str) -> dict:
+    return {"nome": nome, "tipo": "guidata_t9", "variante": variante}
+
+
 def _controllo(linea: dict, camp: str):
     if linea["tipo"] == "campione":
         return None
     if linea["tipo"] == "sequenza":
         return Sequenza(linea["etichette"])
+    if linea["tipo"] == "guidata_t9":
+        return GuidataT9(linea["variante"])
     return Branch(Proposal(**linea["proposta"]), camp, linea["campo"])
 
 
-def continua(pos: dict, st: dict, linea: dict, i: int, modo: str) -> dict:
-    """Una continuazione dal mondo `st` (indice `i`, seme pos.base + i) fino alla fine della partita (finish di ev.py).
-    `campione`: i due posti campione da subito. Sequenza o proposta: il posto del campione e' controllato fino alla
-    consegna (azione di turno libera), poi il turno riparte da quello stato con i due posti campione."""
+class Osservatore:
+    """Registra il piano di un turno da un trace (`g.trace_on`), senza influire sul gioco. Campi usati degli eventi
+    `decision`: `seat`, `point`, `menu`, `index` (l'etichetta giocata e' `menu[index]`)."""
+
+    def __init__(self, camp: str):
+        self.camp = camp
+        self.azione = None          # prima decisione `turn_action` del campione (etichetta)
+        self.apertura = None
+        self.risposte = []          # decisioni non-Pass dell'avversario dopo la prima mossa dell'attacco: [punto, etichetta]
+        self._mossa = False
+
+    def __call__(self, ev: str) -> None:
+        if '"k":"decision"' not in ev[:60]:
+            return
+        d = json.loads(ev)
+        menu, idx = d.get("menu"), d.get("index")
+        if not menu or idx is None or not 0 <= idx < len(menu):
+            return
+        label = menu[idx]
+        if d["seat"] == self.camp:
+            if d["point"] == "turn_action":
+                if self.azione is None:
+                    self.azione = label
+                if not self._mossa and label.startswith("Move "):
+                    self._mossa = True
+        elif self._mossa and not label.startswith("Pass"):
+            self.risposte.append([d["point"], label])
+
+
+def _gioca_turno(pos: dict, st: dict, linea: dict, i: int, modo: str, osserva=None) -> dict:
+    """Il turno del campione dal mondo `st` (indice `i`, seme pos.base + i) fino a fine turno: `g`, `ctrl`, `w` (il
+    vincitore se la partita e' finita), `t0`, `seed`, `fine` (tavolo) e `v_fine` (valori, se la partita continua).
+    `osserva`: funzione `watch(evento_json)` passata a `trace_on` sul primo gioco (solo registra)."""
     P = pos["P"]
     camp = P["camp"]
     opp = _altro(camp)
@@ -424,13 +625,18 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str) -> dict:
     t0 = time.time()
     ctrl = _controllo(linea, camp)
     g = E.gioco(P, st, seed)
+    watch = [f for f in (getattr(ctrl, "watch", None), osserva) if f]
     if ctrl is None:
         setup(g, P, seed)
+        if watch:
+            g.trace_on(lambda ev: [f(ev) for f in watch])
         w = g.run_actions_end()
     else:
         E._agente_campione(g, P, opp, seed * 2 + (opp == "B") + 1_000_003)
         g.set_human_agent(camp, ctrl.ask, False, None)
         g.set_side_chooser()
+        if watch:
+            g.trace_on(lambda ev: [f(ev) for f in watch])
         try:
             w = g.run_actions_end()
         except Release:
@@ -441,6 +647,19 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str) -> dict:
     fine = tavolo(g, camp)
     assert w is not None or fine["t"] == pos["turno"] + 1, (fine["t"], pos["turno"])
     v_fine = valori(g, P) if w is None else None
+    return {"g": g, "ctrl": ctrl, "w": w, "t0": t0, "seed": seed, "fine": fine, "v_fine": v_fine}
+
+
+def continua(pos: dict, st: dict, linea: dict, i: int, modo: str, piano: bool = False) -> dict:
+    """Una continuazione dal mondo `st` (indice `i`, seme pos.base + i) fino alla fine della partita (finish di ev.py).
+    `campione`: i due posti campione da subito. Sequenza o proposta: il posto del campione e' controllato fino alla
+    consegna (azione di turno libera), poi il turno riparte da quello stato con i due posti campione.
+    `piano`: aggiunge alla riga il `piano` del turno (registrato con `Osservatore`); le altre chiavi non cambiano."""
+    P = pos["P"]
+    camp = P["camp"]
+    oss = Osservatore(camp) if piano else None
+    t = _gioca_turno(pos, st, linea, i, modo, oss)
+    g, ctrl, w, t0, seed, fine, v_fine = (t[c] for c in ("g", "ctrl", "w", "t0", "seed", "fine", "v_fine"))
     if w is None:
         setup(g, P, seed + 7411)
         w = g.run_begin()
@@ -458,6 +677,40 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str) -> dict:
            "valori": {"fine_turno": v_fine, "fine_turno_avv": v_avv}, "secondi": time.time() - t0}
     if isinstance(ctrl, Branch) and ctrl.p.waves == 2:
         row["nemici_seconda_ondata"] = ctrl.nemici_seconda
+    if isinstance(ctrl, GuidataT9):
+        row["vi"] = ctrl.attack.vi
+    if oss:
+        row["piano"] = _piano(ctrl, oss)
+    return row
+
+
+def _piano(ctrl, oss: Osservatore) -> dict:
+    """Il piano registrato di un turno: del campione solo `azione`; di una linea controllata apertura, passi (gli eventi
+    di `Attack`, o il log di `GuidataT9`), esito del prefisso e risposte dell'avversario."""
+    if ctrl is None:
+        return {"azione": oss.azione}
+    passi = ctrl.events if isinstance(ctrl, Attack) else ctrl.attack.log if isinstance(ctrl, GuidataT9) else None
+    return {"apertura": oss.azione, "passi": passi, "completato": ctrl.complete, "interruzione": ctrl.reason,
+            "risposte": oss.risposte}
+
+
+def fino_fine_turno(pos: dict, st: dict, linea: dict, i: int, modo: str) -> dict:
+    """Come `continua` ma si ferma a fine turno (niente turno dell'avversario ne' fine partita). `fine`: None se la
+    partita non e' finita nel turno, se no il vincitore; `valore`: il numero della sonda (la valutazione della partita
+    a fine turno, o +1/-1/0 se la partita e' finita nel turno); `piano`: vedi `_piano`."""
+    P = pos["P"]
+    camp = P["camp"]
+    oss = Osservatore(camp)
+    t = _gioca_turno(pos, st, linea, i, modo, oss)
+    ctrl, w, v_fine = t["ctrl"], t["w"], t["v_fine"]
+    if w is None:
+        chiave = P["valutazione"][0] if P.get("valutazione") else "storica"
+        valore = v_fine[chiave]
+    else:
+        valore = 1.0 if w == camp else 0.0 if w == "DRAW" else -1.0
+    row = {"world": i, "set": modo, "line": linea["nome"], "prefix_ok": True if ctrl is None else ctrl.complete,
+           "fallback": None if ctrl is None else ctrl.reason, "t9": t["fine"], "fine": w, "valori": v_fine,
+           "valore": valore, "piano": _piano(ctrl, oss), "secondi": time.time() - t["t0"]}
     return row
 
 
@@ -503,14 +756,17 @@ def linee_da(proposte: list[dict], riferimento) -> list[dict]:
 # -- selezione e verifica -------------------------------------------------------------------------
 
 def _lavoro(args):
-    pos, modo, i, linee = args
+    pos, modo, i, linee = args[:4]
+    piano = len(args) > 4 and args[4]
     st = mondo(pos, modo, pos["base"] + i)
-    return [continua(pos, st, linea, i, modo) for linea in linee]
+    return [continua(pos, st, linea, i, modo, True) if piano else continua(pos, st, linea, i, modo) for linea in linee]
 
 
-def esegui(pos: dict, modo: str, indici, linee: list[dict], path: Path | None, processi: int = 1, out=print) -> list:
-    """Per ogni mondo di `indici` tutte le `linee` (stesso mondo, stesso seme); una riga jsonl per mondo, in ordine."""
-    lavori = [(pos, modo, i, linee) for i in indici]
+def esegui(pos: dict, modo: str, indici, linee: list[dict], path: Path | None, processi: int = 1, out=print,
+           piano: bool = False) -> list:
+    """Per ogni mondo di `indici` tutte le `linee` (stesso mondo, stesso seme); una riga jsonl per mondo, in ordine.
+    `piano`: ogni riga ha anche il `piano` del turno (vedi `continua`)."""
+    lavori = [(pos, modo, i, linee, piano) for i in indici]
     risultati = []
     f = path.open("w", encoding="utf-8") if path else None
     pool = None
