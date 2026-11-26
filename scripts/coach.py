@@ -8,7 +8,7 @@
 
 The engine (25/11): a game between two of the five decks Rust covers (Evelynn, Kha'Zix,
 Rengar, Ivern, Sett), against the champion or the simple bot, plays on the Rust engine
-with the rules profile --regole (default 6427b90+D72-D80: D72-D80 corrected); the
+with the rules profile --regole (default 6427b90+D72-D81: D72-D81 corrected); the
 champion there searches a FIXED number of iterations a move (--iterazioni, default
 riftbound.ai.coach_rs.ITERAZIONI_CAMPIONE, the median of the Rust budget 0.03 s; its
 --budget is for Python), so that "Annulla l'ultima mossa" replays the same game. Anything
@@ -46,7 +46,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from riftbound.provenienza import REGOLE, REGOLE_D72_D80
+from riftbound.provenienza import REGOLE, REGOLE_D72_D81
 
 ROOT = Path(__file__).resolve().parents[1]
 DECK_DIR = ROOT / "riftbound" / "data" / "decks"
@@ -64,7 +64,7 @@ def main() -> None:
                     help="The champion's CPU seconds a move (on Python; on Rust see --iterazioni)")
     ap.add_argument("--motore", choices=("rust", "python"), default="rust",
                     help="The engine: rust where it covers the game, else python (default rust)")
-    ap.add_argument("--regole", choices=REGOLE, default=REGOLE_D72_D80,
+    ap.add_argument("--regole", choices=REGOLE, default=REGOLE_D72_D81,
                     help="The rules profile of the games on Rust (default %(default)s)")
     ap.add_argument("--iterazioni", type=int, default=None,
                     help="The champion's fixed iterations a move on Rust (default "

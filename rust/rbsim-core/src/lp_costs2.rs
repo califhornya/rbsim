@@ -305,6 +305,19 @@ impl Game {
                 } else {
                     extras.iter().filter(|(x, _)| x.as_str() != key && x.as_str() != "power").map(|(x, v)| (x.clone(), v.clone())).collect()
                 };
+                if k == 0 && key == "buffs" && extras.contains_key("energy") && self.gs.reg.regole.d81() {
+                    // D81: "spend a buff; if you do, ignore this spell's cost" (spend_buff_free): without
+                    // the buff the cost comes back whole (it is not spend_buffs_for_power's 1 Power per buff).
+                    let less: Map<String, Value> = less
+                        .into_iter()
+                        .filter(|(x, _)| x.as_str() != "energy")
+                        .collect();
+                    let x_power = extras.get("power").map(py_int).unwrap_or(0);
+                    let p2 = if x_power != 0 { Some(power.unwrap_or(0) + x_power) } else { power };
+                    crate::registry::conta(81);
+                    options.push((less, energy + extras.get("energy").map(py_int).unwrap_or(0), p2));
+                    continue;
+                }
                 options.push((less, energy, Some(power.unwrap_or(0) + back)));
             }
         }
