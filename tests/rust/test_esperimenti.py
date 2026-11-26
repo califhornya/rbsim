@@ -268,3 +268,152 @@ def test_linea_legale_arriva_alla_fine_e_conta_le_etichette(pos):
     b = E.un_mondo(Pp, tree, [gioca, "Pass"], 0, 77)
     assert {x: a[x] for x in ("vince", "punti_turno", "punti_fine", "turni", "passi")} == \
         {x: b[x] for x in ("vince", "punti_turno", "punti_fine", "turni", "passi")}
+
+
+# -- etichette `?` (condizionali), `danni:` / `scelta:` (con ambito), `@finestre` -------------------
+
+def _posizione_conteso(mano_b):
+    """A: Kinkou Initiate in base e Punch First in mano; B: Pit Rookie (Might 2) e First Mate (Might 3) al BF0
+    (lo tiene), `mano_b` in mano."""
+    from audit_helpers import card, setup, unit
+    loop, a, b = setup(active="A")
+    a.base_units.append(unit("Kinkou Initiate"))
+    a.hand.append(card("Punch First"))
+    loop.gs.battlefields[0].add_unit("B", unit("Pit Rookie"))
+    loop.gs.battlefields[0].add_unit("B", unit("First Mate"))
+    loop.gs.battlefields[0].held_by = "B"
+    for n in mano_b:
+        b.hand.append(card(n))
+    return loop
+
+
+def _gioca_condizionale(seq, mano_b=(), script_b=None):
+    import riftbound_rs
+    from riftbound.rs import rust_bridge as rb
+    from riftbound.rs.canon import canonical_state
+    righe = []
+    g = riftbound_rs.Game.from_canonical(rb.registry("6427b90+D72-D82"),
+                                         json.dumps(canonical_state(_posizione_conteso(mano_b).gs)), 1)
+    guida = E.Guida(seq, "A", righe.append)
+    g.set_script("B", **(script_b or {}))
+    g.set_human_agent("A", guida.ask, False, None)
+    g.set_side_chooser()
+    g.trace_on(guida.osserva)
+    try:
+        g.run_actions_end()
+    except E.Stop:
+        pass
+    guida._chiudi_attesa(json.loads(g.raw_dump()))
+    sopravvissuti = {u["card"] for u in json.loads(g.units()) if u["side"] == "B"}
+    return guida, "\n".join(righe), sopravvissuti, g
+
+
+LINEA = ["Move Kinkou Initiate base→BF0", "Pass", "?Punch First", "danni:Pit Rookie"]
+
+
+def test_condizionale_saltata_se_l_avversario_passa():
+    guida, t, vivi, g = _gioca_condizionale(LINEA)
+    assert "?Punch First: condizione non verificata: saltata" in t and guida.saltate == 1
+    assert "Showdown Punch First" not in t
+    assert guida.i == 4 and "[scelta] combat_damage_order: Pit Rookie" in t   # la 4 e' diventata in attesa dopo la saltata
+    assert vivi == {"First Mate"}                                              # Kinkou (3) uccide Pit Rookie per primo
+
+
+def test_condizionale_giocata_dopo_la_risposta():
+    guida, t, vivi, g = _gioca_condizionale(LINEA, ["Punch First"], {"showdown": ["Showdown Punch First"]})
+    assert guida.saltate == 0 and "giocata dopo la risposta Showdown Punch First" in t
+    assert guida.opp_log and guida.opp_log[0][1].startswith("Showdown Punch First")
+    # la risposta di B e' precedente: A ha giocato DOPO (A: Punch First sul proprio Kinkou)
+    ev = [e for e in json.loads(g.events()) if e["k"] == "decision" and e["action"][0] != "PASS"]
+    assert [e["seat"] for e in ev if e["point"] != "turn_action"][:2] == ["B", "A"]
+    assert "[scelta] combat_damage_order: Pit Rookie" in t
+
+
+def test_analizza_etichette():
+    assert [E.Guida.analizza(x)[0] for x in ("?x", "x", "?danni:x")] == [True, False, True]
+    assert E.Guida.analizza("?danni: Vex") == (True, "danni", "Vex")
+    assert E.Guida.analizza("Scelta:Kinkou") == (False, "scelta", "Kinkou")
+    assert E.Guida.analizza("Pass") == (False, None, "Pass")
+
+
+def test_danni_assegna_a_vex_e_il_default_resta_altrove():
+    guida, t, vivi, _g = _gioca_condizionale(["Move Kinkou Initiate base→BF0", "Pass", "danni:First Mate"])
+    assert vivi == {"Pit Rookie"} and "combat_damage_order: First Mate" in t
+    guida, t, vivi, _g = _gioca_condizionale(["Move Kinkou Initiate base→BF0", "Pass", "danni:Pit Rookie"])
+    assert vivi == {"First Mate"}
+
+
+def _scelta(kind, opzioni):
+    return json.dumps({"k": "choice", "seat": "A", "kind": kind, "options_raw": [1, 2], "default": 1, "state_raw": None}), opzioni
+
+
+def test_danni_non_e_consumata_da_una_scelta_di_bersaglio(monkeypatch):
+    for etichetta, atteso_i, scelta in (("danni:Vex", 0, 1), ("Vex", 1, 0), ("scelta:Vex", 1, 0)):
+        g = E.Guida([etichetta], "A", lambda t: None)
+        ev, opz = _scelta("target:grant_temporary_might", ["target: Vex", "target: Ahri"])
+        monkeypatch.setattr(E, "etichette_scelta", lambda e, o=opz: o)
+        assert g.ask(ev) == scelta                               # 0 = Vex; 1 = il default del motore
+        assert g.i == atteso_i, etichetta
+    # la scelta dei danni la consuma, e `scelta:` consuma qualunque scelta
+    g = E.Guida(["danni:Vex"], "A", lambda t: None)
+    ev, opz = _scelta("combat_damage_order", ["combat_damage_order: Ahri", "combat_damage_order: Vex"])
+    monkeypatch.setattr(E, "etichette_scelta", lambda e: opz)
+    assert g.ask(ev) == 1 and g.i == 1
+    # le etichette con ambito non vincono mai nei menu: la finestra passa
+    g = E.Guida(["danni:Pass"], "A", lambda t: None)
+    assert g.ask(_evento(["Pass", "Showdown Z"], "showdown_action")) == 0 and g.i == 0
+
+
+def test_parse_linea_finestre():
+    assert E.parse_linea("Play X ; @finestre") == ["Play X"]
+    assert E.parse_linea("Play X ; Pass ; @Finestre") == ["Play X", "Pass"]
+    assert E.linea_finestre("Play X ; @finestre") and E.linea_finestre("A ; B ; @FINESTRE")
+    assert not E.linea_finestre("Play X ; Pass") and not E.linea_finestre("@finestre")
+
+
+def test_finestre_dopo_la_sequenza_accendono_le_finestre_del_campione(pos, monkeypatch):
+    _D, P, k, Pp, e = pos
+    gioca = next(m for m in e["menu"] if m.startswith("Play ") and " to " not in m and "@" not in m and "gear" not in m)
+    tree = E.albero(e["state_raw"])
+    visto = []
+    orig = E._agente_campione
+
+    def spia(g, P_, seat, seme, primo=None, finestre=False):
+        visto.append((seat, finestre))
+        return orig(g, P_, seat, seme, primo, finestre)
+    monkeypatch.setattr(E, "_agente_campione", spia)
+    r = E.un_mondo(Pp, tree, [gioca, "Pass"], 0, 77, finestre=True)
+    assert r["vince"] in ("A", "B", "DRAW") and (Pp["camp"], True) in visto
+    assert all(f is False for s, f in visto if s != Pp["camp"])
+    visto.clear()
+    E.un_mondo(Pp, tree, [gioca, "Pass"], 0, 77)
+    assert visto and all(f is False for _s, f in visto)
+    # una sola etichetta + @finestre e' una sequenza (non "la prima mossa e poi libero")
+    visto.clear()
+    res = E.continua(P, k, [f"{gioca} ; @finestre", gioca], 1, 1, lambda t: None)
+    assert res["mosse"][f"{gioca} ; @finestre"]["finestre"] and res["mosse"][f"{gioca} ; @finestre"]["consumate"] is not None
+    assert res["mosse"][gioca]["consumate"] is None
+    assert "con le finestre" in "\n".join(E.testo_continua(res))
+
+
+def test_condizionale_con_l_avversario_campione_e_in_continua(pos):
+    _D, P, k, Pp, e = pos
+    gioca = next(m for m in e["menu"] if m.startswith("Play "))
+    righe = []
+    r = E.guidata(P, k, [gioca, "?Punch First", "Pass"], "campione", righe.append)
+    t = "\n".join(righe)
+    assert r["non_legale"] is None and ("condizione non verificata: saltata" in t or "giocata dopo la risposta" in t
+                                        or "Punch First" in t)
+    res = E.continua(P, k, [f"{gioca} ; ?Punch First ; Pass ; @finestre"], 2, 1, lambda t: None)
+    assert res["mosse"][list(res["mosse"])[0]]["n"] == 2
+
+
+def test_danni_condizionale_resta_fino_alla_scelta_dei_danni():
+    """`?danni:X`: con la risposta dell'avversario nello showdown i danni vanno a X; senza, l'etichetta si salta e
+    l'ordine resta quello del motore (segnalazione di Codex, PR 62)."""
+    seq = ["Move Kinkou Initiate base→BF0", "Pass", "?danni:First Mate"]
+    guida, t, _vivi, _g = _gioca_condizionale(seq, ["Punch First"], {"showdown": ["Showdown Punch First"]})
+    assert guida.saltate == 0 and "[scelta] combat_damage_order: First Mate" in t
+    guida, t, _vivi, _g = _gioca_condizionale(seq)
+    assert guida.saltate == 1 and "?danni:First Mate: condizione non verificata: saltata" in t
+    assert "[scelta] combat_damage_order: First Mate" not in t

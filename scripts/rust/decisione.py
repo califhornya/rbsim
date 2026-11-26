@@ -9,6 +9,9 @@
         [--avversario passa|campione] [--out F.txt]
   decisione.py continua --pagina F.json --campione B --k 10 --mosse "Move X base→BF0" "Play Y" [--n 100] [--processi 4]
         (ogni --mosse puo' essere una linea intera: "Play gear Z @BF0 ; Kinkou ; Move X base→BF0 ; Pass ; Punch First")
+        etichette speciali: "?Punch First" = condizionale (solo se l'avversario risponde nella finestra, a catena
+        risolta; se no e' saltata); "danni:Vex" = solo per la scelta dell'ordine dei danni; "scelta:Kinkou" = solo per
+        le scelte; una linea di continua che finisce con " ; @finestre" passa al campione CON le finestre.
 
 `rifai`: rigioca la partita (regole, seed, mazzi, prior e iterazioni del campione come all'origine) e alla ricerca
 scelta rifà la decisione con ogni valore di --iterazioni (quello uguale all'originale, 42 di norma, riproduce la mossa:
@@ -269,7 +272,8 @@ def main(argv=None) -> int:
     x.add_argument("--avversario", default="passa", choices=["passa", "campione"])
     x = sub.choices["continua"]
     x.add_argument("--mosse", nargs="+", required=True, metavar="LINEA",
-                   help='una etichetta (la prima mossa, poi il campione) o etichette separate da " ; " (la linea, forzata come in guidata)')
+                   help='una etichetta (la prima mossa, poi il campione) o etichette separate da " ; " (la linea, forzata come in guidata; '
+                        'in coda " ; @finestre" = poi il campione con le finestre)')
     x.add_argument("--n", type=int, default=100)
     x.add_argument("--processi", type=int, default=1, help="processi in parallelo (una continuazione ciascuno)")
     a = ap.parse_args(argv)
