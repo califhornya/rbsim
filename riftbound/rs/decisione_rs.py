@@ -236,10 +236,18 @@ def originale(partita: dict, stato=None) -> list[dict]:
     if got is None or (stato is not None and not got.get("_stato")):
         righe, eventi, _ = _gioca(P, None, None, stato)
         ev, sonde, pos = _abbina(righe, eventi)
-        got = _ORIGINALI[key] = {"righe": righe, "eventi": ev, "sonde": sonde, "pos": pos, "_stato": stato is not None}
+        got = _ORIGINALI[key] = {"righe": righe, "eventi": ev, "sonde": sonde, "pos": pos, "tutti": eventi,
+                                 "_stato": stato is not None}
     return [{"k": i, "seat": r["seat"], "turn": r["turn"], "point": r["point"],
              "action": e["menu"][e["index"]], "menu": e["menu"], "riga": r, "e": e}
             for i, (r, e) in enumerate(zip(got["righe"], got["eventi"]))]
+
+
+def tutti(partita: dict) -> tuple[list[dict], list[int]]:
+    """Tutti gli eventi di decisione del campione nell'originale (anche quelli della sonda e le reazioni senza riga),
+    in ordine, e per ogni riga di ricerca k l'indice del suo evento nella lista. Va chiamata dopo `originale`."""
+    got = _ORIGINALI[_chiave(_prepara(partita))]
+    return got["tutti"], got["pos"]
 
 
 def sonde(partita: dict) -> list[int]:
