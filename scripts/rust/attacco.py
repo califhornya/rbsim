@@ -5,6 +5,7 @@
   attacco.py confronta --pagina F.json --k 10 --out DIR [--riferimento campione|"Play X ; Move Y base→BF1 ; Pass"]
         [--modo ignote|fisse] [--scelta 2000:16] [--verifica 4000:100] [--senza-deduplica] [--processi 4]
   attacco.py serie     --posizioni F.json --out DIR [--max 12] (come `confronta`, per ogni posizione)
+  attacco.py rivedi    --serie DIR --out DIR [--quota 4] [--mirata 10] [--processi 4] [--ckpt F | --casuali]
   attacco.py riproduci-t9 --dati docs/bot/esperimenti/t9_attacco/dati [--rapida] [--processi 4]
 
 Partita: `--pagina FILE` (una partita della pagina contro il campione) oppure `--autonoma MU:SEME[:POSTO]` (campione
@@ -18,6 +19,10 @@ menu ha uno spostamento dalla base verso di esso; `punto_libero` se c'è anche u
 con le proposte di Astra. `confronta`: proposte, selezione sui mondi di scelta, verifica sui mondi tenuti da parte
 (riferimento contro la migliore, differenze appaiate +-1,96 errori standard), vista del campione ed esito.
 `serie`: `confronta` per ogni posizione (con --max, al più N: metà con punto libero se possibile) e `riepilogo.txt`.
+`rivedi`: su una serie già fatta, verifiche in più: la linea con la valutazione più alta a fine turno e dopo l'avversario
+nei mondi di scelta (sonde), la proposta con più punti se la selezione ha scelto il riferimento; verificate sugli stessi
+mondi di verifica (controllo prima del riferimento su 2 mondi); per gli attacchi verificati migliori, la ricerca del
+campione con finestre e quota (4 per tutte le mosse, 10 sulla prima mossa dell'attacco). `rivedi.txt` con la riga `totale:`.
 `riproduci-t9`: la prova di Astra sul T9 (partita 013325, k=10) confrontata mondo per mondo con i suoi dati.
 """
 from __future__ import annotations
@@ -127,6 +132,12 @@ def cmd_serie(a) -> int:
     return 0
 
 
+def cmd_rivedi(a) -> int:
+    righe = A.rivedi(Path(a.serie), Path(a.out), a.processi, a.quota, a.mirata, print, a.ckpt, a.casuali)
+    print(righe[-1])
+    return 0
+
+
 def cmd_t9(a) -> int:
     out = Path(a.out) if a.out else Path(tempfile.mkdtemp(prefix="riproduci_t9_"))
     dif = A.riproduci_t9(Path(a.dati), out, a.rapida, a.ckpt, a.casuali, a.processi, print, a.replay or A.T9_REPLAY)
@@ -179,6 +190,13 @@ def main() -> int:
     p.add_argument("--max", type=int, help="al più N posizioni (metà con punto libero se possibile)")
     confr(p)
     p.set_defaults(f=cmd_serie)
+    p = sub.add_parser("rivedi", help="verifiche in più su una serie già fatta")
+    comune(p, partita=False)
+    p.add_argument("--serie", required=True, help="cartella di una serie (con le cartelle NN_..._kK)")
+    p.add_argument("--out", required=True)
+    p.add_argument("--quota", type=int, default=4, help="quota per tutte le mosse (4)")
+    p.add_argument("--mirata", type=int, default=10, help="quota sulla prima mossa dell'attacco (10)")
+    p.set_defaults(f=cmd_rivedi)
     p = sub.add_parser("riproduci-t9", help="la prova di Astra sul T9, confrontata coi suoi dati")
     comune(p, partita=False)
     p.add_argument("--dati", required=True, help="docs/bot/esperimenti/t9_attacco/dati")

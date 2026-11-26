@@ -175,3 +175,81 @@ def test_mondi_con_cima_nota_e_mano_pubblica(pos):
         # il mondo si carica e una continuazione arriva in fondo
         row = A.continua(p2, g, A.linea_campione(), 2000, "ignote")
         assert row["winner"] in ("A", "B", "DRAW")
+
+
+def _riga_finta(nome, ret, fine, avv):
+    return {"line": nome, "returns": ret, "valori": {"fine_turno": fine, "fine_turno_avv": avv}}
+
+
+def test_linee_in_piu_sonde_e_migliore_per_vittorie():
+    """Le sonde scelgono la linea con la media piu' alta (None non conta; chiave `rimonta` se c'e'); il riferimento
+    vince a pari media; `migliore per vittorie` solo se la selezione ha scelto il riferimento; niente doppioni."""
+    v = lambda s, r: {"storica": s, "rimonta": r}
+    dati = [[_riga_finta("riferimento", 1.0, v(0, 0), v(0, 0)), _riga_finta("p00", 1.0, v(1, 1), v(0, 0)),
+             _riga_finta("p01", 0.0, v(0, 5), None)],
+            [_riga_finta("riferimento", 0.0, v(0, 0), None), _riga_finta("p00", 0.0, v(1, 2), v(0, 0)),
+             _riga_finta("p01", 0.0, None, v(0, 1))]]
+    nomi = ["riferimento", "p00", "p01"]
+    extra, info = A.linee_in_piu(dati, nomi, "p00", set())
+    assert info["chiave"] == "rimonta" and info["decisa"] is False
+    assert list(extra) == ["p01"] and extra["p01"]["motivi"] == ["sonda fine turno", "sonda dopo l'avversario"]
+    assert extra["p01"]["margini"] == {"fine_turno": 5.0, "fine_turno_avv": 1.0}   # None escluso dalle medie
+    extra, info = A.linee_in_piu(dati, nomi, "riferimento", set())
+    assert extra["p01"]["motivi"][0] == "sonda fine turno" and extra["p00"]["motivi"] == ["migliore per vittorie"]
+    assert A.linee_in_piu(dati, nomi, "riferimento", {"p00", "p01"})[0] == {}
+    # una sola linea che vale per piu' motivi: una voce sola con i due motivi; riferimento a 0 su 2: decisa
+    dati2 = [[_riga_finta("riferimento", 0.0, v(0, 0), v(0, 0)), _riga_finta("p00", 1.0, v(1, 1), v(1, 1))]] * 2
+    extra, info = A.linee_in_piu(dati2, ["riferimento", "p00"], "riferimento", set())
+    assert extra["p00"]["motivi"] == ["sonda fine turno", "sonda dopo l'avversario", "migliore per vittorie"] and info["decisa"]
+
+
+def test_vista_ricerca_cinque_condizioni():
+    pos = A.posizione(PARTITA, K)
+    etichetta = next(m for m in pos["menu"] if m.startswith("Move") and "base→BF1" in m)
+    out = A._vista_ricerca(PARTITA, K, ITER, {"attacco": etichetta, "campione": pos["menu"][0]}, ["Showdown"], 4, 10,
+                           etichetta, lambda *_: None)
+    assert [(v["finestre"], v["quota"]) for v in out] == [(False, None), (True, None), (False, "tutte"), (True, "tutte"),
+                                                         (True, "mirata")]
+    assert all(v["scelta"] in pos["menu"] and v["prefisso_ok"] and set(v["mosse"]) == {"attacco", "campione"} for v in out)
+    assert A._testo_vista(out, pos["P"]["camp"])[0].startswith("    finestre no, senza")
+
+
+def test_rivedi_da_capo_a_fondo(tmp_path):
+    ser = tmp_path / "serie"
+    # mondi di scelta 2004:2 (pesi casuali): il riferimento scelto e due linee in piu' (sonda e migliore per vittorie)
+    A.confronta(PARTITA, K, ser / "00_prova_k8", "campione", "ignote", (2004, 2), (4000, 2), True, 1, lambda *_: None)
+    out = tmp_path / "rivedi"
+    righe = A.rivedi(ser, out, 1, 4, 10, lambda *_: None)
+    testo = (out / "rivedi.txt").read_text(encoding="utf-8")
+    assert righe[-1].startswith("totale:") and "totale:" in testo and "ERRORE" not in testo
+    scheda = json.loads((out / "00_prova_k8" / "rivedi.json").read_text(encoding="utf-8"))
+    assert scheda["errore"] is None
+    assert len(scheda["linee"]) == 2 and scheda["vista"] is None
+    extra = [json.loads(x) for x in (out / "00_prova_k8" / "verifica_extra.jsonl").read_text().splitlines()]
+    assert [r[0]["world"] for r in extra] == [4000, 4001] and len(extra[0]) == 2
+    # un riferimento salvato che non coincide: errore per la posizione, niente righe mescolate
+    v = ser / "00_prova_k8" / "verifica.jsonl"
+    righe_v = [json.loads(x) for x in v.read_text().splitlines()]
+    _orig_v = json.loads(json.dumps(righe_v))
+    righe_v[0][0]["returns"] = 0.25
+    v.write_text("\n".join(json.dumps(r) for r in righe_v) + "\n")
+    A.rivedi(ser, tmp_path / "rivedi2", 1, 4, 10, lambda *_: None)
+    assert "ERRORE" in (tmp_path / "rivedi2" / "rivedi.txt").read_text(encoding="utf-8")
+    # un esito di serie "attacco migliore": la vista con le 5 condizioni nella scheda e nel testo
+    e = json.loads((ser / "00_prova_k8" / "esito.json").read_text())
+    e.update({"esito": "attacco migliore", "proposta": {"nome": "p00"}})
+    (ser / "00_prova_k8" / "esito.json").write_text(json.dumps(e))
+    v.write_text("\n".join(json.dumps(r) for r in [[x for x in r] for r in _orig_v]) + "\n")
+    A.rivedi(ser, tmp_path / "rivedi3", 1, 4, 10, lambda *_: None)
+    s3 = json.loads((tmp_path / "rivedi3" / "00_prova_k8" / "rivedi.json").read_text())
+    assert s3["errore"] is None and len(s3["vista"]["condizioni"]) in (4, 5)
+    assert "vista della ricerca" in (tmp_path / "rivedi3" / "rivedi.txt").read_text(encoding="utf-8")
+    # la mossa del campione e' quella giocata (registrata nella vista), non la piu' visitata (Codex, PR 67); una vista
+    # vecchia senza `azione_originale` la chiede al rifacimento e da' la stessa
+    vj = ser / "00_prova_k8" / "vista.json"
+    vista = json.loads(vj.read_text())
+    assert vista["azione_originale"] and s3["vista"]["mossa_campione"] == vista["azione_originale"]
+    vj.write_text(json.dumps({k: x for k, x in vista.items() if k not in ("azione", "azione_originale")}))
+    A.rivedi(ser, tmp_path / "rivedi4", 1, 4, 10, lambda *_: None)
+    s4 = json.loads((tmp_path / "rivedi4" / "00_prova_k8" / "rivedi.json").read_text())
+    assert s4["vista"]["mossa_campione"] == vista["azione_originale"]
