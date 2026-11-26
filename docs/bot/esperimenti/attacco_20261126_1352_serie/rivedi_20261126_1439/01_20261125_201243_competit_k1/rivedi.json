@@ -1,0 +1,13 @@
+{
+ "k": 1,
+ "turno": 4,
+ "esito_serie": "indeciso",
+ "selezione_migliore": "p02",
+ "chiave": "storica",
+ "mondi": 16,
+ "punti_riferimento": 2.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": null
+}

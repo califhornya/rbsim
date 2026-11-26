@@ -1,0 +1,2 @@
+attacco_rivedi_mac 26/11/2026 14:39; 5bf456a Merge pull request #67 from califhornya/claude/loving-curie-91669c; serie docs/bot/esperimenti/attacco_20261126_1352_serie
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi

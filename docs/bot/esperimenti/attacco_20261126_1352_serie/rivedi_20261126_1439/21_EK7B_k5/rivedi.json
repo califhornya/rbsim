@@ -1,0 +1,35 @@
+{
+ "k": 5,
+ "turno": 7,
+ "esito_serie": "riferimento scelto",
+ "selezione_migliore": "riferimento",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 7.0,
+ "decisa": false,
+ "linee": {
+  "p00": {
+   "nome": "p00",
+   "motivi": [
+    "sonda fine turno",
+    "migliore per vittorie"
+   ],
+   "margini": {
+    "fine_turno": 0.003705196566162028,
+    "fine_turno_avv": -0.1336337248537809
+   },
+   "vittorie_riferimento": 48,
+   "vittorie_linea": 20,
+   "n": 100,
+   "delta": -0.28,
+   "intervallo_95": [
+    -0.40168657205370617,
+    -0.15831342794629386
+   ],
+   "migliore": false,
+   "peggiore": true
+  }
+ },
+ "errore": null,
+ "vista": null
+}

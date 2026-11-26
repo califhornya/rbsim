@@ -1,0 +1,192 @@
+{
+ "k": 10,
+ "turno": 9,
+ "esito_serie": "attacco migliore",
+ "selezione_migliore": "p00",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 3.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": {
+  "proposta": "p00",
+  "prima_etichetta": "Move Pyke Returned base→BF1",
+  "mossa_campione": "Play K'Sante Courageous",
+  "showdown": [
+   "Showdown Switcheroo @BF1"
+  ],
+  "condizioni": [
+   {
+    "finestre": false,
+    "quota": null,
+    "scelta": "Play K'Sante Courageous",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pyke Returned base→BF1"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 10,
+      "tot": 10,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play K'Sante Courageous"
+      ],
+      "n": 136,
+      "q": -0.345214034135521,
+      "rango": 1,
+      "tot": 10,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": null,
+    "scelta": "Play K'Sante Courageous",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pyke Returned base→BF1"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 10,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play K'Sante Courageous"
+      ],
+      "n": 136,
+      "q": -0.09966799462495582,
+      "rango": 1,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 1,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": false,
+    "quota": "tutte",
+    "scelta": "Play K'Sante Courageous",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pyke Returned base→BF1"
+      ],
+      "n": 4,
+      "q": -0.8936977272038726,
+      "rango": 10,
+      "tot": 10,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play K'Sante Courageous"
+      ],
+      "n": 101,
+      "q": -0.3452140341355213,
+      "rango": 1,
+      "tot": 10,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "tutte",
+    "scelta": "Move Pyke Returned base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pyke Returned base→BF1"
+      ],
+      "n": 79,
+      "q": -0.03997868031116358,
+      "rango": 1,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 6,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play K'Sante Courageous"
+      ],
+      "n": 26,
+      "q": -0.6695902596187708,
+      "rango": 2,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "mirata",
+    "scelta": "Move Pyke Returned base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pyke Returned base→BF1"
+      ],
+      "n": 113,
+      "q": 0.14888503362331798,
+      "rango": 1,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 7,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play K'Sante Courageous"
+      ],
+      "n": 18,
+      "q": -0.65270670596199,
+      "rango": 2,
+      "tot": 10,
+      "conta": {
+       "Showdown Switcheroo @BF1": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

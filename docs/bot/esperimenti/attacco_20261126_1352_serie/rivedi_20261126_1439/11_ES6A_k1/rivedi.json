@@ -1,0 +1,192 @@
+{
+ "k": 1,
+ "turno": 3,
+ "esito_serie": "attacco migliore",
+ "selezione_migliore": "p00",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 11.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": {
+  "proposta": "p00",
+  "prima_etichetta": "Move Evelynn Entrancing base→BF0",
+  "mossa_campione": "Play Vex Apathetic",
+  "showdown": [
+   "Showdown Hold 'Em @BF0"
+  ],
+  "condizioni": [
+   {
+    "finestre": false,
+    "quota": null,
+    "scelta": "Play Vex Apathetic",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Evelynn Entrancing base→BF0"
+      ],
+      "n": 1,
+      "q": -0.5979820004989412,
+      "rango": 3,
+      "tot": 7,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play Vex Apathetic"
+      ],
+      "n": 133,
+      "q": 0.34521403413552093,
+      "rango": 1,
+      "tot": 7,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": null,
+    "scelta": "Play Vex Apathetic",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Evelynn Entrancing base→BF0"
+      ],
+      "n": 1,
+      "q": -0.5979820004989412,
+      "rango": 3,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Vex Apathetic"
+      ],
+      "n": 133,
+      "q": 0.35185897690624696,
+      "rango": 1,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": false,
+    "quota": "tutte",
+    "scelta": "Play Vex Apathetic",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Evelynn Entrancing base→BF0"
+      ],
+      "n": 4,
+      "q": -0.3185207769027708,
+      "rango": 6,
+      "tot": 7,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play Vex Apathetic"
+      ],
+      "n": 113,
+      "q": 0.3452140341355205,
+      "rango": 1,
+      "tot": 7,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "tutte",
+    "scelta": "Move Evelynn Entrancing base→BF0",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Evelynn Entrancing base→BF0"
+      ],
+      "n": 8,
+      "q": 0.3799489622552249,
+      "rango": 2,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 2,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Vex Apathetic"
+      ],
+      "n": 109,
+      "q": 0.35149588283802013,
+      "rango": 1,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "mirata",
+    "scelta": "Move Evelynn Entrancing base→BF0",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Evelynn Entrancing base→BF0"
+      ],
+      "n": 10,
+      "q": 0.3799489622552249,
+      "rango": 2,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 2,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Vex Apathetic"
+      ],
+      "n": 124,
+      "q": 0.3513819185679916,
+      "rango": 1,
+      "tot": 7,
+      "conta": {
+       "Showdown Hold 'Em @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

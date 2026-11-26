@@ -1,0 +1,36 @@
+{
+ "k": 23,
+ "turno": 12,
+ "esito_serie": "riferimento scelto",
+ "selezione_migliore": "riferimento",
+ "chiave": "storica",
+ "mondi": 16,
+ "punti_riferimento": 16.0,
+ "decisa": true,
+ "linee": {
+  "p00": {
+   "nome": "p00",
+   "motivi": [
+    "sonda fine turno",
+    "sonda dopo l'avversario",
+    "migliore per vittorie"
+   ],
+   "margini": {
+    "fine_turno": 0.0019260403415678473,
+    "fine_turno_avv": 0.011369717446079175
+   },
+   "vittorie_riferimento": 98,
+   "vittorie_linea": 98,
+   "n": 100,
+   "delta": 0.0,
+   "intervallo_95": [
+    -0.03939748235816111,
+    0.03939748235816111
+   ],
+   "migliore": false,
+   "peggiore": false
+  }
+ },
+ "errore": null,
+ "vista": null
+}

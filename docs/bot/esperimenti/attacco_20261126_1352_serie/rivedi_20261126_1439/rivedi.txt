@@ -1,0 +1,76 @@
+00_20261125_154531_competit_k12:
+  p00 (migliore per vittorie): margine storica fine turno -0.041; dopo l'avversario -0.235; vittorie riferimento/linea 87/69 su 100; differenza -18.0 [-27.4, -8.6] pp
+01_20261125_201243_competit_k1:
+  niente da verificare
+02_20261125_204705_competit_k23:
+  p00 (sonda fine turno, sonda dopo l'avversario, migliore per vittorie): margine storica fine turno +0.002; dopo l'avversario +0.011; vittorie riferimento/linea 98/98 su 100; differenza +0.0 [-3.9, +3.9] pp; decisa
+03_20261125_204705_competit_k38:
+  p00 (sonda dopo l'avversario, migliore per vittorie): margine storica fine turno -0.072; dopo l'avversario +0.206; vittorie riferimento/linea 100/97 su 100; differenza -3.0 [-6.4, +0.4] pp; decisa
+04_20261126_013325_competit_k10:
+  niente da verificare
+05_ES1B_k11:
+  niente da verificare
+06_ES3B_k1:
+  vista della ricerca (attacco p00: 'Move Sett Kingpin base→BF0'; campione: 'Move Sett Kingpin base→BF1'; showdown da giocare: AMBUSH Vi Peacekeeper @BF0):
+    finestre no, senza: scelta 'Move Sett Kingpin base→BF1' | attacco: n=0 q=- r11/11 | campione: n=137 q=0.16 r1/11
+    finestre si, senza: scelta 'Move Sett Kingpin base→BF1' | attacco: n=0 q=- r11/11 showdown AMBUSH Vi Peac=0 | campione: n=137 q=-0.13 r1/11 showdown AMBUSH Vi Peac=0
+    finestre no, quota: scelta 'Move Sett Kingpin base→BF1' | attacco: n=4 q=-0.72 r11/11 | campione: n=97 q=0.16 r1/11
+    finestre si, quota: scelta 'Move Sett Kingpin base→BF0' | attacco: n=80 q=0.68 r1/11 showdown AMBUSH Vi Peac=77 | campione: n=21 q=-0.13 r2/11 showdown AMBUSH Vi Peac=0
+    finestre si, quota mirata: scelta 'Move Sett Kingpin base→BF0' | attacco: n=112 q=0.68 r1/11 showdown AMBUSH Vi Peac=106 | campione: n=21 q=-0.13 r2/11 showdown AMBUSH Vi Peac=0
+07_ES3B_k14:
+  p03 (migliore per vittorie): margine rimonta fine turno -0.138; dopo l'avversario -0.070; vittorie riferimento/linea 54/34 su 100; differenza -20.0 [-31.5, -8.5] pp
+08_ES4A_k10:
+  vista della ricerca (attacco p00: 'Move Pyke Returned base→BF1'; campione: 'Play K'Sante Courageous'; showdown da giocare: Showdown Switcheroo @BF1):
+    finestre no, senza: scelta 'Play K'Sante Courageous' | attacco: n=0 q=- r10/10 | campione: n=136 q=-0.35 r1/10
+    finestre si, senza: scelta 'Play K'Sante Courageous' | attacco: n=0 q=- r10/10 showdown Showdown Switc=0 | campione: n=136 q=-0.10 r1/10 showdown Showdown Switc=1
+    finestre no, quota: scelta 'Play K'Sante Courageous' | attacco: n=4 q=-0.89 r10/10 | campione: n=101 q=-0.35 r1/10
+    finestre si, quota: scelta 'Move Pyke Returned base→BF1' | attacco: n=79 q=-0.04 r1/10 showdown Showdown Switc=6 | campione: n=26 q=-0.67 r2/10 showdown Showdown Switc=0
+    finestre si, quota mirata: scelta 'Move Pyke Returned base→BF1' | attacco: n=113 q=0.15 r1/10 showdown Showdown Switc=7 | campione: n=18 q=-0.65 r2/10 showdown Showdown Switc=0
+09_ES5B_k5:
+  vista della ricerca (attacco p00: 'Move Pit Rookie base→BF0'; campione: 'Move Pit Rookie base→BF1'; showdown da giocare: AMBUSH Vi Peacekeeper @BF0, Showdown Call to Glory @BF0):
+    finestre no, senza: scelta 'Move Pit Rookie base→BF1' | attacco: n=0 q=- r13/13 | campione: n=132 q=0.52 r1/13
+    finestre si, senza: scelta 'Move Pit Rookie base→BF1' | attacco: n=0 q=- r13/13 showdown AMBUSH Vi Peac=0,Showdown Call =0 | campione: n=131 q=0.14 r1/13 showdown AMBUSH Vi Peac=0,Showdown Call =0
+    finestre no, quota: scelta 'Move Pit Rookie base→BF1' | attacco: n=4 q=-0.59 r13/13 | campione: n=88 q=0.28 r1/13
+    finestre si, quota: scelta 'Cast Showstopper @BF0' | attacco: n=4 q=-0.66 r13/13 showdown AMBUSH Vi Peac=3,Showdown Call =0 | campione: n=17 q=-0.14 r2/13 showdown AMBUSH Vi Peac=0,Showdown Call =0
+    finestre si, quota mirata: scelta 'Move Pit Rookie base→BF1' | attacco: n=10 q=-0.63 r2/13 showdown AMBUSH Vi Peac=9,Showdown Call =1 | campione: n=121 q=-0.04 r1/13 showdown AMBUSH Vi Peac=0,Showdown Call =0
+10_ES5B_k15:
+  niente da verificare
+11_ES6A_k1:
+  vista della ricerca (attacco p00: 'Move Evelynn Entrancing base→BF0'; campione: 'Play Vex Apathetic'; showdown da giocare: Showdown Hold 'Em @BF0):
+    finestre no, senza: scelta 'Play Vex Apathetic' | attacco: n=1 q=-0.60 r3/7 | campione: n=133 q=0.35 r1/7
+    finestre si, senza: scelta 'Play Vex Apathetic' | attacco: n=1 q=-0.60 r3/7 showdown Showdown Hold =0 | campione: n=133 q=0.35 r1/7 showdown Showdown Hold =0
+    finestre no, quota: scelta 'Play Vex Apathetic' | attacco: n=4 q=-0.32 r6/7 | campione: n=113 q=0.35 r1/7
+    finestre si, quota: scelta 'Move Evelynn Entrancing base→BF0' | attacco: n=8 q=0.38 r2/7 showdown Showdown Hold =2 | campione: n=109 q=0.35 r1/7 showdown Showdown Hold =0
+    finestre si, quota mirata: scelta 'Move Evelynn Entrancing base→BF0' | attacco: n=10 q=0.38 r2/7 showdown Showdown Hold =2 | campione: n=124 q=0.35 r1/7 showdown Showdown Hold =0
+12_ES7B_k5:
+  p18 (sonda fine turno): margine rimonta fine turno +0.049; dopo l'avversario -0.080; vittorie riferimento/linea 35/41 su 100; differenza +6.0 [-4.7, +16.7] pp
+  p00 (migliore per vittorie): margine rimonta fine turno +0.000; dopo l'avversario +0.000; vittorie riferimento/linea 35/32 su 100; differenza -3.0 [-6.4, +0.4] pp
+13_ES9B_k2:
+  niente da verificare
+14_ES9B_k21:
+  p03 (sonda fine turno): margine rimonta fine turno +0.097; dopo l'avversario +0.365; vittorie riferimento/linea 61/69 su 100; differenza +8.0 [-5.3, +21.3] pp
+  p02 (sonda dopo l'avversario, migliore per vittorie): margine rimonta fine turno +0.054; dopo l'avversario +0.425; vittorie riferimento/linea 61/59 su 100; differenza -2.0 [-16.5, +12.5] pp
+15_EK1B_k15:
+  p00 (sonda fine turno, migliore per vittorie): margine rimonta fine turno +0.137; dopo l'avversario -0.035; vittorie riferimento/linea 2/3 su 100; differenza +1.0 [-3.4, +5.4] pp; decisa
+16_EK1B_k21:
+  p00 (migliore per vittorie): margine rimonta fine turno -0.460; dopo l'avversario -0.156; vittorie riferimento/linea 3/0 su 100; differenza -3.0 [-6.4, +0.4] pp; decisa
+17_EK3B_k17:
+  p00 (sonda fine turno, migliore per vittorie): margine rimonta fine turno +0.045; dopo l'avversario -0.098; vittorie riferimento/linea 67/72 su 100; differenza +5.0 [-5.6, +15.6] pp
+18_EK4A_k16:
+  p00 (sonda dopo l'avversario, migliore per vittorie): margine rimonta fine turno -0.011; dopo l'avversario +0.007; vittorie riferimento/linea 98/99 su 100; differenza +1.0 [-2.4, +4.4] pp; decisa
+19_EK4A_k27:
+  p00 (sonda fine turno, sonda dopo l'avversario, migliore per vittorie): margine rimonta fine turno +0.361; dopo l'avversario +0.426; vittorie riferimento/linea 94/92 su 100; differenza -2.0 [-8.2, +4.2] pp; decisa
+20_EK5B_k30:
+  p27 (migliore per vittorie): margine rimonta fine turno -0.181; dopo l'avversario -0.701; vittorie riferimento/linea 100/93 su 100; differenza -7.0 [-12.0, -2.0] pp; decisa
+21_EK7B_k5:
+  p00 (sonda fine turno, migliore per vittorie): margine rimonta fine turno +0.004; dopo l'avversario -0.134; vittorie riferimento/linea 48/20 su 100; differenza -28.0 [-40.2, -15.8] pp
+22_EK7B_k10:
+  vista della ricerca (attacco p00: 'Move Shadow Clone base→BF0'; campione: 'Play Fizz Trickster'; showdown da giocare: AMBUSH Rengar Trophy Hunter @BF0, Showdown Switcheroo @BF0):
+    finestre no, senza: scelta 'Play Fizz Trickster' | attacco: n=0 q=- r18/21 | campione: n=106 q=0.29 r1/21
+    finestre si, senza: scelta 'Play Fizz Trickster' | attacco: n=0 q=- r18/21 showdown AMBUSH Rengar =0,Showdown Switc=0 | campione: n=98 q=0.19 r1/21 showdown AMBUSH Rengar =0,Showdown Switc=0
+    finestre no, quota: scelta 'Play Fizz Trickster' | attacco: n=4 q=-0.27 r17/21 | campione: n=59 q=0.23 r1/21
+    finestre si, quota: scelta 'Play Fizz Trickster' | attacco: n=4 q=-0.27 r17/21 showdown AMBUSH Rengar =0,Showdown Switc=0 | campione: n=58 q=0.19 r1/21 showdown AMBUSH Rengar =0,Showdown Switc=0
+    finestre si, quota mirata: scelta 'Play Fizz Trickster' | attacco: n=10 q=-0.27 r2/21 showdown AMBUSH Rengar =0,Showdown Switc=0 | campione: n=111 q=0.20 r1/21 showdown AMBUSH Rengar =0,Showdown Switc=0
+23_EK9B_k5:
+  p00 (migliore per vittorie): margine rimonta fine turno -0.184; dopo l'avversario -0.067; vittorie riferimento/linea 1/1 su 100; differenza +0.0 [-2.8, +2.8] pp; decisa
+totale: 16 linee in più verificate; limite inferiore > 0: 0; limite superiore < 0: 4; sonda fine turno: veri positivi 0, falsi positivi 1, indecisi 6

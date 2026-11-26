@@ -1,0 +1,222 @@
+{
+ "k": 10,
+ "turno": 9,
+ "esito_serie": "attacco migliore",
+ "selezione_migliore": "p00",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 10.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": {
+  "proposta": "p00",
+  "prima_etichetta": "Move Shadow Clone base→BF0",
+  "mossa_campione": "Play Fizz Trickster",
+  "showdown": [
+   "AMBUSH Rengar Trophy Hunter @BF0",
+   "Showdown Switcheroo @BF0"
+  ],
+  "condizioni": [
+   {
+    "finestre": false,
+    "quota": null,
+    "scelta": "Play Fizz Trickster",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Shadow Clone base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 18,
+      "tot": 21,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play Fizz Trickster",
+       "Play Fizz Trickster to BF1"
+      ],
+      "n": 106,
+      "q": 0.2930217513294403,
+      "rango": 1,
+      "tot": 21,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": null,
+    "scelta": "Play Fizz Trickster",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Shadow Clone base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 18,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Fizz Trickster",
+       "Play Fizz Trickster to BF1"
+      ],
+      "n": 98,
+      "q": 0.1918474070739048,
+      "rango": 1,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": false,
+    "quota": "tutte",
+    "scelta": "Play Fizz Trickster",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Shadow Clone base→BF0"
+      ],
+      "n": 4,
+      "q": -0.2729050805631327,
+      "rango": 17,
+      "tot": 21,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Play Fizz Trickster",
+       "Play Fizz Trickster to BF1"
+      ],
+      "n": 59,
+      "q": 0.2256035883213449,
+      "rango": 1,
+      "tot": 21,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "tutte",
+    "scelta": "Play Fizz Trickster",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Shadow Clone base→BF0"
+      ],
+      "n": 4,
+      "q": -0.2729050805631327,
+      "rango": 17,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Fizz Trickster",
+       "Play Fizz Trickster to BF1"
+      ],
+      "n": 58,
+      "q": 0.1899357976576861,
+      "rango": 1,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "mirata",
+    "scelta": "Play Fizz Trickster",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Shadow Clone base→BF0"
+      ],
+      "n": 10,
+      "q": -0.2729050805631327,
+      "rango": 2,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Play Fizz Trickster",
+       "Play Fizz Trickster to BF1"
+      ],
+      "n": 111,
+      "q": 0.20496415420455166,
+      "rango": 1,
+      "tot": 21,
+      "conta": {
+       "AMBUSH Rengar Trophy Hunter @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Switcheroo @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

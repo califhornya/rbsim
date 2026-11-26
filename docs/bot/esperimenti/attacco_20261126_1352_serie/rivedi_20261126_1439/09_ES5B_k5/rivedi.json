@@ -1,0 +1,217 @@
+{
+ "k": 5,
+ "turno": 7,
+ "esito_serie": "attacco migliore",
+ "selezione_migliore": "p00",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 4.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": {
+  "proposta": "p00",
+  "prima_etichetta": "Move Pit Rookie base→BF0",
+  "mossa_campione": "Move Pit Rookie base→BF1",
+  "showdown": [
+   "AMBUSH Vi Peacekeeper @BF0",
+   "Showdown Call to Glory @BF0"
+  ],
+  "condizioni": [
+   {
+    "finestre": false,
+    "quota": null,
+    "scelta": "Move Pit Rookie base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pit Rookie base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 13,
+      "tot": 13,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Move Pit Rookie base→BF1"
+      ],
+      "n": 132,
+      "q": 0.5226654296858209,
+      "rango": 1,
+      "tot": 13,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": null,
+    "scelta": "Move Pit Rookie base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pit Rookie base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 13,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Pit Rookie base→BF1"
+      ],
+      "n": 131,
+      "q": 0.13909244787845793,
+      "rango": 1,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": false,
+    "quota": "tutte",
+    "scelta": "Move Pit Rookie base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pit Rookie base→BF0"
+      ],
+      "n": 4,
+      "q": -0.5915193954318164,
+      "rango": 13,
+      "tot": 13,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Move Pit Rookie base→BF1"
+      ],
+      "n": 88,
+      "q": 0.28213481266963414,
+      "rango": 1,
+      "tot": 13,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "tutte",
+    "scelta": "Cast Showstopper @BF0",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pit Rookie base→BF0"
+      ],
+      "n": 4,
+      "q": -0.658409035955251,
+      "rango": 13,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 3
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Pit Rookie base→BF1"
+      ],
+      "n": 17,
+      "q": -0.13909244787845806,
+      "rango": 2,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "mirata",
+    "scelta": "Move Pit Rookie base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Pit Rookie base→BF0"
+      ],
+      "n": 10,
+      "q": -0.6291451614140354,
+      "rango": 2,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 9
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 1
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Pit Rookie base→BF1"
+      ],
+      "n": 121,
+      "q": -0.03997868031116358,
+      "rango": 1,
+      "tot": 13,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       },
+       "Showdown Call to Glory @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

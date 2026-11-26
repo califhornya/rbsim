@@ -1,0 +1,192 @@
+{
+ "k": 1,
+ "turno": 5,
+ "esito_serie": "attacco migliore",
+ "selezione_migliore": "p00",
+ "chiave": "rimonta",
+ "mondi": 16,
+ "punti_riferimento": 9.0,
+ "decisa": false,
+ "linee": {},
+ "errore": null,
+ "vista": {
+  "proposta": "p00",
+  "prima_etichetta": "Move Sett Kingpin base→BF0",
+  "mossa_campione": "Move Sett Kingpin base→BF1",
+  "showdown": [
+   "AMBUSH Vi Peacekeeper @BF0"
+  ],
+  "condizioni": [
+   {
+    "finestre": false,
+    "quota": null,
+    "scelta": "Move Sett Kingpin base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Sett Kingpin base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 11,
+      "tot": 11,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Move Sett Kingpin base→BF1"
+      ],
+      "n": 137,
+      "q": 0.1586485042974991,
+      "rango": 1,
+      "tot": 11,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": null,
+    "scelta": "Move Sett Kingpin base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Sett Kingpin base→BF0"
+      ],
+      "n": 0,
+      "q": null,
+      "rango": 11,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Sett Kingpin base→BF1"
+      ],
+      "n": 137,
+      "q": -0.1292725836060582,
+      "rango": 1,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": false,
+    "quota": "tutte",
+    "scelta": "Move Sett Kingpin base→BF1",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Sett Kingpin base→BF0"
+      ],
+      "n": 4,
+      "q": -0.7211322540766998,
+      "rango": 11,
+      "tot": 11,
+      "conta": null
+     },
+     "campione": {
+      "voci": [
+       "Move Sett Kingpin base→BF1"
+      ],
+      "n": 97,
+      "q": 0.15864850429749905,
+      "rango": 1,
+      "tot": 11,
+      "conta": null
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "tutte",
+    "scelta": "Move Sett Kingpin base→BF0",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Sett Kingpin base→BF0"
+      ],
+      "n": 80,
+      "q": 0.6804760061126619,
+      "rango": 1,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 77
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Sett Kingpin base→BF1"
+      ],
+      "n": 21,
+      "q": -0.12927258360605837,
+      "rango": 2,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   },
+   {
+    "finestre": true,
+    "quota": "mirata",
+    "scelta": "Move Sett Kingpin base→BF0",
+    "prefisso_ok": true,
+    "mosse": {
+     "attacco": {
+      "voci": [
+       "Move Sett Kingpin base→BF0"
+      ],
+      "n": 112,
+      "q": 0.6804760061126619,
+      "rango": 1,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 106
+       }
+      }
+     },
+     "campione": {
+      "voci": [
+       "Move Sett Kingpin base→BF1"
+      ],
+      "n": 21,
+      "q": -0.12927258360605837,
+      "rango": 2,
+      "tot": 11,
+      "conta": {
+       "AMBUSH Vi Peacekeeper @BF0": {
+        "A": 0,
+        "B": 0
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}
