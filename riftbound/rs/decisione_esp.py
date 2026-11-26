@@ -11,6 +11,18 @@
     da " ; " (il posto del campione e' forzato con le regole di `guidata`; esaurita la sequenza, al primo punto di
     turno il gioco passa al campione, ripartendo dallo stato di quel punto).
 
+Etichette speciali (guidata e continua):
+    `?ETICHETTA`  condizionale: si gioca solo se, nella finestra CORRENTE (catena o showdown), l'avversario ha giocato
+                 un'azione non-PASS da quando l'etichetta e' in attesa, e solo a catena risolta (non nelle reazioni);
+                 se la finestra si chiude senza risposta l'etichetta e' scartata ("condizione non verificata: saltata")
+                 e passa alla successiva. Le azioni dell'avversario si osservano dalla traccia del motore (trace_on),
+                 per qualunque avversario (passa, campione).
+    `danni:ETICHETTA`  vale solo per la scelta `combat_damage_order` (l'ordine dei danni di combattimento);
+    `scelta:ETICHETTA` vale solo per le scelte (qualunque tipo); le etichette semplici restano com'erano.
+    (si combinano: `?danni:Vex`.)
+    ` ; @finestre` in coda a una linea di `continua`: esaurita la sequenza, il campione gioca CON le finestre di
+                 reazione/showdown (set_search_finestre) invece che senza.
+
 La posizione di partenza e' lo stato (state_raw) dell'evento di decisione k della partita originale, caricato in un
 Game nuovo (`Game.from_canonical`, come le posizioni dei test): la ricerca del campione riparte senza i "piani" che
 aveva in memoria dai turni precedenti (Layer::Plan), e il generatore del motore riparte da un seme nuovo.
@@ -68,7 +80,7 @@ def gioco(P: dict, tree: dict, seme: int):
     return riftbound_rs.Game.from_canonical(rust_bridge.registry(P["regole"]), json.dumps(tree), seme)
 
 
-def _agente_campione(g, P: dict, seat: str, seme: int, primo: str | None = None) -> None:
+def _agente_campione(g, P: dict, seat: str, seme: int, primo: str | None = None, finestre: bool = False) -> None:
     """Il posto `seat` gioca come il campione della partita (iterazioni, rete, sonda, valutazione); `primo`: la sua
     prima mossa di turno e' la prima legale la cui etichetta contiene `primo`."""
     g.set_search_agent(seat, P["iterazioni"], seme, None, D.rete(P["ckpt"], P["casuali"]), False)
@@ -78,6 +90,8 @@ def _agente_campione(g, P: dict, seat: str, seme: int, primo: str | None = None)
         g.set_search_valutazione(seat, v[0], float(v[1]), float(v[2]))
     if primo:
         g.set_search_first_move(seat, primo)
+    if finestre:
+        g.set_search_finestre(seat, True)
 
 
 def _punti(raw: dict) -> tuple[int, int]:
@@ -223,6 +237,77 @@ class Guida:
         self.default = 0                  # scelte lasciate al motore
         self.finito = False
         self.non_legale = None
+        self.opp_log = []                 # azioni non-PASS dell'avversario nelle finestre: (chiave finestra, descrizione)
+        self.cond_da = 0                  # lunghezza di opp_log quando l'etichetta corrente e' diventata in attesa
+        self.cond_key = None              # la finestra in cui l'etichetta condizionale corrente e' stata vista
+        self.ult_key = None               # chiave dell'ultima finestra vista
+        self.saltate = 0
+
+    @staticmethod
+    def chiave_finestra(win):
+        """La finestra di un evento: ('sd', turno, bf) in uno showdown, ('catena', turno) in una catena fuori da
+        showdown, None fuori da ogni finestra (punto di turno)."""
+        w = win or {}
+        if w.get("showdown") is not None:
+            return ("sd", w.get("turn"), w["showdown"])
+        if w.get("chain"):
+            return ("catena", w.get("turn"))
+        return None
+
+    def osserva(self, ev: str) -> None:
+        """Il `watch` della traccia (Game.trace_on): ogni decisione, dei due posti, a cose fatte."""
+        if '"k":"decision"' not in ev[:60]:
+            return
+        e = json.loads(ev)
+        if e.get("k") != "decision":
+            return
+        key = self.chiave_finestra(e.get("win"))
+        self.ult_key = key
+        if e.get("seat") == self.seat or e.get("point") == "turn_action":
+            return
+        act = e.get("action")
+        if act and act[0] != "PASS":
+            i = e.get("index")
+            menu = e.get("menu") or []
+            self.opp_log.append((key, menu[i] if isinstance(i, int) and 0 <= i < len(menu) else str(act)))
+
+    @staticmethod
+    def analizza(label: str):
+        """(condizionale, ambito, testo): `?` poi `danni:` / `scelta:`."""
+        l = label.strip()
+        cond = l.startswith("?")
+        if cond:
+            l = l[1:].lstrip()
+        for amb in ("danni", "scelta"):
+            if l.casefold().startswith(amb + ":"):
+                return cond, amb, l[len(amb) + 1:].strip()
+        return cond, None, l
+
+    def _risposta(self, key):
+        """La prima azione dell'avversario nella finestra `key` dopo l'attesa dell'etichetta, o None."""
+        if key is None:
+            return None
+        return next((d for k, d in self.opp_log[self.cond_da:] if k == key), None)
+
+    def _salta_condizionali(self, key, chiusa: bool = False) -> None:
+        """Scarta le etichette condizionali in attesa la cui finestra e' chiusa (fuori da ogni finestra, o un'altra;
+        `chiusa`: lo showdown e' finito, il combattimento sta assegnando i danni)."""
+        while self.i < len(self.seq):
+            cond = self.analizza(self.seq[self.i])[0]
+            if not cond:
+                return
+            if chiusa or key is None or (self.cond_key is not None and key != self.cond_key):
+                risp = self._risposta(self.cond_key if self.cond_key is not None else self.ult_key)
+                self.out(f"  {self.i + 1}. {self.seq[self.i]}: " + (
+                    f"condizione verificata (risposta {risp}) ma finestra chiusa senza poterla giocare: saltata" if risp
+                    else "condizione non verificata: saltata"))
+                self.i += 1
+                self.saltate += 1
+                self.cond_da, self.cond_key = len(self.opp_log), None
+                continue
+            if self.cond_key is None:
+                self.cond_key = key
+            return
 
     def _tavolo(self, raw) -> str:
         return riga_tavolo(D.riassunto(raw, self.seat))
@@ -244,16 +329,25 @@ class Guida:
                 return i
         return None
 
-    def passo(self, desc: str) -> None:
+    def passo(self, desc: str, dopo: str | None = None) -> None:
         self.i += 1
-        self.attesa = (self.i, desc)
+        self.cond_da, self.cond_key = len(self.opp_log), None
+        self.attesa = (self.i, desc + (f" (giocata dopo la risposta {dopo})" if dopo else ""))
 
     def ask(self, ev: str):
         e = json.loads(ev)
         k = e["k"]
         raw = e.get("state_raw")
         self._chiudi_attesa(raw)
+        if k == "decision":
+            self.ult_key = self.chiave_finestra(e.get("win"))
+            self._salta_condizionali(self.ult_key)
+        if k == "choice" and e.get("kind") == "combat_damage_order":
+            self._salta_condizionali(None, chiusa=True)   # i danni si assegnano dopo lo showdown: finestra chiusa
         lab = self.seq[self.i] if self.i < len(self.seq) else None
+        cond, amb, testo = self.analizza(lab) if lab is not None else (False, None, None)
+        # risposta dell'avversario nella finestra corrente (solo per le etichette condizionali)
+        dopo = self._risposta(self.ult_key) if cond else None
         if k == "decision":
             menu, punto = e["menu"], e["point"]
             pas = next((j for j, m in enumerate(menu) if m.casefold().startswith("pass")), 0)
@@ -268,10 +362,14 @@ class Guida:
                     self.finito = True
                     self.out(f"  (sequenza finita al punto '{punto}': da qui si passa)")
                 return pas
-            j = self.cerca(lab, menu)
+            j = None
+            if amb is None and (not cond or (dopo is not None and punto != "reaction")):
+                j = self.cerca(testo, menu)
             if j is not None:
-                self.passo(f"[{punto}] {menu[j]}")
+                self.passo(f"[{punto}] {menu[j]}", dopo if cond else None)
                 return j
+            if cond and punto != "turn_action":
+                return pas                                # condizione non (ancora) verificata: la finestra passa
             if punto == "turn_action" and self.consegna and raw is not None:
                 # la risposta dell'avversario ha tolto la mossa prevista: da qui gioca il campione (il mondo conta)
                 self.deviazione = (self.i + 1, lab, punto, menu)
@@ -284,17 +382,20 @@ class Guida:
                 if raw is not None:
                     self.out(f"       posizione: {self._tavolo(raw)}")
                 raise Stop()
-            self.out(f"       (passo {self.i + 1} '{lab}' non offerta in '{punto}', turno "
-                     f"{(e.get('win') or {}).get('turn')}: si passa; menu: {menu})")
+            if amb is None:
+                self.out(f"       (passo {self.i + 1} '{lab}' non offerta in '{punto}', turno "
+                         f"{(e.get('win') or {}).get('turn')}: si passa; menu: {menu})")
             return pas                                    # finestra non voluta dalla sequenza: passo
         if k == "choice":
             opz = etichette_scelta(e) if len(e["options_raw"]) > 1 else []
-            if lab is not None and opz:
-                j = self.cerca(lab, opz)
+            ok = lab is not None and opz and not (amb == "danni" and e["kind"] != "combat_damage_order") \
+                and (not cond or dopo is not None)
+            if ok:
+                j = self.cerca(testo, opz)
                 if j is not None:
-                    self.passo(f"[scelta] {opz[j]}")
+                    self.passo(f"[scelta] {opz[j]}", dopo if cond else None)
                     return j
-            if lab is not None and opz:
+            if lab is not None and opz and not cond and not (amb == "danni" and e["kind"] != "combat_damage_order"):
                 self.out(f"       (passo {self.i + 1} '{lab}' non fra le opzioni della scelta, default del motore; opzioni: {opz})")
             self.default += 1
             return e["default"]
@@ -303,14 +404,14 @@ class Guida:
             tipo = e["args"][1] if len(e.get("args", [])) > 1 and isinstance(e["args"][1], str) else "optional"
             for val in (True, False):
                 t = f"{tipo}: {'sì yes' if val else 'no'} ({nome})"
-                if lab is not None and lab.casefold() in t.casefold():
+                if lab is not None and amb is None and not cond and lab.casefold() in t.casefold():
                     self.passo(f"[opzionale] {t}")
                     return val
             return True
         if k == "decide_mode":
             n = e["args"][1] if len(e.get("args", [])) > 1 else 0
             nome = _nome_carta(e["args"][0]) if e.get("args") else ""
-            if lab is not None and isinstance(n, int):
+            if lab is not None and amb is None and not cond and isinstance(n, int):
                 for j in range(n):
                     t = f"mode {nome} #{j}"
                     if lab.casefold() in t.casefold():
@@ -343,6 +444,8 @@ def guidata(partita: dict, k: int, sequenza: list, avversario: str = "passa", ou
     guida = Guida(sequenza, camp, out)
     g.set_human_agent(camp, guida.ask, False, None)
     g.set_side_chooser()
+    if any(Guida.analizza(x)[0] for x in sequenza):
+        g.trace_on(guida.osserva)                         # le azioni dell'avversario nelle finestre (etichette `?`)
     try:
         g.run_actions_end()
     except Stop:
@@ -354,6 +457,8 @@ def guidata(partita: dict, k: int, sequenza: list, avversario: str = "passa", ou
     out("  " + riga_tavolo(fin))
     out(f"  punti: campione ({camp}) {fin['punti'][0]} - avversario {fin['punti'][1]}; passi forzati {guida.i}/"
         f"{len(sequenza)}; scelte lasciate al motore {guida.default}")
+    if guida.saltate:
+        out(f"  etichette condizionali saltate: {guida.saltate}")
     if guida.i < len(sequenza) and guida.non_legale is None:
         out(f"  ATTENZIONE: etichette mai trovate (il turno è finito): {sequenza[guida.i:]}")
     return {"finale": fin, "punti": fin["punti"], "non_legale": guida.non_legale, "passi": guida.i,
@@ -382,8 +487,18 @@ def differenza(x1: int, n1: int, x2: int, n2: int) -> tuple[float, float, float]
 
 
 def parse_linea(testo: str) -> list[str]:
-    """Una linea di --mosse: etichette separate da " ; " (una sola = la sola prima mossa)."""
-    return [x.strip() for x in testo.split(" ; ") if x.strip()]
+    """Una linea di --mosse: etichette separate da " ; " (una sola = la sola prima mossa). Un'ultima voce
+    `@finestre` non e' un'etichetta: vedi `linea_finestre`."""
+    v = [x.strip() for x in testo.split(" ; ") if x.strip()]
+    if v and v[-1].casefold() == "@finestre":
+        v.pop()
+    return v
+
+
+def linea_finestre(testo: str) -> bool:
+    """La linea finisce con ` ; @finestre`: dopo la sequenza il campione gioca con le finestre."""
+    v = [x.strip() for x in testo.split(" ; ") if x.strip()]
+    return len(v) > 1 and v[-1].casefold() == "@finestre"
 
 
 def _finisci(g, P: dict, w, i: int, t0: float, pt: tuple) -> dict:
@@ -403,19 +518,20 @@ def _finisci(g, P: dict, w, i: int, t0: float, pt: tuple) -> dict:
     return {"vince": w, "punti_turno": pt, "punti_fine": fin, "turni": g.turn, "secondi": time.time() - t0, "mondo": i}
 
 
-def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
+def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int, finestre: bool = False) -> dict:
     """Una continuazione: mondo `i` (mazzi rimescolati col seme base+i), il posto del campione gioca `mossa` e poi
     come il campione; entrambi i posti campione (finestre spente). `mossa`: una etichetta (la prima mossa di turno) o
     una lista di piu' etichette (la linea, forzata come in `guidata`).
     -> {vince, punti_turno, punti_fine, turni, secondi, mondo}; per una linea anche `passi` (etichette consumate) e
     `deviato`: None se la linea e' stata percorsa per intero, se no il numero del passo (1..) dove non era piu'
     proseguibile (etichetta non offerta in un punto di turno, o turno finito prima); da lì gioca il campione e il
-    mondo conta comunque (`menu_dev`: il menu visto in quel punto, se c'e')."""
+    mondo conta comunque (`menu_dev`: il menu visto in quel punto, se c'e'). `finestre`: dopo la sequenza il campione
+    del posto forzato gioca con le finestre (solo per una linea)."""
     t0 = time.time()
     seme = base_seme + i
     camp = P["camp"]
     linea = mossa if isinstance(mossa, (list, tuple)) else None
-    if linea is not None and len(linea) == 1:
+    if linea is not None and len(linea) == 1 and not finestre:
         mossa, linea = linea[0], None
     g = gioco(P, rimescola(tree, seme), seme)
     if linea is None:
@@ -429,6 +545,8 @@ def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
     guida = Guida(linea, camp, lambda t: None, consegna=True)
     g.set_human_agent(camp, guida.ask, False, None)
     g.set_side_chooser()
+    if any(Guida.analizza(x)[0] for x in linea):
+        g.trace_on(guida.osserva)
     w = None
     try:
         w = g.run_actions_end()
@@ -440,7 +558,7 @@ def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
         # col campione ai due posti
         g = gioco(P, albero(guida.resume), seme + 555)
         for s in ("A", "B"):
-            _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003)
+            _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003, None, finestre and s == camp)
         g.set_side_chooser()
         w = g.run_actions_end()
     else:
@@ -448,9 +566,10 @@ def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
         if guida.i < len(linea):
             deviato = guida.i + 1
         if w is None:
-            _agente_campione(g, P, camp, seme * 2 + (camp == "B") + 1_000_003)
+            _agente_campione(g, P, camp, seme * 2 + (camp == "B") + 1_000_003, None, finestre)
     r = _finisci(g, P, w, i, t0, _punti(json.loads(g.raw_dump())))
     r["passi"] = guida.i
+    r["saltate"] = guida.saltate
     r["deviato"] = deviato
     if guida.deviazione:
         r["menu_dev"] = guida.deviazione[3]
@@ -458,8 +577,8 @@ def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
 
 
 def _lavora(args):
-    P, tree, chiave, valore, i, base = args
-    return i, chiave, un_mondo(P, tree, valore, i, base)
+    P, tree, chiave, valore, i, base, fin = args
+    return i, chiave, un_mondo(P, tree, valore, i, base, fin)
 
 
 def punteggio(r: dict, camp: str) -> float:
@@ -495,7 +614,7 @@ def continua(partita: dict, k: int, mosse: list, n: int = 100, processi: int = 1
     for m, lab in linee.items():
         if not lab:
             raise ValueError(f"linea vuota: '{m}'")
-        if len(lab) == 1:
+        if len(lab) == 1 and not linea_finestre(m):
             j = Guida.cerca(lab[0], e["menu"])
             if j is None:
                 raise ValueError(f"mossa '{m}' non nel menu di k={k}: {e['menu']}")
@@ -505,10 +624,10 @@ def continua(partita: dict, k: int, mosse: list, n: int = 100, processi: int = 1
                                                     if len(simili) > 1 and e["menu"][j].casefold() != lab[0].casefold() else ""))
         else:
             valori[m] = lab
-            out(f"linea '{m}': {len(lab)} etichette")
+            out(f"linea '{m}': {len(lab)} etichette" + (", poi il campione con le finestre" if linea_finestre(m) else ""))
     ris = {m: [] for m in mosse}
     t0 = time.time()
-    lavori = [(P, tree, m, valori[m], i, base) for i in range(n) for m in mosse]
+    lavori = [(P, tree, m, valori[m], i, base, linea_finestre(m)) for i in range(n) for m in mosse]
 
     def prog(done):
         if done % (10 * len(mosse)) == 0 or done == len(lavori):
@@ -540,7 +659,9 @@ def continua(partita: dict, k: int, mosse: list, n: int = 100, processi: int = 1
         rep[m] = {"mossa": nome, "n": len(rs), "vittorie": v, "patte": sum(1 for r in rs if r["vince"] == "DRAW"),
                   "non_finite": sum(1 for r in rs if r["vince"] is None),
                   "etichette": len(linee[m]),
-                  "consumate": (sum(r["passi"] for r in rs) / len(rs)) if len(linee[m]) > 1 else None,
+                  "consumate": (sum(r["passi"] for r in rs) / len(rs)) if isinstance(valori[m], list) else None,
+                  "finestre": linea_finestre(m),
+                  "saltate": (sum(r.get("saltate", 0) for r in rs) / len(rs)) if isinstance(valori[m], list) else None,
                   "deviati": sum(dev.values()), "passi_deviazione": dict(sorted(dev.items())),
                   "punti_turno": [sum(pt(r, "punti_turno", camp) for r in rs) / len(rs),
                                   sum(pt(r, "punti_turno", opp) for r in rs) / len(rs)],
@@ -571,7 +692,9 @@ def testo_continua(res: dict) -> list[str]:
         if r["consumate"] is not None:
             hist = ", ".join(f"passo {s}: {c}" for s, c in r["passi_deviazione"].items()) or "nessuno"
             righe.append(f"    etichette consumate in media {r['consumate']:.2f}/{r['etichette']}; mondi deviati dalla linea "
-                         f"{r['deviati']}/{r['n']} (da lì gioca il campione); passo della deviazione: {hist}")
+                         f"{r['deviati']}/{r['n']} (da lì gioca il campione); passo della deviazione: {hist}"
+                         + (f"; condizionali saltate in media {r['saltate']:.2f}" if r.get("saltate") else "")
+                         + ("; poi il campione con le finestre" if r.get("finestre") else ""))
     migliore = max(mosse, key=lambda m: mosse[m]["vittorie"] / max(1, mosse[m]["n"]))
     b = mosse[migliore]
     if len(mosse) > 1:
