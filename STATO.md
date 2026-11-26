@@ -67,10 +67,10 @@ migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdow
 (26/11) Sonda A, prototipo offline (`riftbound/rs/sonda.py`, `attacco.py sonda|congela|fuori|t9-foglia`): sui dati
 salvati sceglie l'attacco in 6 su 24 (i 5 veri + EK4A T15 neutro). Da lanciare: `scripts/rust/sonda_mac.command`
 (congela con identità, 72 posizioni nuove ES/EK + R/I, T9 foglia contro vittorie), ~1 h.
-(26/11, Matteo) Serie «stesso seme»: Matteo gioca una partita col seme 680137721 (`coach.py --seme`), poi
-`scripts/rust/stesso_seme_mac.command` fino alla prima vittoria di Sett nella simulazione (X=500), Evelynn automatica
-dal T1 (il passaggio segui-Matteo-poi-pilota a metà finestra non c'è: serve un agente composto in Rust). Con la rete
-casuale il seme di Sett cambia le simulazioni ma non le mosse: il riepilogo conta le partite distinte.
+(26/11, Matteo) 155859 (seme 680137721, D72-D82) vinta 8 a 4; segnalazioni 29-35 (SEGNALAZIONI; 35 candidato D83:
+costo di un modo pagato senza "Come paghi?", niente Gold). Serie «stesso seme» (`stesso_seme_20261126_1614/`, Evelynn
+automatica dal T1): rifacimento IDENTICO (153 righe); Sett 0 vittorie su 500, ma solo 6 partite distinte: il seme
+della ricerca cambia poco le mosse del campione. Il passaggio segui-Matteo-poi-pilota richiede un agente composto.
 
 ## Prossimi passi
 1. Risultati di `sonda_mac` -> Astra; se passa fuori campione: sonda nel bot dietro interruttore (agente con consegna
