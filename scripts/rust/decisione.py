@@ -51,6 +51,19 @@ def _riga_top(c: list) -> str:
     return " | ".join(f"{x['azione'][:34]} n={x['n']} q={_f(x['q'], 2)} P={_f(x['P'], 3)}" for x in c[:6])
 
 
+def _stampa_diagnosi(d: dict, attese: list) -> None:
+    """Per figlio della radice (per visite): visite, q e le giocate dei piloti nelle sue simulazioni (posto, punto,
+    etichetta: conteggio); con --attese solo quelle la cui etichetta contiene una delle sottostringhe."""
+    print("    figli della radice (visite, q; giocate dei piloti nelle finestre):")
+    for i, c in sorted(enumerate(d["children"]), key=lambda x: (-x[1]["n"], x[0])):
+        if not c["n"]:
+            continue
+        tal = [t for t in c["tally"] if not attese or any(s.casefold() in t[2].casefold() for s in attese)]
+        tal.sort(key=lambda t: -t[3])
+        resto = "; ".join(f"{t[0]} {t[1]} {t[2]}: {t[3]}" for t in tal[:8]) or "-"
+        print(f"      {c['label'][:40]:40} n={c['n']:4} q={_f(c['q'], 2)}  {resto}")
+
+
 def cmd_rifai(a) -> int:
     P = partita_da_args(a)
     elenco = D.elenca(P)
@@ -67,6 +80,8 @@ def cmd_rifai(a) -> int:
     # None = omessa (la decisione rifatta tiene la valutazione originale); anche "storica" esplicita e' un override.
     val = (a.valutazione, a.k_acc, a.alpha) if a.valutazione is not None else None
     etich = f" [{a.valutazione} k={a.k_acc} alpha={a.alpha}]" if val else ""
+    etich += " [finestre]" if a.finestre else ""
+    etich += f" [quota {' | '.join(a.quota)} n={a.quota_n}]" if a.quota else ""
     tutti = []
     for k in bersagli:
         base = D.rifai(P, k, None, posizione=True)
@@ -80,11 +95,15 @@ def cmd_rifai(a) -> int:
         for n in a.iterazioni:
             if val is not None:
                 r = D.rifai(P, k, n, posizione=False, valutazione=val)
+            elif a.finestre or a.quota:
+                r = D.rifai(P, k, n, posizione=False, finestre=a.finestre, quota=(a.quota, a.quota_n) if a.quota else None)
             else:
                 r = base if n == orig_n else D.rifai(P, k, n, posizione=False)
             out["varianti"][n] = {kk: vv for kk, vv in r.items() if kk != "posizione"}
             print(f"  N={n}{etich}: scelta {r['azione']} ({'uguale' if r['uguale'] else 'DIVERSA'} dall'originale)")
             print(f"    top: {_riga_top(r['classifica'])}")
+            if r.get("diagnosi"):
+                _stampa_diagnosi(r["diagnosi"], a.attese)
             for sub in a.attese:
                 trov = [x for x in r["classifica"] if sub.casefold() in x["azione"].casefold()]
                 if not trov:
@@ -141,6 +160,12 @@ def main(argv=None) -> int:
     r.add_argument("--alpha", type=float, default=0.2)
     r.add_argument("--tipo", default="turno", choices=["turno", "reazione", "showdown", "tutti"])
     r.add_argument("--attese", nargs="*", default=[])
+    r.add_argument("--finestre", action="store_true",
+                   help="le simulazioni della ricerca rifatta giocano le finestre di reazione/showdown per i due posti (pilota)")
+    r.add_argument("--quota", nargs="+", default=None, metavar="ETICHETTA",
+                   help="nella radice della ricerca di turno, finché un figlio la cui etichetta contiene una di queste "
+                        "sottostringhe ha meno di --quota-n visite si simula quello con meno visite")
+    r.add_argument("--quota-n", type=int, default=10)
     c = sub.choices["concordanza"]
     c.add_argument("--matchup", nargs="+", required=True)
     c.add_argument("--semi", required=True, help="N (1..N) o A-B")
