@@ -36,8 +36,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
-- (26/11, Matteo) Basta correzioni a mano una alla volta: proposta ad Astra di riallenare la rete con la ricerca
-  (visite e risultati, regole correnti); la pagina può pensare minuti a turno, le arene restano veloci.
+- (26/11, Matteo e Astra) Filone principale: riallenare la rete con la ricerca (visite N/ΣN e esito ±1), --init da
+  ckpt_040000 (che resta l'avversario fisso), stessa architettura. Pilota: 2.000 partite (200 per matchup, D72-D82),
+  Dirichlet 0,25/α 0,3 alle radici di turno, temperatura 1 sulle prime 4 decisioni di turno, poi la più visitata;
+  valore: prima raccolta con rimonta, poi in sviluppo 80/20 rimonta/valore (rimonta sul Pass che chiude il turno).
+  Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
+  Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
 - (26/11, Astra) Attacchi con lo showdown: sonda a un'ondata (A) dietro interruttore, soglia +0,15, generatore e
   budget congelati sulle 24; B (finestre + quota) solo confronto economico; pagina solo dopo fuori campione e arena.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
@@ -60,23 +64,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-§8 chiuso (26/11, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`); bocciati `accumulo`, `minaccia`.
-§9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo; finestre: arena NON PASSA (ES 0,474, EK 0,531). T9 (Astra):
-attaccare Bandle vince 30-38/100 contro 7-8 di Valley. Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
-migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown; sonda di fine turno +0,15: 5 veri, 0 falsi.
-(26/11) Sonda A, prototipo offline (`riftbound/rs/sonda.py`, `attacco.py sonda|congela|fuori|t9-foglia`): sui dati
-salvati sceglie l'attacco in 6 su 24 (i 5 veri + EK4A T15 neutro). Da lanciare: `scripts/rust/sonda_mac.command`
-(congela con identità, 72 posizioni nuove ES/EK + R/I, T9 foglia contro vittorie), ~1 h.
-(26/11, Matteo) 155859 (seme 680137721, D72-D82) vinta 8 a 4; segnalazioni 29-35 (SEGNALAZIONI; 35 candidato D83:
-costo di un modo pagato senza "Come paghi?", niente Gold). Serie «stesso seme» (`stesso_seme_20261126_1614/`, Evelynn
-automatica dal T1): rifacimento IDENTICO (153 righe); Sett 0 vittorie su 500, ma solo 6 partite distinte: il seme
-della ricerca cambia poco le mosse del campione. Il passaggio segui-Matteo-poi-pilota richiede un agente composto.
+§8-§9 (GIOCATE): `rimonta` default della pagina; finestre bocciate in arena. Serie di 24 (`attacco_20261126_1352_serie/`):
+5 attacchi migliori (+28/+43 pp) mai costruiti. Sonda A offline (`riftbound/rs/sonda.py`, `attacco.py
+sonda|congela|fuori|t9-foglia`, `scripts/rust/sonda_mac.command`): sui dati salvati attacco in 6 su 24; ora diagnosi.
+(26/11) 155859 (seme 680137721) vinta da Matteo 8 a 4; segnalazioni 29-35 (35: candidato D83, costo di un modo senza
+"Come paghi?", niente Gold). «Stesso seme» (`stesso_seme_20261126_1614/`): rifacimento IDENTICO; Sett 0 su 500 contro
+Evelynn automatica, solo 6 partite distinte (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Risposte di Astra alla proposta «riallenare con la ricerca» (7 domande: priorità, partenza, valore nelle foglie,
-   esplorazione, promozione, scelte interne, «pensa» nella pagina). Poi il registro delle visite e il ciclo.
-2. `sonda_mac` (prova offline della sonda A) quando Matteo vuole; D83 (Reckless/Gold) da verificare.
-3. §7; `win_probe` in arena; apertura G1; Bo3 col post-side; fili del 23/11.
+1. In corso: raccolta pilota con registro ed esplorazione (Rust + `raccolta.py`); «primo responso» (prior/visite/Q a
+   138 e 512, fino a fine partita); D83 riprodotto (se confermato, correzione prima della raccolta grande).
+2. Poi: allenamento pilota (politica e valore), una partita della rete nuova, confronto in sviluppo, arena.
+3. `sonda_mac` una volta sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
