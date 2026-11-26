@@ -64,17 +64,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-(26/11 sera) Pilota (`generazione_20261126_1810`, 4.000 partite, D72-D83): (b) 47,95%, (c) 49,05%, c−b +1,10 pp
-[−0,80, +3,00]; EQM sull'esito 0,7184 → 0,6339. Da lanciare sul Mac: `valore_mac.command` = arena (d) (100 coppie × 10,
-semi 40M come il pilota), confronto appaiato d−c (solo il prior), d−b, c−b; seguiti (semi 50M: partite del campione
-contro sé stesso, dove (d) cambia mossa entrambe le mosse fino all'esito sugli stessi 32 mondi `ignote`).
+(26/11 sera) Pilota (`generazione_20261126_1810`): (b) 47,95%, (c) 49,05%, c−b +1,10 [−0,80, +3,00]; EQM 0,7184 → 0,6339.
+Prova (d) (`valore_20261126_2054/`): contro il campione 50,2% [48,7, 51,7]; d−c +1,15 [−1,05, +3,35] (il prior nuovo
+non aiuta); d−b +2,25 [0,00, +4,50]. Seguiti: (d) cambia mossa in 70 su 480 (14,6%), d − campione +0,2 pp [−4,2, +4,4],
+18 a favore, 20 contro, 32 pari (29 identiche in tutti i mondi). Il valore al 20% non migliora le scelte. Nota ad Astra.
 §8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
 offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Matteo: `valore_mac.command` sul Mac; risultati ad Astra (arena.txt, confronto.txt, seguiti/riepilogo.txt).
-2. Se (d) sceglie linee migliori con regolarità: raccolta più grande sul CCX63; promozione su semi nuovi (non 30M/40M/50M).
+1. Risposta di Astra sulla prova (d): peso più alto? valore anche sul Pass che chiude il turno? raccolta grande da parte?
+   Indizio: dove (d) non gioca la più visitata −2,2 pp, dove la gioca +4,6 (non significativo): prova sulla scelta finale?
+2. Raccolta grande sul CCX63 ferma; promozioni future su semi nuovi (non 30M/40M/50M).
 3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
 
 ## File principali
