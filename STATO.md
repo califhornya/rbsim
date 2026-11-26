@@ -36,6 +36,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
+- (26/11, Matteo) Basta correzioni a mano una alla volta: proposta ad Astra di riallenare la rete con la ricerca
+  (visite e risultati, regole correnti); la pagina può pensare minuti a turno, le arene restano veloci.
 - (26/11, Astra) Attacchi con lo showdown: sonda a un'ondata (A) dietro interruttore, soglia +0,15, generatore e
   budget congelati sulle 24; B (finestre + quota) solo confronto economico; pagina solo dopo fuori campione e arena.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
@@ -73,10 +75,10 @@ automatica dal T1): rifacimento IDENTICO (153 righe); Sett 0 vittorie su 500, ma
 della ricerca cambia poco le mosse del campione. Il passaggio segui-Matteo-poi-pilota richiede un agente composto.
 
 ## Prossimi passi
-1. Risultati di `sonda_mac` -> Astra; se passa fuori campione: sonda nel bot dietro interruttore (agente con consegna
-   a fine piano), arena a posti scambiati per matchup con limiti di regressione fissati prima, tempo per decisione (p95).
-2. Partita di Matteo col seme e `stesso_seme_mac`; poi, se serve, l'agente composto (segue Matteo, poi pilota).
-3. §7 (showdown 6 a 2); `win_probe` in arena; apertura G1; Bo3 col post-side; fili del 23/11.
+1. Risposte di Astra alla proposta «riallenare con la ricerca» (7 domande: priorità, partenza, valore nelle foglie,
+   esplorazione, promozione, scelte interne, «pensa» nella pagina). Poi il registro delle visite e il ciclo.
+2. `sonda_mac` (prova offline della sonda A) quando Matteo vuole; D83 (Reckless/Gold) da verificare.
+3. §7; `win_probe` in arena; apertura G1; Bo3 col post-side; fili del 23/11.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
