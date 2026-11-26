@@ -7,6 +7,10 @@
   attacco.py serie     --posizioni F.json --out DIR [--max 12] (come `confronta`, per ogni posizione)
   attacco.py rivedi    --serie DIR --out DIR [--quota 4] [--mirata 10] [--processi 4] [--ckpt F | --casuali]
   attacco.py riproduci-t9 --dati docs/bot/esperimenti/t9_attacco/dati [--rapida] [--processi 4]
+  attacco.py sonda     --pagina F | --autonoma MU:S:P --k K --out DIR   (sonda A a un'ondata, riftbound/rs/sonda.py)
+  attacco.py congela   --serie DIR --out DIR
+  attacco.py fuori     --posizioni JSON --out DIR [--per-matchup ES=24,EK=24,ER=6] [--escludi JSON]
+  attacco.py t9-foglia --out DIR
 
 Partita: `--pagina FILE` (una partita della pagina contro il campione) oppure `--autonoma MU:SEME[:POSTO]` (campione
 contro campione; POSTO = il posto studiato, A di default); `--ckpt` (default runs/sett/ekris_s12/ckpt_040000.pt) o
@@ -24,6 +28,9 @@ nei mondi di scelta (sonde), la proposta con più punti se la selezione ha scelt
 mondi di verifica (controllo prima del riferimento su 2 mondi); per gli attacchi verificati migliori, la ricerca del
 campione con finestre e quota (4 per tutte le mosse, 10 sulla prima mossa dell'attacco). `rivedi.txt` con la riga `totale:`.
 `riproduci-t9`: la prova di Astra sul T9 (partita 013325, k=10) confrontata mondo per mondo con i suoi dati.
+`sonda`: la sonda A a un'ondata su una posizione (+ verifica a partita intera su mondi nuovi); `congela`: la sonda sulle
+posizioni di una serie, con controllo di identità; `fuori`: la sonda fuori campione, riepilogo per gruppo e matchup;
+`t9-foglia`: il caso diagnostico del T9 (linee guidate, foglia dopo l'avversario). Vedi riftbound/rs/sonda.py.
 """
 from __future__ import annotations
 
@@ -38,6 +45,7 @@ sys.path.insert(0, str(ROOT))
 
 from riftbound.rs import attacco as A  # noqa: E402
 from riftbound.rs import decisione_rs as D  # noqa: E402
+from riftbound.rs import sonda as S  # noqa: E402
 
 
 def intervallo(testo: str) -> tuple[int, int]:
@@ -146,6 +154,37 @@ def cmd_t9(a) -> int:
     return 0 if not dif else 1
 
 
+def cmd_sonda(a) -> int:
+    e = S.valuta(una_partita(a), a.k, Path(a.out), a.processi, a.verifica, print, a.mondi)
+    print("\n".join(S.testo_esito(e)))
+    return 0
+
+
+def cmd_congela(a) -> int:
+    righe = S.congela(Path(a.serie), Path(a.out), a.processi, print, a.ckpt, a.casuali, a.mondi, a.solo)
+    print(righe[-1])
+    return 0
+
+
+def per_matchup(testo: str | None) -> dict | None:
+    if not testo:
+        return None
+    return {v.split("=")[0]: int(v.split("=")[1]) for v in testo.split(",") if v.strip()}
+
+
+def cmd_fuori(a) -> int:
+    righe = S.fuori(Path(a.posizioni), Path(a.out), a.processi, per_matchup(a.per_matchup),
+                    Path(a.escludi) if a.escludi else None, print, a.ckpt, a.casuali, a.verifica, a.mondi)
+    print("\n".join(r for r in righe if r.startswith(("gruppo", "totale", "differenza media"))))
+    return 0
+
+
+def cmd_t9_foglia(a) -> int:
+    righe = S.diagnosi_t9(Path(a.out), a.processi, a.ckpt, a.casuali, print, a.mondi_t9)
+    print(righe[-1])
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -204,6 +243,36 @@ def main() -> int:
     p.add_argument("--out", help="cartella dei file prodotti (default: temporanea)")
     p.add_argument("--replay", help="partita del T9 (default: la 013325 in docs/bot/partite/coach)")
     p.set_defaults(f=cmd_t9)
+
+    def sond(p):
+        p.add_argument("--out", required=True)
+        p.add_argument("--verifica", type=intervallo, default=S.VERIFICA, help="INIZIO:N mondi di verifica (6000:100)")
+        p.add_argument("--mondi", type=intervallo, default=S.MONDI, help="INIZIO:N mondi della sonda (2000:16)")
+
+    p = sub.add_parser("sonda", help="la sonda A a un'ondata su una posizione")
+    comune(p)
+    p.add_argument("--k", type=int, required=True)
+    sond(p)
+    p.set_defaults(f=cmd_sonda)
+    p = sub.add_parser("congela", help="la sonda sulle posizioni di una serie, con controllo di identità")
+    comune(p, partita=False)
+    p.add_argument("--serie", required=True, help="cartella di una serie (con le cartelle NN_..._kK)")
+    p.add_argument("--out", required=True)
+    p.add_argument("--mondi", type=intervallo, default=S.MONDI, help="INIZIO:N mondi della sonda (2000:16)")
+    p.add_argument("--solo", nargs="+", help="solo le cartelle con questo prefisso (prove)")
+    p.set_defaults(f=cmd_congela)
+    p = sub.add_parser("fuori", help="la sonda fuori campione, riepilogo per gruppo e matchup")
+    comune(p, partita=False)
+    p.add_argument("--posizioni", required=True, help="json di `posizioni`")
+    p.add_argument("--per-matchup", help="al più N posizioni per matchup, es. ES=24,EK=24,ER=6")
+    p.add_argument("--escludi", help="json delle posizioni di sviluppo (default attacco_20261126/posizioni.json)")
+    sond(p)
+    p.set_defaults(f=cmd_fuori)
+    p = sub.add_parser("t9-foglia", help="il caso diagnostico del T9 (linee guidate, foglia)")
+    comune(p, partita=False)
+    p.add_argument("--out", required=True)
+    p.add_argument("--mondi-t9", type=int, default=100, help="mondi per modo (100)")
+    p.set_defaults(f=cmd_t9_foglia)
     a = ap.parse_args()
     return a.f(a)
 
