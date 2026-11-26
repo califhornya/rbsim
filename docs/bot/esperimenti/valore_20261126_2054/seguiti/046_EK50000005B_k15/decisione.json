@@ -1,0 +1,176 @@
+{
+ "nome": "EK50000005B",
+ "k": 15,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Onslaught @BF0",
+  "Cast Onslaught @BF1",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Cast Star-Crossed @BF0",
+  "Cast Star-Crossed @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Move Fizz Trickster base→BF0",
+  "Move Fizz Trickster base→BF1",
+  "Activate buff_unit (Kha'Zix Voidreaver)"
+ ],
+ "campione": "Play gear The Good Stuff @BF0",
+ "d": "Activate buff_unit (Kha'Zix Voidreaver)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 11,
+   "azione": "Move Fizz Trickster base→BF0",
+   "n": 97,
+   "q": -0.9984418439788249,
+   "P": 0.6871124505996704,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 18,
+   "q": -0.9981748631957598,
+   "P": 0.12998323142528534,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 18,
+   "q": -0.9984506431823349,
+   "P": 0.12998323142528534,
+   "rango": 3
+  },
+  {
+   "i": 12,
+   "azione": "Move Fizz Trickster base→BF1",
+   "n": 3,
+   "q": -0.9989257756476975,
+   "P": 0.0279476810246706,
+   "rango": 4
+  },
+  {
+   "i": 13,
+   "azione": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "n": 1,
+   "q": -0.998141238908062,
+   "P": 0.013043965213000774,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.004245673771947622,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Onslaught @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0023348790127784014,
+   "rango": 7
+  },
+  {
+   "i": 2,
+   "azione": "Cast Onslaught @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.001842702622525394,
+   "rango": 8
+  },
+  {
+   "i": 5,
+   "azione": "Cast Star-Crossed @BF0",
+   "n": 0,
+   "q": null,
+   "P": 4.531938975560479e-05,
+   "rango": 9
+  },
+  {
+   "i": 6,
+   "azione": "Cast Star-Crossed @BF1",
+   "n": 0,
+   "q": null,
+   "P": 5.357578629627824e-05,
+   "rango": 10
+  },
+  {
+   "i": 7,
+   "azione": "Cast Void Assault @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0007458552136085927,
+   "rango": 11
+  },
+  {
+   "i": 8,
+   "azione": "Cast Void Assault @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.000957788375671953,
+   "rango": 12
+  },
+  {
+   "i": 9,
+   "azione": "Cast Void Assault @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0007458552136085927,
+   "rango": 13
+  },
+  {
+   "i": 10,
+   "azione": "Cast Void Assault @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.000957788375671953,
+   "rango": 14
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

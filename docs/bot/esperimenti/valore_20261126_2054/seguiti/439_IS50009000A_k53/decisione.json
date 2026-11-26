@@ -1,0 +1,131 @@
+{
+ "nome": "IS50009000A",
+ "k": 53,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Play Fallen Feline",
+  "Play Fallen Feline to BF0",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Move Iridescent Avian BF0→base",
+  "Move Affectionate Poro BF0→base",
+  "Move Daisy! BF0→base",
+  "Activate buff_unit (Iridescent Avian)"
+ ],
+ "campione": "Play Fallen Feline to BF0",
+ "d": "Activate buff_unit (Iridescent Avian)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 8,
+   "azione": "Activate buff_unit (Iridescent Avian)",
+   "n": 119,
+   "q": -0.1194272985343858,
+   "P": 0.6983803510665894,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Play Fallen Feline to BF0",
+   "n": 7,
+   "q": -0.29264933270491955,
+   "P": 0.06623337417840958,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Cast Friendship @BF1",
+   "n": 4,
+   "q": -0.48046820985971905,
+   "P": 0.08685745298862457,
+   "rango": 3
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 2,
+   "q": -0.32747739480870525,
+   "P": 0.03177645429968834,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Cast Friendship @BF0",
+   "n": 2,
+   "q": -0.4805023037165306,
+   "P": 0.06008274853229523,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Play Fallen Feline",
+   "n": 1,
+   "q": -0.4155116550495662,
+   "P": 0.010886923409998417,
+   "rango": 6
+  },
+  {
+   "i": 5,
+   "azione": "Move Iridescent Avian BF0→base",
+   "n": 1,
+   "q": -0.5475821760178256,
+   "P": 0.006141071207821369,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Move Daisy! BF0→base",
+   "n": 1,
+   "q": -0.5970735762359712,
+   "P": 0.037375882267951965,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Move Affectionate Poro BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0022657765075564384,
+   "rango": 9
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

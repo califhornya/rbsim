@@ -1,0 +1,95 @@
+{
+ "nome": "ES50006003B",
+ "k": 37,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Move Trifarian Captain BF1→base",
+  "Move Sett Kingpin BF1→base",
+  "Move Kinkou Initiate BF1→base",
+  "Move First Mate BF1→base"
+ ],
+ "campione": "Move Kinkou Initiate BF1→base",
+ "d": "Move Sett Kingpin BF1→base",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 2,
+   "azione": "Move Sett Kingpin BF1→base",
+   "n": 76,
+   "q": 0.9784565399097168,
+   "P": 0.5425928831100464,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Move Trifarian Captain BF1→base",
+   "n": 38,
+   "q": 0.9766831668903337,
+   "P": 0.28003260493278503,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Move Kinkou Initiate BF1→base",
+   "n": 15,
+   "q": 0.9776796419648635,
+   "P": 0.11144579946994781,
+   "rango": 3
+  },
+  {
+   "i": 4,
+   "azione": "Move First Mate BF1→base",
+   "n": 8,
+   "q": 0.9776796419648635,
+   "P": 0.05967642366886139,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.006252314895391464,
+   "rango": 5
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

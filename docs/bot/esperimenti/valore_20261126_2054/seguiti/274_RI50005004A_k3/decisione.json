@@ -1,0 +1,158 @@
+{
+ "nome": "RI50005004A",
+ "k": 3,
+ "turno": 5,
+ "menu": [
+  "Pass",
+  "Play Kai'Sa Survivor",
+  "Play Inferna",
+  "Play First Mate",
+  "Play Grim Apothecary",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Deploy champion Rengar Trophy Hunter",
+  "Deploy champion Rengar Trophy Hunter to BF0",
+  "Move Pit Rookie BF1→base",
+  "Move Noxus Hopeful base→BF0",
+  "Move Noxus Hopeful base→BF1"
+ ],
+ "campione": "Deploy champion Rengar Trophy Hunter to BF0",
+ "d": "Move Noxus Hopeful base→BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 10,
+   "azione": "Move Noxus Hopeful base→BF0",
+   "n": 100,
+   "q": 0.9468060128462683,
+   "P": 0.686530351638794,
+   "rango": 1
+  },
+  {
+   "i": 11,
+   "azione": "Move Noxus Hopeful base→BF1",
+   "n": 25,
+   "q": 0.9732261643446705,
+   "P": 0.2058878093957901,
+   "rango": 2
+  },
+  {
+   "i": 8,
+   "azione": "Deploy champion Rengar Trophy Hunter to BF0",
+   "n": 11,
+   "q": 0.9397145249276045,
+   "P": 0.08415256440639496,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play Kai'Sa Survivor",
+   "n": 1,
+   "q": 0.498964416496921,
+   "P": 0.014880792237818241,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 4.195976543996949e-06,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Play Inferna",
+   "n": 0,
+   "q": null,
+   "P": 0.0013266823953017592,
+   "rango": 6
+  },
+  {
+   "i": 3,
+   "azione": "Play First Mate",
+   "n": 0,
+   "q": null,
+   "P": 0.0005153216770850122,
+   "rango": 7
+  },
+  {
+   "i": 4,
+   "azione": "Play Grim Apothecary",
+   "n": 0,
+   "q": null,
+   "P": 0.006261543836444616,
+   "rango": 8
+  },
+  {
+   "i": 5,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.927702584225699e-07,
+   "rango": 9
+  },
+  {
+   "i": 6,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 2.2768768204173284e-08,
+   "rango": 10
+  },
+  {
+   "i": 7,
+   "azione": "Deploy champion Rengar Trophy Hunter",
+   "n": 0,
+   "q": null,
+   "P": 0.0004355846031103283,
+   "rango": 11
+  },
+  {
+   "i": 9,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 4.95769063491025e-06,
+   "rango": 12
+  }
+ ],
+ "matchup": "RI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

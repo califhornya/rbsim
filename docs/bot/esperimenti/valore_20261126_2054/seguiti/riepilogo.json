@@ -1,0 +1,4494 @@
+{
+ "impostazioni": {
+  "ckpt": "/Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "ckpt_valore": "/Users/mateo/projects/rbsim2026/rbsim-rust/runs/allena/generazione_20261126_1810/rete.pt",
+  "peso": 0.2,
+  "iterazioni": 138,
+  "regole": "6427b90+D72-D83",
+  "partite": 60,
+  "per_partita": 8,
+  "mondi": 32,
+  "n_boot": 40000
+ },
+ "riassunto": {
+  "esaminate": 480,
+  "escluse": 0,
+  "disaccordi": 70,
+  "n_decisioni": 70,
+  "mondi_validi": 2240,
+  "mondi_esclusi": 0,
+  "tasso_disaccordo": 0.14583333333333334,
+  "media": 0.002232142857142857,
+  "ic95": [
+   -0.04241071428571429,
+   0.044196428571428574
+  ],
+  "a_favore": 18,
+  "contro": 20,
+  "pari": 32,
+  "per_matchup": {
+   "EI": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 5,
+    "tasso_disaccordo": 0.10416666666666667,
+    "media": 0.0375
+   },
+   "EK": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 8,
+    "tasso_disaccordo": 0.16666666666666666,
+    "media": 0.0078125
+   },
+   "ER": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 6,
+    "tasso_disaccordo": 0.125,
+    "media": 0.08333333333333333
+   },
+   "ES": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 11,
+    "tasso_disaccordo": 0.22916666666666666,
+    "media": 0.03409090909090909
+   },
+   "IS": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 7,
+    "tasso_disaccordo": 0.14583333333333334,
+    "media": -0.022321428571428572
+   },
+   "KI": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 8,
+    "tasso_disaccordo": 0.16666666666666666,
+    "media": 0.01953125
+   },
+   "KR": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 8,
+    "tasso_disaccordo": 0.16666666666666666,
+    "media": -0.015625
+   },
+   "KS": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 5,
+    "tasso_disaccordo": 0.10416666666666667,
+    "media": -0.00625
+   },
+   "RI": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 6,
+    "tasso_disaccordo": 0.125,
+    "media": 0.010416666666666666
+   },
+   "RS": {
+    "esaminate": 48,
+    "escluse": 0,
+    "disaccordi": 6,
+    "tasso_disaccordo": 0.125,
+    "media": -0.14583333333333334
+   }
+  }
+ },
+ "decisioni": [
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000000A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000001B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 38,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000002A",
+   "k": 47,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000003B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 42,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 48,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000004A",
+   "k": 52,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EK",
+   "nome": "EK50000005B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 42,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001000A",
+   "k": 48,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.6875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001001B",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001002A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001003B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001004A",
+   "k": 28,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.0625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ER",
+   "nome": "ER50001005B",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002000A",
+   "k": 33,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002001B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002002A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002003B",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 39,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 45,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002004A",
+   "k": 50,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KR",
+   "nome": "KR50002005B",
+   "k": 38,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 37,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 42,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003000A",
+   "k": 51,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003001B",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003002A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 37,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 43,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003003B",
+   "k": 51,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003004A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 32,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "EI",
+   "nome": "EI50003005B",
+   "k": 41,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 33,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 38,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.5625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004000A",
+   "k": 46,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.28125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 35,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 45,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004001B",
+   "k": 48,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.1875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004002A",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 28,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004003B",
+   "k": 39,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004004A",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KI",
+   "nome": "KI50004005B",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005000A",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 33,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005001B",
+   "k": 37,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 28,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005002A",
+   "k": 35,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 40,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005003B",
+   "k": 46,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.21875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.0625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005004A",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RI",
+   "nome": "RI50005005B",
+   "k": 36,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.1875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006000A",
+   "k": 37,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006001B",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.25,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.0625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006002A",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 37,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006003B",
+   "k": 44,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.15625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006004A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 9,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "ES",
+   "nome": "ES50006005B",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007000A",
+   "k": 32,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007001B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 12,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007002A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007003B",
+   "k": 29,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007004A",
+   "k": 36,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 36,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "KS",
+   "nome": "KS50007005B",
+   "k": 40,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008000A",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.96875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 15,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 30,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008001B",
+   "k": 34,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0625,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 2,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008002A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 28,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 35,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.28125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008003B",
+   "k": 40,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 3,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008004A",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 5,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "RS",
+   "nome": "RS50008005B",
+   "k": 24,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 25,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 33,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 36,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 42,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 50,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009000A",
+   "k": 53,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 7,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 14,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 21,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.09375,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009001B",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": -0.28125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 8,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 10,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 22,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009002A",
+   "k": 35,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 4,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.03125,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 13,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 16,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.0,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 19,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009003B",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 11,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 17,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 27,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 31,
+   "prefisso_ok": true,
+   "disaccordo": true,
+   "media": 0.1875,
+   "n_mondi": 32,
+   "mondi_esclusi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009004A",
+   "k": 34,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 0,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 1,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 6,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 18,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 20,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 23,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 26,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  },
+  {
+   "matchup": "IS",
+   "nome": "IS50009005B",
+   "k": 28,
+   "prefisso_ok": true,
+   "disaccordo": false,
+   "media": null,
+   "n_mondi": 0
+  }
+ ]
+}

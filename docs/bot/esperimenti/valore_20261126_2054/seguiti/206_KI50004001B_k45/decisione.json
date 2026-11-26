@@ -1,0 +1,131 @@
+{
+ "nome": "KI50004001B",
+ "k": 45,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Cast Back Off @BF0",
+  "Cast Back Off @BF1",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Move Blitzcrank Impassive base→BF0",
+  "Move Blitzcrank Impassive base→BF1"
+ ],
+ "campione": "Cast Friendship @BF0",
+ "d": "Cast Friendship @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 8,
+   "azione": "Move Blitzcrank Impassive base→BF1",
+   "n": 44,
+   "q": -0.9883073581537545,
+   "P": 0.3351268470287323,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Cast Friendship @BF1",
+   "n": 23,
+   "q": -0.9661529259931456,
+   "P": 0.146309494972229,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Cast Friendship @BF1",
+   "n": 23,
+   "q": -0.9661529259931456,
+   "P": 0.146309494972229,
+   "rango": 3
+  },
+  {
+   "i": 7,
+   "azione": "Move Blitzcrank Impassive base→BF0",
+   "n": 14,
+   "q": -0.988462804361625,
+   "P": 0.1065944954752922,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Cast Friendship @BF0",
+   "n": 13,
+   "q": -0.9860434842992448,
+   "P": 0.10120769590139389,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Cast Friendship @BF0",
+   "n": 13,
+   "q": -0.9860434842992448,
+   "P": 0.10120769590139389,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 7,
+   "q": -0.9896630939394228,
+   "P": 0.05352603271603584,
+   "rango": 7
+  },
+  {
+   "i": 3,
+   "azione": "Cast Back Off @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.006298945751041174,
+   "rango": 8
+  },
+  {
+   "i": 4,
+   "azione": "Cast Back Off @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0034193580504506826,
+   "rango": 9
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

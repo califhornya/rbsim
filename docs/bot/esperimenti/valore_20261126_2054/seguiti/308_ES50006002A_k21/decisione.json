@@ -1,0 +1,140 @@
+{
+ "nome": "ES50006002A",
+ "k": 21,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Play gear Edge of Night @BF0",
+  "Play gear Edge of Night @BF1",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Edge of Night @BF0"
+ ],
+ "campione": "Play Bedeviling Stranger to BF0",
+ "d": "Hide Edge of Night @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 9,
+   "azione": "Hide Edge of Night @BF0",
+   "n": 109,
+   "q": 0.8075689165786144,
+   "P": 0.5802193284034729,
+   "rango": 1
+  },
+  {
+   "i": 8,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 22,
+   "q": 0.8075689165786143,
+   "P": 0.28405341506004333,
+   "rango": 2
+  },
+  {
+   "i": 2,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 3,
+   "q": 0.5323976660246066,
+   "P": 0.07057484984397888,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play Bedeviling Stranger",
+   "n": 1,
+   "q": 0.5261747678793154,
+   "P": 0.01054110936820507,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play gear Edge of Night @BF0",
+   "n": 1,
+   "q": 0.5188347760093521,
+   "P": 0.026707477867603302,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Play gear Edge of Night @BF1",
+   "n": 1,
+   "q": 0.5188347760093521,
+   "P": 0.026707477867603302,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0011659952579066157,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.0993046998919453e-05,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.5810614058864303e-05,
+   "rango": 9
+  },
+  {
+   "i": 7,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 3.517303639455349e-06,
+   "rango": 10
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  -1.0
+ ],
+ "media": -0.0625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

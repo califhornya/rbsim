@@ -1,0 +1,104 @@
+{
+ "nome": "RS50008000A",
+ "k": 11,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Move Noxus Hopeful BF1→base",
+  "Hide Elnuk Herd @BF1",
+  "Hide Pyke Dockside Butcher @BF1"
+ ],
+ "campione": "Pass",
+ "d": "Cast Sabotage @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Hide Pyke Dockside Butcher @BF1",
+   "n": 89,
+   "q": 0.8949672726916837,
+   "P": 0.6445927619934082,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Cast Sabotage @BF1",
+   "n": 28,
+   "q": 0.8993199736655961,
+   "P": 0.1951984465122223,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Cast Sabotage @BF0",
+   "n": 16,
+   "q": 0.8899880678237688,
+   "P": 0.12429893016815186,
+   "rango": 3
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 4,
+   "q": 0.8956928738431645,
+   "P": 0.03089006431400776,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Move Noxus Hopeful BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0002283784851897508,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Hide Elnuk Herd @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.004791444633156061,
+   "rango": 6
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  -1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  1.0,
+  -1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

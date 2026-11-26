@@ -1,0 +1,86 @@
+{
+ "nome": "KI50004003B",
+ "k": 19,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Move Frisky Hunter base→BF1",
+  "Move Bird base→BF1",
+  "Move Fallen Feline base→BF1"
+ ],
+ "campione": "Pass",
+ "d": "Move Bird base→BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 2,
+   "azione": "Move Bird base→BF1",
+   "n": 107,
+   "q": -0.7305938960959438,
+   "P": 0.6837292909622192,
+   "rango": 1
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 13,
+   "q": -0.7708501382451857,
+   "P": 0.10600551962852478,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Move Frisky Hunter base→BF1",
+   "n": 11,
+   "q": -0.8276091064255445,
+   "P": 0.13056471943855286,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Move Fallen Feline base→BF1",
+   "n": 6,
+   "q": -0.8415438722765634,
+   "P": 0.07970049977302551,
+   "rango": 4
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

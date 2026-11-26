@@ -1,0 +1,113 @@
+{
+ "nome": "ES50006002A",
+ "k": 18,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Edge of Night @BF0",
+  "Gear gain_power_any_domain (Gold)"
+ ],
+ "campione": "Gear gain_power_any_domain (Gold)",
+ "d": "Pass",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Hide Edge of Night @BF0",
+   "n": 126,
+   "q": 0.7657620182484388,
+   "P": 0.893069326877594,
+   "rango": 1
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 8,
+   "q": 0.7778880665771847,
+   "P": 0.05180865898728371,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 2,
+   "q": 0.6995257612127214,
+   "P": 0.028212938457727432,
+   "rango": 3
+  },
+  {
+   "i": 4,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 1,
+   "q": 0.67358254956007,
+   "P": 0.023214777931571007,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0010711608920246363,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0013023768551647663,
+   "rango": 6
+  },
+  {
+   "i": 3,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.001320837764069438,
+   "rango": 7
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

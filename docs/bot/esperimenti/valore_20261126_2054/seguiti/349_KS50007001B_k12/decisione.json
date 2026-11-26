@@ -1,0 +1,185 @@
+{
+ "nome": "KS50007001B",
+ "k": 12,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Play Ruin Runner",
+  "Play Ruin Runner to BF0",
+  "Play Rengar Trophy Hunter",
+  "Play Rengar Trophy Hunter to BF0",
+  "Play Rengar Trophy Hunter to BF1",
+  "Cast Call to Glory @BF0",
+  "Cast Call to Glory @BF1",
+  "Move Kinkou Initiate BF0→base",
+  "Move Sett Kingpin BF0→base",
+  "Move Irresistible Faefolk BF0→base",
+  "Move Ruin Runner base→BF0",
+  "Move Ruin Runner base→BF1"
+ ],
+ "campione": "Play Ruin Runner to BF0",
+ "d": "Cast Punch First @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 14,
+   "azione": "Move Ruin Runner base→BF1",
+   "n": 35,
+   "q": 0.8674929212529752,
+   "P": 0.2612138092517853,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Ruin Runner",
+   "n": 27,
+   "q": 0.8734106849549667,
+   "P": 0.17217709124088287,
+   "rango": 2
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 23,
+   "q": 0.8890209934184132,
+   "P": 0.12356105446815491,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 13,
+   "q": 0.8721360157926175,
+   "P": 0.0846400186419487,
+   "rango": 4
+  },
+  {
+   "i": 12,
+   "azione": "Move Irresistible Faefolk BF0→base",
+   "n": 13,
+   "q": 0.8396373581087777,
+   "P": 0.11232266575098038,
+   "rango": 5
+  },
+  {
+   "i": 11,
+   "azione": "Move Sett Kingpin BF0→base",
+   "n": 12,
+   "q": 0.8125374611276536,
+   "P": 0.09765204042196274,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 5,
+   "q": 0.8242721703413975,
+   "P": 0.05378025397658348,
+   "rango": 7
+  },
+  {
+   "i": 9,
+   "azione": "Cast Call to Glory @BF1",
+   "n": 5,
+   "q": 0.8464803178096374,
+   "P": 0.04555860534310341,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Cast Call to Glory @BF0",
+   "n": 2,
+   "q": 0.8464474637294372,
+   "P": 0.023067595437169075,
+   "rango": 9
+  },
+  {
+   "i": 10,
+   "azione": "Move Kinkou Initiate BF0→base",
+   "n": 1,
+   "q": 0.8181147988695056,
+   "P": 0.011995145119726658,
+   "rango": 10
+  },
+  {
+   "i": 13,
+   "azione": "Move Ruin Runner base→BF0",
+   "n": 1,
+   "q": 0.8775342296256354,
+   "P": 0.006652127485722303,
+   "rango": 11
+  },
+  {
+   "i": 4,
+   "azione": "Play Ruin Runner to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.005340671166777611,
+   "rango": 12
+  },
+  {
+   "i": 5,
+   "azione": "Play Rengar Trophy Hunter",
+   "n": 0,
+   "q": null,
+   "P": 0.0012393740471452475,
+   "rango": 13
+  },
+  {
+   "i": 6,
+   "azione": "Play Rengar Trophy Hunter to BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.3843037777405698e-05,
+   "rango": 14
+  },
+  {
+   "i": 7,
+   "azione": "Play Rengar Trophy Hunter to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0007857606979086995,
+   "rango": 15
+  }
+ ],
+ "matchup": "KS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

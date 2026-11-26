@@ -1,0 +1,122 @@
+{
+ "nome": "KR50002001B",
+ "k": 1,
+ "turno": 3,
+ "menu": [
+  "Pass",
+  "Cast Thrill of the Hunt @BF0",
+  "Cast Thrill of the Hunt @BF1",
+  "Play Noxus Hopeful",
+  "Play Noxus Hopeful",
+  "Play Kai'Sa Survivor",
+  "Play Nidalee Cat Form",
+  "Play Inferna"
+ ],
+ "campione": "Play Kai'Sa Survivor",
+ "d": "Play Inferna",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Play Kai'Sa Survivor",
+   "n": 114,
+   "q": 0.05992810352914356,
+   "P": 0.8582208156585693,
+   "rango": 1
+  },
+  {
+   "i": 7,
+   "azione": "Play Inferna",
+   "n": 12,
+   "q": 0.11440930902380003,
+   "P": 0.055017322301864624,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Play Nidalee Cat Form",
+   "n": 5,
+   "q": 0.059928103529143496,
+   "P": 0.04237690940499306,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Play Noxus Hopeful",
+   "n": 3,
+   "q": 0.06200937419551863,
+   "P": 0.022127946838736534,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Play Noxus Hopeful",
+   "n": 3,
+   "q": 0.06200937419551863,
+   "P": 0.022127946838736534,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 6.29385567663121e-06,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Thrill of the Hunt @BF0",
+   "n": 0,
+   "q": null,
+   "P": 7.223628199426457e-05,
+   "rango": 7
+  },
+  {
+   "i": 2,
+   "azione": "Cast Thrill of the Hunt @BF1",
+   "n": 0,
+   "q": null,
+   "P": 5.0513335736468434e-05,
+   "rango": 8
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  1.0,
+  1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  1.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

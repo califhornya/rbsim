@@ -1,0 +1,194 @@
+{
+ "nome": "IS50009002A",
+ "k": 35,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Back Off @BF0",
+  "Cast Back Off @BF1",
+  "Play Stalwart Poro",
+  "Play Stalwart Poro to BF0",
+  "Play Stalwart Poro to BF1",
+  "Play Iridescent Avian",
+  "Play Iridescent Avian to BF0",
+  "Play Iridescent Avian to BF1",
+  "Play Disarming Rake",
+  "Play Disarming Rake to BF0",
+  "Play Disarming Rake to BF1",
+  "Move Ivern Nurturer BF0→base",
+  "Move Daisy! BF1→base",
+  "Hide Back Off @BF0",
+  "Hide Back Off @BF1"
+ ],
+ "campione": "Play Stalwart Poro to BF0",
+ "d": "Play Iridescent Avian to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 6,
+   "azione": "Play Iridescent Avian",
+   "n": 47,
+   "q": 0.9982492807271415,
+   "P": 0.32706138491630554,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Stalwart Poro",
+   "n": 25,
+   "q": 0.9983178696753822,
+   "P": 0.17724622786045074,
+   "rango": 2
+  },
+  {
+   "i": 8,
+   "azione": "Play Iridescent Avian to BF1",
+   "n": 13,
+   "q": 0.9983178696753823,
+   "P": 0.09344567358493805,
+   "rango": 3
+  },
+  {
+   "i": 7,
+   "azione": "Play Iridescent Avian to BF0",
+   "n": 10,
+   "q": 0.9983178696753822,
+   "P": 0.07174999266862869,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 9,
+   "q": 0.9974915940558063,
+   "P": 0.06196631118655205,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Play Stalwart Poro to BF0",
+   "n": 8,
+   "q": 0.9982492807271415,
+   "P": 0.05921703949570656,
+   "rango": 6
+  },
+  {
+   "i": 5,
+   "azione": "Play Stalwart Poro to BF1",
+   "n": 8,
+   "q": 0.9982492807271415,
+   "P": 0.05715641751885414,
+   "rango": 7
+  },
+  {
+   "i": 9,
+   "azione": "Play Disarming Rake",
+   "n": 6,
+   "q": 0.9968661149674987,
+   "P": 0.046276967972517014,
+   "rango": 8
+  },
+  {
+   "i": 13,
+   "azione": "Move Daisy! BF1→base",
+   "n": 4,
+   "q": 0.9969621387366718,
+   "P": 0.033854369074106216,
+   "rango": 9
+  },
+  {
+   "i": 2,
+   "azione": "Cast Back Off @BF1",
+   "n": 3,
+   "q": 0.9967180815533914,
+   "P": 0.02345108799636364,
+   "rango": 10
+  },
+  {
+   "i": 1,
+   "azione": "Cast Back Off @BF0",
+   "n": 2,
+   "q": 0.9965759602383889,
+   "P": 0.020470794290304184,
+   "rango": 11
+  },
+  {
+   "i": 12,
+   "azione": "Move Ivern Nurturer BF0→base",
+   "n": 2,
+   "q": 0.9935644320655288,
+   "P": 0.015548130497336388,
+   "rango": 12
+  },
+  {
+   "i": 10,
+   "azione": "Play Disarming Rake to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.006544094532728195,
+   "rango": 13
+  },
+  {
+   "i": 11,
+   "azione": "Play Disarming Rake to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.004949228838086128,
+   "rango": 14
+  },
+  {
+   "i": 14,
+   "azione": "Hide Back Off @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0004919607890769839,
+   "rango": 15
+  },
+  {
+   "i": 15,
+   "azione": "Hide Back Off @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0005702546914108098,
+   "rango": 16
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

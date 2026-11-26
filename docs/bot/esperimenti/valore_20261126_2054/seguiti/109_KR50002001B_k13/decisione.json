@@ -1,0 +1,122 @@
+{
+ "nome": "KR50002001B",
+ "k": 13,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Move Kai'Sa Survivor BF1→base"
+ ],
+ "campione": "Cast Sabotage @BF0",
+ "d": "Cast Sabotage @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 7,
+   "azione": "Move Kai'Sa Survivor BF1→base",
+   "n": 70,
+   "q": 0.9827967234575947,
+   "P": 0.521926760673523,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Cast Sabotage @BF1",
+   "n": 20,
+   "q": 0.9913931900645173,
+   "P": 0.14107505977153778,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Cast Sabotage @BF0",
+   "n": 15,
+   "q": 0.9911953384066499,
+   "P": 0.10465068370103836,
+   "rango": 3
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 12,
+   "q": 0.9904540397704734,
+   "P": 0.08524446189403534,
+   "rango": 4
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 6,
+   "q": 0.9808819397295924,
+   "P": 0.04272982105612755,
+   "rango": 5
+  },
+  {
+   "i": 6,
+   "azione": "Cast Punch First @BF1",
+   "n": 6,
+   "q": 0.9808819397295924,
+   "P": 0.04272982105612755,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 4,
+   "q": 0.990485078361559,
+   "P": 0.030821722000837326,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Cast Punch First @BF0",
+   "n": 4,
+   "q": 0.990485078361559,
+   "P": 0.030821722000837326,
+   "rango": 8
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

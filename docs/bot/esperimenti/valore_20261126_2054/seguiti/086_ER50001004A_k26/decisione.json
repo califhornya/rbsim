@@ -1,0 +1,95 @@
+{
+ "nome": "ER50001004A",
+ "k": 26,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Move Rengar Trophy Hunter BF1→base",
+  "Move Gutter Guardian BF1→base",
+  "Equip Edge of Night",
+  "Equip Boots of Swiftness"
+ ],
+ "campione": "Equip Boots of Swiftness",
+ "d": "Equip Edge of Night",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Equip Boots of Swiftness",
+   "n": 78,
+   "q": 0.9726926818052982,
+   "P": 0.5672386884689331,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Equip Edge of Night",
+   "n": 59,
+   "q": 0.9726926818052982,
+   "P": 0.42551684379577637,
+   "rango": 2
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.006746257655322552,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Move Rengar Trophy Hunter BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0002953027142211795,
+   "rango": 4
+  },
+  {
+   "i": 2,
+   "azione": "Move Gutter Guardian BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00020285388745833188,
+   "rango": 5
+  }
+ ],
+ "matchup": "ER",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

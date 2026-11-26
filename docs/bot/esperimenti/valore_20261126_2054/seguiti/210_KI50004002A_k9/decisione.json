@@ -1,0 +1,185 @@
+{
+ "nome": "KI50004002A",
+ "k": 9,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play Reckless Innovator",
+  "Play Reckless Innovator to BF0",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Play Fizz Trickster",
+  "Play Fizz Trickster to BF0",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Move Traveling Merchant BF0→base",
+  "Move Kha'Zix Mutating Horror BF0→base",
+  "Move Traveling Merchant BF0→base",
+  "Move Fizz Trickster BF0→base"
+ ],
+ "campione": "Play Reckless Innovator to BF0",
+ "d": "Play Fizz Trickster to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 6,
+   "azione": "Play Fizz Trickster to BF0",
+   "n": 103,
+   "q": 0.658409035955251,
+   "P": 0.5935370922088623,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Play Reckless Innovator to BF0",
+   "n": 14,
+   "q": 0.5778011441168522,
+   "P": 0.15434490144252777,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play Fizz Trickster",
+   "n": 12,
+   "q": 0.5714065969859512,
+   "P": 0.13388478755950928,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play Reckless Innovator",
+   "n": 4,
+   "q": 0.5256908399579618,
+   "P": 0.06503553688526154,
+   "rango": 4
+  },
+  {
+   "i": 9,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 1,
+   "q": 0.506433720929379,
+   "P": 0.00897935964167118,
+   "rango": 5
+  },
+  {
+   "i": 10,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 1,
+   "q": 0.5197311595509,
+   "P": 0.00897935964167118,
+   "rango": 6
+  },
+  {
+   "i": 11,
+   "azione": "Move Traveling Merchant BF0→base",
+   "n": 1,
+   "q": 0.5360033423872274,
+   "P": 0.012122568674385548,
+   "rango": 7
+  },
+  {
+   "i": 13,
+   "azione": "Move Traveling Merchant BF0→base",
+   "n": 1,
+   "q": 0.5073551030130665,
+   "P": 0.012122568674385548,
+   "rango": 8
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0006690706359222531,
+   "rango": 9
+  },
+  {
+   "i": 3,
+   "azione": "Cast Void Assault @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0021496026311069727,
+   "rango": 10
+  },
+  {
+   "i": 4,
+   "azione": "Cast Void Assault @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.003260822733864188,
+   "rango": 11
+  },
+  {
+   "i": 7,
+   "azione": "Play Irresistible Faefolk",
+   "n": 0,
+   "q": null,
+   "P": 0.0015716813504695892,
+   "rango": 12
+  },
+  {
+   "i": 8,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0033394182100892067,
+   "rango": 13
+  },
+  {
+   "i": 12,
+   "azione": "Move Kha'Zix Mutating Horror BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.6498148625032627e-06,
+   "rango": 14
+  },
+  {
+   "i": 14,
+   "azione": "Move Fizz Trickster BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.6317729887305177e-06,
+   "rango": 15
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0
+ ],
+ "media": -0.1875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,194 @@
+{
+ "nome": "IS50009003B",
+ "k": 11,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play gear Pillaged Armory @BF0",
+  "Play gear Pillaged Armory @BF1",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play Irresistible Faefolk to BF1",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Play Trifarian Captain to BF1",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Play Trifarian Captain to BF1",
+  "Deploy champion Sett Kingpin",
+  "Deploy champion Sett Kingpin to BF0",
+  "Deploy champion Sett Kingpin to BF1",
+  "Move Rengar Trophy Hunter BF1→base"
+ ],
+ "campione": "Deploy champion Sett Kingpin to BF0",
+ "d": "Deploy champion Sett Kingpin to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 14,
+   "azione": "Deploy champion Sett Kingpin to BF1",
+   "n": 55,
+   "q": 0.996812275543394,
+   "P": 0.3736981749534607,
+   "rango": 1
+  },
+  {
+   "i": 12,
+   "azione": "Deploy champion Sett Kingpin",
+   "n": 24,
+   "q": 0.9956994201844217,
+   "P": 0.1692844182252884,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play Irresistible Faefolk to BF1",
+   "n": 17,
+   "q": 0.9945360784739778,
+   "P": 0.1225476786494255,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Play Irresistible Faefolk",
+   "n": 12,
+   "q": 0.9939631673505833,
+   "P": 0.08758271485567093,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 7,
+   "q": 0.9941991883964316,
+   "P": 0.05227678269147873,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 5,
+   "q": 0.9939631673505833,
+   "P": 0.0374414287507534,
+   "rango": 6
+  },
+  {
+   "i": 13,
+   "azione": "Deploy champion Sett Kingpin to BF0",
+   "n": 5,
+   "q": 0.9938117794152755,
+   "P": 0.037613287568092346,
+   "rango": 7
+  },
+  {
+   "i": 6,
+   "azione": "Play Trifarian Captain",
+   "n": 4,
+   "q": 0.9870033159614386,
+   "P": 0.03417779132723808,
+   "rango": 8
+  },
+  {
+   "i": 9,
+   "azione": "Play Trifarian Captain",
+   "n": 4,
+   "q": 0.9893173150229873,
+   "P": 0.03417779132723808,
+   "rango": 9
+  },
+  {
+   "i": 1,
+   "azione": "Play gear Pillaged Armory @BF0",
+   "n": 2,
+   "q": 0.9918430104614081,
+   "P": 0.017946990206837654,
+   "rango": 10
+  },
+  {
+   "i": 2,
+   "azione": "Play gear Pillaged Armory @BF1",
+   "n": 2,
+   "q": 0.9870807066322149,
+   "P": 0.017946990206837654,
+   "rango": 11
+  },
+  {
+   "i": 7,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0020506104920059443,
+   "rango": 12
+  },
+  {
+   "i": 8,
+   "azione": "Play Trifarian Captain to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.003641037503257394,
+   "rango": 13
+  },
+  {
+   "i": 10,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0020506104920059443,
+   "rango": 14
+  },
+  {
+   "i": 11,
+   "azione": "Play Trifarian Captain to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.003641037503257394,
+   "rango": 15
+  },
+  {
+   "i": 15,
+   "azione": "Move Rengar Trophy Hunter BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.003922584000974894,
+   "rango": 16
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

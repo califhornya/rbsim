@@ -1,0 +1,194 @@
+{
+ "nome": "KR50002002A",
+ "k": 19,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Up from the Deep @BF0",
+  "Cast Up from the Deep @BF1",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Cast Grim Resolve @BF0",
+  "Cast Grim Resolve @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Activate buff_unit (Kha'Zix Voidreaver)"
+ ],
+ "campione": "Cast Up from the Deep @BF0",
+ "d": "Activate buff_unit (Kha'Zix Voidreaver)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Cast Up from the Deep @BF0",
+   "n": 38,
+   "q": -0.9737493633257944,
+   "P": 0.28030601143836975,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 35,
+   "q": -0.9644112301401784,
+   "P": 0.24215009808540344,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 34,
+   "q": -0.9706848574213673,
+   "P": 0.24215009808540344,
+   "rango": 3
+  },
+  {
+   "i": 4,
+   "azione": "Cast Up from the Deep @BF1",
+   "n": 20,
+   "q": -0.9737493633257944,
+   "P": 0.14882652461528778,
+   "rango": 4
+  },
+  {
+   "i": 15,
+   "azione": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "n": 6,
+   "q": -0.9627589296521822,
+   "P": 0.0459994301199913,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": -0.9816125892654238,
+   "P": 0.010124566964805126,
+   "rango": 6
+  },
+  {
+   "i": 7,
+   "azione": "Cast Grim Resolve @BF0",
+   "n": 1,
+   "q": -0.9749916835714658,
+   "P": 0.006989832501858473,
+   "rango": 7
+  },
+  {
+   "i": 13,
+   "azione": "Cast Sabotage @BF0",
+   "n": 1,
+   "q": -0.9782327576567014,
+   "P": 0.007701585069298744,
+   "rango": 8
+  },
+  {
+   "i": 14,
+   "azione": "Cast Sabotage @BF1",
+   "n": 1,
+   "q": -0.9801242441380166,
+   "P": 0.007401627954095602,
+   "rango": 9
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00028425201890058815,
+   "rango": 10
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0002801869122777134,
+   "rango": 11
+  },
+  {
+   "i": 8,
+   "azione": "Cast Grim Resolve @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0034157850313931704,
+   "rango": 12
+  },
+  {
+   "i": 9,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00028425201890058815,
+   "rango": 13
+  },
+  {
+   "i": 10,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0002801869122777134,
+   "rango": 14
+  },
+  {
+   "i": 11,
+   "azione": "Cast Void Assault @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0017763464711606503,
+   "rango": 15
+  },
+  {
+   "i": 12,
+   "azione": "Cast Void Assault @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.002029212424531579,
+   "rango": 16
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

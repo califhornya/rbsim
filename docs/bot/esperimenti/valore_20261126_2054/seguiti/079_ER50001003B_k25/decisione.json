@@ -1,0 +1,167 @@
+{
+ "nome": "ER50001003B",
+ "k": 25,
+ "turno": 17,
+ "menu": [
+  "Pass",
+  "Play Pyke Dockside Butcher",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Play Kinkou Initiate",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Play First Mate",
+  "Play Kinkou Initiate",
+  "Play Grim Apothecary",
+  "Play Kinkou Initiate",
+  "Play Elnuk Herd",
+  "Play Ferrous Forerunner"
+ ],
+ "campione": "Play Ferrous Forerunner",
+ "d": "Play Elnuk Herd",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 12,
+   "azione": "Play Ferrous Forerunner",
+   "n": 103,
+   "q": -0.7017904342090041,
+   "P": 0.7256045341491699,
+   "rango": 1
+  },
+  {
+   "i": 11,
+   "azione": "Play Elnuk Herd",
+   "n": 27,
+   "q": -0.6984221495020905,
+   "P": 0.18676626682281494,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Play Kinkou Initiate",
+   "n": 2,
+   "q": -0.7692032954389117,
+   "P": 0.023080145940184593,
+   "rango": 3
+  },
+  {
+   "i": 8,
+   "azione": "Play Kinkou Initiate",
+   "n": 2,
+   "q": -0.7692032954389117,
+   "P": 0.023080145940184593,
+   "rango": 4
+  },
+  {
+   "i": 10,
+   "azione": "Play Kinkou Initiate",
+   "n": 2,
+   "q": -0.7692032954389117,
+   "P": 0.023080145940184593,
+   "rango": 5
+  },
+  {
+   "i": 9,
+   "azione": "Play Grim Apothecary",
+   "n": 1,
+   "q": -0.7754126808339618,
+   "P": 0.014568603597581387,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0001214323565363884,
+   "rango": 7
+  },
+  {
+   "i": 1,
+   "azione": "Play Pyke Dockside Butcher",
+   "n": 0,
+   "q": null,
+   "P": 0.0015239724889397621,
+   "rango": 8
+  },
+  {
+   "i": 2,
+   "azione": "Cast Sabotage @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00010791398381115869,
+   "rango": 9
+  },
+  {
+   "i": 3,
+   "azione": "Cast Sabotage @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00010942057269858196,
+   "rango": 10
+  },
+  {
+   "i": 5,
+   "azione": "Cast Sabotage @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00010791398381115869,
+   "rango": 11
+  },
+  {
+   "i": 6,
+   "azione": "Cast Sabotage @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00010942057269858196,
+   "rango": 12
+  },
+  {
+   "i": 7,
+   "azione": "Play First Mate",
+   "n": 0,
+   "q": null,
+   "P": 0.0017401390941813588,
+   "rango": 13
+  }
+ ],
+ "matchup": "ER",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,167 @@
+{
+ "nome": "ES50006002A",
+ "k": 12,
+ "turno": 5,
+ "menu": [
+  "Pass",
+  "Play Rengar Trophy Hunter",
+  "Play Rengar Trophy Hunter to BF0",
+  "Play Fizz Trickster",
+  "Play Fizz Trickster to BF0",
+  "Play K'Sante Courageous",
+  "Play K'Sante Courageous to BF0",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Hide Bedeviling Stranger @BF0",
+  "Gear gain_power_any_domain (Gold)"
+ ],
+ "campione": "Play Rengar Trophy Hunter to BF0",
+ "d": "Play K'Sante Courageous to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 6,
+   "azione": "Play K'Sante Courageous to BF0",
+   "n": 131,
+   "q": 0.9014679878319467,
+   "P": 0.907145619392395,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Play Rengar Trophy Hunter to BF0",
+   "n": 6,
+   "q": 0.770168955161416,
+   "P": 0.09243394434452057,
+   "rango": 2
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 1.3880549154521304e-08,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play Rengar Trophy Hunter",
+   "n": 0,
+   "q": null,
+   "P": 0.00027224686346016824,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play Fizz Trickster",
+   "n": 0,
+   "q": null,
+   "P": 1.3441069313557819e-05,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Play Fizz Trickster to BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.7009457224048674e-05,
+   "rango": 6
+  },
+  {
+   "i": 5,
+   "azione": "Play K'Sante Courageous",
+   "n": 0,
+   "q": null,
+   "P": 6.923493492649868e-05,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Play Bedeviling Stranger",
+   "n": 0,
+   "q": null,
+   "P": 8.61719058775634e-07,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 0,
+   "q": null,
+   "P": 3.5740774819714716e-06,
+   "rango": 9
+  },
+  {
+   "i": 9,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 2.368946816488915e-08,
+   "rango": 10
+  },
+  {
+   "i": 10,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.0309817888298767e-08,
+   "rango": 11
+  },
+  {
+   "i": 11,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 0,
+   "q": null,
+   "P": 4.196988811600022e-05,
+   "rango": 12
+  },
+  {
+   "i": 12,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 0,
+   "q": null,
+   "P": 2.152518391085323e-06,
+   "rango": 13
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.25,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

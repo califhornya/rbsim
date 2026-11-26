@@ -1,0 +1,122 @@
+{
+ "nome": "RS50008004A",
+ "k": 5,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play First Mate",
+  "Play First Mate",
+  "Cast Rampage @BF0",
+  "Cast Rampage @BF1",
+  "Play Noxus Hopeful",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1"
+ ],
+ "campione": "Play Noxus Hopeful",
+ "d": "Play First Mate",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Play Noxus Hopeful",
+   "n": 72,
+   "q": -0.13909244787845804,
+   "P": 0.5298247933387756,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Play First Mate",
+   "n": 32,
+   "q": -0.13263609880235513,
+   "P": 0.2243196815252304,
+   "rango": 2
+  },
+  {
+   "i": 2,
+   "azione": "Play First Mate",
+   "n": 32,
+   "q": -0.13263609880235513,
+   "P": 0.2243196815252304,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Cast Rampage @BF0",
+   "n": 1,
+   "q": -0.13500552292026002,
+   "P": 0.011346776969730854,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0013324855826795101,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Cast Rampage @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.006644876673817635,
+   "rango": 6
+  },
+  {
+   "i": 6,
+   "azione": "Cast Sabotage @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00040140553028322756,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Cast Sabotage @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0018102991161867976,
+   "rango": 8
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

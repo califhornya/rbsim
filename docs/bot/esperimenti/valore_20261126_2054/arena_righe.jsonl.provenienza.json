@@ -1,0 +1,65 @@
+{
+ "rete_sha256": "f68bb963dcb483b129ada4ab7c64cb3318d4747d3f63bcc49a700cf6f9f35f02",
+ "campione_sha256": "f8d8469b506dfc1dcfe939ad944a214684fc5285aefc370bdc7549d42cec41aa",
+ "regole": "6427b90+D72-D83",
+ "iterazioni": 138,
+ "max_turni": 40,
+ "base_seme": 40000000,
+ "ricerca": {
+  "b": {
+   "iter_cand": 138,
+   "iter_opp": 138,
+   "probe_cand": true,
+   "probe_opp": true,
+   "val_cand": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "val_opp": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "log": false
+  },
+  "c": {
+   "iter_cand": 138,
+   "iter_opp": 138,
+   "probe_cand": true,
+   "probe_opp": true,
+   "val_cand": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "val_opp": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "log": false,
+   "vr_cand": 0.2
+  },
+  "d": {
+   "iter_cand": 138,
+   "iter_opp": 138,
+   "probe_cand": true,
+   "probe_opp": true,
+   "val_cand": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "val_opp": [
+    "rimonta",
+    3.0,
+    0.2
+   ],
+   "log": false,
+   "vr_cand": 0.2,
+   "vc_cand": "rete",
+   "prior": "campione"
+  }
+ }
+}

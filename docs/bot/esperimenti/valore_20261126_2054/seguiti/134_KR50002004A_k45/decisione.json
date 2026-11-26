@@ -1,0 +1,266 @@
+{
+ "nome": "KR50002004A",
+ "k": 45,
+ "turno": 17,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Rampage @BF0",
+  "Cast Rampage @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Move Vex Apathetic BF1→base",
+  "Move Tentacle base→BF0",
+  "Move Tentacle base→BF1",
+  "Move Tentacle base→BF0",
+  "Move Tentacle base→BF1",
+  "Move Tentacle base→BF0",
+  "Move Tentacle base→BF1",
+  "Move Tentacle base→BF0",
+  "Move Tentacle base→BF1",
+  "Move Traveling Merchant base→BF0",
+  "Move Traveling Merchant base→BF1",
+  "Move Traveling Merchant base→BF0",
+  "Move Traveling Merchant base→BF1",
+  "Move Traveling Merchant base→BF0",
+  "Move Traveling Merchant base→BF1",
+  "Move Irresistible Faefolk base→BF0",
+  "Move Irresistible Faefolk base→BF1"
+ ],
+ "campione": "Cast Rampage @BF0",
+ "d": "Move Traveling Merchant base→BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Cast Rampage @BF0",
+   "n": 23,
+   "q": -0.6237554462625757,
+   "P": 0.0967111885547638,
+   "rango": 1
+  },
+  {
+   "i": 10,
+   "azione": "Move Tentacle base→BF0",
+   "n": 16,
+   "q": -0.6951698613371932,
+   "P": 0.1387656182050705,
+   "rango": 2
+  },
+  {
+   "i": 12,
+   "azione": "Move Tentacle base→BF0",
+   "n": 16,
+   "q": -0.6989899826254927,
+   "P": 0.1387656182050705,
+   "rango": 3
+  },
+  {
+   "i": 14,
+   "azione": "Move Tentacle base→BF0",
+   "n": 16,
+   "q": -0.7013112735953414,
+   "P": 0.1387656182050705,
+   "rango": 4
+  },
+  {
+   "i": 8,
+   "azione": "Move Tentacle base→BF0",
+   "n": 15,
+   "q": -0.7029187989440047,
+   "P": 0.1387656182050705,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Cast Rampage @BF1",
+   "n": 13,
+   "q": -0.6237554462625757,
+   "P": 0.05500566214323044,
+   "rango": 6
+  },
+  {
+   "i": 21,
+   "azione": "Move Traveling Merchant base→BF1",
+   "n": 10,
+   "q": -0.5958582562557464,
+   "P": 0.028244152665138245,
+   "rango": 7
+  },
+  {
+   "i": 16,
+   "azione": "Move Traveling Merchant base→BF0",
+   "n": 5,
+   "q": -0.7157869852412262,
+   "P": 0.0486132986843586,
+   "rango": 8
+  },
+  {
+   "i": 18,
+   "azione": "Move Traveling Merchant base→BF0",
+   "n": 5,
+   "q": -0.7060967631613156,
+   "P": 0.0486132986843586,
+   "rango": 9
+  },
+  {
+   "i": 20,
+   "azione": "Move Traveling Merchant base→BF0",
+   "n": 5,
+   "q": -0.7091111011778256,
+   "P": 0.0486132986843586,
+   "rango": 10
+  },
+  {
+   "i": 17,
+   "azione": "Move Traveling Merchant base→BF1",
+   "n": 3,
+   "q": -0.7108669913638151,
+   "P": 0.028244152665138245,
+   "rango": 11
+  },
+  {
+   "i": 19,
+   "azione": "Move Traveling Merchant base→BF1",
+   "n": 3,
+   "q": -0.7097920573580778,
+   "P": 0.028244152665138245,
+   "rango": 12
+  },
+  {
+   "i": 22,
+   "azione": "Move Irresistible Faefolk base→BF0",
+   "n": 2,
+   "q": -0.7360450397384146,
+   "P": 0.024069735780358315,
+   "rango": 13
+  },
+  {
+   "i": 9,
+   "azione": "Move Tentacle base→BF1",
+   "n": 1,
+   "q": -0.7187924991500358,
+   "P": 0.0055389064364135265,
+   "rango": 14
+  },
+  {
+   "i": 11,
+   "azione": "Move Tentacle base→BF1",
+   "n": 1,
+   "q": -0.7187924991500358,
+   "P": 0.0055389064364135265,
+   "rango": 15
+  },
+  {
+   "i": 13,
+   "azione": "Move Tentacle base→BF1",
+   "n": 1,
+   "q": -0.7187924991500358,
+   "P": 0.0055389064364135265,
+   "rango": 16
+  },
+  {
+   "i": 15,
+   "azione": "Move Tentacle base→BF1",
+   "n": 1,
+   "q": -0.7187924991500358,
+   "P": 0.0055389064364135265,
+   "rango": 17
+  },
+  {
+   "i": 23,
+   "azione": "Move Irresistible Faefolk base→BF1",
+   "n": 1,
+   "q": -0.7699635408008654,
+   "P": 0.015420886687934399,
+   "rango": 18
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0007615578360855579,
+   "rango": 19
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 3.2710227969801053e-05,
+   "rango": 20
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 7.761188317090273e-05,
+   "rango": 21
+  },
+  {
+   "i": 5,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 3.2710227969801053e-05,
+   "rango": 22
+  },
+  {
+   "i": 6,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 7.761188317090273e-05,
+   "rango": 23
+  },
+  {
+   "i": 7,
+   "azione": "Move Vex Apathetic BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 1.9803914256044663e-05,
+   "rango": 24
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

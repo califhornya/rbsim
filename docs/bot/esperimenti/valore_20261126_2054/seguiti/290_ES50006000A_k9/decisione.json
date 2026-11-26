@@ -1,0 +1,167 @@
+{
+ "nome": "ES50006000A",
+ "k": 9,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play Rengar Trophy Hunter",
+  "Play Rengar Trophy Hunter to BF0",
+  "Play Rengar Trophy Hunter to BF1",
+  "Play Vex Apathetic",
+  "Play Vex Apathetic to BF0",
+  "Cast Hold 'Em @BF0",
+  "Cast Hold 'Em @BF1",
+  "Play Fizz Trickster",
+  "Play Fizz Trickster to BF0",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Vex Apathetic BF0→base",
+  "Move Rengar Trophy Hunter BF0→base"
+ ],
+ "campione": "Play Rengar Trophy Hunter to BF1",
+ "d": "Play Vex Apathetic to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 8,
+   "azione": "Play Fizz Trickster",
+   "n": 59,
+   "q": 0.8716722471896517,
+   "P": 0.45425131916999817,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Play Vex Apathetic",
+   "n": 38,
+   "q": 0.878692193368696,
+   "P": 0.27482089400291443,
+   "rango": 2
+  },
+  {
+   "i": 9,
+   "azione": "Play Fizz Trickster to BF0",
+   "n": 26,
+   "q": 0.8956928738431648,
+   "P": 0.16478964686393738,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Play Vex Apathetic to BF0",
+   "n": 10,
+   "q": 0.9051482536448664,
+   "P": 0.06180401146411896,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play Rengar Trophy Hunter to BF1",
+   "n": 2,
+   "q": 0.8084737358801511,
+   "P": 0.023574620485305786,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.8564849154724973,
+   "P": 0.00652878824621439,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Play Rengar Trophy Hunter",
+   "n": 1,
+   "q": 0.8225954953211783,
+   "P": 0.012029404751956463,
+   "rango": 7
+  },
+  {
+   "i": 2,
+   "azione": "Play Rengar Trophy Hunter to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0002463922428432852,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Cast Hold 'Em @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0004751264350488782,
+   "rango": 9
+  },
+  {
+   "i": 7,
+   "azione": "Cast Hold 'Em @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0006011410150676966,
+   "rango": 10
+  },
+  {
+   "i": 10,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00029682848253287375,
+   "rango": 11
+  },
+  {
+   "i": 11,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00029233083478175104,
+   "rango": 12
+  },
+  {
+   "i": 12,
+   "azione": "Move Rengar Trophy Hunter BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0002895468205679208,
+   "rango": 13
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.1875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

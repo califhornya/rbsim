@@ -1,0 +1,176 @@
+{
+ "nome": "KS50007003B",
+ "k": 21,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Play First Mate",
+  "Play First Mate to BF0",
+  "Play First Mate to BF1",
+  "Play Kinkou Initiate",
+  "Play Kinkou Initiate to BF0",
+  "Play Kinkou Initiate to BF1",
+  "Cast Call to Glory @BF0",
+  "Cast Call to Glory @BF1",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Play Trifarian Captain to BF1",
+  "Move Sett Kingpin BF0→base",
+  "Move Fiora Victorious BF1→base"
+ ],
+ "campione": "Play Kinkou Initiate to BF0",
+ "d": "Play First Mate",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Play Kinkou Initiate",
+   "n": 80,
+   "q": 0.9881290717531097,
+   "P": 0.5547336935997009,
+   "rango": 1
+  },
+  {
+   "i": 9,
+   "azione": "Play Trifarian Captain",
+   "n": 11,
+   "q": 0.9863457351557237,
+   "P": 0.08212921023368835,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Play First Mate",
+   "n": 10,
+   "q": 0.9885385556627166,
+   "P": 0.07112640887498856,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Play Kinkou Initiate to BF0",
+   "n": 8,
+   "q": 0.9870960071560853,
+   "P": 0.060038212686777115,
+   "rango": 4
+  },
+  {
+   "i": 12,
+   "azione": "Move Sett Kingpin BF0→base",
+   "n": 8,
+   "q": 0.9833478138031324,
+   "P": 0.06019667908549309,
+   "rango": 5
+  },
+  {
+   "i": 6,
+   "azione": "Play Kinkou Initiate to BF1",
+   "n": 7,
+   "q": 0.9884975746151916,
+   "P": 0.05091141164302826,
+   "rango": 6
+  },
+  {
+   "i": 3,
+   "azione": "Play First Mate to BF1",
+   "n": 4,
+   "q": 0.9873562541650922,
+   "P": 0.02907514199614525,
+   "rango": 7
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 3,
+   "q": 0.9836748576936802,
+   "P": 0.02823304757475853,
+   "rango": 8
+  },
+  {
+   "i": 13,
+   "azione": "Move Fiora Victorious BF1→base",
+   "n": 2,
+   "q": 0.9693880204752078,
+   "P": 0.021790359169244766,
+   "rango": 9
+  },
+  {
+   "i": 2,
+   "azione": "Play First Mate to BF0",
+   "n": 1,
+   "q": 0.9858283759989812,
+   "P": 0.006950497627258301,
+   "rango": 10
+  },
+  {
+   "i": 7,
+   "azione": "Cast Call to Glory @BF0",
+   "n": 1,
+   "q": 0.981917540638574,
+   "P": 0.00784298125654459,
+   "rango": 11
+  },
+  {
+   "i": 8,
+   "azione": "Cast Call to Glory @BF1",
+   "n": 1,
+   "q": 0.9829746766973814,
+   "P": 0.01106632687151432,
+   "rango": 12
+  },
+  {
+   "i": 10,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 1,
+   "q": 0.9852543963712741,
+   "P": 0.009892658330500126,
+   "rango": 13
+  },
+  {
+   "i": 11,
+   "azione": "Play Trifarian Captain to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.006013376638293266,
+   "rango": 14
+  }
+ ],
+ "matchup": "KS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

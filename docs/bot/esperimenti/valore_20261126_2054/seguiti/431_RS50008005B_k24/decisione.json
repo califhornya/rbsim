@@ -1,0 +1,131 @@
+{
+ "nome": "RS50008005B",
+ "k": 24,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Rampage @BF0",
+  "Cast Rampage @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Play gear Pillaged Armory @BF0",
+  "Play gear Pillaged Armory @BF1",
+  "Move Trifarian Captain BF0→base",
+  "Move Pit Rookie BF0→base"
+ ],
+ "campione": "Cast Rampage @BF0",
+ "d": "Pass",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 1,
+   "azione": "Cast Rampage @BF0",
+   "n": 42,
+   "q": 0.9887983880423595,
+   "P": 0.2996843457221985,
+   "rango": 1
+  },
+  {
+   "i": 5,
+   "azione": "Play gear Pillaged Armory @BF0",
+   "n": 22,
+   "q": 0.9898986301802685,
+   "P": 0.15339376032352448,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Play gear Pillaged Armory @BF1",
+   "n": 21,
+   "q": 0.9887983880423595,
+   "P": 0.15339376032352448,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Cast Rampage @BF1",
+   "n": 19,
+   "q": 0.9873852692030957,
+   "P": 0.13929201662540436,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Cast Punch First @BF1",
+   "n": 13,
+   "q": 0.9845426134225388,
+   "P": 0.10180486738681793,
+   "rango": 5
+  },
+  {
+   "i": 3,
+   "azione": "Cast Punch First @BF0",
+   "n": 11,
+   "q": 0.9845426134225388,
+   "P": 0.0815429762005806,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 5,
+   "q": 0.9966154912452406,
+   "P": 0.03323090821504593,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Move Trifarian Captain BF0→base",
+   "n": 2,
+   "q": 0.9859809267157261,
+   "P": 0.01654309406876564,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Move Pit Rookie BF0→base",
+   "n": 2,
+   "q": 0.984604488574857,
+   "P": 0.021114271134138107,
+   "rango": 9
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

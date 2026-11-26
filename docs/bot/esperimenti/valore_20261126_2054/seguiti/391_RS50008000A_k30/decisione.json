@@ -1,0 +1,140 @@
+{
+ "nome": "RS50008000A",
+ "k": 30,
+ "turno": 15,
+ "menu": [
+  "Pass",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Play Pyke Dockside Butcher",
+  "Play Pyke Dockside Butcher to BF0",
+  "Play First Mate",
+  "Play First Mate to BF0",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Hide Pyke Dockside Butcher @BF0"
+ ],
+ "campione": "Play Pyke Dockside Butcher to BF0",
+ "d": "Pass",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 6,
+   "azione": "Play First Mate to BF0",
+   "n": 97,
+   "q": -0.09774304440525126,
+   "P": 0.5539997220039368,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Play Pyke Dockside Butcher to BF0",
+   "n": 19,
+   "q": -0.18105902348430852,
+   "P": 0.20844648778438568,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play First Mate",
+   "n": 9,
+   "q": -0.19076198339462277,
+   "P": 0.10040554404258728,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Play Pyke Dockside Butcher",
+   "n": 7,
+   "q": -0.21683513113948752,
+   "P": 0.09072130918502808,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 2,
+   "q": -0.05992810352914347,
+   "P": 0.00898170005530119,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Cast Sabotage @BF0",
+   "n": 1,
+   "q": -0.2657276269142442,
+   "P": 0.009950448758900166,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Cast Sabotage @BF1",
+   "n": 1,
+   "q": -0.26433536970065163,
+   "P": 0.010160028003156185,
+   "rango": 7
+  },
+  {
+   "i": 9,
+   "azione": "Hide Pyke Dockside Butcher @BF0",
+   "n": 1,
+   "q": -0.211611246699553,
+   "P": 0.016003062948584557,
+   "rango": 8
+  },
+  {
+   "i": 7,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00048354387399740517,
+   "rango": 9
+  },
+  {
+   "i": 8,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0008482186822220683,
+   "rango": 10
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  0.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  -1.0
+ ],
+ "media": -0.96875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

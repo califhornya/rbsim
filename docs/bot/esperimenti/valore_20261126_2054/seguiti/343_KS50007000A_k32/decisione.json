@@ -1,0 +1,104 @@
+{
+ "nome": "KS50007000A",
+ "k": 32,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Activate buff_unit (Kha'Zix Voidreaver)"
+ ],
+ "campione": "Cast Void Assault @BF0",
+ "d": "Cast Void Assault @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "n": 33,
+   "q": -0.8332428017985757,
+   "P": 0.23750418424606323,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Cast Void Assault @BF0",
+   "n": 26,
+   "q": -0.8332513133418495,
+   "P": 0.19052283465862274,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Cast Void Assault @BF0",
+   "n": 26,
+   "q": -0.8332513133418495,
+   "P": 0.19052283465862274,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Cast Void Assault @BF1",
+   "n": 25,
+   "q": -0.8332428017985757,
+   "P": 0.18108732998371124,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Cast Void Assault @BF1",
+   "n": 25,
+   "q": -0.8332428017985757,
+   "P": 0.18108732998371124,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 2,
+   "q": -0.8336546070121552,
+   "P": 0.01927553117275238,
+   "rango": 6
+  }
+ ],
+ "matchup": "KS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,17 @@
+Seguiti: prior del campione /Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt, valore della rete nuova /Users/mateo/projects/rbsim2026/rbsim-rust/runs/allena/generazione_20261126_1810/rete.pt al 20% (resto: valutazione rimonta), 138 iterazioni, regole 6427b90+D72-D83
+partite 60, al piu' 8 decisioni per partita, 32 mondi per decisione, 40000 ricampionamenti
+decisioni esaminate 480 (prefisso non riprodotto: 0); con mossa diversa dal campione 70 (14.6% delle valide)
+differenza media (d - campione) sulle decisioni con disaccordo: +0.2 pp (IC 95% da -4.2 a +4.4); a favore 18, contro 20, pari 32
+mondi giocati validi 2240; esclusi 0 (la prima mossa forzata non e' quella chiesta)
+per matchup (esaminate, escluse, disaccordi, tasso, differenza media nei disaccordi):
+  EI: 48, 0, 5, 10.4%, +3.8 pp
+  EK: 48, 0, 8, 16.7%, +0.8 pp
+  ER: 48, 0, 6, 12.5%, +8.3 pp
+  ES: 48, 0, 11, 22.9%, +3.4 pp
+  IS: 48, 0, 7, 14.6%, -2.2 pp
+  KI: 48, 0, 8, 16.7%, +2.0 pp
+  KR: 48, 0, 8, 16.7%, -1.6 pp
+  KS: 48, 0, 5, 10.4%, -0.6 pp
+  RI: 48, 0, 6, 12.5%, +1.0 pp
+  RS: 48, 0, 6, 12.5%, -14.6 pp
+totale: 480 decisioni, 70 disaccordi, +0.2 pp, 17.1 min

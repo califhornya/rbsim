@@ -1,0 +1,2 @@
+durata dei passi (s): arena 657, confronto 2, seguiti 1027, totale 1686
+processi 9 su 10 core

@@ -1,0 +1,113 @@
+{
+ "nome": "ES50006000A",
+ "k": 12,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Cast Hold 'Em @BF0",
+  "Cast Hold 'Em @BF1",
+  "Play Fizz Trickster",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Equip Edge of Night"
+ ],
+ "campione": "Play Fizz Trickster",
+ "d": "Equip Edge of Night",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Play Fizz Trickster",
+   "n": 132,
+   "q": 0.4218990052500082,
+   "P": 0.933976411819458,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Equip Edge of Night",
+   "n": 3,
+   "q": 0.4519067044861087,
+   "P": 0.020751643925905228,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 1,
+   "q": 0.23556050036379247,
+   "P": 0.021946394816040993,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 1,
+   "q": 0.2590262082619324,
+   "P": 0.021946394816040993,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.001180781633593142,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Cast Hold 'Em @BF0",
+   "n": 0,
+   "q": null,
+   "P": 9.723104449221864e-05,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Cast Hold 'Em @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00010117141937371343,
+   "rango": 7
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,167 @@
+{
+ "nome": "ER50001001B",
+ "k": 14,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Play Kai'Sa Survivor",
+  "Play Kai'Sa Survivor to BF1",
+  "Play Kai'Sa Survivor",
+  "Play Kai'Sa Survivor to BF1",
+  "Play Kinkou Initiate",
+  "Play Kinkou Initiate to BF1",
+  "Play Grim Apothecary",
+  "Play Grim Apothecary to BF1",
+  "Move Rengar Trophy Hunter BF1→base",
+  "Move Nidalee Cat Form BF1→base",
+  "Move Pit Rookie BF1→base",
+  "Move Irresistible Faefolk BF1→base"
+ ],
+ "campione": "Play Grim Apothecary",
+ "d": "Play Grim Apothecary to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 8,
+   "azione": "Play Grim Apothecary to BF1",
+   "n": 65,
+   "q": 0.7125764262617885,
+   "P": 0.4018424153327942,
+   "rango": 1
+  },
+  {
+   "i": 7,
+   "azione": "Play Grim Apothecary",
+   "n": 59,
+   "q": 0.6887317103704927,
+   "P": 0.4469420909881592,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play Kinkou Initiate",
+   "n": 3,
+   "q": 0.6519361448493086,
+   "P": 0.030483845621347427,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play Kai'Sa Survivor",
+   "n": 2,
+   "q": 0.647218842526921,
+   "P": 0.023011861369013786,
+   "rango": 4
+  },
+  {
+   "i": 2,
+   "azione": "Play Kai'Sa Survivor to BF1",
+   "n": 2,
+   "q": 0.666769553269146,
+   "P": 0.020692916586995125,
+   "rango": 5
+  },
+  {
+   "i": 3,
+   "azione": "Play Kai'Sa Survivor",
+   "n": 2,
+   "q": 0.647218842526921,
+   "P": 0.023011861369013786,
+   "rango": 6
+  },
+  {
+   "i": 4,
+   "azione": "Play Kai'Sa Survivor to BF1",
+   "n": 2,
+   "q": 0.666769553269146,
+   "P": 0.020692916586995125,
+   "rango": 7
+  },
+  {
+   "i": 12,
+   "azione": "Move Irresistible Faefolk BF1→base",
+   "n": 2,
+   "q": 0.4053819234974154,
+   "P": 0.027008477598428726,
+   "rango": 8
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0012227819534018636,
+   "rango": 9
+  },
+  {
+   "i": 6,
+   "azione": "Play Kinkou Initiate to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0025398782454431057,
+   "rango": 10
+  },
+  {
+   "i": 9,
+   "azione": "Move Rengar Trophy Hunter BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 7.248049951158464e-05,
+   "rango": 11
+  },
+  {
+   "i": 10,
+   "azione": "Move Nidalee Cat Form BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00043257494689896703,
+   "rango": 12
+  },
+  {
+   "i": 11,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0020459513179957867,
+   "rango": 13
+  }
+ ],
+ "matchup": "ER",
+ "deltas": [
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0
+ ],
+ "media": 0.6875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

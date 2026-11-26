@@ -1,0 +1,212 @@
+{
+ "nome": "EI50003000A",
+ "k": 37,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Cast Gust @BF0",
+  "Cast Gust @BF1",
+  "Play Reckless Innovator",
+  "Play Reckless Innovator to BF0",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Vex Apathetic BF0→base",
+  "Move Pyke Returned BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Move Reckless Innovator BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move Bedeviling Stranger BF0→base",
+  "Hide Bedeviling Stranger @BF0",
+  "Gear gain_power_any_domain (Gold)",
+  "Gear gain_power_any_domain (Gold)"
+ ],
+ "campione": "Play Reckless Innovator to BF0",
+ "d": "Play Reckless Innovator",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Play Reckless Innovator",
+   "n": 69,
+   "q": 0.8770885488459645,
+   "P": 0.449194997549057,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Play Reckless Innovator to BF0",
+   "n": 30,
+   "q": 0.8616885136563869,
+   "P": 0.22713004052639008,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Play Bedeviling Stranger",
+   "n": 25,
+   "q": 0.8604673455848029,
+   "P": 0.18955287337303162,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 7,
+   "q": 0.8496905008557556,
+   "P": 0.06203659996390343,
+   "rango": 4
+  },
+  {
+   "i": 16,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 2,
+   "q": 0.8231528829729746,
+   "P": 0.023493904620409012,
+   "rango": 5
+  },
+  {
+   "i": 17,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 2,
+   "q": 0.8231528829729746,
+   "P": 0.023493904620409012,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.8075689165786145,
+   "P": 0.006488610524684191,
+   "rango": 7
+  },
+  {
+   "i": 3,
+   "azione": "Cast Gust @BF0",
+   "n": 1,
+   "q": 0.7852455098207177,
+   "P": 0.007057453505694866,
+   "rango": 8
+  },
+  {
+   "i": 4,
+   "azione": "Cast Gust @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.004519812297075987,
+   "rango": 9
+  },
+  {
+   "i": 7,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0001513294264441356,
+   "rango": 10
+  },
+  {
+   "i": 8,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 5.454206620925106e-05,
+   "rango": 11
+  },
+  {
+   "i": 9,
+   "azione": "Move Pyke Returned BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0029639562126249075,
+   "rango": 12
+  },
+  {
+   "i": 10,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 2.9034445105935447e-05,
+   "rango": 13
+  },
+  {
+   "i": 11,
+   "azione": "Move Reckless Innovator BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0013350070221349597,
+   "rango": 14
+  },
+  {
+   "i": 12,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00036529655335471034,
+   "rango": 15
+  },
+  {
+   "i": 13,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00036529655335471034,
+   "rango": 16
+  },
+  {
+   "i": 14,
+   "azione": "Move Bedeviling Stranger BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00012040022556902841,
+   "rango": 17
+  },
+  {
+   "i": 15,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0016469296533614397,
+   "rango": 18
+  }
+ ],
+ "matchup": "EI",
+ "deltas": [
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  -1.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  0.0
+ ],
+ "media": 0.125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

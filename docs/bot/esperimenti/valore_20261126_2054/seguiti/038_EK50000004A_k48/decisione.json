@@ -1,0 +1,77 @@
+{
+ "nome": "EK50000004A",
+ "k": 48,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Move K'Sante Courageous BF0→base",
+  "Move K'Sante Courageous BF0→base"
+ ],
+ "campione": "Pass",
+ "d": "Move K'Sante Courageous BF0→base",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 135,
+   "q": 0.8144140937656875,
+   "P": 0.9813304543495178,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 1,
+   "q": 0.8126402813966455,
+   "P": 0.008530167862772942,
+   "rango": 2
+  },
+  {
+   "i": 2,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 1,
+   "q": 0.8253581770080846,
+   "P": 0.01013929583132267,
+   "rango": 3
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

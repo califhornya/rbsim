@@ -1,0 +1,140 @@
+{
+ "nome": "ES50006005B",
+ "k": 9,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play Irresistible Faefolk to BF1",
+  "Deploy champion Sett Kingpin",
+  "Deploy champion Sett Kingpin to BF0",
+  "Deploy champion Sett Kingpin to BF1",
+  "Move Pit Rookie BF1→base",
+  "Move Pit Rookie BF1→base",
+  "Move Fiora Victorious BF1→base"
+ ],
+ "campione": "Deploy champion Sett Kingpin to BF0",
+ "d": "Deploy champion Sett Kingpin",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Deploy champion Sett Kingpin",
+   "n": 65,
+   "q": 0.9808693626558167,
+   "P": 0.44987061619758606,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Deploy champion Sett Kingpin to BF1",
+   "n": 46,
+   "q": 0.9780261147388137,
+   "P": 0.3253878355026245,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Play Irresistible Faefolk to BF1",
+   "n": 9,
+   "q": 0.9780261147388136,
+   "P": 0.06804481893777847,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Deploy champion Sett Kingpin to BF0",
+   "n": 8,
+   "q": 0.9731704261817145,
+   "P": 0.06430580466985703,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Play Irresistible Faefolk",
+   "n": 7,
+   "q": 0.9648815167640042,
+   "P": 0.06181953102350235,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.9587334055461876,
+   "P": 0.014120292849838734,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 1,
+   "q": 0.9487017421906799,
+   "P": 0.012280751019716263,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0015881344443187118,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0015881344443187118,
+   "rango": 9
+  },
+  {
+   "i": 9,
+   "azione": "Move Fiora Victorious BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0009941401658579707,
+   "rango": 10
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

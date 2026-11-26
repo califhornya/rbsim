@@ -1,0 +1,113 @@
+{
+ "nome": "ER50001005B",
+ "k": 16,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Play First Mate",
+  "Play First Mate to BF1",
+  "Move Rengar Trophy Hunter BF1→base",
+  "Move Noxus Hopeful BF1→base"
+ ],
+ "campione": "Cast Sabotage @BF0",
+ "d": "Pass",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Play First Mate to BF1",
+   "n": 60,
+   "q": 0.6426487104324128,
+   "P": 0.4085051715373993,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Cast Sabotage @BF1",
+   "n": 32,
+   "q": 0.6176212081042554,
+   "P": 0.27001214027404785,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Cast Sabotage @BF0",
+   "n": 22,
+   "q": 0.6264259250191475,
+   "P": 0.17073944211006165,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Play First Mate",
+   "n": 19,
+   "q": 0.6379191211546024,
+   "P": 0.13740327954292297,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 4,
+   "q": 0.7064193203972352,
+   "P": 0.013158830814063549,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Move Rengar Trophy Hunter BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 5.5591615819139406e-05,
+   "rango": 6
+  },
+  {
+   "i": 6,
+   "azione": "Move Noxus Hopeful BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00012560113100335002,
+   "rango": 7
+  }
+ ],
+ "matchup": "ER",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.0625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,213 @@
+{
+ "configurazione": {
+  "rete_sha256": "f68bb963dcb483b129ada4ab7c64cb3318d4747d3f63bcc49a700cf6f9f35f02",
+  "campione_sha256": "f8d8469b506dfc1dcfe939ad944a214684fc5285aefc370bdc7549d42cec41aa",
+  "regole": "6427b90+D72-D83",
+  "iterazioni": 138,
+  "max_turni": 40,
+  "base_seme": 40000000,
+  "ricerca": {
+   "b": {
+    "iter_cand": 138,
+    "iter_opp": 138,
+    "probe_cand": true,
+    "probe_opp": true,
+    "val_cand": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "val_opp": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "log": false
+   },
+   "c": {
+    "iter_cand": 138,
+    "iter_opp": 138,
+    "probe_cand": true,
+    "probe_opp": true,
+    "val_cand": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "val_opp": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "log": false,
+    "vr_cand": 0.2
+   },
+   "d": {
+    "iter_cand": 138,
+    "iter_opp": 138,
+    "probe_cand": true,
+    "probe_opp": true,
+    "val_cand": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "val_opp": [
+     "rimonta",
+     3.0,
+     0.2
+    ],
+    "log": false,
+    "vr_cand": 0.2,
+    "vc_cand": "rete",
+    "prior": "campione"
+   }
+  }
+ },
+ "regole": "6427b90+D72-D83",
+ "iterazioni": 138,
+ "coppie_per_matchup": 100,
+ "matchup": [
+  "EK",
+  "ER",
+  "KR",
+  "EI",
+  "KI",
+  "RI",
+  "ES",
+  "KS",
+  "RS",
+  "IS"
+ ],
+ "base_seme": 40000000,
+ "rete": "/Users/mateo/projects/rbsim2026/rbsim-rust/runs/allena/generazione_20261126_1810/rete.pt",
+ "campione": "/Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+ "varianti": {
+  "d": {
+   "etichetta": "(d) prior del campione, 80% rimonta + 20% valore della rete nuova",
+   "peso_valore_rete": 0.2,
+   "totale": [
+    0.5020000000000001,
+    0.487,
+    0.517
+   ],
+   "matchup": {
+    "EK": [
+     0.47,
+     0.42,
+     0.525
+    ],
+    "ER": [
+     0.52,
+     0.48,
+     0.56
+    ],
+    "KR": [
+     0.47,
+     0.415,
+     0.525
+    ],
+    "EI": [
+     0.49,
+     0.445,
+     0.535
+    ],
+    "KI": [
+     0.535,
+     0.495,
+     0.575
+    ],
+    "RI": [
+     0.5,
+     0.455,
+     0.545
+    ],
+    "ES": [
+     0.535,
+     0.485,
+     0.585
+    ],
+    "KS": [
+     0.495,
+     0.445,
+     0.545
+    ],
+    "RS": [
+     0.48,
+     0.435,
+     0.525
+    ],
+    "IS": [
+     0.525,
+     0.475,
+     0.575
+    ]
+   },
+   "durata_per_mossa_s": {
+    "candidato": {
+     "turn_action": {
+      "n": 41995,
+      "media": 0.06884469710679843,
+      "mediana": 0.050378,
+      "p95": 0.1653585
+     },
+     "tutte": {
+      "n": 73393,
+      "media": 0.04521902058779448,
+      "mediana": 0.018194,
+      "p95": 0.15660739999999995
+     },
+     "showdown_action": {
+      "n": 9606,
+      "media": 0.016225134395169684,
+      "mediana": 0.013142000000000001,
+      "p95": 0.0314285
+     },
+     "reaction": {
+      "n": 21792,
+      "media": 0.01247099311674009,
+      "mediana": 0.0099915,
+      "p95": 0.0252389
+     }
+    },
+    "campione": {
+     "turn_action": {
+      "n": 42354,
+      "media": 0.04632807996883411,
+      "mediana": 0.0352585,
+      "p95": 0.10695809999999999
+     },
+     "tutte": {
+      "n": 74378,
+      "media": 0.03223603989082793,
+      "mediana": 0.016175,
+      "p95": 0.100049
+     },
+     "reaction": {
+      "n": 22335,
+      "media": 0.012478489321692411,
+      "mediana": 0.009657,
+      "p95": 0.0244593
+     },
+     "showdown_action": {
+      "n": 9689,
+      "media": 0.016179751986789146,
+      "mediana": 0.012675,
+      "p95": 0.031417200000000006
+     }
+    }
+   },
+   "chiamate_rete": {
+    "candidato": [
+     2363649,
+     358714
+    ],
+    "campione": [
+     2142017,
+     0
+    ]
+   }
+  }
+ },
+ "minuti": 10.9
+}

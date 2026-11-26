@@ -1,0 +1,113 @@
+{
+ "nome": "KI50004000A",
+ "k": 38,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Move Kha'Zix Mutating Horror BF0→base",
+  "Move Vex Apathetic BF0→base",
+  "Move Traveling Merchant BF0→base",
+  "Move Reckless Innovator BF0→base",
+  "Activate buff_unit (Kha'Zix Voidreaver)",
+  "Activate move_unit (Kha'Zix Voidreaver)"
+ ],
+ "campione": "Move Traveling Merchant BF0→base",
+ "d": "Activate buff_unit (Kha'Zix Voidreaver)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Move Traveling Merchant BF0→base",
+   "n": 103,
+   "q": 0.7305938960959438,
+   "P": 0.7379988431930542,
+   "rango": 1
+  },
+  {
+   "i": 5,
+   "azione": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "n": 18,
+   "q": 0.7452775169889072,
+   "P": 0.11353317648172379,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Activate move_unit (Kha'Zix Voidreaver)",
+   "n": 12,
+   "q": 0.6952931772124749,
+   "P": 0.11353306472301483,
+   "rango": 3
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 4,
+   "q": 0.7258974148490807,
+   "P": 0.03198065236210823,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Move Kha'Zix Mutating Horror BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 7.36224465072155e-05,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00038878642953932285,
+   "rango": 6
+  },
+  {
+   "i": 4,
+   "azione": "Move Reckless Innovator BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.002491834107786417,
+   "rango": 7
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  0.0,
+  1.0,
+  -1.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0
+ ],
+ "media": 0.5625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

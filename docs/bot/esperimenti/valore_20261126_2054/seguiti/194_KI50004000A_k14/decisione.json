@@ -1,0 +1,167 @@
+{
+ "nome": "KI50004000A",
+ "k": 14,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play Fizz Trickster",
+  "Play Fizz Trickster to BF0",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Play Reckless Innovator",
+  "Play Reckless Innovator to BF0",
+  "Move Kha'Zix Mutating Horror BF0→base",
+  "Move Fizz Trickster BF0→base",
+  "Move Traveling Merchant BF0→base",
+  "Hide Switcheroo @BF0"
+ ],
+ "campione": "Play Fizz Trickster",
+ "d": "Play Fizz Trickster to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 2,
+   "azione": "Play Fizz Trickster to BF0",
+   "n": 81,
+   "q": 0.7134276390553402,
+   "P": 0.4676482081413269,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Play Fizz Trickster",
+   "n": 47,
+   "q": 0.6965777624631485,
+   "P": 0.3197537660598755,
+   "rango": 2
+  },
+  {
+   "i": 8,
+   "azione": "Play Reckless Innovator to BF0",
+   "n": 2,
+   "q": 0.4739237501732277,
+   "P": 0.04314902052283287,
+   "rango": 3
+  },
+  {
+   "i": 11,
+   "azione": "Move Traveling Merchant BF0→base",
+   "n": 2,
+   "q": 0.42028134283551644,
+   "P": 0.05834522098302841,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 1,
+   "q": 0.3411168974987273,
+   "P": 0.019182169809937477,
+   "rango": 5
+  },
+  {
+   "i": 4,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 1,
+   "q": 0.3548703593364959,
+   "P": 0.019182169809937477,
+   "rango": 6
+  },
+  {
+   "i": 5,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 1,
+   "q": 0.3588669520965819,
+   "P": 0.019182169809937477,
+   "rango": 7
+  },
+  {
+   "i": 6,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 1,
+   "q": 0.33758926812326956,
+   "P": 0.019182169809937477,
+   "rango": 8
+  },
+  {
+   "i": 7,
+   "azione": "Play Reckless Innovator",
+   "n": 1,
+   "q": 0.4187608389722051,
+   "P": 0.03301655501127243,
+   "rango": 9
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0009647880215197802,
+   "rango": 10
+  },
+  {
+   "i": 9,
+   "azione": "Move Kha'Zix Mutating Horror BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 1.811473885027226e-05,
+   "rango": 11
+  },
+  {
+   "i": 10,
+   "azione": "Move Fizz Trickster BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 6.510263119707815e-06,
+   "rango": 12
+  },
+  {
+   "i": 12,
+   "azione": "Hide Switcheroo @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0003690801386255771,
+   "rango": 13
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  -1.0,
+  -1.0,
+  1.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

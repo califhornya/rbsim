@@ -1,0 +1,221 @@
+{
+ "nome": "KR50002002A",
+ "k": 27,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Cast Grim Resolve @BF0",
+  "Cast Grim Resolve @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1",
+  "Play Fizz Trickster",
+  "Play Fizz Trickster to BF0",
+  "Play Traveling Merchant",
+  "Play Traveling Merchant to BF0",
+  "Cast Switcheroo @BF0",
+  "Cast Switcheroo @BF1",
+  "Hide Switcheroo @BF0",
+  "Play Up from the Deep from trash (FLOW)"
+ ],
+ "campione": "Play Traveling Merchant to BF0",
+ "d": "Play Fizz Trickster to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 11,
+   "azione": "Play Fizz Trickster",
+   "n": 72,
+   "q": -0.9597411436935321,
+   "P": 0.5282495617866516,
+   "rango": 1
+  },
+  {
+   "i": 12,
+   "azione": "Play Fizz Trickster to BF0",
+   "n": 40,
+   "q": -0.9507951431945211,
+   "P": 0.27340278029441833,
+   "rango": 2
+  },
+  {
+   "i": 18,
+   "azione": "Play Up from the Deep from trash (FLOW)",
+   "n": 11,
+   "q": -0.9647273193205547,
+   "P": 0.08378808200359344,
+   "rango": 3
+  },
+  {
+   "i": 13,
+   "azione": "Play Traveling Merchant",
+   "n": 9,
+   "q": -0.9573190893210575,
+   "P": 0.06541397422552109,
+   "rango": 4
+  },
+  {
+   "i": 14,
+   "azione": "Play Traveling Merchant to BF0",
+   "n": 3,
+   "q": -0.9539179170386098,
+   "P": 0.026903046295046806,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 1,
+   "q": -0.9747456197336306,
+   "P": 0.010291950777173042,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 1,
+   "q": -0.9745103125169864,
+   "P": 0.010291950777173042,
+   "rango": 7
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.00033617616281844676,
+   "rango": 8
+  },
+  {
+   "i": 3,
+   "azione": "Cast Grim Resolve @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0002164249453926459,
+   "rango": 9
+  },
+  {
+   "i": 4,
+   "azione": "Cast Grim Resolve @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0001150986208813265,
+   "rango": 10
+  },
+  {
+   "i": 5,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.809794775908813e-05,
+   "rango": 11
+  },
+  {
+   "i": 6,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 3.174750236212276e-05,
+   "rango": 12
+  },
+  {
+   "i": 7,
+   "azione": "Cast Void Assault @BF0",
+   "n": 0,
+   "q": null,
+   "P": 5.905679427087307e-05,
+   "rango": 13
+  },
+  {
+   "i": 8,
+   "azione": "Cast Void Assault @BF1",
+   "n": 0,
+   "q": null,
+   "P": 7.583823753520846e-05,
+   "rango": 14
+  },
+  {
+   "i": 9,
+   "azione": "Cast Sabotage @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00037243260885588825,
+   "rango": 15
+  },
+  {
+   "i": 10,
+   "azione": "Cast Sabotage @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0003802754217758775,
+   "rango": 16
+  },
+  {
+   "i": 15,
+   "azione": "Cast Switcheroo @BF0",
+   "n": 0,
+   "q": null,
+   "P": 4.646235083782813e-06,
+   "rango": 17
+  },
+  {
+   "i": 16,
+   "azione": "Cast Switcheroo @BF1",
+   "n": 0,
+   "q": null,
+   "P": 8.004794835869689e-06,
+   "rango": 18
+  },
+  {
+   "i": 17,
+   "azione": "Hide Switcheroo @BF0",
+   "n": 0,
+   "q": null,
+   "P": 4.08591004088521e-05,
+   "rango": 19
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

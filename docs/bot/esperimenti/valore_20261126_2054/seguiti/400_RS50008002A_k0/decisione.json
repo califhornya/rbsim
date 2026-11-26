@@ -1,0 +1,95 @@
+{
+ "nome": "RS50008002A",
+ "k": 0,
+ "turno": 1,
+ "menu": [
+  "Pass",
+  "Cast Thrill of the Hunt @BF0",
+  "Cast Thrill of the Hunt @BF1",
+  "Cast Sabotage @BF0",
+  "Cast Sabotage @BF1"
+ ],
+ "campione": "Pass",
+ "d": "Cast Sabotage @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 2,
+   "azione": "Cast Thrill of the Hunt @BF1",
+   "n": 74,
+   "q": 0.0,
+   "P": 0.570326030254364,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Cast Thrill of the Hunt @BF0",
+   "n": 34,
+   "q": 0.0,
+   "P": 0.2646799385547638,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Cast Sabotage @BF1",
+   "n": 15,
+   "q": 0.029991003238820143,
+   "P": 0.09055870026350021,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Cast Sabotage @BF0",
+   "n": 13,
+   "q": 0.047930466026992094,
+   "P": 0.06602166593074799,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.029991003238820143,
+   "P": 0.008413637056946754,
+   "rango": 5
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0
+ ],
+ "media": 0.0625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

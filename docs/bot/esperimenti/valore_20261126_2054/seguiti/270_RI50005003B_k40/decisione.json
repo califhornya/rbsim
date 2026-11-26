@@ -1,0 +1,158 @@
+{
+ "nome": "RI50005003B",
+ "k": 40,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Cast Block @BF0",
+  "Cast Block @BF1",
+  "Play Frisky Hunter",
+  "Play Frisky Hunter to BF0",
+  "Move Mutated Mouser BF0→base",
+  "Move Fallen Feline BF0→base",
+  "Move Fallen Feline base→BF0",
+  "Move Fallen Feline base→BF1",
+  "Move Stalwart Poro base→BF0",
+  "Move Stalwart Poro base→BF1",
+  "Hide Block @BF0"
+ ],
+ "campione": "Play Frisky Hunter",
+ "d": "Move Stalwart Poro base→BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 9,
+   "azione": "Move Stalwart Poro base→BF0",
+   "n": 112,
+   "q": -0.5986351225616549,
+   "P": 0.7137798070907593,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Frisky Hunter",
+   "n": 18,
+   "q": -0.616909302877065,
+   "P": 0.13447797298431396,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Play Frisky Hunter to BF0",
+   "n": 5,
+   "q": -0.8040623914048921,
+   "P": 0.09841995686292648,
+   "rango": 3
+  },
+  {
+   "i": 7,
+   "azione": "Move Fallen Feline base→BF0",
+   "n": 1,
+   "q": -0.8177587452870785,
+   "P": 0.018829980865120888,
+   "rango": 4
+  },
+  {
+   "i": 10,
+   "azione": "Move Stalwart Poro base→BF1",
+   "n": 1,
+   "q": -0.7707848233541963,
+   "P": 0.021846076473593712,
+   "rango": 5
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.005814372096210718,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Block @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0007641094853170216,
+   "rango": 7
+  },
+  {
+   "i": 2,
+   "azione": "Cast Block @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0009241811349056661,
+   "rango": 8
+  },
+  {
+   "i": 5,
+   "azione": "Move Mutated Mouser BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00015068898210301995,
+   "rango": 9
+  },
+  {
+   "i": 6,
+   "azione": "Move Fallen Feline BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0003569947148207575,
+   "rango": 10
+  },
+  {
+   "i": 8,
+   "azione": "Move Fallen Feline base→BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.002604398410767317,
+   "rango": 11
+  },
+  {
+   "i": 11,
+   "azione": "Hide Block @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0020314280409365892,
+   "rango": 12
+  }
+ ],
+ "matchup": "RI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

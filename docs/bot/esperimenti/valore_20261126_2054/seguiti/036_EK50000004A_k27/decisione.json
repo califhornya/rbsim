@@ -1,0 +1,122 @@
+{
+ "nome": "EK50000004A",
+ "k": 27,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Move Evelynn Entrancing BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Move Pyke Returned BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Hide Pyke Returned @BF0",
+  "Gear gain_power_any_domain (Gold)",
+  "Gear gain_power_any_domain (Gold)"
+ ],
+ "campione": "Pass",
+ "d": "Gear gain_power_any_domain (Gold)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Hide Pyke Returned @BF0",
+   "n": 108,
+   "q": 0.8402366120601259,
+   "P": 0.7711546421051025,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Move Pyke Returned BF0→base",
+   "n": 10,
+   "q": 0.8296825727499209,
+   "P": 0.08310174196958542,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 8,
+   "q": 0.8475974557212077,
+   "P": 0.057194408029317856,
+   "rango": 3
+  },
+  {
+   "i": 7,
+   "azione": "Gear gain_power_any_domain (Gold)",
+   "n": 8,
+   "q": 0.8475974557212077,
+   "P": 0.057194408029317856,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 3,
+   "q": 0.8242721703413975,
+   "P": 0.028547706082463264,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0005434364429675043,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0011318337637931108,
+   "rango": 7
+  },
+  {
+   "i": 4,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0011318337637931108,
+   "rango": 8
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

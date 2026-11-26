@@ -1,0 +1,203 @@
+{
+ "nome": "ER50001000A",
+ "k": 12,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Hold 'Em @BF0",
+  "Cast Hold 'Em @BF1",
+  "Cast Rampage @BF0",
+  "Cast Rampage @BF1",
+  "Play Gutter Guardian",
+  "Play Gutter Guardian to BF0",
+  "Play gear Edge of Night @BF0",
+  "Play gear Edge of Night @BF1",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Vex Apathetic BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Hide Gutter Guardian @BF0",
+  "Hide Edge of Night @BF0"
+ ],
+ "campione": "Play Gutter Guardian",
+ "d": "Play Gutter Guardian to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 8,
+   "azione": "Play Gutter Guardian to BF0",
+   "n": 71,
+   "q": 0.6764741023242586,
+   "P": 0.43745696544647217,
+   "rango": 1
+  },
+  {
+   "i": 16,
+   "azione": "Hide Edge of Night @BF0",
+   "n": 38,
+   "q": 0.6608203183066826,
+   "P": 0.2696307599544525,
+   "rango": 2
+  },
+  {
+   "i": 15,
+   "azione": "Hide Gutter Guardian @BF0",
+   "n": 18,
+   "q": 0.6162120431176589,
+   "P": 0.18012948334217072,
+   "rango": 3
+  },
+  {
+   "i": 7,
+   "azione": "Play Gutter Guardian",
+   "n": 4,
+   "q": 0.5930237143746779,
+   "P": 0.053321484476327896,
+   "rango": 4
+  },
+  {
+   "i": 5,
+   "azione": "Cast Rampage @BF0",
+   "n": 3,
+   "q": 0.6230098904026957,
+   "P": 0.029757967218756676,
+   "rango": 5
+  },
+  {
+   "i": 6,
+   "azione": "Cast Rampage @BF1",
+   "n": 1,
+   "q": 0.6175038417041413,
+   "P": 0.008055408485233784,
+   "rango": 6
+  },
+  {
+   "i": 9,
+   "azione": "Play gear Edge of Night @BF0",
+   "n": 1,
+   "q": 0.5392864865413908,
+   "P": 0.010635492391884327,
+   "rango": 7
+  },
+  {
+   "i": 10,
+   "azione": "Play gear Edge of Night @BF1",
+   "n": 1,
+   "q": 0.5392864865413908,
+   "P": 0.010635492391884327,
+   "rango": 8
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0002730585401877761,
+   "rango": 9
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.5970035747159272e-05,
+   "rango": 10
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 2.9571430786745623e-05,
+   "rango": 11
+  },
+  {
+   "i": 3,
+   "azione": "Cast Hold 'Em @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.723225614114199e-05,
+   "rango": 12
+  },
+  {
+   "i": 4,
+   "azione": "Cast Hold 'Em @BF1",
+   "n": 0,
+   "q": null,
+   "P": 2.3288041120395064e-05,
+   "rango": 13
+  },
+  {
+   "i": 11,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 3.750164069060702e-06,
+   "rango": 14
+  },
+  {
+   "i": 12,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 5.68377663512365e-06,
+   "rango": 15
+  },
+  {
+   "i": 13,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 5.917558610235574e-06,
+   "rango": 16
+  },
+  {
+   "i": 14,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 2.4794139790174086e-06,
+   "rango": 17
+  }
+ ],
+ "matchup": "ER",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

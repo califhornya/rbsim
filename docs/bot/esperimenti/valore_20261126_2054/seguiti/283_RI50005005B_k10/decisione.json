@@ -1,0 +1,95 @@
+{
+ "nome": "RI50005005B",
+ "k": 10,
+ "turno": 5,
+ "menu": [
+  "Pass",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Move Bird BF0→base",
+  "Hide Back Off @BF0"
+ ],
+ "campione": "Pass",
+ "d": "Hide Back Off @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 88,
+   "q": 0.5915193954318169,
+   "P": 0.6038933992385864,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Cast Friendship @BF1",
+   "n": 24,
+   "q": 0.5770778326784053,
+   "P": 0.190107062458992,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Move Bird BF0→base",
+   "n": 14,
+   "q": 0.5770778326784053,
+   "P": 0.11068517714738846,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Cast Friendship @BF0",
+   "n": 10,
+   "q": 0.5716699660851172,
+   "P": 0.08662587404251099,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Hide Back Off @BF0",
+   "n": 1,
+   "q": 0.6089314103947967,
+   "P": 0.008688503876328468,
+   "rango": 5
+  }
+ ],
+ "matchup": "RI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.09375,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

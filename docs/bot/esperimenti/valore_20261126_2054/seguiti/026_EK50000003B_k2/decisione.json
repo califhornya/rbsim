@@ -1,0 +1,140 @@
+{
+ "nome": "EK50000003B",
+ "k": 2,
+ "turno": 5,
+ "menu": [
+  "Pass",
+  "Cast Grim Resolve @BF0",
+  "Cast Grim Resolve @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Void Assault @BF0",
+  "Cast Void Assault @BF1",
+  "Play Evelynn Entrancing",
+  "Move Kha'Zix Mutating Horror base→BF0",
+  "Move Kha'Zix Mutating Horror base→BF1"
+ ],
+ "campione": "Cast Void Assault @BF1",
+ "d": "Play Evelynn Entrancing",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 9,
+   "azione": "Move Kha'Zix Mutating Horror base→BF1",
+   "n": 74,
+   "q": 0.009999666679999469,
+   "P": 0.21939928829669952,
+   "rango": 1
+  },
+  {
+   "i": 7,
+   "azione": "Play Evelynn Entrancing",
+   "n": 46,
+   "q": 0.11942729853438593,
+   "P": 0.1162971705198288,
+   "rango": 2
+  },
+  {
+   "i": 8,
+   "azione": "Move Kha'Zix Mutating Horror base→BF0",
+   "n": 10,
+   "q": -0.5648995528462251,
+   "P": 0.4425702691078186,
+   "rango": 3
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 2,
+   "q": -0.5511280285381469,
+   "P": 0.1115678995847702,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Cast Grim Resolve @BF0",
+   "n": 1,
+   "q": -0.5729897738324493,
+   "P": 0.025447886437177658,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Cast Grim Resolve @BF1",
+   "n": 1,
+   "q": -0.5729897738324493,
+   "P": 0.039502210915088654,
+   "rango": 6
+  },
+  {
+   "i": 4,
+   "azione": "Cast Punch First @BF1",
+   "n": 1,
+   "q": -0.5828198314534515,
+   "P": 0.0025435062125325203,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Cast Void Assault @BF0",
+   "n": 1,
+   "q": -0.15112106380870569,
+   "P": 0.01542544737458229,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Cast Void Assault @BF1",
+   "n": 1,
+   "q": -0.154100020508077,
+   "P": 0.02607457898557186,
+   "rango": 9
+  },
+  {
+   "i": 3,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0011717474553734064,
+   "rango": 10
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0
+ ],
+ "media": 0.09375,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,9 @@
+# d: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/valore_20261126_2054/arena_righe.jsonl; c: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+d − c: +1.15 punti percentuali (IC 95% da -1.05 a +3.35), 1000 coppie, pesi uguali fra i matchup
+   EI -1.00 (-6.50 / +4.50); EK -1.00 (-8.00 / +6.00); ER +7.00 (+0.50 / +13.50); ES +2.50 (-5.50 / +10.50); IS +0.00 (-7.50 / +7.50); KI +7.50 (+1.50 / +13.50); KR -3.00 (-10.50 / +4.50); KS -3.50 (-9.50 / +3.00); RI +5.50 (-2.50 / +13.50); RS -2.50 (-10.00 / +5.00)
+# d: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/valore_20261126_2054/arena_righe.jsonl; b: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+d − b: +2.25 punti percentuali (IC 95% da -0.00 a +4.50), 1000 coppie, pesi uguali fra i matchup
+   EI +4.00 (-2.00 / +10.00); EK +1.00 (-6.00 / +8.00); ER +8.50 (+1.50 / +15.50); ES +3.00 (-5.50 / +11.00); IS +9.00 (+1.50 / +16.50); KI +4.50 (-1.00 / +10.50); KR -3.50 (-11.50 / +4.50); KS -2.50 (-9.00 / +4.50); RI -2.50 (-10.00 / +5.00); RS +1.00 (-5.00 / +7.50)
+# c: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl; b: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+c − b: +1.10 punti percentuali (IC 95% da -0.80 a +3.00), 1000 coppie, pesi uguali fra i matchup
+   EI +5.00 (-0.50 / +10.50); EK +2.00 (-4.50 / +8.50); ER +1.50 (-4.50 / +7.50); ES +0.50 (-6.50 / +7.50); IS +9.00 (+4.50 / +14.00); KI -3.00 (-8.00 / +1.50); KR -0.50 (-6.50 / +5.50); KS +1.00 (-4.50 / +6.50); RI -8.00 (-14.00 / -2.00); RS +3.50 (-3.00 / +10.00)

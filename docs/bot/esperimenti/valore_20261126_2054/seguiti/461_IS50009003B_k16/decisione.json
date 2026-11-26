@@ -1,0 +1,131 @@
+{
+ "nome": "IS50009003B",
+ "k": 16,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Play First Mate",
+  "Play First Mate to BF0"
+ ],
+ "campione": "Play Trifarian Captain",
+ "d": "Play First Mate to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 7,
+   "azione": "Play First Mate",
+   "n": 64,
+   "q": 0.9808693626558167,
+   "P": 0.4501138925552368,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Play Irresistible Faefolk",
+   "n": 17,
+   "q": 0.9808693626558167,
+   "P": 0.120128333568573,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Play Trifarian Captain",
+   "n": 15,
+   "q": 0.9767197314861931,
+   "P": 0.11480361223220825,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Play Trifarian Captain",
+   "n": 15,
+   "q": 0.9774853177988728,
+   "P": 0.11480361223220825,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 9,
+   "q": 0.9784565399097167,
+   "P": 0.06665101647377014,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 9,
+   "q": 0.9792925249378165,
+   "P": 0.06792023032903671,
+   "rango": 6
+  },
+  {
+   "i": 8,
+   "azione": "Play First Mate to BF0",
+   "n": 8,
+   "q": 0.981224742458304,
+   "P": 0.06196203455328941,
+   "rango": 7
+  },
+  {
+   "i": 4,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0018086083000525832,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0018086083000525832,
+   "rango": 9
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

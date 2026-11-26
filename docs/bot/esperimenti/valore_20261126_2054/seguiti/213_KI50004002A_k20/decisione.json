@@ -1,0 +1,140 @@
+{
+ "nome": "KI50004002A",
+ "k": 20,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play gear The Good Stuff @BF0",
+  "Play gear The Good Stuff @BF1",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Move Traveling Merchant BF0→base",
+  "Move Reckless Innovator BF0→base",
+  "Move Fizz Trickster BF0→base"
+ ],
+ "campione": "Move Traveling Merchant BF0→base",
+ "d": "Play gear The Good Stuff @BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Play gear The Good Stuff @BF1",
+   "n": 81,
+   "q": 0.7310231383963546,
+   "P": 0.22086156904697418,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play gear The Good Stuff @BF0",
+   "n": 25,
+   "q": 0.6489686142323867,
+   "P": 0.22086156904697418,
+   "rango": 2
+  },
+  {
+   "i": 7,
+   "azione": "Move Traveling Merchant BF0→base",
+   "n": 18,
+   "q": 0.5016911358804983,
+   "P": 0.29690709710121155,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 5,
+   "q": 0.5096840795955494,
+   "P": 0.0836537778377533,
+   "rango": 4
+  },
+  {
+   "i": 6,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 3,
+   "q": 0.4181831924711146,
+   "P": 0.0836537778377533,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Play Irresistible Faefolk",
+   "n": 2,
+   "q": 0.43175850164191776,
+   "P": 0.04023824259638786,
+   "rango": 6
+  },
+  {
+   "i": 5,
+   "azione": "Play Irresistible Faefolk",
+   "n": 2,
+   "q": 0.49113716434733923,
+   "P": 0.04023824259638786,
+   "rango": 7
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.5370495669980352,
+   "P": 0.013132220134139061,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Move Reckless Innovator BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0004082059895154089,
+   "rango": 9
+  },
+  {
+   "i": 9,
+   "azione": "Move Fizz Trickster BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 4.5295288146007806e-05,
+   "rango": 10
+  }
+ ],
+ "matchup": "KI",
+ "deltas": [
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0
+ ],
+ "media": 0.0625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

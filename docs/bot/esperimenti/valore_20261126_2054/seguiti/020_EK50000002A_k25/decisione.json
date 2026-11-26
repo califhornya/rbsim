@@ -1,0 +1,104 @@
+{
+ "nome": "EK50000002A",
+ "k": 25,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Move Evelynn Entrancing BF0→BF1",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move Rengar Trophy Hunter BF0→base",
+  "Move Momentary Companion BF0→base"
+ ],
+ "campione": "Pass",
+ "d": "Move Evelynn Entrancing BF0→BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 73,
+   "q": 0.7573623242165277,
+   "P": 0.49288228154182434,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Move Rengar Trophy Hunter BF0→base",
+   "n": 33,
+   "q": 0.7529788156301666,
+   "P": 0.31365975737571716,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Move Evelynn Entrancing BF0→BF1",
+   "n": 21,
+   "q": 0.8008196617909761,
+   "P": 0.09363020956516266,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Move Momentary Companion BF0→base",
+   "n": 5,
+   "q": 0.7211322540766999,
+   "P": 0.05170033872127533,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 4,
+   "q": 0.7305938960959437,
+   "P": 0.03924132511019707,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 1,
+   "q": 0.7080931872067188,
+   "P": 0.008886058814823627,
+   "rango": 6
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

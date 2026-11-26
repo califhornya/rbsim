@@ -1,0 +1,113 @@
+{
+ "nome": "KS50007002A",
+ "k": 22,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Move Vex Apathetic BF0→base",
+  "Move Zed Without a Sound BF1→base",
+  "Move Shadow Clone base→BF0",
+  "Move Shadow Clone base→BF1",
+  "Activate swap_position (Zed Without a Sound)",
+  "Activate buff_unit (Kha'Zix Voidreaver)"
+ ],
+ "campione": "Move Shadow Clone base→BF0",
+ "d": "Activate buff_unit (Kha'Zix Voidreaver)",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 5,
+   "azione": "Activate swap_position (Zed Without a Sound)",
+   "n": 39,
+   "q": 0.9786258781842958,
+   "P": 0.28182631731033325,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Move Zed Without a Sound BF1→base",
+   "n": 35,
+   "q": 0.9786463702611696,
+   "P": 0.25607383251190186,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "n": 22,
+   "q": 0.9803110935441579,
+   "P": 0.15528196096420288,
+   "rango": 3
+  },
+  {
+   "i": 3,
+   "azione": "Move Shadow Clone base→BF0",
+   "n": 17,
+   "q": 0.9801662780992118,
+   "P": 0.12163279950618744,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Move Shadow Clone base→BF1",
+   "n": 12,
+   "q": 0.9785999263219607,
+   "P": 0.08934782445430756,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 8,
+   "q": 0.9719560005097273,
+   "P": 0.0612918958067894,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 4,
+   "q": 0.9715940772546178,
+   "P": 0.03454531356692314,
+   "rango": 7
+  }
+ ],
+ "matchup": "KS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

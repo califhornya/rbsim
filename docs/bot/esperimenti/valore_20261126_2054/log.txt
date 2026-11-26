@@ -1,0 +1,55 @@
+20:54:47 == ambiente
+🛠 Installed riftbound_rs-0.1.0
+ff3ac6a Merge pull request #72 from califhornya/claude/adoring-cray-swjl90
+processi: 9; campione: ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; rete nuova: runs/allena/generazione_20261126_1810/rete.pt; 100 coppie; 6 partite x 8 decisioni x 32 mondi
+20:55:24 == 1. arena di sviluppo, combinazione (d) (100 coppie per matchup)
+Arena di sviluppo: 100 coppie per matchup (EK, ER, KR, EI, KI, RI, ES, KS, RS, IS), 138 iterazioni, win_probe, rimonta, regole 6427b90+D72-D83, semi da 40000000
+(d) prior del campione, 80% rimonta + 20% valore della rete nuova: totale 0.502 (IC 95% 0.487-0.517), pesi uguali fra i matchup
+   EK 0.470 (0.42-0.53); ER 0.520 (0.48-0.56); KR 0.470 (0.41-0.53); EI 0.490 (0.45-0.54); KI 0.535 (0.49-0.57); RI 0.500 (0.46-0.55); ES 0.535 (0.48-0.58); KS 0.495 (0.45-0.55); RS 0.480 (0.43-0.53); IS 0.525 (0.47-0.57)
+   durata per decisione cercata, candidato: media 45.2 ms, mediana 18.2 ms, p95 156.6 ms (73393 ricerche); di turno media 68.8 ms
+   durata per decisione cercata, campione: media 32.2 ms, mediana 16.2 ms, p95 100.0 ms (74378 ricerche); di turno media 46.3 ms
+   chiamate della rete del candidato: 2363649, di cui solo per il valore 358714
+durata dell'arena: 10.9 min
+21:06:21 == 2. confronto con l'arena del pilota
+# d: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/valore_20261126_2054/arena_righe.jsonl; c: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+d − c: +1.15 punti percentuali (IC 95% da -1.05 a +3.35), 1000 coppie, pesi uguali fra i matchup
+   EI -1.00 (-6.50 / +4.50); EK -1.00 (-8.00 / +6.00); ER +7.00 (+0.50 / +13.50); ES +2.50 (-5.50 / +10.50); IS +0.00 (-7.50 / +7.50); KI +7.50 (+1.50 / +13.50); KR -3.00 (-10.50 / +4.50); KS -3.50 (-9.50 / +3.00); RI +5.50 (-2.50 / +13.50); RS -2.50 (-10.00 / +5.00)
+# d: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/valore_20261126_2054/arena_righe.jsonl; b: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+d − b: +2.25 punti percentuali (IC 95% da -0.00 a +4.50), 1000 coppie, pesi uguali fra i matchup
+   EI +4.00 (-2.00 / +10.00); EK +1.00 (-6.00 / +8.00); ER +8.50 (+1.50 / +15.50); ES +3.00 (-5.50 / +11.00); IS +9.00 (+1.50 / +16.50); KI +4.50 (-1.00 / +10.50); KR -3.50 (-11.50 / +4.50); KS -2.50 (-9.00 / +4.50); RI -2.50 (-10.00 / +5.00); RS +1.00 (-5.00 / +7.50)
+# c: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl; b: /Users/mateo/projects/rbsim2026/rbsim-rust/docs/bot/esperimenti/generazione_20261126_1810/arena_righe.jsonl
+c − b: +1.10 punti percentuali (IC 95% da -0.80 a +3.00), 1000 coppie, pesi uguali fra i matchup
+   EI +5.00 (-0.50 / +10.50); EK +2.00 (-4.50 / +8.50); ER +1.50 (-4.50 / +7.50); ES +0.50 (-6.50 / +7.50); IS +9.00 (+4.50 / +14.00); KI -3.00 (-8.00 / +1.50); KR -0.50 (-6.50 / +5.50); KS +1.00 (-4.50 / +6.50); RI -8.00 (-14.00 / -2.00); RS +3.50 (-3.00 / +10.00)
+21:06:23 == 3. seguiti
+== decisione 291/480: ES50006000A k=9 turno 7, 32 mondi
+== decisione 292/480: ES50006000A k=12 turno 9, 32 mondi
+== decisione 302/480: ES50006001B k=16 turno 9, 32 mondi
+== decisione 307/480: ES50006002A k=12 turno 5, 32 mondi
+== decisione 308/480: ES50006002A k=18 turno 7, 32 mondi
+== decisione 309/480: ES50006002A k=21 turno 9, 32 mondi
+== decisione 315/480: ES50006003B k=14 turno 7, 32 mondi
+== decisione 316/480: ES50006003B k=21 turno 9, 32 mondi
+== decisione 319/480: ES50006003B k=37 turno 11, 32 mondi
+== decisione 322/480: ES50006004A k=4 turno 3, 32 mondi
+== decisione 332/480: ES50006005B k=9 turno 7, 32 mondi
+== decisione 344/480: KS50007000A k=32 turno 13, 32 mondi
+== decisione 350/480: KS50007001B k=12 turno 11, 32 mondi
+== decisione 360/480: KS50007002A k=22 turno 13, 32 mondi
+== decisione 367/480: KS50007003B k=21 turno 11, 32 mondi
+== decisione 368/480: KS50007003B k=29 turno 13, 32 mondi
+== decisione 388/480: RS50008000A k=11 turno 9, 32 mondi
+== decisione 392/480: RS50008000A k=30 turno 15, 32 mondi
+== decisione 401/480: RS50008002A k=0 turno 1, 32 mondi
+== decisione 415/480: RS50008003B k=35 turno 15, 32 mondi
+== decisione 419/480: RS50008004A k=5 turno 7, 32 mondi
+== decisione 432/480: RS50008005B k=24 turno 11, 32 mondi
+== decisione 440/480: IS50009000A k=53 turno 13, 32 mondi
+== decisione 446/480: IS50009001B k=21 turno 11, 32 mondi
+== decisione 448/480: IS50009001B k=31 turno 13, 32 mondi
+== decisione 456/480: IS50009002A k=35 turno 11, 32 mondi
+== decisione 460/480: IS50009003B k=11 turno 7, 32 mondi
+== decisione 462/480: IS50009003B k=16 turno 9, 32 mondi
+== decisione 471/480: IS50009004A k=31 turno 11, 32 mondi
+totale: 480 decisioni, 70 disaccordi, +0.2 pp, 17.1 min
+durata dei passi (s): arena 657, confronto 2, seguiti 1027, totale 1686
+processi 9 su 10 core

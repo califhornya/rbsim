@@ -1,0 +1,158 @@
+{
+ "nome": "RS50008003B",
+ "k": 35,
+ "turno": 15,
+ "menu": [
+  "Pass",
+  "Play First Mate",
+  "Play First Mate to BF1",
+  "Play First Mate",
+  "Play First Mate to BF1",
+  "Cast Call to Glory @BF0",
+  "Cast Call to Glory @BF1",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Move Vi Peacekeeper BF1→base",
+  "Move Ruin Runner base→BF0",
+  "Move Ruin Runner base→BF1"
+ ],
+ "campione": "Pass",
+ "d": "Move Ruin Runner base→BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 10,
+   "azione": "Move Ruin Runner base→BF0",
+   "n": 47,
+   "q": 0.47175461189126777,
+   "P": 0.006803442724049091,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Play First Mate",
+   "n": 21,
+   "q": 0.12708117774036481,
+   "P": 0.1469716727733612,
+   "rango": 2
+  },
+  {
+   "i": 3,
+   "azione": "Play First Mate",
+   "n": 21,
+   "q": 0.12708117774036481,
+   "P": 0.1469716727733612,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Play First Mate to BF1",
+   "n": 20,
+   "q": -0.009807702099083299,
+   "P": 0.30322161316871643,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Play First Mate to BF1",
+   "n": 20,
+   "q": -0.009807702099083299,
+   "P": 0.30322161316871643,
+   "rango": 5
+  },
+  {
+   "i": 11,
+   "azione": "Move Ruin Runner base→BF1",
+   "n": 4,
+   "q": -0.011615439449547182,
+   "P": 0.07751986384391785,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.1488850336233179,
+   "P": 0.010025803931057453,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Cast Call to Glory @BF0",
+   "n": 1,
+   "q": 0.19156374681841576,
+   "P": 0.0010220459662377834,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Cast Call to Glory @BF1",
+   "n": 1,
+   "q": 0.19156374681841576,
+   "P": 0.0016654626233503222,
+   "rango": 9
+  },
+  {
+   "i": 9,
+   "azione": "Move Vi Peacekeeper BF1→base",
+   "n": 1,
+   "q": -0.1277198896732052,
+   "P": 0.002296141115948558,
+   "rango": 10
+  },
+  {
+   "i": 7,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00013840147585142404,
+   "rango": 11
+  },
+  {
+   "i": 8,
+   "azione": "Cast Punch First @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00014230703527573496,
+   "rango": 12
+  }
+ ],
+ "matchup": "RS",
+ "deltas": [
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.28125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

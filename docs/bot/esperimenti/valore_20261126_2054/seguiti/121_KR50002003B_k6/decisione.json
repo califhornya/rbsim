@@ -1,0 +1,95 @@
+{
+ "nome": "KR50002003B",
+ "k": 6,
+ "turno": 3,
+ "menu": [
+  "Pass",
+  "Play Noxus Hopeful",
+  "Play Noxus Hopeful to BF0",
+  "Play Inferna",
+  "Play Inferna to BF0"
+ ],
+ "campione": "Play Noxus Hopeful to BF0",
+ "d": "Play Noxus Hopeful",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 1,
+   "azione": "Play Noxus Hopeful",
+   "n": 77,
+   "q": 0.7064193203972349,
+   "P": 0.4702276885509491,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Inferna",
+   "n": 44,
+   "q": 0.658409035955251,
+   "P": 0.38707107305526733,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Play Inferna to BF0",
+   "n": 13,
+   "q": 0.6695902596187708,
+   "P": 0.10610674321651459,
+   "rango": 3
+  },
+  {
+   "i": 2,
+   "azione": "Play Noxus Hopeful to BF0",
+   "n": 3,
+   "q": 0.6535070010439346,
+   "P": 0.03509828820824623,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0014961728593334556,
+   "rango": 5
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0,
+  -1.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0
+ ],
+ "media": -0.125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

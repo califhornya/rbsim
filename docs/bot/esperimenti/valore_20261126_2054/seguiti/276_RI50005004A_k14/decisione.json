@@ -1,0 +1,122 @@
+{
+ "nome": "RI50005004A",
+ "k": 14,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Cast Thrill of the Hunt @BF0",
+  "Cast Thrill of the Hunt @BF1",
+  "Move Rengar Trophy Hunter BF0→base",
+  "Move Pit Rookie BF1→base",
+  "Move Noxus Hopeful BF1→base"
+ ],
+ "campione": "Cast Thrill of the Hunt @BF0",
+ "d": "Pass",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 74,
+   "q": 0.9938415907570444,
+   "P": 0.4041258990764618,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Cast Thrill of the Hunt @BF0",
+   "n": 23,
+   "q": 0.9212959563150279,
+   "P": 0.22136670351028442,
+   "rango": 2
+  },
+  {
+   "i": 4,
+   "azione": "Cast Thrill of the Hunt @BF1",
+   "n": 23,
+   "q": 0.9212959563150279,
+   "P": 0.22613979876041412,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 6,
+   "q": 0.904585202314629,
+   "P": 0.06367085129022598,
+   "rango": 4
+  },
+  {
+   "i": 6,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 5,
+   "q": 0.9933303853851733,
+   "P": 0.031125862151384354,
+   "rango": 5
+  },
+  {
+   "i": 7,
+   "azione": "Move Noxus Hopeful BF1→base",
+   "n": 3,
+   "q": 0.9927768989311369,
+   "P": 0.020987410098314285,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 2,
+   "q": 0.904585202314629,
+   "P": 0.02339654043316841,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Move Rengar Trophy Hunter BF0→base",
+   "n": 1,
+   "q": 0.9020259495218275,
+   "P": 0.009186855517327785,
+   "rango": 8
+  }
+ ],
+ "matchup": "RI",
+ "deltas": [
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.21875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

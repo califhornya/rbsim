@@ -1,0 +1,230 @@
+{
+ "nome": "EI50003000A",
+ "k": 25,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Play Bedeviling Stranger to BF1",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Play Bedeviling Stranger to BF1",
+  "Cast Gust @BF0",
+  "Cast Gust @BF1",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Vex Apathetic BF0→base",
+  "Move Pyke Returned BF0→base",
+  "Move K'Sante Courageous BF0→base",
+  "Move Reckless Innovator BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Bedeviling Stranger @BF1",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Bedeviling Stranger @BF1"
+ ],
+ "campione": "Play Bedeviling Stranger to BF0",
+ "d": "Play Bedeviling Stranger to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Play Bedeviling Stranger to BF1",
+   "n": 54,
+   "q": 0.9833478138031324,
+   "P": 0.3745490610599518,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Play Bedeviling Stranger to BF1",
+   "n": 54,
+   "q": 0.9833478138031324,
+   "P": 0.3745490610599518,
+   "rango": 2
+  },
+  {
+   "i": 1,
+   "azione": "Play Bedeviling Stranger",
+   "n": 8,
+   "q": 0.9819734026943043,
+   "P": 0.060573775321245193,
+   "rango": 3
+  },
+  {
+   "i": 4,
+   "azione": "Play Bedeviling Stranger",
+   "n": 8,
+   "q": 0.9819734026943043,
+   "P": 0.060573775321245193,
+   "rango": 4
+  },
+  {
+   "i": 2,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 7,
+   "q": 0.9655409538890332,
+   "P": 0.05699536204338074,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 6,
+   "q": 0.9601230466510265,
+   "P": 0.05699536204338074,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.004564669448882341,
+   "rango": 7
+  },
+  {
+   "i": 7,
+   "azione": "Cast Gust @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0013934896560385823,
+   "rango": 8
+  },
+  {
+   "i": 8,
+   "azione": "Cast Gust @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.001166180009022355,
+   "rango": 9
+  },
+  {
+   "i": 9,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00011667484068311751,
+   "rango": 10
+  },
+  {
+   "i": 10,
+   "azione": "Move Vex Apathetic BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00010623952402966097,
+   "rango": 11
+  },
+  {
+   "i": 11,
+   "azione": "Move Pyke Returned BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0031656858045607805,
+   "rango": 12
+  },
+  {
+   "i": 12,
+   "azione": "Move K'Sante Courageous BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 2.96577036351664e-05,
+   "rango": 13
+  },
+  {
+   "i": 13,
+   "azione": "Move Reckless Innovator BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.000671457382850349,
+   "rango": 14
+  },
+  {
+   "i": 14,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00011826291301986203,
+   "rango": 15
+  },
+  {
+   "i": 15,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00011826291301986203,
+   "rango": 16
+  },
+  {
+   "i": 16,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0007922105141915381,
+   "rango": 17
+  },
+  {
+   "i": 17,
+   "azione": "Hide Bedeviling Stranger @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0013643312267959118,
+   "rango": 18
+  },
+  {
+   "i": 18,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0007922105141915381,
+   "rango": 19
+  },
+  {
+   "i": 19,
+   "azione": "Hide Bedeviling Stranger @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0013643312267959118,
+   "rango": 20
+  }
+ ],
+ "matchup": "EI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0
+ ],
+ "media": 0.09375,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

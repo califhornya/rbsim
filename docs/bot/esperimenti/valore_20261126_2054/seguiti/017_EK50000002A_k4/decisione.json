@@ -1,0 +1,77 @@
+{
+ "nome": "EK50000002A",
+ "k": 4,
+ "turno": 3,
+ "menu": [
+  "Pass",
+  "Hide Pyke Returned @BF0",
+  "Hide Gutter Guardian @BF0"
+ ],
+ "campione": "Hide Pyke Returned @BF0",
+ "d": "Hide Gutter Guardian @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 2,
+   "azione": "Hide Gutter Guardian @BF0",
+   "n": 136,
+   "q": 0.7442768673618366,
+   "P": 0.9825326204299927,
+   "rango": 1
+  },
+  {
+   "i": 1,
+   "azione": "Hide Pyke Returned @BF0",
+   "n": 1,
+   "q": 0.7043972142950485,
+   "P": 0.01746700331568718,
+   "rango": 2
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 3.3553260436747223e-07,
+   "rango": 3
+  }
+ ],
+ "matchup": "EK",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

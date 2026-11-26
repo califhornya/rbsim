@@ -1,0 +1,176 @@
+{
+ "nome": "RI50005005B",
+ "k": 36,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Play Iridescent Avian",
+  "Play Iridescent Avian to BF0",
+  "Play Iridescent Avian to BF1",
+  "Play Iridescent Avian",
+  "Play Iridescent Avian to BF0",
+  "Play Iridescent Avian to BF1",
+  "Play Stalwart Poro",
+  "Play Stalwart Poro to BF0",
+  "Play Stalwart Poro to BF1",
+  "Move Fallen Feline BF0→base",
+  "Move Daisy! BF1→base"
+ ],
+ "campione": "Play Stalwart Poro to BF1",
+ "d": "Play Iridescent Avian",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 13,
+   "azione": "Move Daisy! BF1→base",
+   "n": 31,
+   "q": 0.9970436117978276,
+   "P": 0.2160608470439911,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Iridescent Avian",
+   "n": 24,
+   "q": 0.9977300295138438,
+   "P": 0.1662832349538803,
+   "rango": 2
+  },
+  {
+   "i": 6,
+   "azione": "Play Iridescent Avian",
+   "n": 23,
+   "q": 0.9977300295138438,
+   "P": 0.1662832349538803,
+   "rango": 3
+  },
+  {
+   "i": 9,
+   "azione": "Play Stalwart Poro",
+   "n": 17,
+   "q": 0.9975898315324421,
+   "P": 0.12389949709177017,
+   "rango": 4
+  },
+  {
+   "i": 12,
+   "azione": "Move Fallen Feline BF0→base",
+   "n": 17,
+   "q": 0.9937316501085228,
+   "P": 0.12237662822008133,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Cast Friendship @BF1",
+   "n": 5,
+   "q": 0.9969121520377489,
+   "P": 0.03567542880773544,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Friendship @BF0",
+   "n": 4,
+   "q": 0.9969121520377489,
+   "P": 0.02954845502972603,
+   "rango": 7
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 3,
+   "q": 0.9974409857310741,
+   "P": 0.024822186678647995,
+   "rango": 8
+  },
+  {
+   "i": 5,
+   "azione": "Play Iridescent Avian to BF1",
+   "n": 3,
+   "q": 0.9970436117978276,
+   "P": 0.024709245190024376,
+   "rango": 9
+  },
+  {
+   "i": 8,
+   "azione": "Play Iridescent Avian to BF1",
+   "n": 3,
+   "q": 0.9970436117978276,
+   "P": 0.024709245190024376,
+   "rango": 10
+  },
+  {
+   "i": 4,
+   "azione": "Play Iridescent Avian to BF0",
+   "n": 2,
+   "q": 0.9968366347452047,
+   "P": 0.01924567110836506,
+   "rango": 11
+  },
+  {
+   "i": 7,
+   "azione": "Play Iridescent Avian to BF0",
+   "n": 2,
+   "q": 0.9968366347452047,
+   "P": 0.01924567110836506,
+   "rango": 12
+  },
+  {
+   "i": 10,
+   "azione": "Play Stalwart Poro to BF0",
+   "n": 2,
+   "q": 0.9966111953529125,
+   "P": 0.014165528118610382,
+   "rango": 13
+  },
+  {
+   "i": 11,
+   "azione": "Play Stalwart Poro to BF1",
+   "n": 1,
+   "q": 0.9975807727326322,
+   "P": 0.012975165620446205,
+   "rango": 14
+  }
+ ],
+ "matchup": "RI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

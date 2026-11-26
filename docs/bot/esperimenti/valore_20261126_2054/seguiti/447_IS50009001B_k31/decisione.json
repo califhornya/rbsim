@@ -1,0 +1,149 @@
+{
+ "nome": "IS50009001B",
+ "k": 31,
+ "turno": 13,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Move Pit Rookie BF1→base",
+  "Move Sett Kingpin BF1→base",
+  "Move First Mate BF1→base",
+  "Move Ruin Runner BF1→base",
+  "Move Irresistible Faefolk BF1→base",
+  "Move Trifarian Captain BF1→base",
+  "Move Pit Rookie BF1→base",
+  "Move Kinkou Initiate BF1→base"
+ ],
+ "campione": "Pass",
+ "d": "Cast Punch First @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 7,
+   "azione": "Move Irresistible Faefolk BF1→base",
+   "n": 79,
+   "q": 0.5221501725842248,
+   "P": 0.5032681226730347,
+   "rango": 1
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 34,
+   "q": 0.5153592780074097,
+   "P": 0.23030748963356018,
+   "rango": 2
+  },
+  {
+   "i": 9,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 6,
+   "q": 0.48538109060537166,
+   "P": 0.05208839848637581,
+   "rango": 3
+  },
+  {
+   "i": 4,
+   "azione": "Move Sett Kingpin BF1→base",
+   "n": 5,
+   "q": 0.29131261245159096,
+   "P": 0.10082482546567917,
+   "rango": 4
+  },
+  {
+   "i": 8,
+   "azione": "Move Trifarian Captain BF1→base",
+   "n": 5,
+   "q": 0.5005202111902354,
+   "P": 0.04279562085866928,
+   "rango": 5
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 3,
+   "q": 0.5443493415027962,
+   "P": 0.016690419986844063,
+   "rango": 6
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 2,
+   "q": 0.5443493415027962,
+   "P": 0.01216142438352108,
+   "rango": 7
+  },
+  {
+   "i": 3,
+   "azione": "Move Pit Rookie BF1→base",
+   "n": 2,
+   "q": 0.44351272124162117,
+   "P": 0.02650952897965908,
+   "rango": 8
+  },
+  {
+   "i": 10,
+   "azione": "Move Kinkou Initiate BF1→base",
+   "n": 1,
+   "q": 0.5127536945658944,
+   "P": 0.010612664744257927,
+   "rango": 9
+  },
+  {
+   "i": 5,
+   "azione": "Move First Mate BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.003924031741917133,
+   "rango": 10
+  },
+  {
+   "i": 6,
+   "azione": "Move Ruin Runner BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0008174419053830206,
+   "rango": 11
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.28125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

@@ -1,0 +1,149 @@
+{
+ "nome": "ES50006004A",
+ "k": 4,
+ "turno": 3,
+ "menu": [
+  "Pass",
+  "Cast Hold 'Em @BF0",
+  "Cast Hold 'Em @BF1",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Play Gutter Guardian",
+  "Play Gutter Guardian to BF0",
+  "Cast Hold 'Em @BF0",
+  "Cast Hold 'Em @BF1",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Gutter Guardian @BF0"
+ ],
+ "campione": "Play Gutter Guardian to BF0",
+ "d": "Hide Bedeviling Stranger @BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 10,
+   "azione": "Hide Gutter Guardian @BF0",
+   "n": 78,
+   "q": 0.43819931483276775,
+   "P": 0.6266151070594788,
+   "rango": 1
+  },
+  {
+   "i": 6,
+   "azione": "Play Gutter Guardian to BF0",
+   "n": 42,
+   "q": 0.47770001216849783,
+   "P": 0.2483040988445282,
+   "rango": 2
+  },
+  {
+   "i": 9,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 15,
+   "q": 0.47770001216849795,
+   "P": 0.08899267017841339,
+   "rango": 3
+  },
+  {
+   "i": 5,
+   "azione": "Play Gutter Guardian",
+   "n": 2,
+   "q": 0.3736519716076718,
+   "P": 0.0304788276553154,
+   "rango": 4
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 1.8844239093596116e-05,
+   "rango": 5
+  },
+  {
+   "i": 1,
+   "azione": "Cast Hold 'Em @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.2361018889350817e-05,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Cast Hold 'Em @BF1",
+   "n": 0,
+   "q": null,
+   "P": 3.998007287009386e-06,
+   "rango": 7
+  },
+  {
+   "i": 3,
+   "azione": "Play Bedeviling Stranger",
+   "n": 0,
+   "q": null,
+   "P": 0.0029533994384109974,
+   "rango": 8
+  },
+  {
+   "i": 4,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.002604298759251833,
+   "rango": 9
+  },
+  {
+   "i": 7,
+   "azione": "Cast Hold 'Em @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.2361018889350817e-05,
+   "rango": 10
+  },
+  {
+   "i": 8,
+   "azione": "Cast Hold 'Em @BF1",
+   "n": 0,
+   "q": null,
+   "P": 3.998007287009386e-06,
+   "rango": 11
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.15625,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

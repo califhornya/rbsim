@@ -1,0 +1,113 @@
+{
+ "nome": "KR50002005B",
+ "k": 17,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Play First Mate",
+  "Play First Mate to BF1",
+  "Play Pit Rookie",
+  "Play Pit Rookie to BF1",
+  "Cast Thrill of the Hunt @BF0",
+  "Cast Thrill of the Hunt @BF1"
+ ],
+ "campione": "Play First Mate to BF1",
+ "d": "Play Pit Rookie to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 4,
+   "azione": "Play Pit Rookie to BF1",
+   "n": 123,
+   "q": -0.9204747950590465,
+   "P": 0.8933213353157043,
+   "rango": 1
+  },
+  {
+   "i": 2,
+   "azione": "Play First Mate to BF1",
+   "n": 14,
+   "q": -0.920821491435847,
+   "P": 0.10338500142097473,
+   "rango": 2
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 2.3433603928424418e-05,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Play First Mate",
+   "n": 0,
+   "q": null,
+   "P": 0.0007936991169117391,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play Pit Rookie",
+   "n": 0,
+   "q": null,
+   "P": 0.002439283300191164,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Cast Thrill of the Hunt @BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.5589792383252643e-05,
+   "rango": 6
+  },
+  {
+   "i": 6,
+   "azione": "Cast Thrill of the Hunt @BF1",
+   "n": 0,
+   "q": null,
+   "P": 2.1667829059879296e-05,
+   "rango": 7
+  }
+ ],
+ "matchup": "KR",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

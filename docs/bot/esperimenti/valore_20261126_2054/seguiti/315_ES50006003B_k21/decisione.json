@@ -1,0 +1,221 @@
+{
+ "nome": "ES50006003B",
+ "k": 21,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Cast Call to Glory @BF0",
+  "Cast Call to Glory @BF1",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF1",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF1",
+  "Play Rengar Trophy Hunter",
+  "Play Rengar Trophy Hunter to BF0",
+  "Play Rengar Trophy Hunter to BF1",
+  "Play Ruin Runner",
+  "Play Ruin Runner to BF1",
+  "Play First Mate",
+  "Play First Mate to BF1",
+  "Move Trifarian Captain BF1→base",
+  "Move Sett Kingpin BF1→base",
+  "Move Kinkou Initiate BF1→base",
+  "Move Kinkou Initiate base→BF0",
+  "Move Kinkou Initiate base→BF1"
+ ],
+ "campione": "Play Irresistible Faefolk to BF1",
+ "d": "Play Ruin Runner to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 10,
+   "azione": "Play Ruin Runner",
+   "n": 33,
+   "q": 0.644928519761309,
+   "P": 0.321826308965683,
+   "rango": 1
+  },
+  {
+   "i": 3,
+   "azione": "Play Irresistible Faefolk",
+   "n": 26,
+   "q": 0.7061265505183258,
+   "P": 0.17642968893051147,
+   "rango": 2
+  },
+  {
+   "i": 5,
+   "azione": "Play Irresistible Faefolk",
+   "n": 26,
+   "q": 0.7061265505183258,
+   "P": 0.17642968893051147,
+   "rango": 3
+  },
+  {
+   "i": 11,
+   "azione": "Play Ruin Runner to BF1",
+   "n": 22,
+   "q": 0.7916375000055017,
+   "P": 0.20021793246269226,
+   "rango": 4
+  },
+  {
+   "i": 4,
+   "azione": "Play Irresistible Faefolk to BF1",
+   "n": 13,
+   "q": 0.7552083717710798,
+   "P": 0.0450279638171196,
+   "rango": 5
+  },
+  {
+   "i": 6,
+   "azione": "Play Irresistible Faefolk to BF1",
+   "n": 13,
+   "q": 0.7552083717710798,
+   "P": 0.0450279638171196,
+   "rango": 6
+  },
+  {
+   "i": 2,
+   "azione": "Cast Call to Glory @BF1",
+   "n": 1,
+   "q": 0.5750312183143709,
+   "P": 0.004120427183806896,
+   "rango": 7
+  },
+  {
+   "i": 12,
+   "azione": "Play First Mate",
+   "n": 1,
+   "q": 0.6781298646163053,
+   "P": 0.005370156839489937,
+   "rango": 8
+  },
+  {
+   "i": 13,
+   "azione": "Play First Mate to BF1",
+   "n": 1,
+   "q": 0.7488267344793794,
+   "P": 0.005875731352716684,
+   "rango": 9
+  },
+  {
+   "i": 15,
+   "azione": "Move Sett Kingpin BF1→base",
+   "n": 1,
+   "q": 0.47090405540865815,
+   "P": 0.013189920224249363,
+   "rango": 10
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0005142835434526205,
+   "rango": 11
+  },
+  {
+   "i": 1,
+   "azione": "Cast Call to Glory @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0010537902126088738,
+   "rango": 12
+  },
+  {
+   "i": 7,
+   "azione": "Play Rengar Trophy Hunter",
+   "n": 0,
+   "q": null,
+   "P": 0.000740360002964735,
+   "rango": 13
+  },
+  {
+   "i": 8,
+   "azione": "Play Rengar Trophy Hunter to BF0",
+   "n": 0,
+   "q": null,
+   "P": 1.3414269233180676e-05,
+   "rango": 14
+  },
+  {
+   "i": 9,
+   "azione": "Play Rengar Trophy Hunter to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00011938712123082951,
+   "rango": 15
+  },
+  {
+   "i": 14,
+   "azione": "Move Trifarian Captain BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0025555831380188465,
+   "rango": 16
+  },
+  {
+   "i": 16,
+   "azione": "Move Kinkou Initiate BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0004229275800753385,
+   "rango": 17
+  },
+  {
+   "i": 17,
+   "azione": "Move Kinkou Initiate base→BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00034604239044710994,
+   "rango": 18
+  },
+  {
+   "i": 18,
+   "azione": "Move Kinkou Initiate base→BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.000718460010830313,
+   "rango": 19
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  1.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.09375,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

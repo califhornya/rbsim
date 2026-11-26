@@ -1,0 +1,149 @@
+{
+ "nome": "ES50006001B",
+ "k": 16,
+ "turno": 9,
+ "menu": [
+  "Pass",
+  "Cast Punch First @BF0",
+  "Cast Punch First @BF1",
+  "Play Irresistible Faefolk",
+  "Play Irresistible Faefolk to BF0",
+  "Play Trifarian Captain",
+  "Play Trifarian Captain to BF0",
+  "Move Fiora Victorious BF0→BF1",
+  "Move Fiora Victorious BF0→base",
+  "Move First Mate base→BF0",
+  "Move First Mate base→BF1"
+ ],
+ "campione": "Move Fiora Victorious BF0→BF1",
+ "d": "Play Irresistible Faefolk to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 10,
+   "azione": "Move First Mate base→BF1",
+   "n": 75,
+   "q": 0.957085420564793,
+   "P": 0.355093389749527,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Play Irresistible Faefolk to BF0",
+   "n": 28,
+   "q": 0.957085420564793,
+   "P": 0.13587665557861328,
+   "rango": 2
+  },
+  {
+   "i": 7,
+   "azione": "Move Fiora Victorious BF0→BF1",
+   "n": 13,
+   "q": 0.9242758432038486,
+   "P": 0.08771885931491852,
+   "rango": 3
+  },
+  {
+   "i": 9,
+   "azione": "Move First Mate base→BF0",
+   "n": 10,
+   "q": 0.7403202194953522,
+   "P": 0.17820632457733154,
+   "rango": 4
+  },
+  {
+   "i": 3,
+   "azione": "Play Irresistible Faefolk",
+   "n": 5,
+   "q": 0.6568999708568006,
+   "P": 0.12457356601953506,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Play Trifarian Captain",
+   "n": 3,
+   "q": 0.6610252152335625,
+   "P": 0.06663555651903152,
+   "rango": 6
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 1,
+   "q": 0.6695902596187707,
+   "P": 0.03460051864385605,
+   "rango": 7
+  },
+  {
+   "i": 2,
+   "azione": "Cast Punch First @BF1",
+   "n": 1,
+   "q": 0.5712942190443417,
+   "P": 0.005302093923091888,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Play Trifarian Captain to BF0",
+   "n": 1,
+   "q": 0.6506643887196426,
+   "P": 0.009244890883564949,
+   "rango": 9
+  },
+  {
+   "i": 1,
+   "azione": "Cast Punch First @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.002696710405871272,
+   "rango": 10
+  },
+  {
+   "i": 8,
+   "azione": "Move Fiora Victorious BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 5.144393799128011e-05,
+   "rango": 11
+  }
+ ],
+ "matchup": "ES",
+ "deltas": [
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

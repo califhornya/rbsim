@@ -1,0 +1,113 @@
+{
+ "nome": "IS50009004A",
+ "k": 31,
+ "turno": 11,
+ "menu": [
+  "Pass",
+  "Move Disarming Rake BF0→base",
+  "Move Mutated Mouser BF0→base",
+  "Move Daisy! base→BF0",
+  "Move Daisy! base→BF1",
+  "Hide Back Off @BF0",
+  "Hide Block @BF0"
+ ],
+ "campione": "Move Daisy! base→BF1",
+ "d": "Move Daisy! base→BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Move Daisy! base→BF0",
+   "n": 136,
+   "q": -0.309506921212638,
+   "P": 0.9834151864051819,
+   "rango": 1
+  },
+  {
+   "i": 4,
+   "azione": "Move Daisy! base→BF1",
+   "n": 1,
+   "q": -0.3164389813843044,
+   "P": 0.01082457322627306,
+   "rango": 2
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0018851413624361157,
+   "rango": 3
+  },
+  {
+   "i": 1,
+   "azione": "Move Disarming Rake BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.0026153381913900375,
+   "rango": 4
+  },
+  {
+   "i": 2,
+   "azione": "Move Mutated Mouser BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 5.578589843935333e-05,
+   "rango": 5
+  },
+  {
+   "i": 5,
+   "azione": "Hide Back Off @BF0",
+   "n": 0,
+   "q": null,
+   "P": 6.067074718885124e-05,
+   "rango": 6
+  },
+  {
+   "i": 6,
+   "azione": "Hide Block @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00114329787902534,
+   "rango": 7
+  }
+ ],
+ "matchup": "IS",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0,
+  1.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.1875,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

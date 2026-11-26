@@ -1,0 +1,167 @@
+{
+ "nome": "EI50003002A",
+ "k": 15,
+ "turno": 7,
+ "menu": [
+  "Pass",
+  "Play Bedeviling Stranger",
+  "Play Bedeviling Stranger to BF0",
+  "Play Bedeviling Stranger to BF1",
+  "Move Evelynn Entrancing BF0→base",
+  "Move Gutter Guardian BF0→base",
+  "Move Rengar Trophy Hunter BF0→base",
+  "Hide Pyke Returned @BF0",
+  "Hide Pyke Returned @BF1",
+  "Hide Gutter Guardian @BF0",
+  "Hide Gutter Guardian @BF1",
+  "Hide Bedeviling Stranger @BF0",
+  "Hide Bedeviling Stranger @BF1"
+ ],
+ "campione": "Hide Pyke Returned @BF1",
+ "d": "Play Bedeviling Stranger to BF0",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 3,
+   "azione": "Play Bedeviling Stranger to BF1",
+   "n": 56,
+   "q": 0.976217736711226,
+   "P": 0.3810804486274719,
+   "rango": 1
+  },
+  {
+   "i": 7,
+   "azione": "Hide Pyke Returned @BF0",
+   "n": 39,
+   "q": 0.976217736711226,
+   "P": 0.26813584566116333,
+   "rango": 2
+  },
+  {
+   "i": 2,
+   "azione": "Play Bedeviling Stranger to BF0",
+   "n": 16,
+   "q": 0.976217736711226,
+   "P": 0.11257285624742508,
+   "rango": 3
+  },
+  {
+   "i": 9,
+   "azione": "Hide Gutter Guardian @BF0",
+   "n": 15,
+   "q": 0.976217736711226,
+   "P": 0.10066031664609909,
+   "rango": 4
+  },
+  {
+   "i": 1,
+   "azione": "Play Bedeviling Stranger",
+   "n": 4,
+   "q": 0.9226021172072292,
+   "P": 0.04802123084664345,
+   "rango": 5
+  },
+  {
+   "i": 10,
+   "azione": "Hide Gutter Guardian @BF1",
+   "n": 4,
+   "q": 0.9229239416651418,
+   "P": 0.046853113919496536,
+   "rango": 6
+  },
+  {
+   "i": 8,
+   "azione": "Hide Pyke Returned @BF1",
+   "n": 3,
+   "q": 0.9144993615679433,
+   "P": 0.032413311302661896,
+   "rango": 7
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.0035491446033120155,
+   "rango": 8
+  },
+  {
+   "i": 4,
+   "azione": "Move Evelynn Entrancing BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00014385225949808955,
+   "rango": 9
+  },
+  {
+   "i": 5,
+   "azione": "Move Gutter Guardian BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00018122961046174169,
+   "rango": 10
+  },
+  {
+   "i": 6,
+   "azione": "Move Rengar Trophy Hunter BF0→base",
+   "n": 0,
+   "q": null,
+   "P": 0.00014074954378884286,
+   "rango": 11
+  },
+  {
+   "i": 11,
+   "azione": "Hide Bedeviling Stranger @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.004698276054114103,
+   "rango": 12
+  },
+  {
+   "i": 12,
+   "azione": "Hide Bedeviling Stranger @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0015495738480240107,
+   "rango": 13
+  }
+ ],
+ "matchup": "EI",
+ "deltas": [
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  -1.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  1.0,
+  -1.0,
+  1.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": -0.03125,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}

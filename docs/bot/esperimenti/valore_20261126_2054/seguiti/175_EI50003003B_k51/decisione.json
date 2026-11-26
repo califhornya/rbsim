@@ -1,0 +1,275 @@
+{
+ "nome": "EI50003003B",
+ "k": 51,
+ "turno": 15,
+ "menu": [
+  "Pass",
+  "Cast Raucous Anthem @BF0",
+  "Cast Raucous Anthem @BF1",
+  "Play Mutated Mouser",
+  "Play Mutated Mouser to BF1",
+  "Play Mutated Mouser",
+  "Play Mutated Mouser to BF1",
+  "Play Iridescent Avian",
+  "Play Iridescent Avian to BF1",
+  "Play Mutated Mouser",
+  "Play Mutated Mouser to BF1",
+  "Cast Friendship @BF0",
+  "Cast Friendship @BF1",
+  "Play Frisky Hunter",
+  "Play Frisky Hunter to BF1",
+  "Play Iridescent Avian",
+  "Play Iridescent Avian to BF1",
+  "Play Ivern Nurturer",
+  "Play Ivern Nurturer to BF1",
+  "Play Blitzcrank Impassive",
+  "Play Blitzcrank Impassive to BF1",
+  "Play Daisy!",
+  "Play Daisy! to BF1",
+  "Move Ivern Nurturer BF1→base",
+  "Move Trusty Ramhound BF1→base"
+ ],
+ "campione": "Play Iridescent Avian",
+ "d": "Play Blitzcrank Impassive to BF1",
+ "prefisso_ok": true,
+ "classifica": [
+  {
+   "i": 20,
+   "azione": "Play Blitzcrank Impassive to BF1",
+   "n": 72,
+   "q": 0.9311981891819097,
+   "P": 0.23509334027767181,
+   "rango": 1
+  },
+  {
+   "i": 18,
+   "azione": "Play Ivern Nurturer to BF1",
+   "n": 47,
+   "q": 0.7931990970835009,
+   "P": 0.5191377997398376,
+   "rango": 2
+  },
+  {
+   "i": 7,
+   "azione": "Play Iridescent Avian",
+   "n": 2,
+   "q": 0.7150272504213047,
+   "P": 0.04029151797294617,
+   "rango": 3
+  },
+  {
+   "i": 15,
+   "azione": "Play Iridescent Avian",
+   "n": 2,
+   "q": 0.7150271878364276,
+   "P": 0.04029151797294617,
+   "rango": 4
+  },
+  {
+   "i": 19,
+   "azione": "Play Blitzcrank Impassive",
+   "n": 2,
+   "q": 0.7031049490452694,
+   "P": 0.04803316667675972,
+   "rango": 5
+  },
+  {
+   "i": 3,
+   "azione": "Play Mutated Mouser",
+   "n": 1,
+   "q": 0.6222411556821669,
+   "P": 0.005377804860472679,
+   "rango": 6
+  },
+  {
+   "i": 4,
+   "azione": "Play Mutated Mouser to BF1",
+   "n": 1,
+   "q": 0.574476034639273,
+   "P": 0.00339359138160944,
+   "rango": 7
+  },
+  {
+   "i": 5,
+   "azione": "Play Mutated Mouser",
+   "n": 1,
+   "q": 0.6222411556821669,
+   "P": 0.005377804860472679,
+   "rango": 8
+  },
+  {
+   "i": 6,
+   "azione": "Play Mutated Mouser to BF1",
+   "n": 1,
+   "q": 0.574476034639273,
+   "P": 0.00339359138160944,
+   "rango": 9
+  },
+  {
+   "i": 8,
+   "azione": "Play Iridescent Avian to BF1",
+   "n": 1,
+   "q": 0.6800198081475674,
+   "P": 0.014500699937343597,
+   "rango": 10
+  },
+  {
+   "i": 9,
+   "azione": "Play Mutated Mouser",
+   "n": 1,
+   "q": 0.6222411556821669,
+   "P": 0.005377804860472679,
+   "rango": 11
+  },
+  {
+   "i": 10,
+   "azione": "Play Mutated Mouser to BF1",
+   "n": 1,
+   "q": 0.574476034639273,
+   "P": 0.00339359138160944,
+   "rango": 12
+  },
+  {
+   "i": 13,
+   "azione": "Play Frisky Hunter",
+   "n": 1,
+   "q": 0.7192082600024964,
+   "P": 0.022827863693237305,
+   "rango": 13
+  },
+  {
+   "i": 16,
+   "azione": "Play Iridescent Avian to BF1",
+   "n": 1,
+   "q": 0.6800198081475674,
+   "P": 0.014500699937343597,
+   "rango": 14
+  },
+  {
+   "i": 17,
+   "azione": "Play Ivern Nurturer",
+   "n": 1,
+   "q": 0.7057146052253183,
+   "P": 0.02337242104113102,
+   "rango": 15
+  },
+  {
+   "i": 21,
+   "azione": "Play Daisy!",
+   "n": 1,
+   "q": 0.7174935471213051,
+   "P": 0.006177961826324463,
+   "rango": 16
+  },
+  {
+   "i": 24,
+   "azione": "Move Trusty Ramhound BF1→base",
+   "n": 1,
+   "q": 0.6131104996328492,
+   "P": 0.004740181379020214,
+   "rango": 17
+  },
+  {
+   "i": 0,
+   "azione": "Pass",
+   "n": 0,
+   "q": null,
+   "P": 0.00014015997294336557,
+   "rango": 18
+  },
+  {
+   "i": 1,
+   "azione": "Cast Raucous Anthem @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.00022366347548086196,
+   "rango": 19
+  },
+  {
+   "i": 2,
+   "azione": "Cast Raucous Anthem @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0005421224050223827,
+   "rango": 20
+  },
+  {
+   "i": 11,
+   "azione": "Cast Friendship @BF0",
+   "n": 0,
+   "q": null,
+   "P": 0.0008730138069950044,
+   "rango": 21
+  },
+  {
+   "i": 12,
+   "azione": "Cast Friendship @BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0017025622073560953,
+   "rango": 22
+  },
+  {
+   "i": 14,
+   "azione": "Play Frisky Hunter to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.0009678599890321493,
+   "rango": 23
+  },
+  {
+   "i": 22,
+   "azione": "Play Daisy! to BF1",
+   "n": 0,
+   "q": null,
+   "P": 0.00019920454360544682,
+   "rango": 24
+  },
+  {
+   "i": 23,
+   "azione": "Move Ivern Nurturer BF1→base",
+   "n": 0,
+   "q": null,
+   "P": 6.999993638601154e-05,
+   "rango": 25
+  }
+ ],
+ "matchup": "EI",
+ "deltas": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "media": 0.0,
+ "n_mondi": 32,
+ "mondi_esclusi": 0
+}
