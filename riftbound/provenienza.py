@@ -58,6 +58,18 @@ _REGISTRO_PY = (ROOT / "riftbound/data/cards/all_cards.json", ROOT / "riftbound/
 _REGISTRO_RS = ROOT / "rust/data/registry.json"
 
 
+def checkpoint_sha256(path) -> str:
+    with Path(path).open("rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest()
+
+
+def scrivi_json_atomico(path: Path, dati: dict) -> None:
+    # Il chiamante detiene il lock della run.
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(dati, indent=1))
+    tmp.replace(path)
+
+
 def file_sha(path) -> Optional[str]:
     p = Path(path)
     return hashlib.sha256(p.read_bytes()).hexdigest()[:16] if p.is_file() else None

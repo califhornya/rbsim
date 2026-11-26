@@ -51,14 +51,9 @@ echo "processi: $PROCESSI; checkpoint: $CKPT; $PARTITE partite per matchup; $COP
 
 T0=$(t)
 passo "== 1. raccolta pilota ($PARTITE per matchup, 138 iterazioni)"
-FATTE=0
-[ -f "$RACC/indice.jsonl" ] && FATTE=$(wc -l < "$RACC/indice.jsonl")
-if [ "$FATTE" -ge $((PARTITE * 10)) ]; then
-  passo "gia' fatta ($FATTE partite in $RACC): salto"
-else
-  esegui raccolta "gia' fatte|partite|stima|secondi" python scripts/rust/raccolta.py --nome "$NOME" \
-    --partite-per-matchup "$PARTITE" --processi "$PROCESSI" --ckpt "$CKPT"
-fi
+# Il raccoglitore convalida la provenienza anche quando il piano e' gia' completo.
+esegui raccolta "gia' fatte|partite|stima|secondi" python scripts/rust/raccolta.py --nome "$NOME" \
+  --partite-per-matchup "$PARTITE" --processi "$PROCESSI" --ckpt "$CKPT"
 T1=$(t)
 mkdir -p "$OUT/raccolta"
 cp "$RACC/misura.txt" "$RACC/provenienza.json" "$OUT/raccolta/" 2>/dev/null || true

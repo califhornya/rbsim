@@ -164,15 +164,8 @@ def misura(righe: list, secondi_muro: float, processi: int, partite_run: int) ->
 
 
 def provenienza(args: dict, out: Path, ckpt) -> dict:
-    import hashlib
     from riftbound import provenienza as P
-    sha = None
-    if ckpt is not None:
-        h = hashlib.sha256()
-        with open(ckpt, "rb") as f:
-            for blocco in iter(lambda: f.read(1 << 20), b""):
-                h.update(blocco)
-        sha = h.hexdigest()
+    sha = P.checkpoint_sha256(ckpt) if ckpt is not None else None
     from riftbound.ai.coach_rs import VALUTAZIONE_ALPHA, VALUTAZIONE_K
     return {"quando": time.strftime("%Y-%m-%d %H:%M:%S"), "regole": args["regole"],
             "checkpoint": None if ckpt is None else {"file": str(ckpt), "sha256": sha}, "pesi_casuali": ckpt is None,
@@ -185,22 +178,59 @@ def provenienza(args: dict, out: Path, ckpt) -> dict:
             "revisione": P.revisione(), "estensione_rust": P.estensione_rust(), "agente_ppo": P.AGENTE_PPO}
 
 
+def _verifica_provenienza(out: Path, richiesta: dict, piano_partite: list, fatte: set) -> None:
+    from riftbound.provenienza import scrivi_json_atomico
+    path = out / "provenienza.json"
+    if not path.exists():
+        index = out / "indice.jsonl"
+        if (index.is_file() and index.stat().st_size) or any((out / "partite").glob("*/*.pkl.gz")):
+            raise ValueError(f"Raccolta senza provenienza: {out}. Usare un'altra cartella.")
+        scrivi_json_atomico(path, richiesta)
+        return
+
+    salvata = json.loads(path.read_text())
+    campi = ("regole", "pesi_casuali", "iterazioni", "valutazione", "win_probe", "esplorazione",
+             "base_seme", "insiemi", "agente_ppo", "estensione_rust")
+    diversi = [k for k in campi if k not in salvata or salvata[k] != richiesta[k]]
+    checkpoint = richiesta["checkpoint"]
+    registrato = salvata.get("checkpoint")
+    if "checkpoint" not in salvata or (registrato or {}).get("sha256") != (checkpoint or {}).get("sha256"):
+        diversi.append("checkpoint")
+    if diversi:
+        raise ValueError(f"Provenienza incompatibile in {out} ({', '.join(diversi)}). Usare un'altra cartella.")
+    if fatte.difference(r[3] for r in piano_partite):
+        raise ValueError(f"{out} contiene partite fuori dal piano richiesto. Usare un'altra cartella.")
+    # Estendere la raccolta e' lecito; conservare la provenienza originale dei dati gia' giocati.
+    stesso_piano = (set(salvata["matchup"]) == set(richiesta["matchup"])
+                    and salvata["partite_per_matchup"] == richiesta["partite_per_matchup"])
+    if not stesso_piano:
+        salvata.update(matchup=richiesta["matchup"], partite_per_matchup=richiesta["partite_per_matchup"])
+        scrivi_json_atomico(path, salvata)
+
+
 def esegui(out: Path, matchup, per_matchup: int, processi: int, ckpt, regole: str, iterazioni: int = ITERAZIONI,
            esplorazione=ESPLORAZIONE, misura_dopo: int = 200, scrivi=print) -> None:
+    from filelock import FileLock
     out.mkdir(parents=True, exist_ok=True)
-    os.environ["RBSIM_REGOLE"] = regole
-    args = {"regole": regole, "iterazioni": iterazioni, "esplorazione": list(esplorazione), "matchup": list(matchup),
+    matchup = list(matchup)
+    args = {"regole": regole, "iterazioni": iterazioni, "esplorazione": list(esplorazione), "matchup": matchup,
             "per_matchup": per_matchup}
-    (out / "provenienza.json").write_text(json.dumps(provenienza(args, out, ckpt), indent=1))
-    fatte = {r["seme"] for r in indice(out)}
-    tasks = [{"mu": mu, "seme": seme, "comincia": c, "scambio": sc, "iterazioni": iterazioni,
-              "ckpt": None if ckpt is None else str(ckpt), "regole": regole, "esplorazione": list(esplorazione),
-              "insieme": insieme(j), "out": str(out)}
-             for mu, i, j, seme, c, sc in piano(matchup, per_matchup) if seme not in fatte]
-    scrivi(f"{len(fatte)} partite gia' fatte, {len(tasks)} da fare, {processi} processi")
+    with FileLock(out / "raccolta.rbsim.lock", timeout=0):
+        pianificate = piano(matchup, per_matchup)
+        fatte = {r["seme"] for r in indice(out)}
+        _verifica_provenienza(out, provenienza(args, out, ckpt), pianificate, fatte)
+        tasks = [{"mu": mu, "seme": seme, "comincia": c, "scambio": sc, "iterazioni": iterazioni,
+                  "ckpt": None if ckpt is None else str(ckpt), "regole": regole, "esplorazione": list(esplorazione),
+                  "insieme": insieme(j), "out": str(out)}
+                 for mu, i, j, seme, c, sc in pianificate if seme not in fatte]
+        scrivi(f"{len(fatte)} partite gia' fatte, {len(tasks)} da fare, {processi} processi")
+        if tasks:
+            os.environ["RBSIM_REGOLE"] = regole
+            _completa(out, tasks, processi, misura_dopo, scrivi)
+
+
+def _completa(out: Path, tasks: list, processi: int, misura_dopo: int, scrivi) -> None:
     t0, nuove, misurato = time.time(), [], False
-    if not tasks:
-        return
 
     def dopo(n_nuove):
         txt = misura(indice(out), time.time() - t0, processi, len(nuove))

@@ -233,14 +233,15 @@ def allena(raccolta: Path, out: Path, init: str | None, casuali: bool = False, e
     t0 = time.time()
     scrivi(f"dispositivo {dev}; carico {raccolta}")
     dati = carica_dati(raccolta, scrivi=scrivi)
-    if prova:
-        for k in ("sviluppo", "verifica"):
-            if not dati[k]["dec"]:
-                dati[k] = dati["allenamento"]
-                scrivi(f"  PROVA: {k} = allenamento (insieme vuoto)")
     tr = dati["allenamento"]
     if not tr["dec"]:
         raise SystemExit("nessuna decisione cercata nell'insieme di allenamento")
+    for k in ("sviluppo", "verifica"):
+        if not dati[k]["dec"]:
+            if not prova:
+                raise SystemExit(f"nessuna decisione cercata nell'insieme di {k}")
+            dati[k] = tr
+            scrivi(f"  PROVA: {k} = allenamento (insieme vuoto)")
     net = rete_di_partenza(init, casuali).to(dev)
     base = copy.deepcopy(net).eval()
     opt = torch.optim.Adam(net.parameters(), lr=lr)

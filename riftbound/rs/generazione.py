@@ -128,37 +128,27 @@ def durata(righe_ricerca: list) -> dict:
 def arena(rete: str, campione: str, matchup, coppie: int, regole: str, righe: Path, processi: int,
           iterazioni: int = ITERAZIONI, varianti=("b", "c"), scrivi=print) -> dict:
     """L'arena di sviluppo; le partite finite vanno in `righe` (jsonl) e un rilancio riprende."""
-    from riftbound.rs.arena_rs import COPERTI
+    from filelock import FileLock
+    from riftbound.provenienza import checkpoint_sha256, scrivi_json_atomico
+    from riftbound.rs.arena_rs import COPERTI, MAX_TURNS
     righe.parent.mkdir(parents=True, exist_ok=True)
-    fatte = {}
-    if righe.is_file():
-        for x in righe.read_text().splitlines():
-            if x.strip():
-                r = json.loads(x)
-                fatte[(r["variante"], r["mu"], r["seme"], r["posto"])] = r
-    jobs = []
-    for v in varianti:
-        for mu in matchup:
-            s0 = BASE_SEME_SVILUPPO + 1_000 * COPERTI.index(mu)
-            for k in range(coppie):
-                for posto in ("A", "B"):
-                    if (v, mu, s0 + k, posto) not in fatte:
-                        jobs.append({"variante": v, "mu": mu, "seme": s0 + k, "posto": posto, "rete": rete,
-                                     "campione": campione, "regole": regole, "iterazioni": iterazioni})
-    scrivi(f"arena di sviluppo: {len(fatte)} partite gia' fatte, {len(jobs)} da giocare, {processi} processi")
     t0 = time.time()
-    if jobs:
-        os.environ["RBSIM_REGOLE"] = regole
-        with ProcessPoolExecutor(processi, mp_context=multiprocessing.get_context("spawn")) as pool, \
-                open(righe, "a") as f:
-            for n, r in enumerate(pool.map(_gioca, jobs), 1):
-                fatte[(r["variante"], r["mu"], r["seme"], r["posto"])] = r
-                f.write(json.dumps(r) + "\n")
-                f.flush()
-                if n % 20 == 0:
-                    scrivi(f"  {n}/{len(jobs)} partite, {(time.time() - t0) / 60:.1f} min")
+    config = {"rete_sha256": checkpoint_sha256(rete), "campione_sha256": checkpoint_sha256(campione),
+              "regole": regole, "iterazioni": iterazioni, "max_turni": MAX_TURNS, "base_seme": BASE_SEME_SVILUPPO,
+              "ricerca": {v: _opz(peso, iterazioni, False) for v, peso in VARIANTI.items()}}
+    manifest = righe.with_name(righe.name + ".provenienza.json")
+    with FileLock(str(righe) + ".rbsim.lock", timeout=0):
+        if manifest.exists():
+            if json.loads(manifest.read_text()) != config:
+                raise ValueError(f"Configurazione arena incompatibile con {manifest}. Usare una nuova uscita.")
+        elif righe.is_file() and righe.stat().st_size:
+            raise ValueError(f"Arena senza provenienza: {righe}. Usare una nuova uscita.")
+        else:
+            scrivi_json_atomico(manifest, config)
+        fatte = _partite_arena(rete, campione, matchup, coppie, regole, righe, processi, iterazioni, varianti, scrivi)
     rng = np.random.default_rng(0)
-    res = {"regole": regole, "iterazioni": iterazioni, "coppie_per_matchup": coppie, "matchup": list(matchup),
+    res = {"configurazione": config, "regole": regole, "iterazioni": iterazioni,
+           "coppie_per_matchup": coppie, "matchup": list(matchup),
            "base_seme": BASE_SEME_SVILUPPO, "rete": rete, "campione": campione, "varianti": {}}
     for v in varianti:
         punti, ricerche = {}, {"cand": [], "opp": []}
@@ -184,6 +174,37 @@ def arena(rete: str, campione: str, matchup, coppie: int, regole: str, righe: Pa
                               "chiamate_rete": {"candidato": chiamate["cand"], "campione": chiamate["opp"]}}
     res["minuti"] = round((time.time() - t0) / 60, 1)
     return res
+
+
+def _partite_arena(rete, campione, matchup, coppie, regole, righe, processi, iterazioni, varianti, scrivi):
+    from riftbound.rs.arena_rs import COPERTI
+    fatte = {}
+    if righe.is_file():
+        for x in righe.read_text().splitlines():
+            if x.strip():
+                r = json.loads(x)
+                fatte[(r["variante"], r["mu"], r["seme"], r["posto"])] = r
+    jobs = []
+    for v in varianti:
+        for mu in matchup:
+            s0 = BASE_SEME_SVILUPPO + 1_000 * COPERTI.index(mu)
+            for k in range(coppie):
+                for posto in ("A", "B"):
+                    if (v, mu, s0 + k, posto) not in fatte:
+                        jobs.append({"variante": v, "mu": mu, "seme": s0 + k, "posto": posto, "rete": rete,
+                                     "campione": campione, "regole": regole, "iterazioni": iterazioni})
+    scrivi(f"arena di sviluppo: {len(fatte)} partite gia' fatte, {len(jobs)} da giocare, {processi} processi")
+    if jobs:
+        os.environ["RBSIM_REGOLE"] = regole
+        with ProcessPoolExecutor(processi, mp_context=multiprocessing.get_context("spawn")) as pool, \
+                open(righe, "a") as f:
+            for n, r in enumerate(pool.map(_gioca, jobs), 1):
+                fatte[(r["variante"], r["mu"], r["seme"], r["posto"])] = r
+                f.write(json.dumps(r) + "\n")
+                f.flush()
+                if n % 20 == 0:
+                    scrivi(f"  {n}/{len(jobs)} partite, {(time.time() - t0) / 60:.1f} min")
+    return fatte
 
 
 def testo_arena(res: dict) -> list[str]:

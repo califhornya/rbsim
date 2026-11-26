@@ -59,3 +59,6 @@ scripts/suggested_vocab.txt
 
 # Rust
 rust/target/
+
+# Advisory locks for resumable local runs
+*.rbsim.lock

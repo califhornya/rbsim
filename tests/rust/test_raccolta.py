@@ -132,3 +132,45 @@ def test_partita_scritta_e_riletta(tmp_path):
     assert all(s["esito"] == d["esito"][s["seat"]] for s in d["stati"])
     assert riga["byte"] > 0 and len(raccolta.indice(out)) == 1
     assert raccolta.piano(["EK"], 4)[2][4] == "b" and raccolta.insieme(8) == "sviluppo"
+
+
+def test_ripresa_controlla_la_provenienza_prima_di_scrivere(tmp_path, monkeypatch):
+    monkeypatch.setenv("RBSIM_REGOLE", REGOLE)
+    ckpt = tmp_path / "originale.pt"
+    ckpt.write_bytes(b"pesi originali")
+    copia = tmp_path / "copia.pt"
+    copia.write_bytes(ckpt.read_bytes())
+    out = tmp_path / "raccolta"
+
+    # Una partita preesistente nel formato precedente, completa per il piano richiesto.
+    seed = raccolta.piano(["EK"], 1)[0][3]
+    file_partita = raccolta.percorso(out, "EK", seed)
+    file_partita.parent.mkdir(parents=True)
+    file_partita.touch()
+    (out / "indice.jsonl").write_text(json.dumps({"seme": seed, "file": str(file_partita.relative_to(out))}) + "\n")
+    args = dict(regole=REGOLE, iterazioni=6, esplorazione=raccolta.ESPLORAZIONE, matchup=["EK"], per_matchup=1)
+    manifest = out / "provenienza.json"
+    manifest.write_text(json.dumps(raccolta.provenienza(args, out, ckpt), indent=1))
+
+    def avvia(**opzioni):
+        args = dict(ckpt=copia, regole=REGOLE, iterazioni=6, esplorazione=raccolta.ESPLORAZIONE)
+        args.update(opzioni)
+        raccolta.esegui(out, ["EK"], 1, 1, **args)
+
+    prima = manifest.read_bytes()
+    avvia()  # gli stessi pesi in un altro percorso
+    assert manifest.read_bytes() == prima
+    for modifiche in ({"regole": "6427b90"}, {"iterazioni": 7}, {"esplorazione": (0.3, 0.0, 4)}, {"ckpt": None}):
+        with pytest.raises(ValueError, match="incompatibile"):
+            avvia(**modifiche)
+    copia.write_bytes(b"pesi diversi")
+    with pytest.raises(ValueError, match="checkpoint"):
+        avvia()
+    assert manifest.read_bytes() == prima
+
+
+def test_raccolta_precedente_senza_provenienza(tmp_path):
+    (tmp_path / "indice.jsonl").write_text('{"seme": 0, "file": "vecchia.pkl.gz"}\n')
+    with pytest.raises(ValueError, match="senza provenienza"):
+        raccolta.esegui(tmp_path, ["EK"], 0, 1, None, REGOLE)
+    assert not (tmp_path / "provenienza.json").exists()

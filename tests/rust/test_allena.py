@@ -59,3 +59,45 @@ def test_arena_di_sviluppo_una_coppia(mini, monkeypatch):
     assert set(res["varianti"]) == {"b", "c"} and 0.0 <= res["varianti"]["c"]["totale"][0] <= 1.0
     assert res["varianti"]["c"]["chiamate_rete"]["candidato"][0] > 0
     assert generazione.testo_arena(res)[-1].startswith("durata")
+
+
+@pytest.mark.parametrize("vuoto", ["sviluppo", "verifica"])
+def test_allenamento_richiede_entrambi_gli_insiemi(tmp_path, monkeypatch, vuoto):
+    # Anche con stati per il valore, senza decisioni non si puo' misurare la politica.
+    dati = {k: {"dec": [] if k == vuoto else [object()], "stati": {"x": [object()]}}
+            for k in ("allenamento", "sviluppo", "verifica")}
+    monkeypatch.setattr(allena, "carica_dati", lambda *a, **kw: dati)
+    with pytest.raises(SystemExit, match=vuoto):
+        allena.allena(tmp_path, tmp_path, None, casuali=True, scegli_dispositivo="cpu")
+    assert not (tmp_path / "rete.pt").exists()
+
+
+def test_arena_ripresa_solo_con_gli_stessi_pesi_e_impostazioni(mini, tmp_path):
+    rete = mini / "allena" / "rete.pt"
+    altra = tmp_path / "copia.pt"
+    altra.write_bytes(rete.read_bytes())
+    righe = tmp_path / "arena.jsonl"
+
+    def avvia(**opzioni):
+        args = dict(rete=str(altra), campione=str(rete), matchup=["EK"], coppie=1,
+                    regole=raccolta.REGOLE_DEFAULT, righe=righe, processi=1, iterazioni=6, varianti=("b",))
+        args.update(opzioni)
+        return generazione.arena(**args)
+
+    prima = avvia()
+    partite = righe.read_bytes()
+    # Zero worker costringe la prova a fallire se si tenta di rigiocare una partita.
+    seconda = avvia(rete=str(rete), campione=str(altra), processi=0)
+    assert seconda["varianti"] == prima["varianti"]
+    for modifiche in ({"regole": "6427b90"}, {"iterazioni": 8}):
+        with pytest.raises(ValueError, match="incompatibile"):
+            avvia(**modifiche)
+    altra.write_bytes(b"checkpoint cambiato allo stesso percorso")
+    for modifiche in ({}, {"rete": str(rete), "campione": str(altra)}):
+        with pytest.raises(ValueError, match="incompatibile"):
+            avvia(**modifiche)
+    assert righe.read_bytes() == partite
+    righe.with_name(righe.name + ".provenienza.json").unlink()
+    with pytest.raises(ValueError, match="senza provenienza"):
+        avvia()
+    assert righe.read_bytes() == partite

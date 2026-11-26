@@ -18,6 +18,7 @@ dependencies = [
 #   uv sync --extra rl
 # torch selects CUDA automatically when available (see riftbound/ai — CUDA-aware).
 rl = [
+    "filelock",
     "torch>=2.2",
 ]
 
