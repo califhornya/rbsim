@@ -1,0 +1,24 @@
+[k=10 turno 9 turn_action] originale: Play Vi Peacekeeper; riproduce la mossa originale: sì
+  turno 9 (attivo B); punti campione 2 - avversario 3; energia 7/2
+  campo 0 Bandle Scouts' Academy controlla avversario: campione 0 [-] | avversario 18 [Reckless Innovator 3, K'Sante Courageous 4, Pyke Returned 3, Momentary Companion 4, Vex Apathetic 4]
+  campo 1 Valley of Idols controlla nessuno: campione 0 [-] | avversario 0 [-]
+  base: campione [Kinkou Initiate 3, Sett Kingpin 5] | avversario [-]
+  mano del campione: Punch First, Rengar Trophy Hunter, Rengar Trophy Hunter, First Mate, Pillaged Armory, First Mate, Vi Peacekeeper (avversario: 2 carte)
+  N=138 [finestre]: scelta Play Vi Peacekeeper (uguale dall'originale)
+    top: Play Vi Peacekeeper n=86 q=0.24 P=0.222 | Move Sett Kingpin base→BF1 n=41 q=-0.27 P=0.472 | Pass n=1 q=-0.74 P=0.012 | Play Rengar Trophy Hunter n=1 q=-0.57 P=0.015 | Play Rengar Trophy Hunter n=1 q=-0.50 P=0.015 | Play First Mate n=1 q=-0.61 P=0.060
+    figli della radice (visite, q; giocate dei piloti nelle finestre):
+      Play Vi Peacekeeper                      n=  86 q=0.24  -
+      Move Sett Kingpin base→BF1               n=  41 q=-0.27  B showdown AMBUSH Vi Peacekeeper @BF1: 10
+      Pass                                     n=   1 q=-0.74  -
+      Play Rengar Trophy Hunter                n=   1 q=-0.57  -
+      Play Rengar Trophy Hunter                n=   1 q=-0.50  -
+      Play First Mate                          n=   1 q=-0.61  -
+      Play gear Pillaged Armory @BF0           n=   1 q=-0.80  -
+      Play gear Pillaged Armory @BF1           n=   1 q=-0.80  -
+      Play First Mate                          n=   1 q=-0.72  -
+      Move Kinkou Initiate base→BF0            n=   1 q=-0.76  -
+      Move Kinkou Initiate base→BF1            n=   1 q=-0.76  -
+      Move Sett Kingpin base→BF0               n=   1 q=-0.78  -
+    attesa 'Vi Peacekeeper': Play Vi Peacekeeper visite=86 q=0.24 rango=1/16
+    attesa 'Kinkou Initiate base→BF0': Move Kinkou Initiate base→BF0 visite=1 q=-0.76 rango=10/16
+    attesa 'Sett Kingpin base→BF1': Move Sett Kingpin base→BF1 visite=41 q=-0.27 rango=2/16

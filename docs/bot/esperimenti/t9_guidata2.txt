@@ -1,0 +1,76 @@
+=== avversario passa
+posizione k=10, turno 9, posto B: [2, 3] punti; avversario: passa
+  T9 punti 2-3 en 7/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  1. [turn_action] Play gear Pillaged Armory @BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  2. [scelta] target:buff_unit: Kinkou Initiate (B, Might 3, base)
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+  3. [turn_action] Move Kinkou Initiate base→BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  4. [turn_action] Pass
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  5. [showdown_action] Showdown Punch First @BF0
+       => T9 punti 2-3 en 5/2 pot bod2,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  6. [scelta] target:grant_temporary_might: Kinkou Initiate (B, Might 4, Bandle Scouts' Academy)
+       => T9 punti 2-3 en 5/2 pot bod2,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 3,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+       (passo 7 'Move Sett Kingpin base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Vi Peacekeeper @BF0'])
+       (passo 7 'Move Sett Kingpin base→BF0' non offerta in 'showdown_action', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Vi Peacekeeper @BF0'])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ["combat_damage_order: Reckless Innovator (A, Might 3, Bandle Scouts' Academy)", "combat_damage_order: K'Sante Courageous (A, Might 6, Bandle Scouts' Academy)", "combat_damage_order: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ["combat_damage_order: Reckless Innovator (A, Might 3, Bandle Scouts' Academy)", "combat_damage_order: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ['optional:sett_save: sì', 'optional:sett_save: no'])
+  7. [turn_action] Move Sett Kingpin base→BF0
+       => T9 punti 2-3 en 5/2 pot bod1,ord3/bod3,cha6 BF0[avve: Sett Kingpin 5 / Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+  8. [turn_action] Pass
+       => T9 punti 2-3 en 5/2 pot bod1,ord3/bod3,cha6 BF0[avve: Sett Kingpin 5 / Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+  9. [showdown_action] AMBUSH Vi Peacekeeper @BF0
+       => T9 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: Sett Kingpin 5,Vi Peacekeeper 5 / Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+       (passo 10 'K'Sante' non offerta in 'reaction', turno 9: si passa; menu: ['Pass'])
+       (passo 10 'K'Sante' non fra le opzioni della scelta, default del motore; opzioni: ["target:stun_unit: Pyke Returned (A, Might 3, Bandle Scouts' Academy)", "target:stun_unit: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "target:stun_unit: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 10 'K'Sante' non offerta in 'reaction', turno 9: si passa; menu: ['Pass'])
+       (passo 10 'K'Sante' non offerta in 'showdown_action', turno 9: si passa; menu: ['Pass'])
+       (passo 10 'K'Sante' non fra le opzioni della scelta, default del motore; opzioni: ["combat_damage_order: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 10 'K'Sante' non offerta in 'reaction', turno 9: si passa; menu: ['Pass'])
+  10. NON LEGALE: 'K'Sante' non è nel menu di 'turn_action' (turno 9). Menu: ['Pass']
+       posizione: T9 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: - / Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8,Vi Peacekeeper 5 / -]
+fermo (sequenza non legale)
+  T9 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: - / Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8,Vi Peacekeeper 5 / -]
+  punti: campione (B) 2 - avversario 3; passi forzati 9/10; scelte lasciate al motore 5
+
+=== avversario campione
+posizione k=10, turno 9, posto B: [2, 3] punti; avversario: campione
+  T9 punti 2-3 en 7/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  1. [turn_action] Play gear Pillaged Armory @BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+  2. [scelta] target:buff_unit: Kinkou Initiate (B, Might 3, base)
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: - / Reckless Innovator 3,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 3,Sett Kingpin 5 / -]
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+       (passo 3 'Move Kinkou Initiate base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0'])
+  3. [turn_action] Move Kinkou Initiate base→BF0
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 5,K'Sante Courageous 4,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  4. [turn_action] Pass
+       => T9 punti 2-3 en 6/2 pot bod4,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 5,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  5. [showdown_action] Showdown Punch First @BF0
+       => T9 punti 2-3 en 5/2 pot bod2,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 5,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+  6. [scelta] target:grant_temporary_might: Kinkou Initiate (B, Might 4, Bandle Scouts' Academy)
+       => T9 punti 2-3 en 5/2 pot bod2,ord3/bod3,cha6 BF0[avve: Kinkou Initiate 4 / Reckless Innovator 5,K'Sante Courageous 6,Pyke Returned 3,Momentary Companion 4,Vex Apathetic 4] BF1[ness: - / -] base[Sett Kingpin 5 / -]
+       (passo 7 'Move Sett Kingpin base→BF0' non offerta in 'reaction', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Vi Peacekeeper @BF0'])
+       (passo 7 'Move Sett Kingpin base→BF0' non offerta in 'showdown_action', turno 9: si passa; menu: ['Pass', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Rengar Trophy Hunter @BF0', 'AMBUSH Vi Peacekeeper @BF0'])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ["combat_damage_order: Reckless Innovator (A, Might 5, Bandle Scouts' Academy)", "combat_damage_order: K'Sante Courageous (A, Might 6, Bandle Scouts' Academy)", "combat_damage_order: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ["combat_damage_order: K'Sante Courageous (A, Might 6, Bandle Scouts' Academy)", "combat_damage_order: Momentary Companion (A, Might 4, Bandle Scouts' Academy)", "combat_damage_order: Vex Apathetic (A, Might 4, Bandle Scouts' Academy)"])
+       (passo 7 'Move Sett Kingpin base→BF0' non fra le opzioni della scelta, default del motore; opzioni: ['optional:sett_save: sì', 'optional:sett_save: no'])
+  7. [turn_action] Move Sett Kingpin base→BF0
+       => T9 punti 2-3 en 5/2 pot bod1,ord3/bod3,cha6 BF0[avve: Sett Kingpin 5 / K'Sante Courageous 4,Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+  8. [turn_action] Pass
+       => T9 punti 2-3 en 5/2 pot bod1,ord3/bod3,cha6 BF0[avve: Sett Kingpin 5 / K'Sante Courageous 6,Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+  9. [showdown_action] AMBUSH Vi Peacekeeper @BF0
+       => T9 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: Sett Kingpin 5,Vi Peacekeeper 5 / K'Sante Courageous 6,Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+       (passo 10 'K'Sante' non offerta in 'reaction', turno 9: si passa; menu: ['Pass'])
+  10. [scelta] target:stun_unit: K'Sante Courageous (A, Might 6, Bandle Scouts' Academy)
+       => T9 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: Sett Kingpin 5,Vi Peacekeeper 5 / K'Sante Courageous 6,Pyke Returned 3,Vex Apathetic 4] BF1[ness: - / -] base[Kinkou Initiate 8 / -]
+  (sequenza finita al punto 'reaction': da qui si passa)
+fine del turno
+  T10 punti 2-3 en 0/2 pot bod1,ord2/bod3,cha6 BF0[avve: - / K'Sante Courageous 4,Pyke Returned 3] BF1[ness: - / -] base[Kinkou Initiate 3,Vi Peacekeeper 5 / -]
+  punti: campione (B) 2 - avversario 3; passi forzati 10/10; scelte lasciate al motore 4
