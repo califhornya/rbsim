@@ -1,0 +1,115 @@
+valutazione: storica
+carte che aumentano la Might: Call to Glory, Friendship, Grand Strategem, Grim Resolve, Hold 'Em, Onslaught, Punch First, Rampage, Raucous Anthem
+  seme 1 posto B: 35 ricerche, 5 episodi (3 s)
+  seme 2 posto B: 26 ricerche, 1 episodi (4 s)
+  seme 3 posto B: 49 ricerche, 9 episodi (8 s)
+  seme 4 posto B: 30 ricerche, 1 episodi (9 s)
+  seme 5 posto B: 47 ricerche, 3 episodi (12 s)
+  seme 6 posto B: 21 ricerche, 5 episodi (14 s)
+  seme 7 posto B: 68 ricerche, 5 episodi (17 s)
+  seme 8 posto B: 35 ricerche, 3 episodi (19 s)
+  seme 9 posto B: 14 ricerche, 3 episodi (20 s)
+  seme 10 posto B: 32 ricerche, 4 episodi (22 s)
+  seme 11 posto B: 24 ricerche, 2 episodi (23 s)
+  seme 12 posto B: 23 ricerche, 2 episodi (24 s)
+  seme 13 posto B: 34 ricerche, 4 episodi (26 s)
+  seme 14 posto B: 8 ricerche, 0 episodi (27 s)
+  seme 15 posto B: 42 ricerche, 6 episodi (29 s)
+  seme 16 posto B: 37 ricerche, 8 episodi (32 s)
+  seme 17 posto B: 30 ricerche, 7 episodi (34 s)
+  seme 18 posto B: 30 ricerche, 5 episodi (36 s)
+  seme 19 posto B: 30 ricerche, 5 episodi (38 s)
+  seme 20 posto B: 38 ricerche, 1 episodi (40 s)
+  seme 21 posto B: 12 ricerche, 0 episodi (40 s)
+  seme 22 posto B: 40 ricerche, 5 episodi (43 s)
+  seme 23 posto B: 31 ricerche, 6 episodi (46 s)
+  seme 24 posto B: 29 ricerche, 6 episodi (48 s)
+  seme 25 posto B: 60 ricerche, 9 episodi (51 s)
+  seme 26 posto B: 60 ricerche, 1 episodi (54 s)
+  seme 27 posto B: 21 ricerche, 2 episodi (55 s)
+  seme 28 posto B: 42 ricerche, 8 episodi (58 s)
+  seme 29 posto B: 34 ricerche, 10 episodi (59 s)
+  seme 30 posto B: 38 ricerche, 1 episodi (61 s)
+  seme 31 posto B: 36 ricerche, 3 episodi (63 s)
+  seme 32 posto B: 48 ricerche, 6 episodi (66 s)
+  seme 33 posto B: 32 ricerche, 1 episodi (68 s)
+  seme 34 posto B: 33 ricerche, 6 episodi (70 s)
+  seme 35 posto B: 32 ricerche, 3 episodi (72 s)
+  seme 36 posto B: 23 ricerche, 7 episodi (75 s)
+  seme 37 posto B: 16 ricerche, 4 episodi (75 s)
+  seme 38 posto B: 13 ricerche, 0 episodi (76 s)
+  seme 39 posto B: 33 ricerche, 5 episodi (78 s)
+  seme 40 posto B: 31 ricerche, 6 episodi (81 s)
+  seme 41 posto B: 43 ricerche, 2 episodi (82 s)
+  seme 42 posto B: 10 ricerche, 1 episodi (83 s)
+  seme 43 posto B: 23 ricerche, 2 episodi (84 s)
+  seme 44 posto B: 15 ricerche, 0 episodi (85 s)
+  seme 45 posto B: 25 ricerche, 3 episodi (87 s)
+  seme 46 posto B: 26 ricerche, 6 episodi (88 s)
+  seme 47 posto B: 24 ricerche, 2 episodi (90 s)
+  seme 48 posto B: 19 ricerche, 2 episodi (90 s)
+  seme 49 posto B: 27 ricerche, 4 episodi (92 s)
+  seme 50 posto B: 20 ricerche, 4 episodi (93 s)
+
+matchup EK: 50 partite, 1549 decisioni esaminate (ricerche del campione)
+§8 accumulo: 190 episodi in 46 partite su 50
+§7 spreco: 4 episodi in 4 partite su 50
+§8 per stato della corsa al momento della decisione (episodi / decisioni Play-Move del campione):
+  race -1: 126/221 = 57.0%
+  race +0: 0/24 = 0.0%
+  race +1: 64/82 = 78.0%
+
+§9 Vex Apathetic, matchup EK, 50 partite (posti B):
+  turni del campione con la Vex su un campo: 100
+  occasioni (unita' giocata con la Vex su un campo): 114, di cui in turno avversario (AMBUSH/reazione) 0
+    uccisa dopo (ordine sbagliato?): 14   sopravvive: 100   n.d.: 0
+  ordine giusto (Vex tolta prima, poi unita' giocata): 2 turni
+  esempi uccisa dopo:
+    seme 6 turno 12 Play Vex Apathetic to BF1; Vex tolta con: React Star-Crossed @BF1
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 14 --iterazioni 138 1000 5000 --attese "React Star-Crossed @BF1" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 8 turno 8 Play Zed Without a Sound to BF1; Vex tolta con: Move Kha'Zix Mutating Horror base→BF0
+      scripts/rust/decisione.py rifai --autonoma EK:8:a --k 6 --iterazioni 138 1000 5000 --attese "Move Kha'Zix Mutating Horror base→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 9 turno 7 Play Fizz Trickster to BF1; Vex tolta con: React Star-Crossed @BF0
+      scripts/rust/decisione.py rifai --autonoma EK:9:b --k 5 --iterazioni 138 1000 5000 --attese "React Star-Crossed @BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 15 turno 9 Play Irresistible Faefolk to BF1; Vex tolta con: React Star-Crossed @BF1
+      scripts/rust/decisione.py rifai --autonoma EK:15:b --k 13 --iterazioni 138 1000 5000 --attese "React Star-Crossed @BF1" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 15 turno 13 Play Fizz Trickster; Vex tolta con: Pass
+      scripts/rust/decisione.py rifai --autonoma EK:15:b --k 25 --iterazioni 138 1000 5000 --attese "Pass" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  esempi sopravvive:
+    seme 4 turno 4 Deploy champion Kha'Zix Mutating Horror
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 3 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 4 turno 6 Play Zed Without a Sound
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 4 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 4 AMBUSH Kha'Zix Mutating Horror @BF1
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 2 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 6 Play Evelynn Entrancing to BF1
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 4 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 8 Play Reckless Innovator to BF1
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 7 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  esempi ordine giusto:
+    seme 4 turno 8 Play Reckless Innovator
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 11 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 30 turno 8 Play Irresistible Faefolk to BF1
+      scripts/rust/decisione.py rifai --autonoma EK:30:a --k 9 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+
+esempi §8 accumulo:
+  turno 9 Play Fizz Trickster to BF1; Might gia' 10; punti 3-3
+    decisione.py rifai --autonoma EK:1:b --k 7 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 13 Play Zed Without a Sound to BF1; Might gia' 20; punti 5-5
+    decisione.py rifai --autonoma EK:1:b --k 17 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 15 Play Zed Without a Sound to BF1; Might gia' 14; punti 6-6
+    decisione.py rifai --autonoma EK:1:b --k 19 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 15 Play Fizz Trickster to BF1; Might gia' 20; punti 6-6
+    decisione.py rifai --autonoma EK:1:b --k 20 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 17 Play Fizz Trickster to BF1; Might gia' 15; punti 7-7
+    decisione.py rifai --autonoma EK:1:b --k 25 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+
+esempi §7 spreco:
+  turno 13 Showdown Punch First @BF1; Might gia' 16 vs 5; punti 5-6
+    decisione.py rifai --autonoma EK:16:a --k 28 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 15 Showdown Punch First @BF1; Might gia' 14 vs 5; punti 6-7
+    decisione.py rifai --autonoma EK:24:a --k 22 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 10 Showdown Punch First @BF0; Might gia' 12 vs 5; punti 4-4
+    decisione.py rifai --autonoma EK:37:b --k 10 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 6 Showdown Punch First @BF0; Might gia' 7 vs 6; punti 2-2
+    decisione.py rifai --autonoma EK:48:a --k 7 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt

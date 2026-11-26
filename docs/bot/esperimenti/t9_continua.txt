@@ -1,0 +1,20 @@
+mossa 'Move Kinkou Initiate base→BF0' -> 'Move Kinkou Initiate base→BF0'
+mossa 'Play Vi Peacekeeper' -> 'Play Vi Peacekeeper'
+mossa 'Move Sett Kingpin base→BF1' -> 'Move Sett Kingpin base→BF1'
+  10/100 mondi (x3 mosse), 8 s
+  20/100 mondi (x3 mosse), 13 s
+  30/100 mondi (x3 mosse), 19 s
+  40/100 mondi (x3 mosse), 26 s
+  50/100 mondi (x3 mosse), 32 s
+  60/100 mondi (x3 mosse), 39 s
+  70/100 mondi (x3 mosse), 46 s
+  80/100 mondi (x3 mosse), 51 s
+  90/100 mondi (x3 mosse), 58 s
+  100/100 mondi (x3 mosse), 64 s
+continuazioni da k=10 (turno 9), campione = posto B, n=100 mondi per mossa (stessi mondi per tutte le mosse, mazzi rimescolati, seme di base 68015812523253); punti all'inizio: campione 2 - avversario 3; 64 s
+- Move Kinkou Initiate base→BF0: vittorie 2/100 = 2% [1-7]; punti a fine turno campione 2.00 avversario 3.00; a fine partita 3.07 / 7.98; durata media 14.8 turni; 2 s a partita
+- Play Vi Peacekeeper: vittorie 5/100 = 5% [2-11]; punti a fine turno campione 3.00 avversario 3.00; a fine partita 5.13 / 7.93; durata media 15.1 turni; 2 s a partita
+- Move Sett Kingpin base→BF1: vittorie 0/100 = 0% [0-4]; punti a fine turno campione 3.00 avversario 3.00; a fine partita 4.32 / 8.00; durata media 14.6 turni; 2 s a partita
+differenza rispetto alla migliore (Play Vi Peacekeeper), punti percentuali, intervallo 95% (Newcombe):
+- Move Kinkou Initiate base→BF0: -3 [-9, +3]
+- Move Sett Kingpin base→BF1: -5 [-11, -0]

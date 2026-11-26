@@ -1,0 +1,119 @@
+valutazione: storica
+carte che aumentano la Might: Call to Glory, Friendship, Grand Strategem, Grim Resolve, Hold 'Em, Onslaught, Punch First, Rampage, Raucous Anthem
+  seme 1 posto B: 44 ricerche, 7 episodi (3 s)
+  seme 2 posto B: 23 ricerche, 3 episodi (5 s)
+  seme 3 posto B: 56 ricerche, 8 episodi (8 s)
+  seme 4 posto B: 39 ricerche, 3 episodi (10 s)
+  seme 5 posto B: 46 ricerche, 6 episodi (12 s)
+  seme 6 posto B: 34 ricerche, 6 episodi (14 s)
+  seme 7 posto B: 24 ricerche, 3 episodi (15 s)
+  seme 8 posto B: 43 ricerche, 9 episodi (17 s)
+  seme 9 posto B: 51 ricerche, 3 episodi (19 s)
+  seme 10 posto B: 42 ricerche, 5 episodi (23 s)
+  seme 11 posto B: 55 ricerche, 5 episodi (25 s)
+  seme 12 posto B: 33 ricerche, 12 episodi (28 s)
+  seme 13 posto B: 37 ricerche, 6 episodi (30 s)
+  seme 14 posto B: 26 ricerche, 3 episodi (31 s)
+  seme 15 posto B: 54 ricerche, 10 episodi (34 s)
+  seme 16 posto B: 27 ricerche, 2 episodi (35 s)
+  seme 17 posto B: 21 ricerche, 2 episodi (36 s)
+  seme 18 posto B: 39 ricerche, 3 episodi (38 s)
+  seme 19 posto B: 25 ricerche, 1 episodi (39 s)
+  seme 20 posto B: 30 ricerche, 6 episodi (40 s)
+  seme 21 posto B: 29 ricerche, 5 episodi (42 s)
+  seme 22 posto B: 38 ricerche, 6 episodi (44 s)
+  seme 23 posto B: 31 ricerche, 6 episodi (46 s)
+  seme 24 posto B: 39 ricerche, 12 episodi (49 s)
+  seme 25 posto B: 37 ricerche, 2 episodi (51 s)
+  seme 26 posto B: 17 ricerche, 0 episodi (52 s)
+  seme 27 posto B: 17 ricerche, 1 episodi (53 s)
+  seme 28 posto B: 29 ricerche, 4 episodi (54 s)
+  seme 29 posto B: 28 ricerche, 11 episodi (56 s)
+  seme 30 posto B: 27 ricerche, 5 episodi (58 s)
+  seme 31 posto B: 49 ricerche, 6 episodi (61 s)
+  seme 32 posto B: 53 ricerche, 8 episodi (63 s)
+  seme 33 posto B: 24 ricerche, 2 episodi (64 s)
+  seme 34 posto B: 30 ricerche, 6 episodi (66 s)
+  seme 35 posto B: 14 ricerche, 0 episodi (66 s)
+  seme 36 posto B: 28 ricerche, 2 episodi (68 s)
+  seme 37 posto B: 37 ricerche, 6 episodi (69 s)
+  seme 38 posto B: 39 ricerche, 7 episodi (71 s)
+  seme 39 posto B: 25 ricerche, 9 episodi (73 s)
+  seme 40 posto B: 46 ricerche, 6 episodi (75 s)
+  seme 41 posto B: 16 ricerche, 0 episodi (76 s)
+  seme 42 posto B: 51 ricerche, 7 episodi (79 s)
+  seme 43 posto B: 43 ricerche, 11 episodi (83 s)
+  seme 44 posto B: 61 ricerche, 15 episodi (87 s)
+  seme 45 posto B: 35 ricerche, 2 episodi (88 s)
+  seme 46 posto B: 23 ricerche, 8 episodi (89 s)
+  seme 47 posto B: 38 ricerche, 1 episodi (91 s)
+  seme 48 posto B: 34 ricerche, 8 episodi (93 s)
+  seme 49 posto B: 54 ricerche, 10 episodi (96 s)
+  seme 50 posto B: 30 ricerche, 3 episodi (97 s)
+
+matchup ES: 50 partite, 1771 decisioni esaminate (ricerche del campione)
+§8 accumulo: 266 episodi in 47 partite su 50
+§7 spreco: 6 episodi in 5 partite su 50
+§8 per stato della corsa al momento della decisione (episodi / decisioni Play-Move del campione):
+  race -1: 158/266 = 59.4%
+  race +0: 0/21 = 0.0%
+  race +1: 108/173 = 62.4%
+
+§9 Vex Apathetic, matchup ES, 50 partite (posti B):
+  turni del campione con la Vex su un campo: 80
+  occasioni (unita' giocata con la Vex su un campo): 105, di cui in turno avversario (AMBUSH/reazione) 0
+    uccisa dopo (ordine sbagliato?): 15   sopravvive: 90   n.d.: 0
+  ordine giusto (Vex tolta prima, poi unita' giocata): 3 turni
+  esempi uccisa dopo:
+    seme 8 turno 10 Play Sett Kingpin to BF1; Vex tolta con: Move Fiora Victorious BF1→BF0
+      scripts/rust/decisione.py rifai --autonoma ES:8:a --k 9 --iterazioni 138 1000 5000 --attese "Move Fiora Victorious BF1→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 8 turno 10 Play Irresistible Faefolk to BF1; Vex tolta con: Move Fiora Victorious BF1→BF0
+      scripts/rust/decisione.py rifai --autonoma ES:8:a --k 10 --iterazioni 138 1000 5000 --attese "Move Fiora Victorious BF1→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 8 turno 10 Play Kinkou Initiate; Vex tolta con: Move Fiora Victorious BF1→BF0
+      scripts/rust/decisione.py rifai --autonoma ES:8:a --k 11 --iterazioni 138 1000 5000 --attese "Move Fiora Victorious BF1→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 9 turno 7 Play Fiora Victorious to BF1; Vex tolta con: Cast Rampage @BF0
+      scripts/rust/decisione.py rifai --autonoma ES:9:b --k 14 --iterazioni 138 1000 5000 --attese "Cast Rampage @BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 12 turno 10 Play Rengar Trophy Hunter to BF1; Vex tolta con: Move Irresistible Faefolk base→BF1
+      scripts/rust/decisione.py rifai --autonoma ES:12:a --k 14 --iterazioni 138 1000 5000 --attese "Move Irresistible Faefolk base→BF1" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  esempi sopravvive:
+    seme 4 turno 6 Deploy champion Sett Kingpin
+      scripts/rust/decisione.py rifai --autonoma ES:4:a --k 11 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 6 Play Kinkou Initiate to BF0
+      scripts/rust/decisione.py rifai --autonoma ES:6:a --k 5 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 6 Play Pit Rookie to BF0
+      scripts/rust/decisione.py rifai --autonoma ES:6:a --k 6 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 8 Play Pit Rookie to BF0
+      scripts/rust/decisione.py rifai --autonoma ES:6:a --k 8 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 6 turno 8 Play Sett Kingpin to BF0
+      scripts/rust/decisione.py rifai --autonoma ES:6:a --k 9 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  esempi ordine giusto:
+    seme 11 turno 11 Play Trifarian Captain to BF1
+      scripts/rust/decisione.py rifai --autonoma ES:11:b --k 29 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 43 turno 15 Play Kinkou Initiate
+      scripts/rust/decisione.py rifai --autonoma ES:43:b --k 40 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+    seme 46 turno 10 Play Kinkou Initiate to BF1
+      scripts/rust/decisione.py rifai --autonoma ES:46:a --k 12 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+
+esempi §8 accumulo:
+  turno 5 Play Vi Peacekeeper to BF1; Might gia' 7; punti 2-1
+    decisione.py rifai --autonoma ES:1:b --k 5 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 9 Play Fiora Victorious to BF1; Might gia' 17; punti 4-3
+    decisione.py rifai --autonoma ES:1:b --k 11 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 9 Play Trifarian Captain to BF1; Might gia' 22; punti 4-3
+    decisione.py rifai --autonoma ES:1:b --k 12 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 9 Move Pit Rookie base→BF1; Might gia' 23; punti 4-3
+    decisione.py rifai --autonoma ES:1:b --k 17 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 11 Play Sett Kingpin to BF1; Might gia' 16; punti 5-4
+    decisione.py rifai --autonoma ES:1:b --k 19 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+
+esempi §7 spreco:
+  turno 9 Showdown Punch First @BF1; Might gia' 17 vs 6; punti 3-3
+    decisione.py rifai --autonoma ES:14:a --k 12 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 13 Showdown Call to Glory @BF1; Might gia' 18 vs 2; punti 5-6
+    decisione.py rifai --autonoma ES:15:b --k 39 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 15 Showdown Call to Glory @BF0; Might gia' 16 vs 2; punti 7-6
+    decisione.py rifai --autonoma ES:29:b --k 26 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 13 Showdown Punch First @BF0; Might gia' 13 vs 5; punti 6-6
+    decisione.py rifai --autonoma ES:34:a --k 21 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+  turno 15 Showdown Call to Glory @BF0; Might gia' 15 vs 7; punti 7-7
+    decisione.py rifai --autonoma ES:34:a --k 29 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
