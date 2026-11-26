@@ -73,9 +73,8 @@ offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Seg
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. (Matteo, 26/11 notte: il campione con `rimonta` è troppo facile, 155859 alle 16 era già il bot attuale) Prova veloce,
-   da proporre domani: scelta finale «più visitata» (o Q con un minimo di visite; oggi Q max anche con 1 visita) e più
-   iterazioni nella pagina, contro il campione di oggi. Poi il giudizio, dalle segnalazioni 28-34. Astra: nota sulla (d).
+1. (Matteo, 26/11 notte: campione troppo facile, 155859 era già il bot attuale) Prova veloce: scelta finale «più visitata»
+   (oggi Q max anche con 1 visita) e più iterazioni, contro il campione; poi il giudizio (segnalazioni 28-34). Astra: (d).
 2. Raccolta CCX63 ferma; promozioni su semi nuovi (non 30M/40M/50M). `sonda_mac` sulle 72 posizioni.
 
 ## File principali
