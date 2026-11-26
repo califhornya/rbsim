@@ -242,3 +242,22 @@ Osservata da Matteo giocando a mano (Evelynn contro il campione con Sett,
   delle due): vinta 8 a 4 in 14 turni. Alla domanda «quale giocata di Sett ti ha costretto a spendere una carta o a
   difendere il campo prima dell'ottavo punto?»: nessuna, «non ho trovato molte difficoltà». L'unica occasione è il T9
   (SEGNALAZIONI 28): schianto contro Vex, Sett su Bandle e Vi in AMBUSH, che la ricerca ha provato 1 volta su 5000.
+
+## 9. Prima togliere il pezzo che blocca, poi giocare (26/11)
+
+Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
+
+- **Il ragionamento atteso (Matteo).** «Ho qualcosa che può entrare accelerato, o con una meccanica come Vi o
+  Rengar (AMBUSH)? Se sì, prima devo sbarazzarmi di Vex, l'elemento che blocca: come faccio?» Non una mossa
+  precisa, un ordine: si toglie il pezzo che punisce le proprie giocate, poi si gioca.
+- **Che cosa ha fatto il campione.** Vi in base con Vex vivo (Vi stordita: non si muove né combatte nel turno), poi
+  Sett su Valley, poi Kinkou + Punch First su Bandle uccidono Vex e Momentary Companion. Vex è morto nello stesso turno,
+  ma dopo: invertire l'ordine lasciava Vi libera di entrare in AMBUSH nello showdown di Bandle.
+- **Perché la ricerca non lo vede.** Lo stordimento dura il turno: a fine turno Vi stordita in base vale quanto Vi
+  libera in base, e la valutazione dà lo stesso valore ai due ordini (q 0,12 per «Vi in base» e «Sett su Valley»).
+  L'ordine conta solo se Vi fa qualcosa in questo turno, una linea di 3-4 mosse (schianto, Sett su Bandle, AMBUSH)
+  il cui primo passo ha avuto 1 visita su 5000 (q -0,76: Kinkou da solo contro 18 Might, prima di vedere Punch First).
+- **Da misurare.** In `scripts/rust/episodi.py` un rilevatore: il campione gioca un'unità mentre un Vex avversario è su
+  un campo (l'unità viene stordita) e Vex muore più tardi nello stesso turno = ordine sbagliato; anche: unità
+  giocata e stordita senza che Vex muoia. Autonome ES ed EK sul Mac col campione: quanto spesso succede, poi `rifai`
+  sugli episodi. Correzioni solo dopo la misura, una alla volta (dopo §7).
