@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-26. Ramo `rust` (default; PR fino alla 58 unite).
+Aggiornato: 2026-11-26. Ramo `rust` (default).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -65,16 +65,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## In corso
 §8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`,
 spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
-Matteo: Evelynn-Sett 013325 (`rimonta`, D72-D81) vinta 8 a 4 in 14; risposta §8: nessuna difficoltà (GIOCATE §8).
-Manca la seconda partita. Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
-§9 (GIOCATE, segnalazione 28): il campione gioca sotto Vex e lo toglie dopo (ES 12 turni su 60, ordine giusto 2).
-Simulazioni con le finestre (`finestre`, piloti PPO; `quota`; `decisione.py incrocio|guidata|continua`; Vex in
-`episodi.py`): arena contro `rimonta` NON PASSA (ES 0,474, EK 0,531, blocco 0,503); non cambiano il §9. Linea di
-Matteo al T9 (Vex muore per primo, Punch First solo se risponde): da misurare (`?`, `danni:`, `@finestre`). Esiti in
-`docs/bot/esperimenti/`, `docs/bot/finestre/`; domande ad Astra date a Matteo (fuori dal repo).
+Matteo: 013325 (`rimonta`, D72-D81) vinta 8 a 4, nessuna difficoltà (§8); manca la 2a partita; 13 episodi umani su D80.
+§9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo (ES 12 su 60); finestre: arena NON PASSA (ES 0,474, EK 0,531).
+(26/11, Astra, GIOCATE §9 terzo giro, `docs/bot/esperimenti/t9_attacco/`) Dal T9 attaccare Bandle vince di più di
+Valley: Armory su Sett + Punch First + Vi 30-38/100 contro 7-8 (+23/+30 pp). Due difetti distinti: linea mai costruita
+(Armory 1 visita) e costruita ma valutata male (Kinkou, q -0,75). Il prototipo genera la linea ma la selezione su 16
+mondi sbaglia. Strumento generale `scripts/rust/attacco.py` (`riftbound/rs/attacco.py`, `Game.valuta`): porting
+identico ad Astra su una posizione di prova a pesi casuali; sul T9 vero da provare sul Mac (`attacco_mac.command`).
 
 ## Prossimi passi
-1. Risposta di Astra sull'arena delle finestre (a: diagnosi ES, b: pilota greedy, c: più iterazioni, d: solo l'avversario).
+1. Matteo: `scripts/rust/attacco_mac.command` (riproduzione T9 identica, T9 col campione, serie su 12 posizioni ES/EK/pagina);
+   poi ad Astra: quante «mai costruite» e «valutate male», posizioni col punto libero giusto. Poi il bot, arena a pari budget.
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
 
@@ -88,7 +89,7 @@ Matteo al T9 (Vex muore per primo, Punch First solo se risponde): da misurare (`
   `posizioni_*.py`, `tenuti_*.sh`, `inventario.py`), Mac (`rengar_mac.command`, `ivern_mac.command`, `sett_mac.command`,
   `arena_mac.command`), misure (`bench_*.py`), arena mista (`arena_mista*.py`, altra sessione).
 - Calibrazione e diagnosi del campione: `scripts/rust/calibra_campione.py` (misura, forza, profilo), `decisione.py`
-  (rifai, concordanza; `riftbound/rs/decisione_rs.py`), `episodi.py`; arena con `--iterazioni-*`, `--win-probe-*`, `--avversario-mano`.
+  (rifai, concordanza; `riftbound/rs/decisione_rs.py`), `episodi.py`, `attacco.py` (proposte d'attacco, serie); arena con `--iterazioni-*`, `--win-probe-*`, `--avversario-mano`.
 - `tests/rust/`: test sull'estensione (`test_<mazzo>.py`, `test_d72_d76.py`, `test_d77.py`); qui `maturin build --release` + `pip install`.
 - `scripts/ppo.py` (`_motore`, `--regole`), `scripts/diag/arena_mazzi.py` (`--motore rust`, `--regole`);
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).
