@@ -301,7 +301,7 @@ def main() -> None:
                     help="motore dei matchup coperti da Rust (EK, ER, KR; rust: estensione riftbound_rs)")
     from riftbound.provenienza import REGOLE, REGOLE_PYTHON
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
-                    help="il profilo delle regole: 6427b90 (lo storico), 6427b90+D72-D76, 6427b90+D72-D77, 6427b90+D72-D80 o 6427b90+D72-D81 (Rust con D72-D76/D77/D81 "
+                    help="il profilo delle regole: 6427b90 (lo storico), 6427b90+D72-D76, 6427b90+D72-D77, 6427b90+D72-D80 6427b90+D72-D81 o 6427b90+D72-D82 (Rust con D72-D76/D77/D82 "
                          "corretti: serve --motore rust e tutti i matchup di training su Rust; per allenare sul "
                          "nuovo profilo --init in una nuova cartella)")
     args = ap.parse_args()
