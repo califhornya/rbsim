@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-26. Ramo `rust` (default).
+Aggiornato: 2026-11-26 sera. Ramo `rust` (default).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -21,13 +21,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Astra) Un selettore delle regole in Rust: `6427b90` (default, = Python; le verifiche di parità lo
   fissano), `6427b90+D72-D76`, `+D72-D77` o `+D72-D80` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
-- (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
-- (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo (D78-D80: `+D72-D80`);
-  (26/11) D81 subito, da solo (`+D72-D81`), perché falsava ogni partita con Sett.
+- (25/11, Matteo) Ogni correzione su un profilo nuovo (le run allenate restano riproducibili); difetti raccolti e
+  corretti in pacchetto (D78-D80: `+D72-D80`); (26/11) D81 subito, da solo (`+D72-D81`): falsava ogni partita con Sett.
   (26/11) D82 subito, da solo (`+D72-D82`): Edge of Night da coperta si attaccava al campo 0 (Evelynn di Matteo).
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
-- Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
-- Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
+- Ogni tappa comprende i matchup coi mazzi già ammessi; liste riconosciute dal contenuto (`lista_sha`); perimetro
+  Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
 - Elementi della pila con identità (`ChainItem.uid`): in Python una scelta sulla pila è l'oggetto, non l'indice.
 - Sideboard provata con liste variate (`riftbound/rs/mazzi.py`): il training non fa sideboarding.
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
@@ -42,8 +41,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   valore: prima raccolta con rimonta, poi in sviluppo 80/20 rimonta/valore (rimonta sul Pass che chiude il turno).
   Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
   Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
-- (26/11, Astra) Attacchi con lo showdown: sonda a un'ondata (A) dietro interruttore, soglia +0,15, generatore e
-  budget congelati sulle 24; B (finestre + quota) solo confronto economico; pagina solo dopo fuori campione e arena.
+- (26/11, Astra) Attacchi con lo showdown: sonda A dietro interruttore, soglia +0,15; pagina solo dopo fuori campione.
+- (26/11 sera, Astra) Pilota senza promozione: campione resta `ckpt_040000`; raccolta da 100.000 rinviata finché non si
+  sa se il valore appreso aiuta a scegliere. Prova (d): prior di `ckpt_040000` + 20% valore di `rete.pt` (epoca 5, due
+  checkpoint completi) nelle foglie; arena sugli stessi semi del pilota + «seguiti». Promozione a parte, su semi nuovi.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
@@ -55,7 +56,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25-26/11 difetti di motore corretti in Rust, ognuno su un profilo (`docs/RUST.md` "Profili delle regole", AUDIT.md,
   `tests/rust/test_d*.py`): D72-D76 (storico 600/600), D77 (180/180), D78-D80 (200/200), D81 (Call to Glory, segnalazione
   26; ES 80/80, 9/30 diverse), D82 (Edge of Night da coperta al BF1 si attaccava al BF0, segnalazione 27; EK ed ES 80/80,
-  0/60 diverse: lo copre il test). `tests/rust` 324; `6427b90+D72-D82` default della pagina.
+  0/60 diverse: lo copre il test). `tests/rust` 430 (con torch); `6427b90+D72-D82` default della pagina.
 - 25/11 pagina su Rust (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"): posto umano nel ponte
   (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
   rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
@@ -63,25 +64,25 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-§8-§9 (GIOCATE): `rimonta` default della pagina; finestre bocciate in arena. Serie di 24 (`attacco_20261126_1352_serie/`):
-5 attacchi migliori (+28/+43 pp) mai costruiti. Sonda A offline (`riftbound/rs/sonda.py`, `attacco.py
-sonda|congela|fuori|t9-foglia`, `scripts/rust/sonda_mac.command`): sui dati salvati attacco in 6 su 24; ora diagnosi.
-(26/11) 155859 (seme 680137721) vinta da Matteo 8 a 4; segnalazioni 29-35 (35: candidato D83, costo di un modo senza
-"Come paghi?", niente Gold). «Stesso seme» (`stesso_seme_20261126_1614/`): rifacimento IDENTICO; Sett 0 su 500 contro
-Evelynn automatica, solo 6 partite distinte (la ricerca non ha rumore).
+(26/11 sera) Pilota (`generazione_20261126_1810`, 4.000 partite, D72-D83): (b) 47,95%, (c) 49,05%, c−b +1,10 pp
+[−0,80, +3,00]; EQM sull'esito 0,7184 → 0,6339. Da lanciare sul Mac: `valore_mac.command` = arena (d) (100 coppie × 10,
+semi 40M come il pilota), confronto appaiato d−c (solo il prior), d−b, c−b; seguiti (semi 50M: partite del campione
+contro sé stesso, dove (d) cambia mossa entrambe le mosse fino all'esito sugli stessi 32 mondi `ignote`).
+§8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
+offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
+«Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. In corso: raccolta pilota (Rust + `raccolta.py`); «primo responso» (prior/visite/Q a 138 e 512); D83 riprodotto
-   (se confermato, correzione prima della raccolta grande).
-2. Scritti e provati con pesi casuali (26/11): allenamento, `peso_valore_rete` (spento = identica), `generazione_mac.command`.
-   Da lanciare sul Mac col checkpoint.
+1. Matteo: `valore_mac.command` sul Mac; risultati ad Astra (arena.txt, confronto.txt, seguiti/riepilogo.txt).
+2. Se (d) sceglie linee migliori con regolarità: raccolta più grande sul CCX63; promozione su semi nuovi (non 30M/40M/50M).
 3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
-  Riallenamento: `riftbound/rs/{raccolta,allena,generazione}.py`, `scripts/rust/` omonimi, `generazione_mac.command`.
+  Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
+  `valore_mac.command`; `arena_rs.make_probs_misto` (prior e valore da due reti), `set_search_valore_rete_at`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
@@ -95,5 +96,4 @@ Evelynn automatica, solo 6 partite distinte (la ricerca non ha rumore).
   `riftbound/provenienza.py` (profili, `regole_partite`); `scripts/rust/confronto_regole.py` (i due profili).
 - Partita a mano: `scripts/coach.py` (server, `--campione`, `--budget`, `--net`, `--motore`, `--regole`, `--iterazioni`),
   `riftbound/ai/coach.py` (`CoachSession`), `coach_rs.py` (partita su Rust), `coach_page.html`; `scripts/allenatore.command` (Mac).
-- `docs/RUST.md`, `docs/rust/` (rapporti, inventari, misure), `docs/audit/AUDIT.md`.
-- `riftbound/core/`: motore Python di riferimento (congelato).
+- `docs/RUST.md`, `docs/rust/` (rapporti, inventari, misure), `docs/audit/AUDIT.md`; `riftbound/core/`: Python (congelato).
