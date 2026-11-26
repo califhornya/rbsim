@@ -51,11 +51,13 @@ def test_la_rete_si_ricarica_e_gioca(mini, monkeypatch):
         assert r[3] in (0.0, 0.5, 1.0)
 
 
-def test_arena_di_sviluppo_una_coppia(mini, monkeypatch):
+def test_arena_di_sviluppo_registra_avanzamento(mini, monkeypatch):
     monkeypatch.setenv("RBSIM_REGOLE", raccolta.REGOLE_DEFAULT)
     rete = str(mini / "allena" / "rete.pt")
-    res = generazione.arena(rete, rete, ["EK", "RS"], 1, raccolta.REGOLE_DEFAULT, mini / "righe.jsonl", 2, 6,
-                            ("b", "c"), lambda t: None)
+    messaggi = []
+    res = generazione.arena(rete, rete, ["EK", "RS"], 3, raccolta.REGOLE_DEFAULT, mini / "righe.jsonl", 2, 6,
+                            ("b", "c"), messaggi.append)
+    assert any("20/24 partite" in riga for riga in messaggi)
     assert set(res["varianti"]) == {"b", "c"} and 0.0 <= res["varianti"]["c"]["totale"][0] <= 1.0
     assert res["varianti"]["c"]["chiamate_rete"]["candidato"][0] > 0
     assert generazione.testo_arena(res)[-1].startswith("durata")
