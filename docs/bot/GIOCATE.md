@@ -341,3 +341,21 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
   - Non attaccare è meglio in 4 posizioni (migliore proposta per vittorie verificata): pagina 154531 T13 -18, ES3B
     T11 -20, EK7B T7 -28 (c'era un punto libero), EK5B T15 -7 (posizione decisa). Nessuna proposta verificata batte
     il campione dove la selezione aveva scelto lui.
+- **Decisione (26/11, Astra): sonda a un'ondata (A), dietro interruttore; B (finestre + quota) resta un confronto
+  economico.** Un'ondata: una o più unità nello stesso spostamento, poi AMBUSH e una magia nello stesso showdown, le
+  risorse tenute per la finestra, l'avversario risponde anche fra i passi; alternative dal menu visibile; la prima
+  mossa vale per tutti i mondi, i passi dopo seguono solo ciò che il giocatore vede. In ogni mondo anche la scelta
+  ordinaria del campione, stesso pilota avversario, fino allo stesso fine turno; differenza media della stessa
+  `rimonta` (non il Q dell'albero), soglia congelata +0,15; sotto soglia la scelta ordinaria.
+  - Selezione nei due versi: la migliore alternativa si verifica sempre su mondi nuovi appaiati, anche quando vince
+    il campione; «il campione gioca meglio» e «conviene il punto libero» distinti (il secondo solo se lo prende
+    davvero); 0/16 e 16/16 restano nel conteggio, segnalati.
+  - T9 caso diagnostico a parte: foglia e vittorie sulla stessa linea guidata (stessi bersagli e risposte); i pesi
+    non si toccano finché lo stesso errore non emerge in altre partite.
+  - Generatore, soglia e budget congelati sulle 24; le 49 posizioni restanti condividono le partite: diagnosi, non
+    verifica. Prova fuori campione su partite ES/EK nuove (+ Rengar e Ivern per la trasferibilità): attacchi utili
+    trovati, falsi positivi e loro costo, vittorie contro il campione su mondi appaiati; poi arena a posti scambiati
+    per matchup; tempo per decisione con la sonda (anche 95° percentile) sul Mac. Pagina solo con guadagno fuori
+    campione, costo compatibile e regressioni per matchup entro limiti fissati prima dell'arena.
+  - Sui dati salvati della serie, A (nessun gear, un'ondata, AMBUSH 0/1) con soglia +0,15 sceglie l'attacco in 6 su
+    24: i 5 veri positivi e EK4A T15 (+0,36, riferimento 16 su 16, neutro).
