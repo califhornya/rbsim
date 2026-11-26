@@ -755,8 +755,11 @@ def diff_proposte(pm: list, pa: list) -> list[str]:
         for chiave in ("field", "proposal", "events", "waves", "ambush", "spell"):
             if a[chiave] != m[chiave]:
                 dif.append(f"proposta p{j:02d}.{chiave}: mia {m[chiave]!r} astra {a[chiave]!r}")
-        if _norm_t9(a["state"]) != _norm_t9(m["state"]):
-            dif.append(f"proposta p{j:02d}.state: mio {_norm_t9(m['state'])} astra {_norm_t9(a['state'])}")
+        # solo le chiavi di Astra (come `_riga_uguale`): le aggiunte del tavolo (`unita`) non contano
+        sa, sm = _norm_t9(a["state"]), _norm_t9(m["state"])
+        sm = {chiave: sm.get(chiave) for chiave in sa}
+        if sa != sm:
+            dif.append(f"proposta p{j:02d}.state: mio {sm} astra {sa}")
     return dif
 
 

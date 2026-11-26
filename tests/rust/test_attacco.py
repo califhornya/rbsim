@@ -128,3 +128,17 @@ def test_cli_posizioni_e_proposte(tmp_path, capsys):
     assert attacco.main() == 0
     out = capsys.readouterr().out
     assert "p17" in out and "proposte," in out
+
+
+def test_diff_proposte_ignora_le_chiavi_nuove_del_tavolo():
+    """Le proposte di Astra contro sé stesse col tavolo di `tavolo` (base_camp, unita): nessuna differenza
+    (Codex, PR 64); una differenza vera in una chiave di Astra resta."""
+    pa = json.loads((ROOT / "docs/bot/esperimenti/t9_attacco/dati/proposte.json").read_text(encoding="utf-8"))
+    pm = json.loads(json.dumps(pa))
+    for p in pm:
+        s = p["state"]
+        s["base_camp"] = s.pop("base_B")
+        s["unita"] = [{"campo": 0, "avversario": s["theirs"], "campione": s["ours"]}]
+    assert A.diff_proposte(pm, pa) == []
+    pm[3]["state"]["theirs"] = []
+    assert len(A.diff_proposte(pm, pa)) == 1
