@@ -1386,6 +1386,23 @@ profile 6427b90+D72-D82; the earlier profiles and Python keep the behavior below
   D72-D81 against D72-D82 on EK and ES, 30 seeds, both seats: 0/60 differ each (Edge of Night from face down at
   BF1 doesn't come up there): the test is the coverage.
 
+### D83. A cost inside an effect is paid only with the runes, never with a Gold
+
+Fixed in Rust (27/11) on the profile 6427b90+D72-D83; the earlier profiles and Python keep the behavior below.
+
+- **Seen.** Raised by the owner (26/11, game 155859, T12, report 35): Reckless Innovator, "When I become
+  exhausted, choose one - Play a Gold ... - Pay [chaos] to draw 1". The Gold ("REACTION[>] Kill this, [tap]: ADD
+  [rune]") may pay the [chaos] (CORE_RULES 204.3, 204.3.a, 445.2.b-c, 430.3, 357.1.a, 204.4.b.1: an ADD Reaction can
+  be activated whenever a resource must be paid, also inside an instruction). The engine checked and paid it only
+  with the runes (`_mode_payable` / `_run_mode` -> `_pay_one_additional_cost` -> `_pay_energy_and_generic`): (a) with a
+  Chaos rune and a Gold it recycled the rune without asking; (b) with only the Gold the mode was not offered.
+- **Fix (Rust).** Behind `regole.d83()`, in `pay_one_additional_cost_x` (`lp_costs2.rs`): the check counts the ready
+  Golds (`golds_needed`); on payment, if the runes do not suffice, the needed Golds are activated (`use_golds`: kill +
+  tap, ADD of the cost's domain, no domain question) and then the cost is paid; counted as `D83`. Agents, PPO and search:
+  runes first, Gold only if needed. Human seat with `payments=True`: when the runes suffice and a Gold is ready, the
+  choice `payment:effect` ("Come paghi?": runes or N Gold; `human.rs`, `coach_rs.py`); other seats are not asked.
+  Tests: `tests/rust/test_d83.py` (D72-D82 pinned, D72-D83 corrected).
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in

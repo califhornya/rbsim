@@ -12,8 +12,7 @@ and two cards in the deck; the human seat (payments=True, as the page) moves Rec
 a) one Chaos rune + the Gold: the [chaos] can be paid either way. Today: the rune is recycled, the Gold stays
    ready, the seat is asked nothing ("Come paghi?" exists only for moves). Pinned.
 b) no Chaos rune, only the Gold: today the draw mode is not offered at all (one mode only) and the unit plays a
-   second Gold instead. Pinned; the correct behaviour is the xfail below (becomes the D83 test on the new
-   profile: change `D72_D82` to `D72_D83` and drop the xfail).
+   second Gold instead. Pinned; the correct behaviour is the xfail below (the D83 test on D72-D83).
 """
 from __future__ import annotations
 
@@ -31,9 +30,10 @@ from audit_helpers import card, setup, unit  # noqa: E402
 from test_d72_d76 import rust  # noqa: E402
 
 D72_D82 = "6427b90+D72-D82"
+D72_D83 = "6427b90+D72-D83"
 
 
-def _play(regole, chaos_runes):
+def _play(regole, chaos_runes, pay=None):
     """-> (events of the game, kinds the seat was asked, offered modes, A's hand / gear after)."""
     from riftbound.core.player import Domain, Rune
     loop, a, _b = setup(active="A", rich=())
@@ -56,6 +56,8 @@ def _play(regole, chaos_runes):
                 return hit[0]
             return e["menu"].index("Pass")
         asked.append(e["k"] + (":" + e["kind"] if "kind" in e else ""))
+        if e["k"] == "choice" and e["kind"] == "payment:effect" and pay is not None:
+            return pay
         return 1 if e["k"] == "decide_mode" else e["default"]
     g.set_human_agent("A", ask, payments=True)
     g.run_segment(1)
@@ -88,14 +90,51 @@ def test_d83_b_only_the_gold_can_pay_the_draw_mode_is_not_offered():
     assert gear == [("Gold", False), ("Gold", True)]       # the unit plays its second (exhausted) Gold instead
 
 
-@pytest.mark.xfail(strict=True, reason="D83: the Gold's ADD cannot pay the cost inside an effect (rules 204.3.a, 430.3, 445.2.c)")
 def test_d83_b_only_the_gold_can_pay_the_draw_mode_is_offered_and_paid_with_the_gold():
-    asked, modes, hand, gear, _pa = _play(D72_D82, 0)      # D83: the new profile
+    asked, modes, hand, gear, _pa = _play(D72_D83, 0)      # D83: the new profile
     assert modes == 2 and hand == ["Punch First"]
     assert gear == []                                      # the Gold was killed to Add the [chaos] that was paid
 
 
-@pytest.mark.xfail(strict=True, reason="D83: no 'Come paghi?' for the cost inside an effect when rune and Gold both pay")
 def test_d83_a_chaos_rune_and_a_gold_the_seat_is_asked_how_to_pay():
-    asked, modes, hand, gear, _pa = _play(D72_D82, 1)      # D83: the new profile, human seat with payments=True
+    asked, modes, hand, gear, _pa = _play(D72_D83, 1)      # D83: the new profile, human seat with payments=True
     assert modes == 2 and len(asked) > 2                   # a question beyond the mode (the way to pay)
+
+
+def test_d83_a_chaos_rune_and_a_gold_the_seat_pays_with_the_gold_or_with_the_rune():
+    asked, modes, hand, gear, pa = _play(D72_D83, 1, pay=1)
+    assert "choice:payment:effect" in asked
+    assert hand == ["Punch First"] and gear == []          # the Gold was killed, the rune stayed
+    assert pa["rune_pool"]                                 # the Chaos rune is still in the pool
+    asked, modes, hand, gear, pa = _play(D72_D83, 1, pay=0)
+    assert hand == ["Punch First"] and gear == [("Gold", False)]   # the rune was recycled, the Gold stayed
+    assert not pa["rune_pool"].get("$dict") if isinstance(pa["rune_pool"], dict) else not pa["rune_pool"]
+
+
+def test_d83_no_question_for_the_other_seats_the_runes_pay():
+    # a seat without payments=True (the bot, a search) is never asked: the runes pay, the Gold stays
+    from riftbound.core.player import Domain, Rune
+    loop, a, _b = setup(active="A", rich=())
+    a.rune_pool[Domain.CHAOS] = [Rune(Domain.CHAOS)]
+    a.channel()
+    gold = card("Gold")
+    gold.tapped = False
+    a.base_gear.append(gold)
+    a.base_units.append(unit("Reckless Innovator"))
+    a.deck.cards.extend([card("Punch First"), card("Punch First")])
+    g = rust(loop, D72_D83)
+    kinds = []
+
+    def ask(ev):
+        e = json.loads(ev)
+        kinds.append(e["k"] + (":" + e["kind"] if "kind" in e else ""))
+        if e["k"] == "decision":
+            hit = [i for i, m in enumerate(e["menu"]) if m.startswith("Move Reckless") and "moved" not in kinds]
+            if hit:
+                kinds.append("moved")
+                return hit[0]
+            return e["menu"].index("Pass")
+        return 1 if e["k"] == "decide_mode" else e["default"]
+    g.set_human_agent("A", ask, payments=False)
+    g.run_segment(1)
+    assert "choice:payment:effect" not in kinds

@@ -121,8 +121,16 @@ impl Game {
             }
         }
         let xp = ac.get("spend_xp").map(py_int).unwrap_or(0);
+        // D83: a cost inside an effect also counts the ready Golds (rules 204.3.a, 430.3, 445.2.c).
+        let mut golds_needed = 0;
         if !self.can_pay_energy_and_generic(ap, energy, power, domain) {
-            return Ok(false);
+            if !self.gs.reg.regole.d83() || power <= 0 || self.gs.player(ap).energy() < energy {
+                return Ok(false);
+            }
+            match self.golds_needed(ap, power, domain)? {
+                Some(n) => golds_needed = n,
+                None => return Ok(false),
+            }
         }
         if xp != 0 && self.gs.get_xp(ap) < xp {
             return Ok(false);
@@ -136,6 +144,22 @@ impl Game {
         }
         if check_only {
             return Ok(true);
+        }
+        if golds_needed == 0 && self.gs.reg.regole.d83() && power > 0 && self.has_agent(ap) {
+            // D83: the runes pay, and a ready Gold could pay instead: the seat that asks how to
+            // pay (the page's "Come paghi?") is asked; the others get the runes (the default).
+            let k = self.gold_lanes(ap)?.len() as i64;
+            if k > 0 {
+                let k = k.min(power);
+                let opts = [Opt::Str("rune".into()), Opt::Str(format!("gold:{k}"))];
+                if self.choose("payment:effect", ap, &opts, opts[0].clone(), Some(card))? == opts[1] {
+                    golds_needed = k;
+                }
+            }
+        }
+        if golds_needed > 0 {
+            crate::registry::conta(83);
+            self.use_golds(ap, golds_needed, domain)?;
         }
         if !self.pay_energy_and_generic(ap, energy, power, domain)? {
             return Ok(false);
@@ -152,6 +176,50 @@ impl Game {
             self.discard(ap, c)?;
         }
         Ok(true)
+    }
+
+    /// D83: the lanes (in `activatable_abilities`) of `ap`'s ready Golds (ADD a Power of any domain).
+    pub fn gold_lanes(&mut self, ap: Side) -> R<Vec<i64>> {
+        let entries = self.activatable_abilities(ap)?;
+        let mut out = Vec::new();
+        for (i, e) in entries.iter().enumerate() {
+            if matches!(e, crate::lp_abilities::AbilityEntry::GearAbility { eff, .. } if eff.effect == "gain_power_any_domain")
+                && self.ability_usable(ap, e)?
+            {
+                out.push(i as i64);
+            }
+        }
+        Ok(out)
+    }
+
+    /// D83: the fewest ready Golds that, with the runes, pay `power` Power of `domain` (any domain
+    /// if None); Some(0) if the runes already do, None if even all the Golds do not.
+    pub fn golds_needed(&mut self, ap: Side, power: i64, domain: Option<Domain>) -> R<Option<i64>> {
+        let n = self.gold_lanes(ap)?.len() as i64;
+        for k in 0..=n {
+            let rest = power - k;
+            let ok = match domain {
+                _ if rest <= 0 => true,
+                Some(d) => self.gs.player(ap).can_pay_cost(0, Some(rest), Some(d)),
+                None => self.can_pay_generic_power(ap, rest),
+            };
+            if ok {
+                return Ok(Some(k));
+            }
+        }
+        Ok(None)
+    }
+
+    /// D83: activate `n` Golds (kill + tap, ADD of `domain`, or the engine's choice if None).
+    pub fn use_golds(&mut self, ap: Side, n: i64, domain: Option<Domain>) -> R<()> {
+        for _ in 0..n {
+            let Some(&l) = self.gold_lanes(ap)?.first() else { break };
+            self.gold_domain = domain;
+            let r = self.apply_activated_ability(ap, l);
+            self.gold_domain = None;
+            r?;
+        }
+        Ok(())
     }
 
     /// py: _action_fingerprint(ap, op)

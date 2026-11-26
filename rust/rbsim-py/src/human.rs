@@ -399,6 +399,9 @@ impl Agent for HumanAgent {
                 }
             }
         }
+        if kind == "payment:effect" && !self.payments {
+            return Ok(Some(default)); // D83: only the page's seat (payments=True) is asked how to pay
+        }
         let mut e = choice_event(g, kind, side, options, default, source, self.real_loop);
         if kind == "optional:sett_save" {
             // For `ask` alone: the units of the seat dying together and the one asked about.
