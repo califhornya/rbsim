@@ -1,6 +1,7 @@
 """Prima generazione, passi 3 e 4 (riftbound/rs/generazione.py); i passi 1 e 2 sono raccolta.py e allena.py.
 
   generazione.py partita --rete runs/allena/X/rete.pt --out docs/bot/esperimenti/generazione_DATA
+  generazione.py confronto --out DIR [--righe arena_righe.jsonl] [--pilota arena_righe.jsonl del pilota]
   generazione.py arena   --rete runs/allena/X/rete.pt --out docs/bot/esperimenti/generazione_DATA [--coppie 100]
                          [--matchup EK ER ...] [--processi N]
 
@@ -27,10 +28,35 @@ def _abs(p) -> Path:
     return p if p.is_absolute() else ROOT / p
 
 
+def _ha(righe: Path, v: str) -> bool:
+    if not righe.is_file():
+        return False
+    return any(f'"variante": "{v}"' in x for x in righe.read_text().splitlines())
+
+
+def _confronto(a, out: Path):
+    principale = _abs(a.righe) if a.righe else out / "arena_righe.jsonl"
+    fonti = [principale] + ([_abs(a.pilota)] if a.pilota else [])
+    dove = lambda v: next((f for f in fonti if _ha(f, v)), None)  # noqa: E731
+    out.mkdir(parents=True, exist_ok=True)
+    risultati, testo = [], []
+    for x, y in (("d", "c"), ("d", "b"), ("c", "b")):
+        fx, fy = dove(x), dove(y)
+        if fx and fy:
+            risultati.append(G.confronto_appaiato(fx, x, fy, y))
+            testo.append(f"# {x}: {fx}; {y}: {fy}")
+            testo += G.testo_confronto(risultati[-1:])
+    if not risultati:
+        sys.exit("nessun confronto possibile: servono almeno due varianti fra --righe e --pilota")
+    (out / "confronto.json").write_text(json.dumps(risultati, indent=1))
+    (out / "confronto.txt").write_text("\n".join(testo) + "\n")
+    print("\n".join(testo))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("passo", choices=("partita", "arena"))
-    ap.add_argument("--rete", required=True)
+    ap.add_argument("passo", choices=("partita", "arena", "confronto"))
+    ap.add_argument("--rete")
     ap.add_argument("--campione", default=R.CKPT_DEFAULT)
     ap.add_argument("--casuali-campione", action="store_true", help=argparse.SUPPRESS)
     ap.add_argument("--out", required=True)
@@ -39,12 +65,19 @@ def main():
     ap.add_argument("--coppie", type=int, default=100)
     ap.add_argument("--matchup", nargs="+", default=list(COPERTI), choices=COPERTI)
     ap.add_argument("--processi", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-    ap.add_argument("--varianti", nargs="+", default=["b", "c"], choices=("b", "c"))
+    ap.add_argument("--varianti", nargs="+", default=["b", "c"], choices=("b", "c", "d"))
     ap.add_argument("--seme", type=int, default=G.BASE_SEME_SVILUPPO + 500_000, help="seme della partita (passo partita)")
     ap.add_argument("--mu", default="EK", choices=COPERTI, help="matchup della partita (passo partita)")
     ap.add_argument("--peso-valore", type=float, default=0.0, help="peso del valore della rete nella partita (default 0: come (b))")
+    ap.add_argument("--righe", help="passo confronto: arena_righe.jsonl (default <out>/arena_righe.jsonl)")
+    ap.add_argument("--pilota", help="passo confronto: arena_righe.jsonl del pilota, per le varianti non in --righe")
     a = ap.parse_args()
-    rete, campione, out = str(_abs(a.rete)), str(_abs(a.campione)), _abs(a.out)
+    out = _abs(a.out)
+    if a.passo == "confronto":
+        return _confronto(a, out)
+    if not a.rete:
+        sys.exit("manca --rete")
+    rete, campione = str(_abs(a.rete)), str(_abs(a.campione))
     for p in (rete, campione):
         if not Path(p).is_file():
             sys.exit(f"manca il file {p}")
