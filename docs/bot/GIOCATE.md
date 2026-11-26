@@ -238,3 +238,7 @@ Osservata da Matteo giocando a mano (Evelynn contro il campione con Sett,
   mosse; `rimonta` (solo quando a campi fermi si perde la corsa ai punti: Might in base verso il campo avversario più
   debole, eccesso sul campo sicuro ridotto, i propri campi minacciati prima) vince: EK 0,522, ES 0,533, gli altri 8
   matchup 0,515-0,607 (semi nuovi, `docs/bot/accumulo/risultati/`). Default della pagina dal 26/11 (`coach.py --valutazione`).
+- **Prova di Matteo (26/11).** Partita 013325 (Evelynn-Sett, `rimonta`, `6427b90+D72-D81`, probabilmente la prima
+  delle due): vinta 8 a 4 in 14 turni. Alla domanda «quale giocata di Sett ti ha costretto a spendere una carta o a
+  difendere il campo prima dell'ottavo punto?»: nessuna, «non ho trovato molte difficoltà». L'unica occasione è il T9
+  (SEGNALAZIONI 28): schianto contro Vex, Sett su Bandle e Vi in AMBUSH, che la ricerca ha provato 1 volta su 5000.
