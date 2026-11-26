@@ -1,0 +1,29 @@
+attacco_mac 26/11/2026 13:30; 04ae895 Merge pull request #64 from califhornya/claude/loving-curie-91669c; posizioni con regole 6427b90+D72-D82, rimonta, 138 iterazioni
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi
+
+== riproduzione T9
+  verifica.jsonl: 100/100 mondi, 33 s
+IDENTICO
+file in docs/bot/esperimenti/attacco_20261126/riproduzione_t9
+== T9 con riferimento campione
+posizione k=10 (turno 9): indeciso
+selezione (16 mondi ignote): migliore p04 con 3 punti, riferimento 2
+proposta p04 campo 0 {'gear_target': 'none', 'waves': 2, 'spell_wave': 1, 'ambush_index': 1}: prima mossa Move Kinkou Initiate base→BF0, visite 1, q -0.762
+differenza (proposta - riferimento) su 100 mondi: -3.0 pp [-7.4, +1.4]
+valori (storica): media -0.741; segno concorde con la differenza di vittorie
+valori (rimonta): media -0.726; segno concorde con la differenza di vittorie
+valori (storica dopo l'avversario): media -0.077; segno concorde con la differenza di vittorie
+valori (rimonta dopo l'avversario): media -0.112; segno concorde con la differenza di vittorie
+== serie
+20261125_154531_competit | k=12 | turno 13 | punto_libero=no | riferimento scelto | differenza - | valori -
+20261125_201243_competit | k=1 | turno 4 | punto_libero=sì | indeciso | differenza +1.0 [-11.9, +13.9] pp | valori storica -0.134 (discorde); storica dopo l'avversario +0.195 (concorde)
+20261126_013325_competit | k=10 | turno 9 | punto_libero=sì | indeciso | differenza -3.0 [-7.4, +1.4] pp | valori storica -0.741 (concorde); rimonta -0.726 (concorde); storica dopo l'avversario -0.077 (concorde); rimonta dopo l'avversario -0.112 (concorde)
+ES1B | k=11 | turno 9 | punto_libero=no | saltata: carta in cima al mazzo o mano pubblica nota
+ES4A | k=10 | turno 9 | punto_libero=sì | saltata: carta in cima al mazzo o mano pubblica nota
+ES5B | k=15 | turno 9 | punto_libero=no | saltata: carta in cima al mazzo o mano pubblica nota
+ES6A | k=1 | turno 3 | punto_libero=sì | saltata: carta in cima al mazzo o mano pubblica nota
+ES9B | k=21 | turno 9 | punto_libero=no | saltata: carta in cima al mazzo o mano pubblica nota
+EK1B | k=21 | turno 13 | punto_libero=sì | saltata: carta in cima al mazzo o mano pubblica nota
+EK3B | k=17 | turno 11 | punto_libero=no | saltata: carta in cima al mazzo o mano pubblica nota
+EK4A | k=27 | turno 15 | punto_libero=sì | saltata: carta in cima al mazzo o mano pubblica nota
+EK7B | k=10 | turno 9 | punto_libero=no | attacco migliore (mai costruita) | differenza +35.0 [+24.8, +45.2] pp | valori storica +0.984 (concorde); rimonta +0.984 (concorde); storica dopo l'avversario +1.390 (concorde); rimonta dopo l'avversario +1.136 (concorde)

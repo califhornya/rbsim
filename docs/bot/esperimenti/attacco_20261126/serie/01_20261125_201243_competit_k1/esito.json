@@ -1,0 +1,119 @@
+{
+ "migliore": "p02",
+ "verifica_dati": {
+  "riferimento": {
+   "n": 100,
+   "punti_partita": 42.0,
+   "vittorie": 42,
+   "patte": 0,
+   "delta": 0.0,
+   "intervallo_95": [
+    0.0,
+    0.0
+   ],
+   "vince_solo_linea": 0,
+   "vince_solo_riferimento": 0,
+   "prefisso_completo": 100,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": 0.0
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.0
+    }
+   }
+  },
+  "p02": {
+   "n": 100,
+   "punti_partita": 43.0,
+   "vittorie": 43,
+   "patte": 0,
+   "delta": 0.01,
+   "intervallo_95": [
+    -0.11915826326525521,
+    0.1391582632652552
+   ],
+   "vince_solo_linea": 22,
+   "vince_solo_riferimento": 21,
+   "prefisso_completo": 0,
+   "valori": {
+    "storica": {
+     "n": 100,
+     "media": -0.13393508915814284
+    },
+    "storica dopo l'avversario": {
+     "n": 100,
+     "media": 0.19515078465315222
+    }
+   }
+  }
+ },
+ "proposta": {
+  "nome": "p02",
+  "field": 1,
+  "proposal": {
+   "gear_target": "none",
+   "waves": 2,
+   "spell_wave": 1,
+   "ambush_index": 0
+  },
+  "events": [
+   [
+    1,
+    "turn_action",
+    "Move Kinkou Initiate base→BF1"
+   ]
+  ],
+  "prima_etichetta": "Move Kinkou Initiate base→BF1",
+  "visite": 1,
+  "q": -0.6750698748386078
+ },
+ "sottoclasse": null,
+ "esito": "indeciso",
+ "differenza": {
+  "media": 0.01,
+  "intervallo_95": [
+   -0.11915826326525521,
+   0.1391582632652552
+  ]
+ },
+ "valori": {
+  "storica": {
+   "n": 100,
+   "media": -0.13393508915814284,
+   "concorda_con_vittorie": false
+  },
+  "storica dopo l'avversario": {
+   "n": 100,
+   "media": 0.19515078465315222,
+   "concorda_con_vittorie": true
+  }
+ },
+ "partita": {
+  "tipo": "pagina",
+  "file": "docs/bot/partite/coach/20261125_201243_competitive_sett_vs_competitive_evelynn.json",
+  "ckpt": "../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "casuali": false
+ },
+ "k": 1,
+ "turno": 4,
+ "riferimento": "campione",
+ "modo": "ignote",
+ "scelta": [
+  2000,
+  16
+ ],
+ "verifica": [
+  4000,
+  100
+ ],
+ "deduplica": true,
+ "selezione": {
+  "riferimento": 2.0,
+  "p00": 3.0,
+  "p02": 5.0
+ },
+ "secondi": 82.13111805915833
+}

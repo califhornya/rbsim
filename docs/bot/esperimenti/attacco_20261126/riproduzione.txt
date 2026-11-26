@@ -1,0 +1,18 @@
+18 proposte (18 dopo la deduplica); 19 linee
+  scelta.jsonl: 1/16 mondi, 28 s
+  scelta.jsonl: 10/16 mondi, 41 s
+  scelta.jsonl: 16/16 mondi, 56 s
+selezione: migliore p04 (3 contro 2 del riferimento)
+  verifica.jsonl: 1/100 mondi, 4 s
+  verifica.jsonl: 10/100 mondi, 5 s
+  verifica.jsonl: 20/100 mondi, 10 s
+  verifica.jsonl: 30/100 mondi, 11 s
+  verifica.jsonl: 40/100 mondi, 16 s
+  verifica.jsonl: 50/100 mondi, 18 s
+  verifica.jsonl: 60/100 mondi, 20 s
+  verifica.jsonl: 70/100 mondi, 23 s
+  verifica.jsonl: 80/100 mondi, 30 s
+  verifica.jsonl: 90/100 mondi, 30 s
+  verifica.jsonl: 100/100 mondi, 33 s
+IDENTICO
+file in docs/bot/esperimenti/attacco_20261126/riproduzione_t9
