@@ -261,3 +261,16 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
   un campo (l'unità viene stordita) e Vex muore più tardi nello stesso turno = ordine sbagliato; anche: unità
   giocata e stordita senza che Vex muoia. Autonome ES ed EK sul Mac col campione: quanto spesso succede, poi `rifai`
   sugli episodi. Correzioni solo dopo la misura, una alla volta (dopo §7).
+- **Esperimento sul Mac (26/11, `docs/bot/esperimenti/`, schema di Astra).** T9 di 013325, k=10, stessi mondi nelle
+  4 condizioni.
+  - Continuazioni campione contro campione, 100 mondi per prima mossa (poi mosse libere): Vi in base 5/100,
+    Kinkou su Bandle 2/100 (differenza -3 [-9, +3]), Sett su Valley 0/100 (-5 [-11, -0]). La posizione era già
+    persa per Sett; il primo passo di Matteo non risulta migliore.
+  - Ricerca: con le finestre «Vi in base» sale da q 0,12 a 0,40 (Punch First del campione in 2139 simulazioni su
+    4894) e «Sett su Valley» scende a -0,27: l'ordine ora conta. Senza finestre a 1000 iterazioni sceglieva Sett su
+    Valley (la peggiore nelle continuazioni), con le finestre Vi in base a 1000 e 5000. Con la quota Kinkou riceve
+    100 visite, Punch First in 91, Vi in AMBUSH in 15, e resta a q -0,75.
+  - La linea intera di Matteo (`guidata`) si è fermata al passo 4: dopo uno spostamento serve «Pass» per chiudere
+    la mossa e aprire lo showdown; la sequenza non lo aveva. Da rifare, con una continuazione che la impone tutta.
+  - Rilevatore §9 (campione `storica`, 50 partite, posto B): ES 105 occasioni, Vex uccisa dopo 15, ordine giusto 3;
+    EK 114 occasioni, uccisa dopo 14, ordine giusto 2. L'ordine sbagliato è ~5 volte più frequente di quello giusto.
