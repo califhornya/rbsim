@@ -73,3 +73,34 @@ def test_misura_su_due_partite(rete, tmp_path, monkeypatch):
     assert m["iterazioni_a_0030s"]["turno"]["n"] > 0 and m["iterazioni_a_0030s"]["turno"]["p90"] >= m["iterazioni_a_0030s"]["turno"]["mediana"]
     assert m["secondi_a_6_iterazioni"]["turno"]["n"] > 0
     assert (out / "misura_righe.jsonl").exists()
+
+
+def test_finestre_nell_arena_si_giocano_e_chiavano_la_ripresa(rete, tmp_path):
+    """fin_cand / fin_opp (--finestre-candidato / --finestre-avversario): arena_rs.game accende `finestre` sui posti
+    e le righe con quell'opzione non si mischiano con quelle senza (arena_mazzi.riprese)."""
+    import importlib.util
+    from riftbound.rs import arena_rs
+    opz = {"iter_cand": 6, "iter_opp": 6, "fin_cand": True, "log": True}
+    task = (40003, "a", "A", "prior_ppo", rete, "mano", None, "EK", None, None, opz)
+    r = arena_rs.game(task)
+    r2 = arena_rs.game(task)
+    assert r[:4] == r2[:4] and r[3] in (0.0, 0.5, 1.0) and r[8]["log"]["cand"]
+    spec = importlib.util.spec_from_file_location("arena_mazzi_f", ROOT / "scripts/diag/arena_mazzi.py")
+    sys.path.insert(0, str(ROOT / "scripts/diag"))
+    arena = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(arena)
+    righe = tmp_path / "a.jsonl"
+    base = {"ckpt": "c.pt", "avversario": "a.pt", "starter": "a", "score": 1.0, "motore": "rust", "mu": "ES", "seat": "A"}
+    righe.write_text("\n".join(json.dumps(base | x) for x in [
+        {"seed": 1, "opz": {"iter_cand": 6, "fin_cand": True}},
+        {"seed": 2, "opz": {"iter_cand": 6}}]) + "\n")
+    kw = dict(ckpt="c.pt", avversario="a.pt", budget_c=None, budget_a=None, motore={"ES": "rust"},
+              regole={"ES": "6427b90"}, sha_c=None, sha_a=None)
+    assert [x[0] for x in arena.riprese(righe, opz={"iter_cand": 6, "fin_cand": True}, **kw)] == [1]
+    assert [x[0] for x in arena.riprese(righe, opz={"iter_cand": 6}, **kw)] == [2]
+
+
+def test_collaudo_finestre_seguono_il_candidato_in_a_e_in_b(rete):
+    sys.path.insert(0, str(ROOT / "scripts/diag"))
+    import collaudo_finestre
+    assert collaudo_finestre.collauda(rete, "ES", 109_000, 8) == []

@@ -67,7 +67,7 @@ def riprese(righe: Path, *, ckpt, avversario, budget_c, budget_a, motore: dict, 
     when recorded, hash), budgets, engine and rules of their matchup (a row
     without `motore` / `regole`, before 24/11: Python, 6427b90). A historical
     game of a seed and seat leaves that game to be played on another profile.
-    `opz`: the per-side settings of --iterazioni-*/--win-probe-* (None when none: a
+    `opz`: the per-side settings of --iterazioni-*/--win-probe-*/--finestre-* (None when none: a
     row without `opz` is one of them)."""
     from riftbound.provenienza import REGOLE_PYTHON
     rows = []
@@ -110,6 +110,9 @@ def main() -> None:
                     help="lavoro fisso: iterazioni per ricerca all'avversario, al posto del budget (solo --motore rust)")
     ap.add_argument("--win-probe-candidato", action="store_true", help="il candidato prova la vittoria nel turno (solo --motore rust)")
     ap.add_argument("--win-probe-avversario", action="store_true", help="idem l'avversario (solo --motore rust)")
+    ap.add_argument("--finestre-candidato", action="store_true",
+                    help="le simulazioni del candidato giocano le finestre di reazione/showdown con i piloti PPO (solo --motore rust)")
+    ap.add_argument("--finestre-avversario", action="store_true", help="idem l'avversario (solo --motore rust)")
     for lato in ("candidato", "avversario"):
         ap.add_argument(f"--valutazione-{lato[0]}", choices=("storica", "accumulo", "minaccia", "corsa", "rimonta"), default="storica",
                         help=f"valutazione delle foglie del {lato} (solo --motore rust; default storica = invariato)")
@@ -125,13 +128,14 @@ def main() -> None:
                          "liste) giocano su Rust (riftbound/rs/arena_rs.py), gli altri su Python")
     args = ap.parse_args()
     nuove = {"iter_cand": args.iterazioni_candidato, "iter_opp": args.iterazioni_avversario,
-             "probe_cand": args.win_probe_candidato or None, "probe_opp": args.win_probe_avversario or None}
+             "probe_cand": args.win_probe_candidato or None, "probe_opp": args.win_probe_avversario or None,
+             "fin_cand": args.finestre_candidato or None, "fin_opp": args.finestre_avversario or None}
     for lato, chiave in (("c", "val_cand"), ("a", "val_opp")):
         if getattr(args, f"valutazione_{lato}") != "storica":
             nuove[chiave] = [getattr(args, f"valutazione_{lato}"), getattr(args, f"k_{lato}"), getattr(args, f"alpha_{lato}")]
     opz = {k: v for k, v in nuove.items() if v} or None
     if (opz or args.avversario_mano) and args.motore != "rust":
-        ap.error("--iterazioni-*, --win-probe-* e --avversario-mano valgono solo con --motore rust")
+        ap.error("--iterazioni-*, --win-probe-*, --finestre-* e --avversario-mano valgono solo con --motore rust")
     if args.avversario_mano == (args.ckpt_avversario is not None):
         ap.error("l'avversario è o --ckpt-avversario o --avversario-mano (uno solo)")
     from riftbound.ai.ppo.collect import DECK_NAME
@@ -158,12 +162,12 @@ def main() -> None:
     avv = ("il bot a mano senza prior" if args.avversario_mano else
            f"il bot a mano con i prior PPO di {args.ckpt_avversario} (sha256 {_sha(args.ckpt_avversario)})")
 
-    def lavoro(it, budget, probe, val=None):
+    def lavoro(it, budget, probe, val=None, fin=False):
         return (f"{it} iterazioni per ricerca" if it else f"{budget or A.REF_BUDGET} s per mossa") + \
-            (" + win probe" if probe else "") + (f" + valutazione {val[0]} k={val[1]} alpha={val[2]}" if val else "")
+            (" + win probe" if probe else "") + (" + finestre" if fin else "") + (f" + valutazione {val[0]} k={val[1]} alpha={val[2]}" if val else "")
     say(f"candidato: il bot a mano con i prior PPO di {args.ckpt} (sha256 {_sha(args.ckpt)}); avversario: {avv}; "
-        f"{lavoro(args.iterazioni_candidato, args.budget_candidato, args.win_probe_candidato, (opz or {}).get('val_cand'))} al candidato, "
-        f"{lavoro(args.iterazioni_avversario, args.budget_avversario, args.win_probe_avversario, (opz or {}).get('val_opp'))} all'avversario; "
+        f"{lavoro(args.iterazioni_candidato, args.budget_candidato, args.win_probe_candidato, (opz or {}).get('val_cand'), args.finestre_candidato)} al candidato, "
+        f"{lavoro(args.iterazioni_avversario, args.budget_avversario, args.win_probe_avversario, (opz or {}).get('val_opp'), args.finestre_avversario)} all'avversario; "
         f"{args.workers} processi")
     say(f"regole fissate prima: ciascuno di {' '.join(args.vecchi) or '-'} limite inferiore > 0,47; ciascun blocco "
         f"({'; '.join(' '.join(b) for b in blocks) or '-'}), a pesi uguali, >= 0,52 e limite inferiore > 0,50; "

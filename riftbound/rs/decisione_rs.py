@@ -104,7 +104,9 @@ def _prepara(partita: dict) -> dict:
                  deck_a=Path(DECK_OF[mu[0]]), deck_b=Path(DECK_OF[mu[1]]), bf_a=None, bf_b=None,
                  starter=str(partita.get("starter", "a")).lower(), iterazioni=partita.get("iterazioni", ITERAZIONI_CAMPIONE),
                  probe=partita.get("probe", True), regole=partita.get("regole") or REGOLE_D72_D80, answers=None,
-                 ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"))
+                 ckpt=partita.get("ckpt") or CKPT_DEFAULT, valutazione=partita.get("valutazione"),
+                 # the champion's `finestre` option in the original game (absent = off: same key as before)
+                 **({"finestre": True} if partita.get("finestre") else {}))
     else:
         raise ValueError(f"tipo di partita sconosciuto: {partita['tipo']}")
     return P
@@ -183,6 +185,8 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
         if mine and P.get("valutazione") and P["valutazione"][0] != "storica":
             v = P["valutazione"]
             g.set_search_valutazione(s, v[0], float(v[1]), float(v[2]))
+        if mine and P.get("finestre"):
+            g.set_search_finestre(s, True)
         if mine:
             g.set_search_timing(s, True)
             if diag_trace:

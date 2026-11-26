@@ -5,8 +5,11 @@
     dei piloti nelle finestre per posto.
 `guidata`: dalla posizione k il posto del campione e' forzato attraverso una sequenza di etichette (azioni di turno,
     finestre, scelte); fino alla fine di quel turno.
-`continua`: dalla posizione k, per ogni prima mossa, n continuazioni fino alla fine della partita (mondi diversi:
+`continua`: dalla posizione k, per ogni linea, n continuazioni fino alla fine della partita (mondi diversi:
     i mazzi, di cui nessuno dei due conosce l'ordine, sono rimescolati; tutto il resto dello stato resta com'e').
+    Una linea e' una etichetta (la prima mossa, poi il campione gioca libero) o una sequenza di etichette separate
+    da " ; " (il posto del campione e' forzato con le regole di `guidata`; esaurita la sequenza, al primo punto di
+    turno il gioco passa al campione, ripartendo dallo stato di quel punto).
 
 La posizione di partenza e' lo stato (state_raw) dell'evento di decisione k della partita originale, caricato in un
 Game nuovo (`Game.from_canonical`, come le posizioni dei test): la ricerca del campione riparte senza i "piani" che
@@ -207,8 +210,12 @@ def riga_tavolo(p: dict) -> str:
 class Guida:
     """Il callback `ask` del posto forzato (Game.set_human_agent). Regole: vedi `cerca`."""
 
-    def __init__(self, sequenza: list, seat: str, out):
+    def __init__(self, sequenza: list, seat: str, out, consegna: bool = False):
         self.seq = list(sequenza)
+        self.consegna = consegna          # sequenza esaurita al primo punto di turno: Stop con `resume` (stato di quel punto)
+        self.resume = None
+        self.deviazione = None            # (passo, etichetta, punto, menu) se in consegna la linea non e' proseguibile
+        self.finestre_passate = 0         # finestre passate dopo la fine della sequenza (solo consegna)
         self.seat = seat
         self.out = out                    # funzione di stampa
         self.i = 0                        # prossima etichetta
@@ -250,6 +257,12 @@ class Guida:
         if k == "decision":
             menu, punto = e["menu"], e["point"]
             pas = next((j for j, m in enumerate(menu) if m.casefold().startswith("pass")), 0)
+            if lab is None and self.consegna:
+                if punto == "turn_action" and raw is not None:
+                    self.resume = raw
+                    raise Stop()
+                self.finestre_passate += 1
+                return pas
             if lab is None:
                 if not self.finito:
                     self.finito = True
@@ -259,6 +272,11 @@ class Guida:
             if j is not None:
                 self.passo(f"[{punto}] {menu[j]}")
                 return j
+            if punto == "turn_action" and self.consegna and raw is not None:
+                # la risposta dell'avversario ha tolto la mossa prevista: da qui gioca il campione (il mondo conta)
+                self.deviazione = (self.i + 1, lab, punto, menu)
+                self.resume = raw
+                raise Stop()
             if punto == "turn_action":
                 self.non_legale = (lab, punto, menu)
                 self.out(f"  {self.i + 1}. NON LEGALE: '{lab}' non è nel menu di '{punto}' (turno "
@@ -266,6 +284,8 @@ class Guida:
                 if raw is not None:
                     self.out(f"       posizione: {self._tavolo(raw)}")
                 raise Stop()
+            self.out(f"       (passo {self.i + 1} '{lab}' non offerta in '{punto}', turno "
+                     f"{(e.get('win') or {}).get('turn')}: si passa; menu: {menu})")
             return pas                                    # finestra non voluta dalla sequenza: passo
         if k == "choice":
             opz = etichette_scelta(e) if len(e["options_raw"]) > 1 else []
@@ -274,6 +294,8 @@ class Guida:
                 if j is not None:
                     self.passo(f"[scelta] {opz[j]}")
                     return j
+            if lab is not None and opz:
+                self.out(f"       (passo {self.i + 1} '{lab}' non fra le opzioni della scelta, default del motore; opzioni: {opz})")
             self.default += 1
             return e["default"]
         if k == "decide_optional":
@@ -359,19 +381,14 @@ def differenza(x1: int, n1: int, x2: int, n2: int) -> tuple[float, float, float]
     return d, d - math.sqrt((p1 - l1) ** 2 + (u2 - p2) ** 2), d + math.sqrt((u1 - p1) ** 2 + (p2 - l2) ** 2)
 
 
-def un_mondo(P: dict, tree: dict, mossa: str, i: int, base_seme: int) -> dict:
-    """Una continuazione: mondo `i` (mazzi rimescolati col seme base+i), il posto del campione gioca `mossa` e poi
-    come il campione; entrambi i posti campione (finestre spente). -> {vince, punti_turno, punti_fine, turni, secondi}."""
-    t0 = time.time()
-    seme = base_seme + i
-    camp = P["camp"]
-    g = gioco(P, rimescola(tree, seme), seme)
-    for s in ("A", "B"):
-        _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003, mossa if s == camp else None)
-    g.set_side_chooser()
-    w = g.run_actions_end()
+def parse_linea(testo: str) -> list[str]:
+    """Una linea di --mosse: etichette separate da " ; " (una sola = la sola prima mossa)."""
+    return [x.strip() for x in testo.split(" ; ") if x.strip()]
+
+
+def _finisci(g, P: dict, w, i: int, t0: float, pt: tuple) -> dict:
+    """Dal fine turno `pt` (punti) alla fine della partita di `g`, con i due posti campione."""
     stato = json.loads(g.raw_dump())
-    pt = _punti(stato)
     max_t = int(stato["root"]["max_turns"])
     giri = 0
     while w is None and giri < MAX_GIRI:
@@ -386,46 +403,126 @@ def un_mondo(P: dict, tree: dict, mossa: str, i: int, base_seme: int) -> dict:
     return {"vince": w, "punti_turno": pt, "punti_fine": fin, "turni": g.turn, "secondi": time.time() - t0, "mondo": i}
 
 
+def un_mondo(P: dict, tree: dict, mossa, i: int, base_seme: int) -> dict:
+    """Una continuazione: mondo `i` (mazzi rimescolati col seme base+i), il posto del campione gioca `mossa` e poi
+    come il campione; entrambi i posti campione (finestre spente). `mossa`: una etichetta (la prima mossa di turno) o
+    una lista di piu' etichette (la linea, forzata come in `guidata`).
+    -> {vince, punti_turno, punti_fine, turni, secondi, mondo}; per una linea anche `passi` (etichette consumate) e
+    `deviato`: None se la linea e' stata percorsa per intero, se no il numero del passo (1..) dove non era piu'
+    proseguibile (etichetta non offerta in un punto di turno, o turno finito prima); da lì gioca il campione e il
+    mondo conta comunque (`menu_dev`: il menu visto in quel punto, se c'e')."""
+    t0 = time.time()
+    seme = base_seme + i
+    camp = P["camp"]
+    linea = mossa if isinstance(mossa, (list, tuple)) else None
+    if linea is not None and len(linea) == 1:
+        mossa, linea = linea[0], None
+    g = gioco(P, rimescola(tree, seme), seme)
+    if linea is None:
+        for s in ("A", "B"):
+            _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003, mossa if s == camp else None)
+        g.set_side_chooser()
+        w = g.run_actions_end()
+        return _finisci(g, P, w, i, t0, _punti(json.loads(g.raw_dump())))
+    opp = "B" if camp == "A" else "A"
+    _agente_campione(g, P, opp, seme * 2 + (opp == "B") + 1_000_003)
+    guida = Guida(linea, camp, lambda t: None, consegna=True)
+    g.set_human_agent(camp, guida.ask, False, None)
+    g.set_side_chooser()
+    w = None
+    try:
+        w = g.run_actions_end()
+    except Stop:
+        pass
+    deviato = guida.deviazione[0] if guida.deviazione else None
+    if guida.resume is not None:
+        # sequenza esaurita (o non proseguibile) a un punto di turno: lo stesso turno riparte da quello stato,
+        # col campione ai due posti
+        g = gioco(P, albero(guida.resume), seme + 555)
+        for s in ("A", "B"):
+            _agente_campione(g, P, s, seme * 2 + (s == "B") + 1_000_003)
+        g.set_side_chooser()
+        w = g.run_actions_end()
+    else:
+        # il turno e' finito (o la partita) con la sequenza non esaurita: da qui gioca il campione
+        if guida.i < len(linea):
+            deviato = guida.i + 1
+        if w is None:
+            _agente_campione(g, P, camp, seme * 2 + (camp == "B") + 1_000_003)
+    r = _finisci(g, P, w, i, t0, _punti(json.loads(g.raw_dump())))
+    r["passi"] = guida.i
+    r["deviato"] = deviato
+    if guida.deviazione:
+        r["menu_dev"] = guida.deviazione[3]
+    return r
+
+
 def _lavora(args):
-    P, tree, mossa, i, base = args
-    return args[3], mossa, un_mondo(P, tree, mossa, i, base)
+    P, tree, chiave, valore, i, base = args
+    return i, chiave, un_mondo(P, tree, valore, i, base)
+
+
+def punteggio(r: dict, camp: str) -> float:
+    """1 vittoria, 0,5 patta, 0 altrimenti (dal posto del campione)."""
+    return 1.0 if r["vince"] == camp else 0.5 if r["vince"] == "DRAW" else 0.0
+
+
+def differenza_appaiata(a: list, b: list) -> tuple[float, float, float]:
+    """Media delle differenze per mondo a_i - b_i, con l'intervallo 95% (normale, errore standard delle differenze)."""
+    d = [x - y for x, y in zip(a, b)]
+    n = len(d)
+    m = sum(d) / n
+    if n < 2:
+        return m, float("nan"), float("nan")
+    h = 1.96 * math.sqrt(sum((x - m) ** 2 for x in d) / (n - 1) / n)
+    return m, m - h, m + h
 
 
 def continua(partita: dict, k: int, mosse: list, n: int = 100, processi: int = 1, out=print) -> dict:
-    """Per ogni mossa (sottostringa dell'etichetta nel menu di k) n continuazioni. Gli stessi n mondi per ogni mossa."""
+    """Per ogni linea di `mosse` n continuazioni. Una linea e' una etichetta (sottostringa dell'etichetta nel menu
+    di k: la prima mossa) o piu' etichette separate da " ; " (il posto del campione forzato come in `guidata`, poi il
+    campione). Gli stessi n mondi per ogni linea. Se la risposta dell'avversario toglie la mossa prevista, da quel
+    passo gioca il campione e il mondo conta: `deviati` e `passi_deviazione` (istogramma passo -> mondi) per linea;
+    `mondi` = l'esito di ogni mondo (per le differenze appaiate)."""
     P, e = posizione(partita, k)
     if e["point"] != "turn_action":
         raise ValueError(f"k={k} non è una decisione di turno ({e['point']})")
     camp = P["camp"]
     tree = albero(e["state_raw"])
     base = P["seed"] * 100_003 + k * 1_009
-    scelte = {}
-    for m in mosse:
-        j = Guida.cerca(m, e["menu"])
-        if j is None:
-            raise ValueError(f"mossa '{m}' non nel menu di k={k}: {e['menu']}")
-        simili = [x for x in e["menu"] if m.casefold() in x.casefold()]
-        scelte[m] = e["menu"][j]
-        out(f"mossa '{m}' -> '{e['menu'][j]}'" + (f" (altre {len(simili) - 1} voci la contengono: {simili[:4]})"
-                                                    if len(simili) > 1 and e["menu"][j].casefold() != m.casefold() else ""))
-    lavori = [(P, tree, scelte[m], i, base) for i in range(n) for m in mosse]
+    linee = {m: parse_linea(m) for m in mosse}
+    valori = {}                                      # chiave -> str (prima mossa) o lista (sequenza)
+    for m, lab in linee.items():
+        if not lab:
+            raise ValueError(f"linea vuota: '{m}'")
+        if len(lab) == 1:
+            j = Guida.cerca(lab[0], e["menu"])
+            if j is None:
+                raise ValueError(f"mossa '{m}' non nel menu di k={k}: {e['menu']}")
+            simili = [x for x in e["menu"] if lab[0].casefold() in x.casefold()]
+            valori[m] = e["menu"][j]
+            out(f"mossa '{m}' -> '{e['menu'][j]}'" + (f" (altre {len(simili) - 1} voci la contengono: {simili[:4]})"
+                                                    if len(simili) > 1 and e["menu"][j].casefold() != lab[0].casefold() else ""))
+        else:
+            valori[m] = lab
+            out(f"linea '{m}': {len(lab)} etichette")
     ris = {m: [] for m in mosse}
-    inv = {scelte[m]: m for m in mosse}
     t0 = time.time()
+    lavori = [(P, tree, m, valori[m], i, base) for i in range(n) for m in mosse]
 
     def prog(done):
         if done % (10 * len(mosse)) == 0 or done == len(lavori):
-            out(f"  {done // len(mosse)}/{n} mondi (x{len(mosse)} mosse), {time.time() - t0:.0f} s")
+            out(f"  {done // len(mosse)}/{n} mondi (x{len(mosse)} linee), {time.time() - t0:.0f} s")
     if processi > 1:
         import multiprocessing as mp
         with mp.get_context("spawn").Pool(processi) as pool:
-            for done, (_i, mossa, r) in enumerate(pool.imap_unordered(_lavora, lavori), 1):
-                ris[inv[mossa]].append(r)
+            for done, (_i, m, r) in enumerate(pool.imap_unordered(_lavora, lavori), 1):
+                ris[m].append(r)
                 prog(done)
     else:
         for done, a in enumerate(lavori, 1):
-            _i, mossa, r = _lavora(a)
-            ris[inv[mossa]].append(r)
+            _i, m, r = _lavora(a)
+            ris[m].append(r)
             prog(done)
     opp = "B" if camp == "A" else "A"
 
@@ -433,27 +530,37 @@ def continua(partita: dict, k: int, mosse: list, n: int = 100, processi: int = 1
         return r[key][0 if seat == "A" else 1]
     rep = {}
     for m in mosse:
-        rs = ris[m]
+        rs = sorted(ris[m], key=lambda r: r["mondo"])
+        nome = valori[m] if isinstance(valori[m], str) else m
+        dev: dict = {}
+        for r in rs:
+            if r.get("deviato"):
+                dev[r["deviato"]] = dev.get(r["deviato"], 0) + 1
         v = sum(1 for r in rs if r["vince"] == camp)
-        rep[m] = {"mossa": scelte[m], "n": len(rs), "vittorie": v, "patte": sum(1 for r in rs if r["vince"] == "DRAW"),
+        rep[m] = {"mossa": nome, "n": len(rs), "vittorie": v, "patte": sum(1 for r in rs if r["vince"] == "DRAW"),
                   "non_finite": sum(1 for r in rs if r["vince"] is None),
+                  "etichette": len(linee[m]),
+                  "consumate": (sum(r["passi"] for r in rs) / len(rs)) if len(linee[m]) > 1 else None,
+                  "deviati": sum(dev.values()), "passi_deviazione": dict(sorted(dev.items())),
                   "punti_turno": [sum(pt(r, "punti_turno", camp) for r in rs) / len(rs),
                                   sum(pt(r, "punti_turno", opp) for r in rs) / len(rs)],
                   "punti_fine": [sum(pt(r, "punti_fine", camp) for r in rs) / len(rs),
                                  sum(pt(r, "punti_fine", opp) for r in rs) / len(rs)],
-                  "turni": sum(r["turni"] for r in rs) / len(rs), "secondi": sum(r["secondi"] for r in rs) / len(rs)}
+                  "turni": sum(r["turni"] for r in rs) / len(rs), "secondi": sum(r["secondi"] for r in rs) / len(rs),
+                  "mondi": [{"mondo": r["mondo"], "seme": base + r["mondo"], "vince": r["vince"], "esito": punteggio(r, camp),
+                             "punti_turno": r["punti_turno"], "punti_fine": r["punti_fine"], "turni": r["turni"],
+                             "passi": r.get("passi"), "deviato": r.get("deviato")} for r in rs]}
     return {"partita": camp, "k": k, "turno": e["turn"], "base_seme": base, "n": n, "mosse": rep,
             "punti_iniziali": D.riassunto(e["state_raw"], camp)["punti"], "secondi": time.time() - t0}
 
 
 def testo_continua(res: dict) -> list[str]:
     camp = res["partita"]
-    righe = [f"continuazioni da k={res['k']} (turno {res['turno']}), campione = posto {camp}, n={res['n']} mondi per mossa "
-             f"(stessi mondi per tutte le mosse, mazzi rimescolati, seme di base {res['base_seme']}); "
+    righe = [f"continuazioni da k={res['k']} (turno {res['turno']}), campione = posto {camp}, n={res['n']} mondi per linea "
+             f"(stessi mondi per tutte le linee, mazzi rimescolati, seme di base {res['base_seme']}); "
              f"punti all'inizio: campione {res['punti_iniziali'][0]} - avversario {res['punti_iniziali'][1]}; "
              f"{res['secondi']:.0f} s"]
     mosse = res["mosse"]
-    migliore = max(mosse, key=lambda m: mosse[m]["vittorie"] / max(1, mosse[m]["n"]))
     for m, r in mosse.items():
         p, lo, hi = wilson(r["vittorie"], r["n"])
         righe.append(f"- {r['mossa']}: vittorie {r['vittorie']}/{r['n']} = {100 * p:.0f}% [{100 * lo:.0f}-{100 * hi:.0f}]; "
@@ -461,11 +568,20 @@ def testo_continua(res: dict) -> list[str]:
                      f"a fine partita {r['punti_fine'][0]:.2f} / {r['punti_fine'][1]:.2f}; durata media {r['turni']:.1f} turni"
                      + (f"; patte {r['patte']}" if r["patte"] else "") + (f"; non finite {r['non_finite']}" if r["non_finite"] else "")
                      + f"; {r['secondi']:.0f} s a partita")
+        if r["consumate"] is not None:
+            hist = ", ".join(f"passo {s}: {c}" for s, c in r["passi_deviazione"].items()) or "nessuno"
+            righe.append(f"    etichette consumate in media {r['consumate']:.2f}/{r['etichette']}; mondi deviati dalla linea "
+                         f"{r['deviati']}/{r['n']} (da lì gioca il campione); passo della deviazione: {hist}")
+    migliore = max(mosse, key=lambda m: mosse[m]["vittorie"] / max(1, mosse[m]["n"]))
     b = mosse[migliore]
-    righe.append(f"differenza rispetto alla migliore ({b['mossa']}), punti percentuali, intervallo 95% (Newcombe):")
-    for m, r in mosse.items():
-        if m == migliore:
-            continue
-        d, lo, hi = differenza(r["vittorie"], r["n"], b["vittorie"], b["n"])
-        righe.append(f"- {r['mossa']}: {100 * d:+.0f} [{100 * lo:+.0f}, {100 * hi:+.0f}]")
+    if len(mosse) > 1:
+        righe.append(f"differenza rispetto alla migliore ({b['mossa']}), punti percentuali: Newcombe (mondi indipendenti) e "
+                     f"appaiata sugli stessi mondi (vittoria 1, patta 0,5), intervalli 95%:")
+        for m, r in mosse.items():
+            if m == migliore:
+                continue
+            d, lo, hi = differenza(r["vittorie"], r["n"], b["vittorie"], b["n"])
+            dm, dl, dh = differenza_appaiata([w["esito"] for w in r["mondi"]], [w["esito"] for w in b["mondi"]])
+            righe.append(f"- {r['mossa']}: Newcombe {100 * d:+.0f} [{100 * lo:+.0f}, {100 * hi:+.0f}]; "
+                         f"appaiata {100 * dm:+.0f} [{100 * dl:+.0f}, {100 * dh:+.0f}]")
     return righe

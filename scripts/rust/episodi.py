@@ -123,7 +123,7 @@ def classifica_vex(seq: list) -> dict:
     turni: dict = {}
     for e in seq:
         turni.setdefault(e["turn"], []).append(e)
-    out = {"turni_vex": 0, "occasioni": [], "ordine_giusto": []}
+    out = {"turni_vex": 0, "occasioni": [], "ordine_giusto": [], "turni_scelta": {}}
     for t, ev in turni.items():
         if any(e["proprio"] and e["vex_bf"] > 0 for e in ev):
             out["turni_vex"] += 1
@@ -145,6 +145,21 @@ def classifica_vex(seq: list) -> dict:
                 tolta = (ta[-1] if ta else np_[-1] if np_ else prima[-1])["label"] if prima else None
             out["occasioni"].append({"turn": t, "k": e["k"], "label": e["label"], "proprio": e["proprio"],
                                      "esito": esito, "tolta": tolta})
+        # Turno "con scelta possibile": turno del campione con una Vex avversaria su un campo e, in una sua decisione di
+        # quel momento, un'unita' giocabile nel menu (`puo`, se manca: l'ha giocata). Una sola classe per turno.
+        if any(e["proprio"] and e["vex_bf"] > 0 and e.get("puo", e["gioca"]) for e in ev):
+            occ_t = [o for o in out["occasioni"] if o["turn"] == t and o["proprio"]]
+            if any(o["esito"] == "uccisa" for o in occ_t):
+                cl = "giocata_poi_uccisa"
+            elif ev[0]["proprio"] and ev[0]["vex_bf"] > 0 and not occ_prima and any(
+                    x["vex_tot"] < ev[0]["vex_tot"] for x in ev) and any(
+                    x["gioca"] for x in ev[next(j for j, x in enumerate(ev) if x["vex_tot"] < ev[0]["vex_tot"]):]):
+                cl = "uccisa_poi_giocata"
+            elif min(x["vex_tot"] for x in ev) >= ev[0]["vex_tot"]:
+                cl = "sopravvive"
+            else:
+                cl = "altro"           # la Vex sparisce senza che il campione giochi un'unita' prima o dopo
+            out["turni_scelta"][t] = cl
         if ev[0]["proprio"] and ev[0]["vex_bf"] > 0 and not occ_prima:
             j = next((j for j, x in enumerate(ev) if x["vex_tot"] < ev[0]["vex_tot"]), None)
             if j is not None:
@@ -167,7 +182,7 @@ def sequenza_vex(partita: dict, unita: set) -> list:
         bf = sum(1 for c in p["campi"] for n, _m in c["avversario"]["unita"] if n == VEX)
         base = sum(1 for n, _m in p["base"]["avversario"]["unita"] if n == VEX)
         seq.append({"turn": e["turn"], "proprio": p["attivo"] == seat, "vex_bf": bf, "vex_tot": bf + base,
-                    "gioca": gioca_unita(lab, unita), "label": lab, "point": e["point"], "k": k_di.get(i)})
+                    "gioca": gioca_unita(lab, unita), "puo": any(gioca_unita(m, unita) for m in e["menu"]), "label": lab, "point": e["point"], "k": k_di.get(i)})
     return seq
 
 
@@ -221,6 +236,12 @@ def stampa_vex(a, vex: dict, comando) -> None:
           f"(AMBUSH/reazione) {sum(1 for o in occ if not o['proprio'])}")
     print(f"    uccisa dopo (ordine sbagliato?): {len(kill)}   sopravvive: {len(surv)}   n.d.: {len(nd)}")
     print(f"  ordine giusto (Vex tolta prima, poi unita' giocata): {len(vex['giusto'])} turni")
+    sc = vex["scelta"]
+    print(f"  TURNI UNICI con scelta possibile (turno del campione, Vex avversaria su un campo, unita' giocabile nel menu): "
+          f"{sum(sc.values())}")
+    print(f"    giocata sotto la Vex, poi Vex uccisa: {sc.get('giocata_poi_uccisa', 0)}   "
+          f"Vex uccisa prima, poi giocata: {sc.get('uccisa_poi_giocata', 0)}   "
+          f"Vex sopravvissuta: {sc.get('sopravvive', 0)}   altro (Vex tolta senza giocare unita'): {sc.get('altro', 0)}")
     for titolo, lista in (("uccisa dopo", kill), ("sopravvive", [(P, o) for P, o in vex["occ"] if o["esito"] == "sopravvive"]),
                           ("ordine giusto", vex["giusto"])):
         print(f"  esempi {titolo}:")
@@ -244,12 +265,18 @@ def main(argv=None) -> int:
     ap.add_argument("--iterazioni", type=int, default=D.ITERAZIONI_CAMPIONE)
     ap.add_argument("--valutazione", default="storica", choices=["storica", "accumulo", "minaccia", "corsa", "rimonta"],
                     help="valutazione delle foglie del campione (default storica)")
+    ap.add_argument("--finestre", action="store_true",
+                    help="il campione gioca con le finestre (le simulazioni giocano reazioni e showdown con i piloti PPO), "
+                         "per confrontare i conteggi §9 con e senza")
     ap.add_argument("--k-acc", type=float, default=3.0)
     ap.add_argument("--alpha", type=float, default=0.2)
     a = ap.parse_args(argv)
     extra = {"valutazione": (a.valutazione, a.k_acc, a.alpha)} if a.valutazione != "storica" else {}
     val_orig = extra.get("valutazione")
-    print(f"valutazione: {a.valutazione}" + (f" k={a.k_acc} alpha={a.alpha}" if extra else ""))
+    if a.finestre:
+        extra["finestre"] = True
+    print(f"valutazione: {a.valutazione}" + (f" k={a.k_acc} alpha={a.alpha}" if val_orig else "")
+          + (" + finestre" if a.finestre else ""))
     might = carte_might()
     print("carte che aumentano la Might:", ", ".join(sorted(might)))
     t0 = time.time()
@@ -257,7 +284,7 @@ def main(argv=None) -> int:
     den_race, ep_race = {-1: 0, 0: 0, 1: 0}, {-1: 0, 0: 0, 1: 0}
     per_partita: dict = {}
     unita = nomi_unita()
-    vex = {"partite": 0, "turni": 0, "occ": [], "giusto": []}
+    vex = {"partite": 0, "turni": 0, "occ": [], "giusto": [], "scelta": {}}
     for seed in D.semi(a.semi):
         for seat in a.posti:
             P = D.autonoma(a.matchup, seed, a.ckpt, a.pesi_casuali, a.iterazioni, seat, **extra)
@@ -268,6 +295,8 @@ def main(argv=None) -> int:
             vex["turni"] += v9["turni_vex"]
             vex["occ"] += [(P, o) for o in v9["occasioni"]]
             vex["giusto"] += [(P, o) for o in v9["ordine_giusto"]]
+            for cl in v9["turni_scelta"].values():
+                vex["scelta"][cl] = vex["scelta"].get(cl, 0) + 1
             for r_, c_ in stati.items():
                 den_race[r_] += c_
             esaminate += n
@@ -300,6 +329,8 @@ def main(argv=None) -> int:
             cmd += f" --iter-orig {a.iterazioni}"
         if val_orig:  # la partita originale ha giocato con questa valutazione: il prefisso si riproduce solo con lei
             cmd += f" --valutazione-orig {val_orig[0]}:{val_orig[1]}:{val_orig[2]}"
+        if a.finestre:
+            cmd += " --finestre-orig"
         return cmd
 
     stampa_vex(a, vex, comando)

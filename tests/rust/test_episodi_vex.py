@@ -15,9 +15,12 @@ import episodi  # noqa: E402
 UNITA = {"Fizz Trickster", "Vi Peacekeeper", "Sett Kingpin"}
 
 
-def ev(turn, label, vex_bf, vex_tot=None, point="turn_action", k=0, proprio=True):
-    return {"turn": turn, "proprio": proprio, "vex_bf": vex_bf, "vex_tot": vex_bf if vex_tot is None else vex_tot,
-            "gioca": episodi.gioca_unita(label, UNITA), "label": label, "point": point, "k": k}
+def ev(turn, label, vex_bf, vex_tot=None, point="turn_action", k=0, proprio=True, puo=None):
+    e = {"turn": turn, "proprio": proprio, "vex_bf": vex_bf, "vex_tot": vex_bf if vex_tot is None else vex_tot,
+         "gioca": episodi.gioca_unita(label, UNITA), "label": label, "point": point, "k": k}
+    if puo is not None:
+        e["puo"] = puo
+    return e
 
 
 def test_etichette_che_giocano_unita():
@@ -55,7 +58,7 @@ def test_ordine_giusto_e_non_osservabile():
 
 def test_senza_vex_o_giocata_prima_non_e_ordine_giusto():
     r = episodi.classifica_vex([ev(2, "Play Fizz Trickster", 0), ev(2, "Pass", 0)])
-    assert r == {"turni_vex": 0, "occasioni": [], "ordine_giusto": []}
+    assert r == {"turni_vex": 0, "occasioni": [], "ordine_giusto": [], "turni_scelta": {}}
     r = episodi.classifica_vex([ev(4, "Play Fizz Trickster", 1), ev(4, "Pass", 0), ev(4, "Play Vi Peacekeeper", 0)])
     assert len(r["occasioni"]) == 1 and r["ordine_giusto"] == []
 
@@ -64,3 +67,14 @@ def test_reazione_in_turno_avversario_e_sonda():
     r = episodi.classifica_vex([ev(6, "AMBUSH Vi Peacekeeper @BF0", 1, proprio=False, point="showdown_action", k=None),
                                 ev(6, "Pass", 1, proprio=False, point="showdown_action", k=None)])
     assert r["turni_vex"] == 0 and r["occasioni"][0]["proprio"] is False and r["occasioni"][0]["k"] is None
+
+
+def test_turni_unici_con_scelta_possibile():
+    r = episodi.classifica_vex([
+        ev(5, "Play Fizz Trickster to BF0", 1, k=1), ev(5, "Pass", 0, k=2),               # giocata sotto, poi uccisa
+        ev(8, "Cast Rampage @BF0", 1, k=3, puo=True), ev(8, "Pass", 0, point="showdown_action", k=4),
+        ev(8, "Play Fizz Trickster", 0, k=5, puo=True),                                    # uccisa prima, poi giocata
+        ev(10, "Pass", 1, k=6, puo=True), ev(10, "Pass", 1, k=7),                          # poteva giocare: la Vex resta
+        ev(12, "Pass", 1, k=8, puo=False),                                                 # nessuna unita' giocabile: no
+        ev(14, "Play Vi Peacekeeper", 1, k=9, proprio=False), ev(14, "Pass", 1, k=10, proprio=False)])  # turno avversario
+    assert r["turni_scelta"] == {5: "giocata_poi_uccisa", 8: "uccisa_poi_giocata", 10: "sopravvive"}
