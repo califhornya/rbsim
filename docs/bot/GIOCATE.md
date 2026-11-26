@@ -316,3 +316,16 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
   - Pagina 154531 T13: riferimento scelto; pagina 201243 T4: indeciso (+1 [-11,9; +13,9]).
   - 9 posizioni su 12 saltate (carte in cima al mazzo note o carte di mano note): ora i mondi tengono quelle carte
     come `determinize`. Da rifare la serie: `scripts/rust/attacco_serie_mac.command` (24 posizioni, riga «totale»).
+- **Quinto giro (26/11, Mac, `docs/bot/esperimenti/attacco_20261126_1352_serie/`).** 24 posizioni (5 della pagina,
+  ES ed EK autonome; 12 con un punto libero). Riferimento scelto 14, indeciso 5, attacco migliore (mai costruita) 5:
+  ES3B T5 +43 [+32,5; +53,5], ES4A T9 +28 [+13,5; +42,5], ES5B T7 +33 [+20,5; +45,5], ES6A T3 +30 [+18,7; +41,3],
+  EK7B T9 +35 [+24,8; +45,2].
+  - I 5 attacchi sono un'ondata sola, senza gear, e usano tutti lo showdown (AMBUSH di Vi o Rengar, Switcheroo,
+    Call to Glory, Hold 'Em). La prima mossa ha 0-1 visite su 138. La valutazione del campione a fine turno concorda
+    in 5 su 5 (dopo il turno avversario 4 su 5): il difetto è la costruzione, non la valutazione. Senza le finestre
+    la ricerca non vede lo showdown, e lo spostamento da solo sembra cattivo (come Kinkou al T9).
+  - In ES3B e ES5B (e ES9B, indeciso) il campione sposta la stessa unità sull'altro campo: punto libero invece
+    dell'attacco. Nessun «costruita ma valutata male» col criterio della prima mossa: il T9 resta l'unico caso di
+    valutazione sbagliata (tutte le proposte sotto Valley a fine turno).
+  - «Riferimento scelto» non è verificato (si verifica solo la proposta scelta); 8 su 14 sono posizioni già decise
+    (16 su 16 o 0 su 16 nei mondi di scelta). Domande ad Astra date a Matteo (fuori dal repo).
