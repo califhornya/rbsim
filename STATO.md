@@ -66,9 +66,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## In corso
 §8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`,
 spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607. Bocciati `accumulo`, `minaccia`/`corsa`.
-Matteo: partita Evelynn-Sett 013325 (`rimonta`, D72-D81, quasi certamente la prima delle due) vinta 8 a 4 in 14; alla
-domanda §8 nessuna giocata di Sett l'ha messo in difficoltà (GIOCATE §8). Manca la seconda. Da fare: i 13 episodi umani
-ricontrollati su D80 (Astra).
+Matteo: Evelynn-Sett 013325 (`rimonta`, D72-D81) vinta 8 a 4 in 14; risposta §8: nessuna difficoltà (GIOCATE §8).
+Manca la seconda partita. Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
 §9 (GIOCATE, segnalazione 28): il campione gioca Vi con Vex vivo e lo toglie dopo; nelle simulazioni nessuno giocava le
 finestre di reazione e showdown (copie senza agenti). Astra (26/11, risposte fuori dal repo): migliorare la ricerca, `rimonta`
 resta il campione; esperimento sul T9 di 013325 (k=10): finestre on/off × quota on/off sugli stessi mondi, linea di Matteo
@@ -79,8 +78,7 @@ Fatto (spento di default, storico 80/80): `finestre` (piloti PPO nelle simulazio
 ## Prossimi passi
 1. Leggere `docs/bot/esperimenti/` (T9, Vex ES/EK): se le finestre trovano la linea da sole → arena; solo con la quota → esplorazione in allenamento.
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
-3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
-4. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
+3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo. Fili del 23/11 (mulligan, Switcheroo, GIOCATE §6).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
