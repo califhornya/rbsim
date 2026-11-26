@@ -118,10 +118,14 @@ def main() -> None:
                         help=f"valutazione delle foglie del {lato} (solo --motore rust; default storica = invariato)")
         ap.add_argument(f"--k-{lato[0]}", type=float, default=3.0, help=f"k dell'accumulo del {lato}")
         ap.add_argument(f"--alpha-{lato[0]}", type=float, default=0.2, help=f"alpha dell'accumulo del {lato}")
+    for lato in ("candidato", "avversario"):
+        ap.add_argument(f"--valore-rete-{lato}", type=float, default=0.0, metavar="PESO",
+                        help=f"peso 0..1 del valore della rete nelle foglie del {lato} (solo --motore rust, con i prior PPO): "
+                             "foglia = (1 - peso) x valutazione a mano + peso x valore della rete; default 0 = spento, ricerca invariata")
     ap.add_argument("--avversario-mano", action="store_true",
                     help="l'avversario è il bot a mano senza prior (solo --motore rust; senza --ckpt-avversario)")
     ap.add_argument("--regole", choices=REGOLE, default=REGOLE_PYTHON,
-                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato), 6427b90+D72-D76, 6427b90+D72-D77, 6427b90+D72-D80 6427b90+D72-D81 o 6427b90+D72-D82 "
+                    help="il profilo delle regole: 6427b90 (lo storico, Python congelato), 6427b90+D72-D76, 6427b90+D72-D77, 6427b90+D72-D80 6427b90+D72-D81 6427b90+D72-D82 o 6427b90+D72-D83 "
                          "(Rust con D72-D76/D77 corretti: serve --motore rust e tutti i matchup su Rust)")
     ap.add_argument("--motore", choices=("python", "rust"), default="python",
                     help="rust: i matchup coperti dal motore Rust (arena_rs.COPERTI: i cinque mazzi fra loro, riconosciuti dal contenuto delle "
@@ -130,12 +134,13 @@ def main() -> None:
     nuove = {"iter_cand": args.iterazioni_candidato, "iter_opp": args.iterazioni_avversario,
              "probe_cand": args.win_probe_candidato or None, "probe_opp": args.win_probe_avversario or None,
              "fin_cand": args.finestre_candidato or None, "fin_opp": args.finestre_avversario or None}
+    nuove["vr_cand"], nuove["vr_opp"] = args.valore_rete_candidato or None, args.valore_rete_avversario or None
     for lato, chiave in (("c", "val_cand"), ("a", "val_opp")):
         if getattr(args, f"valutazione_{lato}") != "storica":
             nuove[chiave] = [getattr(args, f"valutazione_{lato}"), getattr(args, f"k_{lato}"), getattr(args, f"alpha_{lato}")]
     opz = {k: v for k, v in nuove.items() if v} or None
     if (opz or args.avversario_mano) and args.motore != "rust":
-        ap.error("--iterazioni-*, --win-probe-*, --finestre-* e --avversario-mano valgono solo con --motore rust")
+        ap.error("--iterazioni-*, --win-probe-*, --finestre-*, --valore-rete-* e --avversario-mano valgono solo con --motore rust")
     if args.avversario_mano == (args.ckpt_avversario is not None):
         ap.error("l'avversario è o --ckpt-avversario o --avversario-mano (uno solo)")
     from riftbound.ai.ppo.collect import DECK_NAME

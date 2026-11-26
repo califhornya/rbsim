@@ -79,6 +79,8 @@ pub struct Game {
     /// it can (then the preference is spent). None, the default: the engine's
     /// own way, bit for bit.
     pub recycle_first: Option<(Side, Domain)>,
+    /// D83: the domain the Gold activated for a cost inside an effect Adds (None: it asks / the default).
+    pub gold_domain: Option<Domain>,
     /// Where the chain's priority loop was when an agent was last asked: (side asked, passes in a
     /// row). Not game state (never dumped): a search started inside a window resumes from it.
     pub win_chain: Option<(Side, i32)>,
@@ -157,6 +159,7 @@ impl Game {
             discard_sides: Vec::new(),
             trigger_menu: Vec::new(),
             recycle_first: None,
+            gold_domain: None,
             win_chain: None,
             win_show: None,
         }

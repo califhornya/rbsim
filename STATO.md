@@ -36,12 +36,17 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
   (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
+- (26/11, Matteo e Astra) Filone principale: riallenare la rete con la ricerca (visite N/ΣN e esito ±1), --init da
+  ckpt_040000 (che resta l'avversario fisso), stessa architettura. Pilota: 2.000 partite (200 per matchup, D72-D82),
+  Dirichlet 0,25/α 0,3 alle radici di turno, temperatura 1 sulle prime 4 decisioni di turno, poi la più visitata;
+  valore: prima raccolta con rimonta, poi in sviluppo 80/20 rimonta/valore (rimonta sul Pass che chiude il turno).
+  Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
+  Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
 - (26/11, Astra) Attacchi con lo showdown: sonda a un'ondata (A) dietro interruttore, soglia +0,15, generatore e
   budget congelati sulle 24; B (finestre + quota) solo confronto economico; pagina solo dopo fuori campione e arena.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
-
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
   in Rust verificata sul Mac; 24/11 bot Rust a 0,030 s contro Python a 0,400 s: 0,4938 (lim. inf. 0,478): **PROMOSSO**.
@@ -54,34 +59,29 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25/11 pagina su Rust (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"): posto umano nel ponte
   (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
   rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
-- 25/11 apertura nella pagina: campo/d20/chi comincia su entrambi i motori; `riftbound/ai/apertura.py` provvisorio.
 - 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
-  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali).
-  Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Le partite salvate registrano le iterazioni vere.
+  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-§8 chiuso (26/11, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`); bocciati `accumulo`, `minaccia`.
-§9 (GIOCATE, segn. 28): gioca sotto Vex e lo toglie dopo; finestre: arena NON PASSA (ES 0,474, EK 0,531). T9 (Astra):
-attaccare Bandle vince 30-38/100 contro 7-8 di Valley. Serie di 24 (`attacco_20261126_1352_serie/`): 5 attacchi
-migliori (+28/+43 pp), mai costruiti, un'ondata con AMBUSH o magia nello showdown; sonda di fine turno +0,15: 5 veri, 0 falsi.
-(26/11) Sonda A, prototipo offline (`riftbound/rs/sonda.py`, `attacco.py sonda|congela|fuori|t9-foglia`): sui dati
-salvati sceglie l'attacco in 6 su 24 (i 5 veri + EK4A T15 neutro). Da lanciare: `scripts/rust/sonda_mac.command`
-(congela con identità, 72 posizioni nuove ES/EK + R/I, T9 foglia contro vittorie), ~1 h.
-(26/11, Matteo) Serie «stesso seme»: Matteo gioca una partita col seme 680137721 (`coach.py --seme`), poi
-`scripts/rust/stesso_seme_mac.command` fino alla prima vittoria di Sett nella simulazione (X=500), Evelynn automatica
-dal T1 (il passaggio segui-Matteo-poi-pilota a metà finestra non c'è: serve un agente composto in Rust). Con la rete
-casuale il seme di Sett cambia le simulazioni ma non le mosse: il riepilogo conta le partite distinte.
+§8-§9 (GIOCATE): `rimonta` default della pagina; finestre bocciate in arena. Serie di 24 (`attacco_20261126_1352_serie/`):
+5 attacchi migliori (+28/+43 pp) mai costruiti. Sonda A offline (`riftbound/rs/sonda.py`, `attacco.py
+sonda|congela|fuori|t9-foglia`, `scripts/rust/sonda_mac.command`): sui dati salvati attacco in 6 su 24; ora diagnosi.
+(26/11) 155859 (seme 680137721) vinta da Matteo 8 a 4; segnalazioni 29-35 (35: candidato D83, costo di un modo senza
+"Come paghi?", niente Gold). «Stesso seme» (`stesso_seme_20261126_1614/`): rifacimento IDENTICO; Sett 0 su 500 contro
+Evelynn automatica, solo 6 partite distinte (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Risultati di `sonda_mac` -> Astra; se passa fuori campione: sonda nel bot dietro interruttore (agente con consegna
-   a fine piano), arena a posti scambiati per matchup con limiti di regressione fissati prima, tempo per decisione (p95).
-2. Partita di Matteo col seme e `stesso_seme_mac`; poi, se serve, l'agente composto (segue Matteo, poi pilota).
-3. §7 (showdown 6 a 2); `win_probe` in arena; apertura G1; Bo3 col post-side; fili del 23/11.
+1. In corso: raccolta pilota (Rust + `raccolta.py`); «primo responso» (prior/visite/Q a 138 e 512); D83 riprodotto
+   (se confermato, correzione prima della raccolta grande).
+2. Scritti e provati con pesi casuali (26/11): allenamento, `peso_valore_rete` (spento = identica), `generazione_mac.command`.
+   Da lanciare sul Mac col checkpoint.
+3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
-- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO, `search_py.rs` prior).
+- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
+  Riallenamento: `riftbound/rs/{raccolta,allena,generazione}.py`, `scripts/rust/` omonimi, `generazione_mac.command`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,

@@ -740,7 +740,13 @@ impl Game {
             }
         };
         let opts: Vec<Opt> = Domain::ALL.iter().map(|&d| Opt::Domain(d)).collect();
-        let Opt::Domain(d) = self.choose(&kind("domain", spec), player, &opts, Opt::Domain(domain), Some(ctx.card))? else { unreachable!() };
+        let d = match self.gold_domain {
+            Some(d) => d, // D83: the domain the cost inside an effect needs
+            None => {
+                let Opt::Domain(d) = self.choose(&kind("domain", spec), player, &opts, Opt::Domain(domain), Some(ctx.card))? else { unreachable!() };
+                d
+            }
+        };
         self.gs.player_mut(player).add_power(d, amount);
         if self.gs.name(ctx.card) == "Gold" && self.gold_bonus(player) {
             self.gs.player_mut(player).add_energy(1);

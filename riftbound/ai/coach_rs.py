@@ -1,7 +1,7 @@
 """The coach page on the Rust engine (25/11, phase 4).
 
 `CoachSession.new_game` plays on Rust, with the rules profile `regole` (default
-6427b90+D72-D82), a game between two lists the Rust engine covers
+6427b90+D72-D83), a game between two lists the Rust engine covers
 (`arena_rs.COPERTI`) against the champion ("campione") or "simple_trade"; the net's
 advice and "La rete" stay on Python (6427b90, the frozen engine). The page is the
 same: it reads the same JSON (`CoachSession.state()`).
@@ -278,6 +278,11 @@ class RustGame:
             got = self._sett_save(e, source)
             if got is not None:
                 return got
+        if kind == "payment:effect":                       # D83: a cost inside an effect, runes or Gold
+            name = getattr(source, "name", None)
+            texts = ["Con le rune"] + [f"Con {o.split(':')[1]} Gold" for o in options[1:]]
+            pick = s.ask_choice(kind, side, [{"text": t, "ref": None} for t in texts], 0, name)
+            return pick if 0 <= pick < len(raw) else default
         described = [{"text": C.option_text(gs, side, o), "ref": C.option_ref(gs, side, o)} for o in options]
         # Options the page can't tell apart are one (CoachAgent's _CoachChooser).
         keys = [(d["text"], d["ref"]) for d in described]

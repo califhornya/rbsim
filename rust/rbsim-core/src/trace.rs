@@ -66,7 +66,7 @@ pub fn decision_event_for(g: &mut Game, side: Side, point: Point) -> R<(Value, V
 
 fn add_correzioni(g: &Game, e: &mut Value) {
     if g.gs.reg.regole.corrette() {
-        // D72..D82 counted so far in this thread, the decision's search included.
+        // D72..D83 counted so far in this thread, the decision's search included.
         e["correzioni"] = json!(crate::registry::correzioni());
     }
 }

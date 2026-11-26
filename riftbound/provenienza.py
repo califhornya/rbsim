@@ -3,7 +3,7 @@
 Ogni run di training o d'arena registra con che cosa è stata giocata:
 - `regole`: il profilo delle regole scelto (`--regole`, RBSIM_REGOLE): lo
   storico 6427b90 (il motore Python congelato), 6427b90+D72-D76 (Rust con
-  D72-D76 corretti), 6427b90+D72-D77 (come questo, con D77), 6427b90+D72-D80 (come questo, con D78-D80) 6427b90+D72-D81 (come questo, con D81) o 6427b90+D72-D82 (come questo, con D82; docs/audit/AUDIT.md); `regole_partite` quello che gioca
+  D72-D76 corretti), 6427b90+D72-D77 (come questo, con D77), 6427b90+D72-D80 (come questo, con D78-D80) 6427b90+D72-D81 (come questo, con D81) 6427b90+D72-D82 (come questo, con D82) o 6427b90+D72-D83 (come questo, con D83; docs/audit/AUDIT.md); `regole_partite` quello che gioca
   davvero ciascun matchup (su Python sempre lo storico);
 - `agente_ppo`: la versione dell'agente PPO (PPOAgent.inner col contesto
   `made` legato agli oggetti, fix f8a50e4);
@@ -36,7 +36,8 @@ REGOLE_D72_D77 = "6427b90+D72-D77"
 REGOLE_D72_D80 = "6427b90+D72-D80"
 REGOLE_D72_D81 = "6427b90+D72-D81"
 REGOLE_D72_D82 = "6427b90+D72-D82"
-REGOLE = (REGOLE_PYTHON, REGOLE_D72_D76, REGOLE_D72_D77, REGOLE_D72_D80, REGOLE_D72_D81, REGOLE_D72_D82)
+REGOLE_D72_D83 = "6427b90+D72-D83"
+REGOLE = (REGOLE_PYTHON, REGOLE_D72_D76, REGOLE_D72_D77, REGOLE_D72_D80, REGOLE_D72_D81, REGOLE_D72_D82, REGOLE_D72_D83)
 
 
 def regole_scelte() -> str:
@@ -55,6 +56,18 @@ AGENTE_PPO = "f8a50e4"
 
 _REGISTRO_PY = (ROOT / "riftbound/data/cards/all_cards.json", ROOT / "riftbound/registry/cards_registry.py")
 _REGISTRO_RS = ROOT / "rust/data/registry.json"
+
+
+def checkpoint_sha256(path) -> str:
+    with Path(path).open("rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest()
+
+
+def scrivi_json_atomico(path: Path, dati: dict) -> None:
+    # Il chiamante detiene il lock della run.
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(dati, indent=1))
+    tmp.replace(path)
 
 
 def file_sha(path) -> Optional[str]:

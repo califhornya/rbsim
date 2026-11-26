@@ -1003,6 +1003,7 @@ dependencies = [
 
 [package.optional-dependencies]
 rl = [
+    { name = "filelock" },
     { name = "torch" },
 ]
 
@@ -1014,6 +1015,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.103.1" },
+    { name = "filelock", marker = "extra == 'rl'" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pydantic", specifier = ">=2.8.2" },
     { name = "sqlalchemy", specifier = ">=2.0.35" },

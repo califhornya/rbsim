@@ -56,7 +56,7 @@ struct Registry {
 #[pymethods]
 impl Registry {
     /// `regole`: the rules profile ("6427b90", the default, or
-    /// "6427b90+D72-D76", "6427b90+D72-D77", "6427b90+D72-D80", "6427b90+D72-D81" or "6427b90+D72-D82"); every game built on this registry plays it.
+    /// "6427b90+D72-D76", "6427b90+D72-D77", "6427b90+D72-D80", "6427b90+D72-D81", "6427b90+D72-D82" or "6427b90+D72-D83"); every game built on this registry plays it.
     #[new]
     #[pyo3(signature = (path, regole=None))]
     fn new(path: &str, regole: Option<&str>) -> PyResult<Self> {
@@ -487,6 +487,157 @@ impl Game {
         }
     }
 
+    /// Option `esplorazione` (default off; only for collecting games): at the turn search's root Dirichlet(alfa)
+    /// noise with weight eps (two or more distinct actions), and the seat's first `mosse` searched turn
+    /// decisions sampled in proportion to the visits; the other searched decisions play the most visited.
+    fn set_search_esplorazione(&mut self, seat: &str, alfa: f64, eps: f64, mosse: usize) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().esplorazione = Some(rbsim_core::search::Esplorazione { alfa, eps, mosse });
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// Option `peso_valore_rete` (default 0 = off, identical search): the leaf value of a node evaluated with the
+    /// net is (1 - peso) * hand-written value + peso * the net's value, both from the searching seat. Needs the
+    /// prior's function to return (probs, value) (`arena_rs.make_probs_valore`).
+    fn set_search_valore_rete(&mut self, seat: &str, peso: f64) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().peso_valore_rete = peso;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// (net forward calls, of which only for the value) of a search seat: the extra calls of `peso_valore_rete`.
+    fn search_valore_rete_stats(&self, seat: &str) -> PyResult<(i64, i64)> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => (c.borrow().chiamate_rete, c.borrow().chiamate_solo_valore),
+            None => (0, 0),
+        })
+    }
+
+    /// Option `registro` (default off): one record per decision of the seat, see `search_registro`.
+    fn set_search_registro(&mut self, seat: &str, on: bool) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().registro = on;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// The records of a search seat since the last call (the list is emptied): dicts with kind ("cercata",
+    /// "forzata", "sonda", "prima"), seat, turn, point, menu (labels), giocata (index in the menu, -1 if none).
+    /// "cercata" also: azioni (JSON text, `action_list` of each entry), P, P_rumore (or None), N, Q (nan when
+    /// not visited), iters, campionata, and, with a net, x, q, ctx, otype, ocards, ofeats (the root's inputs).
+    fn search_registro<'py>(&self, py: Python<'py>, seat: &str) -> PyResult<Vec<Bound<'py, pyo3::types::PyDict>>> {
+        use numpy::{PyArray1, PyArrayMethods};
+        use pyo3::types::PyDict;
+        let s = seat_of(seat)?;
+        let Some(c) = &self.search[s.idx()] else { return Ok(Vec::new()) };
+        let recs = std::mem::take(&mut c.borrow_mut().records);
+        let mut out = Vec::with_capacity(recs.len());
+        for r in recs {
+            let d = PyDict::new(py);
+            d.set_item("kind", r.kind)?;
+            d.set_item("seat", seat)?;
+            d.set_item("turn", r.turn)?;
+            d.set_item("point", r.point)?;
+            d.set_item("menu", r.menu)?;
+            d.set_item("giocata", r.giocata)?;
+            if r.kind == "cercata" {
+                let f32s = |v: &[f64]| PyArray1::from_vec(py, v.iter().map(|x| *x as f32).collect::<Vec<f32>>());
+                d.set_item("azioni", serde_json::Value::Array(r.azioni).to_string())?;
+                d.set_item("P", f32s(&r.p))?;
+                d.set_item("P_rumore", r.p_rumore.as_ref().map(|v| f32s(v)))?;
+                d.set_item("N", PyArray1::from_vec(py, r.n.iter().map(|x| *x as i32).collect::<Vec<i32>>()))?;
+                d.set_item("Q", f32s(&r.q))?;
+                d.set_item("iters", r.iters)?;
+                d.set_item("campionata", r.campionata)?;
+                if let Some(i) = r.input {
+                    use rbsim_core::features as F;
+                    let n = i.descs.len();
+                    d.set_item("x", PyArray1::from_vec(py, i.x))?;
+                    d.set_item("q", i.q)?;
+                    d.set_item("ctx", PyArray1::from_vec(py, i.ctx.to_vec()))?;
+                    d.set_item("otype", PyArray1::from_vec(py, i.descs.iter().map(|x| x.type_).collect::<Vec<i64>>()))?;
+                    d.set_item("ocards", PyArray1::from_vec(py, i.descs.iter().flat_map(|x| x.cards).collect::<Vec<i64>>())
+                        .reshape([n, 3])?)?;
+                    d.set_item("ofeats", PyArray1::from_vec(py, i.descs.iter().flat_map(|x| x.feats.iter().copied()).collect::<Vec<f32>>())
+                        .reshape([n, F::F_OPT])?)?;
+                }
+            }
+            out.push(d);
+        }
+        Ok(out)
+    }
+
+    /// The value net's inputs for the current state from `seat`'s point of view, as `evaluate` builds them for
+    /// a turn question with an empty menu: (x, q, ctx). Reads a copy: the game is not touched.
+    fn osserva<'py>(&self, py: Python<'py>, seat: &str)
+        -> PyResult<(Bound<'py, numpy::PyArray1<f32>>, i64, Bound<'py, numpy::PyArray1<f32>>)> {
+        use rbsim_core::features as F;
+        let s = seat_of(seat)?;
+        let mut gs = self.g.gs.clone();
+        let obs = rbsim_core::obs::Observation::from_state(&mut gs, s);
+        let x = rbsim_core::obs::encode_observation(&obs, &gs.reg);
+        let ctx = F::context(0, 0, false, false);
+        Ok((numpy::PyArray1::from_vec(py, x), F::question_of("main"), numpy::PyArray1::from_vec(py, ctx.to_vec())))
+    }
+
+    /// GameLoop._setup (the mulligans included), the first half of `start()` for a game played turn by turn.
+    fn setup(&mut self) -> PyResult<()> {
+        drop(human::take());
+        let r = self.g.setup();
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        r.map_err(perr)
+    }
+
+    /// One turn of `start()`'s loop (beginning, actions, end), after `setup()`. -> (winner "A" | "B" | "DRAW",
+    /// turns) when the game is over, else None. The loop of `start()` split: the same game.
+    fn play_turn(&mut self) -> PyResult<Option<(String, i64)>> {
+        drop(human::take());
+        let r = (|| -> Result<Option<rbsim_core::lp_main::GameResult>, EngineError> {
+            if self.g.gs.turn > self.g.gs.max_turns {
+                return Ok(Some(rbsim_core::lp_main::GameResult { winner: None, turns: self.g.gs.turn - 1,
+                    units_played: self.g.units_played, spells_cast: self.g.spells_cast }));
+            }
+            if let Some(r) = self.g.begin_turn()? {
+                return Ok(Some(r));
+            }
+            if let Some(r) = self.g.run_main_actions()? {
+                return Ok(Some(r));
+            }
+            self.g.end_turn()
+        })();
+        let d = match &self.sink {
+            Some(s) => self.g.drain_rng(s),
+            None => Ok(()),
+        };
+        if let Some(e) = human::take() {
+            return Err(e);
+        }
+        let r = r.map_err(perr)?;
+        d.map_err(perr)?;
+        Ok(r.map(|r| {
+            self.winner = Some(r.winner_name().to_string());
+            self.turns = r.turns;
+            (r.winner_name().to_string(), r.turns)
+        }))
+    }
+
     /// A search seat's rows (JSON list), [] for another seat.
     fn search_log(&self, seat: &str) -> PyResult<String> {
         let s = seat_of(seat)?;
@@ -722,7 +873,7 @@ impl Game {
 #[pyfunction]
 fn correzioni() -> std::collections::BTreeMap<String, u64> {
     let c = rbsim_core::registry::correzioni();
-    (0..11).map(|i| (format!("D{}", 72 + i), c[i])).collect()
+    (0..12).map(|i| (format!("D{}", 72 + i), c[i])).collect()
 }
 
 #[pyfunction]

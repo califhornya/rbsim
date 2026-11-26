@@ -14,23 +14,39 @@ pub struct PyPrior {
     pub probs: Py<PyAny>,
 }
 
-impl Prior for PyPrior {
-    fn probs(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<Vec<f32>> {
+impl PyPrior {
+    fn chiama(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor])
+              -> R<(Vec<f32>, Option<f32>)> {
         let n = descs.len();
         let otype: Vec<i64> = descs.iter().map(|d| d.type_).collect();
         let ocards: Vec<i64> = descs.iter().flat_map(|d| d.cards).collect();
         let ofeats: Vec<f32> = descs.iter().flat_map(|d| d.feats.iter().copied()).collect();
-        Python::attach(|py| -> PyResult<Vec<f32>> {
+        Python::attach(|py| -> PyResult<(Vec<f32>, Option<f32>)> {
             let x = PyArray1::from_vec(py, x);
             let c = PyArray1::from_vec(py, ctx.to_vec());
             let otype = PyArray1::from_vec(py, otype);
             let ocards = PyArray1::from_vec(py, ocards).reshape([n, 3])?;
             let ofeats = PyArray1::from_vec(py, ofeats).reshape([n, F::F_OPT])?;
             let out = self.probs.bind(py).call1((x, q, c, otype, ocards, ofeats))?;
+            // Two formats: the softmax array alone (make_probs) or (array, value) (make_probs_valore).
+            if let Ok((arr, v)) = out.extract::<(PyReadonlyArray1<f32>, f64)>() {
+                return Ok((arr.as_slice()?.to_vec(), Some(v as f32)));
+            }
             let arr: PyReadonlyArray1<f32> = out.extract()?;
-            Ok(arr.as_slice()?.to_vec())
+            Ok((arr.as_slice()?.to_vec(), None))
         })
         .map_err(|e| EngineError::Py(format!("prior: {e}")))
+    }
+}
+
+impl Prior for PyPrior {
+    /// py: probs(x, q, ctx, otype, ocards, ofeats) -> float32 array (softmax over the menu), or the pair
+    /// (array, value of the net from the deciding seat).
+    fn probs(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<Vec<f32>> {
+        Ok(self.chiama(x, q, ctx, descs)?.0)
+    }
+    fn eval(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<(Vec<f32>, Option<f32>)> {
+        self.chiama(x, q, ctx, descs)
     }
 }
 

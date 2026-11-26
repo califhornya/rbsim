@@ -250,6 +250,12 @@ pub trait Lockstep {
 
 pub trait Prior {
     fn probs(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<Vec<f32>>;
+    /// The probabilities and, when the caller's function gives it, the net's value of the state. The value is
+    /// seen from the seat of the observation `x` encodes (the one who decides: PPONet's critic, trained on the
+    /// outcome of the observed seat), the same point of view as `table_value`. Default: no value.
+    fn eval(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<(Vec<f32>, Option<f32>)> {
+        Ok((self.probs(x, q, ctx, descs)?, None))
+    }
 }
 
 // -------------------------------------------------------- determinize ---
@@ -1053,6 +1059,66 @@ pub fn process_time() -> f64 {
 }
 
 /// The state of a search agent (py: NetGuidedMCTSAgent's attributes).
+/// Option `esplorazione` (default off, only for collecting games): Dirichlet noise at the turn
+/// search's root, and the first `mosse` searched turn decisions of the seat sampled by visits.
+#[derive(Clone, Copy, Debug)]
+pub struct Esplorazione {
+    pub alfa: f64,
+    pub eps: f64,
+    pub mosse: usize,
+}
+
+/// What `evaluate` gave the net for a root: the inputs of a training example.
+#[derive(Clone, Debug)]
+pub struct RootIn {
+    pub x: Vec<f32>,
+    pub q: i64,
+    pub ctx: [f32; F::F_CTX],
+    pub descs: Vec<Descriptor>,
+}
+
+/// Option `registro`: one record per decision of the seat. `kind`: "cercata" (a search ran: P, N, Q and the
+/// net's inputs), "forzata" (one option), "sonda" (the win probe decided), "prima" (the first forced move).
+#[derive(Clone, Debug)]
+pub struct Record {
+    pub kind: &'static str,
+    pub turn: i64,
+    pub point: &'static str,
+    pub menu: Vec<String>,
+    pub azioni: Vec<Value>,
+    pub giocata: i64,
+    pub p: Vec<f64>,
+    pub p_rumore: Option<Vec<f64>>,
+    pub n: Vec<i64>,
+    pub q: Vec<f64>,
+    pub iters: usize,
+    pub campionata: bool,
+    pub input: Option<RootIn>,
+}
+
+/// Gamma(a, 1) by Marsaglia-Tsang (a < 1 through Gamma(a+1) * U^(1/a)), from `rng`'s uniforms.
+fn gamma_mt(rng: &mut PyRandom, a: f64) -> f64 {
+    if a < 1.0 {
+        let u = 1.0 - rng.random();
+        return gamma_mt(rng, a + 1.0) * u.powf(1.0 / a);
+    }
+    let d = a - 1.0 / 3.0;
+    let c = 1.0 / (9.0 * d).sqrt();
+    loop {
+        let (u1, u2) = (1.0 - rng.random(), rng.random());
+        let x = (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos();
+        let v = 1.0 + c * x;
+        if v <= 0.0 {
+            continue;
+        }
+        let v = v * v * v;
+        let u = 1.0 - rng.random();
+        if u.ln() < 0.5 * x * x + d - d * v + d * v.ln() {
+            return d * v;
+        }
+    }
+}
+
 pub struct SearchCore {
     pub side: Side,
     pub iterations: usize,
@@ -1124,6 +1190,24 @@ pub struct SearchCore {
     tally: BTreeMap<usize, BTreeMap<(String, String, String), i64>>,
     sim_traces: Vec<Value>,
     sim_seeds: Vec<u64>,
+    /// Option `esplorazione` (default off) and the searched turn decisions made so far.
+    pub esplorazione: Option<Esplorazione>,
+    esp_mosse: usize,
+    esp_rng: Option<PyRandom>,
+    /// Option `registro` (default off): the records, drained by the caller.
+    pub registro: bool,
+    pub records: Vec<Record>,
+    /// Of the current search: the root's inputs and priors (before the noise), the priors after it.
+    root_in: Option<RootIn>,
+    root_p_pre: Option<Vec<(Action, f64)>>,
+    root_noised: bool,
+    /// Option `peso_valore_rete` (default 0 = off: nothing changes): leaf value of a node evaluated with the net =
+    /// (1 - w) * hand-written value + w * net's value (same point of view: the searching seat).
+    pub peso_valore_rete: f64,
+    /// Statistics: calls of the net's forward, and those made only for the value (menus of fewer than 2
+    /// options, with `peso_valore_rete` > 0; they were not made before).
+    pub chiamate_rete: i64,
+    pub chiamate_solo_valore: i64,
 }
 
 static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
@@ -1190,6 +1274,17 @@ impl SearchCore {
             tally: BTreeMap::new(),
             sim_traces: Vec::new(),
             sim_seeds: Vec::new(),
+            esplorazione: None,
+            esp_mosse: 0,
+            esp_rng: None,
+            registro: false,
+            records: Vec::new(),
+            root_in: None,
+            root_p_pre: None,
+            root_noised: false,
+            peso_valore_rete: 0.0,
+            chiamate_rete: 0,
+            chiamate_solo_valore: 0,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
         LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1198,6 +1293,88 @@ impl SearchCore {
 
     fn seed(&mut self) -> u64 {
         self.rng.randrange(1 << 30)
+    }
+
+    /// The generator of the exploration, derived from the search's own one the first time it is needed.
+    fn esp_rng(&mut self) -> &mut PyRandom {
+        if self.esp_rng.is_none() {
+            let sd = self.seed();
+            self.esp_rng = Some(PyRandom::new(sd as i128 * 2 + 0x5EED_0000));
+        }
+        self.esp_rng.as_mut().unwrap()
+    }
+
+    /// The turn search's root, just evaluated: keep the priors as they are (for the record) and, with
+    /// `esplorazione`, mix in Dirichlet noise when the root has at least two distinct actions.
+    fn root_noise(&mut self, priors: &mut Vec<(Action, f64)>) {
+        if self.question != "main" {
+            return;
+        }
+        if self.registro {
+            self.root_p_pre = Some(priors.clone());
+        }
+        let Some(e) = self.esplorazione else { return };
+        if priors.len() < 2 || e.eps <= 0.0 {
+            return;
+        }
+        let rng = self.esp_rng();
+        let mut d: Vec<f64> = priors.iter().map(|_| gamma_mt(rng, e.alfa)).collect();
+        let sum: f64 = d.iter().sum();
+        if !(sum > 0.0) {
+            return;
+        }
+        for x in d.iter_mut() {
+            *x /= sum;
+        }
+        for ((_, p), n) in priors.iter_mut().zip(d) {
+            *p = (1.0 - e.eps) * *p + e.eps * n;
+        }
+        self.root_noised = true;
+    }
+
+    /// A light record (a decision without a search).
+    fn registra_leggero(&mut self, kind: &'static str, turn: i64, point: Point, legal: &[Action], chosen: &Action) {
+        if !self.registro {
+            return;
+        }
+        let giocata = legal.iter().position(|a| a.same(chosen)).map_or(-1, |i| i as i64);
+        self.records.push(Record {
+            kind, turn, point: point.name(), menu: legal.iter().map(|a| a.label.clone()).collect(), azioni: Vec::new(),
+            giocata, p: Vec::new(), p_rumore: None, n: Vec::new(), q: Vec::new(), iters: 0, campionata: false, input: None,
+        });
+    }
+
+    /// The full record of a searched decision.
+    fn registra(&mut self, turn: i64, t: &Tree, legal: &[Action], point: Point, chosen: &Action, campionata: bool) {
+        if !self.registro {
+            return;
+        }
+        let root = &t.nodes[0];
+        let find_p = |src: &[(Action, f64)], a: &Action| src.iter().find(|(k, _)| k.same(a)).map_or(0.0, |(_, p)| *p);
+        let (pre, post): (Vec<f64>, Option<Vec<f64>>) = match &self.root_p_pre {
+            Some(pre) => (legal.iter().map(|a| find_p(pre, a)).collect(),
+                          if self.root_noised { Some(legal.iter().map(|a| find_p(&root.p, a)).collect()) } else { None }),
+            None => (legal.iter().map(|a| find_p(&root.p, a)).collect(), None),
+        };
+        let (mut n, mut q) = (Vec::new(), Vec::new());
+        for a in legal {
+            match root.children.iter().find(|(k, _)| k.same(a)) {
+                Some((_, c)) if t.nodes[*c].n > 0 => {
+                    n.push(t.nodes[*c].n);
+                    q.push(t.nodes[*c].q);
+                }
+                _ => {
+                    n.push(0);
+                    q.push(f64::NAN);
+                }
+            }
+        }
+        let giocata = legal.iter().position(|a| a.same(chosen)).map_or(-1, |i| i as i64);
+        self.records.push(Record {
+            kind: "cercata", turn, point: point.name(), menu: legal.iter().map(|a| a.label.clone()).collect(),
+            azioni: legal.iter().map(action_list).collect(), giocata, p: pre, p_rumore: post, n, q,
+            iters: self.last_iters, campionata, input: self.root_in.take(),
+        });
     }
 
     /// py: _evaluate — (priors over the menu, value).
@@ -1216,10 +1393,26 @@ impl SearchCore {
             Some(net) => {
                 let obs = Observation::from_state(&mut c.gs, side);
                 let tv = table_value_v(&obs, self.valutazione);
+                let w = self.peso_valore_rete;
                 let mut p = Vec::new();
                 if legal.len() < 2 {
                     for a in legal {
                         dict_set(&mut p, a, 1.0);
+                    }
+                    // Only with the value weight on: one forward for the value alone (a one-option menu).
+                    if w > 0.0 && legal.len() == 1 {
+                        let descs = on_fresh_loop(c, |fg| -> R<Vec<Descriptor>> {
+                            legal.iter().map(|a| F::describe_action(fg, side, a)).collect()
+                        })?;
+                        let x = encode_observation(&obs, &c.gs.reg);
+                        let q = F::question_of(self.question);
+                        let ctx = F::context(descs.len(), 0, false, false);
+                        let (_, nv) = net.borrow_mut().eval(x, q, ctx, &descs)?;
+                        self.chiamate_rete += 1;
+                        self.chiamate_solo_valore += 1;
+                        if let Some(nv) = nv {
+                            return Ok((p, (1.0 - w) * tv + w * nv as f64));
+                        }
                     }
                     return Ok((p, tv));
                 }
@@ -1229,11 +1422,19 @@ impl SearchCore {
                 let x = encode_observation(&obs, &c.gs.reg);
                 let q = F::question_of(self.question);
                 let ctx = F::context(descs.len(), 0, false, false);
-                let probs = net.borrow_mut().probs(x, q, ctx, &descs)?;
+                if self.registro && self.root_in.is_none() {
+                    self.root_in = Some(RootIn { x: x.clone(), q, ctx, descs: descs.clone() });
+                }
+                let (probs, nv) = net.borrow_mut().eval(x, q, ctx, &descs)?;
+                self.chiamate_rete += 1;
                 for (a, pr) in legal.iter().zip(probs) {
                     dict_add(&mut p, a, pr as f64);
                 }
-                Ok((p, tv))
+                let v = match nv {
+                    Some(nv) if w > 0.0 => (1.0 - w) * tv + w * nv as f64,
+                    _ => tv,
+                };
+                Ok((p, v))
             }
         }
     }
@@ -1285,12 +1486,18 @@ impl SearchCore {
         if let Some(sub) = self.first_forced.take() {
             let sub = sub.to_lowercase();
             return match root_legal.iter().find(|a| a.label.to_lowercase().contains(&sub)) {
-                Some(a) => Ok(a.clone()),
+                Some(a) => {
+                    let a = a.clone();
+                    self.registra_leggero("prima", g.gs.turn, Point::TurnAction, &root_legal, &a);
+                    Ok(a)
+                }
                 None => Err(EngineError::Agent(format!("first forced move not legal: {sub}"))),
             };
         }
         if root_legal.len() <= 1 {
-            return Ok(root_legal.first().cloned().unwrap_or_else(Action::pass));
+            let a = root_legal.first().cloned().unwrap_or_else(Action::pass);
+            self.registra_leggero("forzata", g.gs.turn, Point::TurnAction, &root_legal, &a);
+            return Ok(a);
         }
         let probed = if self.win_probe && self.lockstep.is_none() {
             let t_probe = process_time();
@@ -1301,7 +1508,10 @@ impl SearchCore {
             None
         };
         let action = match probed {
-            Some(a) => a,
+            Some(a) => {
+                self.registra_leggero("sonda", g.gs.turn, Point::TurnAction, &root_legal, &a);
+                a
+            }
             None => {
                 let tree = self.search(g, Point::TurnAction, &root_legal, cards_played, None)?;
                 self.conclude(g, &tree, &root_legal, Point::TurnAction)?
@@ -1548,6 +1758,9 @@ impl SearchCore {
         self.cur_search = self.searches;
         self.sim = 0;
         self.searches += 1;
+        self.root_in = None;
+        self.root_p_pre = None;
+        self.root_noised = false;
         let fixed = match (self.override_at, self.lockstep.as_mut()) {
             (Some((k, n)), _) if k == self.cur_search => Some(n),
             (_, Some(l)) => l.before(&info)?,
@@ -1642,7 +1855,10 @@ impl SearchCore {
                 break;
             }
             if !tree.borrow().nodes[node].expanded {
-                let (priors, v) = self.evaluate(&mut c, &legal_ga)?;
+                let (mut priors, v) = self.evaluate(&mut c, &legal_ga)?;
+                if node == 0 {
+                    self.root_noise(&mut priors);
+                }
                 self.expand(&mut tree.borrow_mut(), node, priors, v);
                 value = v;
                 break;
@@ -1840,7 +2056,9 @@ impl SearchCore {
         self.release_forced(g, level(point));
         let legal = g.legal_actions(point, self.side)?;
         if legal.len() <= 1 && !(!legal.is_empty() && self.choices_ahead(g, &legal[0], point, bf_idx)?) {
-            return Ok(legal.first().cloned().unwrap_or_else(Action::pass));
+            let a = legal.first().cloned().unwrap_or_else(Action::pass);
+            self.registra_leggero("forzata", g.gs.turn, point, &legal, &a);
+            return Ok(a);
         }
         let tree = self.search(g, point, &legal, 0, bf_idx)?;
         self.conclude(g, &tree, &legal, point)
@@ -1851,6 +2069,7 @@ impl SearchCore {
         let t = tree.borrow();
         let root = &t.nodes[0];
         if root.children.is_empty() || !root.children.iter().any(|(_, c)| t.nodes[*c].n != 0) {
+            self.registra(g.gs.turn, &t, legal, point, &Action::pass(), false);
             self.note(g, &t, legal, point, &Action::pass());
             return Ok(Action::pass());
         }
@@ -1862,12 +2081,42 @@ impl SearchCore {
             self.decisions += 1;
         }
         let mut best = 0;
-        for i in 1..items.len() {
-            if t.nodes[items[i].1].q > t.nodes[items[best].1].q {
-                best = i;
+        let mut campionata = false;
+        if self.esplorazione.is_none() {
+            for i in 1..items.len() {
+                if t.nodes[items[i].1].q > t.nodes[items[best].1].q {
+                    best = i;
+                }
+            }
+        } else {
+            // Exploring: the most visited (ties: the higher Q, then the menu order); a turn decision among
+            // the first `mosse` of the seat is sampled in proportion to the visits instead.
+            for i in 1..items.len() {
+                let (a, b) = (&t.nodes[items[i].1], &t.nodes[items[best].1]);
+                if a.n > b.n || (a.n == b.n && a.q > b.q) {
+                    best = i;
+                }
+            }
+            if point == Point::TurnAction {
+                let e = self.esplorazione.unwrap();
+                if self.esp_mosse < e.mosse && items.len() > 1 {
+                    let total: i64 = items.iter().map(|(_, c)| t.nodes[*c].n).sum();
+                    let mut r = self.esp_rng().random() * total as f64;
+                    best = items.len() - 1;
+                    for (i, (_, c)) in items.iter().enumerate() {
+                        r -= t.nodes[*c].n as f64;
+                        if r < 0.0 {
+                            best = i;
+                            break;
+                        }
+                    }
+                    campionata = true;
+                }
+                self.esp_mosse += 1;
             }
         }
         let (key, child) = items[best].clone();
+        self.registra(g.gs.turn, &t, legal, point, &key, campionata);
         self.note(g, &t, legal, point, &key);
         if !t.nodes[child].choices.is_empty() {
             let plan = Plan { me: self.side, tree: tree.clone(), node: child, level: level(point), turn: g.gs.turn };
