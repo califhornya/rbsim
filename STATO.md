@@ -56,7 +56,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 25-26/11 difetti di motore corretti in Rust, ognuno su un profilo (`docs/RUST.md` "Profili delle regole", AUDIT.md,
   `tests/rust/test_d*.py`): D72-D76 (storico 600/600), D77 (180/180), D78-D80 (200/200), D81 (Call to Glory, segnalazione
   26; ES 80/80, 9/30 diverse), D82 (Edge of Night da coperta al BF1 si attaccava al BF0, segnalazione 27; EK ed ES 80/80,
-  0/60 diverse: lo copre il test). `tests/rust` 430 (con torch); `6427b90+D72-D82` default della pagina.
+  0/60 diverse: lo copre il test). `tests/rust` 429 (con torch); `6427b90+D72-D82` default della pagina.
 - 25/11 pagina su Rust (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"): posto umano nel ponte
   (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
   rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
