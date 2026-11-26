@@ -406,3 +406,14 @@ def test_condizionale_con_l_avversario_campione_e_in_continua(pos):
                                         or "Punch First" in t)
     res = E.continua(P, k, [f"{gioca} ; ?Punch First ; Pass ; @finestre"], 2, 1, lambda t: None)
     assert res["mosse"][list(res["mosse"])[0]]["n"] == 2
+
+
+def test_danni_condizionale_resta_fino_alla_scelta_dei_danni():
+    """`?danni:X`: con la risposta dell'avversario nello showdown i danni vanno a X; senza, l'etichetta si salta e
+    l'ordine resta quello del motore (segnalazione di Codex, PR 62)."""
+    seq = ["Move Kinkou Initiate base→BF0", "Pass", "?danni:First Mate"]
+    guida, t, _vivi, _g = _gioca_condizionale(seq, ["Punch First"], {"showdown": ["Showdown Punch First"]})
+    assert guida.saltate == 0 and "[scelta] combat_damage_order: First Mate" in t
+    guida, t, _vivi, _g = _gioca_condizionale(seq)
+    assert guida.saltate == 1 and "?danni:First Mate: condizione non verificata: saltata" in t
+    assert "[scelta] combat_damage_order: First Mate" not in t

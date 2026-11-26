@@ -289,12 +289,17 @@ class Guida:
             return None
         return next((d for k, d in self.opp_log[self.cond_da:] if k == key), None)
 
-    def _salta_condizionali(self, key, chiusa: bool = False) -> None:
+    def _salta_condizionali(self, key, chiusa: bool = False, danni: bool = False) -> None:
         """Scarta le etichette condizionali in attesa la cui finestra e' chiusa (fuori da ogni finestra, o un'altra;
-        `chiusa`: lo showdown e' finito, il combattimento sta assegnando i danni)."""
+        `chiusa`: lo showdown e' finito, il combattimento sta assegnando i danni). `danni`: siamo alla scelta
+        dell'ordine dei danni, e un `?danni:` la cui condizione e' verificata resta in attesa per questa scelta
+        (e' la sua prima occasione: non puo' combaciare con un menu)."""
         while self.i < len(self.seq):
-            cond = self.analizza(self.seq[self.i])[0]
+            cond, amb, _t = self.analizza(self.seq[self.i])
             if not cond:
+                return
+            if danni and amb == "danni" and \
+                    self._risposta(self.cond_key if self.cond_key is not None else self.ult_key) is not None:
                 return
             if chiusa or key is None or (self.cond_key is not None and key != self.cond_key):
                 risp = self._risposta(self.cond_key if self.cond_key is not None else self.ult_key)
@@ -343,7 +348,7 @@ class Guida:
             self.ult_key = self.chiave_finestra(e.get("win"))
             self._salta_condizionali(self.ult_key)
         if k == "choice" and e.get("kind") == "combat_damage_order":
-            self._salta_condizionali(None, chiusa=True)   # i danni si assegnano dopo lo showdown: finestra chiusa
+            self._salta_condizionali(None, chiusa=True, danni=True)  # dopo lo showdown: finestra chiusa
         lab = self.seq[self.i] if self.i < len(self.seq) else None
         cond, amb, testo = self.analizza(lab) if lab is not None else (False, None, None)
         # risposta dell'avversario nella finestra corrente (solo per le etichette condizionali)
