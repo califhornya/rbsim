@@ -282,3 +282,24 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
   finestre 13 / 3 / 51 (69). Le finestre non insegnano a togliere Vex prima: lo stordimento finisce col turno e la
   valutazione di fine turno non lo vede. La linea condizionale di Matteo (Punch First solo se risponde, danni su
   Vex) non è ancora misurata: due errori nella sequenza e nel comando (zsh conta gli array da 1).
+- **Terzo giro (26/11, Astra): quanto vale attaccare Bandle.** Dati e prototipo in `docs/bot/esperimenti/t9_attacco/`
+  (`misure.py` li ricalcola identici). Partite fino alla fine dal T9, 100 mondi appaiati, campione ai due posti dopo
+  i passi guidati; «fisse» = mani e coperta del replay, «ignote» = mano e coperta di Evelynn ricampionate.
+  - Vi in base + Sett su Valley 7 (fisse) / 8 (ignote); Armory su Kinkou, poi Sett con Vi (linea di Matteo) 19 / 18
+    (+12 [3,1; 20,9], +10 [0,6; 19,4]); Armory su Sett, Punch First su Kinkou, Vi in AMBUSH che stordisce K'Sante
+    30 / 38 (+23 [13,0; 33,0], +30 [19,4; 40,6]). Bandle resta di Evelynn in tutti i mondi e Sett chiude il T9 sotto
+    2-3, ma resta il solo Pyke in 74 su 100: la linea che segna di meno vince di più.
+  - Due difetti distinti del campione. Costruzione: Armory su Bandle ha 1 visita su 138, anche con le finestre e con
+    la quota di 4 (dopo Armory il pilota usa Punch First e Rengar, Vi mai): la linea non viene costruita.
+    Valutazione: la linea di Kinkou con la quota c'è (100 visite, Punch First 91, Vi 15) ma vale q -0,75: costruita e
+    valutata male.
+  - Prototipo di generatore (dal menu legale: gear, una o due ondate, momento della magia, AMBUSH; bersagli per lato,
+    posizione e Might): fra 18 proposte p16 ricostruisce la linea buona nel mondo di generazione. La selezione su 16
+    mondi sceglie però p04 (Kinkou, Punch First, Vi, senza Armory: 3 contro 2), che sui 100 tenuti da parte vince 1
+    contro 4 di Valley (-3 [-7,4; +1,4]). Sugli stessi 100 mondi p16 11, la linea guidata 30: Vex è già morto prima
+    di Sett in 34 contro 75 mondi (l'ordine dei danni «uccisione più economica» non sceglie Vex).
+  - Da fare (Astra): registrare a parte le linee mai costruite e quelle costruite ma valutate male; la stessa ricerca
+    su altre partite e carte, con posizioni in cui il punto libero è davvero meglio; arena a parità di budget prima
+    della pagina. Strumento generale: `scripts/rust/attacco.py` (`riproduci-t9` deve dare i numeri di Astra identici;
+    `posizioni`, `confronta`, `serie`; valutazione del campione a fine turno per ogni mondo), sul Mac con
+    `scripts/rust/attacco_mac.command`.

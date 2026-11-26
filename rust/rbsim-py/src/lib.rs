@@ -322,6 +322,15 @@ impl Game {
         }
     }
 
+    /// La valutazione di foglia del bot (`state_value_v`) dello stato corrente dal punto di vista di `seat`:
+    /// "storica" (default), "accumulo" (k, alpha), "minaccia", "corsa" o "rimonta". Lettura pura: non cambia lo stato.
+    #[pyo3(signature = (seat, nome="storica", k=0.0, alpha=0.0))]
+    fn valuta(&mut self, seat: &str, nome: &str, k: f64, alpha: f64) -> PyResult<f64> {
+        let s = seat_of(seat)?;
+        let v = parse_valutazione(nome, k, alpha)?;
+        Ok(rbsim_core::search::state_value_v(&mut self.g.gs, s, v))
+    }
+
     /// Diagnosi: solo la ricerca di indice `k` usa la valutazione (il resto della partita resta com'era).
     #[pyo3(signature = (seat, k, nome, kk=3.0, alpha=0.2))]
     fn set_search_valutazione_at(&mut self, seat: &str, k: usize, nome: &str, kk: f64, alpha: f64) -> PyResult<()> {
