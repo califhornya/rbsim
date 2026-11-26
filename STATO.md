@@ -57,8 +57,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
   rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
 - 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
-  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali).
-  Prior utile su D72-D77 (contro il bot senza prior: ES 0,583, EK 0,550). Apertura nella pagina (`apertura.py`, provvisorio).
+  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
 §8 chiuso (26/11, GIOCATE §8): pagina con `--valutazione rimonta` (default di `coach.py`); bocciati `accumulo`, `minaccia`.
