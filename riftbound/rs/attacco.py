@@ -519,10 +519,12 @@ class GuidataT9:
 
 # -- una continuazione ----------------------------------------------------------------------------
 
-def setup(g, P: dict, seed: int) -> None:
-    """Entrambi i posti campione (seme per posto come in `un_mondo`) e il chooser dei lati."""
+def setup(g, P: dict, seed: int, primo: str | None = None) -> None:
+    """Entrambi i posti campione (seme per posto come in `un_mondo`) e il chooser dei lati. `primo`: la prima mossa
+    di turno del posto del campione e' forzata (la prima voce legale che contiene il testo)."""
     for side in ("A", "B"):
-        E._agente_campione(g, P, side, seed * 2 + (side == "B") + 1_000_003)
+        E._agente_campione(g, P, side, seed * 2 + (side == "B") + 1_000_003,
+                           primo if side == P["camp"] else None)
     g.set_side_chooser()
 
 
@@ -567,6 +569,11 @@ def linea_sequenza(etichette: list[str], nome: str = NOME_RIF) -> dict:
     return {"nome": nome, "tipo": "sequenza", "etichette": list(etichette)}
 
 
+def linea_primo(nome: str, etichetta: str) -> dict:
+    """Come `campione`, ma la prima mossa di turno del campione e' forzata a `etichetta` (poi cerca normalmente)."""
+    return {"nome": nome, "tipo": "primo", "etichetta": etichetta}
+
+
 def linea_proposta(nome: str, proposta: Proposal, campo: int) -> dict:
     return {"nome": nome, "tipo": "proposta", "proposta": asdict(proposta), "campo": campo}
 
@@ -576,7 +583,7 @@ def linea_guidata_t9(nome: str, variante: str) -> dict:
 
 
 def _controllo(linea: dict, camp: str):
-    if linea["tipo"] == "campione":
+    if linea["tipo"] in ("campione", "primo"):
         return None
     if linea["tipo"] == "sequenza":
         return Sequenza(linea["etichette"])
@@ -627,7 +634,7 @@ def _gioca_turno(pos: dict, st: dict, linea: dict, i: int, modo: str, osserva=No
     g = E.gioco(P, st, seed)
     watch = [f for f in (getattr(ctrl, "watch", None), osserva) if f]
     if ctrl is None:
-        setup(g, P, seed)
+        setup(g, P, seed, linea.get("etichetta") if linea["tipo"] == "primo" else None)
         if watch:
             g.trace_on(lambda ev: [f(ev) for f in watch])
         w = g.run_actions_end()
@@ -657,7 +664,8 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str, piano: bool = 
     `piano`: aggiunge alla riga il `piano` del turno (registrato con `Osservatore`); le altre chiavi non cambiano."""
     P = pos["P"]
     camp = P["camp"]
-    oss = Osservatore(camp) if piano else None
+    primo = linea["tipo"] == "primo"
+    oss = Osservatore(camp) if piano or primo else None
     t = _gioca_turno(pos, st, linea, i, modo, oss)
     g, ctrl, w, t0, seed, fine, v_fine = (t[c] for c in ("g", "ctrl", "w", "t0", "seed", "fine", "v_fine"))
     if w is None:
@@ -679,8 +687,12 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str, piano: bool = 
         row["nemici_seconda_ondata"] = ctrl.nemici_seconda
     if isinstance(ctrl, GuidataT9):
         row["vi"] = ctrl.attack.vi
-    if oss:
+    if piano:
         row["piano"] = _piano(ctrl, oss)
+    if primo:
+        # l'etichetta forzata e' proprio quella giocata? (la ricerca prende la prima voce che la *contiene*)
+        row["primo_giocata"] = oss.azione
+        row["primo_ok"] = oss.azione == linea["etichetta"]
     return row
 
 
