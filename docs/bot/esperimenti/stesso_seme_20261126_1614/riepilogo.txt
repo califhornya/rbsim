@@ -1,0 +1,41 @@
+== serie «stesso seme»
+base: 20261126_155859_competitive_evelynn_vs_competitive_sett.json (seme 680137721); mazzi competitive_evelynn (A) contro competitive_sett (B); Matteo = posto A (Evelynn), Sett (campione) = posto B; comincia B
+campi: A Bandle Scouts' Academy; B Valley of Idols; regole 6427b90+D72-D82; campione 138 iterazioni fisse, valutazione rimonta, sonda di vittoria si; rete ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt
+semi: partita 680137721; Sett j = 1360275443 + j; Evelynn automatica 1360275442 (fisso)
+
+partita di Matteo (l'unico risultato contro Matteo e' la sua partita):
+  salvata: vince A in 14 turni; rifatta con le sue risposte: vince A in 14 turni, punti {'A': 8, 'B': 4}
+  controllo: IDENTICA (vincitore, turni e tutte le 153 righe del registro come il log salvato)
+
+tentativi (Evelynn automatica dal turno 1): 500 fatti su 500 previsti
+  Sett vince 0, Evelynn vince 500, patte 0
+  partite distinte (registro diverso): 6 su 500; la prima diversa da j = 0: j = 2
+esito: Sett senza vittorie nella simulazione dopo 500 tentativi
+  sconfitta scelta j = 66: 16 turni, punti Sett 6 contro 8 di Evelynn (sconfitta.json); quella con piu' punti di Sett alla fine
+
+confronto con la partita di Matteo (registro di Matteo contro la sconfitta scelta j = 66):
+  prima riga diversa: la n. 8 (indice 7)
+     =   5 T3 B decision TURN_ACTION: Deploy champion Sett Kingpin
+     =   6 T3 B decision TURN_ACTION: Pass
+    Matteo:
+       7 T4 A decision TURN_ACTION: Play Vex Apathetic
+       8 T4 A decision TURN_ACTION: Pass
+       9 T5 B decision TURN_ACTION: Play Fiora Victorious
+      10 T5 B decision TURN_ACTION: Move Sett Kingpin base→BF1
+      11 T5 B decision TURN_ACTION: Pass
+      12 T5 B decision SHOWDOWN_ACTION: Pass
+      13 T5 A decision SHOWDOWN_ACTION: Pass
+      14 T5 B decision REACTION: Pass
+      15 T5 A decision REACTION: Pass
+    simulazione j=66:
+       7 T4 A decision TURN_ACTION: Move Pyke Returned base→BF1
+       8 T4 A decision TURN_ACTION: Pass
+       9 T4 A decision SHOWDOWN_ACTION: Pass
+      10 T4 B decision SHOWDOWN_ACTION: Pass
+      11 T4 A decision TURN_ACTION: Play Vex Apathetic to BF1
+      12 T4 A decision REACTION: Pass
+      13 T4 B decision REACTION: Pass
+      14 T4 A decision TURN_ACTION: Hide Evelynn Entrancing @BF1
+      15 T4 A decision TURN_ACTION: Pass
+
+totale: 500 tentativi; Sett vince 0, Evelynn 500, patte 0; senza vittorie di Sett dopo 500 tentativi; partita di Matteo identica; 145 s

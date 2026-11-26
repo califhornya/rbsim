@@ -1,0 +1,2 @@
+stesso_seme_mac 26/11/2026 16:14; 953d1b4 Merge pull request #69 from califhornya/claude/friendly-volta-akokjf; partita 20261126_155859_competitive_evelynn_vs_competitive_sett.json; al piu' 500
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi

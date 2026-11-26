@@ -1,0 +1,3661 @@
+{
+ "esito": {
+  "j": 66,
+  "vincitore": "A",
+  "vince_sett": false,
+  "turni": 16,
+  "punti": {
+   "A": 8,
+   "B": 6
+  },
+  "secondi": 2.57
+ },
+ "semi": {
+  "partita": 680137721,
+  "sett": 1360275509,
+  "evelynn": 1360275442
+ },
+ "registro": [
+  "T0 A mulligan: none",
+  "T0 B mulligan: none",
+  "T1 B decision TURN_ACTION: Pass",
+  "T2 A decision TURN_ACTION: Play Pyke Returned",
+  "T2 A decision TURN_ACTION: Pass",
+  "T3 B decision TURN_ACTION: Deploy champion Sett Kingpin",
+  "T3 B decision TURN_ACTION: Pass",
+  "T4 A decision TURN_ACTION: Move Pyke Returned base→BF1",
+  "T4 A decision TURN_ACTION: Pass",
+  "T4 A decision SHOWDOWN_ACTION: Pass",
+  "T4 B decision SHOWDOWN_ACTION: Pass",
+  "T4 A decision TURN_ACTION: Play Vex Apathetic to BF1",
+  "T4 A decision REACTION: Pass",
+  "T4 B decision REACTION: Pass",
+  "T4 A decision TURN_ACTION: Hide Evelynn Entrancing @BF1",
+  "T4 A decision TURN_ACTION: Pass",
+  "T5 B decision TURN_ACTION: Play Fiora Victorious",
+  "T5 A decision REACTION: Play Evelynn Entrancing from Hidden @BF1",
+  "T5 A choice trigger_order: trigger of Valley of Idols (on_unit_played_here) of [trigger of Valley of Idols (on_unit_played_here)]",
+  "T5 A decision REACTION: Pass",
+  "T5 B decision REACTION: Pass",
+  "T5 A decision REACTION: Pass",
+  "T5 B decision REACTION: Pass",
+  "T5 B decision TURN_ACTION: Move Sett Kingpin base→BF0",
+  "T5 B decision TURN_ACTION: Pass",
+  "T5 B decision SHOWDOWN_ACTION: Pass",
+  "T5 A decision SHOWDOWN_ACTION: Pass",
+  "T5 B decision REACTION: Pass",
+  "T5 A decision REACTION: Pass",
+  "T5 B decision TURN_ACTION: Pass",
+  "T6 A decision TURN_ACTION: Play K'Sante Courageous to BF1",
+  "T6 A decision REACTION: Pass",
+  "T6 B decision REACTION: Pass",
+  "T6 A decision TURN_ACTION: Pass",
+  "T7 B decision TURN_ACTION: Move Fiora Victorious base→BF0",
+  "T7 B decision TURN_ACTION: Play Rengar Trophy Hunter to BF1",
+  "T7 A decision REACTION: Pass",
+  "T7 B decision REACTION: Pass",
+  "T7 B decision REACTION: Pass",
+  "T7 A decision REACTION: Pass",
+  "T7 B decision SHOWDOWN_ACTION: Showdown Punch First @BF1",
+  "T7 B decision REACTION: Pass",
+  "T7 A decision REACTION: Pass",
+  "T7 A decision SHOWDOWN_ACTION: Pass",
+  "T7 B decision SHOWDOWN_ACTION: Pass",
+  "T7 B decision TURN_ACTION: Move Sett Kingpin BF0→base",
+  "T7 B decision TURN_ACTION: Pass",
+  "T8 A decision REACTION: Pass",
+  "T8 B decision REACTION: Pass",
+  "T8 A decision TURN_ACTION: Play Momentary Companion to BF1",
+  "T8 A decision REACTION: Pass",
+  "T8 B decision REACTION: Pass",
+  "T8 A decision TURN_ACTION: Hide Edge of Night @BF1",
+  "T8 A decision TURN_ACTION: Play Reckless Innovator",
+  "T8 A decision TURN_ACTION: Move Reckless Innovator base→BF1",
+  "T8 A decision REACTION: Pass",
+  "T8 B decision REACTION: Pass",
+  "T8 A decision TURN_ACTION: Pass",
+  "T9 B decision TURN_ACTION: Play Kinkou Initiate",
+  "T9 A decision REACTION: Play Edge of Night from Hidden @BF1",
+  "T9 A choice trigger_order: trigger of Evelynn Agony's Embrace (on_card_played) of [trigger of Evelynn Agony's Embrace (on_card_played)]",
+  "T9 A decision REACTION: Pass",
+  "T9 B decision REACTION: Pass",
+  "T9 A decision REACTION: Pass",
+  "T9 B decision REACTION: Pass",
+  "T9 A decision REACTION: Pass",
+  "T9 B decision REACTION: Pass",
+  "T9 B decision REACTION: Pass",
+  "T9 A decision REACTION: Pass",
+  "T9 B decision TURN_ACTION: Pass",
+  "T10 A decision REACTION: Pass",
+  "T10 B decision REACTION: Pass",
+  "T10 A decision TURN_ACTION: Play Vex Apathetic to BF1",
+  "T10 A decision REACTION: Pass",
+  "T10 B decision REACTION: Pass",
+  "T10 A decision TURN_ACTION: Play Reckless Innovator",
+  "T10 A decision TURN_ACTION: Move Reckless Innovator base→BF1",
+  "T10 A decision REACTION: Pass",
+  "T10 B decision REACTION: Pass",
+  "T10 A decision TURN_ACTION: Pass",
+  "T11 B decision TURN_ACTION: Cast Rampage @BF0",
+  "T11 B decision REACTION: Pass",
+  "T11 A decision REACTION: Pass",
+  "T11 B decision TURN_ACTION: Play gear Pillaged Armory @BF0",
+  "T11 B decision REACTION: Pass",
+  "T11 A decision REACTION: Pass",
+  "T11 B decision TURN_ACTION: Pass",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Play Reckless Innovator",
+  "T12 A decision TURN_ACTION: Move Reckless Innovator base→BF1",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Play Gutter Guardian to BF1",
+  "T12 A choice trigger_order: trigger of Valley of Idols (on_unit_played_here) of [trigger of Valley of Idols (on_unit_played_here)]",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Move Reckless Innovator BF1→base",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Hide Edge of Night @BF1",
+  "T12 A decision TURN_ACTION: Move Reckless Innovator BF1→base",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Equip Edge of Night",
+  "T12 A decision REACTION: Pass",
+  "T12 B decision REACTION: Pass",
+  "T12 A decision TURN_ACTION: Pass",
+  "T13 B decision TURN_ACTION: Play Rengar Trophy Hunter to BF0",
+  "T13 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]",
+  "T13 A decision REACTION: Play Edge of Night from Hidden @BF1",
+  "T13 A choice trigger_order: trigger of Evelynn Agony's Embrace (on_card_played) of [trigger of Evelynn Agony's Embrace (on_card_played)]",
+  "T13 A decision REACTION: Pass",
+  "T13 B decision REACTION: Pass",
+  "T13 A decision REACTION: Pass",
+  "T13 B decision REACTION: Pass",
+  "T13 A decision REACTION: Pass",
+  "T13 B decision REACTION: Pass",
+  "T13 A decision REACTION: Pass",
+  "T13 B decision REACTION: Pass",
+  "T13 B decision TURN_ACTION: Pass",
+  "T14 A decision REACTION: Pass",
+  "T14 B decision REACTION: Pass",
+  "T14 A decision TURN_ACTION: Cast Rampage @BF0",
+  "T14 A decision REACTION: Pass",
+  "T14 B decision REACTION: Pass",
+  "T14 A decision TURN_ACTION: Move Reckless Innovator base→BF0",
+  "T14 A decision REACTION: Pass",
+  "T14 B decision REACTION: Pass",
+  "T14 A decision TURN_ACTION: Move Reckless Innovator base→BF0",
+  "T14 A decision REACTION: AMBUSH Rengar Trophy Hunter @BF0",
+  "T14 A decision SHOWDOWN_ACTION: Pass",
+  "T14 B decision SHOWDOWN_ACTION: Pass",
+  "T14 A decision REACTION: Pass",
+  "T14 B decision REACTION: Pass",
+  "T14 A decision TURN_ACTION: Pass",
+  "T14 A decision SHOWDOWN_ACTION: Pass",
+  "T14 B decision SHOWDOWN_ACTION: Pass",
+  "T14 A decision TURN_ACTION: Pass",
+  "T15 B decision TURN_ACTION: Move Sett Kingpin base→BF0",
+  "T15 B decision TURN_ACTION: Move Rengar Trophy Hunter base→BF0",
+  "T15 B decision TURN_ACTION: Move Kinkou Initiate base→BF0",
+  "T15 B decision TURN_ACTION: Pass",
+  "T15 B decision SHOWDOWN_ACTION: AMBUSH Vi Peacekeeper @BF0",
+  "T15 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 B choice target:stun_unit [Vi Peacekeeper]: Rengar Trophy Hunter (A, Might 6, Bandle Scouts' Academy) of [Rengar Trophy Hunter (A, Might 6, Bandle Scouts' Academy)]",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 A decision SHOWDOWN_ACTION: Pass",
+  "T15 B decision SHOWDOWN_ACTION: Pass",
+  "T15 B choice trigger_order: trigger of Pillaged Armory (on_conquer) of [trigger of Pillaged Armory (on_conquer)]",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision TURN_ACTION: Play First Mate to BF0",
+  "T15 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision TURN_ACTION: Move Sett Kingpin BF0→base",
+  "T15 B decision TURN_ACTION: Cast Showstopper @BF0",
+  "T15 B choice target:buff_unit [Showstopper]: Sett Kingpin (B, Might 6, base) of [Sett Kingpin (B, Might 6, base)]",
+  "T15 B choice target:move_unit [Showstopper]: Sett Kingpin (B, Might 6, base) of [Sett Kingpin (B, Might 6, base)]",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 B decision SHOWDOWN_ACTION: Showdown Call to Glory @BF1",
+  "T15 B choice cost_extras [Call to Glory]: {'energy': 3, 'power': 0, 'buffs': 1} of [{'energy': 3, 'power': 0, 'buffs': 1}]",
+  "T15 B decision REACTION: Pass",
+  "T15 A decision REACTION: Pass",
+  "T15 A decision SHOWDOWN_ACTION: Pass",
+  "T15 B decision SHOWDOWN_ACTION: Pass",
+  "T15 B decision TURN_ACTION: Pass"
+ ],
+ "eventi": [
+  {
+   "k": "decide_mulligan",
+   "seat": "A",
+   "out": [],
+   "turno": 1,
+   "riga": "T0 A mulligan: none"
+  },
+  {
+   "k": "decide_mulligan",
+   "seat": "B",
+   "out": [],
+   "turno": 1,
+   "riga": "T0 B mulligan: none"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 1,
+   "riga": "T1 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play Pyke Returned",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Deploy champion Evelynn Entrancing"
+   ],
+   "action": [
+    "UNIT",
+    0,
+    0
+   ],
+   "index": 1,
+   "turno": 2,
+   "riga": "T2 A decision TURN_ACTION: Play Pyke Returned"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 2,
+   "riga": "T2 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1",
+    "Play Kinkou Initiate",
+    "Play First Mate",
+    "Deploy champion Sett Kingpin"
+   ],
+   "action": [
+    "CHAMPION",
+    null,
+    0
+   ],
+   "index": 5,
+   "turno": 3,
+   "riga": "T3 B decision TURN_ACTION: Deploy champion Sett Kingpin"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 3,
+   "riga": "T3 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Vex Apathetic",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Reckless Innovator",
+    "Deploy champion Evelynn Entrancing",
+    "Move Pyke Returned base→BF0",
+    "Move Pyke Returned base→BF1"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    1
+   ],
+   "index": 11,
+   "turno": 4,
+   "riga": "T4 A decision TURN_ACTION: Move Pyke Returned base→BF1"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Vex Apathetic",
+    "Play Vex Apathetic to BF1",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Deploy champion Evelynn Entrancing",
+    "Deploy champion Evelynn Entrancing to BF1",
+    "Hide Edge of Night @BF1",
+    "Hide Evelynn Entrancing @BF1"
+   ],
+   "action": [
+    "UNIT",
+    1,
+    0,
+    1
+   ],
+   "index": 4,
+   "turno": 4,
+   "riga": "T4 A decision TURN_ACTION: Play Vex Apathetic to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 4
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Hide Edge of Night @BF1",
+    "Hide Evelynn Entrancing @BF1"
+   ],
+   "action": [
+    "HIDE",
+    "champion",
+    1
+   ],
+   "index": 2,
+   "turno": 4,
+   "riga": "T4 A decision TURN_ACTION: Hide Evelynn Entrancing @BF1"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 4,
+   "riga": "T4 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Kinkou Initiate",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play Fiora Victorious",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1"
+   ],
+   "action": [
+    "UNIT",
+    6,
+    0
+   ],
+   "index": 11,
+   "turno": 5,
+   "riga": "T5 B decision TURN_ACTION: Play Fiora Victorious"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "Play Evelynn Entrancing from Hidden @BF1"
+   ],
+   "action": [
+    "HIDDEN_PLAY",
+    null,
+    1
+   ],
+   "index": 1,
+   "turno": 5,
+   "riga": "T5 A decision REACTION: Play Evelynn Entrancing from Hidden @BF1"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T5 A choice trigger_order: trigger of Valley of Idols (on_unit_played_here) of [trigger of Valley of Idols (on_unit_played_here)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    0
+   ],
+   "index": 3,
+   "turno": 5,
+   "riga": "T5 B decision TURN_ACTION: Move Sett Kingpin base→BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass",
+    "Showdown Punch First @BF0"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 5,
+   "riga": "T5 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play K'Sante Courageous",
+    "Play K'Sante Courageous to BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "UNIT",
+    4,
+    0,
+    1
+   ],
+   "index": 10,
+   "turno": 6,
+   "riga": "T6 A decision TURN_ACTION: Play K'Sante Courageous to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 6
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 6
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 6,
+   "riga": "T6 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 6,
+   "riga": "T6 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 6,
+   "riga": "T6 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Kinkou Initiate",
+    "Play Kinkou Initiate to BF0",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Move Sett Kingpin BF0→base",
+    "Move Fiora Victorious base→BF0",
+    "Move Fiora Victorious base→BF1"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    0
+   ],
+   "index": 18,
+   "turno": 7,
+   "riga": "T7 B decision TURN_ACTION: Move Fiora Victorious base→BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Punch First @BF0",
+    "Cast Punch First @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Kinkou Initiate",
+    "Play Kinkou Initiate to BF0",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Move Sett Kingpin BF0→base"
+   ],
+   "action": [
+    "UNIT",
+    3,
+    0,
+    1
+   ],
+   "index": 9,
+   "turno": 7,
+   "riga": "T7 B decision TURN_ACTION: Play Rengar Trophy Hunter to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "B",
+   "out": true,
+   "turno": 7
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass",
+    "Showdown Punch First @BF1"
+   ],
+   "action": [
+    "SPELL",
+    0,
+    1
+   ],
+   "index": 1,
+   "turno": 7,
+   "riga": "T7 B decision SHOWDOWN_ACTION: Showdown Punch First @BF1"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Sett Kingpin BF0→base"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    0,
+    2
+   ],
+   "index": 1,
+   "turno": 7,
+   "riga": "T7 B decision TURN_ACTION: Move Sett Kingpin BF0→base"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 7,
+   "riga": "T7 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Momentary Companion",
+    "Play Momentary Companion to BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Edge of Night @BF1",
+    "Hide Momentary Companion @BF1"
+   ],
+   "action": [
+    "UNIT",
+    4,
+    0,
+    1
+   ],
+   "index": 10,
+   "turno": 8,
+   "riga": "T8 A decision TURN_ACTION: Play Momentary Companion to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 8
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "HIDE",
+    0,
+    1
+   ],
+   "index": 13,
+   "turno": 8,
+   "riga": "T8 A decision TURN_ACTION: Hide Edge of Night @BF1"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base"
+   ],
+   "action": [
+    "UNIT",
+    1,
+    0
+   ],
+   "index": 3,
+   "turno": 8,
+   "riga": "T8 A decision TURN_ACTION: Play Reckless Innovator"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 8
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    1
+   ],
+   "index": 6,
+   "turno": 8,
+   "riga": "T8 A decision TURN_ACTION: Move Reckless Innovator base→BF1"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 8
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 8,
+   "riga": "T8 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Kinkou Initiate",
+    "Play Kinkou Initiate to BF0",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1"
+   ],
+   "action": [
+    "UNIT",
+    1,
+    0
+   ],
+   "index": 3,
+   "turno": 9,
+   "riga": "T9 B decision TURN_ACTION: Play Kinkou Initiate"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "Play Edge of Night from Hidden @BF1"
+   ],
+   "action": [
+    "HIDDEN_PLAY",
+    null,
+    1
+   ],
+   "index": 1,
+   "turno": 9,
+   "riga": "T9 A decision REACTION: Play Edge of Night from Hidden @BF1"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T9 A choice trigger_order: trigger of Evelynn Agony's Embrace (on_card_played) of [trigger of Evelynn Agony's Embrace (on_card_played)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 9,
+   "riga": "T9 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Vex Apathetic",
+    "Play Vex Apathetic to BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "UNIT",
+    2,
+    0,
+    1
+   ],
+   "index": 6,
+   "turno": 10,
+   "riga": "T10 A decision TURN_ACTION: Play Vex Apathetic to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 10
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "UNIT",
+    2,
+    0
+   ],
+   "index": 5,
+   "turno": 10,
+   "riga": "T10 A decision TURN_ACTION: Play Reckless Innovator"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 10
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    1
+   ],
+   "index": 8,
+   "turno": 10,
+   "riga": "T10 A decision TURN_ACTION: Move Reckless Innovator base→BF1"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 10
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Pyke Returned BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 10,
+   "riga": "T10 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play Vi Peacekeeper",
+    "Play Vi Peacekeeper to BF0",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "SPELL",
+    0,
+    0
+   ],
+   "index": 1,
+   "turno": 11,
+   "riga": "T11 B decision TURN_ACTION: Cast Rampage @BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 11,
+   "riga": "T11 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 11,
+   "riga": "T11 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play gear Pillaged Armory @BF0",
+    "Play gear Pillaged Armory @BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Move Fiora Victorious BF0→BF1",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "GEAR",
+    2,
+    0
+   ],
+   "index": 3,
+   "turno": 11,
+   "riga": "T11 B decision TURN_ACTION: Play gear Pillaged Armory @BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 11,
+   "riga": "T11 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 11,
+   "riga": "T11 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Move Fiora Victorious BF0→BF1",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 11,
+   "riga": "T11 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Play Reckless Innovator",
+    "Play Reckless Innovator to BF1",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "UNIT",
+    2,
+    0
+   ],
+   "index": 5,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Play Reckless Innovator"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 12
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Hide Edge of Night @BF1",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    1
+   ],
+   "index": 15,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Move Reckless Innovator base→BF1"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 12
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Play gear Edge of Night @BF0",
+    "Play gear Edge of Night @BF1",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Play Gutter Guardian",
+    "Play Gutter Guardian to BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Gutter Guardian @BF1",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "UNIT",
+    3,
+    0,
+    1
+   ],
+   "index": 8,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Play Gutter Guardian to BF1"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 12
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T12 A choice trigger_order: trigger of Valley of Idols (on_unit_played_here) of [trigger of Valley of Idols (on_unit_played_here)]"
+  },
+  {
+   "k": "decide_optional",
+   "seat": "A",
+   "out": true,
+   "turno": 12
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "MOVE",
+    4,
+    1,
+    2
+   ],
+   "index": 7,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Move Reckless Innovator BF1→base"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 12
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Cast Switcheroo @BF0",
+    "Cast Switcheroo @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Hide Edge of Night @BF1",
+    "Hide Switcheroo @BF1",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "HIDE",
+    1,
+    1
+   ],
+   "index": 11,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Hide Edge of Night @BF1"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Cast Switcheroo @BF0",
+    "Cast Switcheroo @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "MOVE",
+    5,
+    1,
+    2
+   ],
+   "index": 10,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Move Reckless Innovator BF1→base"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 12
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Equip Edge of Night"
+   ],
+   "action": [
+    "ABILITY",
+    "ACTIVATED",
+    0
+   ],
+   "index": 8,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Equip Edge of Night"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 12,
+   "riga": "T12 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play Rengar Trophy Hunter",
+    "Play Rengar Trophy Hunter to BF0",
+    "Play Rengar Trophy Hunter to BF1",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play Vi Peacekeeper",
+    "Play Vi Peacekeeper to BF0",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Play Irresistible Faefolk",
+    "Play Irresistible Faefolk to BF0",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "UNIT",
+    0,
+    0,
+    0
+   ],
+   "index": 2,
+   "turno": 13,
+   "riga": "T13 B decision TURN_ACTION: Play Rengar Trophy Hunter to BF0"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T13 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "Play Edge of Night from Hidden @BF1"
+   ],
+   "action": [
+    "HIDDEN_PLAY",
+    null,
+    1
+   ],
+   "index": 1,
+   "turno": 13,
+   "riga": "T13 A decision REACTION: Play Edge of Night from Hidden @BF1"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T13 A choice trigger_order: trigger of Evelynn Agony's Embrace (on_card_played) of [trigger of Evelynn Agony's Embrace (on_card_played)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Play Irresistible Faefolk",
+    "Play Irresistible Faefolk to BF0",
+    "Move Fiora Victorious BF0→base",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 13,
+   "riga": "T13 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Cast Switcheroo @BF0",
+    "Cast Switcheroo @BF1",
+    "Play gear The Good Stuff @BF0",
+    "Play gear The Good Stuff @BF1",
+    "Cast Rampage @BF0",
+    "Cast Rampage @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Gutter Guardian BF1→base",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Hide Switcheroo @BF1"
+   ],
+   "action": [
+    "SPELL",
+    4,
+    0
+   ],
+   "index": 9,
+   "turno": 14,
+   "riga": "T14 A decision TURN_ACTION: Cast Rampage @BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play gear Boots of Swiftness @BF0",
+    "Play gear Boots of Swiftness @BF1",
+    "Cast Hold 'Em @BF0",
+    "Cast Hold 'Em @BF1",
+    "Cast Switcheroo @BF0",
+    "Cast Switcheroo @BF1",
+    "Play gear The Good Stuff @BF0",
+    "Play gear The Good Stuff @BF1",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Gutter Guardian BF1→base",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Move Reckless Innovator base→BF0",
+    "Move Reckless Innovator base→BF1",
+    "Hide Switcheroo @BF1"
+   ],
+   "action": [
+    "MOVE",
+    1,
+    2,
+    0
+   ],
+   "index": 18,
+   "turno": 14,
+   "riga": "T14 A decision TURN_ACTION: Move Reckless Innovator base→BF0"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 14
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Reckless Innovator base→BF0"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    0
+   ],
+   "index": 1,
+   "turno": 14,
+   "riga": "T14 A decision TURN_ACTION: Move Reckless Innovator base→BF0"
+  },
+  {
+   "k": "decide_mode",
+   "seat": "A",
+   "out": null,
+   "turno": 14
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "AMBUSH Rengar Trophy Hunter @BF0",
+    "AMBUSH Rengar Trophy Hunter @BF1"
+   ],
+   "action": [
+    "UNIT",
+    4,
+    0,
+    0
+   ],
+   "index": 1,
+   "turno": 14,
+   "riga": "T14 A decision REACTION: AMBUSH Rengar Trophy Hunter @BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Vex Apathetic BF1→base",
+    "Move Evelynn Entrancing BF1→base",
+    "Move K'Sante Courageous BF1→base",
+    "Move Momentary Companion BF1→base",
+    "Move Vex Apathetic BF1→base",
+    "Move Reckless Innovator BF1→base",
+    "Move Gutter Guardian BF1→base",
+    "Hide Switcheroo @BF0",
+    "Hide Switcheroo @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 14,
+   "riga": "T14 A decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play First Mate",
+    "Play First Mate",
+    "Play Vi Peacekeeper",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Play Irresistible Faefolk",
+    "Cast Call to Glory @BF0",
+    "Cast Call to Glory @BF1",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Rengar Trophy Hunter base→BF1",
+    "Move Sett Kingpin base→BF0",
+    "Move Sett Kingpin base→BF1",
+    "Move Kinkou Initiate base→BF0",
+    "Move Kinkou Initiate base→BF1"
+   ],
+   "action": [
+    "MOVE",
+    1,
+    2,
+    0
+   ],
+   "index": 11,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Move Sett Kingpin base→BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Rengar Trophy Hunter base→BF0",
+    "Move Kinkou Initiate base→BF0"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    0
+   ],
+   "index": 1,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Move Rengar Trophy Hunter base→BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Move Kinkou Initiate base→BF0"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    2,
+    0
+   ],
+   "index": 1,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Move Kinkou Initiate base→BF0"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass",
+    "AMBUSH Vi Peacekeeper @BF0",
+    "Showdown Call to Glory @BF0"
+   ],
+   "action": [
+    "UNIT",
+    2,
+    0,
+    0
+   ],
+   "index": 1,
+   "turno": 15,
+   "riga": "T15 B decision SHOWDOWN_ACTION: AMBUSH Vi Peacekeeper @BF0"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "choice",
+   "seat": "B",
+   "kind": "target:stun_unit",
+   "default": 0,
+   "declaring": true,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 B choice target:stun_unit [Vi Peacekeeper]: Rengar Trophy Hunter (A, Might 6, Bandle Scouts' Academy) of [Rengar Trophy Hunter (A, Might 6, Bandle Scouts' Academy)]"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass",
+    "Showdown Call to Glory @BF0"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "choice",
+   "seat": "B",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 B choice trigger_order: trigger of Pillaged Armory (on_conquer) of [trigger of Pillaged Armory (on_conquer)]"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play First Mate",
+    "Play First Mate to BF0",
+    "Play Irresistible Faefolk",
+    "Play Irresistible Faefolk to BF0",
+    "Cast Call to Glory @BF0",
+    "Cast Call to Glory @BF1"
+   ],
+   "action": [
+    "UNIT",
+    0,
+    0,
+    0
+   ],
+   "index": 2,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Play First Mate to BF0"
+  },
+  {
+   "k": "choice",
+   "seat": "A",
+   "kind": "trigger_order",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 A choice trigger_order: trigger of Vex Apathetic (on_enemy_unit_played) of [trigger of Vex Apathetic (on_enemy_unit_played)]"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Call to Glory @BF0",
+    "Cast Call to Glory @BF1",
+    "Move Sett Kingpin BF0→base"
+   ],
+   "action": [
+    "MOVE",
+    0,
+    0,
+    2
+   ],
+   "index": 3,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Move Sett Kingpin BF0→base"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass",
+    "Cast Showstopper @BF0",
+    "Cast Showstopper @BF1",
+    "Cast Call to Glory @BF0",
+    "Cast Call to Glory @BF1"
+   ],
+   "action": [
+    "SPELL",
+    1,
+    0
+   ],
+   "index": 1,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Cast Showstopper @BF0"
+  },
+  {
+   "k": "choice",
+   "seat": "B",
+   "kind": "target:buff_unit",
+   "default": 0,
+   "declaring": true,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 B choice target:buff_unit [Showstopper]: Sett Kingpin (B, Might 6, base) of [Sett Kingpin (B, Might 6, base)]"
+  },
+  {
+   "k": "choice",
+   "seat": "B",
+   "kind": "target:move_unit",
+   "default": 0,
+   "declaring": true,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 B choice target:move_unit [Showstopper]: Sett Kingpin (B, Might 6, base) of [Sett Kingpin (B, Might 6, base)]"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass",
+    "React Call to Glory @BF0",
+    "React Call to Glory @BF1"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass",
+    "Showdown Call to Glory @BF1"
+   ],
+   "action": [
+    "SPELL",
+    2,
+    1
+   ],
+   "index": 1,
+   "turno": 15,
+   "riga": "T15 B decision SHOWDOWN_ACTION: Showdown Call to Glory @BF1"
+  },
+  {
+   "k": "choice",
+   "seat": "B",
+   "kind": "cost_extras",
+   "default": 0,
+   "declaring": false,
+   "chosen": 0,
+   "by": "base",
+   "riga": "T15 B choice cost_extras [Call to Glory]: {'energy': 3, 'power': 0, 'buffs': 1} of [{'energy': 3, 'power': 0, 'buffs': 1}]"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "reaction",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision REACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "A",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 A decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "showdown_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision SHOWDOWN_ACTION: Pass"
+  },
+  {
+   "k": "decision",
+   "seat": "B",
+   "point": "turn_action",
+   "menu": [
+    "Pass"
+   ],
+   "action": [
+    "PASS",
+    null,
+    null
+   ],
+   "index": 0,
+   "turno": 15,
+   "riga": "T15 B decision TURN_ACTION: Pass"
+  }
+ ]
+}
