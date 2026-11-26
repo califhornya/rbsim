@@ -501,6 +501,29 @@ impl Game {
         }
     }
 
+    /// Option `peso_valore_rete` (default 0 = off, identical search): the leaf value of a node evaluated with the
+    /// net is (1 - peso) * hand-written value + peso * the net's value, both from the searching seat. Needs the
+    /// prior's function to return (probs, value) (`arena_rs.make_probs_valore`).
+    fn set_search_valore_rete(&mut self, seat: &str, peso: f64) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().peso_valore_rete = peso;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
+    /// (net forward calls, of which only for the value) of a search seat: the extra calls of `peso_valore_rete`.
+    fn search_valore_rete_stats(&self, seat: &str) -> PyResult<(i64, i64)> {
+        let s = seat_of(seat)?;
+        Ok(match &self.search[s.idx()] {
+            Some(c) => (c.borrow().chiamate_rete, c.borrow().chiamate_solo_valore),
+            None => (0, 0),
+        })
+    }
+
     /// Option `registro` (default off): one record per decision of the seat, see `search_registro`.
     fn set_search_registro(&mut self, seat: &str, on: bool) -> PyResult<()> {
         let s = seat_of(seat)?;

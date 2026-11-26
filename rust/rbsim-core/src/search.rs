@@ -250,6 +250,12 @@ pub trait Lockstep {
 
 pub trait Prior {
     fn probs(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<Vec<f32>>;
+    /// The probabilities and, when the caller's function gives it, the net's value of the state. The value is
+    /// seen from the seat of the observation `x` encodes (the one who decides: PPONet's critic, trained on the
+    /// outcome of the observed seat), the same point of view as `table_value`. Default: no value.
+    fn eval(&mut self, x: Vec<f32>, q: i64, ctx: [f32; F::F_CTX], descs: &[Descriptor]) -> R<(Vec<f32>, Option<f32>)> {
+        Ok((self.probs(x, q, ctx, descs)?, None))
+    }
 }
 
 // -------------------------------------------------------- determinize ---
@@ -1195,6 +1201,13 @@ pub struct SearchCore {
     root_in: Option<RootIn>,
     root_p_pre: Option<Vec<(Action, f64)>>,
     root_noised: bool,
+    /// Option `peso_valore_rete` (default 0 = off: nothing changes): leaf value of a node evaluated with the net =
+    /// (1 - w) * hand-written value + w * net's value (same point of view: the searching seat).
+    pub peso_valore_rete: f64,
+    /// Statistics: calls of the net's forward, and those made only for the value (menus of fewer than 2
+    /// options, with `peso_valore_rete` > 0; they were not made before).
+    pub chiamate_rete: i64,
+    pub chiamate_solo_valore: i64,
 }
 
 static LIVE_CORES: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
@@ -1269,6 +1282,9 @@ impl SearchCore {
             root_in: None,
             root_p_pre: None,
             root_noised: false,
+            peso_valore_rete: 0.0,
+            chiamate_rete: 0,
+            chiamate_solo_valore: 0,
         }));
         core.borrow_mut().me_ref = Some(Rc::downgrade(&core));
         LIVE_CORES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1377,10 +1393,26 @@ impl SearchCore {
             Some(net) => {
                 let obs = Observation::from_state(&mut c.gs, side);
                 let tv = table_value_v(&obs, self.valutazione);
+                let w = self.peso_valore_rete;
                 let mut p = Vec::new();
                 if legal.len() < 2 {
                     for a in legal {
                         dict_set(&mut p, a, 1.0);
+                    }
+                    // Only with the value weight on: one forward for the value alone (a one-option menu).
+                    if w > 0.0 && legal.len() == 1 {
+                        let descs = on_fresh_loop(c, |fg| -> R<Vec<Descriptor>> {
+                            legal.iter().map(|a| F::describe_action(fg, side, a)).collect()
+                        })?;
+                        let x = encode_observation(&obs, &c.gs.reg);
+                        let q = F::question_of(self.question);
+                        let ctx = F::context(descs.len(), 0, false, false);
+                        let (_, nv) = net.borrow_mut().eval(x, q, ctx, &descs)?;
+                        self.chiamate_rete += 1;
+                        self.chiamate_solo_valore += 1;
+                        if let Some(nv) = nv {
+                            return Ok((p, (1.0 - w) * tv + w * nv as f64));
+                        }
                     }
                     return Ok((p, tv));
                 }
@@ -1393,11 +1425,16 @@ impl SearchCore {
                 if self.registro && self.root_in.is_none() {
                     self.root_in = Some(RootIn { x: x.clone(), q, ctx, descs: descs.clone() });
                 }
-                let probs = net.borrow_mut().probs(x, q, ctx, &descs)?;
+                let (probs, nv) = net.borrow_mut().eval(x, q, ctx, &descs)?;
+                self.chiamate_rete += 1;
                 for (a, pr) in legal.iter().zip(probs) {
                     dict_add(&mut p, a, pr as f64);
                 }
-                Ok((p, tv))
+                let v = match nv {
+                    Some(nv) if w > 0.0 => (1.0 - w) * tv + w * nv as f64,
+                    _ => tv,
+                };
+                Ok((p, v))
             }
         }
     }

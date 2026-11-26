@@ -35,13 +35,29 @@ def make_probs(net):
     return probs
 
 
-def _probs_for(path: str):
-    if path not in _NETS:
+def make_probs_valore(net):
+    """Come `make_probs`, ma restituisce (probs, value): il valore del critico della stessa chiamata. E' dal posto
+    di chi decide (l'osservazione `x` e' costruita da quel posto), lo stesso punto di vista di `table_value`."""
+    import torch
+
+    def probs(x, q, ctx, otype, ocards, ofeats):
+        n = len(otype)
+        with torch.no_grad():
+            logits, v = net(torch.as_tensor(x[None]), torch.tensor([q]), torch.tensor([0]),
+                            torch.as_tensor(ctx[None]), torch.as_tensor(otype[None]), torch.as_tensor(ocards[None]),
+                            torch.as_tensor(ofeats[None]), torch.ones(1, n, dtype=torch.bool))
+            return torch.softmax(logits[0], dim=0).numpy(), float(v[0])
+    return probs
+
+
+def _probs_for(path: str, valore: bool = False):
+    key = path + ("|valore" if valore else "")
+    if key not in _NETS:
         import torch
         from riftbound.ai.ppo.model import load
         torch.set_num_threads(1)
-        _NETS[path] = make_probs(load(path).eval())
-    return _NETS[path]
+        _NETS[key] = (make_probs_valore if valore else make_probs)(load(path).eval())
+    return _NETS[key]
 
 
 def liste_coperte() -> set:
@@ -74,7 +90,8 @@ def game(task):
     probe_cand / probe_opp (the win probe of that side), diag_finestre (the last element carries, per side, the `search_finestre_diag` entries: the collaudo of
     scripts/diag/collaudo_finestre.py), fin_cand / fin_opp (the `finestre`
     option of that side's search), val_cand / val_opp
-    ([nome, k, alpha]: the leaf evaluation of that side, default storica), log (the last element
+    ([nome, k, alpha]: the leaf evaluation of that side, default storica), vr_cand / vr_opp (weight 0..1 of the
+    net's value in the leaves, default 0 = off, search unchanged; only for prior_ppo), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
@@ -92,7 +109,8 @@ def game(task):
         iters = opz.get(f"iter_{lato}")
         if kind not in ("prior_ppo", "mano"):
             raise ValueError(f"bot {kind}: su Rust solo prior_ppo e mano")
-        probs = _probs_for(str(path)) if kind == "prior_ppo" else None
+        vr = float(opz.get(f"vr_{lato}") or 0.0)
+        probs = _probs_for(str(path), vr > 0) if kind == "prior_ppo" else None
         if iters:
             g.set_search_agent(seat, int(iters), seed * 2 + (seat == "B"), None, probs, bool(opz.get("log")))
         else:
@@ -103,6 +121,8 @@ def game(task):
             g.set_search_win_probe(seat, True)
         if opz.get(f"fin_{lato}"):
             g.set_search_finestre(seat, True)
+        if vr > 0 and kind == "prior_ppo":
+            g.set_search_valore_rete(seat, vr)
         val = opz.get(f"val_{lato}")
         if val and val[0] != "storica":
             g.set_search_valutazione(seat, val[0], float(val[1]), float(val[2]))
@@ -113,10 +133,13 @@ def game(task):
     ci, ce, ct = g.search_stats(cand_seat)
     oi, oe, ot = g.search_stats(other)
     extra = {}
+    if opz.get("vr_cand") or opz.get("vr_opp"):     # (chiamate della rete, di cui solo per il valore) per lato
+        extra["rete"] = {lato: g.search_valore_rete_stats(seat)
+                         for lato, seat in (("cand", cand_seat), ("opp", other))}
     if opz.get("log"):
         import json
-        extra = {"log": {lato: righe_log(g.search_log(seat))
-                         for lato, seat in (("cand", cand_seat), ("opp", other))}}
+        extra["log"] = {lato: righe_log(g.search_log(seat))
+                        for lato, seat in (("cand", cand_seat), ("opp", other))}
     if opz.get("diag_finestre"):
         import json
         extra["finestre_diag"] = {lato: json.loads(g.search_finestre_diag(seat))

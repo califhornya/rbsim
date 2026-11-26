@@ -47,7 +47,6 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
-
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
   in Rust verificata sul Mac; 24/11 bot Rust a 0,030 s contro Python a 0,400 s: 0,4938 (lim. inf. 0,478): **PROMOSSO**.
@@ -72,15 +71,17 @@ sonda|congela|fuori|t9-foglia`, `scripts/rust/sonda_mac.command`): sui dati salv
 Evelynn automatica, solo 6 partite distinte (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. In corso: raccolta pilota con registro ed esplorazione (Rust + `raccolta.py`); «primo responso» (prior/visite/Q a
-   138 e 512, fino a fine partita); D83 riprodotto (se confermato, correzione prima della raccolta grande).
-2. Poi: allenamento pilota (politica e valore), una partita della rete nuova, confronto in sviluppo, arena.
-3. `sonda_mac` una volta sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
+1. In corso: raccolta pilota (Rust + `raccolta.py`); «primo responso» (prior/visite/Q a 138 e 512); D83 riprodotto
+   (se confermato, correzione prima della raccolta grande).
+2. Scritti e provati con pesi casuali (26/11): allenamento, `peso_valore_rete` (spento = identica), `generazione_mac.command`.
+   Da lanciare sul Mac col checkpoint.
+3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
-- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs` agente PPO, `search_py.rs` prior).
+- `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
+  Riallenamento: `riftbound/rs/{raccolta,allena,generazione}.py`, `scripts/rust/` omonimi, `generazione_mac.command`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
