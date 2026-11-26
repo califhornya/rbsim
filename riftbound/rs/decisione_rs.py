@@ -116,14 +116,15 @@ def _chiave(P: dict) -> str:
 
 
 def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: int | None = None, valutazione=None,
-           finestre: bool = False, quota=None, diag_out: list | None = None):
+           finestre: bool = False, quota=None, diag_out: list | None = None, diag_trace: bool = False):
     """Una partita. `k`, `iterazioni`: la ricerca del campione da rifare con quelle iterazioni (override in Rust;
     None: l'originale); `ordine`: l'ordinale, fra gli eventi di decisione del campione, di quella di k: la
     partita si ferma li'. -> (righe di log "search", eventi del campione, evento di k).
     `valutazione` = (nome, k, alpha): SOLO la ricerca k usa quella valutazione (il prefisso resta storico).
     `stato(e)`: tiene lo stato (state_raw) degli eventi del campione per cui è vero.
     `finestre`, `quota` = (sottostringhe, n): SOLO la ricerca k li usa (il prefisso resta quello originale);
-    `diag_out` riceve le righe di diagnosi (`search_finestre_diag`) del campione."""
+    `diag_out` riceve le righe di diagnosi (`search_finestre_diag`) del campione; `diag_trace`: la diagnosi
+    (con i semi delle simulazioni) c'e' per ogni ricerca del campione, anche senza finestre e quota."""
     from riftbound.rs import arena_rs, rust_bridge
     camp, umano = P["camp"], P["umano"]
     g = rust_bridge.build(P["seed"], P["deck_a"], P["deck_b"], P["starter"], P["max_turni"],
@@ -184,6 +185,8 @@ def _gioca(P: dict, k: int | None, iterazioni: int | None, stato=None, ordine: i
             g.set_search_valutazione(s, v[0], float(v[1]), float(v[2]))
         if mine:
             g.set_search_timing(s, True)
+            if diag_trace:
+                g.set_search_diag_trace(s, True)
             if k is not None and iterazioni is not None:
                 g.set_search_override(s, k, int(iterazioni))
                 if valutazione is not None:
@@ -284,7 +287,7 @@ def riassunto(state_raw: dict, seat: str) -> dict:
         c = "campione" if b.controller == seat else "avversario" if b.controller == opp else None
         campi.append({"campo": i, "nome": b.named, "controlla": c, "campione": lato(mine), "avversario": lato(theirs)})
     return {"seat": seat, "turno": o.turn, "attivo": o.active, "punti": [o.my_points, o.opp_points],
-            "energia": [o.my_energy, o.opp_energy], "campi": campi, "base": {"campione": lato(o.my_base_units),
+            "energia": [o.my_energy, o.opp_energy], "potenza": [dict(o.my_power), dict(o.opp_power)], "campi": campi, "base": {"campione": lato(o.my_base_units),
             "avversario": lato(o.opp_base_units)}, "mano": list(o.my_hand), "mano_avv": o.opp_hand_count,
             "showdown": o.showdown_bf, "v": o.victory_score}
 
@@ -322,7 +325,7 @@ def _classifica(riga: dict, menu: list) -> list[dict]:
 
 
 def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool = True, valutazione=None,
-          finestre: bool = False, quota=None) -> dict:
+          finestre: bool = False, quota=None, semi: bool = False) -> dict:
     """La ricerca k del campione rifatta con `iterazioni` (None: come l'originale), sulla stessa partita.
     -> {k, turn, point, iterazioni, azione, azione_originale, uguale, riproduce (il prefisso 0..k-1
     coincide con l'originale; con iterazioni None anche l'azione di k), classifica (per visite),
@@ -330,7 +333,7 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
     `finestre` (le simulazioni giocano le finestre di reazione/showdown per i due posti con un pilota) e
     `quota` = ([sottostringhe], n) (radice della ricerca di turno) valgono solo per la ricerca k; con uno dei due
     il risultato ha `diagnosi`: per figlio della radice etichetta, visite, q e il conteggio delle giocate dei
-    piloti (posto, punto, etichetta)."""
+    piloti (posto, punto, etichetta). `semi`: la diagnosi c'e' sempre, con `seeds` (un seme per simulazione)."""
     orig = originale(partita)
     if not 0 <= k < len(orig):
         raise ValueError(f"k={k} fuori dalle {len(orig)} ricerche del campione")
@@ -339,7 +342,7 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
         iterazioni = P["iterazioni"]
     diag: list = []
     righe, _ev, e = _gioca(P, k, iterazioni, ordine=_ORIGINALI[_chiave(P)]["pos"][k], valutazione=valutazione,
-                           finestre=finestre, quota=quota, diag_out=diag)
+                           finestre=finestre, quota=quota, diag_out=diag, diag_trace=semi)
     if e is None or len(righe) <= k:
         raise RuntimeError(f"la ricerca {k} non c'è nella partita rifatta ({len(righe)} ricerche)")
     r = righe[k]
@@ -352,7 +355,7 @@ def rifai(partita: dict, k: int, iterazioni: int | None = None, posizione: bool 
            "uguale": uguale, "prefisso_ok": prefisso, "dopo_sonda": any(k >= x for x in sonde(partita)),  # solo informazione
            "riproduce": prefisso and (uguale if iterazioni is None else None),
            "classifica": _classifica(r, e["menu"]), "riga": r}
-    if finestre or quota:
+    if finestre or quota or semi:
         out["diagnosi"] = next((d for d in diag if d["k"] == k), None)
     if posizione:
         out["posizione"] = riassunto(e["state_raw"], P["camp"])
