@@ -1,7 +1,7 @@
 """Raccolta pilota del campione contro se stesso (riftbound/rs/raccolta.py), per riallenare la rete con la ricerca.
 
   raccolta.py --nome pilota [--partite-per-matchup 200] [--matchup EK ER ...] [--processi 4] [--iterazioni 138]
-              [--ckpt F | --casuali] [--regole 6427b90+D72-D82] [--esplorazione 0.3 0.25 4] [--out runs/raccolta]
+              [--ckpt F | --casuali] [--regole 6427b90+D72-D83] [--esplorazione 0.3 0.25 4] [--out runs/raccolta]
 
 Uscita: <out>/<nome>/ con partite/<matchup>/<seme>.pkl.gz, indice.jsonl, provenienza.json, misura.txt (scritta dopo le
 prime 200 partite e alla fine). Rilanciato, salta le partite gia' fatte.

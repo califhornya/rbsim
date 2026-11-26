@@ -1,6 +1,6 @@
 #!/bin/bash
 # Primo responso (riftbound/rs/responso.py): quando prior, visite e Q indicano mosse diverse, quale vince di piu'?
-# 10 matchup x semi 300 e 301 (partite campione contro campione, regole 6427b90+D72-D82, valutazione rimonta, 138
+# 10 matchup x semi 300 e 301 (partite campione contro campione, regole 6427b90+D72-D83, valutazione rimonta, 138
 # iterazioni), fino a 4 decisioni di turno per partita rifatte a 138 e 512 iterazioni; dove c'e' disaccordo ogni mossa
 # e' giocata fino alla fine su 32 mondi `ignote` (indici da 7000).
 # Da lanciare con:  bash scripts/rust/responso_mac.command [checkpoint.pt]

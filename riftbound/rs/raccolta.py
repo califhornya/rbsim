@@ -30,7 +30,7 @@ BASE_SEME = 30_000_000
 MAX_TURNS = 40
 ITERAZIONI = 138
 ESPLORAZIONE = (0.3, 0.25, 4)       # alfa, eps, mosse (Astra)
-REGOLE_DEFAULT = "6427b90+D72-D82"
+REGOLE_DEFAULT = "6427b90+D72-D83"
 CKPT_DEFAULT = "runs/sett/ekris_s12/ckpt_040000.pt"
 
 

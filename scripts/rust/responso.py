@@ -1,7 +1,7 @@
 """Primo responso (riftbound/rs/responso.py): quando la ricerca suggerisce una mossa diversa, si vince di piu'?
 
   responso.py --out DIR [--ckpt F | --casuali] [--matchup EK ES ...] [--semi 300 301] [--per-partita 4]
-        [--mondi 32] [--iterazioni 138 512] [--processi 4] [--regole 6427b90+D72-D82] [--valutazione rimonta]
+        [--mondi 32] [--iterazioni 138 512] [--processi 4] [--regole 6427b90+D72-D83] [--valutazione rimonta]
 
 Partite autonome del campione (10 matchup coperti, semi 300 e 301), al piu' `--per-partita` decisioni di turno a testa,
 rifatte a due budget; dove prior, visite e Q indicano mosse diverse, ogni mossa e' giocata fino alla fine sugli stessi

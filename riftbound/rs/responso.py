@@ -23,7 +23,7 @@ from statistics import mean, stdev
 from riftbound.rs import attacco as A, decisione_rs as D
 
 SEMI = (300, 301)           # posto A per il pari, B per il dispari
-REGOLE = "6427b90+D72-D82"
+REGOLE = "6427b90+D72-D83"
 VALUTAZIONE = "rimonta"
 ITERAZIONI = (138, 512)
 MONDI0 = 7000               # primo indice dei mondi
