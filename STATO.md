@@ -22,7 +22,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   fissano), `6427b90+D72-D76`, `+D72-D77` o `+D72-D80` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
   ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
 - (25/11, Matteo) D77 su un profilo nuovo, D72-D76 invariato: le run già allenate con lui restano riproducibili.
-- (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo (D78-D80: `+D72-D80`).
+- (25/11, Matteo) Difetti di motore: raccolti, poi corretti in un pacchetto su un profilo nuovo (D78-D80: `+D72-D80`);
+  (26/11) D81 subito, da solo (`+D72-D81`), perché falsava ogni partita con Sett.
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup con i mazzi già ammessi (Rengar: ER, KR, ed EK di nuovo).
 - Liste riconosciute dal contenuto (`lista_sha`); perimetro Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
@@ -67,9 +68,10 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 §8 accumulo chiuso (26/11, `docs/bot/accumulo/`, GIOCATE §8): campione della pagina con `--valutazione rimonta` (default di
 `coach.py`; spenta nell'arena e nelle verifiche se non chiesta). Arena su semi nuovi contro la storica: EK 0,522, ES 0,533,
 gli altri 8 matchup 0,515-0,607 (tutti tengono). Bocciati `accumulo` (sempre), `minaccia`/`corsa` (non cambiano le mosse).
-Matteo: 2 partite Evelynn-Sett col campione nuovo; a fine partita «Quale giocata di Sett mi ha costretto a spendere una carta
+Matteo: 2 partite Evelynn-Sett col campione nuovo (ora su D72-D81); a fine partita «Quale giocata di Sett mi ha costretto a spendere una carta
 o a difendere il mio campo prima dell'ottavo punto?». Da fare: i 13 episodi umani ricontrollati su D80 (Astra).
-D81 raccolto (25/11, segnalazione 26): Call to Glory senza buff costa 1 Power invece di 3 Energia (tutti i profili).
+D81 corretto (26/11, segnalazione 26, `test_d81.py`): Call to Glory senza buff costava 1 Power invece di 3 Energia;
+profilo `6427b90+D72-D81`, ora default della pagina. `tests/rust` 320, storico ES 80/80, D72-D80 contro D72-D81 9/30 diverse (tutte D81).
 
 ## Prossimi passi
 2. §8 accumulo (sopra), poi §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.

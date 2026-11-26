@@ -1324,7 +1324,9 @@ Fixed in Rust (25/11) on the profile 6427b90+D72-D80, `09d9384`; 6427b90,
 
 ### D81. Call to Glory without the buff costs 1 Power
 
-Collected (25/11) for the next package; every profile has it, Python too.
+Fixed in Rust (26/11, owner's decision: at once, not in a package) on the
+profile 6427b90+D72-D81, `bbf59b3`; the earlier profiles and Python keep the
+behavior below.
 
 - **Seen.** Raised by the owner (25/11, Evelynn-Sett, coach page on Rust,
   6427b90+D72-D80, T3): Evelynn Entrancing at 5 (Hold 'Em) attacks, a buffed
@@ -1353,6 +1355,10 @@ Collected (25/11) for the next package; every profile has it, Python too.
   cost is affordable; `spend_buffs_for_power` unchanged. Red test first: the
   position above, no option without the buff at 0 Energy; at 3 Energy, offered
   and priced 3.
+  Done: `choose_cost_extras` behind `regole.d81()`, counted as `D81`
+  (`tests/rust/test_d81.py`, red before on the three D72-D81 cases that change).
+  Historical profile 80/80 identical to Python (ES, both seats); D72-D80 against
+  D72-D81 on ES, 30 seeds: 9 games differ, D81 fired in all 9 at the first difference.
 
 ## Deviations, priority 3: card data (BACKLOG O1)
 
