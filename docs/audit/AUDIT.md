@@ -1360,6 +1360,28 @@ behavior below.
   Historical profile 80/80 identical to Python (ES, both seats); D72-D80 against
   D72-D81 on ES, 30 seeds: 9 games differ, D81 fired in all 9 at the first difference.
 
+### D82. Edge of Night from face down attaches at the first battlefield
+
+Fixed in Rust (26/11, at once like D81: it is in the owner's Evelynn list) on the
+profile 6427b90+D72-D82; the earlier profiles and Python keep the behavior below.
+
+- **Seen.** Raised by the owner (26/11, Evelynn-Sett, coach page on Rust,
+  6427b90+D72-D81, T11): Edge of Night hidden at Valley of Idols (BF1), played
+  from face down in the showdown there; its ability offers only his units at
+  Bandle Scouts' Academy (BF0), not his unit at Valley of Idols. The card says
+  "attach it to a unit you control (here)".
+- **Engine.** `_fire_card_played` (Rust `lp_pay.rs: fire_card_played`) fires
+  `on_self_played` at the played card's battlefield, found through its unit; a
+  gear has none, so it falls back to battlefield 0. `_attach_gear` with `here`
+  reads `_units_where(ctx, side, "")`, i.e. `ctx.bf`: the friendly units at BF0.
+  The ability is on the chain and resolves after `_hidden_bf` is cleared, so the
+  facedown filter (§811.1.d) doesn't apply either. Only Edge of Night (the one
+  non-unit `on_self_played`) is affected; hidden at BF0 it works.
+- **Weight.** Every Edge of Night played from face down at BF1 (Evelynn lists):
+  attached to a unit elsewhere, or to nothing when no friendly unit is at BF0.
+- **Fix (Rust).** Behind `regole.d82()`: with no unit for the card, `own_bf` is
+  the card's `hidden_bf` (the battlefield it was played at), counted as `D82`.
+
 ## Deviations, priority 3: card data (BACKLOG O1)
 
 Printed text from `piltover_archive.json`; tests in

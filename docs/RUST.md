@@ -50,6 +50,10 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
   Stessi dati carte e impronta di `6427b90+D72-D76`. Resta com'è.
 - `6427b90+D72-D81`: il precedente più D81 (26/11, `regole.d81()`): in `choose_cost_extras` (`lp_costs2.rs`) Call to
   Glory senza il buff costa le sue 3 Energia (prima 1 Power), quindi con 0 Energia resta solo l'opzione col buff.
+  Resta com'è.
+- `6427b90+D72-D82`: il precedente più D82 (26/11, `regole.d82()`): in `fire_card_played` (`lp_pay.rs`) una carta
+  giocata da coperta che non è un'unità (Edge of Night) innesca `on_self_played` sul campo dove era coperta (prima il
+  campo 0), così «attach it to a unit you control (here)» sceglie fra le unità di quel campo.
   Profilo di default della pagina e da usare per run e arene nuove (le tarature del campione restano misurate su D72-D77).
 - Scelta: `--regole` in `scripts/ppo.py` e `scripts/diag/arena_mazzi.py` (variabile `RBSIM_REGOLE`, ereditata dai
   worker); in codice `rust_bridge.build(..., regole=...)`, `rust_bridge.registry(regole)` (uno per thread e profilo).
@@ -59,8 +63,8 @@ registro, quindi valido per i due giocatori, le copie di ricerca, i worker e i r
 - Provenienza: `regole` (il profilo), `regole_partite` (quelle di ciascun matchup), `registro.rust_effettivo`
   (l'impronta del registro corretto) e `correzione_dati`; le righe dell'arena e la chiave di ripresa hanno le regole
   del matchup (una riga senza = `6427b90`); accanto a ogni `ckpt_*.pt` di `ppo.py` un `ckpt_*.provenienza.json`.
-- `riftbound_rs.correzioni()`: quante volte D72..D81 hanno cambiato qualcosa in questo thread, ricerca compresa
-  (D77 da D72-D77 in poi; D78-D80 da D72-D80; D81 solo su D72-D81); sui profili corretti ogni decisione della traccia ne ha l'istantanea.
+- `riftbound_rs.correzioni()`: quante volte D72..D82 hanno cambiato qualcosa in questo thread, ricerca compresa
+  (D77 da D72-D77 in poi; D78-D80 da D72-D80; D81 da D72-D81; D82 solo su D72-D82); sui profili corretti ogni decisione della traccia ne ha l'istantanea.
   `scripts/rust/confronto_regole.py` gioca le stesse partite su `6427b90` e `6427b90+D72-D76` (o i due profili di
   `--storiche`/`--corrette`) e spiega la prima
   differenza.
@@ -116,7 +120,7 @@ risultati in `docs/rust/misure/calibra_<data>/`). Passi di `scripts/rust/calibra
 - `correzioni` (profili D72+) è il contatore al momento della registrazione, dopo il lavoro dell'agente: la domanda a un umano lo porta com'era prima della risposta.
 
 ### Pagina coach su Rust (fase 4)
-- `scripts/coach.py --motore rust|python` (default rust), `--regole` (default `6427b90+D72-D81`), `--iterazioni`.
+- `scripts/coach.py --motore rust|python` (default rust), `--regole` (default `6427b90+D72-D82`), `--iterazioni`.
   Una partita fra due mazzi di `arena_rs.COPERTI` contro il campione o `simple_trade` gira su Rust con quel profilo
   (`riftbound/ai/coach_rs.py`, `RustGame`); il resto (altri mazzi, `--net` con i consigli, "La rete", `--motore python`)
   gira su Python con `6427b90`. `state()["regole"]`/`["motore"]` e le righe di `games.jsonl` dicono cosa si è giocato.
