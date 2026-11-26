@@ -244,3 +244,12 @@ def test_rivedi_da_capo_a_fondo(tmp_path):
     s3 = json.loads((tmp_path / "rivedi3" / "00_prova_k8" / "rivedi.json").read_text())
     assert s3["errore"] is None and len(s3["vista"]["condizioni"]) in (4, 5)
     assert "vista della ricerca" in (tmp_path / "rivedi3" / "rivedi.txt").read_text(encoding="utf-8")
+    # la mossa del campione e' quella giocata (registrata nella vista), non la piu' visitata (Codex, PR 67); una vista
+    # vecchia senza `azione_originale` la chiede al rifacimento e da' la stessa
+    vj = ser / "00_prova_k8" / "vista.json"
+    vista = json.loads(vj.read_text())
+    assert vista["azione_originale"] and s3["vista"]["mossa_campione"] == vista["azione_originale"]
+    vj.write_text(json.dumps({k: x for k, x in vista.items() if k not in ("azione", "azione_originale")}))
+    A.rivedi(ser, tmp_path / "rivedi4", 1, 4, 10, lambda *_: None)
+    s4 = json.loads((tmp_path / "rivedi4" / "00_prova_k8" / "rivedi.json").read_text())
+    assert s4["vista"]["mossa_campione"] == vista["azione_originale"]

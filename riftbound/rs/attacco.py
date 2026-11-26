@@ -613,6 +613,7 @@ def confronta(partita: dict, k: int, out_dir: Path | None = None, riferimento="c
     if out_dir:
         (out_dir / "proposte.json").write_text(json.dumps(proposte, ensure_ascii=False), encoding="utf-8")
         (out_dir / "vista.json").write_text(json.dumps({"k": k, "iterazioni": iters, "prefisso_ok": vista["prefisso_ok"],
+                                                       "azione": vista["azione"], "azione_originale": vista.get("azione_originale"),
                                                        "classifica": classifica}, ensure_ascii=False), encoding="utf-8")
         (out_dir / "esito.json").write_text(json.dumps(esito, ensure_ascii=False, indent=1), encoding="utf-8")
         (out_dir / "esito.txt").write_text("\n".join(testo_esito(esito)) + "\n", encoding="utf-8")
@@ -910,7 +911,9 @@ def _posizione_rivedi(cart: Path, out: Path, processi: int, quota_n: int, mirata
         p = next(x for x in proposte if x["nome"] == nome_att)
         etichetta = p.get("prima_etichetta") or next((ev[2] for ev in p["events"] if ev[1] == "turn_action"), None)
         vista0 = json.loads((cart / "vista.json").read_text(encoding="utf-8"))
-        orig = vista0["classifica"][0]["azione"] if vista0["classifica"] else None
+        # la mossa giocata dal campione (la ricerca sceglie il figlio visitato col q piu' alto, non il piu' visitato:
+        # Codex, PR 67); le viste delle serie del 26/11 non la registrano, si chiede al rifacimento
+        orig = vista0.get("azione_originale") or D.rifai(partita, k, None, posizione=False)["azione_originale"]
         conta = list(dict.fromkeys(ev[2] for ev in p["events"] if ev[1] == "showdown_action"))
         vista = _vista_ricerca(partita, k, pos["P"]["iterazioni"], {"attacco": etichetta, "campione": orig}, conta,
                                quota_n, mirata_n, etichetta, print_)
