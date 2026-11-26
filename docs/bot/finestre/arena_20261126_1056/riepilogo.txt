@@ -1,0 +1,16 @@
+finestre_mac 26/11/2026 10:57; 8e48079 Merge pull request #61 from califhornya/claude/busy-thompson-mi47eo; regole 6427b90+D72-D81
+checkpoint ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 9 processi; durata prevista 16-23 min
+
+== candidato rimonta+finestre contro rimonta senza finestre
+
+== Arena su 2 matchup (26/11 10:57)
+candidato: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); avversario: il bot a mano con i prior PPO di ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 138 iterazioni per ricerca + win probe + finestre + valutazione rimonta k=3.0 alpha=0.2 al candidato, 138 iterazioni per ricerca + win probe + valutazione rimonta k=3.0 alpha=0.2 all'avversario; 9 processi
+regole fissate prima: ciascuno di - limite inferiore > 0,47; ciascun blocco (ES EK), a pesi uguali, >= 0,52 e limite inferiore > 0,50; tutte -> passa
+   ES 800 coppie, seed 116000-116799; EK 800 coppie, seed 110000-110799
+   provenienza in docs/bot/finestre/arena_20261126_1056/provenienza.jsonl; regole 6427b90+D72-D81; motore: ES rust, EK rust
+   Evelynn-Sett: 0.474 +- 0.020 (0.454-0.494); con Evelynn, comincia Evelynn 0.45; con Evelynn, comincia Sett 0.33; con Sett, comincia Evelynn 0.48; con Sett, comincia Sett 0.64
+   Evelynn-Kha'Zix: 0.531 +- 0.018 (0.513-0.550); con Evelynn, comincia Evelynn 0.77; con Evelynn, comincia Kha'Zix 0.59; con Kha'Zix, comincia Evelynn 0.27; con Kha'Zix, comincia Kha'Zix 0.49
+   blocco ES EK a pesi uguali: 0.503 +- 0.014 (0.489-0.516)
+   blocco ES EK: no (punteggio 0.503, limite inferiore 0.489)
+   21 min da questo lancio
+   Esito: NON PASSA

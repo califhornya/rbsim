@@ -1,0 +1,3 @@
+candidato in A: ricerche con finestre del candidato 26 (giocate dei piloti 925), dell'avversario 0
+candidato in B: ricerche con finestre del candidato 33 (giocate dei piloti 816), dell'avversario 0
+collaudo finestre: SUPERATO
