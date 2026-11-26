@@ -252,9 +252,20 @@ def _uguali(a, b, tol: float = 1e-9) -> bool:
     return a == b
 
 
-def _identita(s: dict, serie_p: list, scelta: list, riferimento_campione: bool) -> list[str]:
+def _stato_identita(dif: list, fatti: int, attesi: int) -> str:
+    """OK solo se tutti i confronti attesi sono stati fatti e nessuno differisce (Codex, PR 69: zero confronti non e'
+    un'identita' verificata)."""
+    if attesi == 0:
+        return "identita NON DISPONIBILE (nessuna riga da confrontare)"
+    if dif:
+        return f"identita DIFFERENZE {len(dif)}" + ("" if fatti == attesi else f" (confronti {fatti} su {attesi})")
+    return "identita OK" if fatti == attesi else f"identita INCOMPLETA (confronti {fatti} su {attesi})"
+
+
+def _identita(s: dict, serie_p: list, scelta: list, riferimento_campione: bool) -> tuple[list[str], int, int]:
     """Confronta `valori.fine_turno` e `t9` delle righe della sonda con quelle salvate in scelta.jsonl (`continua`), per il
-    riferimento e per le proposte A con una linea propria nella serie. -> le differenze (vuota = identico)."""
+    riferimento e per le proposte A con una linea propria nella serie. -> (differenze, confronti fatti, confronti
+    attesi): un mondo o una linea assenti dalle righe salvate contano come confronti mancati."""
     corrisp = {}
     if riferimento_campione:
         corrisp[A.NOME_RIF] = A.NOME_RIF
@@ -265,19 +276,22 @@ def _identita(s: dict, serie_p: list, scelta: list, riferimento_campione: bool) 
             corrisp[p["nome"]] = q["nome"]
     salvate = {rows[0]["world"]: rows for rows in scelta}
     dif = []
+    fatti = attesi = 0
     for rows in s["righe"]:
         for r in rows:
-            vecchia = salvate.get(r["world"])
-            if r["line"] not in corrisp or vecchia is None:
+            if r["line"] not in corrisp:
                 continue
-            v = next((x for x in vecchia if x["line"] == corrisp[r["line"]]), None)
+            attesi += 1
+            vecchia = salvate.get(r["world"])
+            v = None if vecchia is None else next((x for x in vecchia if x["line"] == corrisp[r["line"]]), None)
             if v is None:
                 continue
+            fatti += 1
             if not _uguali(r["valori"], v["valori"]["fine_turno"]):
                 dif.append(f"mondo {r['world']} {r['line']}: valori {r['valori']} contro {v['valori']['fine_turno']}")
             if not _uguali(json.loads(json.dumps(r["t9"])), v["t9"]):
                 dif.append(f"mondo {r['world']} {r['line']}: t9 diverso")
-    return dif
+    return dif, fatti, attesi
 
 
 def congela(serie_dir: Path, out_dir: Path, processi: int = 1, print_=print, ckpt: str | None = None,
@@ -292,7 +306,7 @@ def congela(serie_dir: Path, out_dir: Path, processi: int = 1, print_=print, ckp
         rivedi_dir = trovate[-1] if trovate else None
     righe: list[str] = []
     schede: list[dict] = []
-    tot = {"attacco": 0, "ordinaria": 0, "senza": 0, "errori": 0, "diff": 0}
+    tot = {"attacco": 0, "ordinaria": 0, "senza": 0, "errori": 0, "diff": 0, "id_ok": 0, "posizioni": 0}
     attacchi_attesi = []
     fuori_attesi = []
     for cart in sorted(p for p in serie_dir.iterdir() if (p / "esito.json").is_file()):
@@ -323,7 +337,9 @@ def congela(serie_dir: Path, out_dir: Path, processi: int = 1, print_=print, ckp
             continue
         serie_p = json.loads((cart / "proposte.json").read_text(encoding="utf-8"))
         scelta = A._rilegge(cart / "scelta.jsonl")
-        dif = _identita(s, serie_p, scelta, esito["riferimento"] == "campione")
+        dif, fatti, attesi = _identita(s, serie_p, scelta, esito["riferimento"] == "campione")
+        stato_id = _stato_identita(dif, fatti, attesi)
+        tot["id_ok"] += stato_id == "identita OK"
         rif_salvato = [A._riga(rows, A.NOME_RIF)["returns"] for rows in scelta] if esito["riferimento"] == "campione" else []
         saturata = bool(rif_salvato) and sum(r == 1.0 for r in rif_salvato) in (0, len(rif_salvato))
         rivedi_testo = "-"
@@ -340,6 +356,7 @@ def congela(serie_dir: Path, out_dir: Path, processi: int = 1, print_=print, ckp
                 rivedi_testo = "(la scelta della serie)"
         tot[s["decisione"] if s["migliore"] else "senza"] += 1
         tot["diff"] += len(dif)
+        tot["posizioni"] += 1
         marg = s["margini"].get(s["migliore"]) if s["migliore"] else None
         if (cart.name in ATTESI) != (s["decisione"] == "attacco"):
             fuori_attesi.append(cart.name)
@@ -347,18 +364,22 @@ def congela(serie_dir: Path, out_dir: Path, processi: int = 1, print_=print, ckp
             attacchi_attesi.append(cart.name)
         scheda.update({"decisione": s["decisione"], "migliore": s["migliore"], "margine": marg, "apertura": s.get("apertura"),
                        "apertura_unica": s["apertura_unica"], "saturata": saturata, "rivedi": rivedi_testo,
-                       "identita": dif[:10], "secondi_cpu": s["secondi_cpu"], "margini": s["margini"]})
+                       "identita": dif[:10], "identita_confronti": [fatti, attesi], "identita_stato": stato_id,
+                       "secondi_cpu": s["secondi_cpu"], "margini": s["margini"]})
         schede.append(scheda)
         righe.append(f"{cart.name} | {s['decisione']} | migliore {s['migliore']} | margine "
                      + (f"{marg:+.3f}" if marg is not None else "-") + f" | apertura {s.get('apertura')}"
                      + ("" if s["apertura_unica"] in (True, None) else " [NON unica]")
                      + f" | saturata {'si' if saturata else 'no'} | serie: {esito['esito']} | rivedi: {rivedi_testo} | "
-                     + ("identita OK" if not dif else f"identita DIFFERENZE {len(dif)}"))
+                     + stato_id)
         for d in dif[:3]:
             righe.append(f"    {d}")
         (out_dir / "congela.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
     righe.append(f"totale: attacco {tot['attacco']} (attesi {len(ATTESI)}), ordinaria {tot['ordinaria']}, senza proposta "
-                 f"{tot['senza']}, identità " + ("OK" if tot["diff"] == 0 else f"DIFFERENZE {tot['diff']}")
+                 f"{tot['senza']}, identità OK in {tot['id_ok']} su {tot['posizioni']} posizioni"
+                 + (f", DIFFERENZE {tot['diff']}" if tot["diff"] else "")
+                 + (f", incompleta o non disponibile in {tot['posizioni'] - tot['id_ok']}"
+                    if not tot["diff"] and tot["id_ok"] < tot["posizioni"] else "")
                  + (f", fuori dall'atteso: {', '.join(fuori_attesi)}" if fuori_attesi and not solo else "")
                  + (f", errori {tot['errori']}" if tot["errori"] else ""))
     (out_dir / "congela.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
@@ -490,14 +511,17 @@ def diagnosi_t9(out_dir: Path, processi: int = 1, ckpt: str | None = None, casua
         dati = A.esegui(pos, modo, range(mondi), linee, out_dir / f"{modo}.jsonl", processi, print_)
         astra = A._rilegge(dati_astra / f"{modo}_0_100.jsonl")
         dif = []
+        fatti, attesi = 0, 3 * len(dati)          # valley, matteo, buff_sett in ogni mondo rifatto
         for wm, wa in zip(dati, astra):
             da = {r["line"]: r for r in wa}
             for r in wm:
                 if r["line"] in ("valley", "matteo", "buff_sett") and r["line"] in da:
+                    fatti += 1
                     dif += [f"mondo {r['world']} {r['line']}: {d}" for d in A._riga_uguale(json.loads(json.dumps(r)), da[r["line"]])]
-        difetti += len(dif)
-        righe.append(f"{modo}: identità con Astra (valley, matteo, buff_sett) su {min(len(dati), len(astra))} mondi: "
-                     + ("IDENTICA" if not dif else f"DIFFERENZE {len(dif)}; prime: {dif[:3]}"))
+        difetti += len(dif) + (attesi - fatti)    # un confronto mancato non e' un'identita' (Codex, PR 69)
+        righe.append(f"{modo}: identità con Astra (valley, matteo, buff_sett), confronti {fatti} su {attesi}: "
+                     + ("IDENTICA" if not dif and fatti == attesi > 0 else
+                        f"INCOMPLETA ({attesi - fatti} mancati)" if not dif else f"DIFFERENZE {len(dif)}; prime: {dif[:3]}"))
         c = A.confronto(dati, "valley")
         for li in linee:
             n = li["nome"]
