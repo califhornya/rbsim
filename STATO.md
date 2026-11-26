@@ -69,13 +69,15 @@ spenta altrove); arena contro la storica EK 0,522, ES 0,533, altri 8 0,515-0,607
 Matteo: partita Evelynn-Sett 013325 (`rimonta`, D72-D81, quasi certamente la prima delle due) vinta 8 a 4 in 14; alla
 domanda §8 nessuna giocata di Sett l'ha messo in difficoltà (GIOCATE §8). Manca la seconda. Da fare: i 13 episodi umani
 ricontrollati su D80 (Astra).
-§9 (GIOCATE, segnalazione 28): il campione gioca Vi con Vex vivo e lo toglie solo dopo; il primo passo dell'ordine giusto
-ha 1 visita su 5000 (`rifai` sul Mac). Domanda ad Astra (file dato a Matteo, fuori dal repo; Matteo: il bot deve imparare,
-non essere imboccato): correggere a mano o imparare con esplorazione forzata alla radice. Si aspetta la risposta prima del
-rilevatore §9 in `episodi.py`.
+§9 (GIOCATE, segnalazione 28): il campione gioca Vi con Vex vivo e lo toglie dopo; nelle simulazioni nessuno giocava le
+finestre di reazione e showdown (copie senza agenti). Astra (26/11, risposte fuori dal repo): migliorare la ricerca, `rimonta`
+resta il campione; esperimento sul T9 di 013325 (k=10): finestre on/off × quota on/off sugli stessi mondi, linea di Matteo
+guidata, continuazioni fino alla fine per Kinkou su Bandle / Vi in base / Sett su Valley; poi il valore oltre il turno.
+Fatto (spento di default, storico 80/80): `finestre` (piloti PPO nelle simulazioni, ripresa della finestra), `quota`, diagnosi;
+`decisione.py incrocio|guidata|continua`; rilevatore §9 in `episodi.py`. In attesa: il blocco sul Mac (`docs/bot/esperimenti/`).
 
 ## Prossimi passi
-1. Risposta di Astra (domande del 26/11; le simulazioni non giocano reazioni né showdown): la strada per §7 e §9.
+1. Leggere `docs/bot/esperimenti/` (T9, Vex ES/EK): se le finestre trovano la linea da sole → arena; solo con la quota → esplorazione in allenamento.
 2. §7 (showdown 6 a 2, l'avversario risponde; ricontrollare a 138): una correzione alla volta.
 3. Poi: `win_probe` in arena (Rust nativo); apertura G1; Bo3 col post-side; prior in Rust se l'arena rallenta; mazzo nuovo.
 4. Fili del 23/11: mulligan archiviato come indizio; Switcheroo da contare sui replay; GIOCATE §6 col prior 040000 su Rust.
