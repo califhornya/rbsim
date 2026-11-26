@@ -10,6 +10,11 @@
 # Prerequisiti: uv, Rust (https://rustup.rs). Con Rust l'estensione si compila e la ricerca gira su Rust: qui serve.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+if [ -z "${CKPT:-}" ]; then
+  for c in runs/sett/ekris_s12/ckpt_040000.pt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; do
+    [ -f "$c" ] && { CKPT="$c"; break; }
+  done
+fi
 CKPT="${CKPT:-runs/sett/ekris_s12/ckpt_040000.pt}"
 PARTITE="${PARTITE:-200}"
 COPPIE="${COPPIE:-100}"
