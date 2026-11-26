@@ -142,3 +142,36 @@ def test_diff_proposte_ignora_le_chiavi_nuove_del_tavolo():
     assert A.diff_proposte(pm, pa) == []
     pm[3]["state"]["theirs"] = []
     assert len(A.diff_proposte(pm, pa)) == 1
+
+
+def test_mondi_con_cima_nota_e_mano_pubblica(pos):
+    """Le posizioni con carte note (cima del mazzo vista, carte di mano note all'avversario) non si saltano piu':
+    `fisse` tiene la cima nota dei due mazzi; `ignote` (come `determinize`) tiene la cima nota del campione, azzera
+    quella dell'avversario (mazzo rimescolato) e tiene al loro posto le carte di mano dell'avversario note."""
+    import copy
+    P = pos["P"]
+    camp, opp = P["camp"], A._altro(P["camp"])
+    tree = copy.deepcopy(pos["tree"])
+    r = tree["root"]
+    for s in (camp, opp):
+        d = r[s]["$v"]["deck"]["$v"]
+        d["known_top"] = [d["cards"][-1], d["cards"][-2]]     # le due carte in cima, cima per prima
+    mano_opp = r[opp]["$v"]["hand"]
+    assert len(mano_opp) >= 2
+    r[opp]["$v"]["hand_public"] = [mano_opp[1]]
+    p2 = {**pos, "tree": tree}
+    for seme in (pos["base"] + 2000, pos["base"] + 2001):
+        f = A.mondo(p2, "fisse", seme)
+        for s in (camp, opp):
+            d, d0 = f["root"][s]["$v"]["deck"]["$v"], r[s]["$v"]["deck"]["$v"]
+            assert d["cards"][-2:] == d0["cards"][-2:] and d["known_top"] == d0["known_top"]
+            assert sorted(d["cards"]) == sorted(d0["cards"])
+        g = A.mondo(p2, "ignote", seme)
+        dc, dc0 = g["root"][camp]["$v"]["deck"]["$v"], r[camp]["$v"]["deck"]["$v"]
+        assert dc["cards"][-2:] == dc0["cards"][-2:] and dc["known_top"] == dc0["known_top"]
+        assert g["root"][opp]["$v"]["deck"]["$v"]["known_top"] == []
+        assert g["root"][opp]["$v"]["hand"][1] == mano_opp[1] and g["root"][opp]["$v"]["hand_public"] == [mano_opp[1]]
+        assert g["root"][camp]["$v"]["hand"] == r[camp]["$v"]["hand"]
+        # il mondo si carica e una continuazione arriva in fondo
+        row = A.continua(p2, g, A.linea_campione(), 2000, "ignote")
+        assert row["winner"] in ("A", "B", "DRAW")

@@ -303,3 +303,16 @@ Da Matteo (partita 013325, Evelynn-Sett, T9; SEGNALAZIONI 28).
     della pagina. Strumento generale: `scripts/rust/attacco.py` (`riproduci-t9` deve dare i numeri di Astra identici;
     `posizioni`, `confronta`, `serie`; valutazione del campione a fine turno per ogni mondo), sul Mac con
     `scripts/rust/attacco_mac.command`.
+- **Quarto giro (26/11, Mac, `docs/bot/esperimenti/attacco_20261126/`, `scripts/rust/attacco.py`).**
+  - `riproduci-t9`: IDENTICO ai dati di Astra (18 proposte, 16 mondi di scelta, 100 di verifica).
+  - T9 col campione come riferimento: il campione gioca la linea di Valley (esiti uguali a `valley` nei 100 mondi);
+    esito «indeciso» come Astra (la selezione prende p04, -3 [-7,4; +1,4]). La valutazione del campione a fine T9
+    mette tutte le 18 proposte sotto la sua linea (rimonta da -0,50 a -0,88 contro -0,11, 16 mondi; p16 -0,50) e
+    anche dopo il turno di Evelynn (p16 -0,90 contro -0,80): nel T9 ci sono i due difetti. La valutazione di
+    fine turno non vede quanto vale distruggere le unità di Evelynn su Bandle.
+  - EK seme 7, posto B, T9: «attacco migliore (mai costruita)», +35 [+24,8; +45,2] (96 contro 61 vittorie): un'ondata
+    con Shadow Clone, Traveling Merchant e Vex su BF0, Rengar in AMBUSH, Switcheroo. La prima mossa ha 0 visite su 138
+    (il campione gioca Fizz Trickster, 101); la valutazione concorda (+0,98 a fine turno): solo costruzione.
+  - Pagina 154531 T13: riferimento scelto; pagina 201243 T4: indeciso (+1 [-11,9; +13,9]).
+  - 9 posizioni su 12 saltate (carte in cima al mazzo note o carte di mano note): ora i mondi tengono quelle carte
+    come `determinize`. Da rifare la serie: `scripts/rust/attacco_serie_mac.command` (24 posizioni, riga «totale»).
