@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts/rust"))
 
 STORICHE, CORRETTE = "6427b90", "6427b90+D72-D76"
-CODICI = tuple(f"D{n}" for n in range(72, 82))
+CODICI = tuple(f"D{n}" for n in range(72, 83))
 
 
 def semi(spec: str) -> list:

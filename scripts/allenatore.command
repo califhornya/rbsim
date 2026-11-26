@@ -5,7 +5,7 @@
 # runs/sett/ekris_s12/ckpt_040000.pt (allenato su Evelynn, Kha'Zix, Rengar, Ivern
 # e Sett). Se qui non c'è, lo prende dall'altro checkout (../rbsim/runs/...);
 # senza nessuno dei due restano gli altri avversari.
-# Motore: Rust con le regole 6427b90+D72-D81 (D72-D81 corretti) fra i cinque mazzi;
+# Motore: Rust con le regole 6427b90+D72-D82 (D72-D82 corretti) fra i cinque mazzi;
 # l'estensione si compila qui a ogni avvio (serve Rust: https://rustup.rs; la prima
 # volta qualche minuto). Senza Rust, o fuori dai cinque mazzi, gioca su Python.
 # Opzioni, per esempio:
