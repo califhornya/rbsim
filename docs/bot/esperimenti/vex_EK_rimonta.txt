@@ -34,3 +34,88 @@ carte che aumentano la Might: Call to Glory, Friendship, Grand Strategem, Grim R
   seme 32 posto B: 35 ricerche, 0 episodi (67 s)
   seme 33 posto B: 36 ricerche, 1 episodi (69 s)
   seme 34 posto B: 29 ricerche, 0 episodi (70 s)
+  seme 35 posto B: 32 ricerche, 3 episodi (73 s)
+  seme 36 posto B: 32 ricerche, 2 episodi (75 s)
+  seme 37 posto B: 16 ricerche, 4 episodi (76 s)
+  seme 38 posto B: 27 ricerche, 1 episodi (77 s)
+  seme 39 posto B: 33 ricerche, 5 episodi (79 s)
+  seme 40 posto B: 21 ricerche, 0 episodi (80 s)
+  seme 41 posto B: 46 ricerche, 3 episodi (82 s)
+  seme 42 posto B: 13 ricerche, 1 episodi (83 s)
+  seme 43 posto B: 29 ricerche, 4 episodi (85 s)
+  seme 44 posto B: 24 ricerche, 2 episodi (87 s)
+  seme 45 posto B: 25 ricerche, 3 episodi (88 s)
+  seme 46 posto B: 12 ricerche, 1 episodi (89 s)
+  seme 47 posto B: 24 ricerche, 2 episodi (90 s)
+  seme 48 posto B: 29 ricerche, 2 episodi (92 s)
+  seme 49 posto B: 34 ricerche, 7 episodi (94 s)
+  seme 50 posto B: 31 ricerche, 2 episodi (95 s)
+
+matchup EK: 50 partite, 1578 decisioni esaminate (ricerche del campione)
+§8 accumulo: 117 episodi in 39 partite su 50
+§7 spreco: 4 episodi in 4 partite su 50
+§8 per stato della corsa al momento della decisione (episodi / decisioni Play-Move del campione):
+  race -1: 46/232 = 19.8%
+  race +0: 0/22 = 0.0%
+  race +1: 71/97 = 73.2%
+
+§9 Vex Apathetic, matchup EK, 50 partite (posti B):
+  turni del campione con la Vex su un campo: 78
+  occasioni (unita' giocata con la Vex su un campo): 77, di cui in turno avversario (AMBUSH/reazione) 0
+    uccisa dopo (ordine sbagliato?): 8   sopravvive: 69   n.d.: 0
+  ordine giusto (Vex tolta prima, poi unita' giocata): 4 turni
+  TURNI UNICI con scelta possibile (turno del campione, Vex avversaria su un campo, unita' giocabile nel menu): 71
+    giocata sotto la Vex, poi Vex uccisa: 7   Vex uccisa prima, poi giocata: 2   Vex sopravvissuta: 59   altro (Vex tolta senza giocare unita'): 3
+  esempi uccisa dopo:
+    seme 11 turno 13 Play Rengar Trophy Hunter; Vex tolta con: Move Zed Without a Sound base→BF0
+      scripts/rust/decisione.py rifai --autonoma EK:11:b --k 24 --iterazioni 138 1000 5000 --attese "Move Zed Without a Sound base→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 12 turno 8 Play Zed Without a Sound; Vex tolta con: Cast Void Assault @BF1
+      scripts/rust/decisione.py rifai --autonoma EK:12:a --k 13 --iterazioni 138 1000 5000 --attese "Cast Void Assault @BF1" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 28 turno 12 AMBUSH Rengar Trophy Hunter @BF1; Vex tolta con: Move Tentacle base→BF0
+      scripts/rust/decisione.py rifai --autonoma EK:28:a --k 20 --iterazioni 138 1000 5000 --attese "Move Tentacle base→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 28 turno 12 AMBUSH Kha'Zix Mutating Horror @BF1; Vex tolta con: Move Tentacle base→BF0
+      scripts/rust/decisione.py rifai --autonoma EK:28:a --k 21 --iterazioni 138 1000 5000 --attese "Move Tentacle base→BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 31 turno 7 Play Fizz Trickster to BF0; Vex tolta con: React Star-Crossed @BF0
+      scripts/rust/decisione.py rifai --autonoma EK:31:b --k 6 --iterazioni 138 1000 5000 --attese "React Star-Crossed @BF0" --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  esempi sopravvive:
+    seme 4 turno 4 Deploy champion Kha'Zix Mutating Horror
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 3 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 4 turno 6 Play Zed Without a Sound
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 4 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 6 turno 4 AMBUSH Kha'Zix Mutating Horror @BF1
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 2 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 6 turno 6 Play Reckless Innovator
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 4 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 6 turno 10 Play Vex Apathetic
+      scripts/rust/decisione.py rifai --autonoma EK:6:a --k 11 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  esempi ordine giusto:
+    seme 4 turno 8 Play Reckless Innovator
+      scripts/rust/decisione.py rifai --autonoma EK:4:a --k 11 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 8 turno 12 Play Fizz Trickster to BF1
+      scripts/rust/decisione.py rifai --autonoma EK:8:a --k 26 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 26 turno 10 Play Evelynn Entrancing
+      scripts/rust/decisione.py rifai --autonoma EK:26:a --k 24 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+    seme 30 turno 8 Play Irresistible Faefolk to BF1
+      scripts/rust/decisione.py rifai --autonoma EK:30:a --k 9 --iterazioni 138 1000 5000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+
+esempi §8 accumulo:
+  turno 11 Move Vex Apathetic base→BF1; Might gia' 5; punti 4-4
+    decisione.py rifai --autonoma EK:1:b --k 18 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 17 Move Vex Apathetic base→BF1; Might gia' 7; punti 7-7
+    decisione.py rifai --autonoma EK:1:b --k 44 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 17 Move Fizz Trickster base→BF1; Might gia' 12; punti 7-7
+    decisione.py rifai --autonoma EK:1:b --k 45 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 5 Play Vex Apathetic to BF0; Might gia' 5; punti 2-1
+    decisione.py rifai --autonoma EK:3:b --k 4 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 7 Play Fizz Trickster to BF0; Might gia' 9; punti 3-2
+    decisione.py rifai --autonoma EK:3:b --k 7 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+
+esempi §7 spreco:
+  turno 10 Showdown Punch First @BF0; Might gia' 12 vs 5; punti 4-4
+    decisione.py rifai --autonoma EK:37:b --k 10 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 13 Showdown Punch First @BF1; Might gia' 11 vs 9; punti 5-6
+    decisione.py rifai --autonoma EK:41:b --k 37 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 6 Showdown Punch First @BF0; Might gia' 7 vs 6; punti 2-2
+    decisione.py rifai --autonoma EK:48:a --k 7 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
+  turno 8 Showdown Punch First @BF0; Might gia' 9 vs 8; punti 2-4
+    decisione.py rifai --autonoma EK:50:a --k 12 --iterazioni 42 200 1000 --campione B --ckpt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt --valutazione-orig rimonta:3.0:0.2
