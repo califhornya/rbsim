@@ -1,6 +1,6 @@
 # STATO
 
-Aggiornato: 2026-11-26 sera. Ramo `rust` (default).
+Aggiornato: 2026-11-27. Ramo `rust` (default).
 
 ## Sigle
 - EK = Evelynn contro Kha'Zix; R/I/S = Rengar, Ivern, Sett (EKR, EKRI, EKRIS = i pool di mazzi).
@@ -18,23 +18,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Un difetto nuovo si corregge una volta, in Rust (AUDIT.md).
 - (24/11, Astra/Matteo) Matteo gioca a mano contro il campione nella pagina coach; i consigli della vecchia rete
   si scollegano (solo con `--net`, su Python). (25/11) La pagina gira su Rust col profilo D72-D80 dove Rust copre la partita.
-- (25/11, Astra) Un selettore delle regole in Rust: `6427b90` (default, = Python; le verifiche di parità lo
-  fissano), `6427b90+D72-D76`, `+D72-D77` o `+D72-D80` (`--regole`, solo su Rust, scelto all'avvio). Provenienza, righe e
-  ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo; promozioni solo con le sue partite.
-- (25/11, Matteo) Ogni correzione su un profilo nuovo (le run allenate restano riproducibili); difetti raccolti e
-  corretti in pacchetto (D78-D80: `+D72-D80`); (26/11) D81 subito, da solo (`+D72-D81`): falsava ogni partita con Sett.
-  (26/11) D82 subito, da solo (`+D72-D82`): Edge of Night da coperta si attaccava al campo 0 (Evelynn di Matteo).
+- (25/11, Astra/Matteo) Selettore delle regole in Rust (`--regole`; `6427b90` = Python, fissato dalle verifiche di parità);
+  ogni correzione su un profilo nuovo (run riproducibili), in pacchetto o da sola se falsa le partite (D81, D82);
+  provenienza e ripresa dell'arena con le regole; run nuova (`--init`) per allenare su un profilo.
 - Rust identico a Python sul profilo storico, deviazioni note comprese (D59, D62, D71); ramo non portato = NotPorted.
 - Ogni tappa comprende i matchup coi mazzi già ammessi; liste riconosciute dal contenuto (`lista_sha`); perimetro
   Rust = `arena_rs.COPERTI` (i cinque mazzi fra loro).
-- Elementi della pila con identità (`ChainItem.uid`): in Python una scelta sulla pila è l'oggetto, non l'indice.
-- Sideboard provata con liste variate (`riftbound/rs/mazzi.py`): il training non fa sideboarding.
+- Pila con identità (`ChainItem.uid`); sideboard provata con liste variate (`mazzi.py`), il training non la fa.
 - Confine PPO e prior: Rust costruisce la domanda, Python forward (+ campionamento o softmax).
 - Budget (metodo (a) di Astra): verifica esatta con due copie a passo comune, niente import di posizioni.
 - (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
-- Divergenze dell'arena mista: quelle solo nelle ricerche si rigiocano coi conteggi registrati
-  (identiche = spiegate); quelle di partita al rilancio; si guardano solo quelle che restano.
+- Arena mista: divergenze solo nelle ricerche rigiocate coi conteggi registrati; si guardano solo quelle che restano.
 - (26/11, Matteo e Astra) Filone principale: riallenare la rete con la ricerca (visite N/ΣN e esito ±1), --init da
   ckpt_040000 (che resta l'avversario fisso), stessa architettura. Pilota: 2.000 partite (200 per matchup, D72-D82),
   Dirichlet 0,25/α 0,3 alle radici di turno, temperatura 1 sulle prime 4 decisioni di turno, poi la più visitata;
@@ -47,6 +42,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
+- (27/11, Matteo; Astra non disponibile) «Pensa» = politica migliorata per simulazione: alla decisione di turno la mossa
+  del campione + le 2 più visitate, giocate fino alla fine sugli stessi 32 mondi `ignote` (40000..), si gioca la media
+  più alta (pari: il campione). Misura sulle 480 posizioni, verifica su 100 mondi diversi (50000..); regola fissata
+  prima: lim. inf. > 0 e ≥20 posizioni cambiano mossa. Campione predefinito invariato senza arena (lim. inf. > 50%).
+
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
   in Rust verificata sul Mac; 24/11 bot Rust a 0,030 s contro Python a 0,400 s: 0,4938 (lim. inf. 0,478): **PROMOSSO**.
@@ -64,25 +64,25 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 
 ## In corso
 Nessun guadagno: pilota (b) 47,95%, (c) 49,05%; (d) 50,2% [48,7, 51,7]; scelta finale visite − Q −0,3 pp [−1,0, +0,3];
-sonda A fuori campione −0,70 pp [−3,81, +1,89] (37 posizioni); 1.000 contro 138: 51,2% [49,6, 52,9] (p95 per turno 5,2 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
-+19 pp [+9,5, +28,5] sulla linea del bot. Altri 4 replay (`muovi_20261127_1255/`): 4 posizioni, M−B +4,5 pp [−2,0,
-+16,0]. 60 autonome nuove (`movimento_20261127_1237/`, CCX63): 80 posizioni, M−B +5,0 [+1,1, +8,8], ma il campione
-muove già in 61 (+6,0); schiera in base in 10 (+2,6 [−3,4, +10,9]). Quota: cambia 19 mosse, Q − campione +0,2 pp [−1,2,
-+1,7]: NON PASSA, niente arena. Strada del movimento chiusa.
-§8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
+sonda A fuori campione −0,70 pp [−3,81, +1,89]; 1.000 contro 138: 51,2% [49,6, 52,9]; movimento dalla base
+(`movimento_20261127_1237/`): quota Q − campione +0,2 pp [−1,2, +1,7], NON PASSA, strada chiusa. §8-§9: `rimonta` default
+della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
+Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.command`, `tests/rust/test_fondo.py`; suite
+485): qui ~2,5 s di cpu per rigiocata → ~240 s per decisione, ~25 s sul Mac a 9 processi; CCX63 stimato 1-1,5 h.
 
 ## Prossimi passi
-1. (Astra non disponibile) Proposta a Matteo: «Pensa» per la pagina = alle decisioni di turno le prime 3 mosse della
-   ricerca giocate fino alla fine su 32 mondi, si gioca la migliore; prima la misura sulle 480 posizioni (mondi di
-   scelta e di verifica separati), poi la pagina. Server: `server_prepara.sh`.
-2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
+1. `fondo.command` sul CCX63 (`server_prepara.sh`, tmux `fondo`); risultati in `docs/bot/esperimenti/fondo_*`.
+2. Se passa: «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`) e arena candidato con Pensa contro campione;
+   prima il costo (riga `stima dell'arena` del riepilogo: a occhio ~60 h di CCX63 per 100 coppie).
+3. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
-  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`.
+  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`;
+  «Pensa»: `fondo.py`, `fondo.command`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,

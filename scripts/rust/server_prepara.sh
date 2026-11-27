@@ -36,7 +36,7 @@ cat <<'MSG'
      scp runs/sett/ekris_s12/ckpt_040000.pt root@<server>:rbsim/runs/sett/ekris_s12/
    (sul server prima: mkdir -p rbsim/runs/sett/ekris_s12)
 3. dentro tmux (cosi' la corsa sopravvive alla disconnessione):
-     tmux new -s movimento
-     bash scripts/rust/movimento.command
-   avanzamento: tail -f runs/movimento/*.out   (stacca con Ctrl-b d, riattacca con tmux attach -t movimento)
+     tmux new -s fondo
+     bash scripts/rust/fondo.command
+   avanzamento: tail -f runs/fondo/*.out   (stacca con Ctrl-b d, riattacca con tmux attach -t fondo)
 MSG
