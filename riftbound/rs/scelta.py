@@ -292,25 +292,33 @@ def posizioni(matchup, n_partite: int, per_partita: int, n_mondi: int, out_dir, 
 # -- l'arena ------------------------------------------------------------------------------------------
 
 def _gioca_arena(job: dict) -> dict:
-    """Una partita dell'arena (in un processo): candidato con scelta per visite contro il campione (stesso checkpoint)."""
+    """Una partita dell'arena (in un processo): candidato contro il campione (stesso checkpoint), con le opzioni
+    `opz` del lavoro. Con `opz["log"]` la riga porta anche `log`: per lato (cand/opp) le ricerche [turno, iterazioni,
+    secondi di ricerca + secondi della sonda]."""
     import torch
     torch.set_num_threads(1)
     os.environ["RBSIM_REGOLE"] = job["regole"]
     seme, mu, posto = job["seme"], job["mu"], job["posto"]
     r = arena_rs.game((seme, "a" if seme % 2 == 0 else "b", posto, "prior_ppo", job["ckpt"], "prior_ppo", job["ckpt"],
                        mu, None, None, job["opz"]))
-    return {"mu": mu, "seme": seme, "posto": posto, "score": r[3]}
+    riga = {"mu": mu, "seme": seme, "posto": posto, "score": r[3]}
+    if job["opz"].get("log"):
+        riga["log"] = {lato: [[x[1], x[2], round(x[3] + x[4], 6)] for x in r[8]["log"][lato]]
+                       for lato in ("cand", "opp")}
+    return riga
 
 
 def _opz(iterazioni: int) -> dict:
     return generazione._opz(0.0, iterazioni, False) | {"scelta_cand": "visite"}
 
 
-def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = REGOLE,
-          iterazioni: int = ITERAZIONI, n_boot: int = 4000, print_=print) -> list[str]:
-    """Candidato (campione con scelta per visite) contro il campione, coppie a posti scambiati con lo stesso seme.
-    Le partite finite vanno in `arena_righe.jsonl` (ripresa per (matchup, seme, posto)). `promuovibile`: limite
-    inferiore dell'IC 95% del totale > 0,5. Scrive `arena.json` e `arena.txt`."""
+def arena_campione(matchup, coppie: int, out_dir, ckpt, opz: dict, base_seme: int, config_extra: dict,
+                   etichetta: str = "arena", processi: int = 1, regole: str = REGOLE, n_boot: int = 4000,
+                   print_=print) -> dict:
+    """Il cuore delle arene: candidato (opzioni `opz`) contro il campione con lo stesso checkpoint, coppie a posti
+    scambiati con lo stesso seme (`base_seme` + 1000 per matchup + k). Le partite finite vanno in
+    `arena_righe.jsonl` (ripresa per (matchup, seme, posto)) con il manifest (config_extra va nella configurazione:
+    impostazioni diverse sono rifiutate). -> {"fatte", "punti", "totale", "per", "config", "minuti"}."""
     from filelock import FileLock
     from riftbound.provenienza import checkpoint_sha256, scrivi_json_atomico
     out_dir = Path(out_dir)
@@ -318,9 +326,8 @@ def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = 
     t0 = time.time()
     ckpt = str(ckpt)
     righe = out_dir / "arena_righe.jsonl"
-    opz = _opz(iterazioni)
-    config = {"ckpt_sha256": checkpoint_sha256(ckpt), "regole": regole, "iterazioni": iterazioni,
-              "max_turni": arena_rs.MAX_TURNS, "base_seme": BASE_SEME_ARENA, "opz": opz}
+    config = {"ckpt_sha256": checkpoint_sha256(ckpt), "regole": regole, **config_extra,
+              "max_turni": arena_rs.MAX_TURNS, "base_seme": base_seme, "opz": opz}
     manifest = righe.with_name(righe.name + ".provenienza.json")
     with FileLock(str(righe) + ".rbsim.lock", timeout=0):
         if manifest.exists():
@@ -338,13 +345,13 @@ def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = 
                     fatte[(r["mu"], r["seme"], r["posto"])] = r
         jobs = []
         for mu in matchup:
-            s0 = BASE_SEME_ARENA + 1_000 * arena_rs.COPERTI.index(mu)
+            s0 = base_seme + 1_000 * arena_rs.COPERTI.index(mu)
             for k in range(coppie):
                 for posto in ("A", "B"):
                     if (mu, s0 + k, posto) not in fatte:
                         jobs.append({"mu": mu, "seme": s0 + k, "posto": posto, "ckpt": ckpt, "regole": regole,
                                      "opz": opz})
-        print_(f"== arena: {len(fatte)} partite gia' fatte, {len(jobs)} da giocare, {processi} processi")
+        print_(f"== {etichetta}: {len(fatte)} partite gia' fatte, {len(jobs)} da giocare, {processi} processi")
         if jobs:
             os.environ["RBSIM_REGOLE"] = regole
             with open(righe, "a") as f:
@@ -353,7 +360,7 @@ def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = 
                     f.write(json.dumps(r) + "\n")
                     f.flush()
                     if n % 20 == 0 or n == len(jobs):
-                        print_(f"== arena {n}/{len(jobs)} partite, {(time.time() - t0) / 60:.1f} min")
+                        print_(f"== {etichetta} {n}/{len(jobs)} partite, {(time.time() - t0) / 60:.1f} min")
                 if processi > 1:
                     with ProcessPoolExecutor(processi, mp_context=multiprocessing.get_context("spawn")) as pool:
                         for n, r in enumerate(pool.map(_gioca_arena, jobs), 1):
@@ -363,13 +370,28 @@ def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = 
                         registra(n, _gioca_arena(job))
     punti = {}
     for mu in matchup:
-        s0 = BASE_SEME_ARENA + 1_000 * arena_rs.COPERTI.index(mu)
+        s0 = base_seme + 1_000 * arena_rs.COPERTI.index(mu)
         punti[mu] = np.array([(fatte[(mu, s0 + k, "A")]["score"] + fatte[(mu, s0 + k, "B")]["score"]) / 2
                               for k in range(coppie)])
     tot, lo, hi, per = generazione.intervallo(punti, np.random.default_rng(0), n_boot)
+    return {"fatte": fatte, "punti": punti, "totale": (tot, lo, hi), "per": per, "config": config,
+            "minuti": round((time.time() - t0) / 60, 1)}
+
+
+def arena(matchup, coppie: int, out_dir, ckpt, processi: int = 1, regole: str = REGOLE,
+          iterazioni: int = ITERAZIONI, n_boot: int = 4000, print_=print) -> list[str]:
+    """Candidato (campione con scelta per visite) contro il campione, coppie a posti scambiati con lo stesso seme.
+    Le partite finite vanno in `arena_righe.jsonl` (ripresa per (matchup, seme, posto)). `promuovibile`: limite
+    inferiore dell'IC 95% del totale > 0,5. Scrive `arena.json` e `arena.txt`."""
+    out_dir = Path(out_dir)
+    ckpt = str(ckpt)
+    a = arena_campione(matchup, coppie, out_dir, ckpt, _opz(iterazioni), BASE_SEME_ARENA, {"iterazioni": iterazioni},
+                       "arena", processi, regole, n_boot, print_)
+    tot, lo, hi = a["totale"]
+    per, config = a["per"], a["config"]
     prom = bool(lo > 0.5)
     res = {"totale": [tot, lo, hi], "matchup": {mu: list(x) for mu, x in per.items()}, "coppie_per_matchup": coppie,
-           "promuovibile": prom, "configurazione": config, "minuti": round((time.time() - t0) / 60, 1)}
+           "promuovibile": prom, "configurazione": config, "minuti": a["minuti"]}
     testo = [f"Arena: candidato (scelta per visite) contro il campione {ckpt}, {coppie} coppie per matchup "
              f"({', '.join(matchup)}), {iterazioni} iterazioni, regole {regole}, semi da {BASE_SEME_ARENA}",
              f"totale {tot:.3f} (IC 95% {lo:.3f}-{hi:.3f}), pesi uguali fra i matchup",

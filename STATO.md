@@ -66,23 +66,23 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 Pilota (`generazione_20261126_1810`): (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): contro il campione
 50,2% [48,7, 51,7]; d−c +1,15 [−1,05, +3,35]; seguiti: cambia mossa in 70 su 480, +0,2 pp [−4,2, +4,4] (18/20/32).
 (27/11) Scelta finale (`scelta_20261127_0946/`, stesse 480 posizioni, stesso albero, 32 mondi): diverse in 167 (34,8%);
-visite − Q −0,3 pp [−1,0, +0,3], sui disaccordi −1,0 [−2,8, +0,7] (42/54/71); NON PASSA: resta la scelta per Q, niente
-arena. Anche con la Q a 1-2 visite le visite non vincono (−1,7, n=13). Nota ad Astra (giudizio, attacchi, iterazioni?).
+visite − Q −0,3 pp [−1,0, +0,3] (42/54/71): resta la Q. Astra: prima gli attacchi (sonda A su 72 posizioni nuove), poi
+un'arena 1.000 contro 138 iterazioni (pagina a 1.000 solo se lim. inf. > 50% e turni difficili ≤ 3-5 min).
 §8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
 offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Risposta di Astra. Proposta: giudizio e attacchi dalle segnalazioni 28-34 (campione troppo facile per Matteo);
-   forse prima un'arena 138 contro 1.000 iterazioni (la forza con più tempo non è mai stata misurata).
-2. Promozioni su semi nuovi (non 30M/40M/50M/60M). `sonda_mac` sulle 72 posizioni.
+1. Matteo: `sonda_mac.command` (partite nuove su D72-D83; IC ricampionando le partite di origine), poi `pensa_mac.command`
+   (semi 70M, latenza per turno). Poi le segnalazioni 28-34 come replay di diagnosi. Valore sul Pass e raccolta in coda.
+2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
-  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac.command`.
+  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
