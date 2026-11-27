@@ -420,6 +420,19 @@ impl Game {
         }
     }
 
+    /// Option `quota` (default off), for every turn search of the seat: in the root, while a child whose
+    /// label contains one of `labels` has fewer than `n` visits, the one with the fewest is simulated.
+    fn set_search_quota(&mut self, seat: &str, labels: Vec<String>, n: usize) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().quota = Some((labels, n));
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// Option `quota`, only for the search with index `k`: in the turn search's root, while a child whose
     /// label contains one of `labels` has fewer than `n` visits, the one with the fewest is simulated.
     fn set_search_quota_at(&mut self, seat: &str, k: usize, labels: Vec<String>, n: usize) -> PyResult<()> {

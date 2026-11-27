@@ -69,13 +69,13 @@ posizioni (non 72), −0,70 pp [−3,81, +1,89], VP 1, FP 2, FN 2: niente arena.
 51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
 +19 pp [+9,5, +28,5] sulla linea del bot. Altri 4 replay (`muovi_20261127_1255/`): 4 posizioni, M−B +4,5 pp [−2,0,
 +16,0]; il bot schiera in base dove muovere era meglio solo in 204705 T4 (+4): troppo poche per decidere.
-§8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata (Astra). Segnalazioni 29-35.
-«Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
+§8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
 
 ## Prossimi passi
-1. Risposta di Astra: allargare «muovo prima» alle 60 autonome dei seguiti (`muovi.py --autonome`), a parte le posizioni
-   dove il bot schiera in base; poi, se regge, riservare visite iniziali al movimento (offline).
-2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M).
+1. (Astra non disponibile: decidiamo noi, 27/11) `movimento.command` sul CCX63 (`server_prepara.sh`): 60 autonome nuove
+   (80M), M/B/campione e «con quota» (8 visite iniziali ai figli base→bf); arena su 90M solo se Q − campione > 0 (lim. inf.,
+   ≥20 posizioni, ≥5 cambiano); campione nuovo solo se lim. inf. > 50%.
+2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
