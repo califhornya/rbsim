@@ -63,18 +63,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Pilota: (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): 50,2% [48,7, 51,7]; seguiti +0,2 pp [−4,2, +4,4].
-(27/11) Scelta finale (`scelta_20261127_0946/`, stesse 480 posizioni, stesso albero, 32 mondi): diverse in 167 (34,8%);
-visite − Q −0,3 pp [−1,0, +0,3] (42/54/71): resta la Q. (CCX63) Sonda A fuori campione (`sonda_20261127_1020/`): 37
+Pilota (b) 47,95%, (c) 49,05%; prova (d) 50,2% [48,7, 51,7], seguiti +0,2 pp. (27/11) Scelta finale
+(`scelta_20261127_0946/`): visite − Q −0,3 pp [−1,0, +0,3]: resta la Q. (CCX63) Sonda A fuori campione (`sonda_20261127_1020/`): 37
 posizioni (non 72), −0,70 pp [−3,81, +1,89], VP 1, FP 2, FN 2: niente arena. 1.000 contro 138 (`pensa_20261127_1034/`):
 51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
-+19 pp [+9,5, +28,5] sulla linea del bot (136 visite a Fiora in base, 1 al movimento): da cercare in altre partite.
++19 pp [+9,5, +28,5] sulla linea del bot. Altri 4 replay (`muovi_20261127_1255/`): 4 posizioni, M−B +4,5 pp [−2,0,
++16,0]; il bot schiera in base dove muovere era meglio solo in 204705 T4 (+4): troppo poche per decidere.
 §8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata (Astra). Segnalazioni 29-35.
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Matteo: `muovi_mac.command` (4 replay con semi diversi da 155859; «muovo prima» contro «schiero in base», 100 mondi,
-   continuazione 138 rimonta). Se il vantaggio ricompare: riservare visite iniziali al movimento (offline).
+1. Risposta di Astra: allargare «muovo prima» alle 60 autonome dei seguiti (`muovi.py --autonome`), a parte le posizioni
+   dove il bot schiera in base; poi, se regge, riservare visite iniziali al movimento (offline).
 2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M).
 
 ## File principali
