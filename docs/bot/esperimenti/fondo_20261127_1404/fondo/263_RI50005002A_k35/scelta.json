@@ -1,0 +1,25 @@
+{
+ "candidati": [
+  "Play Kinkou Initiate"
+ ],
+ "n": [
+  137
+ ],
+ "q": [
+  0.6858090622290944
+ ],
+ "mondi": [
+  40000,
+  0
+ ],
+ "medie": [
+  null
+ ],
+ "n_mondi": 0,
+ "mondi_esclusi": 0,
+ "scelta": 0,
+ "mossa": "Play Kinkou Initiate",
+ "cpu": null,
+ "cpu_mondi": [],
+ "un_candidato": true
+}

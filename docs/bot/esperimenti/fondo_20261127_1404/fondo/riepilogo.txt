@@ -1,0 +1,22 @@
+Fondo («Pensa»): fino a 3 mosse dall'albero del campione /root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt, 138 iterazioni, valutazione rimonta, regole 6427b90+D72-D83
+partite 60, al piu' 8 decisioni per partita; mondi di scelta 40000..40031, di verifica 50000..50099, 40000 ricampionamenti di partite intere
+decisioni esaminate 480 (incoerenti: 0, con un solo candidato: 56, scelte senza mondi validi: 0, verifiche senza mondi validi: 0); cambiano mossa 135 (28.1% delle coerenti)
+Pensa - campione, totale (ogni matchup pesa uguale, coincide = 0): +2.5 pp (IC 95% da +1.7 a +3.4)
+Pensa - campione sulle sole posizioni cambiate: +8.9 pp (IC 95% da +6.4 a +11.5); a favore 92, contro 31, pari 12
+mondi di scelta validi 13568, esclusi 0; mondi di verifica validi 13500, esclusi 0 (la prima mossa forzata non e' quella chiesta)
+per matchup (esaminate, incoerenti, cambiano mossa, tasso, Pensa - campione con IC 95%):
+  EI: 48, 0, 10, 20.8%, +2.4 pp (+0.1 a +5.4)
+  EK: 48, 0, 11, 22.9%, +0.7 pp (-0.1 a +1.4)
+  ER: 48, 0, 14, 29.2%, +5.1 pp (+0.6 a +10.8)
+  ES: 48, 0, 19, 39.6%, +2.6 pp (+0.9 a +4.8)
+  IS: 48, 0, 13, 27.1%, +1.0 pp (-0.1 a +2.8)
+  KI: 48, 0, 15, 31.2%, +3.7 pp (+1.1 a +6.5)
+  KR: 48, 0, 12, 25.0%, +1.9 pp (-0.2 a +3.6)
+  KS: 48, 0, 9, 18.8%, +1.7 pp (+0.2 a +3.7)
+  RI: 48, 0, 15, 31.2%, +1.4 pp (+0.5 a +2.8)
+  RS: 48, 0, 17, 35.4%, +4.4 pp (+1.1 a +7.9)
+tempo di cpu per decisione (fase di scelta, 424 decisioni giocate): mediana 206.8 s, 95° percentile 483.1 s, massimo 722.5 s
+stima per turno sul Mac (9 processi, un core del Mac = uno di questa macchina, stima prudente): mediana 65.7 s, 95° percentile 169.0 s; decisioni di turno per turno: media 3.0, 95° percentile 6.0
+stima dell'arena (100 coppie per matchup, 10 matchup, 21.2 decisioni per partita): 2657.0 ore di cpu, 56.5 ore con 47 processi
+regola di stop: PASSA (limite inferiore > 0 e almeno 20 posizioni cambiano mossa): prossimo passo «Pensa» nella pagina e arena
+totale: 480 decisioni, 135 cambiano mossa, +2.5 pp, 65.9 min

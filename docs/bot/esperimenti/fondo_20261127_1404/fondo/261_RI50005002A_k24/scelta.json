@@ -1,0 +1,25 @@
+{
+ "candidati": [
+  "Move Irresistible Faefolk base→BF0"
+ ],
+ "n": [
+  46
+ ],
+ "q": [
+  0.5783634130445059
+ ],
+ "mondi": [
+  40000,
+  0
+ ],
+ "medie": [
+  null
+ ],
+ "n_mondi": 0,
+ "mondi_esclusi": 0,
+ "scelta": 0,
+ "mossa": "Move Irresistible Faefolk base→BF0",
+ "cpu": null,
+ "cpu_mondi": [],
+ "un_candidato": true
+}

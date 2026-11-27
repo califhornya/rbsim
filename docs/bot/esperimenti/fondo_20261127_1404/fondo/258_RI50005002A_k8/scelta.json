@@ -1,0 +1,25 @@
+{
+ "candidati": [
+  "Pass"
+ ],
+ "n": [
+  137
+ ],
+ "q": [
+  0.7352222529158708
+ ],
+ "mondi": [
+  40000,
+  0
+ ],
+ "medie": [
+  null
+ ],
+ "n_mondi": 0,
+ "mondi_esclusi": 0,
+ "scelta": 0,
+ "mossa": "Pass",
+ "cpu": null,
+ "cpu_mondi": [],
+ "un_candidato": true
+}

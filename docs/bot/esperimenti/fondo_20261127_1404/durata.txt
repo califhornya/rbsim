@@ -1,0 +1,2 @@
+durata del passo (s): fondo 3958
+processi 47 su 48 core
