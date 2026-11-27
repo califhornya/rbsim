@@ -63,18 +63,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Pilota (`generazione_20261126_1810`): (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): contro il campione
-50,2% [48,7, 51,7]; d−c +1,15 [−1,05, +3,35]; seguiti: cambia mossa in 70 su 480, +0,2 pp [−4,2, +4,4] (18/20/32).
+Pilota: (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): 50,2% [48,7, 51,7]; seguiti +0,2 pp [−4,2, +4,4].
 (27/11) Scelta finale (`scelta_20261127_0946/`, stesse 480 posizioni, stesso albero, 32 mondi): diverse in 167 (34,8%);
-visite − Q −0,3 pp [−1,0, +0,3] (42/54/71): resta la Q. Astra: prima gli attacchi (sonda A su 72 posizioni nuove), poi
-un'arena 1.000 contro 138 iterazioni (pagina a 1.000 solo se lim. inf. > 50% e turni difficili ≤ 3-5 min).
+visite − Q −0,3 pp [−1,0, +0,3] (42/54/71): resta la Q. (CCX63) Sonda A fuori campione (`sonda_20261127_1020/`): 37
+posizioni (non 72), −0,70 pp [−3,81, +1,89], VP 1, FP 2, FN 2: niente arena. 1.000 contro 138 (`pensa_20261127_1034/`):
+51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Congela sul server: 5 pagine non rigiocabili (percorsi).
 §8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
 offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Matteo: `sonda_mac.command` (partite nuove su D72-D83; IC ricampionando le partite di origine), poi `pensa_mac.command`
-   (semi 70M, latenza per turno). Poi le segnalazioni 28-34 come replay di diagnosi. Valore sul Pass e raccolta in coda.
+1. Risposta di Astra (nota del 27/11): banco di prova dalle partite di Matteo (segnalazioni 28-34, sua linea contro
+   quella del campione sugli stessi mondi)? avversario «sfruttatore»? sonda a due ondate? Valore sul Pass in coda.
 2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M).
 
 ## File principali
