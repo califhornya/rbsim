@@ -1,0 +1,18 @@
+Muovo prima contro schiero in base: prior del campione /Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; continuazione 138 iterazioni, valutazione rimonta (entrambi i posti campione dopo la prima mossa forzata)
+100 mondi per posizione (da 30000), 40000 ricampionamenti di partite
+replay 20261125_154531_competit: seme 525995950, regole 6427b90+D72-D77, valutazione registrata storica, iterazioni registrate 42 (solo il prefisso)
+replay 20261125_201243_competit: seme 893372211, regole 6427b90+D72-D77, valutazione registrata storica, iterazioni registrate 138 (solo il prefisso)
+replay 20261125_203513_competit: seme 844107612, regole 6427b90+D72-D77, valutazione registrata storica, iterazioni registrate 138 (solo il prefisso)
+replay 20261125_204705_competit: seme 473340375, regole 6427b90+D72-D77, valutazione registrata storica, iterazioni registrate 138 (solo il prefisso)
+posizioni 4 (4 con mondi validi)
+20261125_154531_competit t5 k1: M=Move Sett Kingpin base→BF1 | B=Play Kinkou Initiate | campione=Move Sett Kingpin base→BF1 | vittorie M 86/100, B 70/100, rif 86/100 | M-B +16.0 pp [+5.0, +27.0] | flip B perde-M vince 25, B vince-M perde 9
+20261125_201243_competit t4 k1: M=Move Kinkou Initiate base→BF0 | B=Play Pit Rookie | campione=Deploy champion Sett Kingpin | vittorie M 43/100, B 45/100, rif 56/100 | M-B -2.0 pp [-14.1, +10.1] | flip B perde-M vince 18, B vince-M perde 20
+20261125_204705_competit t4 k1: M=Move First Mate base→BF1 | B=Play Fiora Victorious | campione=Play Fiora Victorious | vittorie M 100/100, B 96/100, rif 96/100 | M-B +4.0 pp [+0.1, +7.9] | flip B perde-M vince 4, B vince-M perde 0
+20261125_204705_competit t16 k38: M=Move Pit Rookie base→BF0 | B=Play Sett Kingpin | campione=Play Sett Kingpin | vittorie M 100/100, B 100/100, rif 100/100 | M-B +0.0 pp [+0.0, +0.0] | flip B perde-M vince 0, B vince-M perde 0
+per partita (posizioni, media M-B, IC 95% sui mondi appaiati):
+  20261125_154531_competit: 1, +16.0 pp [+5.0, +27.0]
+  20261125_201243_competit: 1, -2.0 pp [-14.1, +10.1]
+  20261125_204705_competit: 2, +2.0 pp [+0.1, +3.9]
+posizioni con IC sopra 0: 2, sotto 0: 0; partite con IC sopra 0: 2, sotto 0: 0
+flip totali: B perde e M vince 47, B vince e M perde 29
+totale: 4 posizioni, M-B +4.5 pp (IC 95% da -2.0 a +16.0), a favore 2, contro 1, pari 1, 4.0 min

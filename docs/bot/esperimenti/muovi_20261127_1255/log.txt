@@ -1,0 +1,15 @@
+12:55:40 == ambiente
+🛠 Installed riftbound_rs-0.1.0
+ed887da Merge pull request #76 from califhornya/claude/adoring-cray-swjl90
+processi: 9; campione: ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; 100 mondi per posizione
+12:56:17 == muovo prima contro schiero in base
+== selezione: 4 partite (0 gia' fatte)
+== partita 1/4: 1 posizioni, 1 s
+== partita 2/4: 1 posizioni, 2 s
+== partita 3/4: 0 posizioni, 2 s
+== partita 4/4: 2 posizioni, 2 s
+== posizione 1/4: 20261125_154531_competit turno 5 k=1, 100 mondi
+== posizione 2/4: 20261125_201243_competit turno 4 k=1, 100 mondi
+== posizione 3/4: 20261125_204705_competit turno 4 k=1, 100 mondi
+== posizione 4/4: 20261125_204705_competit turno 16 k=38, 100 mondi
+totale: 4 posizioni, M-B +4.5 pp (IC 95% da -2.0 a +16.0), a favore 2, contro 1, pari 1, 4.0 min

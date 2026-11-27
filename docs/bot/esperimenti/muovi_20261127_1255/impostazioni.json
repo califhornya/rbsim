@@ -1,0 +1,14 @@
+{
+ "ckpt_sha256": "f8d8469b506dfc1dcfe939ad944a214684fc5285aefc370bdc7549d42cec41aa",
+ "casuali": false,
+ "mondi": 100,
+ "mondi0": 30000,
+ "iterazioni": 138,
+ "valutazione": "rimonta",
+ "partite": [
+  "20261125_154531_competitive_evelynn_vs_competitive_sett.json",
+  "20261125_201243_competitive_sett_vs_competitive_evelynn.json",
+  "20261125_203513_competitive_evelynn_vs_competitive_khazix.json",
+  "20261125_204705_competitive_khazix_vs_competitive_sett.json"
+ ]
+}

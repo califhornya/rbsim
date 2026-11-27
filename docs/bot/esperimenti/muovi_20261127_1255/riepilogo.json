@@ -1,0 +1,427 @@
+{
+ "impostazioni": {
+  "ckpt": "/Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+  "iterazioni": 138,
+  "valutazione": "rimonta",
+  "mondi": 100,
+  "mondi0": 30000,
+  "n_boot": 40000
+ },
+ "replay": [
+  {
+   "nome": "20261125_154531_competit",
+   "seme": 525995950,
+   "regole": "6427b90+D72-D77",
+   "valutazione": "storica",
+   "iterazioni": 42
+  },
+  {
+   "nome": "20261125_201243_competit",
+   "seme": 893372211,
+   "regole": "6427b90+D72-D77",
+   "valutazione": "storica",
+   "iterazioni": 138
+  },
+  {
+   "nome": "20261125_203513_competit",
+   "seme": 844107612,
+   "regole": "6427b90+D72-D77",
+   "valutazione": "storica",
+   "iterazioni": 138
+  },
+  {
+   "nome": "20261125_204705_competit",
+   "seme": 473340375,
+   "regole": "6427b90+D72-D77",
+   "valutazione": "storica",
+   "iterazioni": 138
+  }
+ ],
+ "riassunto": {
+  "posizioni": 4,
+  "valide": 4,
+  "flip_B_perde_M_vince": 47,
+  "flip_B_vince_M_perde": 29,
+  "pos_ic_positivo": 2,
+  "pos_ic_negativo": 0,
+  "per_partita": {
+   "20261125_154531_competit": {
+    "posizioni": 1,
+    "media": 0.16,
+    "mondi": 100,
+    "ic95": [
+     0.04954643372425542,
+     0.2704535662757446
+    ]
+   },
+   "20261125_201243_competit": {
+    "posizioni": 1,
+    "media": -0.02,
+    "mondi": 100,
+    "ic95": [
+     -0.1413672679818316,
+     0.10136726798183161
+    ]
+   },
+   "20261125_204705_competit": {
+    "posizioni": 2,
+    "media": 0.02,
+    "mondi": 200,
+    "ic95": [
+     0.0005482997345712705,
+     0.03945170026542873
+    ]
+   }
+  },
+  "partite_ic_positivo": 2,
+  "partite_ic_negativo": 0,
+  "media": 0.045000000000000005,
+  "a_favore": 2,
+  "contro": 1,
+  "pari": 1,
+  "ic95": [
+   -0.02,
+   0.16
+  ]
+ },
+ "posizioni": [
+  {
+   "nome": "20261125_154531_competit",
+   "k": 1,
+   "turno": 5,
+   "lab_M": "Move Sett Kingpin base→BF1",
+   "lab_B": "Play Kinkou Initiate",
+   "P_M": 0.9648477435112,
+   "P_B": 0.0008072247146628797,
+   "campione": "Move Sett Kingpin base→BF1",
+   "scelta_campione": "M",
+   "n_M": 2,
+   "n_B": 4,
+   "liberi": [
+    0,
+    1
+   ],
+   "campi": [
+    {
+     "campo": 0,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    },
+    {
+     "campo": 1,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    }
+   ],
+   "linee": {
+    "riferimento": {
+     "n": 100,
+     "vittorie": 86,
+     "patte": 0,
+     "sconfitte": 14,
+     "esclusi": 0
+    },
+    "muovo prima": {
+     "n": 100,
+     "vittorie": 86,
+     "patte": 0,
+     "sconfitte": 14,
+     "esclusi": 0
+    },
+    "schiero in base": {
+     "n": 100,
+     "vittorie": 70,
+     "patte": 0,
+     "sconfitte": 30,
+     "esclusi": 0
+    }
+   },
+   "stat": {
+    "M-B": {
+     "n": 100,
+     "media": 0.16,
+     "ic95": [
+      0.04954643372425542,
+      0.2704535662757446
+     ]
+    },
+    "M-rif": {
+     "n": 100,
+     "media": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    },
+    "B-rif": {
+     "n": 100,
+     "media": -0.16,
+     "ic95": [
+      -0.2704535662757446,
+      -0.04954643372425542
+     ]
+    }
+   },
+   "flip": {
+    "B_perde_M_vince": 25,
+    "B_vince_M_perde": 9
+   },
+   "n_mondi": 100
+  },
+  {
+   "nome": "20261125_201243_competit",
+   "k": 1,
+   "turno": 4,
+   "lab_M": "Move Kinkou Initiate base→BF0",
+   "lab_B": "Play Pit Rookie",
+   "P_M": 0.0010238271206617355,
+   "P_B": 0.12276684492826462,
+   "campione": "Deploy champion Sett Kingpin",
+   "scelta_campione": null,
+   "n_M": 1,
+   "n_B": 4,
+   "liberi": [
+    0
+   ],
+   "campi": [
+    {
+     "campo": 0,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    },
+    {
+     "campo": 1,
+     "controlla": "avversario",
+     "unita_avv": 2,
+     "unita_camp": 0
+    }
+   ],
+   "linee": {
+    "riferimento": {
+     "n": 100,
+     "vittorie": 56,
+     "patte": 0,
+     "sconfitte": 44,
+     "esclusi": 0
+    },
+    "muovo prima": {
+     "n": 100,
+     "vittorie": 43,
+     "patte": 0,
+     "sconfitte": 57,
+     "esclusi": 0
+    },
+    "schiero in base": {
+     "n": 100,
+     "vittorie": 45,
+     "patte": 0,
+     "sconfitte": 55,
+     "esclusi": 0
+    }
+   },
+   "stat": {
+    "M-B": {
+     "n": 100,
+     "media": -0.02,
+     "ic95": [
+      -0.1413672679818316,
+      0.10136726798183161
+     ]
+    },
+    "M-rif": {
+     "n": 100,
+     "media": -0.13,
+     "ic95": [
+      -0.25660943523651425,
+      -0.003390564763485787
+     ]
+    },
+    "B-rif": {
+     "n": 100,
+     "media": -0.11,
+     "ic95": [
+      -0.2278472149039003,
+      0.007847214903900293
+     ]
+    }
+   },
+   "flip": {
+    "B_perde_M_vince": 18,
+    "B_vince_M_perde": 20
+   },
+   "n_mondi": 100
+  },
+  {
+   "nome": "20261125_204705_competit",
+   "k": 1,
+   "turno": 4,
+   "lab_M": "Move First Mate base→BF1",
+   "lab_B": "Play Fiora Victorious",
+   "P_M": 6.132344424258918e-05,
+   "P_B": 0.49995309114456177,
+   "campione": "Play Fiora Victorious",
+   "scelta_campione": "B",
+   "n_M": 2,
+   "n_B": 3,
+   "liberi": [
+    0,
+    1
+   ],
+   "campi": [
+    {
+     "campo": 0,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    },
+    {
+     "campo": 1,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    }
+   ],
+   "linee": {
+    "riferimento": {
+     "n": 100,
+     "vittorie": 96,
+     "patte": 0,
+     "sconfitte": 4,
+     "esclusi": 0
+    },
+    "muovo prima": {
+     "n": 100,
+     "vittorie": 100,
+     "patte": 0,
+     "sconfitte": 0,
+     "esclusi": 0
+    },
+    "schiero in base": {
+     "n": 100,
+     "vittorie": 96,
+     "patte": 0,
+     "sconfitte": 4,
+     "esclusi": 0
+    }
+   },
+   "stat": {
+    "M-B": {
+     "n": 100,
+     "media": 0.04,
+     "ic95": [
+      0.0013985084288812635,
+      0.07860149157111873
+     ]
+    },
+    "M-rif": {
+     "n": 100,
+     "media": 0.04,
+     "ic95": [
+      0.0013985084288812635,
+      0.07860149157111873
+     ]
+    },
+    "B-rif": {
+     "n": 100,
+     "media": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "flip": {
+    "B_perde_M_vince": 4,
+    "B_vince_M_perde": 0
+   },
+   "n_mondi": 100
+  },
+  {
+   "nome": "20261125_204705_competit",
+   "k": 38,
+   "turno": 16,
+   "lab_M": "Move Pit Rookie base→BF0",
+   "lab_B": "Play Sett Kingpin",
+   "P_M": 0.15724684298038483,
+   "P_B": 0.6926790475845337,
+   "campione": "Play Sett Kingpin",
+   "scelta_campione": "B",
+   "n_M": 2,
+   "n_B": 1,
+   "liberi": [
+    0
+   ],
+   "campi": [
+    {
+     "campo": 0,
+     "controlla": null,
+     "unita_avv": 0,
+     "unita_camp": 0
+    },
+    {
+     "campo": 1,
+     "controlla": "avversario",
+     "unita_avv": 1,
+     "unita_camp": 0
+    }
+   ],
+   "linee": {
+    "riferimento": {
+     "n": 100,
+     "vittorie": 100,
+     "patte": 0,
+     "sconfitte": 0,
+     "esclusi": 0
+    },
+    "muovo prima": {
+     "n": 100,
+     "vittorie": 100,
+     "patte": 0,
+     "sconfitte": 0,
+     "esclusi": 0
+    },
+    "schiero in base": {
+     "n": 100,
+     "vittorie": 100,
+     "patte": 0,
+     "sconfitte": 0,
+     "esclusi": 0
+    }
+   },
+   "stat": {
+    "M-B": {
+     "n": 100,
+     "media": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    },
+    "M-rif": {
+     "n": 100,
+     "media": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    },
+    "B-rif": {
+     "n": 100,
+     "media": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "flip": {
+    "B_perde_M_vince": 0,
+    "B_vince_M_perde": 0
+   },
+   "n_mondi": 100
+  }
+ ]
+}
