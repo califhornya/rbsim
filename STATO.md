@@ -64,9 +64,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 Nessun guadagno prima: pilota (d) 50,2% [48,7, 51,7]; visite − Q −0,3 pp; sonda A −0,70 pp; 1.000 contro 138: 51,2%
 [49,6, 52,9]; quota del movimento +0,2 pp [−1,2, +1,7]. `rimonta` default della pagina; la ricerca non ha rumore.
 **«Pensa» PASSA** (`fondo_20261127_1404/`, CCX63, 66 min): Pensa − campione +2,5 pp [+1,7, +3,4] su 480 posizioni;
-135 cambiano mossa (28%): +8,9 pp [+6,4, +11,5], a favore 92, contro 31, pari 12; tutti i 10 matchup > 0 (7 con lim. inf.
-> 0). Primo metodo che passa. Cpu per decisione mediana 207 s, p95 483 s; sul Mac (9 processi, core = server) per turno
-mediana 66 s, p95 169 s. Arena 100 coppie: 2.657 ore di cpu = 56,5 h di CCX63 (esclusa).
+135 cambiano mossa: +8,9 pp [+6,4, +11,5] (92/31/12); 10 matchup > 0. Cpu per decisione mediana 207 s, p95 483 s; sul
+Mac (9 processi) per turno mediana 66 s, p95 169 s. Arena 100 coppie: 56,5 h di CCX63 (esclusa).
 
 ## Prossimi passi
 1. (Matteo, 27/11: deciso, l'attesa non è un problema) «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), spento di
