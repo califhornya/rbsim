@@ -42,9 +42,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
   Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
 - (26/11, Astra) Attacchi con lo showdown: sonda A dietro interruttore, soglia +0,15; pagina solo dopo fuori campione.
-- (26-27/11, Astra) Campione resta `ckpt_040000`. Prova (d) fatta: valore al 20% chiuso (50% bassa priorità; forse solo
-  sul Pass che chiude il turno); raccolta da 100.000 da parte. Ora un solo esperimento: scelta finale più visitata
-  contro Q, con regola di stop. Promozioni sempre su semi nuovi.
+- (26-27/11, Astra) Campione resta `ckpt_040000`; valore al 20% chiuso (forse solo sul Pass che chiude il turno);
+  raccolta da 100.000 da parte; scelta finale per Q confermata (regola di stop). Promozioni sempre su semi nuovi.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
@@ -66,15 +65,16 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 ## In corso
 Pilota (`generazione_20261126_1810`): (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): contro il campione
 50,2% [48,7, 51,7]; d−c +1,15 [−1,05, +3,35]; seguiti: cambia mossa in 70 su 480, +0,2 pp [−4,2, +4,4] (18/20/32).
-(27/11) Da lanciare: `scelta_mac.command`. Sulle stesse 480 posizioni, dallo stesso albero del campione (log originale),
-più visitata contro Q sugli stessi 32 mondi; media a pesi uguali fra matchup, IC ricampionando partite intere. Se il
-limite inferiore > 0: arena (scelta per visite, `set_search_scelta`) su semi 60M, 100 coppie; campione nuovo se > 50%.
+(27/11) Scelta finale (`scelta_20261127_0946/`, stesse 480 posizioni, stesso albero, 32 mondi): diverse in 167 (34,8%);
+visite − Q −0,3 pp [−1,0, +0,3], sui disaccordi −1,0 [−2,8, +0,7] (42/54/71); NON PASSA: resta la scelta per Q, niente
+arena. Anche con la Q a 1-2 visite le visite non vincono (−1,7, n=13). Nota ad Astra (giudizio, attacchi, iterazioni?).
 §8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
 offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Matteo: `scelta_mac.command`; risultati ad Astra. Poi il giudizio (segnalazioni 28-34: il campione è troppo facile).
+1. Risposta di Astra. Proposta: giudizio e attacchi dalle segnalazioni 28-34 (campione troppo facile per Matteo);
+   forse prima un'arena 138 contro 1.000 iterazioni (la forza con più tempo non è mai stata misurata).
 2. Promozioni su semi nuovi (non 30M/40M/50M/60M). `sonda_mac` sulle 72 posizioni.
 
 ## File principali
