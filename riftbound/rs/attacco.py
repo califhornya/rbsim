@@ -690,7 +690,7 @@ def continua(pos: dict, st: dict, linea: dict, i: int, modo: str, piano: bool = 
     if piano:
         row["piano"] = _piano(ctrl, oss)
     if primo:
-        # l'etichetta forzata e' proprio quella giocata? (la ricerca prende la prima voce che la *contiene*)
+        # l'etichetta forzata e' proprio quella giocata? (la ricerca prende prima la voce identica, poi la prima che la contiene)
         row["primo_giocata"] = oss.azione
         row["primo_ok"] = oss.azione == linea["etichetta"]
     return row

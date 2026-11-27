@@ -98,6 +98,17 @@ def _valutazione_registrata(nome):
     return (nome, VALUTAZIONE_K, VALUTAZIONE_ALPHA) if nome and nome != "storica" else None
 
 
+def _mazzo(p) -> Path:
+    """Il percorso di un mazzo salvato in una partita: se non esiste (la pagina registra percorsi assoluti del Mac di
+    Matteo) e il repo ha lo stesso file in `riftbound/data/decks`, quello; altrimenti l'originale."""
+    p = Path(p)
+    if not p.exists():
+        alt = ROOT / "riftbound/data/decks" / p.name
+        if alt.exists():
+            return alt
+    return p
+
+
 def _prepara(partita: dict) -> dict:
     from riftbound.ai.ppo.collect import DECK_OF
     from riftbound.rs import arena_rs
@@ -111,7 +122,7 @@ def _prepara(partita: dict) -> dict:
         seed = rp["seed"]
         umano = rp["seat"]
         P.update(seed=seed, umano=umano, camp="B" if umano == "A" else "A",
-                 deck_a=Path(rp["deck_a"]), deck_b=Path(rp["deck_b"]), bf_a=rp.get("bf_a"), bf_b=rp.get("bf_b"),
+                 deck_a=_mazzo(rp["deck_a"]), deck_b=_mazzo(rp["deck_b"]), bf_a=rp.get("bf_a"), bf_b=rp.get("bf_b"),
                  starter=(rp.get("starter") or random.Random(seed).choice(["A", "B"])).lower(),
                  # Files saved before 25/11 evening hold None for the default, which was then 42.
                  iterazioni=rp.get("iterazioni") or ITERAZIONI_PAGINA_PRIMA, probe=True,

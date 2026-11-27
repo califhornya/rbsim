@@ -464,8 +464,8 @@ impl Game {
         }
     }
 
-    /// Continuations: the search seat's next turn decision plays the first legal move whose label contains
-    /// `label` (case-insensitive); after that it searches as usual.
+    /// Continuations: the search seat's next turn decision plays the legal move whose label equals `label`
+    /// (case-insensitive); if none is equal, the first one whose label contains it; after that it searches as usual.
     fn set_search_first_move(&mut self, seat: &str, label: &str) -> PyResult<()> {
         let s = seat_of(seat)?;
         match &self.search[s.idx()] {

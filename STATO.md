@@ -67,14 +67,14 @@ Pilota: (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): 50,2% [48,7
 (27/11) Scelta finale (`scelta_20261127_0946/`, stesse 480 posizioni, stesso albero, 32 mondi): diverse in 167 (34,8%);
 visite − Q −0,3 pp [−1,0, +0,3] (42/54/71): resta la Q. (CCX63) Sonda A fuori campione (`sonda_20261127_1020/`): 37
 posizioni (non 72), −0,70 pp [−3,81, +1,89], VP 1, FP 2, FN 2: niente arena. 1.000 contro 138 (`pensa_20261127_1034/`):
-51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Congela sul server: 5 pagine non rigiocabili (percorsi).
-§8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
-offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
+51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
++19 pp [+9,5, +28,5] sulla linea del bot (136 visite a Fiora in base, 1 al movimento): da cercare in altre partite.
+§8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata (Astra). Segnalazioni 29-35.
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Risposta di Astra (nota del 27/11): banco di prova dalle partite di Matteo (segnalazioni 28-34, sua linea contro
-   quella del campione sugli stessi mondi)? avversario «sfruttatore»? sonda a due ondate? Valore sul Pass in coda.
+1. Matteo: `muovi_mac.command` (4 replay con semi diversi da 155859; «muovo prima» contro «schiero in base», 100 mondi,
+   continuazione 138 rimonta). Se il vantaggio ricompare: riservare visite iniziali al movimento (offline).
 2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M).
 
 ## File principali
@@ -82,7 +82,7 @@ offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Seg
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
-  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`.
+  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
