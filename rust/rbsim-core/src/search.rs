@@ -1492,7 +1492,9 @@ impl SearchCore {
         let root_legal = g.legal_actions(Point::TurnAction, self.side)?;
         if let Some(sub) = self.first_forced.take() {
             let sub = sub.to_lowercase();
-            return match root_legal.iter().find(|a| a.label.to_lowercase().contains(&sub)) {
+            // Prima l'etichetta identica (cosi' "Play X" non cade su "Play X to BF1"); solo se manca, la contiene.
+            let esatta = root_legal.iter().find(|a| a.label.to_lowercase() == sub);
+            return match esatta.or_else(|| root_legal.iter().find(|a| a.label.to_lowercase().contains(&sub))) {
                 Some(a) => {
                     let a = a.clone();
                     self.registra_leggero("prima", g.gs.turn, Point::TurnAction, &root_legal, &a);
