@@ -1,0 +1,945 @@
+{
+ "n_posizioni": 480,
+ "n_con_mondi": 424,
+ "n_cambiate": 135,
+ "A_tipo_tipo": [
+  {
+   "campione": "Play (carta)",
+   "pensa": "Play (carta)",
+   "n": 16,
+   "delta": 0.053750000000000006,
+   "somma": 0.8600000000000001
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Play (carta)",
+   "n": 15,
+   "delta": 0.05866666666666666,
+   "somma": 0.8799999999999999
+  },
+  {
+   "campione": "Move avanti",
+   "pensa": "Move avanti",
+   "n": 11,
+   "delta": 0.13272727272727272,
+   "somma": 1.46
+  },
+  {
+   "campione": "Pass",
+   "pensa": "Hide",
+   "n": 11,
+   "delta": 0.08454545454545453,
+   "somma": 0.9299999999999999
+  },
+  {
+   "campione": "Play (carta)",
+   "pensa": "Play su campo",
+   "n": 10,
+   "delta": 0.126,
+   "somma": 1.26
+  },
+  {
+   "campione": "Pass",
+   "pensa": "Move ritirata",
+   "n": 8,
+   "delta": 0.08125,
+   "somma": 0.65
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Play su campo",
+   "n": 7,
+   "delta": 0.044285714285714296,
+   "somma": 0.31000000000000005
+  },
+  {
+   "campione": "Pass",
+   "pensa": "Cast (magia)",
+   "n": 6,
+   "delta": 0.008333333333333333,
+   "somma": 0.05
+  },
+  {
+   "campione": "Deploy campione",
+   "pensa": "Play su campo",
+   "n": 6,
+   "delta": 0.023333333333333334,
+   "somma": 0.14
+  },
+  {
+   "campione": "Deploy campione",
+   "pensa": "Play (carta)",
+   "n": 3,
+   "delta": 0.15,
+   "somma": 0.44999999999999996
+  },
+  {
+   "campione": "Equip/Activate/Gear",
+   "pensa": "Equip/Activate/Gear",
+   "n": 3,
+   "delta": 0.10333333333333333,
+   "somma": 0.31
+  },
+  {
+   "campione": "Play (carta)",
+   "pensa": "Pass",
+   "n": 3,
+   "delta": 0.07,
+   "somma": 0.21000000000000002
+  },
+  {
+   "campione": "Move avanti",
+   "pensa": "Pass",
+   "n": 3,
+   "delta": 0.17,
+   "somma": 0.51
+  },
+  {
+   "campione": "Pass",
+   "pensa": "Move avanti",
+   "n": 2,
+   "delta": -0.005,
+   "somma": -0.01
+  },
+  {
+   "campione": "Equip/Activate/Gear",
+   "pensa": "Move ritirata",
+   "n": 2,
+   "delta": 0.35,
+   "somma": 0.7
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Move avanti",
+   "n": 2,
+   "delta": 0.21000000000000002,
+   "somma": 0.42000000000000004
+  },
+  {
+   "campione": "Move avanti",
+   "pensa": "Play (carta)",
+   "n": 2,
+   "delta": 0.275,
+   "somma": 0.55
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Pass",
+   "n": 2,
+   "delta": 0.21500000000000002,
+   "somma": 0.43000000000000005
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Deploy campione",
+   "n": 2,
+   "delta": 0.055,
+   "somma": 0.11
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Hide",
+   "n": 2,
+   "delta": -0.065,
+   "somma": -0.13
+  },
+  {
+   "campione": "Move ritirata",
+   "pensa": "Move ritirata",
+   "n": 2,
+   "delta": -0.045000000000000005,
+   "somma": -0.09000000000000001
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Move ritirata",
+   "n": 2,
+   "delta": 0.135,
+   "somma": 0.27
+  },
+  {
+   "campione": "Pass",
+   "pensa": "Play (carta)",
+   "n": 2,
+   "delta": 0.185,
+   "somma": 0.37
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Cast (magia)",
+   "n": 1,
+   "delta": -0.02,
+   "somma": -0.02
+  },
+  {
+   "campione": "Equip/Activate/Gear",
+   "pensa": "Pass",
+   "n": 1,
+   "delta": -0.04,
+   "somma": -0.04
+  },
+  {
+   "campione": "Play su campo",
+   "pensa": "Move avanti",
+   "n": 1,
+   "delta": 0.02,
+   "somma": 0.02
+  },
+  {
+   "campione": "Move ritirata",
+   "pensa": "Pass",
+   "n": 1,
+   "delta": 0.05,
+   "somma": 0.05
+  },
+  {
+   "campione": "Move avanti",
+   "pensa": "Cast (magia)",
+   "n": 1,
+   "delta": 0.04,
+   "somma": 0.04
+  },
+  {
+   "campione": "Move avanti",
+   "pensa": "Play su campo",
+   "n": 1,
+   "delta": 0.08,
+   "somma": 0.08
+  },
+  {
+   "campione": "Play (carta)",
+   "pensa": "Hide",
+   "n": 1,
+   "delta": 0.01,
+   "somma": 0.01
+  },
+  {
+   "campione": "Move ritirata",
+   "pensa": "Equip/Activate/Gear",
+   "n": 1,
+   "delta": 0.62,
+   "somma": 0.62
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Hide",
+   "n": 1,
+   "delta": 0.36,
+   "somma": 0.36
+  },
+  {
+   "campione": "Equip/Activate/Gear",
+   "pensa": "Hide",
+   "n": 1,
+   "delta": 0.08,
+   "somma": 0.08
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Play su campo",
+   "n": 1,
+   "delta": 0.08,
+   "somma": 0.08
+  },
+  {
+   "campione": "Play (carta)",
+   "pensa": "Cast (magia)",
+   "n": 1,
+   "delta": 0.03,
+   "somma": 0.03
+  },
+  {
+   "campione": "Cast (magia)",
+   "pensa": "Play (carta)",
+   "n": 1,
+   "delta": 0.0,
+   "somma": 0.0
+  }
+ ],
+ "A_fase": {
+  "turno 4-6": {
+   "cambiate": 29,
+   "posizioni": 55,
+   "delta": 0.061724137931034484,
+   "contributo": 0.032545454545454544
+  },
+  "turno<=3": {
+   "cambiate": 23,
+   "posizioni": 102,
+   "delta": 0.07260869565217391,
+   "contributo": 0.016372549019607843
+  },
+  "turno>=7": {
+   "cambiate": 83,
+   "posizioni": 323,
+   "delta": 0.10228915662650602,
+   "contributo": 0.02628482972136223
+  }
+ },
+ "A_matchup": {
+  "EI": {
+   "cambiate": 10,
+   "posizioni": 48,
+   "delta": 0.11400000000000002,
+   "contributo": 0.023750000000000004
+  },
+  "EK": {
+   "cambiate": 11,
+   "posizioni": 48,
+   "delta": 0.029999999999999995,
+   "contributo": 0.006874999999999999
+  },
+  "ER": {
+   "cambiate": 14,
+   "posizioni": 48,
+   "delta": 0.17357142857142857,
+   "contributo": 0.050625
+  },
+  "ES": {
+   "cambiate": 19,
+   "posizioni": 48,
+   "delta": 0.06578947368421052,
+   "contributo": 0.026041666666666668
+  },
+  "IS": {
+   "cambiate": 13,
+   "posizioni": 48,
+   "delta": 0.038461538461538464,
+   "contributo": 0.010416666666666666
+  },
+  "KI": {
+   "cambiate": 15,
+   "posizioni": 48,
+   "delta": 0.11800000000000002,
+   "contributo": 0.036875000000000005
+  },
+  "KR": {
+   "cambiate": 12,
+   "posizioni": 48,
+   "delta": 0.07416666666666667,
+   "contributo": 0.018541666666666668
+  },
+  "KS": {
+   "cambiate": 9,
+   "posizioni": 48,
+   "delta": 0.09222222222222223,
+   "contributo": 0.017291666666666667
+  },
+  "RI": {
+   "cambiate": 15,
+   "posizioni": 48,
+   "delta": 0.046,
+   "contributo": 0.014374999999999999
+  },
+  "RS": {
+   "cambiate": 17,
+   "posizioni": 48,
+   "delta": 0.12470588235294118,
+   "contributo": 0.04416666666666667
+  }
+ },
+ "A_confronto": {
+  "Pass": {
+   "scelto": 81,
+   "cambiato": 29,
+   "tasso": 0.35802469135802467
+  },
+  "Deploy campione": {
+   "scelto": 22,
+   "cambiato": 9,
+   "tasso": 0.4090909090909091
+  },
+  "Play (carta)": {
+   "scelto": 89,
+   "cambiato": 31,
+   "tasso": 0.34831460674157305
+  },
+  "Play su campo": {
+   "scelto": 84,
+   "cambiato": 28,
+   "tasso": 0.3333333333333333
+  },
+  "Cast (magia)": {
+   "scelto": 30,
+   "cambiato": 9,
+   "tasso": 0.3
+  },
+  "Move avanti": {
+   "scelto": 72,
+   "cambiato": 18,
+   "tasso": 0.25
+  },
+  "Move ritirata": {
+   "scelto": 19,
+   "cambiato": 4,
+   "tasso": 0.21052631578947367
+  },
+  "Hide": {
+   "scelto": 5,
+   "cambiato": 0,
+   "tasso": 0.0
+  },
+  "Equip/Activate/Gear": {
+   "scelto": 22,
+   "cambiato": 7,
+   "tasso": 0.3181818181818182
+  }
+ },
+ "A_top12": [
+  {
+   "id": "061_ER50001001B_k19",
+   "matchup": "ER",
+   "turno": 13,
+   "campione": "Move Grim Apothecary base→BF1",
+   "pensa": "Move Grim Apothecary base→BF0",
+   "delta": 0.82,
+   "n": [
+    116,
+    8,
+    4
+   ],
+   "q": [
+    0.12927258360605826,
+    -0.5979820004989412,
+    -0.8716722471896521
+   ],
+   "medie": [
+    0.125,
+    0.0,
+    0.75
+   ]
+  },
+  {
+   "id": "389_RS50008000A_k21",
+   "matchup": "RS",
+   "turno": 13,
+   "campione": "Move Mech base→BF1",
+   "pensa": "Pass",
+   "delta": 0.64,
+   "n": [
+    135,
+    2
+   ],
+   "q": [
+    0.7397830512740045,
+    -0.2069664997294526
+   ],
+   "medie": [
+    0.3125,
+    0.96875
+   ]
+  },
+  {
+   "id": "060_ER50001001B_k14",
+   "matchup": "ER",
+   "turno": 11,
+   "campione": "Play Grim Apothecary",
+   "pensa": "Play Grim Apothecary to BF1",
+   "delta": 0.62,
+   "n": [
+    69,
+    57,
+    2
+   ],
+   "q": [
+    0.7162978701990245,
+    0.7064193203972353,
+    0.6858090622290947
+   ],
+   "medie": [
+    0.28125,
+    0.78125,
+    0.40625
+   ]
+  },
+  {
+   "id": "198_KI50004000A_k38",
+   "matchup": "KI",
+   "turno": 13,
+   "campione": "Move Traveling Merchant BF0→base",
+   "pensa": "Activate buff_unit (Kha'Zix Voidreaver)",
+   "delta": 0.62,
+   "n": [
+    106,
+    16,
+    11
+   ],
+   "q": [
+    0.7305938960959438,
+    0.7305938960959438,
+    0.6858090622290947
+   ],
+   "medie": [
+    0.0625,
+    0.71875,
+    0.0
+   ]
+  },
+  {
+   "id": "150_EI50003000A_k42",
+   "matchup": "EI",
+   "turno": 11,
+   "campione": "Gear gain_power_any_domain (Gold)",
+   "pensa": "Move Pyke Returned BF0→base",
+   "delta": 0.51,
+   "n": [
+    57,
+    32,
+    16
+   ],
+   "q": [
+    0.8642754128460111,
+    0.8482836399575129,
+    0.864275412846011
+   ],
+   "medie": [
+    0.125,
+    0.59375,
+    0.15625
+   ]
+  },
+  {
+   "id": "265_RI50005003B_k5",
+   "matchup": "RI",
+   "turno": 3,
+   "campione": "Pass",
+   "pensa": "Hide Back Off @BF0",
+   "delta": 0.51,
+   "n": [
+    4,
+    133
+   ],
+   "q": [
+    0.7657620182484389,
+    0.7530659048695538
+   ],
+   "medie": [
+    0.46875,
+    1.0
+   ]
+  },
+  {
+   "id": "095_ER50001005B_k22",
+   "matchup": "ER",
+   "turno": 15,
+   "campione": "Play Ferrous Forerunner",
+   "pensa": "Play Ferrous Forerunner to BF1",
+   "delta": 0.39,
+   "n": [
+    87,
+    31,
+    11
+   ],
+   "q": [
+    0.6695902596187709,
+    0.6469294504417666,
+    0.6169093028770651
+   ],
+   "medie": [
+    0.25,
+    0.5625,
+    0.4375
+   ]
+  },
+  {
+   "id": "414_RS50008003B_k35",
+   "matchup": "RS",
+   "turno": 15,
+   "campione": "Pass",
+   "pensa": "Play First Mate",
+   "delta": 0.39,
+   "n": [
+    50,
+    20,
+    20
+   ],
+   "q": [
+    0.14888503362331806,
+    -0.029991003238820143,
+    -0.20696649972945258
+   ],
+   "medie": [
+    0.1875,
+    0.4375,
+    0.4375
+   ]
+  },
+  {
+   "id": "403_RS50008002A_k13",
+   "matchup": "RS",
+   "turno": 7,
+   "campione": "Pass",
+   "pensa": "Move Rengar Trophy Hunter BF0→base",
+   "delta": 0.38,
+   "n": [
+    75,
+    61,
+    1
+   ],
+   "q": [
+    0.9488384233759839,
+    0.9468060128462672,
+    0.935409070603099
+   ],
+   "medie": [
+    0.25,
+    0.3125,
+    0.5625
+   ]
+  },
+  {
+   "id": "302_ES50006001B_k21",
+   "matchup": "ES",
+   "turno": 11,
+   "campione": "Move Fiora Victorious base→BF1",
+   "pensa": "Move Fiora Victorious base→BF0",
+   "delta": 0.37,
+   "n": [
+    93,
+    41,
+    3
+   ],
+   "q": [
+    -0.7487042869693078,
+    -0.7487042869693081,
+    -0.7487042869693088
+   ],
+   "medie": [
+    0.25,
+    0.53125,
+    0.0
+   ]
+  },
+  {
+   "id": "226_KI50004004A_k8",
+   "matchup": "KI",
+   "turno": 5,
+   "campione": "Cast Void Assault @BF0",
+   "pensa": "Hide Switcheroo @BF0",
+   "delta": 0.36,
+   "n": [
+    19,
+    51,
+    18
+   ],
+   "q": [
+    0.9654136868601891,
+    0.9633142186045134,
+    0.9654136868601891
+   ],
+   "medie": [
+    0.21875,
+    0.78125,
+    0.21875
+   ]
+  },
+  {
+   "id": "128_KR50002004A_k0",
+   "matchup": "KR",
+   "turno": 3,
+   "campione": "Play Reckless Innovator",
+   "pensa": "Play Vex Apathetic",
+   "delta": 0.33,
+   "n": [
+    26,
+    77,
+    34
+   ],
+   "q": [
+    0.6858090622290947,
+    0.05992810352914359,
+    0.02999100323882012
+   ],
+   "medie": [
+    0.34375,
+    0.46875,
+    0.6875
+   ]
+  }
+ ],
+ "A_carte": [
+  {
+   "carta": "Pit Rookie",
+   "come_campione": 6,
+   "come_pensa": 6,
+   "delta": 0.06916666666666665
+  },
+  {
+   "carta": "First Mate",
+   "come_campione": 2,
+   "come_pensa": 10,
+   "delta": 0.1391666666666667
+  },
+  {
+   "carta": "Grim Apothecary",
+   "come_campione": 3,
+   "come_pensa": 6,
+   "delta": 0.33555555555555555
+  },
+  {
+   "carta": "Noxus Hopeful",
+   "come_campione": 5,
+   "come_pensa": 4,
+   "delta": 0.024444444444444446
+  },
+  {
+   "carta": "Fizz Trickster",
+   "come_campione": 5,
+   "come_pensa": 3,
+   "delta": 0.08875000000000001
+  },
+  {
+   "carta": "Rengar Trophy Hunter",
+   "come_campione": 4,
+   "come_pensa": 4,
+   "delta": 0.1375
+  },
+  {
+   "carta": "Irresistible Faefolk",
+   "come_campione": 6,
+   "come_pensa": 2,
+   "delta": 0.035
+  },
+  {
+   "carta": "Reckless Innovator",
+   "come_campione": 6,
+   "come_pensa": 2,
+   "delta": 0.053750000000000006
+  },
+  {
+   "carta": "Bedeviling Stranger",
+   "come_campione": 2,
+   "come_pensa": 5,
+   "delta": 0.045714285714285714
+  },
+  {
+   "carta": "Gutter Guardian",
+   "come_campione": 2,
+   "come_pensa": 5,
+   "delta": -0.024285714285714282
+  },
+  {
+   "carta": "Rampage",
+   "come_campione": 4,
+   "come_pensa": 3,
+   "delta": 0.08714285714285716
+  },
+  {
+   "carta": "Stalwart Poro",
+   "come_campione": 2,
+   "come_pensa": 4,
+   "delta": -0.018333333333333333
+  },
+  {
+   "carta": "Mutated Mouser",
+   "come_campione": 1,
+   "come_pensa": 4,
+   "delta": 0.030000000000000006
+  },
+  {
+   "carta": "Kha'Zix Voidreaver",
+   "come_campione": 2,
+   "come_pensa": 3,
+   "delta": 0.252
+  },
+  {
+   "carta": "Ivern Nurturer to BF0",
+   "come_campione": 3,
+   "come_pensa": 2,
+   "delta": 0.06
+  }
+ ],
+ "B_scala": {
+  "quantili": [
+   -0.9994168956584453,
+   -0.9972696727722544,
+   -0.9598622843692025,
+   -0.13909244787845804,
+   0.5979820004989412,
+   0.8242721703413975,
+   0.9879758204514267,
+   0.998375865171187,
+   1.0
+  ],
+  "frac_neg": 0.27535037098103876,
+  "frac_sopra1": 0.0
+ },
+ "B_spearman": {
+  "tutte": 0.746289870674381,
+  "turno 4-6": 0.5370630930539795,
+  "turno<=3": 0.40156690311967996,
+  "turno>=7": 0.7903598498083545,
+  "EI": 0.4778476360669814,
+  "EK": 0.8809678586334194,
+  "ER": 0.8133493750335401,
+  "ES": 0.4839683214893762,
+  "IS": 0.8522253877107977,
+  "KI": 0.6869019203514369,
+  "KR": 0.8478640320855112,
+  "KS": 0.6026202983591129,
+  "RI": 0.7049579100028919,
+  "RS": 0.49584813338202227
+ },
+ "B_decili": [
+  {
+   "da": -0.999212971747347,
+   "a": -0.7196819389133973,
+   "n": 43,
+   "media": 0.034156976744186045
+  },
+  {
+   "da": -0.7196819389133973,
+   "a": -0.2165180614930288,
+   "n": 42,
+   "media": 0.14955357142857142
+  },
+  {
+   "da": -0.2165180614930288,
+   "a": 0.07982976911113138,
+   "n": 42,
+   "media": 0.3861607142857143
+  },
+  {
+   "da": 0.07982976911113138,
+   "a": 0.4251590671665604,
+   "n": 43,
+   "media": 0.4498546511627907
+  },
+  {
+   "da": 0.4251590671665604,
+   "a": 0.6884392660310132,
+   "n": 42,
+   "media": 0.5729166666666666
+  },
+  {
+   "da": 0.6884392660310132,
+   "a": 0.7530659048695519,
+   "n": 41,
+   "media": 0.6996951219512195
+  },
+  {
+   "da": 0.7530659048695519,
+   "a": 0.8144140937656861,
+   "n": 43,
+   "media": 0.7703488372093024
+  },
+  {
+   "da": 0.8144140937656861,
+   "a": 0.9222651442426305,
+   "n": 43,
+   "media": 0.8059593023255814
+  },
+  {
+   "da": 0.9222651442426305,
+   "a": 0.9775871873563142,
+   "n": 41,
+   "media": 0.8109756097560976
+  },
+  {
+   "da": 0.9775871873563142,
+   "a": 1.000000001,
+   "n": 44,
+   "media": 0.9659090909090909
+  }
+ ],
+ "B_accordo": {
+  "Q": {
+   "0.0": {
+    "n": 396,
+    "accordo": 0.5757575757575758
+   },
+   "0.1": {
+    "n": 172,
+    "accordo": 0.6395348837209303
+   },
+   "0.2": {
+    "n": 74,
+    "accordo": 0.7027027027027027
+   },
+   "0.3": {
+    "n": 35,
+    "accordo": 0.6571428571428571
+   }
+  },
+  "visite": {
+   "0.0": {
+    "n": 415,
+    "accordo": 0.5686746987951807
+   },
+   "0.1": {
+    "n": 177,
+    "accordo": 0.6045197740112994
+   },
+   "0.2": {
+    "n": 78,
+    "accordo": 0.6153846153846154
+   },
+   "0.3": {
+    "n": 37,
+    "accordo": 0.5675675675675675
+   }
+  },
+  "stesse_coppie": {
+   "n": 393,
+   "Q": 0.5776081424936387,
+   "visite": 0.5648854961832062
+  }
+ },
+ "B_cambiate": {
+  "delta_medio": 0.08851851851851851,
+  "Q": {
+   "0.0": {
+    "n": 116,
+    "accordo": 0.25
+   },
+   "0.1": {
+    "n": 44,
+    "accordo": 0.09090909090909091
+   },
+   "0.2": {
+    "n": 19,
+    "accordo": 0.0
+   },
+   "0.3": {
+    "n": 13,
+    "accordo": 0.0
+   }
+  },
+  "visite": {
+   "0.0": {
+    "n": 123,
+    "accordo": 0.36585365853658536
+   },
+   "0.1": {
+    "n": 48,
+    "accordo": 0.3541666666666667
+   },
+   "0.2": {
+    "n": 21,
+    "accordo": 0.23809523809523808
+   },
+   "0.3": {
+    "n": 15,
+    "accordo": 0.26666666666666666
+   }
+  },
+  "guadagno_32": 0.1287037037037037,
+  "delta_100": 0.08851851851851851
+ },
+ "B_rumore": {
+  "se_mediana": 0.04490132550669372,
+  "atteso_Phi": {
+   "0.0": 0.8697030268043056,
+   "0.1": 0.9648568813836214,
+   "0.2": 0.993693693731967,
+   "0.3": 0.9995313952939106
+  },
+  "split_half": 0.6402691648633848,
+  "atteso_ridotto30": {
+   "0.0": 0.8087959054017569,
+   "0.1": 0.917238855381682,
+   "0.2": 0.9711084839027507,
+   "0.3": 0.9928942143133972
+  }
+ }
+}

@@ -66,13 +66,13 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 Strade precedenti chiuse senza guadagno (pilota, scelta per Q, sonda A, 1.000 iterazioni, movimento); `rimonta` default.
 «Pensa» misurata sul CCX63 (`docs/bot/esperimenti/fondo_20261127_1404/`): **PASSA**, +2,5 pp [+1,7, +3,4], 135/480
 cambiano mossa (+8,9 pp sulle cambiate); costo: 65,7 s/turno sul Mac (mediana), arena 100 coppie/matchup ~56 h di CCX63.
-Matteo ha al massimo ~16 h di CCX63. Varianti economiche sugli stessi dati (`scripts/rust/fondo_ridotto.py`,
-`ridotto.txt`): regola fissata prima (≥ +1,9 pp, lim. inf. > 0, non verificate ≤ 10%) passa solo 2 candidati/32 mondi
+Matteo ha ~16 h di CCX63. Varianti economiche (`ridotto.txt`): regola fissata prima (≥ +1,9 pp, lim. inf. > 0, non verificate ≤ 10%) passa solo 2 candidati/32 mondi
 (+2,0 pp, costo 0,75, 42 h). 8 mondi/3 candidati: +1,7 pp [+0,9, +2,6] (21 non verificate; a 0: +2,0), costo 0,25:
-arena ~14 h, ~16,5 s/turno sul Mac. Da decidere con Matteo quale «Pensa» provare in arena.
+arena ~14 h, ~16,5 s/turno sul Mac. `analisi.txt` (`fondo_analisi.py`): Q ordina le posizioni (Spearman 0,75; 0,40 a
+inizio partita) ma non le mosse (58% d'accordo con le partite giocate); errori sparsi su tutti i tipi. Domande ad Astra.
 
 ## Prossimi passi
-1. Decisione di Matteo sulla variante (8 mondi entra nelle 16 h; 32 mondi no).
+1. Risposte di Astra (direzione: Pensa in partita o come insegnante; arena 8 mondi) e decisione di Matteo.
 2. «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), facoltativa, con la variante scelta.
 3. Arena candidato con Pensa contro campione sul CCX63, semi nuovi (non 30M..90M), regola fissata prima.
 
@@ -82,7 +82,7 @@ arena ~14 h, ~16,5 s/turno sul Mac. Da decidere con Matteo quale «Pensa» prova
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
   `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`;
-  «Pensa»: `fondo.py`, `fondo.command`, varianti economiche `fondo_ridotto.py`.
+  «Pensa»: `fondo.py`, `fondo.command`, varianti `fondo_ridotto.py`, analisi `fondo_analisi.py`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
