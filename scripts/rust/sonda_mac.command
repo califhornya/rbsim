@@ -52,7 +52,7 @@ for mu in ES EK; do
 done
 for mu in ER KR EI KI; do AUT="$AUT $mu:100:A $mu:101:B"; done
 # shellcheck disable=SC2086
-python scripts/rust/attacco.py posizioni --autonoma $AUT --regole 6427b90+D72-D82 --valutazione rimonta \
+python scripts/rust/attacco.py posizioni --autonoma $AUT --regole 6427b90+D72-D83 --valutazione rimonta \
   --iterazioni 138 --ckpt "$CKPT" --out "$OUT/posizioni.json" 2>&1 | grep -E "posizioni|Traceback|Error" || true
 echo "== 3/4 fuori campione"
 python scripts/rust/attacco.py fuori --posizioni "$OUT/posizioni.json" --out "$OUT/fuori" \

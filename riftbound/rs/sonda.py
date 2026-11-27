@@ -19,9 +19,8 @@ import time
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
-from math import sqrt
 from pathlib import Path
-from statistics import mean, median, stdev
+from statistics import mean, median
 
 from riftbound.rs import attacco as A, decisione_esp as E, decisione_rs as D
 
@@ -441,6 +440,7 @@ def fuori(posizioni_json: Path, out_dir: Path, processi: int = 1, per_matchup: d
             print_(f"  ERRORE {type(x).__name__}: {x}")
             continue
         e["matchup"] = m
+        e["nome_partita"] = nome
         esiti.append(e)
         presi = e["punto_libero_preso"]
         preso = "-" if not presi else "/".join(f"{v[A.NOME_RIF]}" for v in presi.values())
@@ -457,10 +457,11 @@ def fuori(posizioni_json: Path, out_dir: Path, processi: int = 1, per_matchup: d
         for g in sorted({chiave(e) for e in esiti}):
             righe.append(f"{titolo} {g}: " + _riassunto([e for e in esiti if chiave(e) == g]))
     tutte = [d for e in esiti for d in e["diff_mondi"]]
-    if len(tutte) > 1:
-        es = 1.96 * stdev(tutte) / sqrt(len(tutte))
-        righe.append(f"differenza media sonda - campione su {len(tutte)} mondi appaiati: {100 * mean(tutte):+.2f} pp "
-                     f"[{100 * (mean(tutte) - es):+.2f}, {100 * (mean(tutte) + es):+.2f}]")
+    ic = intervallo_partite(esiti)
+    if ic is not None:
+        righe.append(f"differenza media sonda - campione su {len(esiti)} posizioni ({len(tutte)} mondi appaiati, zeri "
+                     f"compresi): {100 * ic[0]:+.2f} pp, IC 95% [{100 * ic[1]:+.2f}, {100 * ic[2]:+.2f}] ricampionando "
+                     f"le partite di origine dentro ogni matchup ({ic[3]} partite)")
     t = sorted(e["secondi_cpu"] for e in esiti)
     if t:
         righe.append(f"tempo della sonda per posizione (s cpu): mediana {median(t):.0f}, 95° percentile "
@@ -468,6 +469,33 @@ def fuori(posizioni_json: Path, out_dir: Path, processi: int = 1, per_matchup: d
     righe.append("totale: " + _riassunto(esiti))
     (out_dir / "riepilogo.txt").write_text("\n".join(righe) + "\n", encoding="utf-8")
     return righe
+
+
+def intervallo_partite(esiti: list[dict], n_boot: int = 40_000, seme: int = 0):
+    """(media, basso, alto, partite) della differenza sonda - campione: valore di una posizione = media dei suoi mondi
+    (zeri compresi dove la sonda lascia giocare il campione); media = media delle posizioni. IC 95% (Astra, 27/11):
+    ricampiona con reinserimento le partite di origine dentro ogni matchup (stesso numero), tenendo insieme i loro
+    turni e i loro mondi; la media di ogni replica e' sulle posizioni estratte. None senza posizioni con mondi."""
+    import numpy as np
+    per: dict = {}
+    for e in esiti:
+        if e.get("diff_mondi"):
+            g = per.setdefault(e["matchup"], {}).setdefault(e.get("nome_partita") or A.nome_partita(e["partita"]), [])
+            g.append(float(mean(e["diff_mondi"])))
+    valori = [v for g in per.values() for vv in g.values() for v in vv]
+    if not valori:
+        return None
+    rng = np.random.default_rng(seme)
+    somma, conta = np.zeros(n_boot), np.zeros(n_boot)
+    for partite in per.values():
+        s = np.array([sum(v) for v in partite.values()])
+        c = np.array([len(v) for v in partite.values()], float)
+        idx = rng.integers(0, len(s), (n_boot, len(s)))
+        somma += s[idx].sum(axis=1)
+        conta += c[idx].sum(axis=1)
+    boot = somma / conta
+    return (float(np.mean(valori)), float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)),
+            sum(len(p) for p in per.values()))
 
 
 def _riassunto(es: list[dict]) -> str:
