@@ -30,12 +30,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Arena mista: divergenze solo nelle ricerche rigiocate coi conteggi registrati; si guardano solo quelle che restano.
-- (26/11, Matteo e Astra) Filone principale: riallenare la rete con la ricerca (visite N/ΣN e esito ±1), --init da
-  ckpt_040000 (che resta l'avversario fisso), stessa architettura. Pilota: 2.000 partite (200 per matchup, D72-D82),
-  Dirichlet 0,25/α 0,3 alle radici di turno, temperatura 1 sulle prime 4 decisioni di turno, poi la più visitata;
-  valore: prima raccolta con rimonta, poi in sviluppo 80/20 rimonta/valore (rimonta sul Pass che chiude il turno).
-  Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
-  Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
+- (26/11, Matteo e Astra) Riallenare la rete con la ricerca (visite ed esito, --init da ckpt_040000): pilota senza
+  guadagno, strada chiusa. Promozione tipo: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50.
 - (26/11, Astra) Attacchi con lo showdown: sonda A dietro interruttore, soglia +0,15; pagina solo dopo fuori campione.
 - (26-27/11, Astra) Campione resta `ckpt_040000`; valore al 20% chiuso (forse solo sul Pass che chiude il turno);
   raccolta da 100.000 da parte; scelta finale per Q confermata (regola di stop). Promozioni sempre su semi nuovi.
@@ -46,6 +42,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   del campione + le 2 più visitate, giocate fino alla fine sugli stessi 32 mondi `ignote` (40000..), si gioca la media
   più alta (pari: il campione). Misura sulle 480 posizioni, verifica su 100 mondi diversi (50000..); regola fissata
   prima: lim. inf. > 0 e ≥20 posizioni cambiano mossa. Campione predefinito invariato senza arena (lim. inf. > 50%).
+- (27/11, Astra/Matteo) Pagina invariata (campione a 138). «Pensa» come insegnante: pilota «studente» (testa su encoder
+  di ckpt_040000 congelato, sceglie fra le ≤3 candidate alla fine della ricerca; bersaglio = differenza appaiata fra
+  mosse sugli stessi mondi), tetto 2 h di CCX63 comprese le verifiche, entrambi i ruoli (chi inizia e chi risponde),
+  identità esatta delle mosse; modello e regola congelati prima della verifica; soglia: ≥ +1 pp e lim. inf. > 0 sui
+  due ruoli insieme (riportati anche separati), se no si ferma. Poi «Pensa» dopo la partita nella pagina (Matteo sceglie
+  un turno e la sua alternativa). Arena Pensa a 8 mondi accantonata.
 
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
@@ -63,18 +65,15 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Strade precedenti chiuse senza guadagno (pilota, scelta per Q, sonda A, 1.000 iterazioni, movimento); `rimonta` default.
-«Pensa» misurata sul CCX63 (`docs/bot/esperimenti/fondo_20261127_1404/`): **PASSA**, +2,5 pp [+1,7, +3,4], 135/480
-cambiano mossa (+8,9 pp sulle cambiate); costo: 65,7 s/turno sul Mac (mediana), arena 100 coppie/matchup ~56 h di CCX63.
-Matteo ha ~16 h di CCX63. Varianti economiche (`ridotto.txt`): regola fissata prima (≥ +1,9 pp, lim. inf. > 0, non verificate ≤ 10%) passa solo 2 candidati/32 mondi
-(+2,0 pp, costo 0,75, 42 h). 8 mondi/3 candidati: +1,7 pp [+0,9, +2,6] (21 non verificate; a 0: +2,0), costo 0,25:
-arena ~14 h, ~16,5 s/turno sul Mac. `analisi.txt` (`fondo_analisi.py`): Q ordina le posizioni (Spearman 0,75; 0,40 a
-inizio partita) ma non le mosse (58% d'accordo con le partite giocate); errori sparsi su tutti i tipi. Domande ad Astra.
+«Pensa» (`docs/bot/esperimenti/fondo_20261127_1404/`): PASSA, +2,5 pp [+1,7, +3,4], ma solo dal lato di chi inizia
+(60/60 partite, turni dispari: buco di `seguiti.partite`); costo ~56 h di CCX63 per un'arena. Varianti economiche
+(`ridotto.txt`) sotto soglia; `analisi.txt`: la Q ordina le posizioni (Spearman 0,75) ma non le mosse (58%).
+Risposta di Astra (27/11): studente lineare su Q/visite/tipo −0,20 pp (servono mano e tavolo); soglia di visite +0,16.
+Matteo ha ~16 h di CCX63. In preparazione il pilota «studente».
 
 ## Prossimi passi
-1. Risposte di Astra (direzione: Pensa in partita o come insegnante; arena 8 mondi) e decisione di Matteo.
-2. «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), facoltativa, con la variante scelta.
-3. Arena candidato con Pensa contro campione sul CCX63, semi nuovi (non 30M..90M), regola fissata prima.
+1. Pilota «studente»: raccolta (entrambi i ruoli), allenamento della testa, verifica congelata; ≤ 2 h di CCX63.
+2. «Pensa» dopo la partita nella pagina (`coach_rs.py`, `scripts/coach.py`, `coach_page.html`).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
