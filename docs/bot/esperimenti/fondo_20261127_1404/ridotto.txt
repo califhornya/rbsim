@@ -1,0 +1,85 @@
+Controllo variante piena: OK -> m=32 k=3 salto=nessuno (saltate 0%): +2.5 pp [+1.7, +3.4], cambi 135, non verif. 0, tot. nv=0 +2.5, costo 1.000, arena 56.5 h, 65.7 s/turno
+Regola: la piu' economica con totale >= +1,9 pp, limite inf. > 0, non verificate <= 10% dei cambi.
+CONSIGLIATA: m=32 k=2 salto=nessuno (saltate 0%): +2.0 pp [+1.3, +2.6], cambi 111, non verif. 6 (distorte 6), tot. nv=0 +1.8, costo 0.750, arena 42.4 h, 49.3 s/turno
+
+Prime 8 che rispettano la regola:
+1. m=32 k=2 salto=nessuno (saltate 0%): +2.0 pp [+1.3, +2.6], cambi 111, non verif. 6 (distorte 6), tot. nv=0 +1.8, costo 0.750, arena 42.4 h, 49.3 s/turno
+2. m=32 k=3 salto=nessuno (saltate 0%): +2.5 pp [+1.7, +3.4], cambi 135, non verif. 0, tot. nv=0 +2.5, costo 1.000, arena 56.5 h, 65.7 s/turno
+
+Tutte le varianti:
+m=8 k=2 salto=scarto 0.0042 (saltate 75%): +0.4 pp [-0.0, +0.8], cambi 23, non verif. 6, tot. nv=0 +0.5, costo 0.038, arena 2.1 h, 2.5 s/turno
+m=8 k=2 salto=quota 0.174 (saltate 75%): +0.2 pp [-0.1, +0.5], cambi 22, non verif. 3, tot. nv=0 +0.3, costo 0.045, arena 2.5 h, 2.9 s/turno
+m=8 k=3 salto=scarto 0.0020 (saltate 75%): +0.5 pp [+0.1, +1.0], cambi 28, non verif. 8, tot. nv=0 +0.7, costo 0.055, arena 3.1 h, 3.6 s/turno
+m=12 k=2 salto=scarto 0.0042 (saltate 75%): +0.5 pp [+0.1, +0.9], cambi 23, non verif. 5, tot. nv=0 +0.5, costo 0.057, arena 3.2 h, 3.8 s/turno
+m=8 k=3 salto=quota 0.174 (saltate 75%): +0.2 pp [-0.1, +0.6], cambi 25, non verif. 4, tot. nv=0 +0.3, costo 0.062, arena 3.5 h, 4.0 s/turno
+m=12 k=2 salto=quota 0.174 (saltate 75%): +0.3 pp [+0.0, +0.6], cambi 23, non verif. 3, tot. nv=0 +0.3, costo 0.067, arena 3.8 h, 4.4 s/turno
+m=16 k=2 salto=scarto 0.0042 (saltate 75%): +0.5 pp [+0.1, +0.9], cambi 23, non verif. 5, tot. nv=0 +0.5, costo 0.076, arena 4.3 h, 5.0 s/turno
+m=12 k=3 salto=scarto 0.0020 (saltate 75%): +0.6 pp [+0.2, +1.1], cambi 29, non verif. 9, tot. nv=0 +0.7, costo 0.083, arena 4.7 h, 5.5 s/turno
+m=8 k=2 salto=scarto 0.0275 (saltate 50%): +0.9 pp [+0.3, +1.5], cambi 43, non verif. 8, tot. nv=0 +1.1, costo 0.086, arena 4.8 h, 5.6 s/turno
+m=16 k=2 salto=quota 0.174 (saltate 75%): +0.2 pp [-0.1, +0.5], cambi 25, non verif. 6, tot. nv=0 +0.3, costo 0.089, arena 5.0 h, 5.8 s/turno
+m=8 k=2 salto=quota 0.482 (saltate 50%): +0.7 pp [+0.2, +1.2], cambi 44, non verif. 6, tot. nv=0 +0.8, costo 0.091, arena 5.2 h, 6.0 s/turno
+m=12 k=3 salto=quota 0.174 (saltate 75%): +0.3 pp [-0.1, +0.6], cambi 26, non verif. 6, tot. nv=0 +0.3, costo 0.092, arena 5.2 h, 6.1 s/turno
+m=16 k=3 salto=scarto 0.0020 (saltate 75%): +0.6 pp [+0.1, +1.1], cambi 31, non verif. 11, tot. nv=0 +0.7, costo 0.111, arena 6.3 h, 7.3 s/turno
+m=24 k=2 salto=scarto 0.0042 (saltate 75%): +0.5 pp [+0.1, +0.9], cambi 23, non verif. 3, tot. nv=0 +0.5, costo 0.114, arena 6.4 h, 7.5 s/turno
+m=8 k=3 salto=scarto 0.0218 (saltate 50%): +1.0 pp [+0.3, +1.6], cambi 47, non verif. 9, tot. nv=0 +1.2, costo 0.118, arena 6.6 h, 7.7 s/turno
+m=16 k=3 salto=quota 0.174 (saltate 75%): +0.2 pp [-0.2, +0.6], cambi 29, non verif. 10, tot. nv=0 +0.3, costo 0.123, arena 6.9 h, 8.1 s/turno
+m=12 k=2 salto=scarto 0.0275 (saltate 50%): +1.0 pp [+0.5, +1.6], cambi 45, non verif. 6, tot. nv=0 +1.1, costo 0.128, arena 7.2 h, 8.4 s/turno
+m=8 k=3 salto=quota 0.482 (saltate 50%): +0.7 pp [+0.2, +1.2], cambi 50, non verif. 8, tot. nv=0 +0.8, costo 0.128, arena 7.2 h, 8.4 s/turno
+m=24 k=2 salto=quota 0.174 (saltate 75%): +0.2 pp [-0.2, +0.6], cambi 30, non verif. 5, tot. nv=0 +0.3, costo 0.133, arena 7.5 h, 8.8 s/turno
+m=8 k=2 salto=quota 0.841 (saltate 26%): +1.2 pp [+0.5, +1.8], cambi 64, non verif. 12, tot. nv=0 +1.4, costo 0.137, arena 7.7 h, 9.0 s/turno
+m=12 k=2 salto=quota 0.482 (saltate 50%): +0.8 pp [+0.4, +1.3], cambi 47, non verif. 7, tot. nv=0 +0.8, costo 0.137, arena 7.8 h, 9.0 s/turno
+m=8 k=2 salto=scarto 0.0794 (saltate 25%): +1.0 pp [+0.4, +1.7], cambi 65, non verif. 13, tot. nv=0 +1.3, costo 0.140, arena 7.9 h, 9.2 s/turno
+m=32 k=2 salto=scarto 0.0042 (saltate 75%): +0.5 pp [+0.2, +1.0], cambi 23, non verif. 1 (distorte 1), tot. nv=0 +0.5, costo 0.152, arena 8.6 h, 10.0 s/turno
+m=24 k=3 salto=scarto 0.0020 (saltate 75%): +0.5 pp [+0.1, +1.0], cambi 27, non verif. 5, tot. nv=0 +0.7, costo 0.167, arena 9.4 h, 11.0 s/turno
+m=16 k=2 salto=scarto 0.0275 (saltate 50%): +0.9 pp [+0.4, +1.5], cambi 47, non verif. 9, tot. nv=0 +1.1, costo 0.170, arena 9.6 h, 11.2 s/turno
+m=12 k=3 salto=scarto 0.0218 (saltate 50%): +1.1 pp [+0.5, +1.7], cambi 48, non verif. 9, tot. nv=0 +1.2, costo 0.176, arena 10.0 h, 11.6 s/turno
+m=32 k=2 salto=quota 0.174 (saltate 75%): +0.4 pp [+0.1, +0.7], cambi 31, non verif. 1 (distorte 1), tot. nv=0 +0.4, costo 0.178, arena 10.1 h, 11.7 s/turno
+m=16 k=2 salto=quota 0.482 (saltate 50%): +0.7 pp [+0.3, +1.1], cambi 50, non verif. 10, tot. nv=0 +0.9, costo 0.182, arena 10.3 h, 12.0 s/turno
+m=24 k=3 salto=quota 0.174 (saltate 75%): +0.0 pp [-0.4, +0.4], cambi 33, non verif. 6, tot. nv=0 +0.4, costo 0.184, arena 10.4 h, 12.1 s/turno
+m=8 k=2 salto=nessuno (saltate 0%): +1.3 pp [+0.6, +2.0], cambi 85, non verif. 20, tot. nv=0 +1.7, costo 0.188, arena 10.6 h, 12.3 s/turno
+m=8 k=3 salto=quota 0.841 (saltate 26%): +1.2 pp [+0.6, +2.0], cambi 73, non verif. 15, tot. nv=0 +1.5, costo 0.189, arena 10.7 h, 12.4 s/turno
+m=8 k=3 salto=scarto 0.0710 (saltate 25%): +1.2 pp [+0.6, +1.9], cambi 74, non verif. 14, tot. nv=0 +1.5, costo 0.191, arena 10.8 h, 12.6 s/turno
+m=12 k=3 salto=quota 0.482 (saltate 50%): +0.8 pp [+0.3, +1.3], cambi 54, non verif. 12, tot. nv=0 +0.8, costo 0.192, arena 10.9 h, 12.6 s/turno
+m=12 k=2 salto=quota 0.841 (saltate 26%): +1.3 pp [+0.7, +1.9], cambi 69, non verif. 14, tot. nv=0 +1.4, costo 0.205, arena 11.6 h, 13.5 s/turno
+m=12 k=2 salto=scarto 0.0794 (saltate 25%): +1.1 pp [+0.5, +1.7], cambi 68, non verif. 13, tot. nv=0 +1.3, costo 0.210, arena 11.9 h, 13.8 s/turno
+m=32 k=3 salto=scarto 0.0020 (saltate 75%): +0.8 pp [+0.4, +1.3], cambi 30, non verif. 0, tot. nv=0 +0.8, costo 0.223, arena 12.6 h, 14.6 s/turno
+m=16 k=3 salto=scarto 0.0218 (saltate 50%): +1.0 pp [+0.3, +1.6], cambi 55, non verif. 17, tot. nv=0 +1.2, costo 0.235, arena 13.3 h, 15.4 s/turno
+m=32 k=3 salto=quota 0.174 (saltate 75%): +0.4 pp [+0.1, +0.7], cambi 33, non verif. 0, tot. nv=0 +0.4, costo 0.246, arena 13.9 h, 16.1 s/turno
+m=8 k=3 salto=nessuno (saltate 0%): +1.7 pp [+0.9, +2.6], cambi 99, non verif. 21, tot. nv=0 +2.0, costo 0.250, arena 14.1 h, 16.5 s/turno
+m=16 k=3 salto=quota 0.482 (saltate 50%): +0.6 pp [+0.1, +1.1], cambi 59, non verif. 20, tot. nv=0 +0.8, costo 0.256, arena 14.5 h, 16.8 s/turno
+m=24 k=2 salto=scarto 0.0275 (saltate 50%): +0.8 pp [+0.2, +1.5], cambi 52, non verif. 7, tot. nv=0 +1.1, costo 0.256, arena 14.5 h, 16.8 s/turno
+m=16 k=2 salto=quota 0.841 (saltate 26%): +1.2 pp [+0.6, +1.8], cambi 76, non verif. 18, tot. nv=0 +1.4, costo 0.273, arena 15.4 h, 17.9 s/turno
+m=24 k=2 salto=quota 0.482 (saltate 50%): +0.7 pp [+0.3, +1.2], cambi 59, non verif. 9, tot. nv=0 +0.9, costo 0.274, arena 15.5 h, 18.0 s/turno
+m=16 k=2 salto=scarto 0.0794 (saltate 25%): +1.0 pp [+0.5, +1.7], cambi 75, non verif. 17, tot. nv=0 +1.3, costo 0.279, arena 15.8 h, 18.4 s/turno
+m=12 k=2 salto=nessuno (saltate 0%): +1.4 pp [+0.7, +2.0], cambi 95, non verif. 23, tot. nv=0 +1.7, costo 0.281, arena 15.9 h, 18.5 s/turno
+m=12 k=3 salto=quota 0.841 (saltate 26%): +1.4 pp [+0.7, +2.1], cambi 79, non verif. 19, tot. nv=0 +1.5, costo 0.284, arena 16.0 h, 18.7 s/turno
+m=12 k=3 salto=scarto 0.0710 (saltate 25%): +1.3 pp [+0.6, +2.0], cambi 79, non verif. 16, tot. nv=0 +1.5, costo 0.287, arena 16.2 h, 18.9 s/turno
+m=32 k=2 salto=scarto 0.0275 (saltate 50%): +1.2 pp [+0.6, +1.8], cambi 53, non verif. 1 (distorte 1), tot. nv=0 +1.2, costo 0.342, arena 19.3 h, 22.5 s/turno
+m=24 k=3 salto=scarto 0.0218 (saltate 50%): +0.9 pp [+0.3, +1.6], cambi 56, non verif. 8, tot. nv=0 +1.3, costo 0.353, arena 19.9 h, 23.2 s/turno
+m=32 k=2 salto=quota 0.482 (saltate 50%): +1.1 pp [+0.6, +1.6], cambi 60, non verif. 3 (distorte 3), tot. nv=0 +1.0, costo 0.365, arena 20.6 h, 24.0 s/turno
+m=16 k=2 salto=nessuno (saltate 0%): +1.4 pp [+0.7, +2.0], cambi 100, non verif. 23, tot. nv=0 +1.7, costo 0.374, arena 21.1 h, 24.6 s/turno
+m=12 k=3 salto=nessuno (saltate 0%): +1.8 pp [+1.0, +2.7], cambi 110, non verif. 25, tot. nv=0 +2.1, costo 0.376, arena 21.2 h, 24.7 s/turno
+m=16 k=3 salto=quota 0.841 (saltate 26%): +1.2 pp [+0.5, +1.9], cambi 89, non verif. 27, tot. nv=0 +1.6, costo 0.378, arena 21.3 h, 24.8 s/turno
+m=16 k=3 salto=scarto 0.0710 (saltate 25%): +1.2 pp [+0.5, +1.9], cambi 92, non verif. 26, tot. nv=0 +1.5, costo 0.382, arena 21.6 h, 25.1 s/turno
+m=24 k=3 salto=quota 0.482 (saltate 50%): +0.6 pp [+0.2, +1.1], cambi 67, non verif. 12, tot. nv=0 +1.0, costo 0.384, arena 21.7 h, 25.2 s/turno
+m=24 k=2 salto=quota 0.841 (saltate 26%): +1.2 pp [+0.7, +1.8], cambi 84, non verif. 15, tot. nv=0 +1.5, costo 0.410, arena 23.2 h, 27.0 s/turno
+m=24 k=2 salto=scarto 0.0794 (saltate 25%): +1.0 pp [+0.4, +1.7], cambi 84, non verif. 13, tot. nv=0 +1.4, costo 0.420, arena 23.7 h, 27.6 s/turno
+m=32 k=3 salto=scarto 0.0218 (saltate 50%): +1.4 pp [+0.7, +2.0], cambi 60, non verif. 0, tot. nv=0 +1.4, costo 0.471, arena 26.6 h, 30.9 s/turno
+m=16 k=3 salto=nessuno (saltate 0%): +1.6 pp [+0.8, +2.5], cambi 124, non verif. 34, tot. nv=0 +2.1, costo 0.499, arena 28.2 h, 32.8 s/turno
+m=32 k=3 salto=quota 0.482 (saltate 50%): +1.1 pp [+0.7, +1.6], cambi 69, non verif. 0, tot. nv=0 +1.1, costo 0.511, arena 28.9 h, 33.6 s/turno
+m=32 k=2 salto=quota 0.841 (saltate 26%): +1.7 pp [+1.1, +2.3], cambi 85, non verif. 5 (distorte 5), tot. nv=0 +1.6, costo 0.548, arena 31.0 h, 36.0 s/turno
+m=32 k=2 salto=scarto 0.0794 (saltate 25%): +1.5 pp [+0.9, +2.1], cambi 84, non verif. 3 (distorte 3), tot. nv=0 +1.4, costo 0.560, arena 31.6 h, 36.8 s/turno
+m=24 k=2 salto=nessuno (saltate 0%): +1.5 pp [+0.9, +2.1], cambi 110, non verif. 16, tot. nv=0 +1.8, costo 0.562, arena 31.8 h, 36.9 s/turno
+m=24 k=3 salto=quota 0.841 (saltate 26%): +1.3 pp [+0.6, +1.9], cambi 96, non verif. 16, tot. nv=0 +1.8, costo 0.567, arena 32.1 h, 37.3 s/turno
+m=24 k=3 salto=scarto 0.0710 (saltate 25%): +1.1 pp [+0.4, +1.8], cambi 101, non verif. 16, tot. nv=0 +1.6, costo 0.574, arena 32.4 h, 37.7 s/turno
+m=24 k=3 salto=nessuno (saltate 0%): +1.9 pp [+1.1, +2.8], cambi 131, non verif. 17, tot. nv=0 +2.4, costo 0.750, arena 42.4 h, 49.3 s/turno
+m=32 k=2 salto=nessuno (saltate 0%): +2.0 pp [+1.3, +2.6], cambi 111, non verif. 6 (distorte 6), tot. nv=0 +1.8, costo 0.750, arena 42.4 h, 49.3 s/turno
+m=32 k=3 salto=quota 0.841 (saltate 26%): +1.9 pp [+1.2, +2.6], cambi 100, non verif. 0, tot. nv=0 +1.9, costo 0.757, arena 42.8 h, 49.7 s/turno
+m=32 k=3 salto=scarto 0.0710 (saltate 25%): +1.7 pp [+1.1, +2.4], cambi 102, non verif. 0, tot. nv=0 +1.7, costo 0.765, arena 43.2 h, 50.2 s/turno
+m=32 k=3 salto=nessuno (saltate 0%): +2.5 pp [+1.7, +3.4], cambi 135, non verif. 0, tot. nv=0 +2.5, costo 1.000, arena 56.5 h, 65.7 s/turno
+
+Anomalie:
+decisioni 480, con >=2 candidati e mondi 424; incoerenti 0
+scelta ricalcolata diversa da scelta.json: 0
+verifiche mancanti dove la scelta piena e' diversa da 0: 0
+non verificate senza mondi validi (valore escluso): 0 su tutte le varianti

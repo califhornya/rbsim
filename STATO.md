@@ -63,18 +63,19 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Nessun guadagno: pilota (b) 47,95%, (c) 49,05%; (d) 50,2% [48,7, 51,7]; scelta finale visite − Q −0,3 pp [−1,0, +0,3];
-sonda A fuori campione −0,70 pp [−3,81, +1,89]; 1.000 contro 138: 51,2% [49,6, 52,9]; movimento dalla base
-(`movimento_20261127_1237/`): quota Q − campione +0,2 pp [−1,2, +1,7], NON PASSA, strada chiusa. §8-§9: `rimonta` default
-della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
-Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.command`, `tests/rust/test_fondo.py`; suite
-485): qui ~2,5 s di cpu per rigiocata → ~240 s per decisione, ~25 s sul Mac a 9 processi; CCX63 stimato 1-1,5 h.
+Nessun guadagno dalle strade precedenti (pilota, scelta finale per Q, sonda A, 1.000 iterazioni, movimento dalla base:
+tutte chiuse, dettagli in `docs/bot/esperimenti/`). `rimonta` default della pagina.
+«Pensa» misurata sul CCX63 (`docs/bot/esperimenti/fondo_20261127_1404/`): **PASSA**, +2,5 pp [+1,7, +3,4], 135/480
+cambiano mossa (+8,9 pp sulle cambiate); costo: 65,7 s/turno sul Mac (mediana), arena 100 coppie/matchup ~56 h di CCX63.
+Matteo ha al massimo ~16 h di CCX63. Varianti economiche sugli stessi dati (`scripts/rust/fondo_ridotto.py`,
+`ridotto.txt`): regola fissata prima (≥ +1,9 pp, lim. inf. > 0, non verificate ≤ 10%) passa solo 2 candidati/32 mondi
+(+2,0 pp, costo 0,75, 42 h). 8 mondi/3 candidati: +1,7 pp [+0,9, +2,6] (21 non verificate; a 0: +2,0), costo 0,25:
+arena ~14 h, ~16,5 s/turno sul Mac. Da decidere con Matteo quale «Pensa» provare in arena.
 
 ## Prossimi passi
-1. `fondo.command` sul CCX63 (`server_prepara.sh`, tmux `fondo`); risultati in `docs/bot/esperimenti/fondo_*`.
-2. Se passa: «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`) e arena candidato con Pensa contro campione;
-   prima il costo (riga `stima dell'arena` del riepilogo: a occhio ~60 h di CCX63 per 100 coppie).
-3. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
+1. Decisione di Matteo sulla variante (8 mondi entra nelle 16 h; 32 mondi no).
+2. «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), facoltativa, con la variante scelta.
+3. Arena candidato con Pensa contro campione sul CCX63, semi nuovi (non 30M..90M), regola fissata prima.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
@@ -82,7 +83,7 @@ Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.comm
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
   `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`;
-  «Pensa»: `fondo.py`, `fondo.command`.
+  «Pensa»: `fondo.py`, `fondo.command`, varianti economiche `fondo_ridotto.py`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
