@@ -119,7 +119,9 @@ def game(task):
     ([nome, k, alpha]: the leaf evaluation of that side, default storica), vr_cand / vr_opp (weight 0..1 of the
     net's value in the leaves, default 0 = off, search unchanged; only for prior_ppo), vc_cand / vc_opp (checkpoint
     da cui viene il valore, se diverso da quello del prior; con vr > 0 e solo per prior_ppo), scelta_cand / scelta_opp
-    ("q" = Q piu' alta, come prima | "visite" = alle decisioni di turno la piu' visitata; Astra 27/11), log (the last element
+    ("q" = Q piu' alta, come prima | "visite" = alle decisioni di turno la piu' visitata; Astra 27/11), quota_cand /
+    quota_opp ([etichette, n]: alla radice di OGNI ricerca di turno di quel lato, finche' un figlio la cui etichetta
+    contiene una delle sottostringhe ha meno di n visite si simula quello con meno visite; assente = come prima), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
@@ -160,6 +162,9 @@ def game(task):
         sc = opz.get(f"scelta_{lato}")
         if sc:
             g.set_search_scelta(seat, str(sc))
+        qt = opz.get(f"quota_{lato}")
+        if qt:
+            g.set_search_quota(seat, [str(x) for x in qt[0]], int(qt[1]))
         val = opz.get(f"val_{lato}")
         if val and val[0] != "storica":
             g.set_search_valutazione(seat, val[0], float(val[1]), float(val[2]))
