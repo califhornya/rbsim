@@ -69,11 +69,12 @@ Nessun guadagno prima: pilota (d) 50,2% [48,7, 51,7]; visite − Q −0,3 pp; so
 mediana 66 s, p95 169 s. Arena 100 coppie: 2.657 ore di cpu = 56,5 h di CCX63 (esclusa).
 
 ## Prossimi passi
-1. «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), opzione spenta di default: alla decisione di turno del bot
-   la ricerca come oggi, poi i 3 candidati di `fondo.candidati` su 32 mondi `ignote` dal punto di vista del bot, pool di
-   processi tenuto vivo per la partita, avanzamento a schermo. Da decidere con Matteo.
-2. Arena solo se serve un campione predefinito nuovo: piccola (20 coppie, 16 mondi, ~6 h) o «Pensa» solo dove la ricerca
-   è incerta; nessuna delle due decisa.
+1. (Matteo, 27/11: deciso, l'attesa non è un problema) «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), spento di
+   default, con un interruttore per tipo: turno, reazioni, showdown. Ricerca come oggi, poi `fondo.candidati` su 32 mondi
+   `ignote` dal punto di vista del bot, pool tenuto vivo, avanzamento a schermo. Serve: `set_search_first_move` (oggi solo
+   turno, `lib.rs`) anche a reazione/showdown; `A.posizione` e `_gioca_turno` oggi solo `turn_action`. Nella stessa PR la
+   misura di `fondo` su reazioni e showdown delle stesse 60 partite (~1 h di CCX63): se passa, accesi di default con Pensa.
+2. Arena solo per un campione predefinito nuovo (piccola o Pensa solo dove la ricerca è incerta): non decisa.
 3. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
 
 ## File principali
