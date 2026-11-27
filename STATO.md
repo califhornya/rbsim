@@ -45,7 +45,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (27/11, Matteo; Astra non disponibile) «Pensa» = politica migliorata per simulazione: alla decisione di turno la mossa
   del campione + le 2 più visitate, giocate fino alla fine sugli stessi 32 mondi `ignote` (40000..), si gioca la media
   più alta (pari: il campione). Misura sulle 480 posizioni, verifica su 100 mondi diversi (50000..); regola fissata
-  prima: lim. inf. > 0 e ≥20 posizioni cambiano mossa. Campione predefinito invariato senza arena (lim. inf. > 50%).
+  prima: lim. inf. > 0 e ≥20 posizioni cambiano mossa. Campione predefinito invariato senza arena (lim. inf. > 50%);
+  (Matteo) niente arena da ~56 h di CCX63 (100 coppie): «Pensa» va nella pagina come opzione, spenta di default.
 
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
@@ -53,27 +54,26 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - 24-25/11 pagina col campione (`scripts/coach.py`, `coach_page.html`, `allenatore.command`/`.bat`); segnalazioni 1-14
   (`docs/bot/SEGNALAZIONI.md`); partite in `runs/coach/partite/`; `win_probe` (vittoria nel turno; arena invariata).
 - 25-26/11 difetti di motore corretti in Rust, ognuno su un profilo (`docs/RUST.md` "Profili delle regole", AUDIT.md,
-  `tests/rust/test_d*.py`): D72-D76 (storico 600/600), D77 (180/180), D78-D80 (200/200), D81 (Call to Glory, segnalazione
-  26; ES 80/80, 9/30 diverse), D82 (Edge of Night da coperta al BF1 si attaccava al BF0, segnalazione 27; EK ed ES 80/80,
-  0/60 diverse: lo copre il test). `tests/rust` 429 (con torch); `6427b90+D72-D82` default della pagina.
+  `tests/rust/test_d*.py`): D72-D82; `tests/rust` 485 (con torch); `6427b90+D72-D83` default della pagina.
 - 25/11 pagina su Rust (`docs/RUST.md` "Posto umano e traccia in diretta", "Pagina coach su Rust"): posto umano nel ponte
   (`set_human_agent`), vista `riftbound/rs/vista_rs.py`, "Come paghi?" (`payment.rs`), `riftbound/ai/coach_rs.py` (rewind
   rigiocando le risposte); `scripts/coach.py --motore rust|python --regole --iterazioni`; fuori perimetro e `--net`: Python.
-- 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): a 0,030 s il campione fa ~138 iterazioni nel turno
-  (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
+- 25/11 taratura sul Mac (`docs/rust/misure/calibra_20261125_1931.txt`): pagina a 138 iterazioni (= 0,030 s nel turno).
 
 ## In corso
-Nessun guadagno: pilota (b) 47,95%, (c) 49,05%; (d) 50,2% [48,7, 51,7]; scelta finale visite − Q −0,3 pp [−1,0, +0,3];
-sonda A fuori campione −0,70 pp [−3,81, +1,89]; 1.000 contro 138: 51,2% [49,6, 52,9]; movimento dalla base
-(`movimento_20261127_1237/`): quota Q − campione +0,2 pp [−1,2, +1,7], NON PASSA, strada chiusa. §8-§9: `rimonta` default
-della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
-Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.command`, `tests/rust/test_fondo.py`; suite
-485): qui ~2,5 s di cpu per rigiocata → ~240 s per decisione, ~25 s sul Mac a 9 processi; CCX63 stimato 1-1,5 h.
+Nessun guadagno prima: pilota (d) 50,2% [48,7, 51,7]; visite − Q −0,3 pp; sonda A −0,70 pp; 1.000 contro 138: 51,2%
+[49,6, 52,9]; quota del movimento +0,2 pp [−1,2, +1,7]. `rimonta` default della pagina; la ricerca non ha rumore.
+**«Pensa» PASSA** (`fondo_20261127_1404/`, CCX63, 66 min): Pensa − campione +2,5 pp [+1,7, +3,4] su 480 posizioni;
+135 cambiano mossa (28%): +8,9 pp [+6,4, +11,5], a favore 92, contro 31, pari 12; tutti i 10 matchup > 0 (7 con lim. inf.
+> 0). Primo metodo che passa. Cpu per decisione mediana 207 s, p95 483 s; sul Mac (9 processi, core = server) per turno
+mediana 66 s, p95 169 s. Arena 100 coppie: 2.657 ore di cpu = 56,5 h di CCX63 (esclusa).
 
 ## Prossimi passi
-1. `fondo.command` sul CCX63 (`server_prepara.sh`, tmux `fondo`); risultati in `docs/bot/esperimenti/fondo_*`.
-2. Se passa: «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`) e arena candidato con Pensa contro campione;
-   prima il costo (riga `stima dell'arena` del riepilogo: a occhio ~60 h di CCX63 per 100 coppie).
+1. «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`), opzione spenta di default: alla decisione di turno del bot
+   la ricerca come oggi, poi i 3 candidati di `fondo.candidati` su 32 mondi `ignote` dal punto di vista del bot, pool di
+   processi tenuto vivo per la partita, avanzamento a schermo. Da decidere con Matteo.
+2. Arena solo se serve un campione predefinito nuovo: piccola (20 coppie, 16 mondi, ~6 h) o «Pensa» solo dove la ricerca
+   è incerta; nessuna delle due decisa.
 3. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
 
 ## File principali
