@@ -531,7 +531,7 @@ def dataset(posizioni: list[dict]) -> dict:
             w.append(1.0 / math.sqrt(len(d)))
             pid.append(n)
             gr.append((p["matchup"], p["seme"]))
-    dim = posizioni[0]["feat"].shape[1] if posizioni and "feat" in posizioni[0] else 0
+    dim = next((p["feat"].shape[1] for p in posizioni if "feat" in p), 0)
     return {"X": np.asarray(X, np.float32).reshape(len(X), dim), "y": np.asarray(y, float), "w": np.asarray(w, float),
             "pid": np.asarray(pid, int), "gruppo": gr}
 
@@ -566,7 +566,7 @@ def addestra(posizioni: list[dict], epoche: int = 300, seme: int = 0, taus=TAU, 
     out = {"impara": False, "guadagno": 0.0, "studente": None, "tabella": [], "n_train": 0, "n_val": 0,
            "semi_train": 0, "semi_val": 0, "righe": int(len(ds["y"]))}
     if not len(ds["y"]):
-        return out
+        return out | {"messaggio": "nessun dato di allenamento"}
     tr, va = dividi_semi(ds["gruppo"], seme=seme)
     it = np.array([g in tr for g in ds["gruppo"]])
     iv = ~it
@@ -679,6 +679,24 @@ def _gruppo_maestro(p: dict, mondi_m: range, mondi_v: range):
     return gruppo("maestro", F._lavoro_mondo, [(p["pos"], "ignote", i, linee) for i in mondi_m], fine)
 
 
+def _prepara_verifica(p: dict, studente, mv: range, mm: range, n_maestro_semi: int) -> list:
+    """Gruppi di verifica di una posizione. L'appartenenza al sottoinsieme fisso del maestro (primi `n_maestro_semi`
+    semi, posizioni valide) si segna SEMPRE, prima di ogni uscita; senza alternative (o senza caratteristiche) non si
+    rigioca niente e la posizione vale 0."""
+    p["ver"], p["scelta_studente"], p["di_maestro"] = {}, None, False
+    if p["stato"] != "ok":
+        return []
+    p["di_maestro"] = p["j"] < n_maestro_semi
+    if "feat" not in p:
+        return []
+    t = studente.decidi(p["feat"])
+    p["scelta_studente"] = t
+    gruppi = _richiedi(p, t, mv, "verifica_studente") if t is not None else []
+    if p["di_maestro"] and len(p["candidati"]) >= 2:
+        gruppi.append(_gruppo_maestro(p, mm, mv))
+    return gruppi
+
+
 def verifica(matchup, n_semi: int, per_posto: int, n_mondi: int, n_maestro_semi: int, cart, ckpt: str,
              processi: int, tetto_min: float, iterazioni: int = ITERAZIONI, regole: str = REGOLE,
              n_mondi_maestro: int = N_MAESTRO, orologio=time.monotonic, esecutore=None, print_=print) -> dict:
@@ -694,16 +712,7 @@ def verifica(matchup, n_semi: int, per_posto: int, n_mondi: int, n_maestro_semi:
     corsa = Corsa(processi, tetto_min * 60, orologio, esecutore, print_)
 
     def prepara(p, _i):
-        p["ver"], p["scelta_studente"], p["di_maestro"] = {}, None, False
-        if p["stato"] != "ok" or "feat" not in p:
-            return []
-        t = studente.decidi(p["feat"])
-        p["scelta_studente"] = t
-        gruppi = _richiedi(p, t, mv, "verifica_studente") if t is not None else []
-        if p["j"] < n_maestro_semi:
-            p["di_maestro"] = True
-            gruppi.append(_gruppo_maestro(p, mm, mv))
-        return gruppi
+        return _prepara_verifica(p, studente, mv, mm, n_maestro_semi)
 
     return corsa.esegui(specs, _lavoro_partita, lambda s: (s, ckpt, iterazioni, regole, per_posto), prepara)
 

@@ -66,8 +66,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 
 ## In corso
 «Pensa» (`docs/bot/esperimenti/fondo_20261127_1404/`): PASSA, +2,5 pp [+1,7, +3,4], ma solo dal lato di chi inizia
-(60/60 partite, turni dispari: buco di `seguiti.partite`); costo ~56 h di CCX63 per un'arena. Varianti economiche
-(`ridotto.txt`) sotto soglia; `analisi.txt`: la Q ordina le posizioni (Spearman 0,75) ma non le mosse (58%).
+(60/60 partite, turni dispari: buco di `seguiti.partite`); costo ~56 h di CCX63 per un'arena. Varianti (`ridotto.txt`,
+mondi rimasti): passa 12 mondi, +2,0 pp, ma l'arena costa ~21 h; `analisi.txt`: la Q ordina le posizioni (Spearman 0,75) ma non le mosse (58%).
 Risposta di Astra (27/11): studente lineare su Q/visite/tipo −0,20 pp (servono mano e tavolo); soglia di visite +0,16.
 Matteo ha ~16 h di CCX63. Pilota «studente» pronto (`docs/bot/STUDENTE.md`; `riftbound/rs/studente.py`,
 `scripts/rust/studente.command`, `tests/rust/test_studente.py` 11 test): tetti 50 + 55 min, maestro su 1 seme.

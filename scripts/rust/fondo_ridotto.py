@@ -24,8 +24,13 @@ def carica(fondo: Path) -> list[dict]:
         cart[(nome, int(k))] = c
     out = []
     for d in decs:
-        c = cart[(d["nome"], d["k"])]
+        c = cart.get((d["nome"], d["k"]))
+        if c is None and d["coerente"]:
+            raise KeyError((d["nome"], d["k"]))
         e = {"dec": d, "sc": None, "dati": [], "ve": None}
+        if c is None:  # decisione incoerente senza cartella: niente scelta, niente verifica
+            out.append(e)
+            continue
         if (c / "scelta_mondi.jsonl").exists():
             e["sc"] = json.loads((c / "scelta.json").read_text())
             e["dati"] = [json.loads(r) for r in open(c / "scelta_mondi.jsonl") if r.strip()]
@@ -49,8 +54,10 @@ def stima_non_verificata(dati: list, nomi: list[str], s: int, m: int):
     return (float(np.mean(dl)) if dl else None), len(dl), biased
 
 
-def valuta(e: dict, m: int, k: int, salto: tuple | None, soglie: dict):
-    """-> (riga, costo, info) con info = dict(cambia, nonver, distorta)"""
+def valuta(e: dict, m: int, k: int, salto: tuple | None, soglie: dict, mista: bool = False):
+    """-> (riga, costo, info) con info = dict(cambia, nonver, distorta). Per m < 32 la scelta ridotta diversa dal
+    campione si valuta SEMPRE sui mondi rimasti (m..31), indipendenti dalla scelta piena; con `mista=True` la stima
+    di prima (verifica se la scelta coincide con la piena, altrimenti i mondi rimasti), non verificate «distorte»."""
     d, sc = e["dec"], e["sc"]
     nc = min(k, len(d["candidati"]))
     base = {"cambia": False, "nonver": False, "distorta": False, "senza_mondi": False}
@@ -68,19 +75,23 @@ def valuta(e: dict, m: int, k: int, salto: tuple | None, soglie: dict):
     if s == 0 or not d["coerente"]:
         return F.riga(d, {"scelta": 0}, None), costo, base
     info = base | {"cambia": True}
-    if s == sc["scelta"] and e["ve"] is not None:
+    if m < len(e["dati"]) and not mista:
+        media, n, _ = stima_non_verificata(e["dati"], nomi, s, m)
+        ve = {"media": media, "n_mondi": n, "mondi_esclusi": 0, "deltas": []}
+        info |= {"senza_mondi": media is None}
+    elif s == sc["scelta"] and e["ve"] is not None:
         ve = e["ve"]
     else:
         media, n, biased = stima_non_verificata(e["dati"], nomi, s, m)
         ve = {"media": media, "n_mondi": n, "mondi_esclusi": 0, "deltas": []}
-        info |= {"nonver": True, "distorta": biased, "senza_mondi": media is None}
+        info |= {"nonver": True, "distorta": biased or mista, "senza_mondi": media is None}
     return F.riga(d, {"scelta": s}, ve), costo, info
 
 
-def variante(es, m, k, salto, soglie):
+def variante(es, m, k, salto, soglie, mista=False):
     rows, costo, ch, nv, dist, sm = [], 0.0, 0, 0, 0, 0
     for e in es:
-        r, c, i = valuta(e, m, k, salto, soglie)
+        r, c, i = valuta(e, m, k, salto, soglie, mista)
         rows.append(r)
         costo += c
         ch += i["cambia"]
@@ -115,6 +126,8 @@ def main(fondo: Path) -> None:
                 sg = {chiave: soglia} if chiave else {}
                 rows, costo, ch, nv, dist, sm = variante(es, m, k, chiave, sg)
                 rs = C.riassunto(rows)
+                rows_m, _c, _ch, nv_m, dist_m, _sm = variante(es, m, k, chiave, sg, mista=True)
+                rs_m = C.riassunto(rows_m)
                 # non verificate a 0
                 nonver_ids = nonverificate_ids(es, m, k, chiave, sg)
                 rows0 = [r | ({"media": 0.0, "disaccordo": r["disaccordo"]} if i in nonver_ids else {}) for i, r in enumerate(rows)]
@@ -123,7 +136,8 @@ def main(fondo: Path) -> None:
                 res.append({"m": m, "k": k, "salto": nome, "tipo": chiave[0] if chiave else None,
                             "frazione": chiave[1] if chiave else 0, "saltate": saltate, "frac_saltate": saltate / n_multi,
                             "totale": rs["totale"], "cambi": ch, "nonverificate": nv, "distorta": dist, "senza_mondi": sm,
-                            "totale_nv0": rs0["totale"][0], "rapporto": costo / c_pieno,
+                            "totale_nv0": rs0["totale"][0], "totale_mista": rs_m["totale"],
+                            "nonver_mista": nv_m, "distorte_mista": dist_m, "rapporto": costo / c_pieno,
                             "ore_arena": ARENA_H * costo / c_pieno, "s_turno_mac": MAC_S * costo / c_pieno})
     # controllo
     pieno = next(r for r in res if r["m"] == 32 and r["k"] == 3 and r["tipo"] is None)
@@ -135,8 +149,9 @@ def main(fondo: Path) -> None:
     anomalie.append(f"verifiche mancanti dove la scelta piena e' diversa da 0: "
                     f"{sum(1 for e in es if e['sc'] and e['sc']['scelta'] != 0 and e['ve'] is None)}")
     anomalie.append(f"non verificate senza mondi validi (valore escluso): {sum(r['senza_mondi'] for r in res)} su tutte le varianti")
+    # m < 32: totale indipendente sui mondi rimasti, senza criterio sulle non verificate (che vale solo per m = 32)
     buone = [r for r in res if r["totale"][0] >= SOGLIA_TOT and r["totale"][1] > 0
-             and r["nonverificate"] <= MAX_NV * max(1, r["cambi"])]
+             and (r["m"] < 32 or r["nonverificate"] <= MAX_NV * max(1, r["cambi"]))]
     buone.sort(key=lambda r: r["rapporto"])
     out = {"controllo": {"ok": ok, "pieno": pieno}, "consigliata": buone[0] if buone else None, "migliori8": buone[:8],
            "varianti": res, "anomalie": anomalie,
@@ -150,9 +165,11 @@ def main(fondo: Path) -> None:
         return (f"m={r['m']} k={r['k']} salto={r['salto']} (saltate {100 * r['frac_saltate']:.0f}%): {pp(r['totale'][0])} pp "
                 f"[{pp(r['totale'][1])}, {pp(r['totale'][2])}], cambi {r['cambi']}, non verif. {r['nonverificate']}"
                 f"{' (distorte ' + str(r['distorta']) + ')' if r['distorta'] else ''}, tot. nv=0 {pp(r['totale_nv0'])}, "
+                f"{'mista ' + pp(r['totale_mista'][0]) + ' [' + pp(r['totale_mista'][1]) + ', ' + pp(r['totale_mista'][2]) + '] non verif. ' + str(r['nonver_mista']) + ' (distorte ' + str(r['distorte_mista']) + '), ' if r['m'] < 32 else ''}"
                 f"costo {r['rapporto']:.3f}, arena {r['ore_arena']:.1f} h, {r['s_turno_mac']:.1f} s/turno")
     L = [f"Controllo variante piena: {'OK' if ok else 'FALLITO'} -> " + riga_t(pieno),
-         "Regola: la piu' economica con totale >= +1,9 pp, limite inf. > 0, non verificate <= 10% dei cambi.",
+         "Regola: la piu' economica con totale >= +1,9 pp, limite inf. > 0; per m = 32 anche non verificate <= 10% dei cambi.",
+         "Per m < 32 il totale usa i mondi rimasti (m..31) per ogni scelta ridotta diversa dal campione; la stima mista e' in 'mista'.",
          "CONSIGLIATA: " + (riga_t(buone[0]) if buone else "nessuna"), "", "Prime 8 che rispettano la regola:"]
     L += [f"{i + 1}. " + riga_t(r) for i, r in enumerate(buone[:8])]
     L += ["", "Tutte le varianti:"] + [riga_t(r) for r in sorted(res, key=lambda r: r["rapporto"])]

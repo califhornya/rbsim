@@ -344,3 +344,33 @@ def test_tetto_prefisso_dell_ordine_indipendente_dagli_esiti():
     assert len(res["usate"]) == len(specs) * 3 and not res["scaduto"]
     # una scadenza che non fa partire nulla
     assert _corsa_finta(1.0, 0.0)[0]["usate"] == []
+
+
+# -- regressioni di revisione -----------------------------------------------------------------------------------------
+
+def test_dataset_dim_da_posizione_con_feat():
+    pos = _sintetico(n_semi=6)
+    pos.insert(0, {"matchup": "EK", "seme": 1, "campione": "A", "raccolta": {"d": [0.1]}})  # prima senza feat
+    ds = T.dataset(pos)
+    assert ds["X"].shape[1] == 24 and len(ds["X"]) == len(ds["y"]) > 0
+
+
+def test_addestra_senza_righe_non_va_in_crash():
+    r = T.addestra([{"matchup": "EK", "seme": 1, "campione": "A"}])
+    assert not r["impara"] and r["studente"] is None and r["messaggio"] == "nessun dato di allenamento"
+
+
+def test_verifica_una_candidata_nel_sottoinsieme_del_maestro():
+    class Fisso:
+        def decidi(self, feat):
+            return None
+
+    p = {"stato": "ok", "j": 0, "matchup": "EK", "seme": 1, "ruolo": "inizia", "candidati": ["a"],
+         "feat": np.zeros((0, 4), np.float32)}
+    assert T._prepara_verifica(p, Fisso(), range(1), range(1), 2) == []
+    assert p["di_maestro"] is True
+    righe, _ = T.righe_verifica([p], "maestro", solo_maestro=True)
+    assert len(righe) == 1 and righe[0]["v"] == 0.0
+    fuori = dict(p, j=5)
+    T._prepara_verifica(fuori, Fisso(), range(1), range(1), 2)
+    assert T.righe_verifica([fuori], "maestro", solo_maestro=True)[0] == []

@@ -19,34 +19,106 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.024895833333333332,
+   "totale_mista": [
+    0.024895833333333332,
+    0.01691666666666667,
+    0.0336875
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 1.0,
    "ore_arena": 56.5,
    "s_turno_mac": 65.7
   }
  },
  "consigliata": {
-  "m": 32,
-  "k": 2,
+  "m": 12,
+  "k": 3,
   "salto": "nessuno",
   "tipo": null,
   "frazione": 0,
   "saltate": 0,
   "frac_saltate": 0.0,
   "totale": [
-   0.019671875,
-   0.013489583333333336,
-   0.026294401041666676
+   0.01989583333333333,
+   0.0121875,
+   0.028333333333333332
   ],
-  "cambi": 111,
-  "nonverificate": 6,
-  "distorta": 6,
+  "cambi": 110,
+  "nonverificate": 0,
+  "distorta": 0,
   "senza_mondi": 0,
-  "totale_nv0": 0.0185,
-  "rapporto": 0.7500668001434703,
-  "ore_arena": 42.37877420810607,
-  "s_turno_mac": 49.279388769426
+  "totale_nv0": 0.01989583333333333,
+  "totale_mista": [
+   0.018104166666666664,
+   0.010062500000000002,
+   0.02704166666666667
+  ],
+  "nonver_mista": 25,
+  "distorte_mista": 25,
+  "rapporto": 0.3755220518150712,
+  "ore_arena": 21.216995927551523,
+  "s_turno_mac": 24.67179880425018
  },
  "migliori8": [
+  {
+   "m": 12,
+   "k": 3,
+   "salto": "nessuno",
+   "tipo": null,
+   "frazione": 0,
+   "saltate": 0,
+   "frac_saltate": 0.0,
+   "totale": [
+    0.01989583333333333,
+    0.0121875,
+    0.028333333333333332
+   ],
+   "cambi": 110,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01989583333333333,
+   "totale_mista": [
+    0.018104166666666664,
+    0.010062500000000002,
+    0.02704166666666667
+   ],
+   "nonver_mista": 25,
+   "distorte_mista": 25,
+   "rapporto": 0.3755220518150712,
+   "ore_arena": 21.216995927551523,
+   "s_turno_mac": 24.67179880425018
+  },
+  {
+   "m": 24,
+   "k": 3,
+   "salto": "nessuno",
+   "tipo": null,
+   "frazione": 0,
+   "saltate": 0,
+   "frac_saltate": 0.0,
+   "totale": [
+    0.02291666666666667,
+    0.0125,
+    0.03411458333333334
+   ],
+   "cambi": 131,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.02291666666666667,
+   "totale_mista": [
+    0.0188125,
+    0.01078125,
+    0.027625
+   ],
+   "nonver_mista": 17,
+   "distorte_mista": 17,
+   "rapporto": 0.7496488398502411,
+   "ore_arena": 42.355159451538626,
+   "s_turno_mac": 49.251928778160845
+  },
   {
    "m": 32,
    "k": 2,
@@ -65,6 +137,13 @@
    "distorta": 6,
    "senza_mondi": 0,
    "totale_nv0": 0.0185,
+   "totale_mista": [
+    0.019671875,
+    0.013489583333333336,
+    0.026294401041666676
+   ],
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.7500668001434703,
    "ore_arena": 42.37877420810607,
    "s_turno_mac": 49.279388769426
@@ -87,6 +166,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.024895833333333332,
+   "totale_mista": [
+    0.024895833333333332,
+    0.01691666666666667,
+    0.0336875
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 1.0,
    "ore_arena": 56.5,
    "s_turno_mac": 65.7
@@ -102,15 +188,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.01362847222222222,
+    0.00685763888888889,
+    0.02092013888888889
+   ],
+   "cambi": 85,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01362847222222222,
+   "totale_mista": [
     0.012631944444444442,
     0.006059027777777779,
     0.019583333333333335
    ],
-   "cambi": 85,
-   "nonverificate": 20,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.016624999999999997,
+   "nonver_mista": 20,
+   "distorte_mista": 20,
    "rapporto": 0.1876502463219148,
    "ore_arena": 10.602238917188185,
    "s_turno_mac": 12.328621183349803
@@ -124,15 +217,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.012760416666666666,
+    0.006597222222222222,
+    0.01935763888888889
+   ],
+   "cambi": 64,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.012760416666666666,
+   "totale_mista": [
     0.01159027777777778,
     0.0051875,
     0.01837161458333334
    ],
-   "cambi": 64,
-   "nonverificate": 12,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014020833333333333,
+   "nonver_mista": 12,
+   "distorte_mista": 12,
    "rapporto": 0.13664758656543252,
    "ore_arena": 7.720588640946937,
    "s_turno_mac": 8.977746437348916
@@ -146,15 +246,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.01154513888888889,
+    0.005208333333333334,
+    0.018315972222222223
+   ],
+   "cambi": 65,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01154513888888889,
+   "totale_mista": [
     0.010263888888888888,
     0.00409375,
     0.01679522569444445
    ],
-   "cambi": 65,
-   "nonverificate": 13,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.013041666666666665,
+   "nonver_mista": 13,
+   "distorte_mista": 13,
    "rapporto": 0.14016469365937453,
    "ore_arena": 7.919305191754661,
    "s_turno_mac": 9.208820373420906
@@ -168,15 +275,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.007725694444444445,
+    0.0028645833333333336,
+    0.013020833333333334
+   ],
+   "cambi": 44,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.007725694444444445,
+   "totale_mista": [
     0.00690625,
     0.0021527777777777778,
     0.011927083333333333
    ],
-   "cambi": 44,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.008208333333333335,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.0913949999815682,
    "ore_arena": 5.163817498958604,
    "s_turno_mac": 6.004651498789032
@@ -190,15 +304,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.008506944444444445,
+    0.0029513888888888892,
+    0.014496527777777778
+   ],
+   "cambi": 43,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.008506944444444445,
+   "totale_mista": [
     0.008645833333333332,
     0.002829861111111111,
     0.014850694444444442
    ],
-   "cambi": 43,
-   "nonverificate": 8,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.010729166666666666,
+   "nonver_mista": 8,
+   "distorte_mista": 8,
    "rapporto": 0.08556081133218128,
    "ore_arena": 4.834185840268243,
    "s_turno_mac": 5.6213453045243105
@@ -212,15 +333,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0038194444444444448,
+    8.68055555555556e-05,
+    0.007986111111111112
+   ],
+   "cambi": 22,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0038194444444444448,
+   "totale_mista": [
     0.0020243055555555557,
     -0.0012083333333333334,
     0.005413194444444444
    ],
-   "cambi": 22,
-   "nonverificate": 3,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.002979166666666667,
+   "nonver_mista": 3,
+   "distorte_mista": 3,
    "rapporto": 0.044738003370465705,
    "ore_arena": 2.5276971904313124,
    "s_turno_mac": 2.939286821439597
@@ -234,15 +362,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.003906250000000001,
+    -0.0002604166666666665,
+    0.00842013888888889
+   ],
+   "cambi": 23,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.003906250000000001,
+   "totale_mista": [
     0.003579861111111111,
     -0.0002986111111111111,
     0.007847309027777786
    ],
-   "cambi": 23,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.005229166666666667,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.03794180616809995,
    "ore_arena": 2.143712048497647,
    "s_turno_mac": 2.492776665244167
@@ -256,15 +391,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.01848958333333333,
+    0.010850694444444444,
+    0.02673611111111111
+   ],
+   "cambi": 99,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01848958333333333,
+   "totale_mista": [
     0.017083333333333332,
     0.00901388888888889,
     0.02599331597222225
    ],
-   "cambi": 99,
-   "nonverificate": 21,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.020208333333333335,
+   "nonver_mista": 21,
+   "distorte_mista": 21,
    "rapporto": 0.2504130559820563,
    "ore_arena": 14.148337662986183,
    "s_turno_mac": 16.4521377780211
@@ -278,15 +420,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.014583333333333332,
+    0.008333333333333335,
+    0.021267361111111112
+   ],
+   "cambi": 73,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.014583333333333332,
+   "totale_mista": [
     0.012489583333333333,
     0.005777777777777778,
     0.019628559027777787
    ],
-   "cambi": 73,
-   "nonverificate": 15,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014833333333333334,
+   "nonver_mista": 15,
+   "distorte_mista": 15,
    "rapporto": 0.1892080004294069,
    "ore_arena": 10.69025202426149,
    "s_turno_mac": 12.430965628212032
@@ -300,15 +449,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.014149305555555556,
+    0.007899305555555555,
+    0.020833333333333336
+   ],
+   "cambi": 74,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.014149305555555556,
+   "totale_mista": [
     0.012430555555555556,
     0.005868055555555556,
     0.01948263888888889
    ],
-   "cambi": 74,
-   "nonverificate": 14,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.015208333333333332,
+   "nonver_mista": 14,
+   "distorte_mista": 14,
    "rapporto": 0.1912135265561713,
    "ore_arena": 10.803564250423678,
    "s_turno_mac": 12.562728694740454
@@ -322,15 +478,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.00859375,
+    0.003906249999999999,
+    0.013802083333333331
+   ],
+   "cambi": 50,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.00859375,
+   "totale_mista": [
     0.006767361111111111,
     0.0022256944444444446,
     0.01152786458333334
    ],
-   "cambi": 50,
-   "nonverificate": 8,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.007895833333333335,
+   "nonver_mista": 8,
+   "distorte_mista": 8,
    "rapporto": 0.12813737079439896,
    "ore_arena": 7.239761449883542,
    "s_turno_mac": 8.418625261192012
@@ -344,15 +507,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009114583333333332,
+    0.0033854166666666663,
+    0.01536458333333333
+   ],
+   "cambi": 47,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009114583333333332,
+   "totale_mista": [
     0.009621527777777777,
     0.003361111111111111,
     0.01634027777777778
    ],
-   "cambi": 47,
-   "nonverificate": 9,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.011791666666666667,
+   "nonver_mista": 9,
+   "distorte_mista": 9,
    "rapporto": 0.11753395734186804,
    "ore_arena": 6.640668589815545,
    "s_turno_mac": 7.721980997360731
@@ -366,15 +536,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0045138888888888885,
+    0.0006944444444444443,
+    0.008854166666666666
+   ],
+   "cambi": 25,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0045138888888888885,
+   "totale_mista": [
     0.0022499999999999994,
     -0.0009965277777777778,
     0.005673611111111111
    ],
-   "cambi": 25,
-   "nonverificate": 4,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0032916666666666663,
+   "nonver_mista": 4,
+   "distorte_mista": 4,
    "rapporto": 0.06163548390102515,
    "ore_arena": 3.482404840407921,
    "s_turno_mac": 4.049451292297353
@@ -388,15 +565,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.004513888888888889,
+    -0.0001736111111111107,
+    0.00954861111111111
+   ],
+   "cambi": 28,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.004513888888888889,
+   "totale_mista": [
     0.0052118055555555555,
     0.0005207465277777775,
     0.0101842013888889
    ],
-   "cambi": 28,
-   "nonverificate": 8,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.007208333333333333,
+   "nonver_mista": 8,
+   "distorte_mista": 8,
    "rapporto": 0.055443527341932426,
    "ore_arena": 3.132559294819182,
    "s_turno_mac": 3.642639746364961
@@ -410,15 +594,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.015104166666666665,
+    0.008229166666666668,
+    0.022708333333333337
+   ],
+   "cambi": 95,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.015104166666666665,
+   "totale_mista": [
     0.013583333333333333,
     0.0074375,
     0.020208333333333335
    ],
-   "cambi": 95,
-   "nonverificate": 23,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0168125,
+   "nonver_mista": 23,
+   "distorte_mista": 23,
    "rapporto": 0.28110844385791967,
    "ore_arena": 15.882627077972462,
    "s_turno_mac": 18.468824761465324
@@ -432,15 +623,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.014166666666666666,
+    0.008020833333333333,
+    0.0209375
+   ],
+   "cambi": 69,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.014166666666666666,
+   "totale_mista": [
     0.012812500000000001,
     0.006812500000000001,
     0.019374999999999996
    ],
-   "cambi": 69,
-   "nonverificate": 14,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.013958333333333333,
+   "nonver_mista": 14,
+   "distorte_mista": 14,
    "rapporto": 0.20493320584640443,
    "ore_arena": 11.57872613032185,
    "s_turno_mac": 13.464111624108773
@@ -454,15 +652,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.012291666666666666,
+    0.0060416666666666665,
+    0.019166666666666665
+   ],
+   "cambi": 68,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.012291666666666666,
+   "totale_mista": [
     0.011104166666666667,
     0.005333333333333334,
     0.017375
    ],
-   "cambi": 68,
-   "nonverificate": 13,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.013083333333333332,
+   "nonver_mista": 13,
+   "distorte_mista": 13,
    "rapporto": 0.2100514109549689,
    "ore_arena": 11.867904718955744,
    "s_turno_mac": 13.800377699741459
@@ -476,15 +681,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.008645833333333333,
+    0.0040625,
+    0.013854166666666667
+   ],
+   "cambi": 47,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.008645833333333333,
+   "totale_mista": [
     0.007895833333333333,
     0.0037083333333333334,
     0.012541666666666668
    ],
-   "cambi": 47,
-   "nonverificate": 7,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.008208333333333335,
+   "nonver_mista": 7,
+   "distorte_mista": 7,
    "rapporto": 0.13717851094722464,
    "ore_arena": 7.750585868518191,
    "s_turno_mac": 9.012628169232658
@@ -498,15 +710,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.010520833333333335,
+    0.004895833333333334,
+    0.016874999999999998
+   ],
+   "cambi": 45,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.010520833333333335,
+   "totale_mista": [
     0.010125,
     0.0048125,
     0.016041666666666666
    ],
-   "cambi": 45,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.010958333333333332,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.12798349463616113,
    "ore_arena": 7.231067446943103,
    "s_turno_mac": 8.408515597595786
@@ -520,15 +739,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.004270833333333333,
+    0.0009375,
+    0.008229166666666666
+   ],
+   "cambi": 23,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.004270833333333333,
+   "totale_mista": [
     0.002625,
     2.083333333333325e-05,
     0.005666666666666667
    ],
-   "cambi": 23,
-   "nonverificate": 3,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.003145833333333334,
+   "nonver_mista": 3,
+   "distorte_mista": 3,
    "rapporto": 0.06674098747250416,
    "ore_arena": 3.770865792196485,
    "s_turno_mac": 4.384882876943523
@@ -542,15 +768,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.004791666666666666,
+    0.0009375000000000002,
+    0.009270833333333332
+   ],
+   "cambi": 23,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.004791666666666666,
+   "totale_mista": [
     0.004770833333333333,
     0.0014166666666666668,
     0.008708333333333334
    ],
-   "cambi": 23,
-   "nonverificate": 5,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.005291666666666667,
+   "nonver_mista": 5,
+   "distorte_mista": 5,
    "rapporto": 0.057141570479197705,
    "ore_arena": 3.2284987320746703,
    "s_turno_mac": 3.7542011804832893
@@ -564,15 +797,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.01989583333333333,
+    0.0121875,
+    0.028333333333333332
+   ],
+   "cambi": 110,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01989583333333333,
+   "totale_mista": [
     0.018104166666666664,
     0.010062500000000002,
     0.02704166666666667
    ],
-   "cambi": 110,
-   "nonverificate": 25,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0205,
+   "nonver_mista": 25,
+   "distorte_mista": 25,
    "rapporto": 0.3755220518150712,
    "ore_arena": 21.216995927551523,
    "s_turno_mac": 24.67179880425018
@@ -586,15 +826,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.016354166666666666,
+    0.009791666666666667,
+    0.023333333333333338
+   ],
+   "cambi": 79,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.016354166666666666,
+   "totale_mista": [
     0.013770833333333333,
     0.007020833333333335,
     0.021020833333333332
    ],
-   "cambi": 79,
-   "nonverificate": 19,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014916666666666667,
+   "nonver_mista": 19,
+   "distorte_mista": 19,
    "rapporto": 0.28403630357845217,
    "ore_arena": 16.04805115218255,
    "s_turno_mac": 18.66118514510431
@@ -608,15 +855,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.013958333333333333,
+    0.0077083333333333335,
+    0.020624999999999998
+   ],
+   "cambi": 79,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.013958333333333333,
+   "totale_mista": [
     0.012625,
     0.006,
     0.019791666666666662
    ],
-   "cambi": 79,
-   "nonverificate": 16,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014604166666666665,
+   "nonver_mista": 16,
+   "distorte_mista": 16,
    "rapporto": 0.2871194780756018,
    "ore_arena": 16.2222505112715,
    "s_turno_mac": 18.86374970956704
@@ -630,15 +884,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.00875,
+    0.0038541666666666668,
+    0.014166666666666666
+   ],
+   "cambi": 54,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.00875,
+   "totale_mista": [
     0.007604166666666667,
     0.0028541666666666663,
     0.012666666666666668
    ],
-   "cambi": 54,
-   "nonverificate": 12,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0077083333333333335,
+   "nonver_mista": 12,
+   "distorte_mista": 12,
    "rapporto": 0.19246758459917543,
    "ore_arena": 10.874418529853411,
    "s_turno_mac": 12.645120308165827
@@ -652,15 +913,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009895833333333333,
+    0.003958333333333333,
+    0.016458333333333332
+   ],
+   "cambi": 48,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009895833333333333,
+   "totale_mista": [
     0.010708333333333335,
     0.004583333333333333,
     0.017458333333333333
    ],
-   "cambi": 48,
-   "nonverificate": 9,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.011645833333333333,
+   "nonver_mista": 9,
+   "distorte_mista": 9,
    "rapporto": 0.17630655799855569,
    "ore_arena": 9.961320526918398,
    "s_turno_mac": 11.58334086050511
@@ -674,15 +942,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0041666666666666675,
+    0.00031249999999999995,
+    0.008645833333333333
+   ],
+   "cambi": 26,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0041666666666666675,
+   "totale_mista": [
     0.002645833333333334,
     -0.0007916666666666669,
     0.006354166666666666
    ],
-   "cambi": 26,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.003270833333333333,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.09219929636674241,
    "ore_arena": 5.209260244720947,
    "s_turno_mac": 6.057493771294977
@@ -696,15 +971,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.004583333333333333,
+    0.00010416666666666596,
+    0.009583333333333334
+   ],
+   "cambi": 29,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.004583333333333333,
+   "totale_mista": [
     0.006062499999999999,
     0.0015625,
     0.011000000000000001
    ],
-   "cambi": 29,
-   "nonverificate": 9,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.007000000000000001,
+   "nonver_mista": 9,
+   "distorte_mista": 9,
    "rapporto": 0.0833910306263594,
    "ore_arena": 4.711593230389306,
    "s_turno_mac": 5.478790712151812
@@ -718,15 +1000,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.015494791666666665,
+    0.008463541666666668,
+    0.023437499999999997
+   ],
+   "cambi": 100,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.015494791666666665,
+   "totale_mista": [
     0.013520833333333334,
     0.007375000000000001,
     0.02013541666666667
    ],
-   "cambi": 100,
-   "nonverificate": 23,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.017166666666666667,
+   "nonver_mista": 23,
+   "distorte_mista": 23,
    "rapporto": 0.3742432627129053,
    "ore_arena": 21.14474434327915,
    "s_turno_mac": 24.58778236023788
@@ -740,15 +1029,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.012890625,
+    0.006770833333333334,
+    0.01953125
+   ],
+   "cambi": 76,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.012890625,
+   "totale_mista": [
     0.011723958333333333,
     0.005989583333333335,
     0.017984505208333345
    ],
-   "cambi": 76,
-   "nonverificate": 18,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014458333333333333,
+   "nonver_mista": 18,
+   "distorte_mista": 18,
    "rapporto": 0.2727114898131242,
    "ore_arena": 15.408199174441517,
    "s_turno_mac": 17.917144880722258
@@ -762,15 +1058,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.012109375,
+    0.005859375,
+    0.018880208333333336
+   ],
+   "cambi": 75,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.012109375,
+   "totale_mista": [
     0.010489583333333333,
     0.0047864583333333335,
     0.016671875
    ],
-   "cambi": 75,
-   "nonverificate": 17,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.013354166666666667,
+   "nonver_mista": 17,
+   "distorte_mista": 17,
    "rapporto": 0.2794766766789302,
    "ore_arena": 15.790432232359558,
    "s_turno_mac": 18.361617657805716
@@ -784,15 +1087,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.007421875,
+    0.0029947916666666664,
+    0.0125
+   ],
+   "cambi": 50,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.007421875,
+   "totale_mista": [
     0.006838541666666667,
     0.0028125000000000003,
     0.011265755208333342
    ],
-   "cambi": 50,
-   "nonverificate": 10,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.008791666666666666,
+   "nonver_mista": 10,
+   "distorte_mista": 10,
    "rapporto": 0.1824802844295867,
    "ore_arena": 10.310136070271648,
    "s_turno_mac": 11.988954687023845
@@ -806,15 +1116,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009895833333333333,
+    0.004036458333333334,
+    0.01640625
+   ],
+   "cambi": 47,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009895833333333333,
+   "totale_mista": [
     0.009369791666666665,
     0.003848958333333334,
     0.015390625
    ],
-   "cambi": 47,
-   "nonverificate": 9,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0110625,
+   "nonver_mista": 9,
+   "distorte_mista": 9,
    "rapporto": 0.17007746063308263,
    "ore_arena": 9.609376525769168,
    "s_turno_mac": 11.174089163593528
@@ -828,15 +1145,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0024739583333333332,
+    -0.0011718749999999997,
+    0.006510416666666667
+   ],
+   "cambi": 25,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0024739583333333332,
+   "totale_mista": [
     0.0017708333333333332,
     -0.0012239583333333332,
     0.005046874999999999
    ],
-   "cambi": 25,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.003333333333333333,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.0888249333510985,
    "ore_arena": 5.018608734337065,
    "s_turno_mac": 5.835798121167173
@@ -850,15 +1174,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.004427083333333333,
+    0.00078125,
+    0.00859375
+   ],
+   "cambi": 23,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.004427083333333333,
+   "totale_mista": [
     0.004604166666666667,
     0.0011562500000000002,
     0.008677083333333332
    ],
-   "cambi": 23,
-   "nonverificate": 5,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.005124999999999999,
+   "nonver_mista": 5,
+   "distorte_mista": 5,
    "rapporto": 0.07590390308224951,
    "ore_arena": 4.288570524147097,
    "s_turno_mac": 4.986886432503793
@@ -872,15 +1203,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.018880208333333332,
+    0.010673828125000001,
+    0.02786458333333333
+   ],
+   "cambi": 124,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.018880208333333332,
+   "totale_mista": [
     0.016276041666666668,
     0.007947916666666667,
     0.025218749999999995
    ],
-   "cambi": 124,
-   "nonverificate": 34,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.021354166666666667,
+   "nonver_mista": 34,
+   "distorte_mista": 34,
    "rapporto": 0.4994981264448087,
    "ore_arena": 28.22164414413169,
    "s_turno_mac": 32.81702690742393
@@ -894,15 +1232,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.014192708333333335,
+    0.007161458333333333,
+    0.021614583333333333
+   ],
+   "cambi": 89,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.014192708333333335,
+   "totale_mista": [
     0.012026041666666664,
     0.005244791666666667,
     0.019182291666666663
    ],
-   "cambi": 89,
-   "nonverificate": 27,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.015541666666666665,
+   "nonver_mista": 27,
+   "distorte_mista": 27,
    "rapporto": 0.37770314127120214,
    "ore_arena": 21.340227481822918,
    "s_turno_mac": 24.815096381517982
@@ -916,15 +1261,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.014322916666666666,
+    0.007552083333333334,
+    0.021484374999999997
+   ],
+   "cambi": 92,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.014322916666666666,
+   "totale_mista": [
     0.012057291666666668,
     0.005286458333333333,
     0.01921875
    ],
-   "cambi": 92,
-   "nonverificate": 26,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.015312500000000001,
+   "nonver_mista": 26,
+   "distorte_mista": 26,
    "rapporto": 0.3818329132628784,
    "ore_arena": 21.57355959935263,
    "s_turno_mac": 25.08642240137111
@@ -938,15 +1290,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.006380208333333333,
+    0.0013020833333333333,
+    0.01171875
+   ],
+   "cambi": 59,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.006380208333333333,
+   "totale_mista": [
     0.005869791666666667,
     0.0009322916666666669,
     0.010869791666666666
    ],
-   "cambi": 59,
-   "nonverificate": 20,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.008083333333333333,
+   "nonver_mista": 20,
+   "distorte_mista": 20,
    "rapporto": 0.2561281928969322,
    "ore_arena": 14.471242898676671,
    "s_turno_mac": 16.827622273328448
@@ -960,15 +1319,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009114583333333334,
+    0.002864583333333334,
+    0.01588541666666667
+   ],
+   "cambi": 55,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009114583333333334,
+   "totale_mista": [
     0.009609375,
     0.00335390625,
     0.016395833333333335
    ],
-   "cambi": 55,
-   "nonverificate": 17,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.012083333333333335,
+   "nonver_mista": 17,
+   "distorte_mista": 17,
    "rapporto": 0.23456934136302157,
    "ore_arena": 13.25316778701072,
    "s_turno_mac": 15.411205727550518
@@ -982,15 +1348,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0023437499999999995,
+    -0.0019531250000000004,
+    0.00703125
+   ],
+   "cambi": 29,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0023437499999999995,
+   "totale_mista": [
     0.0017656250000000003,
     -0.002203125,
     0.005828124999999999
    ],
-   "cambi": 29,
-   "nonverificate": 10,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0034583333333333332,
+   "nonver_mista": 10,
+   "distorte_mista": 10,
    "rapporto": 0.12290896979755415,
    "ore_arena": 6.944356793561809,
    "s_turno_mac": 8.075119315699308
@@ -1004,15 +1377,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.0035156250000000005,
+    -0.0009114583333333333,
+    0.008463541666666668
+   ],
+   "cambi": 31,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0035156250000000005,
+   "totale_mista": [
     0.005531250000000001,
     0.0009218750000000002,
     0.010520963541666676
    ],
-   "cambi": 31,
-   "nonverificate": 11,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.006833333333333333,
+   "nonver_mista": 11,
+   "distorte_mista": 11,
    "rapporto": 0.11068794920955151,
    "ore_arena": 6.25386913033966,
    "s_turno_mac": 7.272198263067534
@@ -1026,15 +1406,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.01588541666666667,
+    0.008333333333333333,
+    0.02395833333333334
+   ],
+   "cambi": 110,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01588541666666667,
+   "totale_mista": [
     0.015020833333333334,
     0.008927083333333335,
     0.021489843750000022
    ],
-   "cambi": 110,
-   "nonverificate": 16,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.017625,
+   "nonver_mista": 16,
+   "distorte_mista": 16,
    "rapporto": 0.5623168424979449,
    "ore_arena": 31.770901601133886,
    "s_turno_mac": 36.94421655211498
@@ -1048,15 +1435,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.01328125,
+    0.0062499999999999995,
+    0.020833333333333336
+   ],
+   "cambi": 84,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.01328125,
+   "totale_mista": [
     0.012302083333333333,
     0.006812499999999999,
     0.018312500000000002
    ],
-   "cambi": 84,
-   "nonverificate": 15,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.014645833333333334,
+   "nonver_mista": 15,
+   "distorte_mista": 15,
    "rapporto": 0.4104243327128002,
    "ore_arena": 23.18897479827321,
    "s_turno_mac": 26.964878659230973
@@ -1070,15 +1464,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.0125,
+    0.005989583333333334,
+    0.019791666666666662
+   ],
+   "cambi": 84,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0125,
+   "totale_mista": [
     0.010374999999999999,
     0.0042916666666666685,
     0.01678125
    ],
-   "cambi": 84,
-   "nonverificate": 13,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.013500000000000002,
+   "nonver_mista": 13,
+   "distorte_mista": 13,
    "rapporto": 0.420193648816383,
    "ore_arena": 23.74094115812564,
    "s_turno_mac": 27.606722727236363
@@ -1092,15 +1493,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009114583333333334,
+    0.003125,
+    0.015625
+   ],
+   "cambi": 59,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009114583333333334,
+   "totale_mista": [
     0.007416666666666669,
     0.00303125,
     0.012229166666666668
    ],
-   "cambi": 59,
-   "nonverificate": 9,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.008979166666666667,
+   "nonver_mista": 9,
+   "distorte_mista": 9,
    "rapporto": 0.2740804973719262,
    "ore_arena": 15.485548101513828,
    "s_turno_mac": 18.00708867733555
@@ -1114,15 +1522,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009374999999999998,
+    0.002604166666666667,
+    0.01666666666666667
+   ],
+   "cambi": 52,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009374999999999998,
+   "totale_mista": [
     0.00828125,
     0.0022916666666666667,
     0.014604166666666668
    ],
-   "cambi": 52,
-   "nonverificate": 7,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.011145833333333336,
+   "nonver_mista": 7,
+   "distorte_mista": 7,
    "rapporto": 0.25640748948324493,
    "ore_arena": 14.48702315580334,
    "s_turno_mac": 16.845972059049192
@@ -1136,15 +1551,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.002604166666666667,
+    -0.00234375,
+    0.0078125
+   ],
+   "cambi": 30,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.002604166666666667,
+   "totale_mista": [
     0.0018541666666666665,
     -0.0021666666666666666,
     0.006020833333333334
    ],
-   "cambi": 30,
-   "nonverificate": 5,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0034166666666666672,
+   "nonver_mista": 5,
+   "distorte_mista": 5,
    "rapporto": 0.1334362873329231,
    "ore_arena": 7.5391502343101555,
    "s_turno_mac": 8.766764077773049
@@ -1158,15 +1580,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.00390625,
+    8.673617379884036e-20,
+    0.008333333333333333
+   ],
+   "cambi": 23,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.00390625,
+   "totale_mista": [
     0.004770833333333333,
     0.0012916666666666667,
     0.008718749999999999
    ],
-   "cambi": 23,
-   "nonverificate": 3,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.005291666666666667,
+   "nonver_mista": 3,
+   "distorte_mista": 3,
    "rapporto": 0.11409696478291405,
    "ore_arena": 6.446478510234644,
    "s_turno_mac": 7.496170586237454
@@ -1180,15 +1609,22 @@
    "saltate": 0,
    "frac_saltate": 0.0,
    "totale": [
+    0.02291666666666667,
+    0.0125,
+    0.03411458333333334
+   ],
+   "cambi": 131,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.02291666666666667,
+   "totale_mista": [
     0.0188125,
     0.01078125,
     0.027625
    ],
-   "cambi": 131,
-   "nonverificate": 17,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.024020833333333335,
+   "nonver_mista": 17,
+   "distorte_mista": 17,
    "rapporto": 0.7496488398502411,
    "ore_arena": 42.355159451538626,
    "s_turno_mac": 49.251928778160845
@@ -1202,15 +1638,22 @@
    "saltate": 109,
    "frac_saltate": 0.25707547169811323,
    "totale": [
+    0.016927083333333332,
+    0.00832682291666667,
+    0.026041666666666668
+   ],
+   "cambi": 96,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.016927083333333332,
+   "totale_mista": [
     0.012572916666666666,
     0.006437500000000001,
     0.01928125
    ],
-   "cambi": 96,
-   "nonverificate": 16,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.017520833333333336,
+   "nonver_mista": 16,
+   "distorte_mista": 16,
    "rapporto": 0.5672781373616355,
    "ore_arena": 32.0512147609324,
    "s_turno_mac": 37.270173624659456
@@ -1224,15 +1667,22 @@
    "saltate": 106,
    "frac_saltate": 0.25,
    "totale": [
+    0.015104166666666665,
+    0.0075520833333333325,
+    0.023177083333333338
+   ],
+   "cambi": 101,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.015104166666666665,
+   "totale_mista": [
     0.011114583333333334,
     0.004177083333333333,
     0.018458333333333334
    ],
-   "cambi": 101,
-   "nonverificate": 16,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0160625,
+   "nonver_mista": 16,
+   "distorte_mista": 16,
    "rapporto": 0.5739320990873769,
    "ore_arena": 32.42716359843679,
    "s_turno_mac": 37.70733891004066
@@ -1246,15 +1696,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.009895833333333333,
+    0.0031249999999999993,
+    0.017447916666666667
+   ],
+   "cambi": 67,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.009895833333333333,
+   "totale_mista": [
     0.005989583333333334,
     0.0016875000000000004,
     0.010666666666666666
    ],
-   "cambi": 67,
-   "nonverificate": 12,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.009895833333333335,
+   "nonver_mista": 12,
+   "distorte_mista": 12,
    "rapporto": 0.38406919290437974,
    "ore_arena": 21.699909399097457,
    "s_turno_mac": 25.233345973817748
@@ -1268,15 +1725,22 @@
    "saltate": 212,
    "frac_saltate": 0.5,
    "totale": [
+    0.010416666666666668,
+    0.002864583333333333,
+    0.018489583333333334
+   ],
+   "cambi": 56,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.010416666666666668,
+   "totale_mista": [
     0.009000000000000001,
     0.002520833333333333,
     0.01596875
    ],
-   "cambi": 56,
-   "nonverificate": 8,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.012645833333333334,
+   "nonver_mista": 8,
+   "distorte_mista": 8,
    "rapporto": 0.35303504719986023,
    "ore_arena": 19.946480166792103,
    "s_turno_mac": 23.194402601030816
@@ -1290,15 +1754,22 @@
    "saltate": 319,
    "frac_saltate": 0.7523584905660378,
    "totale": [
+    0.0020833333333333337,
+    -0.0028645833333333327,
+    0.007291666666666666
+   ],
+   "cambi": 33,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0020833333333333337,
+   "totale_mista": [
     0.0003020833333333332,
     -0.0035000000000000005,
     0.00415625
    ],
-   "cambi": 33,
-   "nonverificate": 6,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.0036875,
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.18422945724887557,
    "ore_arena": 10.40896433456147,
    "s_turno_mac": 12.103875341251126
@@ -1312,15 +1783,22 @@
    "saltate": 318,
    "frac_saltate": 0.75,
    "totale": [
+    0.0036458333333333334,
+    -0.0010416666666666664,
+    0.008854166666666666
+   ],
+   "cambi": 27,
+   "nonverificate": 0,
+   "distorta": 0,
+   "senza_mondi": 0,
+   "totale_nv0": 0.0036458333333333334,
+   "totale_mista": [
     0.0053437499999999995,
     0.000989583333333334,
     0.010146093750000017
    ],
-   "cambi": 27,
-   "nonverificate": 5,
-   "distorta": 0,
-   "senza_mondi": 0,
-   "totale_nv0": 0.007166666666666668,
+   "nonver_mista": 5,
+   "distorte_mista": 5,
    "rapporto": 0.16718066411709978,
    "ore_arena": 9.445707522616138,
    "s_turno_mac": 10.983769632493456
@@ -1343,6 +1821,13 @@
    "distorta": 6,
    "senza_mondi": 0,
    "totale_nv0": 0.0185,
+   "totale_mista": [
+    0.019671875,
+    0.013489583333333336,
+    0.026294401041666676
+   ],
+   "nonver_mista": 6,
+   "distorte_mista": 6,
    "rapporto": 0.7500668001434703,
    "ore_arena": 42.37877420810607,
    "s_turno_mac": 49.279388769426
@@ -1365,6 +1850,13 @@
    "distorta": 5,
    "senza_mondi": 0,
    "totale_nv0": 0.015520833333333334,
+   "totale_mista": [
+    0.016627604166666664,
+    0.0106666015625,
+    0.02317194010416667
+   ],
+   "nonver_mista": 5,
+   "distorte_mista": 5,
    "rapporto": 0.5478795738667539,
    "ore_arena": 30.955195923471596,
    "s_turno_mac": 35.995688003045736
@@ -1387,6 +1879,13 @@
    "distorta": 3,
    "senza_mondi": 0,
    "totale_nv0": 0.01429166666666667,
+   "totale_mista": [
+    0.0150078125,
+    0.009208333333333336,
+    0.021419335937500002
+   ],
+   "nonver_mista": 3,
+   "distorte_mista": 3,
    "rapporto": 0.5598889031108528,
    "ore_arena": 31.63372302576318,
    "s_turno_mac": 36.78470093438303
@@ -1409,6 +1908,13 @@
    "distorta": 3,
    "senza_mondi": 0,
    "totale_nv0": 0.009812500000000002,
+   "totale_mista": [
+    0.010658854166666667,
+    0.006229166666666667,
+    0.015708333333333335
+   ],
+   "nonver_mista": 3,
+   "distorte_mista": 3,
    "rapporto": 0.36486726694358446,
    "ore_arena": 20.615000582312522,
    "s_turno_mac": 23.9717794381935
@@ -1431,6 +1937,13 @@
    "distorta": 1,
    "senza_mondi": 0,
    "totale_nv0": 0.011875,
+   "totale_mista": [
+    0.012005208333333333,
+    0.006333333333333332,
+    0.018270833333333333
+   ],
+   "nonver_mista": 1,
+   "distorte_mista": 1,
    "rapporto": 0.3421725537572581,
    "ore_arena": 19.33274928728508,
    "s_turno_mac": 22.480736781851856
@@ -1453,6 +1966,13 @@
    "distorta": 1,
    "senza_mondi": 0,
    "totale_nv0": 0.0035833333333333333,
+   "totale_mista": [
+    0.003973958333333334,
+    0.0012083333333333334,
+    0.007197916666666668
+   ],
+   "nonver_mista": 1,
+   "distorte_mista": 1,
    "rapporto": 0.17801954664983502,
    "ore_arena": 10.058104385715678,
    "s_turno_mac": 11.69588421489416
@@ -1475,6 +1995,13 @@
    "distorta": 1,
    "senza_mondi": 0,
    "totale_nv0": 0.0053124999999999995,
+   "totale_mista": [
+    0.005442708333333333,
+    0.0019010416666666665,
+    0.009630208333333331
+   ],
+   "nonver_mista": 1,
+   "distorte_mista": 1,
    "rapporto": 0.15234994910473013,
    "ore_arena": 8.607772124417252,
    "s_turno_mac": 10.009391656180771
@@ -1497,6 +2024,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.024895833333333332,
+   "totale_mista": [
+    0.024895833333333332,
+    0.01691666666666667,
+    0.0336875
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 1.0,
    "ore_arena": 56.5,
    "s_turno_mac": 65.7
@@ -1519,6 +2053,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.018687500000000003,
+   "totale_mista": [
+    0.018687500000000003,
+    0.012229166666666666,
+    0.025750000000000002
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.7569415696158616,
    "ore_arena": 42.76719868329618,
    "s_turno_mac": 49.7310611237621
@@ -1541,6 +2082,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.017125,
+   "totale_mista": [
+    0.017125,
+    0.010666666666666665,
+    0.024292187500000038
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.7646604879662906,
    "ore_arena": 43.20331757009542,
    "s_turno_mac": 50.2381940593853
@@ -1563,6 +2111,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.011041666666666668,
+   "totale_mista": [
+    0.011041666666666668,
+    0.006500000000000001,
+    0.01620833333333333
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.5114186959188672,
    "ore_arena": 28.895156319415996,
    "s_turno_mac": 33.60020832186958
@@ -1585,6 +2140,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.013500000000000002,
+   "totale_mista": [
+    0.013500000000000002,
+    0.007354166666666667,
+    0.020312500000000004
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.470711669553255,
    "ore_arena": 26.595209329758905,
    "s_turno_mac": 30.925756689648853
@@ -1607,6 +2169,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.0038541666666666663,
+   "totale_mista": [
+    0.0038541666666666663,
+    0.001125,
+    0.007062500000000001
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.24556404691121833,
    "ore_arena": 13.874368650483836,
    "s_turno_mac": 16.133557882067045
@@ -1629,6 +2198,13 @@
    "distorta": 0,
    "senza_mondi": 0,
    "totale_nv0": 0.007979166666666666,
+   "totale_mista": [
+    0.007979166666666666,
+    0.003520833333333333,
+    0.013000000000000001
+   ],
+   "nonver_mista": 0,
+   "distorte_mista": 0,
    "rapporto": 0.22277463327480918,
    "ore_arena": 12.586766780026718,
    "s_turno_mac": 14.636293406154964
