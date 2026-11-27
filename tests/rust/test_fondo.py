@@ -194,3 +194,48 @@ def test_gioca_fase_verifica_diretta(tmp_path):
     assert json.loads((tmp_path / "d" / "verifica.json").read_text()) == res
     righe = [json.loads(x) for x in (tmp_path / "d" / "verifica_mondi.jsonl").read_text().splitlines()]
     assert [r[0]["world"] for r in righe] == [50_000, 50_001] and {x["line"] for x in righe[0]} == {"campione", "scelta"}
+
+
+def _fondo_sintetico(tmp_path, incoerente=True):
+    """Una decisione coerente (c1 batte il campione di +0,5 su tutti i 32 mondi) e una incoerente senza cartella."""
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "fondo_ridotto", Path(__file__).resolve().parents[2] / "scripts" / "rust" / "fondo_ridotto.py")
+    R = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(R)
+    dec = lambda nome, coer: {"nome": nome, "k": 0, "matchup": "EK", "turno": 1, "coerente": coer,
+                              "candidati": ["a", "b"], "n": [100, 38], "q": [0.5, 0.4]}
+    decs = [dec("p1", True)] + ([dec("p2", False)] if incoerente else [])
+    (tmp_path / "decisioni.jsonl").write_text(json.dumps({"decisioni": decs}) + "\n")
+    c = tmp_path / "000_p1_k0"
+    c.mkdir()
+    (c / "scelta.json").write_text(json.dumps({"scelta": 1}))
+    righe = [[{"line": "c0", "returns": 0.0, "primo_ok": True, "secondi": 1.0},
+              {"line": "c1", "returns": 0.5, "primo_ok": True, "secondi": 1.0}] for _ in range(32)]
+    (c / "scelta_mondi.jsonl").write_text("\n".join(json.dumps(r) for r in righe) + "\n")
+    (c / "verifica.json").write_text(json.dumps({"media": 0.5, "deltas": [0.5] * 10}))
+    return R
+
+
+def test_ridotto_decisione_incoerente_senza_cartella(tmp_path):
+    R = _fondo_sintetico(tmp_path)
+    es = R.carica(tmp_path)
+    assert len(es) == 2 and es[1]["sc"] is None and es[1]["dati"] == [] and es[1]["ve"] is None
+    rows, *_ = R.variante(es, 32, 2, None, {})
+    assert rows[1]["coerente"] is False and C.riassunto(rows)["totale"][0] == pytest.approx(0.5)
+
+
+def test_ridotto_mondi_rimasti_indipendenti_dalla_scelta_piena(tmp_path):
+    R = _fondo_sintetico(tmp_path, incoerente=False)
+    es = R.carica(tmp_path)
+    es[0]["ve"]["media"] = 9.0  # la verifica della scelta piena non deve influire per m < 32
+    r, _, info = R.valuta(es[0], 8, 2, None, {})
+    assert r["media"] == pytest.approx(0.5) and r["n_mondi"] == 24 and not info["nonver"]
+    r, _, info = R.valuta(es[0], 8, 2, None, {}, mista=True)
+    assert r["media"] == 9.0 and not info["distorta"]  # mista: scelta uguale alla piena -> verifica
+    es[0]["sc"]["scelta"] = 0
+    r, _, info = R.valuta(es[0], 8, 2, None, {}, mista=True)
+    assert info["nonver"] and info["distorta"]
+    r, _, info = R.valuta(es[0], 32, 2, None, {})  # m = 32 come prima
+    assert info["nonver"] and info["distorta"]

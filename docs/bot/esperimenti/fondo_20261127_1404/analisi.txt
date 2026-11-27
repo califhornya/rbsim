@@ -1,0 +1,154 @@
+Posizioni 480, con >=2 candidati e mondi 424, cambiate 135; delta medio sulle cambiate +0.0885, su tutte le posizioni +0.0249
+
+=== A. Che mosse sbaglia il campione ===
+Tipi: Pass, Deploy campione, Play (carta), Play su campo, Cast (magia), Move avanti, Move ritirata, Hide, Equip/Activate/Gear
+
+A1. Tipo campione -> tipo Pensa (cambiate): n, delta medio, somma delta
+  Play (carta)         -> Play (carta)         n= 16 delta=+0.054 somma=+0.86
+  Play su campo        -> Play (carta)         n= 15 delta=+0.059 somma=+0.88
+  Move avanti          -> Move avanti          n= 11 delta=+0.133 somma=+1.46
+  Pass                 -> Hide                 n= 11 delta=+0.085 somma=+0.93
+  Play (carta)         -> Play su campo        n= 10 delta=+0.126 somma=+1.26
+  Pass                 -> Move ritirata        n=  8 delta=+0.081 somma=+0.65
+  Play su campo        -> Play su campo        n=  7 delta=+0.044 somma=+0.31
+  Pass                 -> Cast (magia)         n=  6 delta=+0.008 somma=+0.05
+  Deploy campione      -> Play su campo        n=  6 delta=+0.023 somma=+0.14
+  Deploy campione      -> Play (carta)         n=  3 delta=+0.150 somma=+0.45
+  Equip/Activate/Gear  -> Equip/Activate/Gear  n=  3 delta=+0.103 somma=+0.31
+  Play (carta)         -> Pass                 n=  3 delta=+0.070 somma=+0.21
+  Move avanti          -> Pass                 n=  3 delta=+0.170 somma=+0.51
+  Pass                 -> Move avanti          n=  2 delta=-0.005 somma=-0.01
+  Equip/Activate/Gear  -> Move ritirata        n=  2 delta=+0.350 somma=+0.70
+  Cast (magia)         -> Move avanti          n=  2 delta=+0.210 somma=+0.42
+  Move avanti          -> Play (carta)         n=  2 delta=+0.275 somma=+0.55
+  Cast (magia)         -> Pass                 n=  2 delta=+0.215 somma=+0.43
+  Play su campo        -> Deploy campione      n=  2 delta=+0.055 somma=+0.11
+  Play su campo        -> Hide                 n=  2 delta=-0.065 somma=-0.13
+  Move ritirata        -> Move ritirata        n=  2 delta=-0.045 somma=-0.09
+  Cast (magia)         -> Move ritirata        n=  2 delta=+0.135 somma=+0.27
+  Pass                 -> Play (carta)         n=  2 delta=+0.185 somma=+0.37
+  Play su campo        -> Cast (magia)         n=  1 delta=-0.020 somma=-0.02
+  Equip/Activate/Gear  -> Pass                 n=  1 delta=-0.040 somma=-0.04
+  Play su campo        -> Move avanti          n=  1 delta=+0.020 somma=+0.02
+  Move ritirata        -> Pass                 n=  1 delta=+0.050 somma=+0.05
+  Move avanti          -> Cast (magia)         n=  1 delta=+0.040 somma=+0.04
+  Move avanti          -> Play su campo        n=  1 delta=+0.080 somma=+0.08
+  Play (carta)         -> Hide                 n=  1 delta=+0.010 somma=+0.01
+  Move ritirata        -> Equip/Activate/Gear  n=  1 delta=+0.620 somma=+0.62
+  Cast (magia)         -> Hide                 n=  1 delta=+0.360 somma=+0.36
+  Equip/Activate/Gear  -> Hide                 n=  1 delta=+0.080 somma=+0.08
+  Cast (magia)         -> Play su campo        n=  1 delta=+0.080 somma=+0.08
+  Play (carta)         -> Cast (magia)         n=  1 delta=+0.030 somma=+0.03
+  Cast (magia)         -> Play (carta)         n=  1 delta=+0.000 somma=+0.00
+
+A2. Cambiate per fase: n cambiate / n posizioni, delta medio, contributo (somma delta / posizioni totali)
+  turno 4-6   29/ 55 delta=+0.062 contributo=+0.0325
+  turno<=3    23/102 delta=+0.073 contributo=+0.0164
+  turno>=7    83/323 delta=+0.102 contributo=+0.0263
+
+A2. Cambiate per matchup: n cambiate / n posizioni, delta medio, contributo (somma delta / posizioni totali)
+  EI          10/ 48 delta=+0.114 contributo=+0.0238
+  EK          11/ 48 delta=+0.030 contributo=+0.0069
+  ER          14/ 48 delta=+0.174 contributo=+0.0506
+  ES          19/ 48 delta=+0.066 contributo=+0.0260
+  IS          13/ 48 delta=+0.038 contributo=+0.0104
+  KI          15/ 48 delta=+0.118 contributo=+0.0369
+  KR          12/ 48 delta=+0.074 contributo=+0.0185
+  KS           9/ 48 delta=+0.092 contributo=+0.0173
+  RI          15/ 48 delta=+0.046 contributo=+0.0144
+  RS          17/ 48 delta=+0.125 contributo=+0.0442
+
+A3. Sulle posizioni con >=2 candidati: quanto spesso il campione sceglie il tipo, tasso di cambio per tipo, delta medio
+  Pass                 scelto  81 (19.1%)  cambiato  29 (35.8%)  delta medio sui cambi +0.069
+  Deploy campione      scelto  22 ( 5.2%)  cambiato   9 (40.9%)  delta medio sui cambi +0.066
+  Play (carta)         scelto  89 (21.0%)  cambiato  31 (34.8%)  delta medio sui cambi +0.076
+  Play su campo        scelto  84 (19.8%)  cambiato  28 (33.3%)  delta medio sui cambi +0.042
+  Cast (magia)         scelto  30 ( 7.1%)  cambiato   9 (30.0%)  delta medio sui cambi +0.173
+  Move avanti          scelto  72 (17.0%)  cambiato  18 (25.0%)  delta medio sui cambi +0.147
+  Move ritirata        scelto  19 ( 4.5%)  cambiato   4 (21.1%)  delta medio sui cambi +0.145
+  Hide                 scelto   5 ( 1.2%)  cambiato   0 ( 0.0%)  delta medio sui cambi +nan
+  Equip/Activate/Gear  scelto  22 ( 5.2%)  cambiato   7 (31.8%)  delta medio sui cambi +0.150
+  (posizioni con >=2 candidati: 424)
+  Tipo scelto da Pensa sulle cambiate: Play (carta) 39, Play su campo 25, Move avanti 16, Hide 16, Move ritirata 14, Pass 10, Cast (magia) 9, Equip/Activate/Gear 4, Deploy campione 2
+
+A4. Le 12 cambiate con delta piu' alto (matchup, turno, campione | Pensa, delta, n, q dei candidati)
+  061_ER50001001B_k19 ER t13: Move Grim Apothecary base→BF1 | Move Grim Apothecary base→BF0 delta=+0.82 n=[116, 8, 4] q=[0.129, -0.598, -0.872] medie=[0.12, 0.0, 0.75]
+  389_RS50008000A_k21 RS t13: Move Mech base→BF1 | Pass delta=+0.64 n=[135, 2] q=[0.74, -0.207] medie=[0.31, 0.97]
+  060_ER50001001B_k14 ER t11: Play Grim Apothecary | Play Grim Apothecary to BF1 delta=+0.62 n=[69, 57, 2] q=[0.716, 0.706, 0.686] medie=[0.28, 0.78, 0.41]
+  198_KI50004000A_k38 KI t13: Move Traveling Merchant BF0→base | Activate buff_unit (Kha'Zix Voidreaver) delta=+0.62 n=[106, 16, 11] q=[0.731, 0.731, 0.686] medie=[0.06, 0.72, 0.0]
+  150_EI50003000A_k42 EI t11: Gear gain_power_any_domain (Gold) | Move Pyke Returned BF0→base delta=+0.51 n=[57, 32, 16] q=[0.864, 0.848, 0.864] medie=[0.12, 0.59, 0.16]
+  265_RI50005003B_k5 RI t3: Pass | Hide Back Off @BF0 delta=+0.51 n=[4, 133] q=[0.766, 0.753] medie=[0.47, 1.0]
+  095_ER50001005B_k22 ER t15: Play Ferrous Forerunner | Play Ferrous Forerunner to BF1 delta=+0.39 n=[87, 31, 11] q=[0.67, 0.647, 0.617] medie=[0.25, 0.56, 0.44]
+  414_RS50008003B_k35 RS t15: Pass | Play First Mate delta=+0.39 n=[50, 20, 20] q=[0.149, -0.03, -0.207] medie=[0.19, 0.44, 0.44]
+  403_RS50008002A_k13 RS t7: Pass | Move Rengar Trophy Hunter BF0→base delta=+0.38 n=[75, 61, 1] q=[0.949, 0.947, 0.935] medie=[0.25, 0.31, 0.56]
+  302_ES50006001B_k21 ES t11: Move Fiora Victorious base→BF1 | Move Fiora Victorious base→BF0 delta=+0.37 n=[93, 41, 3] q=[-0.749, -0.749, -0.749] medie=[0.25, 0.53, 0.0]
+  226_KI50004004A_k8 KI t5: Cast Void Assault @BF0 | Hide Switcheroo @BF0 delta=+0.36 n=[19, 51, 18] q=[0.965, 0.963, 0.965] medie=[0.22, 0.78, 0.22]
+  128_KR50002004A_k0 KR t3: Play Reckless Innovator | Play Vex Apathetic delta=+0.33 n=[26, 77, 34] q=[0.686, 0.06, 0.03] medie=[0.34, 0.47, 0.69]
+
+A5. Carte piu' ricorrenti nei cambi: n volte come mossa del campione (rimossa) / di Pensa (scelta), delta medio dei cambi in cui compaiono
+  Pit Rookie                     campione  6  pensa  6  delta medio +0.069  (quando e' del campione +0.060, di Pensa +0.078)
+  First Mate                     campione  2  pensa 10  delta medio +0.139  (quando e' del campione +0.140, di Pensa +0.139)
+  Grim Apothecary                campione  3  pensa  6  delta medio +0.336  (quando e' del campione +0.513, di Pensa +0.247)
+  Noxus Hopeful                  campione  5  pensa  4  delta medio +0.024  (quando e' del campione +0.008, di Pensa +0.045)
+  Fizz Trickster                 campione  5  pensa  3  delta medio +0.089  (quando e' del campione +0.050, di Pensa +0.153)
+  Rengar Trophy Hunter           campione  4  pensa  4  delta medio +0.138  (quando e' del campione +0.175, di Pensa +0.100)
+  Irresistible Faefolk           campione  6  pensa  2  delta medio +0.035  (quando e' del campione +0.033, di Pensa +0.040)
+  Reckless Innovator             campione  6  pensa  2  delta medio +0.054  (quando e' del campione +0.062, di Pensa +0.030)
+  Bedeviling Stranger            campione  2  pensa  5  delta medio +0.046  (quando e' del campione +0.050, di Pensa +0.044)
+  Gutter Guardian                campione  2  pensa  5  delta medio -0.024  (quando e' del campione -0.055, di Pensa -0.012)
+  Rampage                        campione  4  pensa  3  delta medio +0.087  (quando e' del campione +0.140, di Pensa +0.017)
+  Stalwart Poro                  campione  2  pensa  4  delta medio -0.018  (quando e' del campione +0.000, di Pensa -0.028)
+  Mutated Mouser                 campione  1  pensa  4  delta medio +0.030  (quando e' del campione +0.010, di Pensa +0.035)
+  Kha'Zix Voidreaver             campione  2  pensa  3  delta medio +0.252  (quando e' del campione +0.160, di Pensa +0.313)
+  Ivern Nurturer to BF0          campione  3  pensa  2  delta medio +0.060  (quando e' del campione +0.063, di Pensa +0.055)
+
+=== B. Affidabilita' della valutazione ===
+B1. Scala di tutte le q (min, 1%, 5%, 25%, 50%, 75%, 95%, 99%, max): -0.999, -0.997, -0.960, -0.139, 0.598, 0.824, 0.988, 0.998, 1.000
+    q[0] mediana per fase: turno 4-6 0.635, turno<=3 0.090, turno>=7 0.696;  q<0: 27.5%, q>1: 0.0%
+
+B2. Valore: Spearman q[0] vs medie[0] su 424 posizioni: +0.746; media di medie[0] = 0.565
+    IC95 bootstrap sulle posizioni: [+0.683, +0.789]
+    Decili di q[0]: [da, a) n media(medie[0])
+      [ -0.999, -0.720) n= 43 0.034
+      [ -0.720, -0.217) n= 42 0.150
+      [ -0.217,  0.080) n= 42 0.386
+      [  0.080,  0.425) n= 43 0.450
+      [  0.425,  0.688) n= 42 0.573
+      [  0.688,  0.753) n= 41 0.700
+      [  0.753,  0.814) n= 43 0.770
+      [  0.814,  0.922) n= 43 0.806
+      [  0.922,  0.978) n= 41 0.811
+      [  0.978,  1.000) n= 44 0.966
+    turno 4-6: n=47 Spearman +0.537; quintili di q[0] -> media medie[0]: 0.33, 0.52, 0.75, 0.89, 0.78
+    turno<=3: n=67 Spearman +0.402; quintili di q[0] -> media medie[0]: 0.53, 0.68, 0.59, 0.80, 0.83
+    turno>=7: n=310 Spearman +0.790; quintili di q[0] -> media medie[0]: 0.03, 0.27, 0.59, 0.83, 0.90
+    matchup EI: n=45 Spearman +0.478
+    matchup EK: n=43 Spearman +0.881
+    matchup ER: n=42 Spearman +0.813
+    matchup ES: n=46 Spearman +0.484
+    matchup IS: n=40 Spearman +0.852
+    matchup KI: n=39 Spearman +0.687
+    matchup KR: n=47 Spearman +0.848
+    matchup KS: n=41 Spearman +0.603
+    matchup RI: n=39 Spearman +0.705
+    matchup RS: n=42 Spearman +0.496
+
+B3. Ordine fra candidati: coppie (0,j) con mondi: 733; medie pari (escluse): 315; visite pari (escluse dal conto visite): 10
+    accordo con l'ordine delle medie (32 mondi); soglia su |diff. medie|
+      Q       >=0.0: 57.6% (n=396)  >=0.1: 64.0% (n=172)  >=0.2: 70.3% (n=74)  >=0.3: 65.7% (n=35)
+      visite  >=0.0: 56.9% (n=415)  >=0.1: 60.5% (n=177)  >=0.2: 61.5% (n=78)  >=0.3: 56.8% (n=37)
+    Stesse coppie per Q e visite (nessun pari, n=393): Q 57.8%, visite 56.5%
+    Accordo Q per ampiezza del gap di Q (terzili): piccolo 55.1%, medio 52.8%, grande 63.2%
+    Quota coppie in cui la media (32 mondi) del candidato j supera quella del campione: 24.6%; di queste Q dice 'campione meglio' sempre (coerente)
+
+B4. Sulle 135 cambiate, delta di verifica (100 mondi nuovi) come verita'
+      Q       >=0.0: 25.0% (n=116)  >=0.1: 9.1% (n=44)  >=0.2: 0.0% (n=19)  >=0.3: 0.0% (n=13)
+      visite  >=0.0: 36.6% (n=123)  >=0.1: 35.4% (n=48)  >=0.2: 23.8% (n=21)  >=0.3: 26.7% (n=15)
+    delta>0 in 68.1%, delta<0 in 23.0%, =0 in 8.9%; delta medio +0.089 (IC95 su posizioni +0.061..+0.116)
+    Guadagno visto sui 32 mondi di scelta (da cui Pensa ha scelto): +0.129; sui 100 mondi nuovi: +0.089 (la differenza e' il 'vincitore tra rumore')
+
+B5. Rumore (limite dell'accordo anche con Q perfette)
+    SE della differenza appaiata (stesso mondo) fra due candidati: mediana 0.045, media 0.048 (la SE di una media singola ~0,09; il confronto appaiato e' piu' stretto per la correlazione fra linee)
+    Accordo atteso dal solo rumore se Q fosse perfetta, ricavato dalle differenze osservate (stima OTTIMISTA: |diff.| osservate sono gonfiate dal rumore): >=0.0: 87.0% (n=416)  >=0.1: 96.5% (n=176)  >=0.2: 99.4% (n=76)  >=0.3: 100.0% (n=35)
+    Split-half (due meta' da 16 mondi): accordo medio fra le due meta' (come test-retest a 16 mondi): 64.0% (coppie con parita' nelle meta' escluse). Con 32 mondi l'accordo reale con la verita' sarebbe un po' piu' alto.
+    Stessa stima con differenze vere ridotte del 30% (scenario prudente, soglia sulle osservate): >=0.0: 80.9%  >=0.1: 91.7%  >=0.2: 97.1%  >=0.3: 99.3%

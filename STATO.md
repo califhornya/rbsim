@@ -30,12 +30,8 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 - (25/11, Matteo) Apertura come RiftAtlas/§488 (`docs/bot/APERTURA.md`): campo scelto coperto, d20, chi vince decide chi
   comincia (G2-G3: chi ha perso). Il campione deve scegliere campo e inizio in modo ponderato, per matchup.
 - Arena mista: divergenze solo nelle ricerche rigiocate coi conteggi registrati; si guardano solo quelle che restano.
-- (26/11, Matteo e Astra) Filone principale: riallenare la rete con la ricerca (visite N/ΣN e esito ±1), --init da
-  ckpt_040000 (che resta l'avversario fisso), stessa architettura. Pilota: 2.000 partite (200 per matchup, D72-D82),
-  Dirichlet 0,25/α 0,3 alle radici di turno, temperatura 1 sulle prime 4 decisioni di turno, poi la più visitata;
-  valore: prima raccolta con rimonta, poi in sviluppo 80/20 rimonta/valore (rimonta sul Pass che chiude il turno).
-  Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
-  Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
+- (26/11, Matteo e Astra) Riallenare la rete con la ricerca (visite ed esito, --init da ckpt_040000): pilota senza
+  guadagno, strada chiusa. Promozione tipo: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50.
 - (26/11, Astra) Attacchi con lo showdown: sonda A dietro interruttore, soglia +0,15; pagina solo dopo fuori campione.
 - (26-27/11, Astra) Campione resta `ckpt_040000`; valore al 20% chiuso (forse solo sul Pass che chiude il turno);
   raccolta da 100.000 da parte; scelta finale per Q confermata (regola di stop). Promozioni sempre su semi nuovi.
@@ -46,6 +42,12 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   del campione + le 2 più visitate, giocate fino alla fine sugli stessi 32 mondi `ignote` (40000..), si gioca la media
   più alta (pari: il campione). Misura sulle 480 posizioni, verifica su 100 mondi diversi (50000..); regola fissata
   prima: lim. inf. > 0 e ≥20 posizioni cambiano mossa. Campione predefinito invariato senza arena (lim. inf. > 50%).
+- (27/11, Astra/Matteo) Pagina invariata (campione a 138). «Pensa» come insegnante: pilota «studente» (testa su encoder
+  di ckpt_040000 congelato, sceglie fra le ≤3 candidate alla fine della ricerca; bersaglio = differenza appaiata fra
+  mosse sugli stessi mondi), tetto 2 h di CCX63 comprese le verifiche, entrambi i ruoli (chi inizia e chi risponde),
+  identità esatta delle mosse; modello e regola congelati prima della verifica; soglia: ≥ +1 pp e lim. inf. > 0 sui
+  due ruoli insieme (riportati anche separati), se no si ferma. Poi «Pensa» dopo la partita nella pagina (Matteo sceglie
+  un turno e la sua alternativa). Arena Pensa a 8 mondi accantonata.
 
 ## Fatto
 - Porting EK, Rengar, Ivern, Sett (`docs/rust/RAPPORTO_*.md`): identico a Python; `COPERTI` = i cinque mazzi. Arena
@@ -63,18 +65,16 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Nessun guadagno: pilota (b) 47,95%, (c) 49,05%; (d) 50,2% [48,7, 51,7]; scelta finale visite − Q −0,3 pp [−1,0, +0,3];
-sonda A fuori campione −0,70 pp [−3,81, +1,89]; 1.000 contro 138: 51,2% [49,6, 52,9]; movimento dalla base
-(`movimento_20261127_1237/`): quota Q − campione +0,2 pp [−1,2, +1,7], NON PASSA, strada chiusa. §8-§9: `rimonta` default
-della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
-Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.command`, `tests/rust/test_fondo.py`; suite
-485): qui ~2,5 s di cpu per rigiocata → ~240 s per decisione, ~25 s sul Mac a 9 processi; CCX63 stimato 1-1,5 h.
+«Pensa» (`docs/bot/esperimenti/fondo_20261127_1404/`): PASSA, +2,5 pp [+1,7, +3,4], ma solo dal lato di chi inizia
+(60/60 partite, turni dispari: buco di `seguiti.partite`); costo ~56 h di CCX63 per un'arena. Varianti (`ridotto.txt`,
+mondi rimasti): passa 12 mondi, +2,0 pp, ma l'arena costa ~21 h; `analisi.txt`: la Q ordina le posizioni (Spearman 0,75) ma non le mosse (58%).
+Risposta di Astra (27/11): studente lineare su Q/visite/tipo −0,20 pp (servono mano e tavolo); soglia di visite +0,16.
+Matteo ha ~16 h di CCX63. Pilota «studente» pronto (`docs/bot/STUDENTE.md`; `riftbound/rs/studente.py`,
+`scripts/rust/studente.command`, `tests/rust/test_studente.py` 11 test): tetti 50 + 55 min, maestro su 1 seme.
 
 ## Prossimi passi
-1. `fondo.command` sul CCX63 (`server_prepara.sh`, tmux `fondo`); risultati in `docs/bot/esperimenti/fondo_*`.
-2. Se passa: «Pensa» nella pagina (`coach_rs.py`, `scripts/coach.py`) e arena candidato con Pensa contro campione;
-   prima il costo (riga `stima dell'arena` del riepilogo: a occhio ~60 h di CCX63 per 100 coppie).
-3. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
+1. `studente.command` sul CCX63 (tmux `studente`, ~1 h 50 min); risultati in `docs/bot/esperimenti/studente_*`.
+2. «Pensa» dopo la partita nella pagina (`coach_rs.py`, `scripts/coach.py`, `coach_page.html`).
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
@@ -82,7 +82,7 @@ Pronta la misura di «Pensa» (`riftbound/rs/fondo.py`, `scripts/rust/fondo.comm
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
   `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`;
-  «Pensa»: `fondo.py`, `fondo.command`.
+  «Pensa»: `fondo.py`, `fondo.command`; studente: `studente.py`, `studente.command`, varianti `fondo_ridotto.py`, analisi `fondo_analisi.py`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,
