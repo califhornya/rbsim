@@ -40,6 +40,11 @@ def main() -> int:
             partite.append(D.autonoma(mu, int(seme), None if a.casuali else ckpt, a.casuali, a.iterazioni, "A",
                                       valutazione=D._valutazione_registrata(M.VALUTAZIONE), entrambi=True))
     else:
+        # PR 76 (Codex): un replay della pagina si rigioca solo con la rete che ha giocato quella partita (le risposte
+        # registrate di Matteo seguono le sue mosse); con pesi casuali non si riproduce, e il riepilogo direbbe
+        # «pesi casuali» per un esperimento diverso.
+        if a.casuali:
+            ap.error("--casuali vale solo con --autonome: i replay della pagina vogliono il checkpoint del campione")
         files = [Path(f) for f in a.replay] if a.replay else M.replay_default()
         partite = M.partite_replay(files, ckpt)
     righe = M.muovi(partite, a.mondi, Path(a.out), None if a.casuali else ckpt, a.casuali, a.processi, a.iterazioni)

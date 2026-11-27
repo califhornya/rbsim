@@ -224,3 +224,11 @@ def test_continuazione_col_campione_di_oggi(tmp_path, monkeypatch):
 def test_cli_aiuto():
     r = subprocess.run([sys.executable, str(D.ROOT / "scripts/rust/muovi.py"), "--help"], capture_output=True, text=True)
     assert r.returncode == 0 and "--autonome" in r.stdout
+
+
+def test_cli_rifiuta_casuali_con_i_replay(tmp_path):
+    """PR 76 (Codex): --casuali con i replay della pagina farebbe un esperimento diverso da quello dichiarato."""
+    r = subprocess.run([sys.executable, str(D.ROOT / "scripts/rust/muovi.py"), "--out", str(tmp_path / "x"), "--casuali"],
+                       capture_output=True, text=True)
+    assert r.returncode == 2 and "--casuali vale solo con --autonome" in r.stderr
+    assert not (tmp_path / "x").exists()
