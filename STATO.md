@@ -42,9 +42,9 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   Promozione: 800 coppie per matchup, media ≥0,52, lim. inf. 95% >0,50, ogni matchup lim. inf. unilaterale >0,47.
   Ritocchi a mano in pausa; la pagina può pensare minuti («Pensa», facoltativo), arene veloci.
 - (26/11, Astra) Attacchi con lo showdown: sonda A dietro interruttore, soglia +0,15; pagina solo dopo fuori campione.
-- (26/11 sera, Astra) Pilota senza promozione: campione resta `ckpt_040000`; raccolta da 100.000 rinviata finché non si
-  sa se il valore appreso aiuta a scegliere. Prova (d): prior di `ckpt_040000` + 20% valore di `rete.pt` (epoca 5, due
-  checkpoint completi) nelle foglie; arena sugli stessi semi del pilota + «seguiti». Promozione a parte, su semi nuovi.
+- (26-27/11, Astra) Campione resta `ckpt_040000`. Prova (d) fatta: valore al 20% chiuso (50% bassa priorità; forse solo
+  sul Pass che chiude il turno); raccolta da 100.000 da parte. Ora un solo esperimento: scelta finale più visitata
+  contro Q, con regola di stop. Promozioni sempre su semi nuovi.
 - (25/11, Astra) Scenari e promozioni nuove su D72-D77; rete ferma (`ckpt_040000`, profilo di addestramento registrato
   a parte). Correzioni una alla volta, provate su casi opposti e partite tenute fuori. Campione calibrato come
   avversario predefinito; apertura G1: campo abituale e scelta manuale; Bo3 quando Matteo vuole il post-side.
@@ -64,25 +64,25 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-(26/11 sera) Pilota (`generazione_20261126_1810`, 4.000 partite, D72-D83): (b) 47,95%, (c) 49,05%, c−b +1,10 pp
-[−0,80, +3,00]; EQM sull'esito 0,7184 → 0,6339. Da lanciare sul Mac: `valore_mac.command` = arena (d) (100 coppie × 10,
-semi 40M come il pilota), confronto appaiato d−c (solo il prior), d−b, c−b; seguiti (semi 50M: partite del campione
-contro sé stesso, dove (d) cambia mossa entrambe le mosse fino all'esito sugli stessi 32 mondi `ignote`).
+Pilota (`generazione_20261126_1810`): (b) 47,95%, (c) 49,05%. Prova (d) (`valore_20261126_2054/`): contro il campione
+50,2% [48,7, 51,7]; d−c +1,15 [−1,05, +3,35]; seguiti: cambia mossa in 70 su 480, +0,2 pp [−4,2, +4,4] (18/20/32).
+(27/11) Da lanciare: `scelta_mac.command`. Sulle stesse 480 posizioni, dallo stesso albero del campione (log originale),
+più visitata contro Q sugli stessi 32 mondi; media a pesi uguali fra matchup, IC ricampionando partite intere. Se il
+limite inferiore > 0: arena (scelta per visite, `set_search_scelta`) su semi 60M, 100 coppie; campione nuovo se > 50%.
 §8-§9: `rimonta` default della pagina; finestre bocciate. Serie di 24: 5 attacchi migliori mai costruiti; sonda A
 offline (`sonda.py`, `sonda_mac.command`): attacco in 6 su 24, ora diagnosi. Segnalazioni 29-35 (35 = D83, corretto).
 «Stesso seme»: rifacimento identico; Sett 0 su 500 contro Evelynn automatica (la ricerca non ha rumore).
 
 ## Prossimi passi
-1. Matteo: `valore_mac.command` sul Mac; risultati ad Astra (arena.txt, confronto.txt, seguiti/riepilogo.txt).
-2. Se (d) sceglie linee migliori con regolarità: raccolta più grande sul CCX63; promozione su semi nuovi (non 30M/40M/50M).
-3. `sonda_mac` sulle 72 posizioni (diagnosi). Dopo: «Pensa» nella pagina se c'è capacità.
+1. Matteo: `scelta_mac.command`; risultati ad Astra. Poi il giudizio (segnalazioni 28-34: il campione è troppo facile).
+2. Promozioni su semi nuovi (non 30M/40M/50M/60M). `sonda_mac` sulle 72 posizioni.
 
 ## File principali
 - `rust/rbsim-core/src/`: motore (`game.rs`, `lp_*.rs`, `effects*.rs`, `legality.rs`, `agents.rs`,
   `obs.rs`, `features.rs`, `dump.rs`, `trace.rs`); `search.rs` la ricerca dell'arena.
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
-  `valore_mac.command`; `arena_rs.make_probs_misto` (prior e valore da due reti), `set_search_valore_rete_at`.
+  `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac.command`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,

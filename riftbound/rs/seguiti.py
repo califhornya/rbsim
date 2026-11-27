@@ -53,14 +53,20 @@ def _riassunto_rifai(r: dict) -> dict:
             "classifica": [{k: x[k] for k in ("i", "azione", "n", "q", "P", "rango")} for x in r["classifica"]]}
 
 
-def decisioni(partita: dict, per_partita: int, ckpt_valore, peso: float = PESO) -> list[dict]:
-    """Le decisioni `turn_action` del campione con almeno 2 voci nel menu, al piu' `per_partita` sparse sui turni,
-    ciascuna rifatta con (d). Una riga: partita, nome, k, turno, menu, campione, d, prefisso_ok, classifica."""
+def selezionate(partita: dict, per_partita: int) -> list[dict]:
+    """Le righe di `D.originale` da esaminare: decisioni `turn_action` del campione con almeno 2 voci nel menu, al piu'
+    `per_partita` sparse sui turni (le stesse per ogni esperimento sulle posizioni di sviluppo)."""
     P = D._prepara(partita)
     cand = [o for o in D.originale(partita) if o["seat"] == P["camp"] and o["point"] == "turn_action"
             and len(o["menu"]) >= 2]
+    return sparse(cand, per_partita)
+
+
+def decisioni(partita: dict, per_partita: int, ckpt_valore, peso: float = PESO) -> list[dict]:
+    """Le decisioni `turn_action` del campione con almeno 2 voci nel menu, al piu' `per_partita` sparse sui turni,
+    ciascuna rifatta con (d). Una riga: partita, nome, k, turno, menu, campione, d, prefisso_ok, classifica."""
     out = []
-    for o in sparse(cand, per_partita):
+    for o in selezionate(partita, per_partita):
         r = D.rifai(partita, o["k"], posizione=False, valore_rete=(peso, str(ckpt_valore)))
         out.append({"partita": partita, "nome": A.nome_partita(partita), "k": o["k"], "turno": o["turn"],
                     "menu": o["menu"], "campione": o["action"], "d": r["azione"], "prefisso_ok": r["prefisso_ok"],

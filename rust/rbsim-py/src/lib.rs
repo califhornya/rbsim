@@ -528,6 +528,23 @@ impl Game {
         }
     }
 
+    /// Option `scelta_visite`: "q" (default: la Q piu' alta) o "visite" (alle decisioni di turno la piu' visitata).
+    fn set_search_scelta(&mut self, seat: &str, nome: &str) -> PyResult<()> {
+        let s = seat_of(seat)?;
+        let v = match nome {
+            "q" => false,
+            "visite" => true,
+            _ => return Err(pyo3::exceptions::PyValueError::new_err(format!("scelta {nome}: attesi q o visite"))),
+        };
+        match &self.search[s.idx()] {
+            Some(c) => {
+                c.borrow_mut().scelta_visite = v;
+                Ok(())
+            }
+            None => Err(pyo3::exceptions::PyValueError::new_err(format!("no search agent on seat {seat}"))),
+        }
+    }
+
     /// (net forward calls, of which only for the value) of a search seat: the extra calls of `peso_valore_rete`.
     fn search_valore_rete_stats(&self, seat: &str) -> PyResult<(i64, i64)> {
         let s = seat_of(seat)?;

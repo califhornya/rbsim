@@ -1206,6 +1206,9 @@ pub struct SearchCore {
     /// Option `peso_valore_rete` (default 0 = off: nothing changes): leaf value of a node evaluated with the net =
     /// (1 - w) * hand-written value + w * net's value (same point of view: the searching seat).
     pub peso_valore_rete: f64,
+    /// Option: scelta finale alle decisioni di turno: la piu' visitata (pari visite: Q piu' alta, poi l'ordine)
+    /// invece della Q piu' alta (Astra 27/11). Le reazioni e il resto restano a Q piu' alta.
+    pub scelta_visite: bool,
     /// Statistics: calls of the net's forward, and those made only for the value (menus of fewer than 2
     /// options, with `peso_valore_rete` > 0; they were not made before).
     pub chiamate_rete: i64,
@@ -1286,6 +1289,7 @@ impl SearchCore {
             root_p_pre: None,
             root_noised: false,
             peso_valore_rete: 0.0,
+            scelta_visite: false,
             chiamate_rete: 0,
             chiamate_solo_valore: 0,
         }));
@@ -2094,9 +2098,18 @@ impl SearchCore {
         let mut best = 0;
         let mut campionata = false;
         if self.esplorazione.is_none() {
-            for i in 1..items.len() {
-                if t.nodes[items[i].1].q > t.nodes[items[best].1].q {
-                    best = i;
+            if self.scelta_visite && point == Point::TurnAction {
+                for i in 1..items.len() {
+                    let (a, b) = (&t.nodes[items[i].1], &t.nodes[items[best].1]);
+                    if a.n > b.n || (a.n == b.n && a.q > b.q) {
+                        best = i;
+                    }
+                }
+            } else {
+                for i in 1..items.len() {
+                    if t.nodes[items[i].1].q > t.nodes[items[best].1].q {
+                        best = i;
+                    }
                 }
             }
         } else {
