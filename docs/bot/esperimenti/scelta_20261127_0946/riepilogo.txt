@@ -1,0 +1,19 @@
+Scelta finale: mossa piu' visitata contro mossa con Q piu' alta, dallo stesso albero del campione /Users/mateo/projects/rbsim2026/rbsim-rust/../rbsim/runs/sett/ekris_s12/ckpt_040000.pt, 138 iterazioni, valutazione rimonta, regole 6427b90+D72-D83
+partite 60, al piu' 8 decisioni per partita, 32 mondi per decisione, 40000 ricampionamenti di partite intere
+decisioni esaminate 480 (incoerenti: 0, disaccordi senza mondi validi: 0); con mossa diversa 167 (34.8% delle coerenti)
+visite - Q, totale (ogni matchup pesa uguale, accordi = 0): -0.3 pp (IC 95% da -1.0 a +0.3)
+visite - Q sui soli disaccordi: -1.0 pp (IC 95% da -2.8 a +0.7); a favore 42, contro 54, pari 71
+mondi giocati validi 5344; esclusi 0 (la prima mossa forzata non e' quella chiesta)
+per matchup (esaminate, incoerenti, disaccordi, tasso, visite - Q con IC 95%):
+  EI: 48, 0, 18, 37.5%, +1.0 pp (-0.3 a +2.5)
+  EK: 48, 0, 17, 35.4%, -0.5 pp (-1.0 a -0.1)
+  ER: 48, 0, 11, 22.9%, +0.1 pp (-1.2 a +1.9)
+  ES: 48, 0, 19, 39.6%, -0.1 pp (-0.7 a +0.7)
+  IS: 48, 0, 18, 37.5%, -0.9 pp (-3.1 a +0.8)
+  KI: 48, 0, 15, 31.2%, -2.1 pp (-3.8 a -0.4)
+  KR: 48, 0, 20, 41.7%, +0.3 pp (-1.6 a +2.5)
+  KS: 48, 0, 20, 41.7%, -0.1 pp (-0.5 a +0.3)
+  RI: 48, 0, 15, 31.2%, +1.2 pp (-1.0 a +4.2)
+  RS: 48, 0, 14, 29.2%, -2.4 pp (-6.8 a +0.1)
+regola di stop: NON PASSA: resta la scelta per Q
+totale: 480 decisioni, 167 disaccordi, -0.3 pp, 39.5 min

@@ -1,0 +1,38 @@
+09:46:23 == ambiente
+🛠 Installed riftbound_rs-0.1.0
+abb71f6 Merge pull request #73 from califhornya/claude/adoring-cray-swjl90
+processi: 9; campione: ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; 6 partite x 8 decisioni x 32 mondi; 100 coppie
+09:47:02 == 1. posizioni: piu' visitata contro Q piu' alta
+== decisione 395/480: RS50008001B k=11 turno 9, 32 mondi
+== decisione 397/480: RS50008001B k=18 turno 11, 32 mondi
+== decisione 400/480: RS50008001B k=34 turno 15, 32 mondi
+== decisione 401/480: RS50008002A k=0 turno 1, 32 mondi
+== decisione 402/480: RS50008002A k=2 turno 3, 32 mondi
+== decisione 406/480: RS50008002A k=20 turno 11, 32 mondi
+== decisione 411/480: RS50008003B k=17 turno 9, 32 mondi
+== decisione 421/480: RS50008004A k=11 turno 9, 32 mondi
+== decisione 424/480: RS50008004A k=18 turno 13, 32 mondi
+== decisione 430/480: RS50008005B k=16 turno 9, 32 mondi
+== decisione 434/480: IS50009000A k=4 turno 3, 32 mondi
+== decisione 438/480: IS50009000A k=42 turno 11, 32 mondi
+== decisione 440/480: IS50009000A k=53 turno 13, 32 mondi
+== decisione 442/480: IS50009001B k=4 turno 3, 32 mondi
+== decisione 447/480: IS50009001B k=27 turno 13, 32 mondi
+== decisione 448/480: IS50009001B k=31 turno 13, 32 mondi
+== decisione 451/480: IS50009002A k=8 turno 5, 32 mondi
+== decisione 456/480: IS50009002A k=35 turno 11, 32 mondi
+== decisione 459/480: IS50009003B k=4 turno 5, 32 mondi
+== decisione 460/480: IS50009003B k=11 turno 7, 32 mondi
+== decisione 462/480: IS50009003B k=16 turno 9, 32 mondi
+== decisione 463/480: IS50009003B k=19 turno 9, 32 mondi
+== decisione 464/480: IS50009003B k=20 turno 11, 32 mondi
+== decisione 468/480: IS50009004A k=17 turno 7, 32 mondi
+== decisione 469/480: IS50009004A k=23 turno 9, 32 mondi
+== decisione 471/480: IS50009004A k=31 turno 11, 32 mondi
+== decisione 479/480: IS50009005B k=26 turno 13, 32 mondi
+== decisione 480/480: IS50009005B k=28 turno 13, 32 mondi
+regola di stop: NON PASSA: resta la scelta per Q
+totale: 480 decisioni, 167 disaccordi, -0.3 pp, 39.5 min
+10:26:37 Regola di stop: niente arena, resta la scelta per Q.
+durata dei passi (s): posizioni 2375, arena 0, totale 2375
+processi 9 su 10 core

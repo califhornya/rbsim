@@ -1,0 +1,12 @@
+{
+ "ckpt_sha256": "f8d8469b506dfc1dcfe939ad944a214684fc5285aefc370bdc7549d42cec41aa",
+ "casuali": false,
+ "regole": "6427b90+D72-D83",
+ "iterazioni": 138,
+ "valutazione": "rimonta",
+ "base_seme": 50000000,
+ "mondi0": 7000,
+ "partite": 6,
+ "per_partita": 8,
+ "mondi": 32
+}
