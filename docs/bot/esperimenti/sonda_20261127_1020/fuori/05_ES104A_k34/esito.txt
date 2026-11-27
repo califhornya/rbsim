@@ -1,0 +1,4 @@
+posizione k=34 (turno 15, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.040 (soglia 0.15), apertura Move Pyke Returned base→BF1; sonda 24 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +0.0 pp [+0.0, +0.0]; vittorie campione/migliore 100/100; saturata
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

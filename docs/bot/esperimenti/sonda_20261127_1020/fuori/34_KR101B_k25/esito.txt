@@ -1,0 +1,5 @@
+posizione k=25 (turno 13, punto libero no): sonda ordinaria
+migliore BF0a0, margine -0.427 (soglia 0.15), apertura Move Irresistible Faefolk base→BF0; sonda 31 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -29.0 pp [-38.4, -19.6]; vittorie campione/migliore 33/4
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

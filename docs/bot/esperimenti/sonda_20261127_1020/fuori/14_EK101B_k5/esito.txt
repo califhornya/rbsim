@@ -1,0 +1,6 @@
+posizione k=5 (turno 5, punto libero si): sonda ordinaria
+migliore BF0a0, margine -0.767 (soglia 0.15), apertura Move Reckless Innovator base→BF0; sonda 20 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -15.0 pp [-27.3, -2.7]; vittorie campione/migliore 39/24
+vero negativo: conviene il punto libero
+punto libero preso (campione/migliore): BF1 100/0
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: Play Pyke Returned from Hidden @BF0 (19)', 'reaction: Play Momentary Companion from Hidden @BF0 (17)', 'reaction: Play Gutter Guardian from Hidden @BF0 (17)', 'reaction: Play Edge of Night from Hidden @BF0 (17)', 'reaction: Play Bedeviling Stranger from Hidden @BF0 (16)']

@@ -1,0 +1,5 @@
+posizione k=32 (turno 13, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.202 (soglia 0.15), apertura Move Reckless Innovator base→BF1; sonda 24 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -19.0 pp [-29.7, -8.3]; vittorie campione/migliore 36/17
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: React Call to Glory @BF0 (28)']

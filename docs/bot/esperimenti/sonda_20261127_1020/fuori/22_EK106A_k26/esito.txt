@@ -1,0 +1,4 @@
+posizione k=26 (turno 13, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.023 (soglia 0.15), apertura Move Rengar Trophy Hunter base→BF1; sonda 23 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione -1.0 pp [-3.0, +1.0]; vittorie campione/migliore 100/99; saturata
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: Play Evelynn Entrancing from Hidden @BF1 (54)', 'reaction: Play Switcheroo from Hidden @BF1 (46)']

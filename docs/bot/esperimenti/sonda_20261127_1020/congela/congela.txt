@@ -1,0 +1,27 @@
+00_20261125_154531_competit_k12 | ERRORE FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_evelynn.json'
+01_20261125_201243_competit_k1 | ERRORE FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_sett.json'
+02_20261125_204705_competit_k23 | ERRORE FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_khazix.json'
+03_20261125_204705_competit_k38 | ERRORE FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_khazix.json'
+04_20261126_013325_competit_k10 | ERRORE FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_evelynn.json'
+05_ES1B_k11 | ordinaria | migliore BF0a0 | margine -0.090 | apertura Move Pit Rookie base→BF0 | saturata no | serie: indeciso | rivedi: - | identita DIFFERENZE 1
+    mondo 2012 riferimento: t9 diverso
+06_ES3B_k1 | attacco | migliore BF0a0 | margine +0.454 | apertura Move Sett Kingpin base→BF0 | saturata no | serie: attacco migliore | rivedi: (la scelta della serie) | identita OK
+07_ES3B_k14 | ERRORE ValueError: k=14 non è una decisione di turno (showdown_action)
+08_ES4A_k10 | attacco | migliore BF1a0 | margine +0.638 | apertura Move Pyke Returned base→BF1 | saturata no | serie: attacco migliore | rivedi: (la scelta della serie) | identita OK
+09_ES5B_k5 | attacco | migliore BF0a0 | margine +0.307 | apertura Move Pit Rookie base→BF0 | saturata no | serie: attacco migliore | rivedi: (la scelta della serie) | identita OK
+10_ES5B_k15 | ordinaria | migliore BF1a0 | margine -0.003 | apertura Move Kinkou Initiate base→BF1 | saturata si | serie: indeciso | rivedi: - | identita OK
+11_ES6A_k1 | attacco | migliore BF0a0 | margine +0.183 | apertura Move Evelynn Entrancing base→BF0 | saturata no | serie: attacco migliore | rivedi: (la scelta della serie) | identita OK
+12_ES7B_k5 | ordinaria | migliore BF1a0 | margine +0.049 | apertura Move Fiora Victorious base→BF1 | saturata no | serie: riferimento scelto | rivedi: indecisa | identita OK
+13_ES9B_k2 | ordinaria | migliore BF0a0 | margine -0.413 | apertura Move Sett Kingpin base→BF0 | saturata no | serie: indeciso | rivedi: - | identita OK
+14_ES9B_k21 | ordinaria | migliore BF0a0 | margine -0.084 | apertura Move Kinkou Initiate base→BF0 | saturata no | serie: riferimento scelto | rivedi: - | identita OK
+15_EK1B_k15 | ordinaria | migliore BF0a0 | margine +0.137 | apertura Move Vex Apathetic base→BF0 | saturata si | serie: riferimento scelto | rivedi: indecisa | identita OK
+16_EK1B_k21 | ordinaria | migliore BF0a0 | margine -0.460 | apertura Move Traveling Merchant base→BF0 | saturata si | serie: riferimento scelto | rivedi: indecisa | identita OK
+17_EK3B_k17 | ordinaria | migliore BF1a0 | margine +0.045 | apertura Move Fizz Trickster base→BF1 | saturata no | serie: riferimento scelto | rivedi: indecisa | identita OK
+18_EK4A_k16 | ordinaria | migliore BF0a0 | margine -0.011 | apertura Move Pyke Returned base→BF0 | saturata si | serie: riferimento scelto | rivedi: indecisa | identita OK
+19_EK4A_k27 | attacco | migliore BF1a0 | margine +0.361 | apertura Move Pyke Returned base→BF1 | saturata si | serie: riferimento scelto | rivedi: indecisa | identita OK
+20_EK5B_k30 | ERRORE ValueError: k=30 non è una decisione di turno (showdown_action)
+21_EK7B_k5 | ordinaria | migliore BF0a0 | margine +0.004 | apertura Move Zed Without a Sound base→BF0 | saturata no | serie: riferimento scelto | rivedi: peggiore | identita OK
+22_EK7B_k10 | attacco | migliore BF0a0 | margine +1.037 | apertura Move Shadow Clone base→BF0 | saturata no | serie: attacco migliore | rivedi: (la scelta della serie) | identita DIFFERENZE 1
+    mondo 2006 BF0a0: t9 diverso
+23_EK9B_k5 | ordinaria | migliore BF0a0 | margine -0.184 | apertura Move Traveling Merchant base→BF0 | saturata si | serie: riferimento scelto | rivedi: indecisa | identita OK
+totale: attacco 6 (attesi 6), ordinaria 11, senza proposta 0, identità OK in 15 su 17 posizioni, DIFFERENZE 2, errori 7

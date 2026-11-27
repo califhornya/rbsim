@@ -1,0 +1,4 @@
+posizione k=29 (turno 13, punto libero no): sonda ordinaria
+migliore BF1a0, margine +0.049 (soglia 0.15), apertura Move Evelynn Entrancing base→BF1; sonda 20 s cpu
+verifica 100 mondi: falso negativo; differenza migliore - campione +42.0 pp [+31.1, +52.9]; vittorie campione/migliore 39/81
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

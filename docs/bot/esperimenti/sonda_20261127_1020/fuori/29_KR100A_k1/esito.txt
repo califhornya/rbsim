@@ -1,0 +1,5 @@
+posizione k=1 (turno 3, punto libero si): sonda ordinaria
+migliore BF0a0, margine +0.000 (soglia 0.15), apertura Move Traveling Merchant base→BF0; sonda 19 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +7.0 pp [-4.6, +18.6]; vittorie campione/migliore 41/48
+punto libero preso (campione/migliore): BF1 0/0
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

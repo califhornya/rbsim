@@ -1,0 +1,5 @@
+posizione k=7 (turno 9, punto libero no): sonda ordinaria
+migliore BF0a0, margine -0.775 (soglia 0.15), apertura Move Kinkou Initiate base→BF0; sonda 22 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -19.0 pp [-28.1, -9.9]; vittorie campione/migliore 94/75
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['showdown_action: Showdown Punch First @BF0 (16)']

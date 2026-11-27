@@ -1,0 +1,4 @@
+posizione k=19 (turno 11, punto libero no): sonda ordinaria
+migliore BF0a0, margine -0.027 (soglia 0.15), apertura Move Noxus Hopeful base→BF0; sonda 24 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione -5.0 pp [-14.8, +4.8]; vittorie campione/migliore 20/15
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

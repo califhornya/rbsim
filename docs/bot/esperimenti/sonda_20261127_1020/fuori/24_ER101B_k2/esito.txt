@@ -1,0 +1,5 @@
+posizione k=2 (turno 5, punto libero si): sonda ordinaria
+migliore BF0a0, margine -0.046 (soglia 0.15), apertura Move Noxus Hopeful base→BF0; sonda 21 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +5.0 pp [-5.6, +15.6]; vittorie campione/migliore 24/29
+punto libero preso (campione/migliore): BF1 100/100
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: Play Edge of Night from Hidden @BF0 (21)', 'reaction: Play Momentary Companion from Hidden @BF0 (19)', 'reaction: Play Bedeviling Stranger from Hidden @BF0 (18)', 'reaction: Play Pyke Returned from Hidden @BF0 (15)', 'reaction: Play Gutter Guardian from Hidden @BF0 (14)']

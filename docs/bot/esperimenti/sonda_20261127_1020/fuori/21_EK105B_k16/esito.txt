@@ -1,0 +1,4 @@
+posizione k=16 (turno 11, punto libero no): sonda ordinaria
+migliore BF0a0, margine +0.039 (soglia 0.15), apertura Move Reckless Innovator base→BF0; sonda 22 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +0.0 pp [+0.0, +0.0]; vittorie campione/migliore 0/0; saturata
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: AMBUSH Rengar Trophy Hunter @BF0 (28)', 'reaction: React Star-Crossed @BF0 (22)', 'showdown_action: Showdown Switcheroo @BF0 (15)', "showdown_action: Showdown Hold 'Em @BF0 (12)", 'reaction: React Gust @BF0 (11)']

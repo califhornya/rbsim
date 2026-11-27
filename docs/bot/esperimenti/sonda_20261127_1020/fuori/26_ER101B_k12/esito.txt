@@ -1,0 +1,5 @@
+posizione k=12 (turno 9, punto libero si): sonda attacco
+migliore BF0a0, margine +0.450 (soglia 0.15), apertura Move Inferna base→BF0; sonda 21 s cpu
+verifica 100 mondi: vero positivo; differenza migliore - campione +35.0 pp [+24.8, +45.2]; vittorie campione/migliore 8/43
+punto libero preso (campione/migliore): BF1 100/0
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

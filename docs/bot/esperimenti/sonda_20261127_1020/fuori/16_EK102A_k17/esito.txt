@@ -1,0 +1,4 @@
+posizione k=17 (turno 9, punto libero no): sonda ordinaria
+migliore BF1a0, margine +0.054 (soglia 0.15), apertura Move Fizz Trickster base→BF1; sonda 23 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione -3.0 pp [-12.8, +6.8]; vittorie campione/migliore 70/67
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

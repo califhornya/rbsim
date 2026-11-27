@@ -1,0 +1,5 @@
+posizione k=3 (turno 5, punto libero si): sonda ordinaria
+migliore BF0a0, margine -0.080 (soglia 0.15), apertura Move First Mate base→BF0; sonda 19 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +7.0 pp [-4.6, +18.6]; vittorie campione/migliore 25/32
+punto libero preso (campione/migliore): BF1 100/100
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['showdown_action: Showdown Punch First @BF0 (27)']

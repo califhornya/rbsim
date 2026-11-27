@@ -1,0 +1,39 @@
+{
+ "decisione": "ordinaria",
+ "migliore": "BF1a0",
+ "margini": {
+  "BF0a0": -0.014584614532397434,
+  "BF1a0": 0.008467386547956701
+ },
+ "soglia": 0.15,
+ "proposte": [
+  {
+   "nome": "BF0a0",
+   "field": 0,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 0
+  },
+  {
+   "nome": "BF1a0",
+   "field": 1,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 0
+  }
+ ],
+ "apertura_unica": true,
+ "secondi_cpu": 20.001761436462402,
+ "secondi_muro": 2.4844024181365967,
+ "linee": 3,
+ "mondi": 16,
+ "apertura": "Move Mutated Mouser base→BF1"
+}

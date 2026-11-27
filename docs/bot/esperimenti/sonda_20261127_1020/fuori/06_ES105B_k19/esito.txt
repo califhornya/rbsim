@@ -1,0 +1,4 @@
+posizione k=19 (turno 13, punto libero no): sonda ordinaria
+migliore BF0a0, margine +0.043 (soglia 0.15), apertura Move Sett Kingpin base→BF0; sonda 18 s cpu
+verifica 100 mondi: falso negativo; differenza migliore - campione +43.0 pp [+33.2, +52.8]; vittorie campione/migliore 43/86
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

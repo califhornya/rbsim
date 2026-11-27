@@ -1,0 +1,4 @@
+posizione k=7 (turno 5, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.018 (soglia 0.15), apertura Move Vex Apathetic base→BF1; sonda 21 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +0.0 pp [+0.0, +0.0]; vittorie campione/migliore 100/100; saturata
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

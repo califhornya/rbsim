@@ -1,0 +1,2 @@
+durata (s): arena 591
+processi 47 su 48 core

@@ -1,0 +1,5 @@
+posizione k=38 (turno 15, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.744 (soglia 0.15), apertura Move Rengar Trophy Hunter base→BF1; sonda 25 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -96.0 pp [-99.9, -92.1]; vittorie campione/migliore 100/4; saturata
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

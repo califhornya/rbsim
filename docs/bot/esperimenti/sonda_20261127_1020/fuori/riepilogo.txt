@@ -1,0 +1,47 @@
+ES101B | ES | k=1 | turno 5 | punto libero si | ordinaria | margine -0.601 | vero negativo (conviene il punto libero) | differenza -23.0 pp | saturata no | punto libero preso 100 | sonda 19 s cpu
+ES101B | ES | k=3 | turno 7 | punto libero no | attacco | margine +0.318 | falso positivo | differenza -23.0 pp | saturata no | punto libero preso - | sonda 21 s cpu
+ES101B | ES | k=7 | turno 9 | punto libero no | ordinaria | margine -0.775 | vero negativo (il campione gioca meglio) | differenza -19.0 pp | saturata no | punto libero preso - | sonda 22 s cpu
+ES102A | ES | k=32 | turno 13 | punto libero no | ordinaria | margine -0.202 | vero negativo (il campione gioca meglio) | differenza -19.0 pp | saturata no | punto libero preso - | sonda 24 s cpu
+ES103B | ES | k=10 | turno 7 | punto libero si | ordinaria | margine +0.000 | neutro | differenza +0.0 pp | saturata no | punto libero preso 0 | sonda 20 s cpu
+ES104A | ES | k=34 | turno 15 | punto libero no | ordinaria | margine -0.040 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 24 s cpu
+ES105B | ES | k=19 | turno 13 | punto libero no | ordinaria | margine +0.043 | falso negativo | differenza +43.0 pp | saturata no | punto libero preso - | sonda 18 s cpu
+ES105B | ES | k=21 | turno 15 | punto libero no | ordinaria | margine -0.152 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 18 s cpu
+ES106A | ES | k=12 | turno 7 | punto libero no | ordinaria | margine +0.060 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 20 s cpu
+ES106A | ES | k=15 | turno 9 | punto libero no | ordinaria | margine -0.008 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 20 s cpu
+EK100A | EK | k=21 | turno 9 | punto libero si | ordinaria | margine -0.094 | neutro | differenza -1.0 pp | saturata no | punto libero preso 100 | sonda 19 s cpu
+EK100A | EK | k=26 | turno 11 | punto libero no | ordinaria | margine -0.005 | neutro | differenza +0.0 pp | saturata no | punto libero preso - | sonda 18 s cpu
+EK100A | EK | k=29 | turno 13 | punto libero no | ordinaria | margine +0.049 | falso negativo | differenza +42.0 pp | saturata no | punto libero preso - | sonda 20 s cpu
+EK100A | EK | k=38 | turno 15 | punto libero no | ordinaria | margine -0.744 | vero negativo (il campione gioca meglio) | differenza -96.0 pp | saturata si | punto libero preso - | sonda 25 s cpu
+EK101B | EK | k=5 | turno 5 | punto libero si | ordinaria | margine -0.767 | vero negativo (conviene il punto libero) | differenza -15.0 pp | saturata no | punto libero preso 100 | sonda 20 s cpu
+EK101B | EK | k=19 | turno 13 | punto libero no | ordinaria | margine +0.100 | neutro | differenza -1.0 pp | saturata no | punto libero preso - | sonda 25 s cpu
+EK102A | EK | k=17 | turno 9 | punto libero no | ordinaria | margine +0.054 | neutro | differenza -3.0 pp | saturata no | punto libero preso - | sonda 23 s cpu
+EK102A | EK | k=21 | turno 11 | punto libero no | ordinaria | margine -0.179 | vero negativo (il campione gioca meglio) | differenza -14.0 pp | saturata no | punto libero preso - | sonda 21 s cpu
+EK103B | EK | k=8 | turno 7 | punto libero no | ordinaria | margine -0.069 | neutro | differenza -2.0 pp | saturata no | punto libero preso - | sonda 19 s cpu
+EK103B | EK | k=21 | turno 13 | punto libero no | ordinaria | margine +0.093 | neutro | differenza -1.0 pp | saturata no | punto libero preso - | sonda 28 s cpu
+EK104A | EK | k=7 | turno 5 | punto libero no | ordinaria | margine -0.018 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 21 s cpu
+EK105B | EK | k=16 | turno 11 | punto libero no | ordinaria | margine +0.039 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 22 s cpu
+EK106A | EK | k=26 | turno 13 | punto libero no | ordinaria | margine -0.023 | neutro | differenza -1.0 pp | saturata si | punto libero preso - | sonda 23 s cpu
+ER100A | ER | k=1 | turno 3 | punto libero si | attacco | margine +0.157 | falso positivo | differenza -38.0 pp | saturata no | punto libero preso 100 | sonda 18 s cpu
+ER101B | ER | k=2 | turno 5 | punto libero si | ordinaria | margine -0.046 | neutro | differenza +5.0 pp | saturata no | punto libero preso 100 | sonda 21 s cpu
+ER101B | ER | k=5 | turno 7 | punto libero no | ordinaria | margine -0.028 | vero negativo (il campione gioca meglio) | differenza -13.0 pp | saturata no | punto libero preso - | sonda 27 s cpu
+ER101B | ER | k=12 | turno 9 | punto libero si | attacco | margine +0.450 | vero positivo | differenza +35.0 pp | saturata no | punto libero preso 100 | sonda 21 s cpu
+ER101B | ER | k=17 | turno 11 | punto libero si | ordinaria | margine -0.112 | neutro | differenza -5.0 pp | saturata no | punto libero preso 100 | sonda 19 s cpu
+ER101B | ER | k=21 | turno 13 | punto libero no | ordinaria | margine -0.159 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 20 s cpu
+KR100A | KR | k=1 | turno 3 | punto libero si | ordinaria | margine +0.000 | neutro | differenza +7.0 pp | saturata no | punto libero preso 0 | sonda 19 s cpu
+KR101B | KR | k=3 | turno 5 | punto libero si | ordinaria | margine -0.080 | neutro | differenza +7.0 pp | saturata no | punto libero preso 100 | sonda 19 s cpu
+KR101B | KR | k=5 | turno 7 | punto libero no | ordinaria | margine -0.172 | neutro | differenza +8.0 pp | saturata no | punto libero preso - | sonda 24 s cpu
+KR101B | KR | k=14 | turno 9 | punto libero no | ordinaria | margine -0.522 | vero negativo (il campione gioca meglio) | differenza -14.0 pp | saturata no | punto libero preso - | sonda 23 s cpu
+KR101B | KR | k=19 | turno 11 | punto libero no | ordinaria | margine -0.027 | neutro | differenza -5.0 pp | saturata no | punto libero preso - | sonda 24 s cpu
+KR101B | KR | k=25 | turno 13 | punto libero no | ordinaria | margine -0.427 | vero negativo (il campione gioca meglio) | differenza -29.0 pp | saturata no | punto libero preso - | sonda 31 s cpu
+EI101B | EI | k=23 | turno 9 | punto libero no | ordinaria | margine +0.008 | neutro | differenza +0.0 pp | saturata no | punto libero preso - | sonda 20 s cpu
+EI101B | EI | k=30 | turno 11 | punto libero no | ordinaria | margine -0.206 | neutro | differenza +0.0 pp | saturata si | punto libero preso - | sonda 22 s cpu
+gruppo principale: posizioni 23, veri positivi 0, falsi positivi 1 (costo medio -23.0 pp), falsi negativi 2, veri negativi 6 (conviene il punto libero 2), neutri 14, senza proposta 0, saturate 8
+gruppo trasferimento: posizioni 14, veri positivi 1, falsi positivi 1 (costo medio -38.0 pp), falsi negativi 0, veri negativi 3 (conviene il punto libero 0), neutri 9, senza proposta 0, saturate 2
+matchup EI: posizioni 2, veri positivi 0, falsi positivi 0, falsi negativi 0, veri negativi 0 (conviene il punto libero 0), neutri 2, senza proposta 0, saturate 1
+matchup EK: posizioni 13, veri positivi 0, falsi positivi 0, falsi negativi 1, veri negativi 3 (conviene il punto libero 1), neutri 9, senza proposta 0, saturate 4
+matchup ER: posizioni 6, veri positivi 1, falsi positivi 1 (costo medio -38.0 pp), falsi negativi 0, veri negativi 1 (conviene il punto libero 0), neutri 3, senza proposta 0, saturate 1
+matchup ES: posizioni 10, veri positivi 0, falsi positivi 1 (costo medio -23.0 pp), falsi negativi 1, veri negativi 3 (conviene il punto libero 1), neutri 5, senza proposta 0, saturate 4
+matchup KR: posizioni 6, veri positivi 0, falsi positivi 0, falsi negativi 0, veri negativi 2 (conviene il punto libero 0), neutri 4, senza proposta 0, saturate 0
+differenza media sonda - campione su 37 posizioni (3700 mondi appaiati, zeri compresi): -0.70 pp, IC 95% [-3.81, +1.89] ricampionando le partite di origine dentro ogni matchup (18 partite)
+tempo della sonda per posizione (s cpu): mediana 21, 95° percentile 28, massimo 31
+totale: posizioni 37, veri positivi 1, falsi positivi 2 (costo medio -30.5 pp), falsi negativi 2, veri negativi 9 (conviene il punto libero 2), neutri 23, senza proposta 0, saturate 10

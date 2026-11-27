@@ -1,0 +1,5 @@
+posizione k=21 (turno 11, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.179 (soglia 0.15), apertura Move Reckless Innovator base→BF1; sonda 21 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -14.0 pp [-24.4, -3.6]; vittorie campione/migliore 82/68
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

@@ -1,0 +1,47 @@
+10:34:40 == ambiente
+🛠 Installed riftbound_rs-0.1.0
+d168015 Merge pull request #74 from califhornya/claude/adoring-cray-swjl90
+processi: 47; campione: runs/sett/ekris_s12/ckpt_040000.pt; 1000 contro 138 iterazioni; 100 coppie per matchup
+10:34:41 == arena: 1000 contro 138 iterazioni
+== pensa 1480/2000 partite, 7.8 min
+== pensa 1500/2000 partite, 7.8 min
+== pensa 1520/2000 partite, 7.9 min
+== pensa 1540/2000 partite, 7.9 min
+== pensa 1560/2000 partite, 8.0 min
+== pensa 1580/2000 partite, 8.0 min
+== pensa 1600/2000 partite, 8.0 min
+== pensa 1620/2000 partite, 8.0 min
+== pensa 1640/2000 partite, 8.4 min
+== pensa 1660/2000 partite, 8.4 min
+== pensa 1680/2000 partite, 8.4 min
+== pensa 1700/2000 partite, 8.4 min
+== pensa 1720/2000 partite, 8.9 min
+== pensa 1740/2000 partite, 8.9 min
+== pensa 1760/2000 partite, 8.9 min
+== pensa 1780/2000 partite, 8.9 min
+== pensa 1800/2000 partite, 8.9 min
+== pensa 1820/2000 partite, 9.0 min
+== pensa 1840/2000 partite, 9.1 min
+== pensa 1860/2000 partite, 9.4 min
+== pensa 1880/2000 partite, 9.6 min
+== pensa 1900/2000 partite, 9.6 min
+== pensa 1920/2000 partite, 9.6 min
+== pensa 1940/2000 partite, 9.6 min
+== pensa 1960/2000 partite, 9.7 min
+== pensa 1980/2000 partite, 9.8 min
+== pensa 2000/2000 partite, 9.8 min
+Pensare di piu': campione a 1000 iterazioni contro il campione a 138, /root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt, 100 coppie per matchup (EK, ER, KR, EI, KI, RI, ES, KS, RS, IS), regole 6427b90+D72-D83, scelta per Q, valutazione rimonta e sonda da entrambe le parti, semi da 70000000
+totale 0.512 (IC 95% 0.496-0.529) sulle coppie, pesi uguali fra i matchup
+   EK 0.570 (0.53-0.62); ER 0.535 (0.48-0.58); KR 0.535 (0.47-0.59); EI 0.500 (0.45-0.55); KI 0.510 (0.46-0.56); RI 0.480 (0.43-0.53); ES 0.490 (0.44-0.54); KS 0.525 (0.47-0.58); RS 0.505 (0.45-0.56); IS 0.475 (0.42-0.53)
+latenza in secondi, lato 1000 iterazioni:
+   per decisione cercata: n 70758, media 0.33, mediana 0.15, p95 1.26, p99 1.63, max 15.80
+   per turno: n 16412, media 1.42, mediana 0.69, p95 5.17, p99 9.31, max 121.16
+latenza in secondi, lato 138 iterazioni (confronto):
+   per decisione cercata: n 70562, media 0.05, mediana 0.02, p95 0.17, p99 0.21, max 0.94
+   per turno: n 16447, media 0.22, mediana 0.12, p95 0.75, p99 1.20, max 3.84
+nota: i tempi sono misurati con tutti i processi in parallelo, quindi sono una stima per eccesso della latenza di una partita singola sulla pagina
+criterio: limite inferiore > 50%: NO
+lato 1000: p95 per turno 5.2 s, max per turno 121.2 s; max per turno <= 5 min: SI (la decisione sulla pagina e' umana)
+durata dell'arena: 9.8 min
+durata (s): arena 591
+processi 47 su 48 core

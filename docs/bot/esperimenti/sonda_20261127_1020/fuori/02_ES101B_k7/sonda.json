@@ -1,0 +1,27 @@
+{
+ "decisione": "ordinaria",
+ "migliore": "BF0a0",
+ "margini": {
+  "BF0a0": -0.7754565820694308
+ },
+ "soglia": 0.15,
+ "proposte": [
+  {
+   "nome": "BF0a0",
+   "field": 0,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 1
+  }
+ ],
+ "apertura_unica": true,
+ "secondi_cpu": 21.825677633285522,
+ "secondi_muro": 2.6665613651275635,
+ "linee": 2,
+ "mondi": 16,
+ "apertura": "Move Kinkou Initiate base→BF0"
+}

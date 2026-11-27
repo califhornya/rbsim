@@ -1,0 +1,39 @@
+{
+ "decisione": "ordinaria",
+ "migliore": "BF1a0",
+ "margini": {
+  "BF0a0": -0.46890270173711807,
+  "BF1a0": 0.049212993205398806
+ },
+ "soglia": 0.15,
+ "proposte": [
+  {
+   "nome": "BF0a0",
+   "field": 0,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 1
+  },
+  {
+   "nome": "BF1a0",
+   "field": 1,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 1
+  }
+ ],
+ "apertura_unica": true,
+ "secondi_cpu": 20.360713720321655,
+ "secondi_muro": 2.5439140796661377,
+ "linee": 3,
+ "mondi": 16,
+ "apertura": "Move Evelynn Entrancing base→BF1"
+}

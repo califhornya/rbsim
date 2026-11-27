@@ -1,0 +1,27 @@
+{
+ "decisione": "ordinaria",
+ "migliore": "BF1a0",
+ "margini": {
+  "BF1a0": -0.02251040552440072
+ },
+ "soglia": 0.15,
+ "proposte": [
+  {
+   "nome": "BF1a0",
+   "field": 1,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 0
+  }
+ ],
+ "apertura_unica": true,
+ "secondi_cpu": 22.84275460243225,
+ "secondi_muro": 2.92470383644104,
+ "linee": 2,
+ "mondi": 16,
+ "apertura": "Move Rengar Trophy Hunter base→BF1"
+}

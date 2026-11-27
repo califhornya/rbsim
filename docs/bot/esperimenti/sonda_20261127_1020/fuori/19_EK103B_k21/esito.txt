@@ -1,0 +1,4 @@
+posizione k=21 (turno 13, punto libero no): sonda ordinaria
+migliore BF1a0, margine +0.093 (soglia 0.15), apertura Move Zed Without a Sound base→BF1; sonda 28 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione -1.0 pp [-3.0, +1.0]; vittorie campione/migliore 1/0
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna

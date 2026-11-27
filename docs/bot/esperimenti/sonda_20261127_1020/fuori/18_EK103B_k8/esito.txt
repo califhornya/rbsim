@@ -1,0 +1,4 @@
+posizione k=8 (turno 7, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.069 (soglia 0.15), apertura Move Reckless Innovator base→BF1; sonda 19 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione -2.0 pp [-12.0, +8.0]; vittorie campione/migliore 23/21
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: React Gust @BF1 (6)', 'reaction: React Gust @BF0 (1)']

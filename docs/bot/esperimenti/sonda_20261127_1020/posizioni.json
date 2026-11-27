@@ -1,0 +1,1155 @@
+[
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 1,
+  "turno": 5,
+  "punti": [
+   0,
+   1
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "ES101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 3,
+  "turno": 7,
+  "punti": [
+   2,
+   2
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "ES101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 7,
+  "turno": 9,
+  "punti": [
+   3,
+   3
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "ES101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 102,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 32,
+  "turno": 13,
+  "punti": [
+   6,
+   5
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES102A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 103,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 10,
+  "turno": 7,
+  "punti": [
+   2,
+   2
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": true,
+  "nome": "ES103B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 104,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 34,
+  "turno": 15,
+  "punti": [
+   7,
+   6
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES104A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 105,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 19,
+  "turno": 13,
+  "punti": [
+   7,
+   5
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES105B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 105,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 21,
+  "turno": 15,
+  "punti": [
+   7,
+   7
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES105B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 106,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 12,
+  "turno": 7,
+  "punti": [
+   2,
+   4
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES106A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ES",
+   "seed": 106,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 15,
+  "turno": 9,
+  "punti": [
+   2,
+   6
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ES106A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 21,
+  "turno": 9,
+  "punti": [
+   5,
+   2
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": true,
+  "nome": "EK100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 26,
+  "turno": 11,
+  "punti": [
+   7,
+   3
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 29,
+  "turno": 13,
+  "punti": [
+   7,
+   5
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 38,
+  "turno": 15,
+  "punti": [
+   7,
+   7
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 5,
+  "turno": 5,
+  "punti": [
+   1,
+   1
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "EK101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 19,
+  "turno": 13,
+  "punti": [
+   4,
+   7
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 102,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 17,
+  "turno": 9,
+  "punti": [
+   4,
+   3
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK102A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 102,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 21,
+  "turno": 11,
+  "punti": [
+   5,
+   4
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK102A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 103,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 8,
+  "turno": 7,
+  "punti": [
+   3,
+   2
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK103B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 103,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 21,
+  "turno": 13,
+  "punti": [
+   4,
+   7
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK103B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 104,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 7,
+  "turno": 5,
+  "punti": [
+   2,
+   1
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK104A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 105,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 16,
+  "turno": 11,
+  "punti": [
+   3,
+   6
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK105B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EK",
+   "seed": 106,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 26,
+  "turno": 13,
+  "punti": [
+   6,
+   5
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EK106A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 1,
+  "turno": 3,
+  "punti": [
+   0,
+   1
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": true,
+  "nome": "ER100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 2,
+  "turno": 5,
+  "punti": [
+   0,
+   1
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "ER101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 5,
+  "turno": 7,
+  "punti": [
+   2,
+   2
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "ER101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 12,
+  "turno": 9,
+  "punti": [
+   2,
+   3
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "ER101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 17,
+  "turno": 11,
+  "punti": [
+   3,
+   5
+  ],
+  "campi": [
+   1
+  ],
+  "punto_libero": true,
+  "nome": "ER101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "ER",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 21,
+  "turno": 13,
+  "punti": [
+   4,
+   7
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "ER101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 100,
+   "starter": "a",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "A",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 1,
+  "turno": 3,
+  "punti": [
+   0,
+   1
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "KR100A"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 3,
+  "turno": 5,
+  "punti": [
+   0,
+   1
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": true,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 5,
+  "turno": 7,
+  "punti": [
+   2,
+   2
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 14,
+  "turno": 9,
+  "punti": [
+   2,
+   4
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 19,
+  "turno": 11,
+  "punti": [
+   4,
+   5
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 25,
+  "turno": 13,
+  "punti": [
+   5,
+   6
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "KR",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 39,
+  "turno": 15,
+  "punti": [
+   6,
+   7
+  ],
+  "campi": [
+   0
+  ],
+  "punto_libero": false,
+  "nome": "KR101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EI",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 23,
+  "turno": 9,
+  "punti": [
+   3,
+   4
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EI101B"
+ },
+ {
+  "partita": {
+   "tipo": "autonoma",
+   "matchup": "EI",
+   "seed": 101,
+   "starter": "b",
+   "iterazioni": 138,
+   "probe": true,
+   "ckpt": "/root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt",
+   "casuali": false,
+   "campione": "B",
+   "regole": "6427b90+D72-D83",
+   "valutazione": [
+    "rimonta",
+    3.0,
+    0.2
+   ]
+  },
+  "k": 30,
+  "turno": 11,
+  "punti": [
+   3,
+   6
+  ],
+  "campi": [
+   0,
+   1
+  ],
+  "punto_libero": false,
+  "nome": "EI101B"
+ }
+]

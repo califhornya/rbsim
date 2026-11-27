@@ -1,0 +1,27 @@
+{
+ "decisione": "ordinaria",
+ "migliore": "BF0a0",
+ "margini": {
+  "BF0a0": -0.6011287671222241
+ },
+ "soglia": 0.15,
+ "proposte": [
+  {
+   "nome": "BF0a0",
+   "field": 0,
+   "proposal": {
+    "gear_target": "none",
+    "waves": 1,
+    "spell_wave": 1,
+    "ambush_index": 0
+   },
+   "ambush_mano": 1
+  }
+ ],
+ "apertura_unica": true,
+ "secondi_cpu": 19.04615068435669,
+ "secondi_muro": 2.425204277038574,
+ "linee": 2,
+ "mondi": 16,
+ "apertura": "Move Fiora Victorious base→BF0"
+}

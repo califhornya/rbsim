@@ -1,0 +1,4 @@
+posizione k=26 (turno 11, punto libero no): sonda ordinaria
+migliore BF1a0, margine -0.005 (soglia 0.15), apertura Move Rengar Trophy Hunter base→BF1; sonda 18 s cpu
+verifica 100 mondi: neutro; differenza migliore - campione +0.0 pp [-2.8, +2.8]; vittorie campione/migliore 99/99
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['showdown_action: Showdown Switcheroo @BF1 (18)']

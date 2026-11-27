@@ -1,0 +1,5 @@
+posizione k=5 (turno 7, punto libero no): sonda ordinaria
+migliore BF0a0, margine -0.028 (soglia 0.15), apertura Move Rengar Trophy Hunter base→BF0; sonda 27 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -13.0 pp [-24.4, -1.6]; vittorie campione/migliore 37/24
+vero negativo: il campione gioca meglio
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['reaction: Play Pyke Returned from Hidden @BF0 (24)', 'reaction: Play Edge of Night from Hidden @BF0 (16)', 'reaction: Play Momentary Companion from Hidden @BF0 (16)', 'reaction: Play Bedeviling Stranger from Hidden @BF0 (15)', 'reaction: Play Gutter Guardian from Hidden @BF0 (9)']

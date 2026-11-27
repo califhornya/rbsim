@@ -1,0 +1,424 @@
+[
+ {
+  "cartella": "00_20261125_154531_competit_k12",
+  "k": 12,
+  "esito_serie": "riferimento scelto",
+  "errore": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_evelynn.json'"
+ },
+ {
+  "cartella": "01_20261125_201243_competit_k1",
+  "k": 1,
+  "esito_serie": "indeciso",
+  "errore": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_sett.json'"
+ },
+ {
+  "cartella": "02_20261125_204705_competit_k23",
+  "k": 23,
+  "esito_serie": "riferimento scelto",
+  "errore": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_khazix.json'"
+ },
+ {
+  "cartella": "03_20261125_204705_competit_k38",
+  "k": 38,
+  "esito_serie": "riferimento scelto",
+  "errore": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_khazix.json'"
+ },
+ {
+  "cartella": "04_20261126_013325_competit_k10",
+  "k": 10,
+  "esito_serie": "indeciso",
+  "errore": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/mateo/projects/rbsim2026/rbsim-rust/riftbound/data/decks/competitive_evelynn.json'"
+ },
+ {
+  "cartella": "05_ES1B_k11",
+  "k": 11,
+  "esito_serie": "indeciso",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.09011606307238498,
+  "apertura": "Move Pit Rookie base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "-",
+  "identita": [
+   "mondo 2012 riferimento: t9 diverso"
+  ],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita DIFFERENZE 1",
+  "secondi_cpu": 25.692899227142334,
+  "margini": {
+   "BF0a0": -0.09011606307238498
+  }
+ },
+ {
+  "cartella": "06_ES3B_k1",
+  "k": 1,
+  "esito_serie": "attacco migliore",
+  "decisione": "attacco",
+  "migliore": "BF0a0",
+  "margine": 0.4544476538339909,
+  "apertura": "Move Sett Kingpin base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "(la scelta della serie)",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 18.225547313690186,
+  "margini": {
+   "BF0a0": 0.4544476538339909
+  }
+ },
+ {
+  "cartella": "07_ES3B_k14",
+  "k": 14,
+  "esito_serie": "riferimento scelto",
+  "errore": "ValueError: k=14 non è una decisione di turno (showdown_action)"
+ },
+ {
+  "cartella": "08_ES4A_k10",
+  "k": 10,
+  "esito_serie": "attacco migliore",
+  "decisione": "attacco",
+  "migliore": "BF1a0",
+  "margine": 0.6376774431088306,
+  "apertura": "Move Pyke Returned base→BF1",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "(la scelta della serie)",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 19.453697443008423,
+  "margini": {
+   "BF1a0": 0.6376774431088306
+  }
+ },
+ {
+  "cartella": "09_ES5B_k5",
+  "k": 5,
+  "esito_serie": "attacco migliore",
+  "decisione": "attacco",
+  "migliore": "BF0a0",
+  "margine": 0.30737810230903284,
+  "apertura": "Move Pit Rookie base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "(la scelta della serie)",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 25.82324528694153,
+  "margini": {
+   "BF0a0": 0.30737810230903284
+  }
+ },
+ {
+  "cartella": "10_ES5B_k15",
+  "k": 15,
+  "esito_serie": "indeciso",
+  "decisione": "ordinaria",
+  "migliore": "BF1a0",
+  "margine": -0.0034912196137818034,
+  "apertura": "Move Kinkou Initiate base→BF1",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "-",
+  "identita": [],
+  "identita_confronti": [
+   48,
+   48
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 23.315011262893677,
+  "margini": {
+   "BF0a0": -0.5779907870681498,
+   "BF1a0": -0.0034912196137818034
+  }
+ },
+ {
+  "cartella": "11_ES6A_k1",
+  "k": 1,
+  "esito_serie": "attacco migliore",
+  "decisione": "attacco",
+  "migliore": "BF0a0",
+  "margine": 0.18257364203032092,
+  "apertura": "Move Evelynn Entrancing base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "(la scelta della serie)",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 17.944897890090942,
+  "margini": {
+   "BF0a0": 0.18257364203032092
+  }
+ },
+ {
+  "cartella": "12_ES7B_k5",
+  "k": 5,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF1a0",
+  "margine": 0.04880828451127184,
+  "apertura": "Move Fiora Victorious base→BF1",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   48,
+   48
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 19.02530312538147,
+  "margini": {
+   "BF0a0": 0.0,
+   "BF1a0": 0.04880828451127184
+  }
+ },
+ {
+  "cartella": "13_ES9B_k2",
+  "k": 2,
+  "esito_serie": "indeciso",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.41290808761505576,
+  "apertura": "Move Sett Kingpin base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "-",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 26.09096598625183,
+  "margini": {
+   "BF0a0": -0.41290808761505576
+  }
+ },
+ {
+  "cartella": "14_ES9B_k21",
+  "k": 21,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.0839000075418813,
+  "apertura": "Move Kinkou Initiate base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "-",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 23.190467357635498,
+  "margini": {
+   "BF0a0": -0.0839000075418813
+  }
+ },
+ {
+  "cartella": "15_EK1B_k15",
+  "k": 15,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": 0.1367558255697869,
+  "apertura": "Move Vex Apathetic base→BF0",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 21.028282165527344,
+  "margini": {
+   "BF0a0": 0.1367558255697869
+  }
+ },
+ {
+  "cartella": "16_EK1B_k21",
+  "k": 21,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.4599158092513582,
+  "apertura": "Move Traveling Merchant base→BF0",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 20.69409942626953,
+  "margini": {
+   "BF0a0": -0.4599158092513582
+  }
+ },
+ {
+  "cartella": "17_EK3B_k17",
+  "k": 17,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF1a0",
+  "margine": 0.04506994067231355,
+  "apertura": "Move Fizz Trickster base→BF1",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 30.37117648124695,
+  "margini": {
+   "BF1a0": 0.04506994067231355
+  }
+ },
+ {
+  "cartella": "18_EK4A_k16",
+  "k": 16,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.010871716322156291,
+  "apertura": "Move Pyke Returned base→BF0",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 19.245222806930542,
+  "margini": {
+   "BF0a0": -0.010871716322156291
+  }
+ },
+ {
+  "cartella": "19_EK4A_k27",
+  "k": 27,
+  "esito_serie": "riferimento scelto",
+  "decisione": "attacco",
+  "migliore": "BF1a0",
+  "margine": 0.3611094976296524,
+  "apertura": "Move Pyke Returned base→BF1",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 23.180160522460938,
+  "margini": {
+   "BF1a0": 0.3611094976296524
+  }
+ },
+ {
+  "cartella": "20_EK5B_k30",
+  "k": 30,
+  "esito_serie": "riferimento scelto",
+  "errore": "ValueError: k=30 non è una decisione di turno (showdown_action)"
+ },
+ {
+  "cartella": "21_EK7B_k5",
+  "k": 5,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": 0.003705196566162048,
+  "apertura": "Move Zed Without a Sound base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "peggiore",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 23.548704147338867,
+  "margini": {
+   "BF0a0": 0.003705196566162048
+  }
+ },
+ {
+  "cartella": "22_EK7B_k10",
+  "k": 10,
+  "esito_serie": "attacco migliore",
+  "decisione": "attacco",
+  "migliore": "BF0a0",
+  "margine": 1.0370195667731483,
+  "apertura": "Move Shadow Clone base→BF0",
+  "apertura_unica": true,
+  "saturata": false,
+  "rivedi": "(la scelta della serie)",
+  "identita": [
+   "mondo 2006 BF0a0: t9 diverso"
+  ],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita DIFFERENZE 1",
+  "secondi_cpu": 35.79691982269287,
+  "margini": {
+   "BF0a0": 1.0370195667731483
+  }
+ },
+ {
+  "cartella": "23_EK9B_k5",
+  "k": 5,
+  "esito_serie": "riferimento scelto",
+  "decisione": "ordinaria",
+  "migliore": "BF0a0",
+  "margine": -0.18359791752917173,
+  "apertura": "Move Traveling Merchant base→BF0",
+  "apertura_unica": true,
+  "saturata": true,
+  "rivedi": "indecisa",
+  "identita": [],
+  "identita_confronti": [
+   32,
+   32
+  ],
+  "identita_stato": "identita OK",
+  "secondi_cpu": 21.737867832183838,
+  "margini": {
+   "BF0a0": -0.18359791752917173
+  }
+ }
+]

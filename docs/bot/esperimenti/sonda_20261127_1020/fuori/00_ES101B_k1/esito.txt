@@ -1,0 +1,6 @@
+posizione k=1 (turno 5, punto libero si): sonda ordinaria
+migliore BF0a0, margine -0.601 (soglia 0.15), apertura Move Fiora Victorious base→BF0; sonda 19 s cpu
+verifica 100 mondi: vero negativo; differenza migliore - campione -23.0 pp [-35.4, -10.6]; vittorie campione/migliore 64/41
+vero negativo: conviene il punto libero
+punto libero preso (campione/migliore): BF1 100/0
+piano: attacco completato 100/100; interruzioni nessuna; risposte ['showdown_action: Play Bedeviling Stranger from Hidden @BF0 (22)', 'showdown_action: Play Pyke Returned from Hidden @BF0 (17)', 'showdown_action: Play Momentary Companion from Hidden @BF0 (17)', 'showdown_action: Play Switcheroo from Hidden @BF0 (16)', 'showdown_action: Play Gutter Guardian from Hidden @BF0 (14)']

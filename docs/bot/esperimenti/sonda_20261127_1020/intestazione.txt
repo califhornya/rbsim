@@ -1,0 +1,2 @@
+sonda_mac 27/11/2026 10:21; d168015 Merge pull request #74 from califhornya/claude/adoring-cray-swjl90
+checkpoint /root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt (sha256 f8d8469b506dfc1d); 47 processi

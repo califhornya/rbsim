@@ -1,0 +1,4 @@
+posizione k=3 (turno 7, punto libero no): sonda attacco
+migliore BF0a0, margine +0.318 (soglia 0.15), apertura Move Sett Kingpin base→BF0; sonda 21 s cpu
+verifica 100 mondi: falso positivo; differenza migliore - campione -23.0 pp [-35.7, -10.3]; vittorie campione/migliore 70/47
+piano: attacco completato 100/100; interruzioni nessuna; risposte nessuna
