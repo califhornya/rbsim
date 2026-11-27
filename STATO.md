@@ -63,18 +63,18 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Pilota (b) 47,95%, (c) 49,05%; prova (d) 50,2% [48,7, 51,7], seguiti +0,2 pp. (27/11) Scelta finale
-(`scelta_20261127_0946/`): visite − Q −0,3 pp [−1,0, +0,3]: resta la Q. (CCX63) Sonda A fuori campione (`sonda_20261127_1020/`): 37
-posizioni (non 72), −0,70 pp [−3,81, +1,89], VP 1, FP 2, FN 2: niente arena. 1.000 contro 138 (`pensa_20261127_1034/`):
-51,2% [49,6, 52,9]: resta 138 (per turno p95 5,2 s, max 121 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
+Nessun guadagno: pilota (b) 47,95%, (c) 49,05%; (d) 50,2% [48,7, 51,7]; scelta finale visite − Q −0,3 pp [−1,0, +0,3];
+sonda A fuori campione −0,70 pp [−3,81, +1,89] (37 posizioni); 1.000 contro 138: 51,2% [49,6, 52,9] (p95 per turno 5,2 s). Astra (155859, T5): «muovo Sett, poi Fiora sul campo»
 +19 pp [+9,5, +28,5] sulla linea del bot. Altri 4 replay (`muovi_20261127_1255/`): 4 posizioni, M−B +4,5 pp [−2,0,
-+16,0]; il bot schiera in base dove muovere era meglio solo in 204705 T4 (+4): troppo poche per decidere.
++16,0]. 60 autonome nuove (`movimento_20261127_1237/`, CCX63): 80 posizioni, M−B +5,0 [+1,1, +8,8], ma il campione
+muove già in 61 (+6,0); schiera in base in 10 (+2,6 [−3,4, +10,9]). Quota: cambia 19 mosse, Q − campione +0,2 pp [−1,2,
++1,7]: NON PASSA, niente arena. Strada del movimento chiusa.
 §8-§9: `rimonta` default della pagina; finestre bocciate; sonda A a un'ondata archiviata; la ricerca non ha rumore.
 
 ## Prossimi passi
-1. (Astra non disponibile: decidiamo noi, 27/11) `movimento.command` sul CCX63 (`server_prepara.sh`): 60 autonome nuove
-   (80M), M/B/campione e «con quota» (8 visite iniziali ai figli base→bf); arena su 90M solo se Q − campione > 0 (lim. inf.,
-   ≥20 posizioni, ≥5 cambiano); campione nuovo solo se lim. inf. > 50%.
+1. (Astra non disponibile) Proposta a Matteo: «Pensa» per la pagina = alle decisioni di turno le prime 3 mosse della
+   ricerca giocate fino alla fine su 32 mondi, si gioca la migliore; prima la misura sulle 480 posizioni (mondi di
+   scelta e di verifica separati), poi la pagina. Server: `server_prepara.sh`.
 2. Promozioni su semi nuovi (non 30M/40M/50M/60M/70M/80M/90M).
 
 ## File principali
