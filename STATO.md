@@ -63,8 +63,7 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
   (reazione 445, showdown 342); 138 fisse non inferiori a 0,030 s (ES 0,505, EK 0,520) → pagina a 138 (era 42, pesi casuali). Prior utile (ES 0,583, EK 0,550).
 
 ## In corso
-Nessun guadagno dalle strade precedenti (pilota, scelta finale per Q, sonda A, 1.000 iterazioni, movimento dalla base:
-tutte chiuse, dettagli in `docs/bot/esperimenti/`). `rimonta` default della pagina.
+Strade precedenti chiuse senza guadagno (pilota, scelta per Q, sonda A, 1.000 iterazioni, movimento); `rimonta` default.
 «Pensa» misurata sul CCX63 (`docs/bot/esperimenti/fondo_20261127_1404/`): **PASSA**, +2,5 pp [+1,7, +3,4], 135/480
 cambiano mossa (+8,9 pp sulle cambiate); costo: 65,7 s/turno sul Mac (mediana), arena 100 coppie/matchup ~56 h di CCX63.
 Matteo ha al massimo ~16 h di CCX63. Varianti economiche sugli stessi dati (`scripts/rust/fondo_ridotto.py`,
