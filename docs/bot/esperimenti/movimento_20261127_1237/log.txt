@@ -1,0 +1,38 @@
+12:37:32 == ambiente
+🛠 Installed riftbound_rs-0.1.0
+49ebf5e Merge pull request #77 from califhornya/claude/adoring-cray-swjl90
+processi: 47; campione: runs/sett/ekris_s12/ckpt_040000.pt; 6 partite x 10 matchup x 100 mondi; 100 coppie
+12:38:25 == 1. posizioni: partite nuove, muovo prima / schiero in base / con quota
+== posizione 53/80: ES80006005B turno 3 k=1, 100 mondi
+== posizione 54/80: KS80007000A turno 3 k=1, 100 mondi
+== posizione 55/80: KS80007001B turno 5 k=2, 100 mondi
+== posizione 56/80: KS80007001B turno 13 k=26, 100 mondi
+== posizione 57/80: KS80007003B turno 3 k=1, 100 mondi
+== posizione 58/80: KS80007004A turno 3 k=2, 100 mondi
+== posizione 59/80: KS80007005B turno 3 k=2, 100 mondi
+== posizione 60/80: KS80007005B turno 5 k=6, 100 mondi
+== posizione 61/80: RS80008000A turno 5 k=3, 100 mondi
+== posizione 62/80: RS80008000A turno 11 k=20, 100 mondi
+== posizione 63/80: RS80008001B turno 3 k=1, 100 mondi
+== posizione 64/80: RS80008001B turno 5 k=5, 100 mondi
+== posizione 65/80: RS80008002A turno 5 k=1, 100 mondi
+== posizione 66/80: RS80008002A turno 9 k=8, 100 mondi
+== posizione 67/80: RS80008002A turno 17 k=32, 100 mondi
+== posizione 68/80: RS80008003B turno 3 k=1, 100 mondi
+== posizione 69/80: RS80008004A turno 3 k=2, 100 mondi
+== posizione 70/80: RS80008004A turno 7 k=7, 100 mondi
+== posizione 71/80: RS80008005B turno 3 k=1, 100 mondi
+== posizione 72/80: RS80008005B turno 11 k=21, 100 mondi
+== posizione 73/80: IS80009000A turno 3 k=1, 100 mondi
+== posizione 74/80: IS80009001B turno 3 k=2, 100 mondi
+== posizione 75/80: IS80009001B turno 5 k=6, 100 mondi
+== posizione 76/80: IS80009002A turno 5 k=1, 100 mondi
+== posizione 77/80: IS80009003B turno 3 k=1, 100 mondi
+== posizione 78/80: IS80009004A turno 3 k=1, 100 mondi
+== posizione 79/80: IS80009005B turno 3 k=1, 100 mondi
+== posizione 80/80: IS80009005B turno 5 k=4, 100 mondi
+regola di stop: NON PASSA (serve limite inferiore di Q - campione > 0, almeno 20 posizioni valide e 5 che cambiano mossa): resta il campione
+totale: 80 posizioni, M-B +5.0 pp (IC 95% da +1.1 a +8.8), a favore 43, contro 26, pari 11, 34.5 min
+13:12:55 Regola di stop: niente arena, il campione resta com'è.
+durata dei passi (s): posizioni 2070, arena 0, totale 2070
+processi 47 su 48 core

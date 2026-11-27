@@ -1,0 +1,223 @@
+Muovo prima contro schiero in base: prior del campione /root/rbsim/runs/sett/ekris_s12/ckpt_040000.pt; continuazione 138 iterazioni, valutazione rimonta (entrambi i posti campione dopo la prima mossa forzata)
+100 mondi per posizione (da 30000), 40000 ricampionamenti di partite
+modo quota: etichette ['base→bf'], 8 visite iniziali per figlio alla radice; linee campione (mossa originale forzata), M, B, con quota
+replay EK80000000A: seme 80000000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EK80000001B: seme 80000001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EK80000002A: seme 80000002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EK80000003B: seme 80000003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EK80000004A: seme 80000004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EK80000005B: seme 80000005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001000A: seme 80001000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001001B: seme 80001001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001002A: seme 80001002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001003B: seme 80001003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001004A: seme 80001004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ER80001005B: seme 80001005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002000A: seme 80002000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002001B: seme 80002001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002002A: seme 80002002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002003B: seme 80002003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002004A: seme 80002004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KR80002005B: seme 80002005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003000A: seme 80003000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003001B: seme 80003001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003002A: seme 80003002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003003B: seme 80003003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003004A: seme 80003004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay EI80003005B: seme 80003005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004000A: seme 80004000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004001B: seme 80004001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004002A: seme 80004002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004003B: seme 80004003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004004A: seme 80004004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KI80004005B: seme 80004005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005000A: seme 80005000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005001B: seme 80005001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005002A: seme 80005002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005003B: seme 80005003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005004A: seme 80005004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RI80005005B: seme 80005005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006000A: seme 80006000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006001B: seme 80006001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006002A: seme 80006002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006003B: seme 80006003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006004A: seme 80006004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay ES80006005B: seme 80006005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007000A: seme 80007000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007001B: seme 80007001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007002A: seme 80007002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007003B: seme 80007003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007004A: seme 80007004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay KS80007005B: seme 80007005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008000A: seme 80008000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008001B: seme 80008001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008002A: seme 80008002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008003B: seme 80008003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008004A: seme 80008004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay RS80008005B: seme 80008005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009000A: seme 80009000, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009001B: seme 80009001, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009002A: seme 80009002, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009003B: seme 80009003, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009004A: seme 80009004, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+replay IS80009005B: seme 80009005, regole 6427b90+D72-D83, valutazione registrata rimonta, iterazioni registrate 138 (solo il prefisso)
+posizioni 80 (80 con mondi validi)
+EK80000000A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Reckless Innovator | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 86/100, M 86/100, B 75/100, Q 86/100 | M-B +11.0 pp [+1.4, +20.6] | Q-campione +0.0 pp
+EK80000001B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Irresistible Faefolk | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 70/100, M 70/100, B 23/100, Q 70/100 | M-B +47.0 pp [+35.0, +59.0] | Q-campione +0.0 pp
+EK80000001B t9 k8: campione=Move Fizz Trickster base→BF0 | M=Move Fizz Trickster base→BF0 | B=Play Irresistible Faefolk | Q=Move Fizz Trickster base→BF0 (campione) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp
+EK80000002A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Momentary Companion | Q=Move Evelynn Entrancing base→BF1 (altro) | vittorie campione 71/100, M 71/100, B 61/100, Q 79/100 | M-B +10.0 pp [-1.0, +21.0] | Q-campione +8.0 pp [-3.4, +19.4]
+EK80000002A t11 k22: campione=Play Rengar Trophy Hunter to BF0 | M=Move Pyke Returned base→BF1 | B=Play Rengar Trophy Hunter | Q=Play Rengar Trophy Hunter to BF0 (campione) | vittorie campione 100/100, M 100/100, B 92/100, Q 100/100 | M-B +8.0 pp [+2.7, +13.3] | Q-campione +0.0 pp
+EK80000003B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Evelynn Entrancing | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 84/100, M 84/100, B 39/100, Q 84/100 | M-B +45.0 pp [+34.1, +55.9] | Q-campione +0.0 pp
+EK80000004A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Pyke Returned | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 85/100, M 85/100, B 77/100, Q 85/100 | M-B +8.0 pp [-1.1, +17.1] | Q-campione +0.0 pp
+ER80001000A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Vex Apathetic | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 90/100, M 90/100, B 94/100, Q 90/100 | M-B -4.0 pp [-11.8, +3.8] | Q-campione +0.0 pp
+ER80001001B t5 k2: campione=Move Kai'Sa Survivor base→BF1 | M=Move Kai'Sa Survivor base→BF1 | B=Play Kinkou Initiate | Q=Move Kai'Sa Survivor base→BF1 (campione) | vittorie campione 41/100, M 41/100, B 49/100, Q 41/100 | M-B -8.0 pp [-21.0, +5.0] | Q-campione +0.0 pp
+ER80001001B t13 k22: campione=Move Noxus Hopeful base→BF1 | M=Move Noxus Hopeful base→BF1 | B=Play Pyke Dockside Butcher | Q=Move Noxus Hopeful base→BF1 (campione) | vittorie campione 35/100, M 35/100, B 16/100, Q 35/100 | M-B +19.0 pp [+8.7, +29.3] | Q-campione +0.0 pp
+ER80001001B t15 k25: campione=Move First Mate base→BF0 | M=Move First Mate base→BF0 | B=Play Pyke Dockside Butcher | Q=Move First Mate base→BF0 (campione) | vittorie campione 96/100, M 96/100, B 89/100, Q 96/100 | M-B +7.0 pp [-0.5, +14.5] | Q-campione +0.0 pp
+ER80001002A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Gutter Guardian | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 85/100, M 85/100, B 76/100, Q 85/100 | M-B +9.0 pp [+2.1, +15.9] | Q-campione +0.0 pp
+ER80001003B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Kinkou Initiate | Q=Move Irresistible Faefolk base→BF1 (altro) | vittorie campione 52/100, M 52/100, B 55/100, Q 74/100 | M-B -3.0 pp [-17.1, +11.1] | Q-campione +22.0 pp [+10.0, +34.0]
+ER80001004A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Gutter Guardian | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 84/100, M 84/100, B 88/100, Q 84/100 | M-B -4.0 pp [-12.8, +4.8] | Q-campione +0.0 pp
+ER80001005B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play First Mate | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 49/100, M 49/100, B 58/100, Q 49/100 | M-B -9.0 pp [-22.4, +4.4] | Q-campione +0.0 pp
+KR80002000A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Irresistible Faefolk | Q=Move Evelynn Entrancing base→BF1 (altro) | vittorie campione 67/100, M 67/100, B 24/100, Q 47/100 | M-B +43.0 pp [+31.4, +54.6] | Q-campione -20.0 pp [-31.5, -8.5]
+KR80002000A t11 k22: campione=Move Tentacle base→BF0 | M=Move Tentacle base→BF0 | B=Play Fizz Trickster | Q=Move Tentacle base→BF0 (campione) | vittorie campione 3/100, M 3/100, B 12/100, Q 3/100 | M-B -9.0 pp [-16.4, -1.6] | Q-campione +0.0 pp
+KR80002001B t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play Kai'Sa Survivor | Q=Move Pit Rookie base→BF1 (campione) | vittorie campione 67/100, M 67/100, B 76/100, Q 67/100 | M-B -9.0 pp [-20.2, +2.2] | Q-campione +0.0 pp
+KR80002002A t3 k1: campione=Move Traveling Merchant base→BF0 | M=Move Traveling Merchant base→BF0 | B=Play Vex Apathetic | Q=Move Traveling Merchant base→BF1 (altro) | vittorie campione 89/100, M 89/100, B 81/100, Q 66/100 | M-B +8.0 pp [-1.5, +17.5] | Q-campione -23.0 pp [-34.1, -11.9]
+KR80002003B t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play Kai'Sa Survivor | Q=Move Pit Rookie base→BF1 (campione) | vittorie campione 81/100, M 81/100, B 77/100, Q 81/100 | M-B +4.0 pp [-7.1, +15.1] | Q-campione +0.0 pp
+KR80002004A t5 k1: campione=Move Kha'Zix Mutating Horror base→BF1 | M=Move Kha'Zix Mutating Horror base→BF1 | B=Play Zed Without a Sound | Q=Move Kha'Zix Mutating Horror base→BF1 (campione) | vittorie campione 22/100, M 22/100, B 29/100, Q 22/100 | M-B -7.0 pp [-17.5, +3.5] | Q-campione +0.0 pp
+KR80002004A t11 k12: campione=Play Zed Without a Sound | M=Move Irresistible Faefolk base→BF1 | B=Play Zed Without a Sound | Q=Play Zed Without a Sound (campione) | vittorie campione 5/100, M 0/100, B 5/100, Q 5/100 | M-B -5.0 pp [-9.3, -0.7] | Q-campione +0.0 pp
+KR80002005B t3 k1: campione=Play Grim Apothecary | M=Move Inferna base→BF1 | B=Play Grim Apothecary | Q=Move Inferna base→BF1 (M) | vittorie campione 65/100, M 80/100, B 65/100, Q 80/100 | M-B +15.0 pp [+4.4, +25.6] | Q-campione +15.0 pp [+4.4, +25.6]
+KR80002005B t11 k20: campione=Move First Mate base→BF1 | M=Move First Mate base→BF0 | B=Play Pit Rookie | Q=Move First Mate base→BF1 (campione) | vittorie campione 99/100, M 94/100, B 100/100, Q 99/100 | M-B -6.0 pp [-10.7, -1.3] | Q-campione +0.0 pp
+EI80003000A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Momentary Companion | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 71/100, M 71/100, B 70/100, Q 71/100 | M-B +1.0 pp [-10.0, +12.0] | Q-campione +0.0 pp
+EI80003001B t3 k1: campione=Move Stalwart Poro base→BF1 | M=Move Stalwart Poro base→BF1 | B=Play Iridescent Avian | Q=Move Stalwart Poro base→BF1 (campione) | vittorie campione 94/100, M 94/100, B 73/100, Q 94/100 | M-B +21.0 pp [+10.5, +31.5] | Q-campione +0.0 pp
+EI80003002A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Gutter Guardian | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 80/100, M 80/100, B 91/100, Q 80/100 | M-B -11.0 pp [-19.8, -2.2] | Q-campione +0.0 pp
+EI80003003B t3 k1: campione=Move Mutated Mouser base→BF1 | M=Move Mutated Mouser base→BF1 | B=Play Affectionate Poro | Q=Move Mutated Mouser base→BF1 (campione) | vittorie campione 96/100, M 96/100, B 66/100, Q 96/100 | M-B +30.0 pp [+19.8, +40.2] | Q-campione +0.0 pp
+EI80003004A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Momentary Companion | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 76/100, M 76/100, B 74/100, Q 76/100 | M-B +2.0 pp [-6.3, +10.3] | Q-campione +0.0 pp
+EI80003005B t3 k1: campione=Move Stalwart Poro base→BF1 | M=Move Stalwart Poro base→BF1 | B=Play Frisky Hunter | Q=Move Stalwart Poro base→BF1 (campione) | vittorie campione 96/100, M 96/100, B 83/100, Q 96/100 | M-B +13.0 pp [+4.3, +21.7] | Q-campione +0.0 pp
+KI80004000A t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Reckless Innovator | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 51/100, M 51/100, B 18/100, Q 51/100 | M-B +33.0 pp [+22.9, +43.1] | Q-campione +0.0 pp
+KI80004000A t11 k17: campione=Move Evelynn Entrancing base→BF1 | M=Move Evelynn Entrancing base→BF1 | B=Play Traveling Merchant | Q=Move Evelynn Entrancing base→BF1 (campione) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp
+KI80004000A t13 k22: campione=Move Reckless Innovator base→BF1 | M=Move Reckless Innovator base→BF1 | B=Play Traveling Merchant | Q=Move Reckless Innovator base→BF1 (campione) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp
+KI80004001B t7 k11: campione=Move Affectionate Poro base→BF1 | M=Move Affectionate Poro base→BF1 | B=Play Daisy! | Q=Move Affectionate Poro base→BF1 (campione) | vittorie campione 54/100, M 54/100, B 33/100, Q 54/100 | M-B +21.0 pp [+9.1, +32.9] | Q-campione +0.0 pp
+KI80004002A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Vex Apathetic | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 35/100, M 35/100, B 24/100, Q 35/100 | M-B +11.0 pp [-0.5, +22.5] | Q-campione +0.0 pp
+KI80004003B t3 k1: campione=Move Stalwart Poro base→BF0 | M=Move Stalwart Poro base→BF0 | B=Play Iridescent Avian | Q=Move Stalwart Poro base→BF0 (campione) | vittorie campione 98/100, M 98/100, B 95/100, Q 98/100 | M-B +3.0 pp [-2.2, +8.2] | Q-campione +0.0 pp
+KI80004004A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Irresistible Faefolk | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 31/100, M 31/100, B 34/100, Q 31/100 | M-B -3.0 pp [-15.9, +9.9] | Q-campione +0.0 pp
+KI80004005B t3 k1: campione=Move Stalwart Poro base→BF0 | M=Move Stalwart Poro base→BF0 | B=Play Affectionate Poro | Q=Move Stalwart Poro base→BF0 (campione) | vittorie campione 92/100, M 92/100, B 89/100, Q 92/100 | M-B +3.0 pp [-2.9, +8.9] | Q-campione +0.0 pp
+RI80005000A t3 k1: campione=Move Inferna base→BF0 | M=Move Inferna base→BF0 | B=Play Kinkou Initiate | Q=Move Inferna base→BF0 (campione) | vittorie campione 53/100, M 53/100, B 67/100, Q 53/100 | M-B -14.0 pp [-26.8, -1.2] | Q-campione +0.0 pp
+RI80005001B t3 k1: campione=Move Stalwart Poro base→BF0 | M=Move Stalwart Poro base→BF0 | B=Play Affectionate Poro | Q=Move Stalwart Poro base→BF0 (campione) | vittorie campione 99/100, M 99/100, B 95/100, Q 99/100 | M-B +4.0 pp [-0.8, +8.8] | Q-campione +0.0 pp
+RI80005002A t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play Kinkou Initiate | Q=Move Pit Rookie base→BF0 (altro) | vittorie campione 71/100, M 71/100, B 43/100, Q 64/100 | M-B +28.0 pp [+16.8, +39.2] | Q-campione -7.0 pp [-19.8, +5.8]
+RI80005003B t3 k1: campione=Play Iridescent Avian | M=Move Fallen Feline base→BF0 | B=Play Iridescent Avian | Q=Move Fallen Feline base→BF0 (M) | vittorie campione 23/100, M 53/100, B 23/100, Q 53/100 | M-B +30.0 pp [+17.4, +42.6] | Q-campione +30.0 pp [+17.4, +42.6]
+RI80005003B t7 k10: campione=Move Stalwart Poro base→BF1 | M=Move Stalwart Poro base→BF1 | B=Play Mutated Mouser | Q=Move Stalwart Poro base→BF1 (campione) | vittorie campione 29/100, M 29/100, B 18/100, Q 29/100 | M-B +11.0 pp [+0.2, +21.8] | Q-campione +0.0 pp
+RI80005004A t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play First Mate | Q=Move Pit Rookie base→BF0 (altro) | vittorie campione 60/100, M 60/100, B 55/100, Q 40/100 | M-B +5.0 pp [-8.2, +18.2] | Q-campione -20.0 pp [-33.4, -6.6]
+RI80005005B t7 k11: campione=Play Stalwart Poro | M=Move Ivern Nurturer base→BF1 | B=Play Stalwart Poro | Q=Play Stalwart Poro (campione) | vittorie campione 68/100, M 67/100, B 68/100, Q 68/100 | M-B -1.0 pp [-5.4, +3.4] | Q-campione +0.0 pp
+ES80006000A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Bedeviling Stranger | Q=Move Evelynn Entrancing base→BF1 (altro) | vittorie campione 28/100, M 28/100, B 28/100, Q 26/100 | M-B +0.0 pp [-10.4, +10.4] | Q-campione -2.0 pp [-14.1, +10.1]
+ES80006001B t3 k1: campione=Move Irresistible Faefolk base→BF1 | M=Move Irresistible Faefolk base→BF1 | B=Play Pit Rookie | Q=Move Irresistible Faefolk base→BF1 (campione) | vittorie campione 76/100, M 76/100, B 64/100, Q 76/100 | M-B +12.0 pp [+1.5, +22.5] | Q-campione +0.0 pp
+ES80006002A t3 k1: campione=Move Evelynn Entrancing base→BF0 | M=Move Evelynn Entrancing base→BF0 | B=Play Gutter Guardian | Q=Move Evelynn Entrancing base→BF0 (campione) | vittorie campione 61/100, M 61/100, B 53/100, Q 61/100 | M-B +8.0 pp [-4.0, +20.0] | Q-campione +0.0 pp
+ES80006002A t13 k24: campione=Play gear Edge of Night @BF0 | M=Move Pyke Returned base→BF0 | B=Play Pyke Returned | Q=Move Pyke Returned base→BF0 (M) | vittorie campione 12/100, M 12/100, B 12/100, Q 12/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp [+0.0, +0.0]
+ES80006002A t15 k30: campione=Play Vex Apathetic | M=Move Pyke Returned base→BF0 | B=Play Vex Apathetic | Q=Move Pyke Returned base→BF0 (M) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp [+0.0, +0.0]
+ES80006003B t3 k2: campione=Move Trifarian Captain base→BF0 | M=Move Trifarian Captain base→BF0 | B=Play Irresistible Faefolk | Q=Move Trifarian Captain base→BF0 (campione) | vittorie campione 47/100, M 47/100, B 28/100, Q 47/100 | M-B +19.0 pp [+6.0, +32.0] | Q-campione +0.0 pp
+ES80006004A t3 k1: campione=Move Evelynn Entrancing base→BF1 | M=Move Evelynn Entrancing base→BF1 | B=Play Vex Apathetic | Q=Move Evelynn Entrancing base→BF1 (campione) | vittorie campione 85/100, M 85/100, B 52/100, Q 85/100 | M-B +33.0 pp [+21.5, +44.5] | Q-campione +0.0 pp
+ES80006005B t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play Irresistible Faefolk | Q=Move Pit Rookie base→BF0 (altro) | vittorie campione 28/100, M 28/100, B 28/100, Q 47/100 | M-B +0.0 pp [-12.1, +12.1] | Q-campione +19.0 pp [+7.3, +30.7]
+KS80007000A t3 k1: campione=Move Traveling Merchant base→BF0 | M=Move Traveling Merchant base→BF0 | B=Play Reckless Innovator | Q=Move Traveling Merchant base→BF0 (campione) | vittorie campione 48/100, M 48/100, B 49/100, Q 48/100 | M-B -1.0 pp [-14.2, +12.2] | Q-campione +0.0 pp
+KS80007001B t5 k2: campione=Play Rengar Trophy Hunter | M=Move Sett Kingpin base→BF1 | B=Play Rengar Trophy Hunter | Q=Play Rengar Trophy Hunter (campione) | vittorie campione 89/100, M 82/100, B 89/100, Q 89/100 | M-B -7.0 pp [-15.9, +1.9] | Q-campione +0.0 pp
+KS80007001B t13 k26: campione=Play First Mate to BF1 | M=Move Irresistible Faefolk base→BF0 | B=Play Kinkou Initiate | Q=Play First Mate to BF1 (campione) | vittorie campione 84/100, M 89/100, B 92/100, Q 84/100 | M-B -3.0 pp [-10.6, +4.6] | Q-campione +0.0 pp
+KS80007003B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Pit Rookie | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 96/100, M 96/100, B 90/100, Q 96/100 | M-B +6.0 pp [+0.6, +11.4] | Q-campione +0.0 pp
+KS80007004A t3 k2: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF1 | B=Play Vex Apathetic | Q=Move Irresistible Faefolk base→BF1 (M) | vittorie campione 90/100, M 88/100, B 35/100, Q 88/100 | M-B +53.0 pp [+42.4, +63.6] | Q-campione -2.0 pp [-8.2, +4.2]
+KS80007005B t3 k2: campione=Play Fiora Victorious | M=Move Trifarian Captain base→BF0 | B=Play Fiora Victorious | Q=Move Trifarian Captain base→BF0 (M) | vittorie campione 98/100, M 94/100, B 98/100, Q 94/100 | M-B -4.0 pp [-9.5, +1.5] | Q-campione -4.0 pp [-9.5, +1.5]
+KS80007005B t5 k6: campione=Move Fiora Victorious base→BF1 | M=Move Fiora Victorious base→BF1 | B=Play First Mate | Q=Move Fiora Victorious base→BF1 (campione) | vittorie campione 95/100, M 95/100, B 96/100, Q 95/100 | M-B -1.0 pp [-6.2, +4.2] | Q-campione +0.0 pp
+RS80008000A t5 k3: campione=Move Grim Apothecary base→BF0 | M=Move Grim Apothecary base→BF1 | B=Play First Mate | Q=Move Grim Apothecary base→BF0 (campione) | vittorie campione 3/100, M 14/100, B 3/100, Q 3/100 | M-B +11.0 pp [+4.8, +17.2] | Q-campione +0.0 pp
+RS80008000A t11 k20: campione=Move Pyke Dockside Butcher base→BF1 | M=Move Pyke Dockside Butcher base→BF1 | B=Play Irresistible Faefolk | Q=Move Pyke Dockside Butcher base→BF1 (campione) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp
+RS80008001B t3 k1: campione=Play Fiora Victorious | M=Move Pit Rookie base→BF1 | B=Play Fiora Victorious | Q=Move Pit Rookie base→BF1 (M) | vittorie campione 85/100, M 92/100, B 85/100, Q 92/100 | M-B +7.0 pp [-2.3, +16.3] | Q-campione +7.0 pp [-2.3, +16.3]
+RS80008001B t5 k5: campione=Move Fiora Victorious base→BF0 | M=Move Fiora Victorious base→BF0 | B=Play First Mate | Q=Move Fiora Victorious base→BF0 (campione) | vittorie campione 95/100, M 95/100, B 94/100, Q 95/100 | M-B +1.0 pp [-5.5, +7.5] | Q-campione +0.0 pp
+RS80008002A t5 k1: campione=Deploy champion Rengar Trophy Hunter to BF1 | M=Move Noxus Hopeful base→BF0 | B=Play Elnuk Herd | Q=Deploy champion Rengar Trophy Hunter to BF1 (campione) | vittorie campione 45/100, M 45/100, B 64/100, Q 45/100 | M-B -19.0 pp [-31.0, -7.0] | Q-campione +0.0 pp
+RS80008002A t9 k8: campione=Play Elnuk Herd | M=Move Kinkou Initiate base→BF0 | B=Play Elnuk Herd | Q=Play Elnuk Herd (campione) | vittorie campione 23/100, M 14/100, B 23/100, Q 23/100 | M-B -9.0 pp [-18.3, +0.3] | Q-campione +0.0 pp
+RS80008002A t17 k32: campione=Play Pit Rookie | M=Move Ferrous Forerunner base→BF0 | B=Play Pit Rookie | Q=Move Ferrous Forerunner base→BF0 (M) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp [+0.0, +0.0]
+RS80008003B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Fiora Victorious | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 76/100, M 76/100, B 74/100, Q 76/100 | M-B +2.0 pp [-8.8, +12.8] | Q-campione +0.0 pp
+RS80008004A t3 k2: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF1 | B=Play Kinkou Initiate | Q=Move Irresistible Faefolk base→BF0 (campione) | vittorie campione 68/100, M 82/100, B 57/100, Q 68/100 | M-B +25.0 pp [+13.1, +36.9] | Q-campione +0.0 pp
+RS80008004A t7 k7: campione=Move Kinkou Initiate base→BF1 | M=Move Kinkou Initiate base→BF1 | B=Play First Mate | Q=Move Kinkou Initiate base→BF1 (campione) | vittorie campione 98/100, M 98/100, B 97/100, Q 98/100 | M-B +1.0 pp [-3.4, +5.4] | Q-campione +0.0 pp
+RS80008005B t3 k1: campione=Move Pit Rookie base→BF1 | M=Move Pit Rookie base→BF1 | B=Play First Mate | Q=Move Pit Rookie base→BF1 (campione) | vittorie campione 36/100, M 36/100, B 40/100, Q 36/100 | M-B -4.0 pp [-16.4, +8.4] | Q-campione +0.0 pp
+RS80008005B t11 k21: campione=Move Kinkou Initiate base→BF1 | M=Move Kinkou Initiate base→BF1 | B=Play Irresistible Faefolk | Q=Move Kinkou Initiate base→BF1 (campione) | vittorie campione 0/100, M 0/100, B 0/100, Q 0/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +0.0 pp
+IS80009000A t3 k1: campione=Move Stalwart Poro base→BF0 | M=Move Stalwart Poro base→BF0 | B=Play Affectionate Poro | Q=Move Stalwart Poro base→BF1 (altro) | vittorie campione 88/100, M 88/100, B 60/100, Q 75/100 | M-B +28.0 pp [+19.2, +36.8] | Q-campione -13.0 pp [-24.0, -2.0]
+IS80009001B t3 k2: campione=Move Trifarian Captain base→BF0 | M=Move Trifarian Captain base→BF0 | B=Play Fiora Victorious | Q=Move Trifarian Captain base→BF1 (altro) | vittorie campione 72/100, M 72/100, B 72/100, Q 80/100 | M-B +0.0 pp [+0.0, +0.0] | Q-campione +8.0 pp [-3.7, +19.7]
+IS80009001B t5 k6: campione=Move Fiora Victorious base→BF1 | M=Move Fiora Victorious base→BF1 | B=Play Trifarian Captain | Q=Move Fiora Victorious base→BF1 (campione) | vittorie campione 88/100, M 88/100, B 85/100, Q 88/100 | M-B +3.0 pp [-4.6, +10.6] | Q-campione +0.0 pp
+IS80009002A t5 k1: campione=Move Frisky Hunter base→BF0 | M=Move Frisky Hunter base→BF0 | B=Play Iridescent Avian | Q=Move Frisky Hunter base→BF0 (campione) | vittorie campione 16/100, M 16/100, B 17/100, Q 16/100 | M-B -1.0 pp [-6.2, +4.2] | Q-campione +0.0 pp
+IS80009003B t3 k1: campione=Move Pit Rookie base→BF0 | M=Move Pit Rookie base→BF0 | B=Play Trifarian Captain | Q=Move Pit Rookie base→BF0 (campione) | vittorie campione 42/100, M 42/100, B 47/100, Q 42/100 | M-B -5.0 pp [-17.9, +7.9] | Q-campione +0.0 pp
+IS80009004A t3 k1: campione=Move Stalwart Poro base→BF0 | M=Move Stalwart Poro base→BF1 | B=Play Mutated Mouser | Q=Move Stalwart Poro base→BF0 (campione) | vittorie campione 91/100, M 33/100, B 95/100, Q 91/100 | M-B -62.0 pp [-72.3, -51.7] | Q-campione +0.0 pp
+IS80009005B t3 k1: campione=Move Irresistible Faefolk base→BF0 | M=Move Irresistible Faefolk base→BF0 | B=Play Kinkou Initiate | Q=Move Irresistible Faefolk base→BF1 (altro) | vittorie campione 3/100, M 3/100, B 90/100, Q 2/100 | M-B -87.0 pp [-93.6, -80.4] | Q-campione -1.0 pp [-5.4, +3.4]
+IS80009005B t5 k4: campione=Move First Mate base→BF1 | M=Move First Mate base→BF1 | B=Play Rengar Trophy Hunter | Q=Move First Mate base→BF1 (campione) | vittorie campione 92/100, M 92/100, B 58/100, Q 92/100 | M-B +34.0 pp [+23.1, +44.9] | Q-campione +0.0 pp
+per partita (posizioni, media M-B, IC 95% sui mondi appaiati):
+  EK80000000A: 1, +11.0 pp [+1.4, +20.6]
+  EK80000001B: 2, +23.5 pp [+16.7, +30.3]
+  EK80000002A: 2, +9.0 pp [+2.9, +15.1]
+  EK80000003B: 1, +45.0 pp [+34.1, +55.9]
+  EK80000004A: 1, +8.0 pp [-1.1, +17.1]
+  ER80001000A: 1, -4.0 pp [-11.8, +3.8]
+  ER80001001B: 3, +6.0 pp [-0.2, +12.2]
+  ER80001002A: 1, +9.0 pp [+2.1, +15.9]
+  ER80001003B: 1, -3.0 pp [-17.1, +11.1]
+  ER80001004A: 1, -4.0 pp [-12.8, +4.8]
+  ER80001005B: 1, -9.0 pp [-22.4, +4.4]
+  KR80002000A: 2, +17.0 pp [+9.3, +24.7]
+  KR80002001B: 1, -9.0 pp [-20.2, +2.2]
+  KR80002002A: 1, +8.0 pp [-1.5, +17.5]
+  KR80002003B: 1, +4.0 pp [-7.1, +15.1]
+  KR80002004A: 2, -6.0 pp [-11.7, -0.3]
+  KR80002005B: 2, +4.5 pp [-1.4, +10.4]
+  EI80003000A: 1, +1.0 pp [-10.0, +12.0]
+  EI80003001B: 1, +21.0 pp [+10.5, +31.5]
+  EI80003002A: 1, -11.0 pp [-19.8, -2.2]
+  EI80003003B: 1, +30.0 pp [+19.8, +40.2]
+  EI80003004A: 1, +2.0 pp [-6.3, +10.3]
+  EI80003005B: 1, +13.0 pp [+4.3, +21.7]
+  KI80004000A: 3, +11.0 pp [+7.2, +14.8]
+  KI80004001B: 1, +21.0 pp [+9.1, +32.9]
+  KI80004002A: 1, +11.0 pp [-0.5, +22.5]
+  KI80004003B: 1, +3.0 pp [-2.2, +8.2]
+  KI80004004A: 1, -3.0 pp [-15.9, +9.9]
+  KI80004005B: 1, +3.0 pp [-2.9, +8.9]
+  RI80005000A: 1, -14.0 pp [-26.8, -1.2]
+  RI80005001B: 1, +4.0 pp [-0.8, +8.8]
+  RI80005002A: 1, +28.0 pp [+16.8, +39.2]
+  RI80005003B: 2, +20.5 pp [+12.1, +28.9]
+  RI80005004A: 1, +5.0 pp [-8.2, +18.2]
+  RI80005005B: 1, -1.0 pp [-5.4, +3.4]
+  ES80006000A: 1, +0.0 pp [-10.4, +10.4]
+  ES80006001B: 1, +12.0 pp [+1.5, +22.5]
+  ES80006002A: 3, +2.7 pp [-1.4, +6.7]
+  ES80006003B: 1, +19.0 pp [+6.0, +32.0]
+  ES80006004A: 1, +33.0 pp [+21.5, +44.5]
+  ES80006005B: 1, +0.0 pp [-12.1, +12.1]
+  KS80007000A: 1, -1.0 pp [-14.2, +12.2]
+  KS80007001B: 2, -5.0 pp [-10.9, +0.9]
+  KS80007003B: 1, +6.0 pp [+0.6, +11.4]
+  KS80007004A: 1, +53.0 pp [+42.4, +63.6]
+  KS80007005B: 2, -2.5 pp [-6.3, +1.3]
+  RS80008000A: 2, +5.5 pp [+2.3, +8.7]
+  RS80008001B: 2, +4.0 pp [-1.7, +9.7]
+  RS80008002A: 3, -9.3 pp [-14.5, -4.2]
+  RS80008003B: 1, +2.0 pp [-8.8, +12.8]
+  RS80008004A: 2, +13.0 pp [+6.4, +19.6]
+  RS80008005B: 2, -2.0 pp [-8.2, +4.2]
+  IS80009000A: 1, +28.0 pp [+19.2, +36.8]
+  IS80009001B: 2, +1.5 pp [-2.3, +5.3]
+  IS80009002A: 1, -1.0 pp [-6.2, +4.2]
+  IS80009003B: 1, -5.0 pp [-17.9, +7.9]
+  IS80009004A: 1, -62.0 pp [-72.3, -51.7]
+  IS80009005B: 2, -26.5 pp [-37.0, -16.0]
+posizioni con IC sopra 0: 25, sotto 0: 8; partite con IC sopra 0: 21, sotto 0: 6
+flip totali: B perde e M vince 1257, B vince e M perde 860
+con la quota: 19 posizioni cambiano mossa (verso M 8, B 0, altro 11); escluse per il prefisso 0, senza mondi validi 0
+M-B per mossa originale del campione (posizioni, con mondi validi, media e IC 95% ricampionando le partite):
+  campione = B: 10, 10, +2.6 pp [-3.4, +10.9]
+  campione = M: 61, 61, +6.0 pp [+2.2, +9.6]
+  altro: 9, 9, +0.8 pp [-19.2, +19.6]
+Q - campione su tutte le posizioni (zeri compresi, IC 95% ricampionando le partite per matchup): +0.2 pp [-1.2, +1.7] su 80 posizioni
+  EI: 6 posizioni, +0.0 pp
+  EK: 7 posizioni, +1.1 pp
+  ER: 8 posizioni, +2.8 pp
+  ES: 8 posizioni, +2.1 pp
+  IS: 8 posizioni, -0.8 pp
+  KI: 8 posizioni, +0.0 pp
+  KR: 9 posizioni, -3.1 pp
+  KS: 7 posizioni, -0.9 pp
+  RI: 7 posizioni, +0.4 pp
+  RS: 12 posizioni, +0.6 pp
+regola di stop: NON PASSA (serve limite inferiore di Q - campione > 0, almeno 20 posizioni valide e 5 che cambiano mossa): resta il campione
+totale: 80 posizioni, M-B +5.0 pp (IC 95% da +1.1 a +8.8), a favore 43, contro 26, pari 11, 34.5 min

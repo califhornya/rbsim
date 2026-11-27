@@ -1,0 +1,2 @@
+durata dei passi (s): posizioni 2070, arena 0, totale 2070
+processi 47 su 48 core
