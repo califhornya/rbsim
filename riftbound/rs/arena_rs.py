@@ -118,7 +118,8 @@ def game(task):
     option of that side's search), val_cand / val_opp
     ([nome, k, alpha]: the leaf evaluation of that side, default storica), vr_cand / vr_opp (weight 0..1 of the
     net's value in the leaves, default 0 = off, search unchanged; only for prior_ppo), vc_cand / vc_opp (checkpoint
-    da cui viene il valore, se diverso da quello del prior; con vr > 0 e solo per prior_ppo), log (the last element
+    da cui viene il valore, se diverso da quello del prior; con vr > 0 e solo per prior_ppo), scelta_cand / scelta_opp
+    ("q" = Q piu' alta, come prima | "visite" = alle decisioni di turno la piu' visitata; Astra 27/11), log (the last element
     of the return carries, per side, the compact rows [point, turn, iters,
     secs, probe_secs] of every search: {"cand": [...], "opp": [...]})."""
     from riftbound.ai.ppo.collect import DECK_OF
@@ -156,6 +157,9 @@ def game(task):
             g.set_search_finestre(seat, True)
         if vr > 0 and kind == "prior_ppo":
             g.set_search_valore_rete(seat, vr)
+        sc = opz.get(f"scelta_{lato}")
+        if sc:
+            g.set_search_scelta(seat, str(sc))
         val = opz.get(f"val_{lato}")
         if val and val[0] != "storica":
             g.set_search_valutazione(seat, val[0], float(val[1]), float(val[2]))
