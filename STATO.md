@@ -69,10 +69,11 @@ Obiettivo pratico: un avversario con cui Matteo possa giocare e allenarsi, anche
 (60/60 partite, turni dispari: buco di `seguiti.partite`); costo ~56 h di CCX63 per un'arena. Varianti economiche
 (`ridotto.txt`) sotto soglia; `analisi.txt`: la Q ordina le posizioni (Spearman 0,75) ma non le mosse (58%).
 Risposta di Astra (27/11): studente lineare su Q/visite/tipo −0,20 pp (servono mano e tavolo); soglia di visite +0,16.
-Matteo ha ~16 h di CCX63. In preparazione il pilota «studente».
+Matteo ha ~16 h di CCX63. Pilota «studente» pronto (`docs/bot/STUDENTE.md`; `riftbound/rs/studente.py`,
+`scripts/rust/studente.command`, `tests/rust/test_studente.py` 11 test): tetti 50 + 55 min, maestro su 1 seme.
 
 ## Prossimi passi
-1. Pilota «studente»: raccolta (entrambi i ruoli), allenamento della testa, verifica congelata; ≤ 2 h di CCX63.
+1. `studente.command` sul CCX63 (tmux `studente`, ~1 h 50 min); risultati in `docs/bot/esperimenti/studente_*`.
 2. «Pensa» dopo la partita nella pagina (`coach_rs.py`, `scripts/coach.py`, `coach_page.html`).
 
 ## File principali
@@ -81,7 +82,7 @@ Matteo ha ~16 h di CCX63. In preparazione il pilota «studente».
 - `rust/rbsim-py/`: estensione `riftbound_rs` (`ppo.rs`, `search_py.rs` prior e valore).
   Riallenamento: `riftbound/rs/{raccolta,allena,generazione,seguiti}.py`, `scripts/rust/` omonimi, `generazione_mac`,
   `valore_mac`; `make_probs_misto`, `set_search_valore_rete_at`; scelta finale: `scelta.py`, `scelta_mac`; `pensa.py`, `pensa_mac`; `muovi.py`, `muovi_mac`;
-  «Pensa»: `fondo.py`, `fondo.command`, varianti `fondo_ridotto.py`, analisi `fondo_analisi.py`.
+  «Pensa»: `fondo.py`, `fondo.command`; studente: `studente.py`, `studente.command`, varianti `fondo_ridotto.py`, analisi `fondo_analisi.py`.
 - `riftbound/rs/`: ponte Python (`rust_bridge.py`, `collect_rs.py`, `arena_rs.py` con il perimetro,
   `trace_py.py`, `mazzi.py` liste con sideboard).
 - `scripts/rust/`: verifiche (`autonome.py`, `diff_trace.py`, `parita_ppo.py`, `arena_parita.py`,

@@ -39,7 +39,7 @@ Tetto: **2 h di CCX63 comprese le verifiche**. Se la soglia non passa ci si ferm
 ## Verifica (dopo il congelamento)
 - Posizioni dalle partite di verifica, stesse regole. Studente: se resta sul campione vale 0 senza giocare; se cambia,
   campione e scelta giocate su `MONDI_VERIFICA` = 64 mondi appaiati nuovi (indici 70000..).
-- Maestro («Pensa» piena, 32 mondi 40000.., 3 candidati) su un sottoinsieme fisso: i primi `SEMI_MAESTRO` semi per
+- Maestro («Pensa» piena, 32 mondi 40000.., 3 candidati) su un sottoinsieme fisso: i primi `SEMI_MAESTRO` (1) semi per
   matchup (entrambe le prospettive); i suoi cambi valutati sugli stessi 64 mondi nuovi.
 - Riepilogo come `scelta.riassunto`: matchup a pesi uguali, IC 95% ricampionando i semi dentro il matchup; totale e
   ruoli separati («inizia», «risponde»), per studente e maestro; cambi, esclusioni, tempi.
@@ -47,8 +47,8 @@ Tetto: **2 h di CCX63 comprese le verifiche**. Se la soglia non passa ci si ferm
   candidato per l'arena è lo studente veloce; se no, si ferma la spesa e resta il campione.
 
 ## Tetto di tempo
-- Compiti in ordine fisso intercalato (matchup, seme, prospettiva). Scadenza per fase (`TETTO_RACCOLTA_MIN` 55,
-  `TETTO_VERIFICA_MIN` 50): dopo la scadenza non si inviano compiti nuovi, si aspettano quelli in corso e si usano solo le
+- Compiti in ordine fisso intercalato (matchup, seme, prospettiva). Scadenza per fase (`TETTO_RACCOLTA_MIN` 50,
+  `TETTO_VERIFICA_MIN` 55): dopo la scadenza non si inviano compiti nuovi, si aspettano quelli in corso e si usano solo le
   posizioni complete. Il taglio dipende dall'ordine, mai dagli esiti.
 - Dati pesanti (input della rete) in `runs/studente/<stamp>/`; risultati leggeri in `docs/bot/esperimenti/studente_<stamp>/`.
 
