@@ -10,6 +10,7 @@
 # Rilanciato con OUT=<cartella> riprende: salta il lavoro gia' fatto.
 # Prerequisiti: uv, Rust (https://rustup.rs).
 set -euo pipefail
+export PYTHONUNBUFFERED=1   # avanzamento visibile subito in runs/fondo/*.out
 cd "$(dirname "$0")/../.."
 if [ -z "${CKPT:-}" ]; then
   for c in runs/sett/ekris_s12/ckpt_040000.pt ../rbsim/runs/sett/ekris_s12/ckpt_040000.pt; do
